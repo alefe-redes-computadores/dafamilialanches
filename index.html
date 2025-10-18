@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Da Família Lanches - Cardápio Digital</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/promocoes.css">
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-content">
+            <div class="logo-container">
+                <img src="images/logo.png" alt="Da Família Lanches" class="logo">
+            </div>
+            <div class="header-info">
+                <h1>Da Família Lanches</h1>
+                <p class="tagline">Hambúrgueres Artesanais e Deliciosos</p>
+            </div>
+        </div>
+    </header>
+
+    <!-- Horário de Funcionamento -->
+    <section class="horario-section">
+        <h2>Horário de Funcionamento</h2>
+        <div class="horario-grid">
+            <div class="horario-item">
+                <span class="dia">Segunda a Quinta</span>
+                <span class="hora">18h00 - 23h15</span>
+            </div>
+            <div class="horario-item">
+                <span class="dia">Terça</span>
+                <span class="hora">Fechado</span>
+            </div>
+            <div class="horario-item">
+                <span class="dia">Sexta, Sábado e Domingo</span>
+                <span class="hora">17h30 - 23h30</span>
+            </div>
+        </div>
+    </section>
+
+    <!-- Carousel de Promoções -->
+    <section class="carousel-section">
+        <div class="promo-header">
+            <h2>Confira as Promoções de Hoje</h2>
+            <p class="promo-subtitle">Estoque limitado • Poucas unidades disponíveis</p>
+        </div>
+        <div class="carousel-container">
+            <div class="carousel-slides">
+                <div class="carousel-slide-link" data-index="0">
+                    <img src="images/promo1.jpg" alt="Promoção 1" class="carousel-slide">
+                </div>
+                <div class="carousel-slide-link" data-index="1">
+                    <img src="images/promo2.jpg" alt="Promoção 2" class="carousel-slide">
+                </div>
+                <div class="carousel-slide-link" data-index="2">
+                    <img src="images/promo3.jpg" alt="Promoção 3" class="carousel-slide">
+                </div>
+                <div class="carousel-slide-link" data-index="3">
+                    <img src="images/promo4.jpg" alt="Promoção 4" class="carousel-slide">
+                </div>
+                <div class="carousel-slide-link" data-index="4">
+                    <img src="images/promo5.jpg" alt="Promoção 5" class="carousel-slide">
+                </div>
+                <div class="carousel-slide-link" data-index="5">
+                    <img src="images/promo6.jpg" alt="Promoção 6" class="carousel-slide">
+                </div>
+                <div class="carousel-slide-link" data-index="6">
+                    <img src="images/promo7.jpg" alt="Promoção 7" class="carousel-slide">
+                </div>
+                <div class="carousel-slide-link" data-index="7">
+                    <img src="images/promo8.jpg" alt="Promoção 8" class="carousel-slide">
+                </div>
+                <div class="carousel-slide-link" data-index="8">
+                    <img src="images/promo9.jpg" alt="Promoção 9" class="carousel-slide">
+                </div>
+            </div>
+        </div>
+        <div class="countdown-timer">
+            <p>Promoções encerram em: <span id="timer">00:00:00</span></p>
+        </div>
+    </section>
+
+    <!-- Menu Principal -->
+    <main class="menu-container">
+        <!-- Hambúrgueres Tradicionais -->
+        <section class="menu-section">
+            <h2>Hambúrgueres Tradicionais</h2>
+            <div class="products-grid">
+                <div class="product-card">
+                    <h3>BÃO</h3>
+                    <div class="price">R$ 11,00</div>
+                    <div class="description">Pão, hambúrguer, alface, tomate, presunto e mussarela</div>
+                </div>
+                <div class="product-card">
+                    <h3>UAI</h3>
+                    <div class="price">R$ 13,00</div>
+                    <div class="description">Pão, hambúrguer, milho, bacon, alface, tomate, presunto e mussarela</div>
+                </div>
+                <div class="product-card">
+                    <h3>TREM</h3>
+                    <div class="price">R$ 14,00</div>
+                    <div class="description">Pão, hambúrguer, salsisha, bacon, milho, alface, tomate, presunto e mussarela</div>
+                </div>
+                <div class="product-card">
+                    <h3>CADIM</h3>
+                    <div class="price">R$ 17,00</div>
+                    <div class="description">Pão, hambúrguer, milé frango, bacon, milho, batata palha e mussarela</div>
+                </div>
+                <div class="product-card">
+                    <h3>ARMARIA</h3>
+                    <div class="price">R$ 18,00</div>
+                    <div class="description">Pão, 1 hambúrguer, 1 filé frango, bacon, milho, batata palha e mussarela</div>
+                </div>
+                <div class="product-card">
+                    <h3>BITELA</h3>
+                    <div class="price">R$ 22,00</div>
+                    <div class="description">Pão, 2 hambúrguer, filé frango, bacon, milho, batata palha, 2 salsisha, presunto e mussarela</div>
+                </div>
+                <div class="product-card">
+                    <h3>APRUMA</h3>
+                    <div class="price">R$ 25,00</div>
+                    <div class="description">Pão, 2 hambúrguer artesanal, 2 filé frango, bacon, milho, batata palha e cheddar</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Burgers Especiais -->
+        <section class="menu-section">
+            <h2>Burgers Especiais</h2>
+            <div class="products-grid">
+                <div class="product-card">
+                    <h3>GRADICIDO</h3>
+                    <div class="price">R$ 28,00</div>
+                    <div class="description">Pão, 3 hambúrguer, filé frango, bacon, ovo, 1 salsisha milho, batata palha, alface, tomate, 2 presunto e 2 mussarela</div>
+                </div>
+                <div class="product-card">
+                    <h3>VARADIFOME</h3>
+                    <div class="price">R$ 30,00</div>
+                    <div class="description">Pão, 4 hambúrguer, filé frango, bacon, ovo, cheddar, milho, batata palha, 2 salsisha, alface, tomate, presunto e mussarela</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Hambúrgueres Artesanais -->
+        <section class="menu-section">
+            <h2>Hambúrgueres Artesanais</h2>
+            <div class="products-grid">
+                <div class="product-card">
+                    <h3>PELEJA</h3>
+                    <div class="price">R$ 26,00</div>
+                    <div class="description">Pão, alface, tomate, milho, bacon, batata palha, hambúrguer artesanal 120g, filé de frango, presunto e mussarela</div>
+                </div>
+                <div class="product-card">
+                    <h3>TUDIBOM</h3>
+                    <div class="price">R$ 28,50</div>
+                    <div class="description">Pão, alface, tomate, milho, bacon, batata palha, 2 hambúrguer artesanal 120g, filé de frango, presunto e mussarela</div>
+                </div>
+                <div class="product-card">
+                    <h3>CUSTOSO</h3>
+                    <div class="price">R$ 31,00</div>
+                    <div class="description">Pão, alface, tomate, milho, bacon, batata palha, 2 hambúrguer artesanal 120g, filé de frango, cheddar cremoso, 2 presunto e 2 mussarela</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Combos -->
+        <section class="menu-section">
+            <h2>Combos</h2>
+            <div class="products-grid">
+                <div class="product-card">
+                    <h3>Combo Casal (Tradicional)</h3>
+                    <div class="price"><span class="old-price">De R$ 39,99</span> R$ 34,99</div>
+                    <div class="description">2 Burger Trem + 1 Fanta 1L</div>
+                </div>
+                <div class="product-card">
+                    <h3>Combo Casal (Artesanal)</h3>
+                    <div class="price"><span class="old-price">De R$ 64,99</span> R$ 54,99</div>
+                    <div class="description">2 Burger Peleja + 1 Fanta 1L</div>
+                </div>
+                <div class="product-card">
+                    <h3>Combo Família (Tradicional)</h3>
+                    <div class="price"><span class="old-price">De R$ 79,99</span> R$ 59,99</div>
+                    <div class="description">4 Burger Trem + 1 Kuat 2L</div>
+                </div>
+                <div class="product-card">
+                    <h3>Combo Família (Artesanal)</h3>
+                    <div class="price"><span class="old-price">De R$ 116,99</span> R$ 89,99</div>
+                    <div class="description">4 Burger Peleja + 1 Coca 2L</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Bebidas -->
+        <section class="menu-section">
+            <h2>Bebidas</h2>
+            <div class="products-grid">
+                <div class="product-card">
+                    <h3>Coca-Cola 200ml</h3>
+                    <div class="price">R$ 4,00</div>
+                    <div class="description">Un</div>
+                </div>
+                <div class="product-card">
+                    <h3>Água com Gás 500ml</h3>
+                    <div class="price">R$ 4,00</div>
+                    <div class="description">Un</div>
+                </div>
+                <div class="product-card">
+                    <h3>Coca-Cola 310ml</h3>
+                    <div class="price">R$ 6,00</div>
+                    <div class="description">Un</div>
+                </div>
+                <div class="product-card">
+                    <h3>Fanta 1L</h3>
+                    <div class="price">R$ 9,00</div>
+                    <div class="description">Un</div>
+                </div>
+                <div class="product-card">
+                    <h3>Coca 1L</h3>
+                    <div class="price">R$ 9,00</div>
+                    <div class="description">Un</div>
+                </div>
+                <div class="product-card">
+                    <h3>Coca 1L Zero</h3>
+                    <div class="price">R$ 9,00</div>
+                    <div class="description">Un</div>
+                </div>
+                <div class="product-card">
+                    <h3>Kuat 2L</h3>
+                    <div class="price">R$ 10,00</div>
+                    <div class="description">Un</div>
+                </div>
+                <div class="product-card">
+                    <h3>Coca-Cola 2L</h3>
+                    <div class="price">R$ 13,00</div>
+                    <div class="description">Un</div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Onde Estamos -->
+    <section class="location-section">
+        <h2>Onde Estamos?</h2>
+        <div class="location-content">
+            <div class="location-info">
+                <p><strong>Endereço:</strong> Rua dos Caiçaras, 212 - Caramuru</p>
+                <p><strong>Telefone:</strong> <a href="tel:+5534997178336">(34) 9.9717-8336</a></p>
+            </div>
+            <div class="location-map">
+                <a href="https://www.google.com/maps/search/Rua+dos+Caiçaras,+212+-+Caramuru" target="_blank" class="map-link">
+                    📍 Ver no Google Maps
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Call-to-Action Button -->
+    <section class="cta-section">
+        <a href="https://wa.me/5534997178336?text=Olá,%20vim%20pelo%20*seu%20site*%20gostaria%20de%20fazer%20um%20pedido" class="cta-button" target="_blank">
+            Fazer Pedido Agora
+        </a>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <p>&copy; 2025 Da Família Lanches. Todos os direitos reservados.</p>
+    </footer>
+
+    <!-- Modal/Lightbox para Imagens em Tamanho Completo -->
+    <div id="imageModal" class="image-modal">
+        <div class="modal-content">
+            <span class="modal-close">&times;</span>
+            <div class="modal-image-container">
+                <img id="modalImage" src="" alt="Promoção" class="modal-image">
+            </div>
+            <div class="modal-nav">
+                <button class="modal-prev">&#10094;</button>
+                <button class="modal-next">&#10095;</button>
+            </div>
+            <div class="modal-counter">
+                <span id="imageCounter">1 / 9</span>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/script.js"></script>
+</body>
+</html>
+
