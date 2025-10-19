@@ -23,22 +23,13 @@
     </div>
   </header>
 
-  <!-- Horário de Funcionamento -->
+  <!-- Horário -->
   <section class="horario-section">
     <h2>Horário de Funcionamento</h2>
     <div class="horario-grid">
-      <div class="horario-item">
-        <span class="dia">Segunda a Quinta</span>
-        <span class="hora">18h00 - 23h15</span>
-      </div>
-      <div class="horario-item">
-        <span class="dia">Sexta, Sábado e Domingo</span>
-        <span class="hora">17h30 - 23h30</span>
-      </div>
-      <div class="horario-item">
-        <span class="dia">Terça</span>
-        <span class="hora">Fechado</span>
-      </div>
+      <div class="horario-item"><span class="dia">Segunda a Quinta</span><span class="hora">18h00 - 23h15</span></div>
+      <div class="horario-item"><span class="dia">Sexta, Sábado e Domingo</span><span class="hora">17h30 - 23h30</span></div>
+      <div class="horario-item"><span class="dia">Terça</span><span class="hora">Fechado</span></div>
     </div>
   </section>
 
@@ -55,17 +46,12 @@
 
     <div class="carousel-container">
       <div class="carousel-slides">
-        <!-- 🔗 Clique redireciona pro WhatsApp -->
-        <a href="https://wa.me/5534999999999?text=Quero%20aproveitar%20a%20promo%C3%A7%C3%A3o%20de%20hoje!" target="_blank" class="carousel-slide-link active">
-          <img src="promo1.jpg" alt="2 Purizin + 1 Fanta 1L" class="carousel-slide">
-        </a>
-        <a href="https://wa.me/5534999999999?text=Gostei%20do%20Combo%20Casal%20Artesanal!" target="_blank" class="carousel-slide-link">
-          <img src="promo2.jpg" alt="Combo Casal Artesanal" class="carousel-slide">
-        </a>
-        <a href="https://wa.me/5534999999999?text=Quero%20o%20Combo%20Fam%C3%ADlia%20Tradicional!" target="_blank" class="carousel-slide-link">
-          <img src="promo3.jpg" alt="Combo Família Tradicional" class="carousel-slide">
-        </a>
+        <img src="promo1.jpg" alt="2 Purizin + 1 Fanta 1L" class="carousel-slide active" data-whatsapp="https://wa.me/5534999999999?text=Quero%20a%20promo%C3%A7%C3%A3o%202%20Purizin!">
+        <img src="promo2.jpg" alt="Combo Casal Artesanal" class="carousel-slide" data-whatsapp="https://wa.me/5534999999999?text=Gostei%20do%20Combo%20Casal%20Artesanal!">
+        <img src="promo3.jpg" alt="Combo Família Tradicional" class="carousel-slide" data-whatsapp="https://wa.me/5534999999999?text=Quero%20o%20Combo%20Fam%C3%ADlia%20Tradicional!">
       </div>
+      <button class="carousel-btn prev">◀</button>
+      <button class="carousel-btn next">▶</button>
     </div>
   </section>
 
@@ -83,7 +69,7 @@
     </div>
   </section>
 
-  <!-- Hambúrgueres Artesanais -->
+  <!-- Artesanais -->
   <section class="menu-section">
     <h2>Hambúrgueres Artesanais</h2>
     <div class="products-grid">
@@ -109,6 +95,12 @@
     <h2>Bebidas</h2>
     <div class="products-grid">
       <div class="product-card"><h3>Coca-Cola 200ml</h3><p class="price">R$ 4,00</p></div>
+      <div class="product-card"><h3>Coca-Cola 350ml</h3><p class="price">R$ 5,00</p></div>
+      <div class="product-card"><h3>Fanta Laranja 350ml</h3><p class="price">R$ 5,00</p></div>
+      <div class="product-card"><h3>Guaraná Antarctica 350ml</h3><p class="price">R$ 5,00</p></div>
+      <div class="product-card"><h3>Kuat 2L</h3><p class="price">R$ 10,00</p></div>
+      <div class="product-card"><h3>Coca-Cola 2L</h3><p class="price">R$ 12,00</p></div>
+      <div class="product-card"><h3>Água Mineral</h3><p class="price">R$ 3,00</p></div>
     </div>
   </section>
 
@@ -117,7 +109,49 @@
     <p>© 2025 Da Família Lanches — Você faz parte disso!</p>
   </footer>
 
-  <!-- Scripts -->
-  <script src="script.js"></script>
+  <!-- SCRIPT embutido -->
+  <script>
+    // Carrossel simples
+    const slides = document.querySelectorAll('.carousel-slide');
+    const nextBtn = document.querySelector('.next');
+    const prevBtn = document.querySelector('.prev');
+    let index = 0;
+
+    function showSlide(i) {
+      slides.forEach(slide => slide.classList.remove('active'));
+      slides[i].classList.add('active');
+    }
+
+    nextBtn.addEventListener('click', () => {
+      index = (index + 1) % slides.length;
+      showSlide(index);
+    });
+
+    prevBtn.addEventListener('click', () => {
+      index = (index - 1 + slides.length) % slides.length;
+      showSlide(index);
+    });
+
+    slides.forEach(img => {
+      img.addEventListener('click', () => {
+        const link = img.dataset.whatsapp;
+        if (link) window.open(link, '_blank');
+      });
+    });
+
+    // Timer
+    function startCountdown() {
+      const timer = document.getElementById("timer");
+      let total = 3600;
+      setInterval(() => {
+        const h = String(Math.floor(total / 3600)).padStart(2, "0");
+        const m = String(Math.floor((total % 3600) / 60)).padStart(2, "0");
+        const s = String(total % 60).padStart(2, "0");
+        timer.textContent = `${h}:${m}:${s}`;
+        if (--total < 0) total = 3600;
+      }, 1000);
+    }
+    startCountdown();
+  </script>
 </body>
 </html>
