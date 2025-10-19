@@ -3,21 +3,20 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>🍔 DFL - Cardápio Oficial</title>
+  <title>DFL - Cardápio Oficial</title>
   <link rel="stylesheet" href="style.css" />
   <script defer src="script.js"></script>
 </head>
-
 <body>
-  <!-- Carrinho fixo no topo -->
-  <div id="cart-icon" onclick="openCart()">
+  <!-- Carrinho fixo (contador) -->
+  <button id="cart-icon" aria-label="Abrir carrinho">
     🛒 <span id="cart-count">0</span>
-  </div>
+  </button>
 
-  <!-- Header -->
-  <header class="header section">
-    <div class="header-content" style="display:flex;align-items:center;gap:14px">
-      <img src="logo.png" alt="DFL - Da Família Lanches" class="logo" style="width:70px;height:70px;border-radius:14px" />
+  <!-- Cabeçalho -->
+  <header class="header">
+    <div class="header-content">
+      <img src="logo.png" alt="DFL" class="logo" />
       <div class="header-info">
         <h1>Da Família Lanches</h1>
         <p class="tagline">Hambúrgueres Artesanais e Deliciosos</p>
@@ -25,105 +24,192 @@
     </div>
   </header>
 
-  <!-- Horário de funcionamento -->
+  <!-- Horários (compacto) -->
   <div class="hours-banner">
-    <span>🕒 Seg–Qui <b>18h–23h15</b></span> • 
-    <span>Sex–Dom <b>17h30–23h30</b></span> • 
+    <span>🕒 Seg–Qui <b>18h–23h15</b></span> •
+    <span>Sex–Dom <b>17h30–23h30</b></span> •
     <span>Ter <b>Fechado</b></span>
   </div>
 
-  <!-- Promoções -->
-  <section class="promo section">
+  <!-- Promoções + Contagem -->
+  <section class="promo-section">
     <h2>Confira as Promoções de Hoje</h2>
-    <p>Estoque limitado • Poucas unidades disponíveis</p>
+    <p class="promo-sub">Estoque limitado • Poucas unidades disponíveis</p>
+
+    <div class="countdown-ticker">
+      ⚡ <b>Últimas horas!</b> TERMINA EM <span id="timer">00:00:00</span>
+    </div>
 
     <div class="carousel" id="promoCarousel">
+      <button class="c-btn c-prev" aria-label="Anterior">◀</button>
       <div class="slides">
-        <img src="promo1.jpg" class="slide active" alt="Promo 1" data-wa="https://wa.me/5534997178336?text=Quero%20a%20promo%201">
-        <img src="promo2.jpg" class="slide" alt="Promo 2" data-wa="https://wa.me/5534997178336?text=Quero%20a%20promo%202">
-        <img src="promo3.jpg" class="slide" alt="Promo 3" data-wa="https://wa.me/5534997178336?text=Quero%20a%20promo%203">
+        <img class="slide active" src="promo1.jpg" alt="Promo 1" data-wa="Quero a promoção 1" />
+        <img class="slide" src="promo2.jpg" alt="Promo 2" data-wa="Quero a promoção 2" />
+        <img class="slide" src="promo3.jpg" alt="Promo 3" data-wa="Quero a promoção 3" />
+        <img class="slide" src="promo4.jpg" alt="Promo 4" data-wa="Quero a promoção 4" />
+        <img class="slide" src="promo5.jpg" alt="Promo 5" data-wa="Quero a promoção 5" />
+        <img class="slide" src="promo6.jpg" alt="Promo 6" data-wa="Quero a promoção 6" />
+        <img class="slide" src="promo7.jpg" alt="Promo 7" data-wa="Quero a promoção 7" />
+        <img class="slide" src="promo8.jpg" alt="Promo 8" data-wa="Quero a promoção 8" />
+        <img class="slide" src="promo9.jpg" alt="Promo 9" data-wa="Quero a promoção 9" />
       </div>
-      <button class="c-btn c-prev">◀</button>
-      <button class="c-btn c-next">▶</button>
-    </div>
-
-    <div class="countdown-sticky">
-      🚨 Promoções acabam hoje! TERMINA EM <span id="timer">00:00:00</span>
+      <button class="c-btn c-next" aria-label="Próxima">▶</button>
     </div>
   </section>
 
-  <!-- Hambúrgueres Tradicionais -->
-  <section class="section" id="tradicionais">
+  <!-- Tradicionais -->
+  <section class="menu-section">
     <h2>Hambúrgueres Tradicionais</h2>
     <div class="grid">
-      <div class="card">
-        <strong>BÃO</strong>
-        <div class="price">R$ 11,00</div>
-        <div class="desc">Pão, alface, tomate, hambúrguer, presunto e mussarela.</div>
-      </div>
+      <article class="card" data-id="BAO" data-name="BÃO" data-price="11.00">
+        <h3>BÃO</h3><div class="price">R$ 11,00</div>
+        <p>Pão, alface, tomate, hambúrguer, presunto e mussarela.</p>
+        <button class="add-cart">Adicionar</button>
+      </article>
 
-      <div class="card">
-        <strong>UAI</strong>
-        <div class="price">R$ 13,00</div>
-        <div class="desc">Pão, alface, tomate, milho, bacon, hambúrguer, presunto e mussarela.</div>
-      </div>
+      <article class="card" data-id="UAI" data-name="UAI" data-price="13.00">
+        <h3>UAI</h3><div class="price">R$ 13,00</div>
+        <p>Pão, alface, tomate, milho, bacon, hambúrguer, presunto e mussarela.</p>
+        <button class="add-cart">Adicionar</button>
+      </article>
 
-      <div class="card">
-        <strong>TREM</strong>
-        <div class="price">R$ 14,00</div>
-        <div class="desc">Pão, alface, tomate, milho, bacon, salsicha, hambúrguer, presunto e mussarela.</div>
-      </div>
+      <article class="card" data-id="TREM" data-name="TREM" data-price="14.00">
+        <h3>TREM</h3><div class="price">R$ 14,00</div>
+        <p>Pão, alface, tomate, milho, bacon, salsicha, hambúrguer, presunto e mussarela.</p>
+        <button class="add-cart">Adicionar</button>
+      </article>
+
+      <article class="card" data-id="CADIM" data-name="CADIM" data-price="17.00">
+        <h3>CADIM</h3><div class="price">R$ 17,00</div>
+        <p>Pão, alface, tomate, milho, bacon, salsicha, hambúrguer, filé de frango, presunto e mussarela.</p>
+        <button class="add-cart">Adicionar</button>
+      </article>
+
+      <article class="card" data-id="ARMARIA" data-name="ARMARIA" data-price="18.00">
+        <h3>ARMARIA</h3><div class="price">R$ 18,00</div>
+        <p>Pão, alface, tomate, milho, bacon, salsicha, hambúrguer, filé de frango, batata palha, presunto e mussarela.</p>
+        <button class="add-cart">Adicionar</button>
+      </article>
+
+      <article class="card" data-id="BITELA" data-name="BITELA" data-price="22.00">
+        <h3>BITELA</h3><div class="price">R$ 22,00</div>
+        <p>Pão, alface, tomate, milho, bacon, salsicha, 2 hambúrgueres, filé de frango, batata palha, presunto e mussarela.</p>
+        <button class="add-cart">Adicionar</button>
+      </article>
+
+      <article class="card" data-id="APRUMA" data-name="APRUMA" data-price="25.00">
+        <h3>APRUMA</h3><div class="price">R$ 25,00</div>
+        <p>Pão, alface, tomate, milho, bacon, salsicha, 3 hambúrgueres, filé de frango, batata palha, presunto e mussarela.</p>
+        <button class="add-cart">Adicionar</button>
+      </article>
     </div>
   </section>
 
-  <!-- Hambúrgueres Artesanais -->
-  <section class="section" id="artesanais">
+  <!-- Artesanais -->
+  <section class="menu-section">
     <h2>Hambúrgueres Artesanais</h2>
     <div class="grid">
-      <div class="card">
-        <strong>TUDIBOM</strong>
-        <div class="price">R$ 28,50</div>
-        <div class="desc">
-          Pão, alface, tomate, milho, bacon, 2 hambúrgueres artesanais 120g, filé de frango, presunto e mussarela.
-        </div>
-        <!-- Botão para teste -->
-        <button class="add-cart" onclick="addToCart('TUDIBOM')">Adicionar</button>
-      </div>
+      <article class="card" data-id="GRADICIDO" data-name="GRADICIDO" data-price="28.00">
+        <h3>GRADICIDO</h3><div class="price">R$ 28,00</div>
+        <p>Pão, alface, tomate, milho, bacon, salsicha, 3 hambúrgueres, filé de frango, ovo, batata palha, presunto e mussarela.</p>
+        <button class="add-cart">Adicionar</button>
+      </article>
 
-      <div class="card">
-        <strong>PELEJA</strong>
-        <div class="price">R$ 26,00</div>
-        <div class="desc">
-          Pão, alface, tomate, milho, bacon, hambúrguer artesanal 120g, filé de frango, presunto e mussarela.
-        </div>
-      </div>
+      <article class="card" data-id="VARADIFOME" data-name="VARADIFOME" data-price="30.00">
+        <h3>VARADIFOME</h3><div class="price">R$ 30,00</div>
+        <p>Pão, alface, tomate, milho, bacon, salsicha, 4 hambúrgueres, filé de frango, ovo, batata palha, presunto e mussarela.</p>
+        <button class="add-cart">Adicionar</button>
+      </article>
 
-      <div class="card">
-        <strong>CUSTOSO</strong>
-        <div class="price">R$ 31,00</div>
-        <div class="desc">
-          Pão, alface, tomate, milho, bacon, 2 hambúrgueres artesanais 120g, filé de frango, cheddar cremoso, presunto e 2 fatias de mussarela.
-        </div>
-      </div>
+      <article class="card" data-id="PELEJA" data-name="PELEJA" data-price="26.00">
+        <h3>PELEJA</h3><div class="price">R$ 26,00</div>
+        <p>Pão, alface, tomate, milho, bacon, hambúrguer artesanal 120g, filé de frango, presunto e mussarela.</p>
+        <button class="add-cart">Adicionar</button>
+      </article>
+
+      <article class="card" data-id="TUDIBOM" data-name="TUDIBOM" data-price="28.50">
+        <h3>TUDIBOM</h3><div class="price">R$ 28,50</div>
+        <p>Pão, alface, tomate, milho, bacon, 2 hambúrgueres artesanais 120g, filé de frango, presunto e mussarela.</p>
+        <button class="add-cart">Adicionar</button>
+      </article>
+
+      <article class="card" data-id="CUSTOSO" data-name="CUSTOSO" data-price="31.00">
+        <h3>CUSTOSO</h3><div class="price">R$ 31,00</div>
+        <p>Pão, alface, tomate, milho, bacon, 2 hambúrgueres artesanais 120g, filé de frango, cheddar cremoso, presunto e mussarela.</p>
+        <button class="add-cart">Adicionar</button>
+      </article>
+    </div>
+  </section>
+
+  <!-- Combos -->
+  <section class="menu-section">
+    <h2>Combos</h2>
+    <div class="grid">
+      <article class="card" data-id="CC_TRAD" data-name="Combo Casal (Tradicional)" data-price="34.99">
+        <h3>Combo Casal (Tradicional)</h3><div class="price">R$ 34,99</div>
+        <p>2 Hambúrguer Trem + 1 Fanta 1L</p>
+        <button class="add-cart">Adicionar</button>
+      </article>
+
+      <article class="card" data-id="CF_TRAD" data-name="Combo Família (Tradicional)" data-price="59.99">
+        <h3>Combo Família (Tradicional)</h3><div class="price">R$ 59,99</div>
+        <p>4 Hambúrguer Trem + 1 Kuat 2L</p>
+        <button class="add-cart">Adicionar</button>
+      </article>
+
+      <article class="card" data-id="CC_ART" data-name="Combo Casal (Artesanal)" data-price="54.99">
+        <h3>Combo Casal (Artesanal)</h3><div class="price">R$ 54,99</div>
+        <p>2 Hambúrguer Peleja + 1 Coca 1L</p>
+        <button class="add-cart">Adicionar</button>
+      </article>
+
+      <article class="card" data-id="CF_ART" data-name="Combo Família (Artesanal)" data-price="79.99">
+        <h3>Combo Família (Artesanal)</h3><div class="price">R$ 79,99</div>
+        <p>4 Hambúrguer Peleja + 1 Coca 2L</p>
+        <button class="add-cart">Adicionar</button>
+      </article>
     </div>
   </section>
 
   <!-- Bebidas -->
-  <section class="section drinks" id="bebidas">
+  <section class="menu-section">
     <h2>Bebidas & Refrigerantes</h2>
     <div class="grid">
-      <div class="card"><strong>Coca-Cola 200ml</strong><div class="price">R$ 4,00</div></div>
-      <div class="card"><strong>Coca-Cola 2L</strong><div class="price">R$ 13,00</div></div>
+      <article class="card" data-id="coca200" data-name="Coca-Cola 200ml" data-price="4.00"><h3>Coca-Cola 200ml</h3><div class="price">R$ 4,00</div><button class="add-cart">Adicionar</button></article>
+      <article class="card" data-id="aguaG" data-name="Água com Gás" data-price="4.00"><h3>Água com Gás</h3><div class="price">R$ 4,00</div><button class="add-cart">Adicionar</button></article>
+      <article class="card" data-id="uva450" data-name="Dell-Valle Uva 450ml" data-price="5.00"><h3>Dell-Valle Uva 450ml</h3><div class="price">R$ 5,00</div><button class="add-cart">Adicionar</button></article>
+      <article class="card" data-id="laranja450" data-name="Dell-Valle Laranja 450ml" data-price="5.00"><h3>Dell-Valle Laranja 450ml</h3><div class="price">R$ 5,00</div><button class="add-cart">Adicionar</button></article>
+      <article class="card" data-id="coca310" data-name="Coca-Cola 310ml" data-price="5.00"><h3>Coca-Cola 310ml</h3><div class="price">R$ 5,00</div><button class="add-cart">Adicionar</button></article>
+      <article class="card" data-id="coca310zero" data-name="Coca-Cola 310ml Zero" data-price="5.00"><h3>Coca-Cola 310ml Zero</h3><div class="price">R$ 5,00</div><button class="add-cart">Adicionar</button></article>
+      <article class="card" data-id="fanta1l" data-name="Fanta Laranja 1L" data-price="8.00"><h3>Fanta Laranja 1L</h3><div class="price">R$ 8,00</div><button class="add-cart">Adicionar</button></article>
+      <article class="card" data-id="coca1l" data-name="Coca-Cola 1L" data-price="9.00"><h3>Coca-Cola 1L</h3><div class="price">R$ 9,00</div><button class="add-cart">Adicionar</button></article>
+      <article class="card" data-id="coca1lzero" data-name="Coca-Cola 1L Zero" data-price="9.00"><h3>Coca-Cola 1L Zero</h3><div class="price">R$ 9,00</div><button class="add-cart">Adicionar</button></article>
+      <article class="card" data-id="kuat2l" data-name="Kuat Guaraná 2L" data-price="10.00"><h3>Kuat Guaraná 2L</h3><div class="price">R$ 10,00</div><button class="add-cart">Adicionar</button></article>
+      <article class="card" data-id="coca2l" data-name="Coca-Cola 2L" data-price="13.00"><h3>Coca-Cola 2L</h3><div class="price">R$ 13,00</div><button class="add-cart">Adicionar</button></article>
     </div>
   </section>
 
   <!-- Rodapé -->
-  <footer class="footer section">
+  <footer class="footer">
     <h2>Onde estamos</h2>
-    <p>Patos de Minas — Delivery e retirada.</p>
-    <p>📍 <a href="https://maps.google.com/?q=Da%20Fam%C3%ADlia%20Lanches%20Patos%20de%20Minas" target="_blank">Abrir no Google Maps</a></p>
-    <p>📸 Instagram: <a href="https://instagram.com/dafamilia_patos" target="_blank">@dafamilia_patos</a></p>
-    <p>🛒 iFood: <a href="https://www.ifood.com.br/delivery/patos-de-minas-mg/da-familia-lanches-caramuru/9aadff75-b014-4e7f-a9b4-b3e478e38af8" target="_blank">Peça agora</a></p>
+    <p>Patos de Minas — Atendimento delivery e retirada.</p>
+    <a class="map-link" href="https://maps.app.goo.gl/jQ1cYcmuZm8rU5Dk9" target="_blank" rel="noopener">Abrir no Google Maps</a>
+    <p class="social-line">📸 Siga <a href="https://www.instagram.com/dafamilia_patos" target="_blank">@dafamilia_patos</a> · 🛒 Peça também no <a href="https://www.ifood.com.br/delivery/patos-de-minas-mg/da-familia-lanches-caramuru/9aadff75-b014-4e7f-a9b4-b3e478e38af8" target="_blank">iFood</a> · 💬 ou direto no <a href="https://wa.me/5534997178336" target="_blank">WhatsApp</a></p>
+    <p class="copy">© 2025 Da Família Lanches — Você faz parte disso!</p>
   </footer>
+
+  <!-- Mini-carrinho (popup flutuante) -->
+  <div id="cart-backdrop"></div>
+  <aside id="mini-cart" aria-hidden="true">
+    <header class="mini-head">
+      <h3>Seu Pedido</h3>
+      <button class="mini-close" aria-label="Fechar">✕</button>
+    </header>
+    <div id="mini-list" class="mini-list"><!-- itens via JS --></div>
+    <footer class="mini-foot">
+      <button id="mini-clear" class="btn-secondary">Limpar carrinho</button>
+      <button id="mini-checkout" class="btn-primary">Fechar pedido</button>
+    </footer>
+  </aside>
 </body>
 </html>
