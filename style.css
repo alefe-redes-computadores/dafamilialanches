@@ -473,3 +473,41 @@ button.extras-btn:hover {
     touch-action: none;
   }
 }
+/* ===== FIX HARD do carrinho (força estado fechado/aberto) ===== */
+#cart-backdrop{
+  position:fixed; inset:0; background:rgba(0,0,0,.55);
+  opacity:0; visibility:hidden; pointer-events:none;
+  transition:opacity .25s ease; z-index:9998 !important;
+}
+#cart-backdrop.show{ opacity:1; visibility:visible; pointer-events:auto; }
+
+/* Desktop: lateral direita fechada por padrão */
+#mini-cart{
+  position:fixed !important; top:0 !important; right:0 !important; left:auto !important;
+  width:320px !important; height:100vh !important; background:#111 !important;
+  border-left:2px solid #f9d44b; border-top:0; border-radius:0 !important;
+  z-index:9999 !important; overflow:hidden; display:flex; flex-direction:column;
+  transform:translateX(100%) !important;              /* << fechado */
+  transition:transform .3s ease !important; will-change:transform;
+  pointer-events:none;                                 /* não clica quando fechado */
+}
+#mini-cart.active{
+  transform:translateX(0) !important;                  /* << aberto */
+  pointer-events:auto;
+}
+
+/* Mobile: sobe de baixo e fica 100% escondido quando fechado */
+@media (max-width:768px){
+  #mini-cart{
+    left:0 !important; right:0 !important; width:100vw !important; height:85vh !important;
+    top:auto !important; border-left:0 !important; border-top:2px solid #f9d44b !important;
+    border-radius:16px 16px 0 0 !important;
+    transform:none !important;                         /* ignora o translateX do desktop */
+    bottom:-100% !important;                           /* << fechado fora da tela */
+    transition:bottom .35s ease !important; will-change:bottom;
+  }
+  #mini-cart.active{ bottom:0 !important; }            /* << aberto */
+
+  /* trava scroll do fundo quando aberto (se JS marcar) */
+  body.no-scroll{ overflow:hidden !important; height:100vh; touch-action:none; }
+}
