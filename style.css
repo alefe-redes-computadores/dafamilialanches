@@ -523,3 +523,30 @@ body {
     grid-template-columns: 1fr;
   }
 }
+/* === Corrige visibilidade do carrinho no mobile === */
+@media (max-width: 768px) {
+  #mini-cart {
+    transform: translateY(100%);
+    transition: transform 0.3s ease-in-out;
+    height: 85vh;
+    top: auto;
+    bottom: 0;
+    border-radius: 16px 16px 0 0;
+  }
+
+  #mini-cart.active {
+    transform: translateY(0);
+  }
+
+  #cart-backdrop {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.6);
+    z-index: 998;
+  }
+
+  #cart-backdrop.show {
+    display: block;
+  }
+}
