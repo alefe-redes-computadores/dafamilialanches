@@ -36,15 +36,16 @@ function atualizarCarrinho() {
     div.innerHTML = `
       <span>${item.nome} ${extrasTxt}</span>
       <strong>R$ ${item.preco.toFixed(2)}</strong>
-      <button class="remove" data-i="${i}">✕</button>
+      <button class="remove" data-i="${i}" aria-label="Remover">✕</button>
     `;
     miniList.appendChild(div);
     total += item.preco;
   });
 
   cartCount.textContent = carrinho.length;
-  document.querySelector(".mini-foot .btn-primary").textContent =
-    carrinho.length ? `Fechar pedido – R$${total.toFixed(2)}` : "Fechar pedido";
+  miniCheckout.textContent = carrinho.length
+    ? `Fechar pedido – R$${total.toFixed(2)}`
+    : "Fechar pedido";
 
   miniClear.style.display = carrinho.length ? "inline-block" : "none";
   miniCheckout.style.display = carrinho.length ? "inline-block" : "none";
@@ -52,10 +53,12 @@ function atualizarCarrinho() {
 
 function abrirCarrinho() {
   miniCart.classList.add("active");
+  miniCart.setAttribute("aria-hidden","false");
   cartBackdrop.classList.add("show");
 }
 function fecharCarrinho() {
   miniCart.classList.remove("active");
+  miniCart.setAttribute("aria-hidden","true");
   cartBackdrop.classList.remove("show");
 }
 function limparCarrinho() {
@@ -63,15 +66,21 @@ function limparCarrinho() {
   atualizarCarrinho();
 }
 
-// ---------- EVENTOS DO CARRINHO ----------
-cartIcon.addEventListener("click", abrirCarrinho);
-cartBackdrop.addEventListener("click", fecharCarrinho);
-miniClear.addEventListener("click", limparCarrinho);
-document.querySelector(".mini-close")?.addEventListener("click", fecharCarrinho);
+// ---------- LISTENERS ROBUSTOS ----------
+["click","touchstart"].forEach(evt=>{
+  cartBackdrop.addEventListener(evt, fecharCarrinho);
+  document.addEventListener(evt, (e)=>{
+    if (e.target.closest(".mini-close")) fecharCarrinho();
+  });
+});
 
+// (mantém o clique do ícone)
+cartIcon.addEventListener("click", abrirCarrinho);
+
+// remover item
 miniList.addEventListener("click", (e) => {
   if (e.target.classList.contains("remove")) {
-    const i = e.target.dataset.i;
+    const i = +e.target.dataset.i;
     carrinho.splice(i, 1);
     atualizarCarrinho();
   }
@@ -89,6 +98,19 @@ document.querySelectorAll(".add-cart").forEach((btn) => {
     animarBotao(btn);
   });
 });
+
+// ---------- POPUP “+1” ----------
+function mostrarPopup(texto) {
+  const pop = document.createElement("div");
+  pop.className = "add-popup";
+  pop.textContent = texto;
+  document.body.appendChild(pop);
+  setTimeout(() => pop.remove(), 1000);
+}
+function animarBotao(btn) {
+  btn.classList.add("clicked");
+  setTimeout(() => btn.classList.remove("clicked"), 220);
+}
 
 // ---------- BOTÕES DE ADICIONAIS ----------
 document.querySelectorAll(".extras-btn").forEach((btn) => {
