@@ -1,3 +1,7 @@
+// Som de clique global
+const clickSound = new Audio("click.wav");
+clickSound.volume = 0.4; // 🔉 volume suave
+
 // ======================
 // DFL – Da Família Lanches 🍔
 // Script principal
@@ -89,6 +93,8 @@ cartList.addEventListener("click", (e) => {
 // ======================
 document.querySelectorAll(".add-cart").forEach((btn) => {
   btn.addEventListener("click", () => {
+    clickSound.currentTime = 0;
+    clickSound.play().catch(() => {});
     const card = btn.closest(".card");
     const nome = card.dataset.name;
     const preco = parseFloat(card.dataset.price);
@@ -152,21 +158,10 @@ function fecharExtras() {
 }
 
 extrasAdd.addEventListener("click", () => {
+  clickSound.currentTime = 0;
+  clickSound.play().catch(() => {});
   const checkboxes = extrasList.querySelectorAll("input[type='checkbox']:checked");
-  extrasSelecionados = Array.from(checkboxes).map((cb) => ({
-    nome: cb.value,
-    preco: parseFloat(cb.dataset.price),
-  }));
-
-  let totalExtras = 0;
-  extrasSelecionados.forEach((x) => (totalExtras += x.preco));
-
-  if (produtoAtual) {
-    const nome = produtoAtual.dataset.name + " (com adicionais)";
-    const precoBase = parseFloat(produtoAtual.dataset.price);
-    adicionarAoCarrinho(nome, precoBase + totalExtras);
-  }
-
+  ...
   fecharExtras();
 });
 
@@ -281,15 +276,19 @@ cartBackdrop.addEventListener("touchstart", fecharCarrinho);
 // Finalizar pedido – WhatsApp
 // ======================
 finishOrderBtn.addEventListener("click", () => {
+  // 🔊 toca o som de clique
+  clickSound.currentTime = 0;
+  clickSound.play().catch(() => {});
+
   if (!cart.length) return alert("Seu carrinho está vazio!");
 
   let mensagem = "🧾 *Pedido – Da Família Lanches*%0A%0A";
   cart.forEach((item, i) => {
-    mensagem += `${i + 1}x *${item.nome}* — R$ ${item.preco.toFixed(2)}%0A`;
+    mensagem += `${i + 1}. ${item.nome} — R$ ${item.preco.toFixed(2)}%0A`;
   });
 
   const total = cart.reduce((sum, item) => sum + item.preco, 0);
-  mensagem += `%0A💰 *Total:* R$ ${total.toFixed(2)}%0A%0A📍 Patos de Minas`;
+  mensagem += `%0A💰 *Total:* R$ ${total.toFixed(2)}%0A📍 Patos de Minas`;
 
   const numero = "5534997178336";
   const link = `https://wa.me/${numero}?text=${mensagem}`;
