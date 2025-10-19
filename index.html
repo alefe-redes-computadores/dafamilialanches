@@ -2,155 +2,138 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Da Família Lanches — Cardápio Oficial</title>  <!-- ===== CSS EMBUTIDO ===== -->  <style>
-    :root{
-      --bg:#0f0f10;--card:#151618;--card2:#1b1c1f;--txt:#f5f5f7;--sub:#c9c9cf;--prim:#ffd100;--accent:#ff4d00;--gap:14px;--rad:16px;
-    }
-    *{box-sizing:border-box;margin:0;padding:0}
-    body{background:var(--bg);color:var(--txt);font-family:system-ui,Roboto,Arial,sans-serif;line-height:1.5}
-    img{max-width:100%;display:block}
-    h1,h2{font-weight:700}
+  <title>DFL - Cardápio Oficial</title>  <!-- CSS principal -->  <link rel="stylesheet" href="style.css" />  <!-- Ajustes visuais mínimos para os novos blocos (seguros e discretos) -->  <style>
+    /* Faixa compacta de horários (logo abaixo do header) */
+    .hours-banner{display:flex;gap:12px;flex-wrap:wrap;align-items:center;justify-content:center;background:rgba(27,28,31,.85);color:#f5f5f7;border:1px solid #2a2d34;border-radius:10px;padding:8px 12px;margin:10px 0 20px}
+    .hours-banner b{color:#ffd100}
+    .hours-banner .sep{opacity:.6}
+    .hours-banner .icon{filter:grayscale(.1)}
+    .hours-banner .icon{font-size:18px;margin-right:6px}
 
-    .container{max-width:1100px;margin:auto;padding:24px}
+    /* Faixa amarela pulsante (abaixo do carrossel) */
+    .countdown-banner{background:#ffd100;color:#111;text-align:center;font-weight:800;border-radius:12px;padding:14px 12px;margin-top:16px;font-size:clamp(18px,2.6vw,22px);animation:pulse 2s infinite}
+    @keyframes pulse{0%{filter:brightness(100%)}50%{filter:brightness(120%)}100%{filter:brightness(100%)}}
 
-    /* Header */
-    .header{display:flex;align-items:center;gap:14px;margin-bottom:28px}
-    .header img{width:70px;height:70px;border-radius:14px}
-    .header h1{font-size:clamp(24px,3.5vw,34px)}
-    .header p{color:var(--sub)}
-
-    /* Horários */
-    .hours{background:var(--card);border-radius:var(--rad);padding:16px;margin-bottom:30px}
-    .hours-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:var(--gap)}
-    .hour{background:var(--card2);padding:10px;border-radius:12px}
-    .day{color:var(--prim);font-weight:600;display:block;margin-bottom:4px}
-
-    /* Promoções */
-    .promo{background:var(--card);border-radius:var(--rad);padding:16px;margin-bottom:30px}
-    .promo h2{margin-bottom:6px}
-    .promo p{color:var(--sub);margin-bottom:10px}
-
-    /* Faixa amarela */
-    .countdown-banner{background:var(--prim);color:#111;font-weight:800;text-align:center;font-size:22px;padding:12px 10px;border-radius:10px;animation:pulse 2s infinite}
-    @keyframes pulse{0%{filter:brightness(100%)}50%{filter:brightness(125%)}100%{filter:brightness(100%)}}
-
-    /* Carrossel */
-    .carousel{position:relative;border-radius:14px;overflow:hidden;margin-top:20px}
-    .slide{display:none;width:100%}
+    /* Controles do carrossel (por garantia, caso o CSS externo não defina) */
+    .carousel{position:relative;border-radius:14px;overflow:hidden}
+    .slides{display:grid}
+    .slide{grid-area:1/1;display:none;width:100%}
     .slide.active{display:block}
-    .c-btn{position:absolute;top:50%;transform:translateY(-50%);border:0;background:rgba(0,0,0,.5);color:#fff;font-size:20px;padding:8px 12px;border-radius:50%;cursor:pointer}
+    .c-btn{position:absolute;top:50%;transform:translateY(-50%);border:0;background:rgba(0,0,0,.5);color:#fff;font-size:20px;padding:8px 12px;border-radius:999px;cursor:pointer}
     .c-prev{left:10px}.c-next{right:10px}
 
-    /* Grade */
-    .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:var(--gap)}
-    .card{background:var(--card);border:1px solid #202226;border-radius:var(--rad);padding:14px}
-    .price{color:var(--prim);font-weight:700}
-    .old{text-decoration:line-through;color:#777;margin-right:6px}
-
-    /* Bebidas */
-    .drinks .card{display:flex;flex-direction:column;gap:4px}
-
-    /* Rodapé */
-    .footer{margin-top:40px;background:var(--card);padding:18px;border-radius:var(--rad)}
-    .footer h2{margin-bottom:6px}
-    .footer a{display:inline-block;background:var(--prim);color:#111;padding:8px 14px;border-radius:10px;font-weight:700;margin-top:8px}
-
-    /* Botão WhatsApp flutuante */
-    .wa-fab{position:fixed;right:16px;bottom:16px;background:#25d366;color:#fff;border-radius:50px;padding:14px 18px;font-weight:700;box-shadow:0 8px 25px rgba(0,0,0,.3);z-index:99}
-    .wa-fab:hover{background:#1eb15a}
-
-    @media(max-width:520px){.grid{grid-template-columns:1fr 1fr}}
+    /* Botão flutuante WhatsApp (fallback leve) */
+    .wa-fab{position:fixed;right:16px;bottom:16px;background:#25d366;color:#fff;border-radius:999px;padding:14px 18px;font-weight:800;box-shadow:0 8px 24px rgba(0,0,0,.35);z-index:99}
   </style></head>
 <body>
   <div class="container">
     <!-- Header -->
-    <div class="header">
-      <img src="logo.png" alt="DFL Logo"/>
-      <div>
-        <h1>Da Família Lanches</h1>
-        <p>Hambúrgueres Artesanais e Deliciosos</p>
+    <header class="header">
+      <div class="header-content">
+        <img src="logo.png" alt="DFL - Da Família Lanches" class="logo" />
+        <div class="header-info">
+          <h1>Da Família Lanches</h1>
+          <p class="tagline">Hambúrgueres Artesanais e Deliciosos</p>
+        </div>
       </div>
-    </div><!-- Horários -->
-<section class="hours">
-  <h2>Horário de Funcionamento</h2>
-  <div class="hours-grid" style="margin-top:10px">
-    <div class="hour"><span class="day">Segunda a Quinta</span><span>18h00 – 23h15</span></div>
-    <div class="hour"><span class="day">Sexta, Sábado e Domingo</span><span>17h30 – 23h30</span></div>
-    <div class="hour"><span class="day">Terça</span><span>Fechado</span></div>
-  </div>
-</section>
+    </header><!-- Horário (faixa compacta: opção 1 com ícone) -->
+<div class="hours-banner" aria-label="Horário de funcionamento">
+  <span class="icon" aria-hidden="true">🕒</span>
+  <span>Seg–Qui <b>18h–23h15</b></span>
+  <span class="sep">•</span>
+  <span>Sex–Dom <b>17h30–23h30</b></span>
+  <span class="sep">•</span>
+  <span>Ter <b>Fechado</b></span>
+</div>
 
 <!-- Promoções -->
-<section class="promo">
-  <h2>Confira as Promoções de Hoje</h2>
-  <p>Estoque limitado • Poucas unidades disponíveis</p>
+<section class="promo-section">
+  <div class="promo-header">
+    <h2>Confira as Promoções de Hoje</h2>
+    <p class="promo-subtitle">Estoque limitado • Poucas unidades disponíveis</p>
+  </div>
 
-  <div class="countdown-banner">⚡ Últimas horas! TERMINA EM <span id="timer">00:00:00</span></div>
+  <!-- Carrossel com 9 imagens (já existentes no seu GitHub) -->
+  <div class="carousel" id="promoCarousel">
+    <div class="slides">
+      <img src="promo1.jpg"  alt="Promoção 1"  class="slide active" data-wa="https://wa.me/5534997178336?text=Quero%20a%20promo%201" />
+      <img src="promo2.jpg"  alt="Promoção 2"  class="slide"        data-wa="https://wa.me/5534997178336?text=Quero%20a%20promo%202" />
+      <img src="promo3.jpg"  alt="Promoção 3"  class="slide"        data-wa="https://wa.me/5534997178336?text=Quero%20a%20promo%203" />
+      <img src="promo4.jpg"  alt="Promoção 4"  class="slide"        data-wa="https://wa.me/5534997178336?text=Quero%20a%20promo%204" />
+      <img src="promo5.jpg"  alt="Promoção 5"  class="slide"        data-wa="https://wa.me/5534997178336?text=Quero%20a%20promo%205" />
+      <img src="promo6.jpg"  alt="Promoção 6"  class="slide"        data-wa="https://wa.me/5534997178336?text=Quero%20a%20promo%206" />
+      <img src="promo7.jpg"  alt="Promoção 7"  class="slide"        data-wa="https://wa.me/5534997178336?text=Quero%20a%20promo%207" />
+      <img src="promo8.jpg"  alt="Promoção 8"  class="slide"        data-wa="https://wa.me/5534997178336?text=Quero%20a%20promo%208" />
+      <img src="promo9.jpg"  alt="Promoção 9"  class="slide"        data-wa="https://wa.me/5534997178336?text=Quero%20a%20promo%209" />
+    </div>
+    <button class="c-btn c-prev" aria-label="Anterior">◀</button>
+    <button class="c-btn c-next" aria-label="Próxima">▶</button>
+  </div>
 
-  <div class="carousel">
-    <img src="promo1.jpg" class="slide active" alt="Promoção 1" data-wa="https://wa.me/5534997178336?text=Quero%20a%20promo%C3%A7%C3%A3o%202%20Purizin!"/>
-    <img src="promo2.jpg" class="slide" alt="Promoção 2" data-wa="https://wa.me/5534997178336?text=Gostei%20do%20Combo%20Casal%20Artesanal!"/>
-    <img src="promo3.jpg" class="slide" alt="Promoção 3" data-wa="https://wa.me/5534997178336?text=Quero%20o%20Combo%20Fam%C3%ADlia%20Tradicional!"/>
-    <button class="c-btn c-prev">◀</button>
-    <button class="c-btn c-next">▶</button>
+  <!-- Faixa amarela pulsante abaixo do carrossel -->
+  <div class="countdown-banner" id="dailyCountdown" data-countdown="daily-235959">
+    ⚡ Últimas horas! <span style="opacity:.8">TERMINA EM</span> <span id="timer">00:00:00</span>
   </div>
 </section>
 
-<!-- Bebidas -->
-<section class="drinks">
+<!-- Bebidas (mantidas) -->
+<section class="menu-section drinks">
   <h2>Bebidas</h2>
-  <div class="grid" style="margin-top:10px">
-    <div class="card"><strong>Coca-Cola 200ml</strong><div class="price">R$ 4,00</div></div>
-    <div class="card"><strong>Coca-Cola 350ml</strong><div class="price">R$ 5,00</div></div>
-    <div class="card"><strong>Fanta Laranja 350ml</strong><div class="price">R$ 5,00</div></div>
-    <div class="card"><strong>Guaraná Antarctica 350ml</strong><div class="price">R$ 5,00</div></div>
-    <div class="card"><strong>Sprite 350ml</strong><div class="price">R$ 5,00</div></div>
-    <div class="card"><strong>Kuat 2L</strong><div class="price">R$ 10,00</div></div>
-    <div class="card"><strong>Fanta 2L</strong><div class="price">R$ 10,00</div></div>
-    <div class="card"><strong>Coca-Cola 2L</strong><div class="price">R$ 12,00</div></div>
-    <div class="card"><strong>Água Mineral</strong><div class="price">R$ 3,00</div></div>
+  <div class="products-grid">
+    <div class="product-card"><h3>Coca-Cola 200ml</h3><p class="price">R$ 4,00</p></div>
+    <div class="product-card"><h3>Coca-Cola 350ml</h3><p class="price">R$ 5,00</p></div>
+    <div class="product-card"><h3>Fanta Laranja 350ml</h3><p class="price">R$ 5,00</p></div>
+    <div class="product-card"><h3>Guaraná Antarctica 350ml</h3><p class="price">R$ 5,00</p></div>
+    <div class="product-card"><h3>Sprite 350ml</h3><p class="price">R$ 5,00</p></div>
+    <div class="product-card"><h3>Kuat 2L</h3><p class="price">R$ 10,00</p></div>
+    <div class="product-card"><h3>Fanta 2L</h3><p class="price">R$ 10,00</p></div>
+    <div class="product-card"><h3>Coca-Cola 2L</h3><p class="price">R$ 12,00</p></div>
+    <div class="product-card"><h3>Água Mineral</h3><p class="price">R$ 3,00</p></div>
   </div>
 </section>
 
-<!-- Rodapé -->
+<!-- Rodapé / Endereço -->
 <footer class="footer">
   <h2>Onde estamos</h2>
   <p>Patos de Minas — Atendimento delivery e retirada.</p>
-  <a href="https://maps.google.com/?q=Da%20Fam%C3%ADlia%20Lanches%20Patos%20de%20Minas" target="_blank">Abrir no Google Maps</a>
-  <p style="margin-top:6px">© 2025 Da Família Lanches — Você faz parte disso!</p>
+  <p><a href="https://maps.google.com/?q=Da%20Fam%C3%ADlia%20Lanches%20Patos%20de%20Minas" target="_blank" rel="noopener">Abrir no Google Maps</a></p>
+  <p>© 2025 Da Família Lanches — Você faz parte disso!</p>
 </footer>
 
-  </div>  <!-- Botão flutuante WhatsApp --><a href="https://wa.me/5534997178336?text=Ol%C3%A1%2C%20quero%20fazer%20um%20pedido!" class="wa-fab" target="_blank">💬 Pedir no WhatsApp</a>
+  </div>  <!-- Botão flutuante WhatsApp --><a class="wa-fab" href="https://wa.me/5534997178336?text=Ol%C3%A1%2C%20quero%20fazer%20um%20pedido!" target="_blank" rel="noopener" aria-label="Fazer pedido no WhatsApp">💬 Pedir no WhatsApp</a>
 
-  <!-- ===== JS EMBUTIDO ===== -->  <script>
-    // Contagem regressiva até 23:59:59
-    function startCountdown(){
-      const timerEl=document.getElementById('timer');
-      function update(){
-        const now=new Date();
-        const end=new Date();
+  <!-- JS principal -->  <script src="script.js" defer></script>  <!-- Fallback leve do contador diário até 23:59:59 (caso o script.js não trate) -->  <script>
+    (function(){
+      const el = document.getElementById('timer');
+      const banner = document.getElementById('dailyCountdown');
+      if (!el || !banner) return;
+      function tick(){
+        const now = new Date();
+        const end = new Date();
         end.setHours(23,59,59,999);
-        let diff=(end-now)/1000;
-        if(diff<0) diff=0;
-        const h=String(Math.floor(diff/3600)).padStart(2,'0');
-        const m=String(Math.floor((diff%3600)/60)).padStart(2,'0');
-        const s=String(Math.floor(diff%60)).padStart(2,'0');
-        timerEl.textContent=`${h}:${m}:${s}`;
+        let diff = Math.max(0, Math.floor((end - now)/1000));
+        const h = String(Math.floor(diff/3600)).padStart(2,'0');
+        const m = String(Math.floor((diff%3600)/60)).padStart(2,'0');
+        const s = String(diff%60).padStart(2,'0');
+        el.textContent = `${h}:${m}:${s}`;
       }
-      update();
-      setInterval(update,1000);
-    }
-    startCountdown();
+      tick();
+      setInterval(tick,1000);
+    })();
 
-    // Carrossel simples com clique
-    const slides=document.querySelectorAll('.slide');
-    const prev=document.querySelector('.c-prev');
-    const next=document.querySelector('.c-next');
-    let idx=0;
-    function show(i){slides.forEach(s=>s.classList.remove('active'));slides[i].classList.add('active');}
-    function go(d){idx=(idx+d+slides.length)%slides.length;show(idx);}
-    prev.addEventListener('click',()=>go(-1));
-    next.addEventListener('click',()=>go(1));
-    slides.forEach(s=>s.addEventListener('click',()=>{const wa=s.dataset.wa;if(wa)window.open(wa,'_blank');}));
+    // Fallback básico do carrossel (caso o script.js não inicialize)
+    (function(){
+      const slides = Array.from(document.querySelectorAll('.slide'));
+      const prev = document.querySelector('.c-prev');
+      const next = document.querySelector('.c-next');
+      if (!slides.length || !prev || !next) return;
+      let i = slides.findIndex(s=>s.classList.contains('active'));
+      if (i<0) i=0; slides.forEach((s,idx)=>s.style.display = idx===i ? 'block':'none');
+      function show(n){slides.forEach((s,idx)=>s.style.display = idx===n ? 'block':'none');}
+      function go(d){i=(i+d+slides.length)%slides.length;show(i);}    
+      prev.addEventListener('click',()=>go(-1));
+      next.addEventListener('click',()=>go(1));
+      slides.forEach(s=>s.addEventListener('click',()=>{const wa=s.dataset.wa;if(wa)window.open(wa,'_blank');}));
+    })();
   </script></body>
 </html>
