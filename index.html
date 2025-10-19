@@ -2,74 +2,43 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>DFL - Cardápio Oficial</title>  <!-- ===== CSS EMBUTIDO (tema escuro BOOT original) ===== -->  <style>
-    :root{
-      --bg:#0f0f10;--card:#151618;--card2:#1b1c1f;--txt:#f5f5f7;--sub:#c9c9cf;--prim:#ffd100;--accent:#ff4d00;--gap:14px;--rad:16px;
-    }
-    *{box-sizing:border-box;margin:0;padding:0}
-    body{background:var(--bg);color:var(--txt);font-family:system-ui,Roboto,Arial,sans-serif;line-height:1.5}
-    img{max-width:100%;display:block}
-    h1,h2{font-weight:700}
-
-    .container{max-width:1100px;margin:auto;padding:24px}
-
-    /* Header */
-    .header{display:flex;align-items:center;gap:14px;margin-bottom:12px}
-    .header img{width:70px;height:70px;border-radius:14px}
-    .header h1{font-size:clamp(24px,3.5vw,34px)}
-    .header p{color:var(--sub)}
-
-    /* Faixa compacta de horários (mantida) */
-    .hours-banner{display:flex;gap:12px;flex-wrap:wrap;align-items:center;justify-content:center;background:rgba(27,28,31,.85);color:#f5f5f7;border:1px solid #2a2d34;border-radius:10px;padding:8px 12px;margin:10px 0 24px}
-    .hours-banner b{color:#ffd100}
+  <title>DFL - Cardápio Oficial</title>  <!-- CSS principal (cache-bust) -->  <link rel="stylesheet" href="style.css?v=2" />  <!-- Ajustes visuais específicos (mínimos e compatíveis com o tema BOOT) -->  <style>
+    /* Faixa de horários compacta */
+    .hours-banner{display:flex;gap:12px;flex-wrap:wrap;align-items:center;justify-content:center;background:rgba(27,28,31,.85);color:#f5f5f7;border:1px solid #2a2d34;border-radius:10px;padding:8px 12px;margin:10px 0 20px}
+    .hours-banner b{color:#ffcc00}
     .hours-banner .sep{opacity:.6}
-    .hours-banner .icon{filter:grayscale(.1)}
     .hours-banner .icon{font-size:18px;margin-right:6px}
 
-    /* Promoções */
-    .promo{background:var(--card);border-radius:var(--rad);padding:16px;margin-bottom:30px}
-    .promo h2{margin-bottom:6px}
-    .promo p{color:var(--sub);margin-bottom:10px}
-
-    /* Carrossel */
+    /* Carrossel (fallback visual) */
     .carousel{position:relative;border-radius:14px;overflow:hidden;margin-top:10px}
-    .slide{display:none;width:100%}
+    .slides{display:grid}
+    .slide{grid-area:1/1;display:none;width:100%}
     .slide.active{display:block}
-    .c-btn{position:absolute;top:50%;transform:translateY(-50%);border:0;background:rgba(0,0,0,.5);color:#fff;font-size:20px;padding:8px 12px;border-radius:50%;cursor:pointer}
+    .c-btn{position:absolute;top:50%;transform:translateY(-50%);border:0;background:rgba(0,0,0,.5);color:#fff;font-size:20px;padding:8px 12px;border-radius:999px;cursor:pointer}
     .c-prev{left:10px}.c-next{right:10px}
 
-    /* Faixa amarela pulsante */
-    .countdown-banner{background:#ffd100;color:#111;text-align:center;font-weight:800;border-radius:12px;padding:14px 12px;margin-top:16px;font-size:clamp(18px,2.6vw,22px);animation:pulse 2s infinite}
+    /* Faixa amarela FIXA (stick) logo abaixo do cabeçalho */
+    .countdown-sticky{position:sticky;top:0;z-index:50;background:#ffcc00;color:#111;text-align:center;font-weight:800;border-radius:12px;padding:12px 10px;margin:16px 0 0;font-size:clamp(18px,2.6vw,22px);animation:pulse 2s infinite}
     @keyframes pulse{0%{filter:brightness(100%)}50%{filter:brightness(120%)}100%{filter:brightness(100%)}}
 
-    /* Grade */
-    .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:var(--gap)}
-    .card{background:var(--card);border:1px solid #202226;border-radius:var(--rad);padding:14px}
-    .price{color:var(--prim);font-weight:700}
-    .old{text-decoration:line-through;color:#777;margin-right:6px}
-    .desc{color:var(--sub);margin-top:6px;font-size:14px}
+    /* Botão WhatsApp flutuante (fallback, caso o CSS principal não defina) */
+    .wa-fab{position:fixed;right:16px;bottom:16px;background:#25d366;color:#fff;border-radius:999px;padding:14px 18px;font-weight:800;box-shadow:0 8px 24px rgba(0,0,0,.35);z-index:99;text-decoration:none}
 
-    .drinks .card{display:flex;flex-direction:column;gap:4px}
-
-    .footer{margin-top:40px;background:var(--card);padding:18px;border-radius:var(--rad)}
-    .footer h2{margin-bottom:6px}
-    .footer a{display:inline-block;background:var(--prim);color:#111;padding:8px 14px;border-radius:10px;font-weight:700;margin-top:8px}
-
-    .wa-fab{position:fixed;right:16px;bottom:16px;background:#25d366;color:#fff;border-radius:50px;padding:14px 18px;font-weight:700;box-shadow:0 8px 25px rgba(0,0,0,.3);z-index:99}
-    .wa-fab:hover{background:#1eb15a}
-
-    @media(max-width:520px){.grid{grid-template-columns:1fr 1fr}}
+    /* Espaçamento de seções (garante respiro caso o CSS esteja ausente) */
+    .section{margin:24px 0}
   </style></head>
 <body>
   <div class="container">
     <!-- Header -->
-    <div class="header">
-      <img src="logo.png" alt="DFL Logo"/>
-      <div>
-        <h1>Da Família Lanches</h1>
-        <p>Hambúrgueres Artesanais e Deliciosos</p>
+    <header class="header section">
+      <div class="header-content" style="display:flex;align-items:center;gap:14px">
+        <img src="logo.png" alt="DFL - Da Família Lanches" class="logo" style="width:70px;height:70px;border-radius:14px"/>
+        <div class="header-info">
+          <h1>Da Família Lanches</h1>
+          <p class="tagline">Hambúrgueres Artesanais e Deliciosos</p>
+        </div>
       </div>
-    </div><!-- Horário (mantendo o novo formato compacto) -->
+    </header><!-- Horário (faixa compacta) -->
 <div class="hours-banner" aria-label="Horário de funcionamento">
   <span class="icon" aria-hidden="true">🕒</span>
   <span>Seg–Qui <b>18h–23h15</b></span>
@@ -80,29 +49,72 @@
 </div>
 
 <!-- Promoções -->
-<section class="promo">
+<section class="promo section">
   <h2>Confira as Promoções de Hoje</h2>
-  <p>Estoque limitado • Poucas unidades disponíveis</p>
-  <div class="carousel">
-    <img src="promo1.jpg" class="slide active" alt="Promoção 1" data-wa="https://wa.me/5534997178336?text=Promo1"/>
-    <img src="promo2.jpg" class="slide" alt="Promoção 2" data-wa="https://wa.me/5534997178336?text=Promo2"/>
-    <img src="promo3.jpg" class="slide" alt="Promoção 3" data-wa="https://wa.me/5534997178336?text=Promo3"/>
-    <img src="promo4.jpg" class="slide" alt="Promoção 4" data-wa="https://wa.me/5534997178336?text=Promo4"/>
-    <img src="promo5.jpg" class="slide" alt="Promoção 5" data-wa="https://wa.me/5534997178336?text=Promo5"/>
-    <img src="promo6.jpg" class="slide" alt="Promoção 6" data-wa="https://wa.me/5534997178336?text=Promo6"/>
-    <img src="promo7.jpg" class="slide" alt="Promoção 7" data-wa="https://wa.me/5534997178336?text=Promo7"/>
-    <img src="promo8.jpg" class="slide" alt="Promoção 8" data-wa="https://wa.me/5534997178336?text=Promo8"/>
-    <img src="promo9.jpg" class="slide" alt="Promoção 9" data-wa="https://wa.me/5534997178336?text=Promo9"/>
-    <button class="c-btn c-prev">◀</button>
-    <button class="c-btn c-next">▶</button>
+  <p class="promo-subtitle">Estoque limitado • Poucas unidades disponíveis</p>
+
+  <!-- Carrossel com 9 imagens -->
+  <div class="carousel" id="promoCarousel">
+    <div class="slides">
+      <img src="promo1.jpg"  alt="Promoção 1"  class="slide active" data-wa="https://wa.me/5534997178336?text=Quero%20a%20promo%201" />
+      <img src="promo2.jpg"  alt="Promoção 2"  class="slide"        data-wa="https://wa.me/5534997178336?text=Quero%20a%20promo%202" />
+      <img src="promo3.jpg"  alt="Promoção 3"  class="slide"        data-wa="https://wa.me/5534997178336?text=Quero%20a%20promo%203" />
+      <img src="promo4.jpg"  alt="Promoção 4"  class="slide"        data-wa="https://wa.me/5534997178336?text=Quero%20a%20promo%204" />
+      <img src="promo5.jpg"  alt="Promoção 5"  class="slide"        data-wa="https://wa.me/5534997178336?text=Quero%20a%20promo%205" />
+      <img src="promo6.jpg"  alt="Promoção 6"  class="slide"        data-wa="https://wa.me/5534997178336?text=Quero%20a%20promo%206" />
+      <img src="promo7.jpg"  alt="Promoção 7"  class="slide"        data-wa="https://wa.me/5534997178336?text=Quero%20a%20promo%207" />
+      <img src="promo8.jpg"  alt="Promoção 8"  class="slide"        data-wa="https://wa.me/5534997178336?text=Quero%20a%20promo%208" />
+      <img src="promo9.jpg"  alt="Promoção 9"  class="slide"        data-wa="https://wa.me/5534997178336?text=Quero%20a%20promo%209" />
+    </div>
+    <button class="c-btn c-prev" aria-label="Anterior">◀</button>
+    <button class="c-btn c-next" aria-label="Próxima">▶</button>
   </div>
-  <div class="countdown-banner">⚡ Últimas horas! TERMINA EM <span id="timer">00:00:00</span></div>
+
+  <!-- Faixa amarela FIXA (sticky) abaixo do cabeçalho -->
+  <div class="countdown-sticky" id="dailyCountdown" data-countdown="daily-235959">
+    🚨 Promoções acabam hoje! <span style="opacity:.8">TERMINA EM</span> <span id="timer">00:00:00</span>
+  </div>
+</section>
+
+<!-- Hambúrgueres Tradicionais -->
+<section class="section">
+  <h2>Hambúrgueres Tradicionais</h2>
+  <div class="grid" style="margin-top:10px">
+    <div class="card"><strong>BÃO</strong><div class="price">R$ 11,00</div><div class="desc">Pão, hambúrguer, alface, tomate, presunto e mussarela</div></div>
+    <div class="card"><strong>UAI</strong><div class="price">R$ 13,00</div><div class="desc">Pão, hambúrguer, milho, bacon, alface, tomate, presunto e mussarela</div></div>
+    <div class="card"><strong>TREM</strong><div class="price">R$ 14,00</div><div class="desc">Pão, hambúrguer, salsicha, bacon, milho, alface, tomate, presunto e mussarela</div></div>
+    <div class="card"><strong>CADIM</strong><div class="price">R$ 17,00</div><div class="desc">Pão, hambúrguer, filé frango, bacon, milho, batata palha e mussarela</div></div>
+    <div class="card"><strong>ARMARIA</strong><div class="price">R$ 18,00</div><div class="desc">Pão, 1 hambúrguer, 1 filé frango, bacon, milho, batata palha e mussarela</div></div>
+    <div class="card"><strong>BITELA</strong><div class="price">R$ 22,00</div><div class="desc">Pão, 2 hambúrgueres, filé frango, bacon, milho, batata palha, 2 salsichas, presunto e mussarela</div></div>
+    <div class="card"><strong>APRUMA</strong><div class="price">R$ 25,00</div><div class="desc">Pão, 2 hambúrgueres artesanais, filé frango, bacon, milho, batata palha e cheddar</div></div>
+  </div>
+</section>
+
+<!-- Hambúrgueres Artesanais -->
+<section class="section">
+  <h2>Hambúrgueres Artesanais</h2>
+  <div class="grid" style="margin-top:10px">
+    <div class="card"><strong>PELEJA</strong><div class="price">R$ 26,00</div><div class="desc">Pão, alface, tomate, milho, bacon, batata palha, hambúrguer artesanal 120g, filé frango, presunto e mussarela</div></div>
+    <div class="card"><strong>TUDIBOM</strong><div class="price">R$ 28,50</div><div class="desc">Pão, alface, tomate, milho, bacon, batata palha, 2 hambúrgueres artesanais 120g, filé frango, presunto e mussarela</div></div>
+    <div class="card"><strong>CUSTOSO</strong><div class="price">R$ 31,00</div><div class="desc">Pão, alface, tomate, milho, bacon, batata palha, 2 hambúrgueres artesanais 120g, filé frango, cheddar cremoso e presunto</div></div>
+  </div>
+</section>
+
+<!-- Combos -->
+<section class="section">
+  <h2>Combos</h2>
+  <div class="grid" style="margin-top:10px">
+    <div class="card"><strong>Combo Casal (Tradicional)</strong><div><span class="old">R$ 39,99</span> <span class="price">R$ 34,99</span></div><div class="desc">2 Burger Trem + 1 Fanta 1L</div></div>
+    <div class="card"><strong>Combo Casal (Artesanal)</strong><div><span class="old">R$ 64,99</span> <span class="price">R$ 54,99</span></div><div class="desc">2 Burger Peleja + 1 Fanta 1L</div></div>
+    <div class="card"><strong>Combo Família (Tradicional)</strong><div><span class="old">R$ 79,99</span> <span class="price">R$ 59,99</span></div><div class="desc">4 Burger Trem + 1 Kuat 2L</div></div>
+    <div class="card"><strong>Combo Família (Artesanal)</strong><div><span class="old">R$ 106,99</span> <span class="price">R$ 89,99</span></div><div class="desc">4 Burger Peleja + 1 Coca 2L</div></div>
+  </div>
 </section>
 
 <!-- Bebidas -->
-<section class="drinks">
+<section class="section drinks">
   <h2>Bebidas</h2>
-  <div class="grid">
+  <div class="grid" style="margin-top:10px">
     <div class="card"><strong>Coca-Cola 200ml</strong><div class="price">R$ 4,00</div></div>
     <div class="card"><strong>Coca-Cola 350ml</strong><div class="price">R$ 5,00</div></div>
     <div class="card"><strong>Fanta Laranja 350ml</strong><div class="price">R$ 5,00</div></div>
@@ -115,43 +127,46 @@
   </div>
 </section>
 
-<!-- Rodapé -->
-<footer class="footer">
+<!-- Rodapé / Endereço -->
+<footer class="footer section">
   <h2>Onde estamos</h2>
   <p>Patos de Minas — Atendimento delivery e retirada.</p>
-  <a href="https://maps.google.com/?q=Da%20Fam%C3%ADlia%20Lanches%20Patos%20de%20Minas" target="_blank">Abrir no Google Maps</a>
-  <p style="margin-top:6px">© 2025 Da Família Lanches — Você faz parte disso!</p>
+  <p><a href="https://maps.google.com/?q=Da%20Fam%C3%ADlia%20Lanches%20Patos%20de%20Minas" target="_blank" rel="noopener">Abrir no Google Maps</a></p>
+  <p>© 2025 Da Família Lanches — Você faz parte disso!</p>
 </footer>
 
-  </div>  <!-- Botão flutuante WhatsApp --><a href="https://wa.me/5534997178336?text=Ol%C3%A1%2C%20quero%20fazer%20um%20pedido!" class="wa-fab" target="_blank">💬 Pedir no WhatsApp</a>
+  </div>  <!-- Botão flutuante WhatsApp --><a class="wa-fab" href="https://wa.me/5534997178336?text=Ol%C3%A1%2C%20quero%20fazer%20um%20pedido!" target="_blank" rel="noopener" aria-label="Fazer pedido no WhatsApp">💬 Pedir no WhatsApp</a>
 
-  <!-- ===== JS EMBUTIDO (contador + carrossel) ===== -->  <script>
-    function startCountdown(){
-      const el=document.getElementById('timer');
-      function update(){
+  <!-- JS principal -->  <script src="script.js?v=2" defer></script>  <!-- Fallbacks leves para garantir funcionamento mesmo sem script.js -->  <script>
+    // Contagem regressiva diária até 23:59:59 (reset a cada dia)
+    (function(){
+      const el = document.getElementById('timer');
+      if(!el) return;
+      function tick(){
         const now=new Date();
-        const end=new Date();
-        end.setHours(23,59,59,999);
-        let diff=(end-now)/1000;
-        if(diff<0) diff=0;
+        const end=new Date(); end.setHours(23,59,59,999);
+        let diff=Math.max(0, Math.floor((end-now)/1000));
         const h=String(Math.floor(diff/3600)).padStart(2,'0');
         const m=String(Math.floor((diff%3600)/60)).padStart(2,'0');
-        const s=String(Math.floor(diff%60)).padStart(2,'0');
+        const s=String(diff%60).padStart(2,'0');
         el.textContent=`${h}:${m}:${s}`;
       }
-      update();setInterval(update,1000);
-    }
-    startCountdown();
+      tick(); setInterval(tick,1000);
+    })();
 
-    const slides=document.querySelectorAll('.slide');
-    const prev=document.querySelector('.c-prev');
-    const next=document.querySelector('.c-next');
-    let idx=0;
-    function show(i){slides.forEach(s=>s.classList.remove('active'));slides[i].classList.add('active');}
-    function go(d){idx=(idx+d+slides.length)%slides.length;show(idx);}
-    prev.addEventListener('click',()=>go(-1));
-    next.addEventListener('click',()=>go(1));
-    slides.forEach(s=>s.addEventListener('click',()=>{const wa=s.dataset.wa;if(wa)window.open(wa,'_blank');}));
+    // Carrossel básico (prev/next + clique para WhatsApp)
+    (function(){
+      const slides=[...document.querySelectorAll('.slide')];
+      const prev=document.querySelector('.c-prev');
+      const next=document.querySelector('.c-next');
+      if(!slides.length||!prev||!next) return;
+      let i=slides.findIndex(s=>s.classList.contains('active')); if(i<0) i=0;
+      function show(n){slides.forEach((s,idx)=>s.style.display=idx===n?'block':'none');}
+      function go(d){i=(i+d+slides.length)%slides.length;show(i);}    
+      show(i);
+      prev.addEventListener('click',()=>go(-1));
+      next.addEventListener('click',()=>go(1));
+      slides.forEach(s=>s.addEventListener('click',()=>{const wa=s.dataset.wa;if(wa)window.open(wa,'_blank');}));
+    })();
   </script></body>
 </html>
-
