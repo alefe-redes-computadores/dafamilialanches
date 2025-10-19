@@ -307,3 +307,11 @@ document.addEventListener("DOMContentLoaded", () => {
   atualizarStatus();
   ajustarCarrinhoMobile();
 });
+// === Clique nas promoções → abrir WhatsApp ===
+document.querySelectorAll(".carousel .slide").forEach((img) => {
+  img.addEventListener("click", () => {
+    const msg = encodeURIComponent(img.dataset.wa || "Olá! Quero aproveitar a promoção 🍔");
+    const phone = "5534997178336"; // número do WhatsApp da DFL
+    window.open(`https://wa.me/${phone}?text=${msg}`, "_blank");
+  });
+});
