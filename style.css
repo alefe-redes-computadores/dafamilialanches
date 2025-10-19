@@ -1,4 +1,4 @@
-/* ====== BASE ====== */
+W3/* ====== BASE ====== */
 * {
   margin: 0;
   padding: 0;
@@ -355,5 +355,34 @@ button {
 
   #extras-modal {
     width: 95%;
+  }
+}
+/* ====== CORREÇÃO MOBILE DO MINI-CARRINHO ====== */
+@media (max-width: 600px) {
+  #mini-cart {
+    width: 100%;
+    right: -100%;
+    border-left: none;
+    border-top: 3px solid #f9d44b;
+    height: 100%;
+    bottom: 0;
+    transition: transform 0.35s ease;
+    transform: translateY(100%);
+  }
+
+  #mini-cart.active {
+    transform: translateY(0);
+  }
+
+  #cart-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.6);
+    display: none;
+    z-index: 998;
+  }
+
+  #cart-backdrop.show {
+    display: block;
   }
 }
