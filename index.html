@@ -1,157 +1,219 @@
-<!DOCTYPE html>
-<html lang="pt-BR">
+<!DOCTYPE html><html lang="pt-BR">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Da Família Lanches - Cardápio Oficial 🍔</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Da Família Lanches — Cardápio Oficial</title>  <!-- ===== CSS EMBUTIDO (para evitar erro de caminho de arquivo) ===== -->  <style>
+    :root{
+      --bg:#0f0f10; --card:#151618; --card-2:#1b1c1f; --txt:#f5f5f7; --sub:#c9c9cf;
+      --prim:#ffd100; --accent:#ff4d00; --ok:#22c55e; --rad:18px; --gap:14px;
+    }
+    *{box-sizing:border-box}
+    html,body{margin:0;background:var(--bg);color:var(--txt);font-family:system-ui,-apple-system,Segoe UI,Roboto,Inter,Arial,sans-serif}
+    img{max-width:100%;display:block}
+    a{color:inherit;text-decoration:none}
 
-  <!-- CSS principal -->
-  <link rel="stylesheet" href="style.css">
-</head>
+    /* Layout */
+    .container{max-width:1100px;margin:auto;padding:24px}
+    .section{margin:28px 0}
+    h1,h2{margin:0 0 12px}
+    h1{font-size:clamp(22px,3.5vw,34px)}
+    h2{font-size:clamp(18px,2.6vw,26px)}
+    p{margin:0;color:var(--sub)}
 
+    /* Header */
+    .header{background:linear-gradient(180deg,#181a1f,transparent)}
+    .header-wrap{display:flex;align-items:center;gap:16px}
+    .logo{width:64px;height:64px;border-radius:12px;object-fit:cover}
+    .tagline{margin-top:4px}
+
+    /* Horários */
+    .hours{background:var(--card);border-radius:var(--rad);padding:16px}
+    .hours-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:var(--gap)}
+    .hour{background:var(--card-2);padding:12px;border-radius:12px}
+    .hour .day{color:var(--prim);font-weight:600;display:block;margin-bottom:4px}
+
+    /* Promoções / Carrossel */
+    .promo{background:var(--card);border-radius:var(--rad);padding:16px}
+    .promo-head{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:8px;margin-bottom:12px}
+    .count{font-variant-numeric:tabular-nums;background:#22252b;border:1px solid #2a2d34;padding:6px 10px;border-radius:10px}
+    .carousel{position:relative;border-radius:14px;overflow:hidden;background:#0c0d0f}
+    .slides{display:grid}
+    .slide{grid-area:1/1;display:none}
+    .slide.active{display:block}
+    .c-btn{position:absolute;top:50%;transform:translateY(-50%);border:0;background:rgba(0,0,0,.45);color:#fff;font-size:18px;padding:10px 12px;border-radius:999px;cursor:pointer}
+    .c-btn:hover{background:rgba(0,0,0,.65)}
+    .c-prev{left:8px}
+    .c-next{right:8px}
+
+    /* Grade de produtos */
+    .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:var(--gap)}
+    .card{background:var(--card);border:1px solid #202226;border-radius:16px;padding:14px}
+    .price{color:var(--prim);font-weight:700}
+    .old{color:#888;text-decoration:line-through;margin-right:6px}
+    .desc{color:var(--sub);margin-top:6px;font-size:14px}
+
+    /* Bebidas (garante que TODAS aparecem) */
+    .drinks .grid .card{display:flex;flex-direction:column;gap:4px}
+
+    /* Rodapé / Endereço */
+    .footer{margin:28px 0 80px}
+    .loc{background:var(--card);border:1px solid #202226;border-radius:16px;padding:16px;display:grid;gap:10px}
+    .loc a.btn{justify-self:start;background:var(--prim);color:#111;font-weight:700;padding:10px 14px;border-radius:12px}
+
+    /* Botão flutuante WhatsApp */
+    .wa-fab{position:fixed;right:16px;bottom:16px;background:#25d366;color:#fff;border-radius:999px;padding:14px 16px;font-weight:800;box-shadow:0 8px 24px rgba(0,0,0,.35);z-index:40}
+
+    /* Responsivo */
+    @media (max-width:520px){
+      .grid{grid-template-columns:1fr 1fr}
+      .hours-grid{grid-template-columns:1fr}
+    }
+  </style></head>
 <body>
-  <!-- Header -->
-  <header class="header">
-    <div class="header-content">
-      <div class="logo-container">
-        <img src="logo.png" alt="DFL - Da Família Lanches" class="logo" />
-      </div>
-      <div class="header-info">
-        <h1>Da Família Lanches</h1>
-        <p class="tagline">Hambúrgueres Artesanais e Deliciosos</p>
-      </div>
+  <div class="container"><!-- HEADER -->
+<header class="header section">
+  <div class="header-wrap">
+    <img class="logo" src="logo.png" alt="DFL - Da Família Lanches"/>
+    <div>
+      <h1>Da Família Lanches</h1>
+      <p class="tagline">Hambúrgueres Artesanais e Deliciosos</p>
     </div>
-  </header>
+  </div>
+</header>
 
-  <!-- Horário -->
-  <section class="horario-section">
-    <h2>Horário de Funcionamento</h2>
-    <div class="horario-grid">
-      <div class="horario-item"><span class="dia">Segunda a Quinta</span><span class="hora">18h00 - 23h15</span></div>
-      <div class="horario-item"><span class="dia">Sexta, Sábado e Domingo</span><span class="hora">17h30 - 23h30</span></div>
-      <div class="horario-item"><span class="dia">Terça</span><span class="hora">Fechado</span></div>
-    </div>
-  </section>
+<!-- HORÁRIOS -->
+<section class="hours section">
+  <h2>Horário de Funcionamento</h2>
+  <div class="hours-grid" style="margin-top:10px">
+    <div class="hour"><span class="day">Segunda a Quinta</span><span>18h00 – 23h15</span></div>
+    <div class="hour"><span class="day">Sexta, Sábado e Domingo</span><span>17h30 – 23h30</span></div>
+    <div class="hour"><span class="day">Terça</span><span>Fechado</span></div>
+  </div>
+</section>
 
-  <!-- Promoções -->
-  <section class="promo-section">
-    <div class="promo-header">
+<!-- PROMOÇÕES / CARROSSEL -->
+<section class="promo section">
+  <div class="promo-head">
+    <div>
       <h2>Confira as Promoções de Hoje</h2>
-      <p class="promo-subtitle">Estoque limitado • Poucas unidades disponíveis</p>
+      <p>Estoque limitado • Poucas unidades disponíveis</p>
     </div>
+    <div class="count">Encerra em <span id="timer">00:00:00</span></div>
+  </div>
 
-    <div class="countdown-timer">
-      Promoções encerram em: <span id="timer">00:00:00</span>
+  <div class="carousel">
+    <div class="slides" id="slides">
+      <img class="slide active" src="promo1.jpg" alt="2 Purizin + 1 Fanta 1L" data-wa="https://wa.me/5534999999999?text=Quero%20a%20promo%202%20Purizin%20%2B%20Fanta%201L"/>
+      <img class="slide" src="promo2.jpg" alt="Combo Casal Artesanal" data-wa="https://wa.me/5534999999999?text=Quero%20o%20Combo%20Casal%20Artesanal"/>
+      <img class="slide" src="promo3.jpg" alt="Combo Família Tradicional" data-wa="https://wa.me/5534999999999?text=Quero%20o%20Combo%20Fam%C3%ADlia%20Tradicional"/>
     </div>
+    <button class="c-btn c-prev" aria-label="Anterior">◀</button>
+    <button class="c-btn c-next" aria-label="Próxima">▶</button>
+  </div>
+</section>
 
-    <div class="carousel-container">
-      <div class="carousel-slides">
-        <img src="promo1.jpg" alt="2 Purizin + 1 Fanta 1L" class="carousel-slide active" data-whatsapp="https://wa.me/5534999999999?text=Quero%20a%20promo%C3%A7%C3%A3o%202%20Purizin!">
-        <img src="promo2.jpg" alt="Combo Casal Artesanal" class="carousel-slide" data-whatsapp="https://wa.me/5534999999999?text=Gostei%20do%20Combo%20Casal%20Artesanal!">
-        <img src="promo3.jpg" alt="Combo Família Tradicional" class="carousel-slide" data-whatsapp="https://wa.me/5534999999999?text=Quero%20o%20Combo%20Fam%C3%ADlia%20Tradicional!">
-      </div>
-      <button class="carousel-btn prev">◀</button>
-      <button class="carousel-btn next">▶</button>
+<!-- TRADICIONAIS -->
+<section class="section">
+  <h2>Hambúrgueres Tradicionais</h2>
+  <div class="grid" style="margin-top:10px">
+    <div class="card"><strong>BÃO</strong><div class="price">R$ 11,00</div><div class="desc">Pão, hambúrguer, alface, tomate, presunto e mussarela</div></div>
+    <div class="card"><strong>UAI</strong><div class="price">R$ 13,00</div><div class="desc">Pão, hambúrguer, milho, bacon, alface, tomate, presunto e mussarela</div></div>
+    <div class="card"><strong>TREM</strong><div class="price">R$ 14,00</div><div class="desc">Pão, hambúrguer, salsicha, bacon, milho, alface, tomate, presunto e mussarela</div></div>
+    <div class="card"><strong>CADIM</strong><div class="price">R$ 17,00</div><div class="desc">Pão, hambúrguer, filé frango, bacon, milho, batata palha e mussarela</div></div>
+    <div class="card"><strong>ARMARIA</strong><div class="price">R$ 18,00</div><div class="desc">Pão, 1 hambúrguer, 1 filé frango, bacon, milho, batata palha e mussarela</div></div>
+    <div class="card"><strong>BITELA</strong><div class="price">R$ 22,00</div><div class="desc">Pão, 2 hambúrgueres, filé frango, bacon, milho, batata palha, 2 salsichas, presunto e mussarela</div></div>
+    <div class="card"><strong>APRUMA</strong><div class="price">R$ 25,00</div><div class="desc">Pão, 2 hambúrgueres artesanais, filé frango, bacon, milho, batata palha e cheddar</div></div>
+  </div>
+</section>
+
+<!-- ARTESANAIS -->
+<section class="section">
+  <h2>Hambúrgueres Artesanais</h2>
+  <div class="grid" style="margin-top:10px">
+    <div class="card"><strong>PELEJA</strong><div class="price">R$ 26,00</div><div class="desc">Pão, alface, tomate, milho, bacon, batata palha, hambúrguer artesanal 120g, filé frango, presunto e mussarela</div></div>
+    <div class="card"><strong>TUDIBOM</strong><div class="price">R$ 28,50</div><div class="desc">Pão, alface, tomate, milho, bacon, batata palha, 2 hambúrgueres artesanais 120g, filé frango, presunto e mussarela</div></div>
+    <div class="card"><strong>CUSTOSO</strong><div class="price">R$ 31,00</div><div class="desc">Pão, alface, tomate, milho, bacon, batata palha, 2 hambúrgueres artesanais 120g, filé frango, cheddar cremoso e presunto</div></div>
+  </div>
+</section>
+
+<!-- COMBOS -->
+<section class="section">
+  <h2>Combos</h2>
+  <div class="grid" style="margin-top:10px">
+    <div class="card"><strong>Combo Casal (Tradicional)</strong><div><span class="old">R$ 39,99</span><span class="price">R$ 34,99</span></div><div class="desc">2 Burger Trem + 1 Fanta 1L</div></div>
+    <div class="card"><strong>Combo Casal (Artesanal)</strong><div><span class="old">R$ 64,99</span><span class="price">R$ 54,99</span></div><div class="desc">2 Burger Peleja + 1 Fanta 1L</div></div>
+    <div class="card"><strong>Combo Família (Tradicional)</strong><div><span class="old">R$ 79,99</span><span class="price">R$ 59,99</span></div><div class="desc">4 Burger Trem + 1 Kuat 2L</div></div>
+    <div class="card"><strong>Combo Família (Artesanal)</strong><div><span class="old">R$ 106,99</span><span class="price">R$ 89,99</span></div><div class="desc">4 Burger Peleja + 1 Coca 2L</div></div>
+  </div>
+</section>
+
+<!-- BEBIDAS (RESTAURO COMPLETO) -->
+<section class="section drinks">
+  <h2>Bebidas</h2>
+  <div class="grid" style="margin-top:10px">
+    <div class="card"><strong>Coca-Cola 200ml</strong><div class="price">R$ 4,00</div></div>
+    <div class="card"><strong>Coca-Cola 350ml</strong><div class="price">R$ 5,00</div></div>
+    <div class="card"><strong>Fanta Laranja 350ml</strong><div class="price">R$ 5,00</div></div>
+    <div class="card"><strong>Guaraná Antarctica 350ml</strong><div class="price">R$ 5,00</div></div>
+    <div class="card"><strong>Sprite 350ml</strong><div class="price">R$ 5,00</div></div>
+    <div class="card"><strong>Itubaína 350ml</strong><div class="price">R$ 4,50</div></div>
+    <div class="card"><strong>Kuat 2L</strong><div class="price">R$ 10,00</div></div>
+    <div class="card"><strong>Fanta 2L</strong><div class="price">R$ 10,00</div></div>
+    <div class="card"><strong>Coca-Cola 2L</strong><div class="price">R$ 12,00</div></div>
+    <div class="card"><strong>Água Mineral</strong><div class="price">R$ 3,00</div></div>
+  </div>
+</section>
+
+<!-- ENDEREÇO / CONTATO (com botão Google Maps) -->
+<footer class="footer">
+  <div class="loc">
+    <div>
+      <h2>Onde estamos</h2>
+      <p>Patos de Minas — Atendimento delivery e retirada.</p>
     </div>
-  </section>
+    <a class="btn" href="https://maps.google.com/?q=Da%20Fam%C3%ADlia%20Lanches%20Patos%20de%20Minas" target="_blank" rel="noopener">Abrir no Google Maps</a>
+    <p style="margin-top:6px">© 2025 Da Família Lanches — Você faz parte disso!</p>
+  </div>
+</footer>
 
-  <!-- Menu -->
-  <section class="menu-section">
-    <h2>Hambúrgueres Tradicionais</h2>
-    <div class="products-grid">
-      <div class="product-card"><h3>BÃO</h3><p class="price">R$ 11,00</p><p class="description">Pão, hambúrguer, alface, tomate, presunto e mussarela</p></div>
-      <div class="product-card"><h3>UAI</h3><p class="price">R$ 13,00</p><p class="description">Pão, hambúrguer, milho, bacon, alface, tomate, presunto e mussarela</p></div>
-      <div class="product-card"><h3>TREM</h3><p class="price">R$ 14,00</p><p class="description">Pão, hambúrguer, salsicha, bacon, milho, alface, tomate, presunto e mussarela</p></div>
-      <div class="product-card"><h3>CADIM</h3><p class="price">R$ 17,00</p><p class="description">Pão, hambúrguer, filé frango, bacon, milho, batata palha e mussarela</p></div>
-      <div class="product-card"><h3>ARMARIA</h3><p class="price">R$ 18,00</p><p class="description">Pão, 1 hambúrguer, 1 filé frango, bacon, milho, batata palha e mussarela</p></div>
-      <div class="product-card"><h3>BITELA</h3><p class="price">R$ 22,00</p><p class="description">Pão, 2 hambúrgueres, filé frango, bacon, milho, batata palha, 2 salsichas, presunto e mussarela</p></div>
-      <div class="product-card"><h3>APRUMA</h3><p class="price">R$ 25,00</p><p class="description">Pão, 2 hambúrgueres artesanais, filé frango, bacon, milho, batata palha e cheddar</p></div>
-    </div>
-  </section>
+  </div>  <!-- Botão flutuante WhatsApp (troque o número abaixo pelo seu) --><a class="wa-fab" href="https://wa.me/5534999999999?text=Ol%C3%A1%2C%20quero%20fazer%20um%20pedido!" target="_blank" aria-label="Fazer pedido no WhatsApp">Pedir no WhatsApp</a>
 
-  <!-- Artesanais -->
-  <section class="menu-section">
-    <h2>Hambúrgueres Artesanais</h2>
-    <div class="products-grid">
-      <div class="product-card"><h3>PELEJA</h3><p class="price">R$ 26,00</p><p class="description">Pão, alface, tomate, milho, bacon, batata palha, hambúrguer artesanal 120g, filé frango, presunto e mussarela</p></div>
-      <div class="product-card"><h3>TUDIBOM</h3><p class="price">R$ 28,50</p><p class="description">Pão, alface, tomate, milho, bacon, batata palha, 2 hambúrgueres artesanais 120g, filé frango, presunto e mussarela</p></div>
-      <div class="product-card"><h3>CUSTOSO</h3><p class="price">R$ 31,00</p><p class="description">Pão, alface, tomate, milho, bacon, batata palha, 2 hambúrgueres artesanais 120g, filé frango, cheddar cremoso e presunto</p></div>
-    </div>
-  </section>
+  <!-- ===== JS EMBUTIDO (carrossel + clique + timer) ===== -->  <script>
+    // Timer simples (1h)
+    (function(){
+      const el = document.getElementById('timer');
+      let t = 3600; // 1h
+      setInterval(()=>{
+        const h = String(Math.floor(t/3600)).padStart(2,'0');
+        const m = String(Math.floor((t%3600)/60)).padStart(2,'0');
+        const s = String(t%60).padStart(2,'0');
+        el.textContent = `${h}:${m}:${s}`;
+        t = (t-1+3601)%3601;
+      },1000);
+    })();
 
-  <!-- Combos -->
-  <section class="menu-section">
-    <h2>Combos</h2>
-    <div class="products-grid">
-      <div class="product-card"><h3>Combo Casal (Tradicional)</h3><p class="old-price">De R$ 39,99</p><p class="price">R$ 34,99</p><p class="description">2 Burger Trem + 1 Fanta 1L</p></div>
-      <div class="product-card"><h3>Combo Casal (Artesanal)</h3><p class="old-price">De R$ 64,99</p><p class="price">R$ 54,99</p><p class="description">2 Burger Peleja + 1 Fanta 1L</p></div>
-      <div class="product-card"><h3>Combo Família (Tradicional)</h3><p class="old-price">De R$ 79,99</p><p class="price">R$ 59,99</p><p class="description">4 Burger Trem + 1 Kuat 2L</p></div>
-      <div class="product-card"><h3>Combo Família (Artesanal)</h3><p class="old-price">De R$ 106,99</p><p class="price">R$ 89,99</p><p class="description">4 Burger Peleja + 1 Coca 2L</p></div>
-    </div>
-  </section>
-
-  <!-- Bebidas -->
-  <section class="menu-section">
-    <h2>Bebidas</h2>
-    <div class="products-grid">
-      <div class="product-card"><h3>Coca-Cola 200ml</h3><p class="price">R$ 4,00</p></div>
-      <div class="product-card"><h3>Coca-Cola 350ml</h3><p class="price">R$ 5,00</p></div>
-      <div class="product-card"><h3>Fanta Laranja 350ml</h3><p class="price">R$ 5,00</p></div>
-      <div class="product-card"><h3>Guaraná Antarctica 350ml</h3><p class="price">R$ 5,00</p></div>
-      <div class="product-card"><h3>Kuat 2L</h3><p class="price">R$ 10,00</p></div>
-      <div class="product-card"><h3>Coca-Cola 2L</h3><p class="price">R$ 12,00</p></div>
-      <div class="product-card"><h3>Água Mineral</h3><p class="price">R$ 3,00</p></div>
-    </div>
-  </section>
-
-  <!-- Rodapé -->
-  <footer class="footer">
-    <p>© 2025 Da Família Lanches — Você faz parte disso!</p>
-  </footer>
-
-  <!-- SCRIPT embutido -->
-  <script>
-    // Carrossel simples
-    const slides = document.querySelectorAll('.carousel-slide');
-    const nextBtn = document.querySelector('.next');
-    const prevBtn = document.querySelector('.prev');
-    let index = 0;
-
-    function showSlide(i) {
-      slides.forEach(slide => slide.classList.remove('active'));
-      slides[i].classList.add('active');
-    }
-
-    nextBtn.addEventListener('click', () => {
-      index = (index + 1) % slides.length;
-      showSlide(index);
-    });
-
-    prevBtn.addEventListener('click', () => {
-      index = (index - 1 + slides.length) % slides.length;
-      showSlide(index);
-    });
-
-    slides.forEach(img => {
-      img.addEventListener('click', () => {
-        const link = img.dataset.whatsapp;
-        if (link) window.open(link, '_blank');
-      });
-    });
-
-    // Timer
-    function startCountdown() {
-      const timer = document.getElementById("timer");
-      let total = 3600;
-      setInterval(() => {
-        const h = String(Math.floor(total / 3600)).padStart(2, "0");
-        const m = String(Math.floor((total % 3600) / 60)).padStart(2, "0");
-        const s = String(total % 60).padStart(2, "0");
-        timer.textContent = `${h}:${m}:${s}`;
-        if (--total < 0) total = 3600;
-      }, 1000);
-    }
-    startCountdown();
-  </script>
-</body>
+    // Carrossel: setas + clique abre WhatsApp
+    (function(){
+      const slides = Array.from(document.querySelectorAll('.slide'));
+      const prev = document.querySelector('.c-prev');
+      const next = document.querySelector('.c-next');
+      let i = 0;
+      function show(n){
+        slides.forEach(s=>s.classList.remove('active'));
+        slides[n].classList.add('active');
+      }
+      function go(dir){ i = (i + dir + slides.length) % slides.length; show(i); }
+      prev.addEventListener('click',()=>go(-1));
+      next.addEventListener('click',()=>go(1));
+      slides.forEach(s=> s.addEventListener('click',()=>{
+        const url = s.getAttribute('data-wa');
+        if(url) window.open(url,'_blank');
+      }));
+      // deslize no celular
+      let x0=null; const touchStart=e=>x0=(e.touches?e.touches[0].clientX:e.clientX),
+            touchEnd=e=>{ if(x0===null) return; const x1=(e.changedTouches?e.changedTouches[0].clientX:e.clientX); const dx=x1-x0; if(Math.abs(dx)>40) go(dx<0?1:-1); x0=null; };
+      const box=document.querySelector('.carousel');
+      box.addEventListener('touchstart',touchStart); box.addEventListener('touchend',touchEnd);
+    })();
+  </script></body>
 </html>
