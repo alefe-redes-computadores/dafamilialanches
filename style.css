@@ -407,3 +407,69 @@ button.extras-btn:hover {
     overflow: hidden;
   }
 }
+
+/* ======= OVERRIDE DO CARRINHO – DESKTOP E MOBILE ======= */
+#cart-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,.55);
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity .25s ease;
+  z-index: 9998;
+}
+
+#cart-backdrop.show {
+  opacity: 1;
+  visibility: visible;
+}
+
+/* --- Desktop (padrão) --- */
+#mini-cart {
+  position: fixed;
+  top: 0;
+  right: 0;
+  width: 320px;
+  height: 100vh;
+  background: #111;
+  border-left: 2px solid #f9d44b;
+  border-radius: 0;
+  z-index: 9999;
+  /* fecha fora da tela à direita */
+  transform: translateX(100%);
+  transition: transform .3s ease;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+#mini-cart.active {
+  transform: translateX(0);
+}
+
+/* --- Mobile (até 768px) — sobe de baixo e fica 100% oculto quando fechado --- */
+@media (max-width: 768px) {
+  #mini-cart {
+    left: 0;
+    right: 0;
+    width: 100vw;
+    height: 85vh;
+    top: auto;
+    bottom: -100%;          /* totalmente fora da tela */
+    border-left: 0;
+    border-top: 2px solid #f9d44b;
+    border-radius: 16px 16px 0 0;
+    transform: none !important;   /* ignora o translateX do desktop */
+    transition: bottom .35s ease; /* anima de baixo pra cima */
+  }
+  #mini-cart.active {
+    bottom: 0;              /* aparece */
+  }
+
+  /* quando o carrinho abrir, bloqueia scroll de fundo (se o JS adicionar a classe) */
+  body.no-scroll {
+    overflow: hidden;
+    height: 100vh;
+    touch-action: none;
+  }
+}
