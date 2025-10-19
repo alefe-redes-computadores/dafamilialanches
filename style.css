@@ -386,3 +386,37 @@ button {
     bottom: 0;
   }
 }
+/* ===== Popup de adicionado ===== */
+.add-popup{
+  position: fixed;
+  left: 50%;
+  top: 18%;
+  transform: translate(-50%, -50%) scale(0.96);
+  background: #111;
+  color: #fff;
+  padding: 10px 16px;
+  border-radius: 999px;
+  border: 2px solid #f9d44b;
+  font-weight: 700;
+  z-index: 99999;            /* acima do carrinho/backdrop */
+  opacity: 0;
+  animation: popfade 1s ease forwards;
+  pointer-events: none;
+  box-shadow: 0 6px 22px rgba(0,0,0,.35);
+}
+@keyframes popfade{
+  0%   {opacity: 0; transform: translate(-50%, -58%) scale(.9);}
+  15%  {opacity: 1; transform: translate(-50%, -50%) scale(1);}
+  80%  {opacity: 1; transform: translate(-50%, -48%) scale(1);}
+  100% {opacity: 0; transform: translate(-50%, -42%) scale(.97);}
+}
+
+/* garante que backdrop/carrinho estejam abaixo do popup */
+#cart-backdrop{ z-index: 9000; }
+#mini-cart{ z-index: 9500; }
+
+/* melhora hitbox do X */
+.mini-close{
+  width: 36px; height: 36px; display: inline-grid; place-items: center;
+  border-radius: 10px;
+}
