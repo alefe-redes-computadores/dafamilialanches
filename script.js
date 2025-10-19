@@ -1,9 +1,9 @@
 // ======================
 // DFL – Da Família Lanches 🍔
-// Script principal com sons e pop-up
+// Script completo com som e popup personalizado
 // ======================
 
-// 🎵 Som de clique global
+// 🎵 Som global de clique
 const clickSound = new Audio("click.wav");
 clickSound.volume = 0.4;
 
@@ -49,7 +49,7 @@ function adicionarAoCarrinho(nome, preco) {
   cart.push({ nome, preco });
   atualizarCarrinho();
   abrirCarrinho();
-  mostrarPopupAdicionado();
+  mostrarPopupAdicionado(nome);
 }
 
 function removerDoCarrinho(index) {
@@ -62,6 +62,7 @@ function limparCarrinho() {
   atualizarCarrinho();
 }
 
+// === Abrir / Fechar carrinho ===
 function abrirCarrinho() {
   miniCart.classList.add("active");
   cartBackdrop.classList.add("show");
@@ -104,12 +105,14 @@ document.querySelectorAll(".add-cart").forEach((btn) => {
 });
 
 // ======================
-// Popup “+1 Adicionado!”
+// Popup “Produto adicionado!”
 // ======================
-function mostrarPopupAdicionado() {
+function mostrarPopupAdicionado(nomeProduto = null) {
   const popup = document.createElement("div");
   popup.className = "popup-add";
-  popup.textContent = "+1 adicionado!";
+  popup.textContent = nomeProduto
+    ? `🍔 ${nomeProduto} adicionado!`
+    : "+1 adicionado!";
   document.body.appendChild(popup);
   setTimeout(() => popup.remove(), 1400);
 }
@@ -171,7 +174,7 @@ extrasAdd.addEventListener("click", () => {
     adicionarAoCarrinho(extra.nome, extra.preco);
   });
 
-  mostrarPopupAdicionado();
+  mostrarPopupAdicionado("Adicional");
   fecharExtras();
 });
 
@@ -245,7 +248,7 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 // ======================
-// Responsividade do carrinho
+// Responsividade carrinho
 // ======================
 function ajustarCarrinhoMobile() {
   if (window.innerWidth <= 768) {
@@ -264,12 +267,10 @@ function ajustarCarrinhoMobile() {
 }
 ajustarCarrinhoMobile();
 window.addEventListener("resize", ajustarCarrinhoMobile);
-
-// Fechar carrinho ao tocar fora
 cartBackdrop.addEventListener("touchstart", fecharCarrinho);
 
 // ======================
-// Finalizar pedido (WhatsApp)
+// Finalizar pedido WhatsApp
 // ======================
 finishOrderBtn.addEventListener("click", () => {
   clickSound.currentTime = 0;
@@ -305,7 +306,7 @@ document.querySelectorAll(".carousel .slide").forEach((img) => {
 });
 
 // ======================
-// Inicialização final
+// Inicialização
 // ======================
 document.addEventListener("DOMContentLoaded", () => {
   atualizarCarrinho();
