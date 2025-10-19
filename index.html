@@ -2,30 +2,32 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>DFL - Cardápio Oficial</title>  <!-- CSS principal (cache-bust) -->  <link rel="stylesheet" href="style.css?v=2" />  <!-- Ajustes visuais específicos (mínimos e compatíveis com o tema BOOT) -->  <style>
-    /* Faixa de horários compacta */
-    .hours-banner{display:flex;gap:12px;flex-wrap:wrap;align-items:center;justify-content:center;background:rgba(27,28,31,.85);color:#f5f5f7;border:1px solid #2a2d34;border-radius:10px;padding:8px 12px;margin:10px 0 20px}
+  <title>DFL - Cardápio Oficial</title>  <!-- CSS principal (tema escuro BOOT). O v=3 força recarregar sem cache -->  <link rel="stylesheet" href="style.css?v=3" />  <!-- CSS mínimo complementar (somente o que é novo nesta versão) -->  <style>
+    /* Faixa compacta de horários abaixo do header */
+    .hours-banner{display:flex;gap:12px;flex-wrap:wrap;align-items:center;justify-content:center;background:rgba(27,28,31,.85);color:#f5f5f7;border:1px solid #2a2d34;border-radius:10px;padding:8px 12px;margin:10px 0 18px}
     .hours-banner b{color:#ffcc00}
     .hours-banner .sep{opacity:.6}
     .hours-banner .icon{font-size:18px;margin-right:6px}
 
-    /* Carrossel (fallback visual) */
-    .carousel{position:relative;border-radius:14px;overflow:hidden;margin-top:10px}
-    .slides{display:grid}
-    .slide{grid-area:1/1;display:none;width:100%}
-    .slide.active{display:block}
-    .c-btn{position:absolute;top:50%;transform:translateY(-50%);border:0;background:rgba(0,0,0,.5);color:#fff;font-size:20px;padding:8px 12px;border-radius:999px;cursor:pointer}
-    .c-prev{left:10px}.c-next{right:10px}
+    /* Carrossel: setas sutis amarelas + prioridade de clique */
+    .carousel{position:relative;border-radius:14px;overflow:hidden;margin-top:10px;background:var(--card, #151618)}
+    .carousel .slides{display:grid}
+    .carousel .slide{grid-area:1/1;display:none;width:100%}
+    .carousel .slide.active{display:block}
+    .carousel .c-btn{position:absolute;top:50%;transform:translateY(-50%);border:0;background:rgba(0,0,0,.45);color:#ffcc00;font-size:22px;padding:10px 12px;border-radius:999px;cursor:pointer;z-index:3}
+    .carousel .c-btn:hover{background:rgba(0,0,0,.65)}
+    .carousel .c-prev{left:10px}
+    .carousel .c-next{right:10px}
 
-    /* Faixa amarela FIXA (stick) logo abaixo do cabeçalho */
-    .countdown-sticky{position:sticky;top:0;z-index:50;background:#ffcc00;color:#111;text-align:center;font-weight:800;border-radius:12px;padding:12px 10px;margin:16px 0 0;font-size:clamp(18px,2.6vw,22px);animation:pulse 2s infinite}
+    /* Faixa amarela FIXA (sticky) logo abaixo do cabeçalho */
+    .countdown-sticky{position:sticky;top:0;z-index:40;background:#ffcc00;color:#111;text-align:center;font-weight:800;border-radius:12px;padding:12px 10px;margin:16px 0 0;font-size:clamp(18px,2.6vw,22px);animation:pulse 2s infinite}
     @keyframes pulse{0%{filter:brightness(100%)}50%{filter:brightness(120%)}100%{filter:brightness(100%)}}
 
-    /* Botão WhatsApp flutuante (fallback, caso o CSS principal não defina) */
-    .wa-fab{position:fixed;right:16px;bottom:16px;background:#25d366;color:#fff;border-radius:999px;padding:14px 18px;font-weight:800;box-shadow:0 8px 24px rgba(0,0,0,.35);z-index:99;text-decoration:none}
-
-    /* Espaçamento de seções (garante respiro caso o CSS esteja ausente) */
+    /* Garantia de espaçamento das seções (caso CSS principal falhe) */
     .section{margin:24px 0}
+
+    /* Botão WhatsApp flutuante (fallback leve) */
+    .wa-fab{position:fixed;right:16px;bottom:16px;background:#25d366;color:#fff;border-radius:999px;padding:14px 18px;font-weight:800;box-shadow:0 8px 24px rgba(0,0,0,.35);z-index:99;text-decoration:none}
   </style></head>
 <body>
   <div class="container">
@@ -53,7 +55,7 @@
   <h2>Confira as Promoções de Hoje</h2>
   <p class="promo-subtitle">Estoque limitado • Poucas unidades disponíveis</p>
 
-  <!-- Carrossel com 9 imagens -->
+  <!-- Carrossel com 9 imagens e setas sutis amarelas -->
   <div class="carousel" id="promoCarousel">
     <div class="slides">
       <img src="promo1.jpg"  alt="Promoção 1"  class="slide active" data-wa="https://wa.me/5534997178336?text=Quero%20a%20promo%201" />
@@ -71,13 +73,13 @@
   </div>
 
   <!-- Faixa amarela FIXA (sticky) abaixo do cabeçalho -->
-  <div class="countdown-sticky" id="dailyCountdown" data-countdown="daily-235959">
+  <div class="countdown-sticky" id="dailyCountdown">
     🚨 Promoções acabam hoje! <span style="opacity:.8">TERMINA EM</span> <span id="timer">00:00:00</span>
   </div>
 </section>
 
 <!-- Hambúrgueres Tradicionais -->
-<section class="section">
+<section class="section" id="tradicionais">
   <h2>Hambúrgueres Tradicionais</h2>
   <div class="grid" style="margin-top:10px">
     <div class="card"><strong>BÃO</strong><div class="price">R$ 11,00</div><div class="desc">Pão, hambúrguer, alface, tomate, presunto e mussarela</div></div>
@@ -91,7 +93,7 @@
 </section>
 
 <!-- Hambúrgueres Artesanais -->
-<section class="section">
+<section class="section" id="artesanais">
   <h2>Hambúrgueres Artesanais</h2>
   <div class="grid" style="margin-top:10px">
     <div class="card"><strong>PELEJA</strong><div class="price">R$ 26,00</div><div class="desc">Pão, alface, tomate, milho, bacon, batata palha, hambúrguer artesanal 120g, filé frango, presunto e mussarela</div></div>
@@ -101,7 +103,7 @@
 </section>
 
 <!-- Combos -->
-<section class="section">
+<section class="section" id="combos">
   <h2>Combos</h2>
   <div class="grid" style="margin-top:10px">
     <div class="card"><strong>Combo Casal (Tradicional)</strong><div><span class="old">R$ 39,99</span> <span class="price">R$ 34,99</span></div><div class="desc">2 Burger Trem + 1 Fanta 1L</div></div>
@@ -112,7 +114,7 @@
 </section>
 
 <!-- Bebidas -->
-<section class="section drinks">
+<section class="section drinks" id="bebidas">
   <h2>Bebidas</h2>
   <div class="grid" style="margin-top:10px">
     <div class="card"><strong>Coca-Cola 200ml</strong><div class="price">R$ 4,00</div></div>
@@ -137,7 +139,7 @@
 
   </div>  <!-- Botão flutuante WhatsApp --><a class="wa-fab" href="https://wa.me/5534997178336?text=Ol%C3%A1%2C%20quero%20fazer%20um%20pedido!" target="_blank" rel="noopener" aria-label="Fazer pedido no WhatsApp">💬 Pedir no WhatsApp</a>
 
-  <!-- JS principal -->  <script src="script.js?v=2" defer></script>  <!-- Fallbacks leves para garantir funcionamento mesmo sem script.js -->  <script>
+  <!-- JS EMBUTIDO (refinado: setas sutis e clique seguro) -->  <script>
     // Contagem regressiva diária até 23:59:59 (reset a cada dia)
     (function(){
       const el = document.getElementById('timer');
@@ -154,19 +156,39 @@
       tick(); setInterval(tick,1000);
     })();
 
-    // Carrossel básico (prev/next + clique para WhatsApp)
+    // Carrossel com setas sutis (amarelas) e clique seguro
     (function(){
       const slides=[...document.querySelectorAll('.slide')];
       const prev=document.querySelector('.c-prev');
       const next=document.querySelector('.c-next');
       if(!slides.length||!prev||!next) return;
       let i=slides.findIndex(s=>s.classList.contains('active')); if(i<0) i=0;
-      function show(n){slides.forEach((s,idx)=>s.style.display=idx===n?'block':'none');}
-      function go(d){i=(i+d+slides.length)%slides.length;show(i);}    
+
+      function show(n){
+        slides.forEach((s,idx)=>{
+          s.classList.toggle('active', idx===n);
+          s.style.display = idx===n ? 'block' : 'none';
+        });
+      }
+      function go(d){ i=(i+d+slides.length)%slides.length; show(i); }
+
+      // Evita que o clique nas setas abra o WhatsApp
+      function stop(e){ e.stopPropagation(); e.preventDefault(); }
+      prev.addEventListener('click', (e)=>{ stop(e); go(-1); });
+      next.addEventListener('click', (e)=>{ stop(e); go(1);  });
+
+      // Clique na imagem abre o WhatsApp da promo atual
+      slides.forEach(s=> s.addEventListener('click', ()=>{
+        const wa=s.dataset.wa; if(wa) window.open(wa,'_blank');
+      }));
+
+      // Suporte a gesto (mobile)
+      let x0=null; const ts=e=>x0=(e.touches?e.touches[0].clientX:e.clientX),
+          te=e=>{ if(x0===null) return; const x1=(e.changedTouches?e.changedTouches[0].clientX:e.clientX); const dx=x1-x0; if(Math.abs(dx)>40) go(dx<0?1:-1); x0=null; };
+      const box=document.getElementById('promoCarousel');
+      box.addEventListener('touchstart',ts); box.addEventListener('touchend',te);
+
       show(i);
-      prev.addEventListener('click',()=>go(-1));
-      next.addEventListener('click',()=>go(1));
-      slides.forEach(s=>s.addEventListener('click',()=>{const wa=s.dataset.wa;if(wa)window.open(wa,'_blank');}));
     })();
   </script></body>
 </html>
