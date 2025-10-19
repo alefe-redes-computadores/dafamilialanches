@@ -2,7 +2,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>🍔 DFL - Cardápio Oficial</title>  <!-- CSS principal (tema escuro BOOT). O v=4 força recarregar sem cache -->  <link rel="stylesheet" href="style.css?v=4" />  <!-- CSS mínimo complementar (somente os blocos novos/ajustados) -->  <style>
+  <title>🍔 DFL - Cardápio Oficial</title>  <!-- CSS principal (tema escuro BOOT). O v=6 força recarregar sem cache -->  <link rel="stylesheet" href="style.css?v=6" />  <!-- CSS mínimo complementar (somente ajustes novos desta versão) -->  <style>
     /* Faixa compacta de horários (logo abaixo do header) */
     .hours-banner{display:flex;gap:12px;flex-wrap:wrap;align-items:center;justify-content:center;background:rgba(27,28,31,.85);color:#f5f5f7;border:1px solid #2a2d34;border-radius:10px;padding:8px 12px;margin:10px 0 18px}
     .hours-banner b{color:#ffcc00}
@@ -23,19 +23,34 @@
     .countdown-sticky{position:sticky;top:0;z-index:40;background:#E6B800;color:#111;text-align:center;font-weight:800;border-radius:12px;padding:12px 10px;margin:16px 0 0;font-size:clamp(18px,2.6vw,22px);animation:pulse 2s infinite}
     @keyframes pulse{0%{filter:brightness(100%)}50%{filter:brightness(118%)}100%{filter:brightness(100%)}}
 
-    /* Garantia de espaçamento das seções (fallback) */
-    .section{margin:24px 0}
+    /* ===== FABs (botões flutuantes) — pilha vertical canto inferior direito ===== */
+    .fab{position:fixed;right:16px;width:56px;height:56px;border-radius:999px;display:grid;place-items:center;color:#111;box-shadow:0 8px 24px rgba(0,0,0,.35);z-index:99;text-decoration:none;overflow:hidden}
+    .fab svg{width:60%;height:60%}
+    .fab:hover{filter:brightness(1.08);transform:translateY(-2px);transition:.25s}
 
-    /* FABs (botões flutuantes) — pilha vertical canto inferior direito */
-    .fab{position:fixed;right:16px;width:48px;height:48px;border-radius:999px;display:grid;place-items:center;color:#111;font-size:22px;box-shadow:0 8px 24px rgba(0,0,0,.35);z-index:99;text-decoration:none}
-    .fab--wa{bottom:16px;background:#25d366;color:#fff}
-    .fab--ig{bottom:72px;background:#ffcc00;color:#111}
-    .fab--ifood{bottom:128px;background:#EA1D2C;color:#fff}
-    .fab:hover{filter:brightness(1.05)}
+    /* WhatsApp — verde oficial + pulsar leve */
+    .fab--wa{bottom:16px;background:#25D366}
+    .fab--wa{animation:waPulse 2.2s ease-in-out infinite}
+    @keyframes waPulse{0%{transform:scale(1)}50%{transform:scale(1.06)}100%{transform:scale(1)}}
+
+    /* Instagram — gradiente oficial aproximado */
+    .fab--ig{bottom:84px;background:radial-gradient(circle at 30% 107%, #feda75 0%, #fa7e1e 30%, #d62976 62%, #962fbf 85%, #4f5bd5 100%)}
+
+    /* iFood — vermelho oficial */
+    .fab--ifood{bottom:152px;background:#EA1D2C}
+
+    /* ===== NOVO: Estilo distinto para a seção Bebidas & Refrigerantes ===== */
+    #bebidas {background: linear-gradient(180deg, #0e0e0f 0%, #1c0d0d 100%); border-radius: 14px; padding: 16px;}
+    #bebidas h2 { margin-bottom: 12px; }
+    #bebidas .grid { margin-top: 10px; }
+    #bebidas .card { background: #221214; border: 1px solid rgba(255,204,0,0.08); }
+    #bebidas .card strong { color: #FFCC00; }
 
     /* Mobile: reduz um pouco a faixa sticky para não cobrir títulos */
     @media (max-width:520px){
       .countdown-sticky{padding:10px 8px;font-size:clamp(16px,4.5vw,20px)}
+      .fab{width:52px;height:52px}
+      .fab--ifood{bottom:146px}.fab--ig{bottom:80px}.fab--wa{bottom:14px}
     }
   </style></head>
 <body>
@@ -122,19 +137,21 @@
   </div>
 </section>
 
-<!-- Bebidas -->
+<!-- Bebidas & Refrigerantes -->
 <section class="section drinks" id="bebidas">
-  <h2>Bebidas</h2>
-  <div class="grid" style="margin-top:10px">
+  <h2>Bebidas & Refrigerantes</h2>
+  <div class="grid">
     <div class="card"><strong>Coca-Cola 200ml</strong><div class="price">R$ 4,00</div></div>
-    <div class="card"><strong>Coca-Cola 350ml</strong><div class="price">R$ 5,00</div></div>
-    <div class="card"><strong>Fanta Laranja 350ml</strong><div class="price">R$ 5,00</div></div>
-    <div class="card"><strong>Guaraná Antarctica 350ml</strong><div class="price">R$ 5,00</div></div>
-    <div class="card"><strong>Sprite 350ml</strong><div class="price">R$ 5,00</div></div>
-    <div class="card"><strong>Kuat 2L</strong><div class="price">R$ 10,00</div></div>
-    <div class="card"><strong>Fanta 2L</strong><div class="price">R$ 10,00</div></div>
-    <div class="card"><strong>Coca-Cola 2L</strong><div class="price">R$ 12,00</div></div>
-    <div class="card"><strong>Água Mineral</strong><div class="price">R$ 3,00</div></div>
+    <div class="card"><strong>Água com Gás</strong><div class="price">R$ 4,00</div></div>
+    <div class="card"><strong>Dell-Vale Uva 450ml</strong><div class="price">R$ 5,00</div></div>
+    <div class="card"><strong>Dell-Vale Laranja 450ml</strong><div class="price">R$ 5,00</div></div>
+    <div class="card"><strong>Coca-Cola 310ml</strong><div class="price">R$ 5,00</div></div>
+    <div class="card"><strong>Coca-Cola 310ml Zero</strong><div class="price">R$ 5,00</div></div>
+    <div class="card"><strong>Fanta Laranja 1L</strong><div class="price">R$ 8,00</div></div>
+    <div class="card"><strong>Coca-Cola 1L</strong><div class="price">R$ 9,00</div></div>
+    <div class="card"><strong>Coca-Cola 1L Zero</strong><div class="price">R$ 9,00</div></div>
+    <div class="card"><strong>Kuat Guaraná 2L</strong><div class="price">R$ 10,00</div></div>
+    <div class="card"><strong>Coca-Cola 2L</strong><div class="price">R$ 13,00</div></div>
   </div>
 </section>
 
@@ -148,9 +165,24 @@
   <p style="margin-top:6px">© 2025 Da Família Lanches — Você faz parte disso!</p>
 </footer>
 
-  </div>  <!-- FABs (somente ícones) --><a class="fab fab--ifood" href="https://www.ifood.com.br/delivery/patos-de-minas-mg/da-familia-lanches-caramuru/9aadff75-b014-4e7f-a9b4-b3e478e38af8?UTM_Medium=share" target="_blank" rel="noopener" aria-label="Pedir pelo iFood">🛒</a> <a class="fab fab--ig" href="https://instagram.com/dafamilia_patos" target="_blank" rel="noopener" aria-label="Abrir Instagram">📸</a> <a class="fab fab--wa" href="https://wa.me/5534997178336?text=Ol%C3%A1%2C%20quero%20fazer%20um%20pedido!" target="_blank" rel="noopener" aria-label="Fazer pedido no WhatsApp">💬</a>
-
-  <!-- JS EMBUTIDO (carrossel + contador refinados) -->  <script>
+  </div>  <!-- FABs (ícones oficiais por SVG embutido) -->  <!-- iFood -->  <a class="fab fab--ifood" href="https://www.ifood.com.br/delivery/patos-de-minas-mg/da-familia-lanches-caramuru/9aadff75-b014-4e7f-a9b4-b3e478e38af8?UTM_Medium=share" target="_blank" rel="noopener" aria-label="Pedir pelo iFood">
+    <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+      <!-- Marca iFood simplificada em branco (versão vetorial leve) -->
+      <path fill="#ffffff" d="M6.1 14.6c-.3 1.3-1.4 2.2-2.9 2.2H2v-1.7h1c.7 0 1.2-.4 1.3-1l1.8-7.9h1.9L6.1 14.6zm10.7-7.7c-1.4 0-2.5.7-3.1 1.8l1.6.8c.3-.6.8-1 1.6-1 .9 0 1.4.5 1.4 1.2v.2c-2.8.1-4.5 1-4.5 2.8 0 1.2 1 2.2 2.5 2.2 1 0 1.8-.4 2.2-1.1v.9h1.9V9.9c0-1.9-1.2-3-3.6-3zm1.4 4.4c0 .9-.9 1.5-2 1.5-.6 0-1-.3-1-.8 0-.8 1-.9 3.1-1v.3zM11 7.2H9.1l-1.3 5.5c-.2 1 .4 1.6 1.5 1.6.5 0 1 0 1.5-.2l.3-1.5c-.3.1-.6.1-.9.1-.5 0-.8-.2-.7-.6L11 7.2z"/>
+    </svg>
+  </a>  <!-- Instagram -->  <a class="fab fab--ig" href="https://instagram.com/dafamilia_patos" target="_blank" rel="noopener" aria-label="Abrir Instagram">
+    <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+      <!-- Câmera Instagram em branco sobre gradiente do botão -->
+      <rect x="4" y="4" width="16" height="16" rx="4" ry="4" fill="none" stroke="#ffffff" stroke-width="2"/>
+      <circle cx="12" cy="12" r="3.5" fill="none" stroke="#ffffff" stroke-width="2"/>
+      <circle cx="17" cy="7" r="1.2" fill="#ffffff"/>
+    </svg>
+  </a>  <!-- WhatsApp (verde oficial + pulsar) -->  <a class="fab fab--wa" href="https://wa.me/5534997178336?text=Ol%C3%A1%2C%20quero%20fazer%20um%20pedido!" target="_blank" rel="noopener" aria-label="Fazer pedido no WhatsApp">
+    <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+      <!-- Balão + fone em branco -->
+      <path fill="#ffffff" d="M20.5 12c0 4.7-3.9 8.5-8.6 8.5-1.5 0-2.9-.4-4.1-1l-3.3 1 .9-3.2c-.9-1.3-1.4-2.8-1.4-4.3C4 7.8 7.9 4 12.6 4c4.7 0 7.9 3.8 7.9 8zm-4.4 3.1c.1.1.1.3 0 .5-.2.5-1 1-1.5 1.1-.4.1-1 .1-1.7-.2-.9-.3-2-.9-3.2-2.1-1.2-1.1-2-2.5-2.3-3.5-.3-.9-.1-1.6.1-2 .1-.2.3-.3.4-.3h.4c.1 0 .3 0 .4.3l.6 1.4c.1.2.1.4 0 .5l-.3.5c-.1.2-.1.4 0 .6.2.4.8 1.2 1.5 1.9.8.7 1.6 1.2 2 .1.2-.1.4-.1.5 0l1.5.6c.2.1.3.2.3.3z"/>
+    </svg>
+  </a>  <!-- JS EMBUTIDO (carrossel + contador refinados) -->  <script>
     // Contagem regressiva diária até 23:59:59 (reset a cada dia)
     (function(){
       const el = document.getElementById('timer');
