@@ -1,13 +1,15 @@
-// Som de clique global
-const clickSound = new Audio("click.wav");
-clickSound.volume = 0.4; // 🔉 volume suave
-
 // ======================
 // DFL – Da Família Lanches 🍔
-// Script principal
+// Script principal com sons e pop-up
 // ======================
 
+// 🎵 Som de clique global
+const clickSound = new Audio("click.wav");
+clickSound.volume = 0.4;
+
+// ======================
 // Elementos principais
+// ======================
 const cartBtn = document.getElementById("cart-icon");
 const miniCart = document.getElementById("mini-cart");
 const cartBackdrop = document.getElementById("cart-backdrop");
@@ -60,17 +62,16 @@ function limparCarrinho() {
   atualizarCarrinho();
 }
 
-// === Abrir / Fechar carrinho de forma responsiva ===
 function abrirCarrinho() {
   miniCart.classList.add("active");
   cartBackdrop.classList.add("show");
-  document.body.style.overflow = "hidden"; // evita rolagem
+  document.body.style.overflow = "hidden";
 }
 
 function fecharCarrinho() {
   miniCart.classList.remove("active");
   cartBackdrop.classList.remove("show");
-  document.body.style.overflow = ""; // restaura rolagem
+  document.body.style.overflow = "";
 }
 
 // ======================
@@ -110,9 +111,9 @@ function mostrarPopupAdicionado() {
   popup.className = "popup-add";
   popup.textContent = "+1 adicionado!";
   document.body.appendChild(popup);
-
   setTimeout(() => popup.remove(), 1400);
 }
+
 // ======================
 // Modal de Adicionais
 // ======================
@@ -161,12 +162,21 @@ extrasAdd.addEventListener("click", () => {
   clickSound.currentTime = 0;
   clickSound.play().catch(() => {});
   const checkboxes = extrasList.querySelectorAll("input[type='checkbox']:checked");
-  ...
+  extrasSelecionados = Array.from(checkboxes).map((cb) => ({
+    nome: cb.value,
+    preco: parseFloat(cb.dataset.price),
+  }));
+
+  extrasSelecionados.forEach((extra) => {
+    adicionarAoCarrinho(extra.nome, extra.preco);
+  });
+
+  mostrarPopupAdicionado();
   fecharExtras();
 });
 
 // ======================
-// Contagem regressiva das promoções
+// Contagem regressiva
 // ======================
 function atualizarContagem() {
   const agora = new Date();
@@ -182,19 +192,18 @@ function atualizarContagem() {
   const horas = Math.floor(diff / 1000 / 60 / 60);
   const minutos = Math.floor((diff / 1000 / 60) % 60);
   const segundos = Math.floor((diff / 1000) % 60);
-
   document.getElementById("timer").textContent = `${String(horas).padStart(2, "0")}:${String(minutos).padStart(2, "0")}:${String(segundos).padStart(2, "0")}`;
 }
 setInterval(atualizarContagem, 1000);
 atualizarContagem();
 
 // ======================
-// Status de funcionamento
+// Status aberto/fechado
 // ======================
 function atualizarStatus() {
   const banner = document.getElementById("status-banner");
   const agora = new Date();
-  const dia = agora.getDay(); // 0=Dom, 1=Seg, 2=Ter, ...
+  const dia = agora.getDay();
   const hora = agora.getHours();
   const minuto = agora.getMinutes();
 
@@ -216,8 +225,9 @@ function atualizarStatus() {
 }
 setInterval(atualizarStatus, 60000);
 atualizarStatus();
+
 // ======================
-// Mapa interativo – Patos de Minas
+// Mapa interativo
 // ======================
 document.addEventListener("DOMContentLoaded", () => {
   const mapaEl = document.getElementById("mapa-entregas");
@@ -228,28 +238,14 @@ document.addEventListener("DOMContentLoaded", () => {
       scrollWheelZoom: true,
       zoomControl: true,
     });
-
-    L.tileLayer("https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png", {
-      attribution: "",
-    }).addTo(mapa);
-
-    L.circle([-18.5783, -46.5187], {
-      radius: 6000,
-      color: "#d4af37",
-      fillColor: "#ffd700",
-      fillOpacity: 0.25,
-      weight: 2,
-    }).addTo(mapa);
-
-    L.marker([-18.5783, -46.5187])
-      .addTo(mapa)
-      .bindPopup("<b>🍔 DFL</b><br>Entregamos em toda Patos de Minas 💛")
-      .openPopup();
+    L.tileLayer("https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png", { attribution: "" }).addTo(mapa);
+    L.circle([-18.5783, -46.5187], { radius: 6000, color: "#d4af37", fillColor: "#ffd700", fillOpacity: 0.25, weight: 2 }).addTo(mapa);
+    L.marker([-18.5783, -46.5187]).addTo(mapa).bindPopup("<b>🍔 DFL</b><br>Entregamos em toda Patos de Minas 💛").openPopup();
   }
 });
 
 // ======================
-// Responsividade do carrinho (mobile)
+// Responsividade do carrinho
 // ======================
 function ajustarCarrinhoMobile() {
   if (window.innerWidth <= 768) {
@@ -269,17 +265,15 @@ function ajustarCarrinhoMobile() {
 ajustarCarrinhoMobile();
 window.addEventListener("resize", ajustarCarrinhoMobile);
 
-// Fechar carrinho ao tocar fora no mobile
+// Fechar carrinho ao tocar fora
 cartBackdrop.addEventListener("touchstart", fecharCarrinho);
 
 // ======================
-// Finalizar pedido – WhatsApp
+// Finalizar pedido (WhatsApp)
 // ======================
 finishOrderBtn.addEventListener("click", () => {
-  // 🔊 toca o som de clique
   clickSound.currentTime = 0;
   clickSound.play().catch(() => {});
-
   if (!cart.length) return alert("Seu carrinho está vazio!");
 
   let mensagem = "🧾 *Pedido – Da Família Lanches*%0A%0A";
@@ -298,6 +292,19 @@ finishOrderBtn.addEventListener("click", () => {
 });
 
 // ======================
+// Promoções → Som + WhatsApp
+// ======================
+document.querySelectorAll(".carousel .slide").forEach((img) => {
+  img.addEventListener("click", () => {
+    clickSound.currentTime = 0;
+    clickSound.play().catch(() => {});
+    const msg = encodeURIComponent(img.dataset.wa || "Olá! Quero aproveitar a promoção 🍔");
+    const phone = "5534997178336";
+    window.open(`https://wa.me/${phone}?text=${msg}`, "_blank");
+  });
+});
+
+// ======================
 // Inicialização final
 // ======================
 document.addEventListener("DOMContentLoaded", () => {
@@ -305,28 +312,4 @@ document.addEventListener("DOMContentLoaded", () => {
   atualizarContagem();
   atualizarStatus();
   ajustarCarrinhoMobile();
-});
-// === Clique nas promoções → abrir WhatsApp ===
-document.querySelectorAll(".carousel .slide").forEach((img) => {
-  img.addEventListener("click", () => {
-    const msg = encodeURIComponent(img.dataset.wa || "Olá! Quero aproveitar a promoção 🍔");
-    const phone = "5534997178336"; // número do WhatsApp da DFL
-    window.open(`https://wa.me/${phone}?text=${msg}`, "_blank");
-  });
-});
-// === Clique nas promoções → som + abrir WhatsApp ===
-const clickSound = new Audio("click.wav"); // arquivo de som na mesma pasta
-clickSound.volume = 0.4; // 🔉 volume suave (de 0.0 a 1.0)
-
-document.querySelectorAll(".carousel .slide").forEach((img) => {
-  img.addEventListener("click", () => {
-    // toca o som
-    clickSound.currentTime = 0;
-    clickSound.play().catch(() => {});
-
-    // abre WhatsApp
-    const msg = encodeURIComponent(img.dataset.wa || "Olá! Quero aproveitar a promoção 🍔");
-    const phone = "5534997178336"; // número da DFL
-    window.open(`https://wa.me/${phone}?text=${msg}`, "_blank");
-  });
 });
