@@ -1,125 +1,239 @@
-<!DOCTYPE html>
-<html lang="pt-BR">
+<!DOCTYPE html><html lang="pt-BR">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>DFL - Cardápio Oficial</title>
-  <link rel="stylesheet" href="style.css" />
-  <script defer src="script.js"></script>
-</head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>🍔 DFL - Cardápio Oficial</title>  <!-- CSS principal (tema escuro BOOT). O v=6 força recarregar sem cache -->  <link rel="stylesheet" href="style.css?v=6" />  <!-- CSS mínimo complementar (somente ajustes novos desta versão) -->  <style>
+    /* Faixa compacta de horários (logo abaixo do header) */
+    .hours-banner{display:flex;gap:12px;flex-wrap:wrap;align-items:center;justify-content:center;background:rgba(27,28,31,.85);color:#f5f5f7;border:1px solid #2a2d34;border-radius:10px;padding:8px 12px;margin:10px 0 18px}
+    .hours-banner b{color:#ffcc00}
+    .hours-banner .sep{opacity:.6}
+    .hours-banner .icon{font-size:18px;margin-right:6px}
 
+    /* Carrossel: setas sutis amarelas + prioridade de clique */
+    .carousel{position:relative;border-radius:14px;overflow:hidden;margin-top:10px;background:var(--card, #151618)}
+    .carousel .slides{display:grid}
+    .carousel .slide{grid-area:1/1;display:none;width:100%}
+    .carousel .slide.active{display:block}
+    .carousel .c-btn{position:absolute;top:50%;transform:translateY(-50%);border:0;background:rgba(0,0,0,.45);color:#ffcc00;font-size:22px;padding:10px 12px;border-radius:999px;cursor:pointer;z-index:3}
+    .carousel .c-btn:hover{background:rgba(0,0,0,.65)}
+    .carousel .c-prev{left:10px}
+    .carousel .c-next{right:10px}
+
+    /* Faixa amarela FIXA (sticky) logo abaixo do cabeçalho — tom escurecido */
+    .countdown-sticky{position:sticky;top:0;z-index:40;background:#E6B800;color:#111;text-align:center;font-weight:800;border-radius:12px;padding:12px 10px;margin:16px 0 0;font-size:clamp(18px,2.6vw,22px);animation:pulse 2s infinite}
+    @keyframes pulse{0%{filter:brightness(100%)}50%{filter:brightness(118%)}100%{filter:brightness(100%)}}
+
+    /* ===== FABs (botões flutuantes) — pilha vertical canto inferior direito ===== */
+    .fab{position:fixed;right:16px;width:56px;height:56px;border-radius:999px;display:grid;place-items:center;color:#111;box-shadow:0 8px 24px rgba(0,0,0,.35);z-index:99;text-decoration:none;overflow:hidden}
+    .fab svg{width:60%;height:60%}
+    .fab:hover{filter:brightness(1.08);transform:translateY(-2px);transition:.25s}
+
+    /* WhatsApp — verde oficial + pulsar leve */
+    .fab--wa{bottom:16px;background:#25D366}
+    .fab--wa{animation:waPulse 2.2s ease-in-out infinite}
+    @keyframes waPulse{0%{transform:scale(1)}50%{transform:scale(1.06)}100%{transform:scale(1)}}
+
+    /* Instagram — gradiente oficial aproximado */
+    .fab--ig{bottom:84px;background:radial-gradient(circle at 30% 107%, #feda75 0%, #fa7e1e 30%, #d62976 62%, #962fbf 85%, #4f5bd5 100%)}
+
+    /* iFood — vermelho oficial */
+    .fab--ifood{bottom:152px;background:#EA1D2C}
+
+    /* ===== NOVO: Estilo distinto para a seção Bebidas & Refrigerantes ===== */
+    #bebidas {background: linear-gradient(180deg, #0e0e0f 0%, #1c0d0d 100%); border-radius: 14px; padding: 16px;}
+    #bebidas h2 { margin-bottom: 12px; }
+    #bebidas .grid { margin-top: 10px; }
+    #bebidas .card { background: #221214; border: 1px solid rgba(255,204,0,0.08); }
+    #bebidas .card strong { color: #FFCC00; }
+
+    /* Mobile: reduz um pouco a faixa sticky para não cobrir títulos */
+    @media (max-width:520px){
+      .countdown-sticky{padding:10px 8px;font-size:clamp(16px,4.5vw,20px)}
+      .fab{width:52px;height:52px}
+      .fab--ifood{bottom:146px}.fab--ig{bottom:80px}.fab--wa{bottom:14px}
+    }
+  </style></head>
 <body>
-  <header>
-    <img src="logo.png" alt="Logo DFL" class="logo" />
-    <div class="header-text">
-      <h1>Da Família Lanches</h1>
-      <p>Hambúrgueres Artesanais e Deliciosos</p>
-    </div>
-  </header>
-
-  <section class="horario">
-    <h2>Horário de Funcionamento</h2>
-    <div class="dias">
-      <p><strong>Segunda a Quinta</strong><br>18h00 – 23h15</p>
-      <p><strong>Sexta, Sábado e Domingo</strong><br>17h30 – 23h30</p>
-      <p><strong>Terça</strong><br>Fechado</p>
-    </div>
-  </section>
-
-  <section class="promocoes">
-    <h2>Confira as Promoções de Hoje</h2>
-    <p>Estoque limitado • Poucas unidades disponíveis</p>
-    <div id="countdown" class="countdown"></div>
-
-    <div class="carousel">
-      <div class="carousel-inner">
-        <img src="promo1.jpg" class="promo" alt="Promo 1" />
-        <img src="promo2.jpg" class="promo" alt="Promo 2" />
-        <img src="promo3.jpg" class="promo" alt="Promo 3" />
-        <img src="promo4.jpg" class="promo" alt="Promo 4" />
-        <img src="promo5.jpg" class="promo" alt="Promo 5" />
-        <img src="promo6.jpg" class="promo" alt="Promo 6" />
-        <img src="promo7.jpg" class="promo" alt="Promo 7" />
-        <img src="promo8.jpg" class="promo" alt="Promo 8" />
-        <img src="promo9.jpg" class="promo" alt="Promo 9" />
+  <div class="container">
+    <!-- Header -->
+    <header class="header section">
+      <div class="header-content" style="display:flex;align-items:center;gap:14px">
+        <img src="logo.png" alt="DFL - Da Família Lanches" class="logo" style="width:70px;height:70px;border-radius:14px"/>
+        <div class="header-info">
+          <h1>Da Família Lanches</h1>
+          <p class="tagline">Hambúrgueres Artesanais e Deliciosos</p>
+        </div>
       </div>
-      <button class="prev">&#10094;</button>
-      <button class="next">&#10095;</button>
+    </header><!-- Horário (faixa compacta) -->
+<div class="hours-banner" aria-label="Horário de funcionamento">
+  <span class="icon" aria-hidden="true">🕒</span>
+  <span>Seg–Qui <b>18h–23h15</b></span>
+  <span class="sep">•</span>
+  <span>Sex–Dom <b>17h30–23h30</b></span>
+  <span class="sep">•</span>
+  <span>Ter <b>Fechado</b></span>
+</div>
+
+<!-- Promoções -->
+<section class="promo section">
+  <h2>Confira as Promoções de Hoje</h2>
+  <p class="promo-subtitle">Estoque limitado • Poucas unidades disponíveis</p>
+
+  <!-- Carrossel com 9 imagens e setas sutis amarelas -->
+  <div class="carousel" id="promoCarousel">
+    <div class="slides">
+      <img src="promo1.jpg"  alt="Promoção 1"  class="slide active" data-wa="https://wa.me/5534997178336?text=Quero%20a%20promo%201" />
+      <img src="promo2.jpg"  alt="Promoção 2"  class="slide"        data-wa="https://wa.me/5534997178336?text=Quero%20a%20promo%202" />
+      <img src="promo3.jpg"  alt="Promoção 3"  class="slide"        data-wa="https://wa.me/5534997178336?text=Quero%20a%20promo%203" />
+      <img src="promo4.jpg"  alt="Promoção 4"  class="slide"        data-wa="https://wa.me/5534997178336?text=Quero%20a%20promo%204" />
+      <img src="promo5.jpg"  alt="Promoção 5"  class="slide"        data-wa="https://wa.me/5534997178336?text=Quero%20a%20promo%205" />
+      <img src="promo6.jpg"  alt="Promoção 6"  class="slide"        data-wa="https://wa.me/5534997178336?text=Quero%20a%20promo%206" />
+      <img src="promo7.jpg"  alt="Promoção 7"  class="slide"        data-wa="https://wa.me/5534997178336?text=Quero%20a%20promo%207" />
+      <img src="promo8.jpg"  alt="Promoção 8"  class="slide"        data-wa="https://wa.me/5534997178336?text=Quero%20a%20promo%208" />
+      <img src="promo9.jpg"  alt="Promoção 9"  class="slide"        data-wa="https://wa.me/5534997178336?text=Quero%20a%20promo%209" />
     </div>
-  </section>
-
-  <!-- Categorias de produtos -->
-  <section class="categoria">
-    <h2>Hambúrgueres Tradicionais</h2>
-    <div class="itens">
-      <div><h3>BÃO</h3><p>Pão, Alface, Tomate, Hambúrguer, Presunto e Mussarela.</p><span>R$11,00</span></div>
-      <div><h3>UAI</h3><p>Pão, Alface, Tomate, Milho, Bacon, Hambúrguer, Presunto e Mussarela.</p><span>R$13,00</span></div>
-      <div><h3>TREM</h3><p>Pão, Alface, Tomate, Milho, Bacon, Salsicha, Hambúrguer, Presunto e Mussarela.</p><span>R$14,00</span></div>
-      <div><h3>CADIM</h3><p>Pão, Alface, Tomate, Milho, Bacon, Salsicha, Hambúrguer, Filé de Frango, Presunto e Mussarela.</p><span>R$17,00</span></div>
-      <div><h3>ARMARIA</h3><p>Pão, Alface, Tomate, Milho, Bacon, Salsicha, Hambúrguer, Filé de Frango, Batata Palha, Presunto e Mussarela.</p><span>R$18,00</span></div>
-      <div><h3>BITLEA</h3><p>Pão, Alface, Tomate, Milho, Bacon, Salsicha, 2 Hambúrgueres, Filé de Frango, Batata Palha, Presunto e Mussarela.</p><span>R$22,00</span></div>
-      <div><h3>APRUMA</h3><p>Pão, Alface, Tomate, Milho, Bacon, Salsicha, 3 Hambúrgueres, Filé de Frango, Batata Palha, Presunto e Mussarela.</p><span>R$25,00</span></div>
-    </div>
-  </section>
-
-  <section class="categoria">
-    <h2>Hambúrgueres Artesanais</h2>
-    <div class="itens">
-      <div><h3>GRADICIDO</h3><p>Pão, Alface, Tomate, Milho, Bacon, Salsicha, 3 Hambúrgueres, Filé de Frango, Ovo, Batata Palha, Presunto e Mussarela.</p><span>R$28,00</span></div>
-      <div><h3>VARADIFOME</h3><p>Pão, Alface, Tomate, Milho, Bacon, Salsicha, 4 Hambúrgueres, Filé de Frango, Ovo, Batata Palha, Presunto e Mussarela.</p><span>R$30,00</span></div>
-      <div><h3>PELEJA</h3><p>Pão, Alface, Tomate, Milho, Bacon, Hambúrguer Artesanal 120g, Filé de Frango, Presunto e Mussarela.</p><span>R$26,00</span></div>
-      <div><h3>TUDIBOM</h3><p>Pão, Alface, Tomate, Milho, Bacon, 2 Hambúrguer Artesanal 120g, Filé de Frango, Presunto e Mussarela.</p><span>R$28,50</span></div>
-      <div><h3>CUSTOSO</h3><p>Pão, Alface, Tomate, Milho, Bacon, 2 Hambúrguer Artesanal 120g, Filé de Frango, Cheddar Cremoso, Presunto e Mussarela.</p><span>R$31,00</span></div>
-    </div>
-  </section>
-
-  <section class="categoria">
-    <h2>Combos</h2>
-    <div class="itens">
-      <div><h3>Combo Casal Tradicional</h3><p>2 Hambúrguer Trem + 1 Fanta 1L</p><span>R$34,99</span></div>
-      <div><h3>Combo Família Tradicional</h3><p>4 Hambúrguer Trem + 1 Fanta 2L</p><span>R$59,99</span></div>
-      <div><h3>Combo Casal Artesanal</h3><p>2 Hambúrguer Peleja + 1 Coca 1L</p><span>R$54,99</span></div>
-      <div><h3>Combo Família Artesanal</h3><p>4 Hambúrguer Peleja + 1 Coca 2L</p><span>R$79,99</span></div>
-    </div>
-  </section>
-
-  <section class="categoria">
-    <h2>Bebidas</h2>
-    <div class="itens">
-      <div><h3>Coca-Cola 200ml</h3><span>R$4,00</span></div>
-      <div><h3>Água com Gás</h3><span>R$4,00</span></div>
-      <div><h3>Dell-Valle Uva 450ml</h3><span>R$5,00</span></div>
-      <div><h3>Dell-Valle Laranja 450ml</h3><span>R$5,00</span></div>
-      <div><h3>Coca-Cola 310ml</h3><span>R$5,00</span></div>
-      <div><h3>Coca-Cola 310ml Zero</h3><span>R$5,00</span></div>
-      <div><h3>Fanta Laranja 1L</h3><span>R$8,00</span></div>
-      <div><h3>Coca-Cola 1L</h3><span>R$9,00</span></div>
-      <div><h3>Coca-Cola 1L Zero</h3><span>R$9,00</span></div>
-      <div><h3>Kuat Guaraná 2L</h3><span>R$10,00</span></div>
-      <div><h3>Coca-Cola 2L</h3><span>R$13,00</span></div>
-    </div>
-  </section>
-
-  <footer>
-    <h2>Onde estamos</h2>
-    <p>Patos de Minas — Atendimento delivery e retirada.</p>
-    <a href="https://maps.app.goo.gl/jQ1cYcmuZm8rU5Dk9" class="btn-map" target="_blank">Abrir no Google Maps</a>
-    <p>📸 Siga a gente no <a href="https://www.instagram.com/dafamilia_patos" target="_blank">@dafamilia_patos</a></p>
-    <p>🛒 Peça também pelo <a href="https://www.ifood.com.br/delivery/patos-de-minas-mg/da-familia-lanches-caramuru/9aadff75-b014-4e7f-a9b4-b3e478e38af8" target="_blank">iFood</a> · 💬 Ou direto no <a href="https://wa.me/5534997178336" target="_blank">WhatsApp</a></p>
-    <p>© 2025 Da Família Lanches — Você faz parte disso!</p>
-  </footer>
-
-  <!-- Botões flutuantes -->
-  <div class="floating-buttons">
-    <a href="https://wa.me/5534997178336" class="btn-float whatsapp" target="_blank" title="Pedir no WhatsApp">
-      <img src="https://cdn-icons-png.flaticon.com/512/733/733585.png" alt="WhatsApp">
-    </a>
-    <a href="https://www.instagram.com/dafamilia_patos" class="btn-float instagram" target="_blank" title="Instagram">
-      <img src="https://cdn-icons-png.flaticon.com/512/2111/2111463.png" alt="Instagram">
-    </a>
-    <a href="https://www.ifood.com.br/delivery/patos-de-minas-mg/da-familia-lanches-caramuru/9aadff75-b014-4e7f-a9b4-b3e478e38af8" class="btn-float ifood" target="_blank" title="iFood">
-      <img src="https://upload.wikimedia.org/wikipedia/commons/2/2f/IFood_logo_2023.svg" alt="iFood">
-    </a>
+    <button class="c-btn c-prev" aria-label="Anterior">◀</button>
+    <button class="c-btn c-next" aria-label="Próxima">▶</button>
   </div>
-</body>
+
+  <!-- Faixa amarela FIXA (sticky) abaixo do cabeçalho -->
+  <div class="countdown-sticky" id="dailyCountdown">
+    🚨 Promoções acabam hoje! <span style="opacity:.85">TERMINA EM</span> <span id="timer">00:00:00</span>
+  </div>
+</section>
+
+<!-- Hambúrgueres Tradicionais -->
+<section class="section" id="tradicionais">
+  <h2>Hambúrgueres Tradicionais</h2>
+  <div class="grid" style="margin-top:10px">
+    <div class="card"><strong>BÃO</strong><div class="price">R$ 11,00</div><div class="desc">Pão, alface, tomate, hambúrguer, presunto e mussarela.</div></div>
+    <div class="card"><strong>UAI</strong><div class="price">R$ 13,00</div><div class="desc">Pão, alface, tomate, milho, bacon, hambúrguer, presunto e mussarela.</div></div>
+    <div class="card"><strong>TREM</strong><div class="price">R$ 14,00</div><div class="desc">Pão, alface, tomate, milho, bacon, salsicha, hambúrguer, presunto e mussarela.</div></div>
+    <div class="card"><strong>CADIM</strong><div class="price">R$ 17,00</div><div class="desc">Pão, alface, tomate, milho, bacon, salsicha, hambúrguer, filé de frango, presunto e mussarela.</div></div>
+    <div class="card"><strong>ARMARIA</strong><div class="price">R$ 18,00</div><div class="desc">Pão, alface, tomate, milho, bacon, salsicha, hambúrguer, filé de frango, batata palha, presunto e mussarela.</div></div>
+    <div class="card"><strong>BITELA</strong><div class="price">R$ 22,00</div><div class="desc">Pão, alface, tomate, milho, bacon, salsicha, 2 hambúrgueres, filé de frango, batata palha, presunto e mussarela.</div></div>
+    <div class="card"><strong>APRUMA</strong><div class="price">R$ 25,00</div><div class="desc">Pão, alface, tomate, milho, bacon, salsicha, 3 hambúrgueres, filé de frango, batata palha, presunto e mussarela.</div></div>
+  </div>
+</section>
+
+<!-- Hambúrgueres Artesanais -->
+<section class="section" id="artesanais">
+  <h2>Hambúrgueres Artesanais</h2>
+  <div class="grid" style="margin-top:10px">
+    <div class="card"><strong>PELEJA</strong><div class="price">R$ 26,00</div><div class="desc">Pão, alface, tomate, milho, bacon, hambúrguer artesanal 120g, filé de frango, presunto e mussarela.</div></div>
+    <div class="card"><strong>TUDIBOM</strong><div class="price">R$ 28,50</div><div class="desc">Pão, alface, tomate, milho, bacon, 2 hambúrgueres artesanais 120g, filé de frango, presunto e mussarela.</div></div>
+    <div class="card"><strong>CUSTOSO</strong><div class="price">R$ 31,00</div><div class="desc">Pão, alface, tomate, milho, bacon, 2 hambúrgueres artesanais 120g, filé de frango, cheddar cremoso, presunto e 2 fatias de mussarela.</div></div>
+  </div>
+</section>
+
+<!-- Combos -->
+<section class="section" id="combos">
+  <h2>Combos</h2>
+  <div class="grid" style="margin-top:10px">
+    <div class="card"><strong>Combo Casal (Tradicional)</strong><div><span class="old">R$ 39,99</span> <span class="price">R$ 34,99</span></div><div class="desc">2 Burger Trem + 1 Fanta 1L</div></div>
+    <div class="card"><strong>Combo Casal (Artesanal)</strong><div><span class="old">R$ 64,99</span> <span class="price">R$ 54,99</span></div><div class="desc">2 Burger Peleja + 1 Fanta 1L</div></div>
+    <div class="card"><strong>Combo Família (Tradicional)</strong><div><span class="old">R$ 79,99</span> <span class="price">R$ 59,99</span></div><div class="desc">4 Burger Trem + 1 Kuat 2L</div></div>
+    <div class="card"><strong>Combo Família (Artesanal)</strong><div><span class="old">R$ 106,99</span> <span class="price">R$ 89,99</span></div><div class="desc">4 Burger Peleja + 1 Coca 2L</div></div>
+  </div>
+</section>
+
+<!-- Bebidas & Refrigerantes -->
+<section class="section drinks" id="bebidas">
+  <h2>Bebidas & Refrigerantes</h2>
+  <div class="grid">
+    <div class="card"><strong>Coca-Cola 200ml</strong><div class="price">R$ 4,00</div></div>
+    <div class="card"><strong>Água com Gás</strong><div class="price">R$ 4,00</div></div>
+    <div class="card"><strong>Dell-Vale Uva 450ml</strong><div class="price">R$ 5,00</div></div>
+    <div class="card"><strong>Dell-Vale Laranja 450ml</strong><div class="price">R$ 5,00</div></div>
+    <div class="card"><strong>Coca-Cola 310ml</strong><div class="price">R$ 5,00</div></div>
+    <div class="card"><strong>Coca-Cola 310ml Zero</strong><div class="price">R$ 5,00</div></div>
+    <div class="card"><strong>Fanta Laranja 1L</strong><div class="price">R$ 8,00</div></div>
+    <div class="card"><strong>Coca-Cola 1L</strong><div class="price">R$ 9,00</div></div>
+    <div class="card"><strong>Coca-Cola 1L Zero</strong><div class="price">R$ 9,00</div></div>
+    <div class="card"><strong>Kuat Guaraná 2L</strong><div class="price">R$ 10,00</div></div>
+    <div class="card"><strong>Coca-Cola 2L</strong><div class="price">R$ 13,00</div></div>
+  </div>
+</section>
+
+<!-- Rodapé / Endereço e links oficiais -->
+<footer class="footer section">
+  <h2>Onde estamos</h2>
+  <p>Patos de Minas — Atendimento delivery e retirada.</p>
+  <p><a href="https://maps.google.com/?q=Da%20Fam%C3%ADlia%20Lanches%20Patos%20de%20Minas" target="_blank" rel="noopener">Abrir no Google Maps</a></p>
+  <p style="margin-top:8px">📸 Siga a gente no <a href="https://instagram.com/dafamilia_patos" target="_blank" rel="noopener">@dafamilia_patos</a></p>
+  <p>🛒 Peça também pelo <a href="https://www.ifood.com.br/delivery/patos-de-minas-mg/da-familia-lanches-caramuru/9aadff75-b014-4e7f-a9b4-b3e478e38af8?UTM_Medium=share" target="_blank" rel="noopener">iFood</a> • 💬 Ou direto no <a href="https://wa.me/5534997178336?text=Ol%C3%A1%2C%20quero%20fazer%20um%20pedido!" target="_blank" rel="noopener">WhatsApp</a></p>
+  <p style="margin-top:6px">© 2025 Da Família Lanches — Você faz parte disso!</p>
+</footer>
+
+  </div>  <!-- FABs (ícones oficiais por SVG embutido) -->  <!-- iFood -->  <a class="fab fab--ifood" href="https://www.ifood.com.br/delivery/patos-de-minas-mg/da-familia-lanches-caramuru/9aadff75-b014-4e7f-a9b4-b3e478e38af8?UTM_Medium=share" target="_blank" rel="noopener" aria-label="Pedir pelo iFood">
+    <!-- Ícone oficial redondo do iFood (estilo app) -->
+    <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+      <circle cx="12" cy="12" r="10" fill="#EA1D2C"/>
+      <!-- Marca "f" estilizada (traço contínuo) -->
+      <path fill="#FFFFFF" d="M8.2 12.4c.1.9-.6 1.6-1.9 1.6H5.2v-1.4h.8c.5 0 .8-.2.9-.6l1.1-4.6h1.6L8.2 12.4zM16.9 7.8c-1.1 0-2 .5-2.5 1.3l1.2.6c.2-.4.6-.7 1.2-.7.7 0 1 .3 1 .8v.2c-2 .1-3.4.7-3.4 2 0 .9.8 1.6 1.9 1.6.8 0 1.4-.3 1.7-.8v.7h1.5V9.6c0-1.3-.9-1.8-2.6-1.8zm1 3c0 .6-.7 1-1.5 1-.4 0-.7-.2-.7-.6 0-.6.7-.6 2.2-.7v.3zM12 7.8H10.5l-.9 3.7c-.1.7.3 1.1 1.1 1.1.4 0 .8 0 1.2-.1l.2-1.1c-.2.1-.5.1-.7.1-.4 0-.6-.1-.6-.4L12 7.8z"/>
+    </svg>
+  </a>  <!-- Instagram -->  <a class="fab fab--ig" href="https://instagram.com/dafamilia_patos" target="_blank" rel="noopener" aria-label="Abrir Instagram">
+    <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+      <!-- Câmera Instagram em branco sobre gradiente do botão -->
+      <rect x="4" y="4" width="16" height="16" rx="4" ry="4" fill="none" stroke="#ffffff" stroke-width="2"/>
+      <circle cx="12" cy="12" r="3.5" fill="none" stroke="#ffffff" stroke-width="2"/>
+      <circle cx="17" cy="7" r="1.2" fill="#ffffff"/>
+    </svg>
+  </a>  <!-- WhatsApp (verde oficial + pulsar) -->  <a class="fab fab--wa" href="https://wa.me/5534997178336?text=Ol%C3%A1%2C%20quero%20fazer%20um%20pedido!" target="_blank" rel="noopener" aria-label="Fazer pedido no WhatsApp">
+    <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+      <!-- Balão + fone em branco -->
+      <path fill="#ffffff" d="M20.5 12c0 4.7-3.9 8.5-8.6 8.5-1.5 0-2.9-.4-4.1-1l-3.3 1 .9-3.2c-.9-1.3-1.4-2.8-1.4-4.3C4 7.8 7.9 4 12.6 4c4.7 0 7.9 3.8 7.9 8zm-4.4 3.1c.1.1.1.3 0 .5-.2.5-1 1-1.5 1.1-.4.1-1 .1-1.7-.2-.9-.3-2-.9-3.2-2.1-1.2-1.1-2-2.5-2.3-3.5-.3-.9-.1-1.6.1-2 .1-.2.3-.3.4-.3h.4c.1 0 .3 0 .4.3l.6 1.4c.1.2.1.4 0 .5l-.3.5c-.1.2-.1.4 0 .6.2.4.8 1.2 1.5 1.9.8.7 1.6 1.2 2 .1.2-.1.4-.1.5 0l1.5.6c.2.1.3.2.3.3z"/>
+    </svg>
+  </a>  <!-- JS EMBUTIDO (carrossel + contador refinados) -->  <script>
+    // Contagem regressiva diária até 23:59:59 (reset a cada dia)
+    (function(){
+      const el = document.getElementById('timer');
+      if(!el) return;
+      function tick(){
+        const now=new Date();
+        const end=new Date(); end.setHours(23,59,59,999);
+        let diff=Math.max(0, Math.floor((end-now)/1000));
+        const h=String(Math.floor(diff/3600)).padStart(2,'0');
+        const m=String(Math.floor((diff%3600)/60)).padStart(2,'0');
+        const s=String(diff%60).padStart(2,'0');
+        el.textContent=`${h}:${m}:${s}`;
+      }
+      tick(); setInterval(tick,1000);
+    })();
+
+    // Carrossel com setas sutis (amarelas) e clique seguro
+    (function(){
+      const slides=[...document.querySelectorAll('.slide')];
+      const prev=document.querySelector('.c-prev');
+      const next=document.querySelector('.c-next');
+      const box=document.getElementById('promoCarousel');
+      if(!slides.length||!prev||!next||!box) return;
+      let i=slides.findIndex(s=>s.classList.contains('active')); if(i<0) i=0;
+
+      function show(n){
+        slides.forEach((s,idx)=>{
+          s.classList.toggle('active', idx===n);
+          s.style.display = idx===n ? 'block' : 'none';
+        });
+      }
+      function go(d){ i=(i+d+slides.length)%slides.length; show(i); }
+
+      // Evita que o clique nas setas abra o WhatsApp
+      function stop(e){ e.stopPropagation(); e.preventDefault(); }
+      prev.addEventListener('click', (e)=>{ stop(e); go(-1); });
+      next.addEventListener('click', (e)=>{ stop(e); go(1);  });
+
+      // Clique na imagem abre o WhatsApp da promo atual
+      slides.forEach(s=> s.addEventListener('click', ()=>{
+        const wa=s.dataset.wa; if(wa) window.open(wa,'_blank');
+      }));
+
+      // Gesto (mobile)
+      let x0=null; const ts=e=>x0=(e.touches?e.touches[0].clientX:e.clientX),
+          te=e=>{ if(x0===null) return; const x1=(e.changedTouches?e.changedTouches[0].clientX:e.clientX); const dx=x1-x0; if(Math.abs(dx)>40) go(dx<0?1:-1); x0=null; };
+      box.addEventListener('touchstart',ts); box.addEventListener('touchend',te);
+
+      show(i);
+    })();
+  </script></body>
 </html>
