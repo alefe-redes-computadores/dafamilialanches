@@ -314,3 +314,33 @@ document.addEventListener("DOMContentLoaded", () => {
   atualizarStatus();
   ajustarCarrinhoMobile();
 });
+
+/* ===== HOTFIX cart visibility ===== */
+(function () {
+  const cart = document.getElementById('mini-cart');
+  const backdrop = document.getElementById('cart-backdrop');
+  const openBtn = document.getElementById('cart-icon');
+  const closeBtn = document.querySelector('.mini-close');
+
+  // inicia 100% fechado
+  cart.classList.remove('active');
+  backdrop.classList.remove('show');
+  document.body.classList.remove('no-scroll');
+
+  function openCart() {
+    cart.classList.add('active');
+    backdrop.classList.add('show');
+    document.body.classList.add('no-scroll');
+  }
+  function closeCart() {
+    cart.classList.remove('active');
+    backdrop.classList.remove('show');
+    document.body.classList.remove('no-scroll');
+  }
+
+  // reforça binds (não importa se já existem, estes vencem)
+  openBtn && openBtn.addEventListener('click', openCart);
+  closeBtn && closeBtn.addEventListener('click', closeCart);
+  backdrop && backdrop.addEventListener('click', closeCart);
+  backdrop && backdrop.addEventListener('touchstart', closeCart);
+})();
