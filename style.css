@@ -162,11 +162,12 @@ body {
 }
 
 .badge {
-  background: #222;
-  color: #f9d44b;
-  border-radius: 6px;
-  padding: 2px 5px;
+  background: #f9d44b;
+  color: #000;
+  border-radius: 10px;
+  padding: 3px 8px;
   font-size: 0.8rem;
+  font-weight: 600;
   margin-left: 4px;
 }
 
@@ -367,6 +368,18 @@ body {
   border: 1px solid #f9d44b;
   border-radius: 6px;
   text-align: center;
+}
+
+/* ===== ETIQUETAS "COM MOLHO VERDE" ===== */
+.badge-molho {
+  background: #f9d44b;
+  color: #000;
+  font-weight: 700;
+  font-size: 0.8rem;
+  padding: 3px 8px;
+  border-radius: 8px;
+  display: inline-block;
+  margin-left: 6px;
 }
 
 /* ===== RODAPÉ ===== */
