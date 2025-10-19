@@ -56,16 +56,17 @@ function limparCarrinho() {
   atualizarCarrinho();
 }
 
+// === Abrir / Fechar carrinho de forma responsiva ===
 function abrirCarrinho() {
   miniCart.classList.add("active");
   cartBackdrop.classList.add("show");
-  document.body.style.overflow = "hidden";
+  document.body.style.overflow = "hidden"; // evita rolagem
 }
 
 function fecharCarrinho() {
   miniCart.classList.remove("active");
   cartBackdrop.classList.remove("show");
-  document.body.style.overflow = "";
+  document.body.style.overflow = ""; // restaura rolagem
 }
 
 // ======================
