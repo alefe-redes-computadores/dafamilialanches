@@ -1,272 +1,269 @@
-// ======================
-// Da Família Lanches JS
-// ======================
+/* ===================================================
+   DFL – script.js (compatível com seu HTML atual)
+   =================================================== */
 
-// Elementos principais
-const cartBtn = document.getElementById("cart-btn");
-const miniCart = document.getElementById("mini-cart");
-const cartBackdrop = document.getElementById("cart-backdrop");
-const cartList = document.getElementById("cart-list");
-const cartCount = document.getElementById("cart-count");
-const totalPriceEl = document.getElementById("total-price");
-const clearCartBtn = document.getElementById("clear-cart");
-const closeCartBtn = document.getElementById("close-cart");
-const finishOrderBtn = document.getElementById("finish-order");
-
-// Estado do carrinho
-let cart = [];
-
-// ======================
-// Funções do Carrinho
-// ======================
-function atualizarCarrinho() {
-  cartList.innerHTML = "";
-  let total = 0;
-
-  cart.forEach((item, index) => {
-    const li = document.createElement("li");
-    li.classList.add("cart-item");
-    li.innerHTML = `
-      <span>${item.nome}</span>
-      <strong>R$ ${item.preco.toFixed(2)}</strong>
-      <button class="remove-item" data-index="${index}">✕</button>
-    `;
-    cartList.appendChild(li);
-    total += item.preco;
-  });
-
-  cartCount.textContent = cart.length;
-  totalPriceEl.textContent = total.toFixed(2);
-
-  // Mostrar ou esconder o botão de limpar
-  clearCartBtn.style.display = cart.length ? "inline-block" : "none";
-  finishOrderBtn.style.display = cart.length ? "inline-block" : "none";
-}
-
-function adicionarAoCarrinho(nome, preco) {
-  cart.push({ nome, preco });
-  atualizarCarrinho();
-  abrirCarrinho();
-}
-
-function removerDoCarrinho(index) {
-  cart.splice(index, 1);
-  atualizarCarrinho();
-}
-
-function limparCarrinho() {
-  cart = [];
-  atualizarCarrinho();
-}
-
-function abrirCarrinho() {
-  miniCart.classList.add("active");
-  cartBackdrop.classList.add("show");
-}
-
-function fecharCarrinho() {
-  miniCart.classList.remove("active");
-  cartBackdrop.classList.remove("show");
-}
-// ======================
-// Eventos dos botões do carrinho
-// ======================
-cartBtn.addEventListener("click", abrirCarrinho);
-cartBackdrop.addEventListener("click", fecharCarrinho);
-closeCartBtn.addEventListener("click", fecharCarrinho);
-clearCartBtn.addEventListener("click", limparCarrinho);
-
-// Remover item individual
-cartList.addEventListener("click", (e) => {
-  if (e.target.classList.contains("remove-item")) {
-    const index = e.target.dataset.index;
-    removerDoCarrinho(index);
-  }
-});
-
-// ======================
-// Adicionar produtos
-// ======================
-document.querySelectorAll(".add-cart").forEach((btn) => {
-  btn.addEventListener("click", () => {
-    const card = btn.closest(".card");
-    const nome = card.dataset.name;
-    const preco = parseFloat(card.dataset.price);
-    adicionarAoCarrinho(nome, preco);
-  });
-});
-
-// ======================
-// Extras (Adicionais)
-// ======================
-const extrasBackdrop = document.getElementById("extras-backdrop");
-const extrasModal = document.getElementById("extras-modal");
-const extrasList = document.getElementById("extras-list");
-const extrasCancel = document.getElementById("extras-cancel");
-const extrasAdd = document.getElementById("extras-add");
-let extrasSelecionados = [];
-let produtoAtual = null;
-
-document.querySelectorAll(".extras-btn").forEach((btn) => {
-  btn.addEventListener("click", () => {
-    produtoAtual = btn.closest(".card");
-    abrirExtras(produtoAtual.dataset.name);
-  });
-});
-
-function abrirExtras(nomeProduto) {
-  extrasList.innerHTML = `
-    <label><input type="checkbox" value="Cebola" data-price="0.99"> Cebola – R$0,99</label>
-    <label><input type="checkbox" value="Salada" data-price="1.99"> Salada – R$1,99</label>
-    <label><input type="checkbox" value="Filé de Frango" data-price="6.99"> Filé de Frango – R$6,99</label>
-    <label><input type="checkbox" value="Hambúrguer Artesanal 120g" data-price="7.99"> Hambúrguer Artesanal 120g – R$7,99</label>
-  `;
-  extrasModal.classList.add("show");
-  extrasBackdrop.classList.add("show");
-}
-
-extrasCancel.addEventListener("click", fecharExtras);
-extrasBackdrop.addEventListener("click", fecharExtras);
-
-function fecharExtras() {
-  extrasModal.classList.remove("show");
-  extrasBackdrop.classList.remove("show");
-  extrasSelecionados = [];
-}
-
-extrasAdd.addEventListener("click", () => {
-  const checkboxes = extrasList.querySelectorAll("input[type='checkbox']:checked");
-  extrasSelecionados = Array.from(checkboxes).map((cb) => ({
-    nome: cb.value,
-    preco: parseFloat(cb.dataset.price),
-  }));
-
-  let texto = "Adicionais selecionados:\n";
-  extrasSelecionados.forEach((x) => (texto += `${x.nome} - R$${x.preco.toFixed(2)}\n`));
-  alert(texto);
-
-  fecharExtras();
-});
-// ======================
-// Contagem regressiva das promoções
-// ======================
-function atualizarContagem() {
-  const agora = new Date();
-  const fim = new Date();
-  fim.setHours(23, 59, 59, 999);
-  const diff = fim - agora;
-
-  if (diff <= 0) {
-    document.getElementById("timer").textContent = "00:00:00";
-    return;
-  }
-
-  const horas = Math.floor(diff / 1000 / 60 / 60);
-  const minutos = Math.floor((diff / 1000 / 60) % 60);
-  const segundos = Math.floor((diff / 1000) % 60);
-
-  document.getElementById("timer").textContent = `${String(horas).padStart(2, "0")}:${String(minutos).padStart(2, "0")}:${String(segundos).padStart(2, "0")}`;
-}
-setInterval(atualizarContagem, 1000);
-atualizarContagem();
-
-// ======================
-// Status de funcionamento
-// ======================
-function atualizarStatus() {
-  const banner = document.getElementById("status-banner");
-  const agora = new Date();
-  const dia = agora.getDay(); // 0=Dom, 1=Seg, ..., 6=Sáb
-  const hora = agora.getHours();
-  const minuto = agora.getMinutes();
-
-  let aberto = false;
-  let msg = "";
-
-  if (dia === 2) {
-    msg = "❌ Fechado — abrimos amanhã às 18h";
-  } else if ([1, 3, 4].includes(dia)) {
-    aberto = hora >= 18 && (hora < 23 || (hora === 23 && minuto <= 15));
-    msg = aberto ? "🟢 Aberto até 23h15" : "🔴 Fechado — abrimos às 18h";
-  } else if ([5, 6, 0].includes(dia)) {
-    aberto = hora >= 17 && (hora < 23 || (hora === 23 && minuto <= 30));
-    msg = aberto ? "🟢 Aberto até 23h30" : "🔴 Fechado — abrimos às 17h30";
-  }
-
-  banner.textContent = msg;
-  banner.className = aberto ? "status-banner aberto" : "status-banner fechado";
-}
-setInterval(atualizarStatus, 60000);
-atualizarStatus();
-
-// ======================
-// Corrigir mapa interativo
-// ======================
 document.addEventListener("DOMContentLoaded", () => {
-  const mapaEl = document.getElementById("mapa-entregas");
-  if (mapaEl && L) {
-    const mapa = L.map(mapaEl, {
-      center: [-18.5783, -46.5187],
-      zoom: 13,
-      scrollWheelZoom: true,
-      zoomControl: true
+  /* ============== 1) STATUS (ABERTO/FECHADO) ============== */
+  const statusBanner = document.getElementById("status-banner");
+  function atualizarStatus() {
+    if (!statusBanner) return;
+    const agora = new Date();
+    const d = agora.getDay(); // 0 dom ... 6 sáb
+    const h = agora.getHours();
+    const m = agora.getMinutes();
+    let aberto = false;
+    let txt = "";
+
+    if (d === 2) {
+      aberto = false;
+      txt = "❌ Fechado — abrimos amanhã às 18h";
+    } else if ([1, 3, 4].includes(d)) {
+      aberto = (h > 18 || (h === 18 && m >= 0)) && (h < 23 || (h === 23 && m <= 15));
+      txt = aberto ? "🟢 Aberto até 23h15" : "🔴 Fechado — abrimos às 18h";
+    } else if ([5, 6, 0].includes(d)) {
+      aberto = (h > 17 || (h === 17 && m >= 30)) && (h < 23 || (h === 23 && m <= 30));
+      txt = aberto ? "🟢 Aberto até 23h30" : "🔴 Fechado — abrimos às 17h30";
+    }
+
+    statusBanner.textContent = txt;
+    statusBanner.className = aberto ? "status-banner aberto" : "status-banner fechado";
+  }
+  atualizarStatus();
+  setInterval(atualizarStatus, 60000);
+
+  /* ============== 2) CONTAGEM REGRESSIVA 23:59:59 ============== */
+  const timer = document.getElementById("timer");
+  function atualizarContagem() {
+    if (!timer) return;
+    const agora = new Date();
+    const fim = new Date();
+    fim.setHours(23, 59, 59, 999);
+    const diff = fim - agora;
+    if (diff <= 0) {
+      timer.textContent = "00:00:00";
+      return;
+    }
+    const h = String(Math.floor(diff / 3600000)).padStart(2, "0");
+    const m = String(Math.floor((diff % 3600000) / 60000)).padStart(2, "0");
+    const s = String(Math.floor((diff % 60000) / 1000)).padStart(2, "0");
+    timer.textContent = `${h}:${m}:${s}`;
+  }
+  atualizarContagem();
+  setInterval(atualizarContagem, 1000);
+
+  /* ============== 3) CARROSSEL PROMOS ============== */
+  const slides = document.querySelector(".slides");
+  const prev = document.querySelector(".c-prev");
+  const next = document.querySelector(".c-next");
+
+  if (slides && prev && next) {
+    prev.addEventListener("click", () => slides.scrollBy({ left: -300, behavior: "smooth" }));
+    next.addEventListener("click", () => slides.scrollBy({ left: 300, behavior: "smooth" }));
+
+    slides.querySelectorAll(".slide").forEach((img) => {
+      img.addEventListener("click", () => {
+        const msg = img.getAttribute("data-wa") || "Quero a promoção!";
+        window.open(`https://wa.me/5534997178336?text=${encodeURIComponent(msg)}`, "_blank");
+      });
+    });
+  }
+
+  /* ============== 4) CARRINHO ============== */
+  const cartIcon = document.getElementById("cart-icon");     // <- seu HTML
+  const miniCart = document.getElementById("mini-cart");
+  const cartBackdrop = document.getElementById("cart-backdrop");
+  const miniList = document.getElementById("mini-list");
+  const cartCount = document.getElementById("cart-count");
+  const btnClear = document.getElementById("mini-clear");
+  const btnCheckout = document.getElementById("mini-checkout");
+  const btnCloseMini = document.querySelector(".mini-close");
+
+  let carrinho = [];
+
+  function atualizarCarrinho() {
+    if (!miniList || !cartCount) return;
+    miniList.innerHTML = "";
+    let totalItens = 0;
+
+    carrinho.forEach((item, idx) => {
+      totalItens += item.qtd;
+
+      const linha = document.createElement("div");
+      linha.className = "mini-item";
+      const extrasTxt = item.extras && item.extras.length
+        ? ` <small>(+${item.extras.join(", ")})</small>`
+        : "";
+      linha.innerHTML = `
+        <span><b>${item.qtd}x</b> ${item.nome}${extrasTxt}</span>
+        <div>
+          <button class="rm" data-i="${idx}" title="Remover">✕</button>
+        </div>
+      `;
+      miniList.appendChild(linha);
     });
 
-    L.tileLayer("https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png", {
-      attribution: ""
-    }).addTo(mapa);
+    cartCount.textContent = String(totalItens);
 
-    L.circle([-18.5783, -46.5187], {
-      radius: 6000,
-      color: "#d4af37",
-      fillColor: "#ffd700",
-      fillOpacity: 0.25,
-      weight: 2
-    }).addTo(mapa);
-
-    L.marker([-18.5783, -46.5187])
-      .addTo(mapa)
-      .bindPopup("<b>🍔 DFL</b><br>Entregamos em toda Patos de Minas 💛")
-      .openPopup();
+    // listeners de remover
+    miniList.querySelectorAll(".rm").forEach((b) => {
+      b.addEventListener("click", () => {
+        const i = Number(b.getAttribute("data-i"));
+        carrinho.splice(i, 1);
+        atualizarCarrinho();
+      });
+    });
   }
-});
 
-// ======================
-// Ajuste carrinho mobile
-// ======================
-function ajustarCarrinhoMobile() {
-  if (window.innerWidth <= 768) {
-    miniCart.style.height = "85vh";
-    miniCart.style.bottom = "0";
-    miniCart.style.top = "auto";
-    miniCart.style.borderRadius = "16px 16px 0 0";
-  } else {
-    miniCart.style.height = "";
-    miniCart.style.top = "";
-    miniCart.style.borderRadius = "";
+  function abrirCarrinho() {
+    if (!miniCart || !cartBackdrop) return;
+    miniCart.classList.add("active");
+    cartBackdrop.classList.add("show");
   }
-}
-ajustarCarrinhoMobile();
-window.addEventListener("resize", ajustarCarrinhoMobile);
+  function fecharCarrinho() {
+    if (!miniCart || !cartBackdrop) return;
+    miniCart.classList.remove("active");
+    cartBackdrop.classList.remove("show");
+  }
 
-// Fechar carrinho no toque fora (mobile)
-cartBackdrop.addEventListener("touchstart", fecharCarrinho);
-// ===== Efeito visual "adicionado" =====
-function mostrarPopupAdd(nomeProduto) {
-  const popup = document.createElement("div");
-  popup.className = "add-popup";
-  popup.textContent = `+1 ${nomeProduto} adicionado!`;
-  document.body.appendChild(popup);
-  setTimeout(() => popup.remove(), 1000);
-}
+  if (cartIcon) cartIcon.addEventListener("click", abrirCarrinho);
+  if (cartBackdrop) cartBackdrop.addEventListener("click", fecharCarrinho);
+  if (btnCloseMini) btnCloseMini.addEventListener("click", fecharCarrinho);
+  if (btnClear) btnClear.addEventListener("click", () => { carrinho = []; atualizarCarrinho(); });
 
-// Ajustar botão de adicionar para chamar o efeito
-document.querySelectorAll(".add-cart").forEach((btn) => {
-  btn.addEventListener("click", () => {
-    const card = btn.closest(".card");
-    const nome = card.dataset.name;
-    const preco = parseFloat(card.dataset.price);
-    adicionarAoCarrinho(nome, preco);
-    mostrarPopupAdd(nome);
+  if (btnCheckout) {
+    btnCheckout.addEventListener("click", () => {
+      if (!carrinho.length) return alert("Seu carrinho está vazio.");
+      let msg = "*Pedido Da Família Lanches*%0A";
+      carrinho.forEach((i) => {
+        const extras = i.extras && i.extras.length ? ` (+${i.extras.join(", ")})` : "";
+        msg += `%0A• *${i.qtd}x ${i.nome}*${extras}`;
+      });
+      msg += "%0A%0AObrigado! 💛";
+      window.open(`https://wa.me/5534997178336?text=${msg}`, "_blank");
+    });
+  }
+
+  /* ============== 5) BOTÕES ADICIONAR + POPUP ============== */
+  function mostrarPopupAdd(nomeProduto) {
+    const popup = document.createElement("div");
+    popup.className = "add-popup";
+    popup.textContent = `+1 ${nomeProduto} adicionado!`;
+    document.body.appendChild(popup);
+    setTimeout(() => popup.remove(), 1000);
+  }
+
+  document.querySelectorAll(".add-cart").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const card = btn.closest(".card");
+      if (!card) return;
+      const nome = card.dataset.name || "Item";
+      const preco = parseFloat(card.dataset.price || "0");
+
+      const existente = carrinho.find((x) => x.nome === nome && (!x.extras || x.extras.length === 0));
+      if (existente) existente.qtd += 1;
+      else carrinho.push({ nome, preco, qtd: 1, extras: [] });
+
+      // animação no botão
+      btn.classList.add("clicked");
+      setTimeout(() => btn.classList.remove("clicked"), 200);
+
+      mostrarPopupAdd(nome);
+      atualizarCarrinho();
+    });
   });
+
+  /* ============== 6) MODAL DE ADICIONAIS ============== */
+  const extrasBackdrop = document.getElementById("extras-backdrop");
+  const extrasModal = document.getElementById("extras-modal");
+  const extrasList = document.getElementById("extras-list");
+  const extrasCancel = document.getElementById("extras-cancel");
+  const extrasAdd = document.getElementById("extras-add");
+  const extrasClose = document.querySelector(".extras-close");
+  let cardAtual = null;
+
+  // lista de adicionais (hambúrguer/hot dog)
+  const ADICIONAIS = [
+    { nome: "Cebola", preco: 0.99 },
+    { nome: "Salada", preco: 1.99 },
+    { nome: "Ovo", preco: 1.99 },
+    { nome: "Salsicha", preco: 1.99 },
+    { nome: "Bacon", preco: 2.99 },
+    { nome: "Molho Verde", preco: 2.99 },
+    { nome: "Hambúrguer Tradicional", preco: 2.99 },
+    { nome: "Cheddar", preco: 3.99 },
+    { nome: "Filé de Frango", preco: 6.99 },
+    { nome: "Hambúrguer Artesanal 120g", preco: 7.99 },
+  ];
+
+  function abrirExtras(card) {
+    if (!extrasModal || !extrasBackdrop || !extrasList) return;
+    cardAtual = card;
+    extrasList.innerHTML = ADICIONAIS.map((a, i) =>
+      `<label><input type="checkbox" data-i="${i}"> ${a.nome} – R$${a.preco.toFixed(2)}</label>`
+    ).join("");
+    extrasModal.classList.add("open");
+    extrasBackdrop.classList.add("show");
+  }
+  function fecharExtras() {
+    if (!extrasModal || !extrasBackdrop) return;
+    extrasModal.classList.remove("open");
+    extrasBackdrop.classList.remove("show");
+    cardAtual = null;
+  }
+
+  document.querySelectorAll(".extras-btn").forEach((b) => {
+    b.addEventListener("click", () => {
+      const card = b.closest(".card");
+      if (!card) return;
+      abrirExtras(card);
+    });
+  });
+  if (extrasCancel) extrasCancel.addEventListener("click", fecharExtras);
+  if (extrasClose) extrasClose.addEventListener("click", fecharExtras);
+  if (extrasBackdrop) extrasBackdrop.addEventListener("click", fecharExtras);
+
+  if (extrasAdd) {
+    extrasAdd.addEventListener("click", () => {
+      if (!cardAtual) return fecharExtras();
+      const nome = cardAtual.dataset.name || "Item";
+      const preco = parseFloat(cardAtual.dataset.price || "0");
+      const selecionados = [...extrasList.querySelectorAll("input:checked")]
+        .map((inp) => ADICIONAIS[Number(inp.dataset.i)].nome);
+
+      // Agrupa por nome+extras (para não misturar com o "sem extras")
+      const keyMatch = (x) =>
+        x.nome === nome &&
+        Array.isArray(x.extras) &&
+        x.extras.length === selecionados.length &&
+        x.extras.every((e) => selecionados.includes(e));
+
+      const existente = carrinho.find(keyMatch);
+      if (existente) existente.qtd += 1;
+      else carrinho.push({ nome, preco, qtd: 1, extras: selecionados });
+
+      mostrarPopupAdd(nome);
+      atualizarCarrinho();
+      fecharExtras();
+    });
+  }
+
+  /* ============== 7) MOBILE: FECHAR POR TOQUE/GEStO ============== */
+  if (window.innerWidth <= 768) {
+    if (cartBackdrop) cartBackdrop.addEventListener("click", fecharCarrinho);
+
+    if (miniCart) {
+      let startY = null;
+      miniCart.addEventListener("touchstart", (e) => {
+        startY = e.touches[0].clientY;
+      });
+      miniCart.addEventListener("touchmove", (e) => {
+        if (startY === null) return;
+        const endY = e.touches[0].clientY;
+        if (endY - startY > 70) fecharCarrinho();
+      });
+    }
+  }
+
+  /* ============== 8) PRONTO! ============== */
+  console.log("✅ script.js carregado e conectado ao seu HTML/IDs atuais.");
 });
