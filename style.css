@@ -1,388 +1,254 @@
-W3/* ====== BASE ====== */
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-  font-family: "Poppins", Arial, sans-serif;
+// ======================
+// Da Família Lanches JS
+// ======================
+
+// Elementos principais
+const cartBtn = document.getElementById("cart-btn");
+const miniCart = document.getElementById("mini-cart");
+const cartBackdrop = document.getElementById("cart-backdrop");
+const cartList = document.getElementById("cart-list");
+const cartCount = document.getElementById("cart-count");
+const totalPriceEl = document.getElementById("total-price");
+const clearCartBtn = document.getElementById("clear-cart");
+const closeCartBtn = document.getElementById("close-cart");
+const finishOrderBtn = document.getElementById("finish-order");
+
+// Estado do carrinho
+let cart = [];
+
+// ======================
+// Funções do Carrinho
+// ======================
+function atualizarCarrinho() {
+  cartList.innerHTML = "";
+  let total = 0;
+
+  cart.forEach((item, index) => {
+    const li = document.createElement("li");
+    li.classList.add("cart-item");
+    li.innerHTML = `
+      <span>${item.nome}</span>
+      <strong>R$ ${item.preco.toFixed(2)}</strong>
+      <button class="remove-item" data-index="${index}">✕</button>
+    `;
+    cartList.appendChild(li);
+    total += item.preco;
+  });
+
+  cartCount.textContent = cart.length;
+  totalPriceEl.textContent = total.toFixed(2);
+
+  // Mostrar ou esconder o botão de limpar
+  clearCartBtn.style.display = cart.length ? "inline-block" : "none";
+  finishOrderBtn.style.display = cart.length ? "inline-block" : "none";
 }
 
-body {
-  background: #0c0c0c;
-  color: #fff;
-  line-height: 1.5;
-  overflow-x: hidden;
+function adicionarAoCarrinho(nome, preco) {
+  cart.push({ nome, preco });
+  atualizarCarrinho();
+  abrirCarrinho();
 }
 
-h1, h2, h3 {
-  font-weight: 600;
-  color: #f9d44b;
+function removerDoCarrinho(index) {
+  cart.splice(index, 1);
+  atualizarCarrinho();
 }
 
-a {
-  color: #f9d44b;
-  text-decoration: none;
+function limparCarrinho() {
+  cart = [];
+  atualizarCarrinho();
 }
 
-button {
-  cursor: pointer;
-  border: none;
-  outline: none;
-  font-weight: 600;
-  transition: all 0.2s ease;
+function abrirCarrinho() {
+  miniCart.classList.add("active");
+  cartBackdrop.classList.add("show");
 }
 
-/* ====== CABEÇALHO ====== */
-.header {
-  background: #000;
-  text-align: center;
-  padding: 30px 10px 20px;
-  border-bottom: 2px solid #f9d44b;
+function fecharCarrinho() {
+  miniCart.classList.remove("active");
+  cartBackdrop.classList.remove("show");
+}
+// ======================
+// Eventos dos botões do carrinho
+// ======================
+cartBtn.addEventListener("click", abrirCarrinho);
+cartBackdrop.addEventListener("click", fecharCarrinho);
+closeCartBtn.addEventListener("click", fecharCarrinho);
+clearCartBtn.addEventListener("click", limparCarrinho);
+
+// Remover item individual
+cartList.addEventListener("click", (e) => {
+  if (e.target.classList.contains("remove-item")) {
+    const index = e.target.dataset.index;
+    removerDoCarrinho(index);
+  }
+});
+
+// ======================
+// Adicionar produtos
+// ======================
+document.querySelectorAll(".add-cart").forEach((btn) => {
+  btn.addEventListener("click", () => {
+    const card = btn.closest(".card");
+    const nome = card.dataset.name;
+    const preco = parseFloat(card.dataset.price);
+    adicionarAoCarrinho(nome, preco);
+  });
+});
+
+// ======================
+// Extras (Adicionais)
+// ======================
+const extrasBackdrop = document.getElementById("extras-backdrop");
+const extrasModal = document.getElementById("extras-modal");
+const extrasList = document.getElementById("extras-list");
+const extrasCancel = document.getElementById("extras-cancel");
+const extrasAdd = document.getElementById("extras-add");
+let extrasSelecionados = [];
+let produtoAtual = null;
+
+document.querySelectorAll(".extras-btn").forEach((btn) => {
+  btn.addEventListener("click", () => {
+    produtoAtual = btn.closest(".card");
+    abrirExtras(produtoAtual.dataset.name);
+  });
+});
+
+function abrirExtras(nomeProduto) {
+  extrasList.innerHTML = `
+    <label><input type="checkbox" value="Cebola" data-price="0.99"> Cebola – R$0,99</label>
+    <label><input type="checkbox" value="Salada" data-price="1.99"> Salada – R$1,99</label>
+    <label><input type="checkbox" value="Filé de Frango" data-price="6.99"> Filé de Frango – R$6,99</label>
+    <label><input type="checkbox" value="Hambúrguer Artesanal 120g" data-price="7.99"> Hambúrguer Artesanal 120g – R$7,99</label>
+  `;
+  extrasModal.classList.add("show");
+  extrasBackdrop.classList.add("show");
 }
 
-.logo {
-  width: 110px;
-  height: auto;
-  margin-bottom: 10px;
-  filter: brightness(0) invert(1);
+extrasCancel.addEventListener("click", fecharExtras);
+extrasBackdrop.addEventListener("click", fecharExtras);
+
+function fecharExtras() {
+  extrasModal.classList.remove("show");
+  extrasBackdrop.classList.remove("show");
+  extrasSelecionados = [];
 }
 
-.tagline {
-  font-size: 0.95rem;
-  color: #ccc;
-}
+extrasAdd.addEventListener("click", () => {
+  const checkboxes = extrasList.querySelectorAll("input[type='checkbox']:checked");
+  extrasSelecionados = Array.from(checkboxes).map((cb) => ({
+    nome: cb.value,
+    preco: parseFloat(cb.dataset.price),
+  }));
 
-/* ====== STATUS ====== */
-.status-banner {
-  text-align: center;
-  padding: 10px;
-  background: #222;
-  color: #f9d44b;
-  font-weight: 600;
-  font-size: 0.95rem;
-}
+  let texto = "Adicionais selecionados:\n";
+  extrasSelecionados.forEach((x) => (texto += `${x.nome} - R$${x.preco.toFixed(2)}\n`));
+  alert(texto);
 
-.hours-banner {
-  background: #f9d44b;
-  color: #000;
-  text-align: center;
-  font-weight: 500;
-  padding: 8px 4px;
-}
+  fecharExtras();
+});
 
-/* ====== PROMOÇÕES ====== */
-.promo-section {
-  text-align: center;
-  padding: 25px 10px;
-}
+// ======================
+// Contagem regressiva das promoções
+// ======================
+function atualizarContagem() {
+  const agora = new Date();
+  const fim = new Date();
+  fim.setHours(23, 59, 59, 999);
+  const diff = fim - agora;
 
-.promo-section h2 {
-  font-size: 1.4rem;
-  margin-bottom: 8px;
-}
-
-.promo-sub {
-  color: #bbb;
-  font-size: 0.9rem;
-}
-
-.countdown-ticker {
-  color: #ffd700;
-  margin: 10px 0 20px;
-  font-weight: 600;
-}
-
-.carousel {
-  position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  overflow: hidden;
-}
-
-.slides {
-  display: flex;
-  overflow-x: auto;
-  scroll-behavior: smooth;
-  gap: 10px;
-  padding: 5px;
-}
-
-.slide {
-  flex: 0 0 auto;
-  width: 160px;
-  border-radius: 12px;
-  transition: transform 0.2s;
-  border: 1px solid #f9d44b33;
-}
-
-.slide:hover {
-  transform: scale(1.05);
-  border-color: #f9d44b;
-}
-
-.c-btn {
-  background: transparent;
-  color: #f9d44b;
-  font-size: 1.5rem;
-  border: none;
-}
-
-/* ====== SEÇÕES DE MENU ====== */
-.menu-section {
-  padding: 25px 15px;
-}
-
-.menu-section h2 {
-  text-align: center;
-  margin-bottom: 15px;
-  border-bottom: 2px solid #f9d44b;
-  display: inline-block;
-  padding-bottom: 4px;
-}
-
-.grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 15px;
-}
-
-.card {
-  background: #121212;
-  border-radius: 12px;
-  padding: 15px;
-  border: 1px solid #333;
-  transition: all 0.2s ease;
-}
-
-.card:hover {
-  border-color: #f9d44b66;
-}
-
-.card h3 {
-  color: #fff;
-  font-size: 1.05rem;
-  margin-bottom: 6px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.price {
-  color: #f9d44b;
-  font-weight: bold;
-  margin-bottom: 8px;
-}
-
-.badge {
-  background: #f9d44b;
-  color: #000;
-  padding: 2px 6px;
-  border-radius: 6px;
-  font-size: 0.75rem;
-  font-weight: 600;
-}
-
-.actions {
-  display: flex;
-  justify-content: space-between;
-  margin-top: 8px;
-  gap: 6px;
-}
-
-.add-cart, .extras-btn, .btn-primary, .btn-secondary {
-  flex: 1;
-  border-radius: 8px;
-  padding: 8px 10px;
-  font-size: 0.9rem;
-}
-
-.add-cart, .btn-primary {
-  background: #f9d44b;
-  color: #000;
-}
-
-.btn-secondary, .extras-btn {
-  background: #222;
-  color: #f9d44b;
-}
-
-.add-cart:hover, .btn-primary:hover {
-  background: #ffe766;
-}
-
-.extras-btn:hover {
-  background: #333;
-}
-
-/* ====== CARRINHO ====== */
-#cart-icon {
-  position: fixed;
-  top: 14px;
-  right: 14px;
-  background: #000;
-  color: #f9d44b;
-  border: 2px solid #f9d44b;
-  border-radius: 50px;
-  padding: 10px 14px;
-  font-size: 1rem;
-  z-index: 1000;
-}
-
-#mini-cart {
-  position: fixed;
-  top: 0;
-  right: -400px;
-  width: 320px;
-  height: 100%;
-  background: #0c0c0c;
-  border-left: 2px solid #f9d44b;
-  box-shadow: -5px 0 12px rgba(0, 0, 0, 0.5);
-  transition: right 0.4s ease;
-  z-index: 999;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-}
-
-#mini-cart.active {
-  right: 0;
-}
-
-.mini-head, .mini-foot {
-  padding: 12px;
-  border-bottom: 1px solid #222;
-}
-
-.mini-foot {
-  border-top: 1px solid #222;
-  border-bottom: none;
-}
-
-.mini-list {
-  flex: 1;
-  overflow-y: auto;
-  padding: 12px;
-}
-
-/* ====== MODAL DE ADICIONAIS ====== */
-#extras-modal {
-  position: fixed;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%) scale(0);
-  background: #111;
-  border: 2px solid #f9d44b;
-  border-radius: 14px;
-  width: 90%;
-  max-width: 360px;
-  padding: 20px;
-  z-index: 1001;
-  transition: all 0.3s ease;
-}
-
-#extras-modal.active {
-  transform: translate(-50%, -50%) scale(1);
-}
-
-#extras-list {
-  margin: 12px 0;
-  max-height: 240px;
-  overflow-y: auto;
-}
-
-#extras-list label {
-  display: flex;
-  justify-content: space-between;
-  margin-bottom: 6px;
-}
-
-/* ====== MAPA ====== */
-.mapa-titulo {
-  text-align: center;
-  font-size: 1.3rem;
-  margin: 40px 0 12px;
-  color: #f9d44b;
-  text-shadow: 0 0 8px rgba(0,0,0,.7);
-}
-
-#mapa-entregas {
-  width: 100%;
-  height: 350px;
-  border-top: 2px solid #d4af37;
-  border-bottom: 2px solid #d4af37;
-  border-radius: 10px;
-  margin-bottom: 25px;
-  box-shadow: 0 0 20px rgba(212,175,55,0.2);
-}
-
-/* ====== RODAPÉ ====== */
-.footer {
-  text-align: center;
-  padding: 30px 10px;
-  background: #000;
-  color: #ccc;
-  border-top: 2px solid #f9d44b;
-}
-
-.footer h2 {
-  color: #f9d44b;
-  margin-bottom: 8px;
-}
-
-.footer a:hover {
-  text-decoration: underline;
-}
-
-.copy {
-  margin-top: 10px;
-  font-size: 0.85rem;
-  color: #777;
-}
-
-/* ====== RESPONSIVO ====== */
-@media (max-width: 600px) {
-  .slides {
-    gap: 6px;
+  if (diff <= 0) {
+    document.getElementById("timer").textContent = "00:00:00";
+    return;
   }
 
-  .slide {
-    width: 130px;
+  const horas = Math.floor(diff / 1000 / 60 / 60);
+  const minutos = Math.floor((diff / 1000 / 60) % 60);
+  const segundos = Math.floor((diff / 1000) % 60);
+
+  document.getElementById("timer").textContent = `${String(horas).padStart(2, "0")}:${String(minutos).padStart(2, "0")}:${String(segundos).padStart(2, "0")}`;
+}
+setInterval(atualizarContagem, 1000);
+atualizarContagem();
+
+// ======================
+// Status de funcionamento
+// ======================
+function atualizarStatus() {
+  const banner = document.getElementById("status-banner");
+  const agora = new Date();
+  const dia = agora.getDay(); // 0=Dom, 1=Seg, ..., 6=Sáb
+  const hora = agora.getHours();
+  const minuto = agora.getMinutes();
+
+  let aberto = false;
+  let msg = "";
+
+  if (dia === 2) {
+    msg = "❌ Fechado — abrimos amanhã às 18h";
+  } else if ([1, 3, 4].includes(dia)) {
+    aberto = hora >= 18 && (hora < 23 || (hora === 23 && minuto <= 15));
+    msg = aberto ? "🟢 Aberto até 23h15" : "🔴 Fechado — abrimos às 18h";
+  } else if ([5, 6, 0].includes(dia)) {
+    aberto = hora >= 17 && (hora < 23 || (hora === 23 && minuto <= 30));
+    msg = aberto ? "🟢 Aberto até 23h30" : "🔴 Fechado — abrimos às 17h30";
   }
 
-  #mini-cart {
-    width: 100%;
-  }
+  banner.textContent = msg;
+  banner.className = aberto ? "status-banner aberto" : "status-banner fechado";
+}
+setInterval(atualizarStatus, 60000);
+atualizarStatus();
 
-  #extras-modal {
-    width: 95%;
+// ======================
+// Corrigir mapa interativo
+// ======================
+document.addEventListener("DOMContentLoaded", () => {
+  const mapaEl = document.getElementById("mapa-entregas");
+  if (mapaEl && L) {
+    const mapa = L.map(mapaEl, {
+      center: [-18.5783, -46.5187],
+      zoom: 13,
+      scrollWheelZoom: true,
+      zoomControl: true
+    });
+
+    L.tileLayer("https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png", {
+      attribution: ""
+    }).addTo(mapa);
+
+    L.circle([-18.5783, -46.5187], {
+      radius: 6000,
+      color: "#d4af37",
+      fillColor: "#ffd700",
+      fillOpacity: 0.25,
+      weight: 2
+    }).addTo(mapa);
+
+    L.marker([-18.5783, -46.5187])
+      .addTo(mapa)
+      .bindPopup("<b>🍔 DFL</b><br>Entregamos em toda Patos de Minas 💛")
+      .openPopup();
+  }
+});
+
+// ======================
+// Ajuste carrinho mobile
+// ======================
+function ajustarCarrinhoMobile() {
+  if (window.innerWidth <= 768) {
+    miniCart.style.height = "85vh";
+    miniCart.style.bottom = "0";
+    miniCart.style.top = "auto";
+    miniCart.style.borderRadius = "16px 16px 0 0";
+  } else {
+    miniCart.style.height = "";
+    miniCart.style.top = "";
+    miniCart.style.borderRadius = "";
   }
 }
-/* ====== CORREÇÃO MOBILE DO MINI-CARRINHO ====== */
-@media (max-width: 600px) {
-  #mini-cart {
-    width: 100%;
-    right: -100%;
-    border-left: none;
-    border-top: 3px solid #f9d44b;
-    height: 100%;
-    bottom: 0;
-    transition: transform 0.35s ease;
-    transform: translateY(100%);
-  }
+ajustarCarrinhoMobile();
+window.addEventListener("resize", ajustarCarrinhoMobile);
 
-  #mini-cart.active {
-    transform: translateY(0);
-  }
-
-  #cart-backdrop {
-    position: fixed;
-    inset: 0;
-    background: rgba(0,0,0,0.6);
-    display: none;
-    z-index: 998;
-  }
-
-  #cart-backdrop.show {
-    display: block;
-  }
-}
+// Fechar carrinho no toque fora (mobile)
+cartBackdrop.addEventListener("touchstart", fecharCarrinho);
