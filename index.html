@@ -102,37 +102,7 @@
       <article class="card" data-id="CUSTOSO" data-price="31.00"><h3>CUSTOSO <span class="badge">Com Molho Verde 🌿</span></h3><div class="price">R$ 31,00</div><p>Pão, alface, tomate, milho, bacon, 2 hambúrgueres artesanais 120g, filé de frango, cheddar cremoso, presunto e mussarela. <em>Acompanha sachê de ketchup.</em></p><div class="actions"><button class="add-cart">Adicionar</button><button class="extras-btn">Adicionais</button></div></article>
     </div>
   </section>
-<!-- Combos -->
-  <section class="menu-section">
-    <h2>Combos</h2>
-    <div class="grid">
-      <article class="card" data-id="CC_TRAD" data-price="34.99"><h3>Combo Casal (Tradicional)</h3><div class="price">R$ 34,99</div><p>2 Hambúrguer Trem + 1 Fanta 1L.</p><div class="actions"><button class="add-cart">Adicionar</button></div></article>
-      <article class="card" data-id="CF_TRAD" data-price="59.99"><h3>Combo Família (Tradicional)</h3><div class="price">R$ 59,99</div><p>4 Hambúrguer Trem + 1 Kuat 2L.</p><div class="actions"><button class="add-cart">Adicionar</button></div></article>
-      <article class="card" data-id="CC_ART" data-price="54.99"><h3>Combo Casal (Artesanal)</h3><div class="price">R$ 54,99</div><p>2 Hambúrguer Peleja + 1 Coca 1L.</p><div class="actions"><button class="add-cart">Adicionar</button></div></article>
-      <article class="card" data-id="CF_ART" data-price="79.99"><h3>Combo Família (Artesanal)</h3><div class="price">R$ 79,99</div><p>4 Hambúrguer Peleja + 1 Coca 2L.</p><div class="actions"><button class="add-cart">Adicionar</button></div></article>
-    </div>
-  </section>
-
-  <!-- Hot Dogs -->
-  <section class="menu-section">
-    <h2>🌭 Hot Dog’s</h2>
-    <div class="grid">
-      <article class="card" data-id="NIGUCIM" data-price="10.00"><h3>NIGUCIM <span class="badge">Com Molho Verde 🌿</span></h3><div class="price">R$ 10,00</div><p>Pão, molho, salsicha (Sadia/Perdigão), milho, batata palha, ketchup e maionese.</p><div class="actions"><button class="add-cart">Adicionar</button><button class="extras-btn">Adicionais</button></div></article>
-      <article class="card" data-id="PURIZIM" data-price="14.00"><h3>PURIZIM <span class="badge">Com Molho Verde 🌿</span></h3><div class="price">R$ 14,00</div><p>Pão, molho, milho, purê de batata cremoso, 1 salsicha, batata palha, ketchup e maionese.</p><div class="actions"><button class="add-cart">Adicionar</button><button class="extras-btn">Adicionais</button></div></article>
-      <article class="card" data-id="TREMBAO" data-price="17.00"><h3>TREMBÃO <span class="badge">Com Molho Verde 🌿</span></h3><div class="price">R$ 17,00</div><p>Pão, molho, milho, purê de batata, 2 salsichas, bacon, mussarela, batata palha, vinagrete, ketchup e maionese.</p><div class="actions"><button class="add-cart">Adicionar</button><button class="extras-btn">Adicionais</button></div></article>
-    </div>
-  </section>
-
-  <!-- Bebidas -->
-  <section class="menu-section">
-    <h2>Bebidas & Refrigerantes</h2>
-    <div class="grid">
-      <article class="card" data-id="coca200" data-price="4.00"><h3>Coca-Cola 200ml</h3><div class="price">R$ 4,00</div><div class="actions"><button class="add-cart">Adicionar</button></div></article>
-      <article class="card" data-id="coca2l" data-price="13.00"><h3>Coca-Cola 2L</h3><div class="price">R$ 13,00</div><div class="actions"><button class="add-cart">Adicionar</button></div></article>
-    </div>
-  </section>
-
-  <!-- Mapa -->
+<!-- Mapa -->
   <h2 class="mapa-titulo">🚗 Entregamos em toda Patos de Minas 💛</h2>
   <div id="mapa-entregas"></div>
 
@@ -140,4 +110,80 @@
   <footer class="footer">
     <h2>Onde estamos</h2>
     <p>Patos de Minas — Atendimento delivery e retirada.</p>
-    <a class="map-link" href="https://maps.app.goo.gl/jQ
+    <a class="map-link" href="https://maps.app.goo.gl/jQ1cYcmuZm8rU5Dk9" target="_blank" rel="noopener">
+      📍 Abrir no Google Maps
+    </a>
+    <p class="social-line">
+      📸 <a href="https://www.instagram.com/dafamilia_patos" target="_blank">@dafamilia_patos</a> ·
+      🛒 <a href="https://www.ifood.com.br/delivery/patos-de-minas-mg/da-familia-lanches-caramuru/9aadff75-b014-4e7f-a9b4-b3e478e38af8" target="_blank">iFood</a> ·
+      💬 <a href="https://wa.me/5534997178336" target="_blank">WhatsApp</a>
+    </p>
+    <p class="copy">© 2025 Da Família Lanches — Você faz parte disso!</p>
+  </footer>
+
+  <!-- Mini carrinho -->
+  <div id="cart-backdrop"></div>
+  <aside id="mini-cart" aria-hidden="true">
+    <header class="mini-head">
+      <h3>Seu Pedido</h3>
+      <button class="mini-close" aria-label="Fechar">✕</button>
+    </header>
+    <div id="mini-list" class="mini-list"></div>
+    <footer class="mini-foot">
+      <button id="mini-clear" class="btn-secondary">Limpar carrinho</button>
+      <button id="mini-checkout" class="btn-primary">Fechar pedido</button>
+    </footer>
+  </aside>
+
+  <!-- Modal de Adicionais -->
+  <div id="extras-backdrop"></div>
+  <aside id="extras-modal" aria-hidden="true">
+    <header class="extras-head">
+      <h3 id="extras-title">Adicionais</h3>
+      <button class="extras-close" aria-label="Fechar">✕</button>
+    </header>
+    <div id="extras-list" class="extras-list"></div>
+    <footer class="extras-foot">
+      <button id="extras-cancel" class="btn-secondary">Cancelar</button>
+      <button id="extras-add" class="btn-primary">Adicionar ao carrinho</button>
+    </footer>
+  </aside>
+
+  <!-- Scripts -->
+  <script src="script.js"></script>
+
+  <!-- Script do mapa -->
+  <script>
+    (function(){
+      const el = document.getElementById('mapa-entregas');
+      if(!el) return;
+
+      const map = L.map('mapa-entregas', {
+        center: [-18.5783, -46.5187],
+        zoom: 13,
+        scrollWheelZoom: true,
+        zoomControl: true
+      });
+
+      L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+        attribution: ''
+      }).addTo(map);
+
+      L.circle([-18.5783, -46.5187], {
+        radius: 6000,
+        color: '#d4af37',
+        fillColor: '#ffd700',
+        fillOpacity: 0.25,
+        weight: 2
+      }).addTo(map);
+
+      L.marker([-18.5783, -46.5187])
+        .addTo(map)
+        .bindPopup("<b>🍔 DFL</b><br>Entregamos em toda Patos de Minas 💛")
+        .openPopup();
+
+      console.log("✅ script.js e mapa carregados com sucesso!");
+    })();
+  </script>
+</body>
+</html>
