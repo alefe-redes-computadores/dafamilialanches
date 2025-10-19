@@ -1,101 +1,62 @@
-// ================== STATUS DE FUNCIONAMENTO ==================
-function atualizarStatus() {
-  const agora = new Date();
-  const dia = agora.getDay(); // 0 = Domingo
-  const hora = agora.getHours();
-  const banner = document.getElementById("status-banner");
+// ======================
+// Da Família Lanches JS
+// ======================
 
-  let aberto = false;
-  let msg = "";
-
-  if (dia === 2) {
-    msg = "🚫 Hoje (terça) estamos fechados. Voltamos amanhã!";
-  } else if ((dia >= 1 && dia <= 4 && hora >= 18 && hora < 23) ||
-             ((dia === 5 || dia === 6 || dia === 0) && hora >= 17 && hora < 23)) {
-    aberto = true;
-    msg = "✅ Estamos abertos! Faça seu pedido 💛";
-  } else {
-    const proximaAbertura = (dia === 2 ? "quarta às 18h" : "hoje às 18h");
-    msg = `⏰ Fechado agora. Abrimos ${proximaAbertura}.`;
-  }
-
-  banner.textContent = msg;
-}
-setInterval(atualizarStatus, 30000);
-atualizarStatus();
-
-
-// ================== CONTAGEM REGRESSIVA PROMO ==================
-function atualizarContagem() {
-  const agora = new Date();
-  const fim = new Date();
-  fim.setHours(23, 59, 59, 999);
-
-  const diff = fim - agora;
-  if (diff <= 0) {
-    document.getElementById("timer").textContent = "00:00:00";
-    return;
-  }
-
-  const h = String(Math.floor(diff / (1000 * 60 * 60))).padStart(2, "0");
-  const m = String(Math.floor((diff / (1000 * 60)) % 60)).padStart(2, "0");
-  const s = String(Math.floor((diff / 1000) % 60)).padStart(2, "0");
-
-  document.getElementById("timer").textContent = `${h}:${m}:${s}`;
-}
-setInterval(atualizarContagem, 1000);
-atualizarContagem();
-
-
-// ================== CARROSSEL DE PROMOÇÕES ==================
-const slides = document.querySelector(".slides");
-const prevBtn = document.querySelector(".c-prev");
-const nextBtn = document.querySelector(".c-next");
-let scrollPos = 0;
-
-if (slides) {
-  prevBtn.addEventListener("click", () => slides.scrollBy({ left: -200, behavior: "smooth" }));
-  nextBtn.addEventListener("click", () => slides.scrollBy({ left: 200, behavior: "smooth" }));
-
-  slides.querySelectorAll(".slide").forEach(slide => {
-    slide.addEventListener("click", () => {
-      const msg = slide.getAttribute("data-wa");
-      window.open(`https://wa.me/5534997178336?text=${encodeURIComponent(msg)}`, "_blank");
-    });
-  });
-}
-
-
-// ================== CARRINHO ==================
-let carrinho = [];
-
-const cartIcon = document.getElementById("cart-icon");
+// Elementos principais
+const cartBtn = document.getElementById("cart-btn");
 const miniCart = document.getElementById("mini-cart");
 const cartBackdrop = document.getElementById("cart-backdrop");
+const cartList = document.getElementById("cart-list");
 const cartCount = document.getElementById("cart-count");
-const miniList = document.getElementById("mini-list");
-const clearBtn = document.getElementById("mini-clear");
-const checkoutBtn = document.getElementById("mini-checkout");
+const totalPriceEl = document.getElementById("total-price");
+const clearCartBtn = document.getElementById("clear-cart");
+const closeCartBtn = document.getElementById("close-cart");
+const finishOrderBtn = document.getElementById("finish-order");
 
+// Estado do carrinho
+let cart = [];
+
+// ======================
+// Funções do Carrinho
+// ======================
 function atualizarCarrinho() {
-  cartCount.textContent = carrinho.reduce((acc, item) => acc + item.qtd, 0);
-  miniList.innerHTML = "";
+  cartList.innerHTML = "";
+  let total = 0;
 
-  carrinho.forEach((item, i) => {
-    const li = document.createElement("div");
-    li.className = "mini-item";
+  cart.forEach((item, index) => {
+    const li = document.createElement("li");
+    li.classList.add("cart-item");
     li.innerHTML = `
-      <span>${item.qtd}x ${item.nome}</span>
-      <button class="rm" data-i="${i}">✕</button>`;
-    miniList.appendChild(li);
+      <span>${item.nome}</span>
+      <strong>R$ ${item.preco.toFixed(2)}</strong>
+      <button class="remove-item" data-index="${index}">✕</button>
+    `;
+    cartList.appendChild(li);
+    total += item.preco;
   });
 
-  document.querySelectorAll(".rm").forEach(btn => {
-    btn.addEventListener("click", e => {
-      carrinho.splice(e.target.dataset.i, 1);
-      atualizarCarrinho();
-    });
-  });
+  cartCount.textContent = cart.length;
+  totalPriceEl.textContent = total.toFixed(2);
+
+  // Mostrar ou esconder o botão de limpar
+  clearCartBtn.style.display = cart.length ? "inline-block" : "none";
+  finishOrderBtn.style.display = cart.length ? "inline-block" : "none";
+}
+
+function adicionarAoCarrinho(nome, preco) {
+  cart.push({ nome, preco });
+  atualizarCarrinho();
+  abrirCarrinho();
+}
+
+function removerDoCarrinho(index) {
+  cart.splice(index, 1);
+  atualizarCarrinho();
+}
+
+function limparCarrinho() {
+  cart = [];
+  atualizarCarrinho();
 }
 
 function abrirCarrinho() {
@@ -107,118 +68,186 @@ function fecharCarrinho() {
   miniCart.classList.remove("active");
   cartBackdrop.classList.remove("show");
 }
-
-cartIcon.addEventListener("click", abrirCarrinho);
+// ======================
+// Eventos dos botões do carrinho
+// ======================
+cartBtn.addEventListener("click", abrirCarrinho);
 cartBackdrop.addEventListener("click", fecharCarrinho);
-document.querySelector(".mini-close").addEventListener("click", fecharCarrinho);
+closeCartBtn.addEventListener("click", fecharCarrinho);
+clearCartBtn.addEventListener("click", limparCarrinho);
 
-clearBtn.addEventListener("click", () => {
-  carrinho = [];
-  atualizarCarrinho();
+// Remover item individual
+cartList.addEventListener("click", (e) => {
+  if (e.target.classList.contains("remove-item")) {
+    const index = e.target.dataset.index;
+    removerDoCarrinho(index);
+  }
 });
 
-checkoutBtn.addEventListener("click", () => {
-  if (carrinho.length === 0) return;
-  const pedido = carrinho.map(i => `${i.qtd}x *${i.nome}*`).join(", ");
-  const msg = `Olá! Gostaria de pedir: ${pedido}`;
-  window.open(`https://wa.me/5534997178336?text=${encodeURIComponent(msg)}`, "_blank");
-});
-
-
-// ================== BOTÕES ADICIONAR ==================
-document.querySelectorAll(".add-cart").forEach(btn => {
-  btn.addEventListener("click", e => {
-    const card = e.target.closest(".card");
+// ======================
+// Adicionar produtos
+// ======================
+document.querySelectorAll(".add-cart").forEach((btn) => {
+  btn.addEventListener("click", () => {
+    const card = btn.closest(".card");
     const nome = card.dataset.name;
     const preco = parseFloat(card.dataset.price);
-
-    const existente = carrinho.find(i => i.nome === nome);
-    if (existente) existente.qtd++;
-    else carrinho.push({ nome, preco, qtd: 1 });
-
-    atualizarCarrinho();
-
-    // animação do botão
-    e.target.classList.add("clicked");
-    setTimeout(() => e.target.classList.remove("clicked"), 200);
+    adicionarAoCarrinho(nome, preco);
   });
 });
 
-
-// ================== MODAL DE ADICIONAIS ==================
-const extrasModal = document.getElementById("extras-modal");
+// ======================
+// Extras (Adicionais)
+// ======================
 const extrasBackdrop = document.getElementById("extras-backdrop");
+const extrasModal = document.getElementById("extras-modal");
 const extrasList = document.getElementById("extras-list");
-const extrasAdd = document.getElementById("extras-add");
 const extrasCancel = document.getElementById("extras-cancel");
-const extrasClose = document.querySelector(".extras-close");
-let itemAtual = null;
+const extrasAdd = document.getElementById("extras-add");
+let extrasSelecionados = [];
+let produtoAtual = null;
 
-// lista fixa de adicionais
-const adicionais = [
-  { nome: "Cebola", preco: 0.99 },
-  { nome: "Salada", preco: 1.99 },
-  { nome: "Ovo", preco: 1.99 },
-  { nome: "Salsicha", preco: 1.99 },
-  { nome: "Bacon", preco: 2.99 },
-  { nome: "Molho Verde", preco: 2.99 },
-  { nome: "Hambúrguer Tradicional", preco: 2.99 },
-  { nome: "Cheddar", preco: 3.99 },
-  { nome: "Filé de Frango", preco: 6.99 },
-  { nome: "Hambúrguer Artesanal 120g", preco: 7.99 }
-];
-
-function abrirExtras(card) {
-  itemAtual = card;
-  extrasList.innerHTML = "";
-  adicionais.forEach(adc => {
-    const div = document.createElement("label");
-    div.innerHTML = `
-      <span>${adc.nome}</span>
-      <input type="number" min="0" max="5" value="0" step="1" data-nome="${adc.nome}" data-preco="${adc.preco}">
-    `;
-    extrasList.appendChild(div);
+document.querySelectorAll(".extras-btn").forEach((btn) => {
+  btn.addEventListener("click", () => {
+    produtoAtual = btn.closest(".card");
+    abrirExtras(produtoAtual.dataset.name);
   });
-  extrasModal.classList.add("active");
+});
+
+function abrirExtras(nomeProduto) {
+  extrasList.innerHTML = `
+    <label><input type="checkbox" value="Cebola" data-price="0.99"> Cebola – R$0,99</label>
+    <label><input type="checkbox" value="Salada" data-price="1.99"> Salada – R$1,99</label>
+    <label><input type="checkbox" value="Filé de Frango" data-price="6.99"> Filé de Frango – R$6,99</label>
+    <label><input type="checkbox" value="Hambúrguer Artesanal 120g" data-price="7.99"> Hambúrguer Artesanal 120g – R$7,99</label>
+  `;
+  extrasModal.classList.add("show");
   extrasBackdrop.classList.add("show");
 }
 
+extrasCancel.addEventListener("click", fecharExtras);
+extrasBackdrop.addEventListener("click", fecharExtras);
+
 function fecharExtras() {
-  extrasModal.classList.remove("active");
+  extrasModal.classList.remove("show");
   extrasBackdrop.classList.remove("show");
+  extrasSelecionados = [];
 }
 
-document.querySelectorAll(".extras-btn").forEach(btn => {
-  btn.addEventListener("click", e => {
-    const card = e.target.closest(".card");
-    abrirExtras(card);
-  });
-});
-
 extrasAdd.addEventListener("click", () => {
-  if (!itemAtual) return;
-  const nome = itemAtual.dataset.name;
-  const preco = parseFloat(itemAtual.dataset.price);
-  const adicionaisSelecionados = [];
+  const checkboxes = extrasList.querySelectorAll("input[type='checkbox']:checked");
+  extrasSelecionados = Array.from(checkboxes).map((cb) => ({
+    nome: cb.value,
+    preco: parseFloat(cb.dataset.price),
+  }));
 
-  extrasList.querySelectorAll("input").forEach(inp => {
-    if (inp.value > 0) {
-      adicionaisSelecionados.push(`${inp.value}x ${inp.dataset.nome}`);
-    }
-  });
+  let texto = "Adicionais selecionados:\n";
+  extrasSelecionados.forEach((x) => (texto += `${x.nome} - R$${x.preco.toFixed(2)}\n`));
+  alert(texto);
 
-  const item = {
-    nome,
-    preco,
-    qtd: 1,
-    adicionais: adicionaisSelecionados
-  };
-
-  carrinho.push(item);
-  atualizarCarrinho();
   fecharExtras();
 });
+// ======================
+// Contagem regressiva das promoções
+// ======================
+function atualizarContagem() {
+  const agora = new Date();
+  const fim = new Date();
+  fim.setHours(23, 59, 59, 999);
+  const diff = fim - agora;
 
-extrasCancel.addEventListener("click", fecharExtras);
-extrasClose.addEventListener("click", fecharExtras);
-extrasBackdrop.addEventListener("click", fecharExtras);
+  if (diff <= 0) {
+    document.getElementById("timer").textContent = "00:00:00";
+    return;
+  }
+
+  const horas = Math.floor(diff / 1000 / 60 / 60);
+  const minutos = Math.floor((diff / 1000 / 60) % 60);
+  const segundos = Math.floor((diff / 1000) % 60);
+
+  document.getElementById("timer").textContent = `${String(horas).padStart(2, "0")}:${String(minutos).padStart(2, "0")}:${String(segundos).padStart(2, "0")}`;
+}
+setInterval(atualizarContagem, 1000);
+atualizarContagem();
+
+// ======================
+// Status de funcionamento
+// ======================
+function atualizarStatus() {
+  const banner = document.getElementById("status-banner");
+  const agora = new Date();
+  const dia = agora.getDay(); // 0=Dom, 1=Seg, ..., 6=Sáb
+  const hora = agora.getHours();
+  const minuto = agora.getMinutes();
+
+  let aberto = false;
+  let msg = "";
+
+  if (dia === 2) {
+    msg = "❌ Fechado — abrimos amanhã às 18h";
+  } else if ([1, 3, 4].includes(dia)) {
+    aberto = hora >= 18 && (hora < 23 || (hora === 23 && minuto <= 15));
+    msg = aberto ? "🟢 Aberto até 23h15" : "🔴 Fechado — abrimos às 18h";
+  } else if ([5, 6, 0].includes(dia)) {
+    aberto = hora >= 17 && (hora < 23 || (hora === 23 && minuto <= 30));
+    msg = aberto ? "🟢 Aberto até 23h30" : "🔴 Fechado — abrimos às 17h30";
+  }
+
+  banner.textContent = msg;
+  banner.className = aberto ? "status-banner aberto" : "status-banner fechado";
+}
+setInterval(atualizarStatus, 60000);
+atualizarStatus();
+
+// ======================
+// Corrigir mapa interativo
+// ======================
+document.addEventListener("DOMContentLoaded", () => {
+  const mapaEl = document.getElementById("mapa-entregas");
+  if (mapaEl && L) {
+    const mapa = L.map(mapaEl, {
+      center: [-18.5783, -46.5187],
+      zoom: 13,
+      scrollWheelZoom: true,
+      zoomControl: true
+    });
+
+    L.tileLayer("https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png", {
+      attribution: ""
+    }).addTo(mapa);
+
+    L.circle([-18.5783, -46.5187], {
+      radius: 6000,
+      color: "#d4af37",
+      fillColor: "#ffd700",
+      fillOpacity: 0.25,
+      weight: 2
+    }).addTo(mapa);
+
+    L.marker([-18.5783, -46.5187])
+      .addTo(mapa)
+      .bindPopup("<b>🍔 DFL</b><br>Entregamos em toda Patos de Minas 💛")
+      .openPopup();
+  }
+});
+
+// ======================
+// Ajuste carrinho mobile
+// ======================
+function ajustarCarrinhoMobile() {
+  if (window.innerWidth <= 768) {
+    miniCart.style.height = "85vh";
+    miniCart.style.bottom = "0";
+    miniCart.style.top = "auto";
+    miniCart.style.borderRadius = "16px 16px 0 0";
+  } else {
+    miniCart.style.height = "";
+    miniCart.style.top = "";
+    miniCart.style.borderRadius = "";
+  }
+}
+ajustarCarrinhoMobile();
+window.addEventListener("resize", ajustarCarrinhoMobile);
+
+// Fechar carrinho no toque fora (mobile)
+cartBackdrop.addEventListener("touchstart", fecharCarrinho);
