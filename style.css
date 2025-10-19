@@ -1,165 +1,137 @@
-<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>DFL – Feito da Nossa Família para a Sua 💛</title>
-  <link rel="stylesheet" href="style.css" />
-  <link rel="icon" type="image/png" href="favicon.png" />
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Poppins', sans-serif;
+}
 
-  <!-- 🌍 Leaflet CSS (mapa) -->
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+body {
+  background-color: #111;
+  color: #fff;
+  line-height: 1.6;
+}
 
-  <script defer src="script.js"></script>
-  <!-- 🌍 Leaflet JS -->
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 15px;
+  background-color: #000;
+  border-bottom: 2px solid #f1c40f;
+}
 
-  <style>
-    /* ===== MAPA DE COBERTURA ===== */
-    #map {
-      width: 100%;
-      height: 400px;
-      margin-top: 30px;
-      border-top: 2px solid #d4af37;
-      border-bottom: 2px solid #d4af37;
-      box-shadow: 0 0 20px rgba(212, 175, 55, 0.2);
-    }
-    .map-title {
-      text-align: center;
-      font-size: 1.3rem;
-      margin-top: 25px;
-      color: #f9d44b;
-      text-shadow: 0 0 8px rgba(0,0,0,0.8);
-      letter-spacing: 0.5px;
-    }
-    .leaflet-control-attribution {
-      display: none !important;
-    }
+.logo {
+  height: 80px;
+  margin-right: 15px;
+}
 
-    /* ✨ Animação de brilho dourado */
-    @keyframes goldenPulse {
-      0% { box-shadow: 0 0 10px rgba(255, 215, 0, 0.2); }
-      50% { box-shadow: 0 0 25px rgba(255, 215, 0, 0.5); }
-      100% { box-shadow: 0 0 10px rgba(255, 215, 0, 0.2); }
-    }
-    #map::after {
-      content: "";
-      position: absolute;
-      left: 0; right: 0; top: 0; bottom: 0;
-      border-radius: 0;
-      animation: goldenPulse 4s ease-in-out infinite;
-      pointer-events: none;
-    }
-  </style>
-</head>
+.header-info h1 {
+  color: #fff;
+  font-size: 1.8rem;
+}
 
-<body>
-  <!-- 🛒 Ícone do Carrinho -->
-  <button id="cart-icon" aria-label="Abrir carrinho">🛒 <span id="cart-count">0</span></button>
+.tagline {
+  color: #f1c40f;
+  font-weight: 500;
+}
 
-  <!-- 🧭 Cabeçalho -->
-  <header class="header">
-    <div class="header-content">
-      <img src="logo.png" alt="DFL" class="logo" />
-      <div class="header-info">
-        <h1>Da Família Lanches</h1>
-        <p class="tagline">O sabor que une a família 🍔</p>
-      </div>
-    </div>
-  </header>
+.hours-banner {
+  text-align: center;
+  background-color: #f1c40f;
+  color: #000;
+  font-weight: 600;
+  padding: 8px;
+}
 
-  <!-- 🕒 Horário -->
-  <div id="status-banner" class="status-banner">Carregando horário...</div>
-  <div class="hours-banner">
-    <span>🕒 Seg–Qui <b>18h–23h15</b></span> •
-    <span>Sex–Dom <b>17h30–23h30</b></span> •
-    <span>Ter <b>Fechado</b></span>
-  </div>
+.promotions {
+  text-align: center;
+  margin: 20px;
+}
 
-  <!-- ⚡ Promoções -->
-  <section class="promo-section">
-    <h2>Confira as Promoções de Hoje</h2>
-    <p class="promo-sub">Estoque limitado • Poucas unidades disponíveis</p>
-    <div class="countdown-ticker">⚡ <b>Últimas horas!</b> TERMINA EM <span id="timer">00:00:00</span></div>
+.promotions h2 {
+  color: #f1c40f;
+  margin-bottom: 5px;
+}
 
-    <div class="carousel" id="promoCarousel">
-      <button class="c-btn c-prev" aria-label="Anterior">◀</button>
-      <div class="slides">
-        <img class="slide active" src="promo1.jpg" alt="Promo 1" data-wa="Quero a promoção 1" />
-        <img class="slide" src="promo2.jpg" alt="Promo 2" data-wa="Quero a promoção 2" />
-        <img class="slide" src="promo3.jpg" alt="Promo 3" data-wa="Quero a promoção 3" />
-      </div>
-      <button class="c-btn c-next" aria-label="Próxima">▶</button>
-    </div>
-  </section>
+.countdown {
+  background-color: #f1c40f;
+  color: #000;
+  font-weight: bold;
+  padding: 8px;
+  border-radius: 8px;
+  display: inline-block;
+}
 
-  <!-- 🍔 CARDÁPIO -->
-  <section class="menu-section">
-    <h2>Hambúrgueres Tradicionais</h2>
-    <div class="grid">
-      <!-- ... seus artigos ... -->
-    </div>
-  </section>
+.carousel {
+  display: flex;
+  overflow-x: scroll;
+  scroll-behavior: smooth;
+  gap: 10px;
+  padding: 10px;
+}
 
-  <section class="menu-section">
-    <h2>Hambúrgueres Artesanais</h2>
-    <div class="grid">
-      <!-- ... -->
-    </div>
-  </section>
+.carousel img {
+  height: 220px;
+  border-radius: 10px;
+  cursor: pointer;
+}
 
-  <section class="menu-section">
-    <h2>Hot Dog’s</h2>
-    <div class="grid">
-      <!-- ... -->
-    </div>
-  </section>
+.category {
+  margin: 30px 15px;
+}
 
-  <section class="menu-section">
-    <h2>Bebidas</h2>
-    <div class="grid">
-      <!-- ... -->
-    </div>
-  </section>
+.category h2 {
+  color: #f1c40f;
+  margin-bottom: 10px;
+}
 
-  <!-- 🌍 MAPA DE COBERTURA -->
-  <div class="map-title">🚗 Entregamos em toda Patos de Minas e região 💛</div>
-  <div id="map"></div>
+.product-card {
+  background-color: #1b1b1b;
+  padding: 12px;
+  border-radius: 10px;
+  margin-bottom: 15px;
+  box-shadow: 0 0 5px rgba(255, 215, 0, 0.1);
+}
 
-  <!-- 📍 Rodapé -->
-  <footer class="footer">
-    <p>© 2025 Da Família Lanches – DFL • O sabor que une a família 🍔</p>
-    <p>Feito com 💛 em Patos de Minas – MG</p>
-  </footer>
+.product-card h3 {
+  color: #f1c40f;
+}
 
-  <!-- ===== SCRIPT DO MAPA ===== -->
-  <script>
-    const map = L.map('map', {
-      center: [-18.5783, -46.5187], // Patos de Minas - MG
-      zoom: 13,
-      scrollWheelZoom: true,
-      zoomControl: true
-    });
+.price {
+  color: #fff;
+  font-weight: 600;
+}
 
-    // Fundo escuro bonito
-    L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
-      attribution: ''
-    }).addTo(map);
+.add-btn,
+.add-options {
+  background-color: #f1c40f;
+  border: none;
+  border-radius: 8px;
+  padding: 6px 10px;
+  margin: 5px 5px 0 0;
+  cursor: pointer;
+  font-weight: bold;
+  color: #000;
+  transition: transform 0.2s;
+}
 
-    // Cobertura dourada
-    const coverage = L.circle([-18.5783, -46.5187], {
-      radius: 6000, // ~6km
-      color: '#d4af37',
-      fillColor: '#ffd700',
-      fillOpacity: 0.25,
-      weight: 2
-    }).addTo(map);
+.add-btn:hover,
+.add-options:hover {
+  transform: scale(1.05);
+}
 
-    // Marcador central
-    L.marker([-18.5783, -46.5187])
-      .addTo(map)
-      .bindPopup("<b>DFL</b><br>Entregamos em toda a cidade 💛")
-      .openPopup();
-  </script>
-</body>
-</html>
+footer {
+  background-color: #000;
+  color: #f1c40f;
+  text-align: center;
+  padding: 25px 15px;
+  font-size: 0.9rem;
+}
+
+#mapa-entregas {
+  height: 300px;
+  width: 100%;
+  border: 2px solid #f1c40f;
+  border-radius: 12px;
+  margin-bottom: 15px;
+}
