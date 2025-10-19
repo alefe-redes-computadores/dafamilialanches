@@ -315,3 +315,19 @@ document.querySelectorAll(".carousel .slide").forEach((img) => {
     window.open(`https://wa.me/${phone}?text=${msg}`, "_blank");
   });
 });
+// === Clique nas promoções → som + abrir WhatsApp ===
+const clickSound = new Audio("click.wav"); // arquivo de som na mesma pasta
+clickSound.volume = 0.4; // 🔉 volume suave (de 0.0 a 1.0)
+
+document.querySelectorAll(".carousel .slide").forEach((img) => {
+  img.addEventListener("click", () => {
+    // toca o som
+    clickSound.currentTime = 0;
+    clickSound.play().catch(() => {});
+
+    // abre WhatsApp
+    const msg = encodeURIComponent(img.dataset.wa || "Olá! Quero aproveitar a promoção 🍔");
+    const phone = "5534997178336"; // número da DFL
+    window.open(`https://wa.me/${phone}?text=${msg}`, "_blank");
+  });
+});
