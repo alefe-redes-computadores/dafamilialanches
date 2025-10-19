@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+40<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
   <meta charset="utf-8" />
@@ -324,38 +324,52 @@
     </footer>
   </aside>
 
-  <!-- Script do mapa (isolado, não toca no script.js do site) -->
-  <script>
-    (function(){
-      const el = document.getElementById('mapa-entregas');
-      if(!el) return;
+</aside>
 
-      const map = L.map('mapa-entregas', {
-        center: [-18.5783, -46.5187],
-        zoom: 13,
-        scrollWheelZoom: true,
-        zoomControl: true
-      });
+<!-- ======= MAPA DE COBERTURA ======= -->
+<footer class="footer">
+  <h3 id="delivery-text">🚗 Entregamos em toda Patos de Minas 💛</h3>
+  <div id="mapa-entregas" style="height:300px;width:100%;border-radius:12px;margin:20px auto;border:2px solid #f9d44b;"></div>
+  <p class="copy">© 2025 Da Família Lanches – O sabor que une a família 🍔</p>
+</footer>
 
-      L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
-        attribution: ''
-      }).addTo(map);
+<!-- ======= CHAMANDO O SCRIPT (posição correta) ======= -->
+<script src="script.js"></script>
 
-      // Cobertura ~6km
-      L.circle([-18.5783, -46.5187], {
-        radius: 6000,
-        color: '#d4af37',
-        fillColor: '#ffd700',
-        fillOpacity: 0.25,
-        weight: 2
-      }).addTo(map);
+<!-- ======= SCRIPT DO MAPA (isolado, sem quebrar o restante) ======= -->
+<script>
+(function(){
+  const el = document.getElementById('mapa-entregas');
+  if(!el) return;
 
-      // Pino central
-      L.marker([-18.5783, -46.5187])
-        .addTo(map)
-        .bindPopup("<b>DFL</b><br>Entregamos em toda a cidade 💛")
-        .openPopup();
-    })();
-  </script>
+  const map = L.map('mapa-entregas', {
+    center: [-18.5783, -46.5187],
+    zoom: 13,
+    scrollWheelZoom: true,
+    zoomControl: true
+  });
+
+  L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+    attribution: ''
+  }).addTo(map);
+
+  // Cobertura ~6km
+  L.circle([-18.5783, -46.5187], {
+    radius: 6000,
+    color: '#d4af37',
+    fillColor: '#ffd700',
+    fillOpacity: 0.25,
+    weight: 2
+  }).addTo(map);
+
+  // Pino central
+  L.marker([-18.5783, -46.5187])
+    .addTo(map)
+    .bindPopup("<b>🍔 DFL</b><br>Entregamos em toda Patos de Minas 💛")
+    .openPopup();
+
+  console.log("✅ script.js e mapa carregados com sucesso!");
+})();
+</script>
 </body>
 </html>
