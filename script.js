@@ -251,3 +251,22 @@ window.addEventListener("resize", ajustarCarrinhoMobile);
 
 // Fechar carrinho no toque fora (mobile)
 cartBackdrop.addEventListener("touchstart", fecharCarrinho);
+// ===== Efeito visual "adicionado" =====
+function mostrarPopupAdd(nomeProduto) {
+  const popup = document.createElement("div");
+  popup.className = "add-popup";
+  popup.textContent = `+1 ${nomeProduto} adicionado!`;
+  document.body.appendChild(popup);
+  setTimeout(() => popup.remove(), 1000);
+}
+
+// Ajustar botão de adicionar para chamar o efeito
+document.querySelectorAll(".add-cart").forEach((btn) => {
+  btn.addEventListener("click", () => {
+    const card = btn.closest(".card");
+    const nome = card.dataset.name;
+    const preco = parseFloat(card.dataset.price);
+    adicionarAoCarrinho(nome, preco);
+    mostrarPopupAdd(nome);
+  });
+});
