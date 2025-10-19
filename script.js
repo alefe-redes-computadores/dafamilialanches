@@ -1,178 +1,167 @@
-// Carousel functionality
-let currentSlide = 0;
-const slideLinks = document.querySelectorAll('.carousel-slide-link');
-const totalSlides = slideLinks.length;
+// ================================
+// 🛒 SISTEMA DE CARRINHO DFL
+// ================================
 
-function showSlide(n) {
-    slideLinks.forEach(link => link.classList.remove('active'));
-    slideLinks[n].classList.add('active');
+// Carrinho de compras (array global)
+let cart = [];
+
+// Função para adicionar um produto ao carrinho
+function addToCart(productName) {
+  const existing = cart.find(item => item.name === productName);
+  if (existing) {
+    existing.qty++;
+  } else {
+    cart.push({ name: productName, qty: 1 });
+  }
+  updateCartCount();
+  showAddedPopup(productName);
 }
 
-function nextSlide() {
-    currentSlide = (currentSlide + 1) % totalSlides;
-    showSlide(currentSlide);
+// Atualiza o contador do carrinho no topo
+function updateCartCount() {
+  const count = cart.reduce((sum, item) => sum + item.qty, 0);
+  const countElement = document.getElementById('cart-count');
+  if (countElement) countElement.textContent = count;
 }
 
-// Auto-rotate carousel every 10 seconds
-setInterval(nextSlide, 10000);
+// Mostra um pequeno aviso “+1” ao adicionar um produto
+function showAddedPopup(productName) {
+  const popup = document.createElement('div');
+  popup.textContent = `+1 ${productName}`;
+  popup.className = 'added-popup';
+  document.body.appendChild(popup);
+  setTimeout(() => popup.remove(), 1200);
+}
 
-// Modal/Lightbox functionality
-const modal = document.getElementById('imageModal');
-const modalImage = document.getElementById('modalImage');
-const modalClose = document.querySelector('.modal-close');
-const modalPrev = document.querySelector('.modal-prev');
-const modalNext = document.querySelector('.modal-next');
-const imageCounter = document.getElementById('imageCounter');
+// Gera mensagem personalizada e abre o WhatsApp
+function openCart() {
+  if (cart.length === 0) {
+    alert('Seu carrinho está vazio!');
+    return;
+  }
 
-const promoImages = [
-    'images/promo1.jpg',
-    'images/promo2.jpg',
-    'images/promo3.jpg',
-    'images/promo4.jpg',
-    'images/promo5.jpg',
-    'images/promo6.jpg',
-    'images/promo7.jpg',
-    'images/promo8.jpg',
-    'images/promo9.jpg'
-];
+  let message = 'Olá, quero fazer um pedido:%0A';
+  cart.forEach(item => {
+    message += `- ${item.qty}x ${item.name}%0A`;
+  });
 
-let currentModalImage = 0;
+  const whatsappNumber = '5534997178336';
+  const url = `https://wa.me/${whatsappNumber}?text=${message}`;
+  window.open(url, '_blank');
+}
 
-// Open modal when clicking on carousel images
-slideLinks.forEach((link, index) => {
-    link.addEventListener('click', (e) => {
-        e.preventDefault();
-        currentModalImage = index;
-        openModal();
+// Reseta o carrinho (opcional, pode chamar após envio)
+function clearCart() {
+  cart = [];
+  updateCartCount();
+}
+
+// ================================
+// 🕓 CONTADOR DE PROMOÇÃO (23:59)
+// ================================
+(function() {
+  const el = document.getElementById('timer');
+  if (!el) return;
+
+  function tick() {
+    const now = new Date();
+    const end = new Date();
+    end.setHours(23, 59, 59, 999);
+    let diff = Math.max(0, Math.floor((end - now) / 1000));
+    const h = String(Math.floor(diff / 3600)).padStart(2, '0');
+    const m = String(Math.floor((diff % 3600) / 60)).padStart(2, '0');
+    const s = String(diff % 60).padStart(2, '0');
+    el.textContent = `${h}:${m}:${s}`;
+  }
+
+  tick();
+  setInterval(tick, 1000);
+})();
+
+// ================================
+// 🎠 CARROSSEL DE PROMOÇÕES
+// ================================
+(function() {
+  const slides = [...document.querySelectorAll('.slide')];
+  const prev = document.querySelector('.c-prev');
+  const next = document.querySelector('.c-next');
+  const box = document.getElementById('promoCarousel');
+  if (!slides.length || !prev || !next || !box) return;
+
+  let i = slides.findIndex(s => s.classList.contains('active'));
+  if (i < 0) i = 0;
+
+  function show(n) {
+    slides.forEach((s, idx) => {
+      s.classList.toggle('active', idx === n);
+      s.style.display = idx === n ? 'block' : 'none';
     });
-});
+  }
 
-function openModal() {
-    modal.classList.add('active');
-    updateModalImage();
-    document.body.style.overflow = 'hidden';
+  function go(d) {
+    i = (i + d + slides.length) % slides.length;
+    show(i);
+  }
+
+  prev.addEventListener('click', e => {
+    e.stopPropagation();
+    e.preventDefault();
+    go(-1);
+  });
+
+  next.addEventListener('click', e => {
+    e.stopPropagation();
+    e.preventDefault();
+    go(1);
+  });
+
+  slides.forEach(s =>
+    s.addEventListener('click', () => {
+      const wa = s.dataset.wa;
+      if (wa) window.open(wa, '_blank');
+    })
+  );
+
+  // Suporte a toque (mobile)
+  let x0 = null;
+  const ts = e => (x0 = e.touches ? e.touches[0].clientX : e.clientX);
+  const te = e => {
+    if (x0 === null) return;
+    const x1 = e.changedTouches ? e.changedTouches[0].clientX : e.clientX;
+    const dx = x1 - x0;
+    if (Math.abs(dx) > 40) go(dx < 0 ? 1 : -1);
+    x0 = null;
+  };
+  box.addEventListener('touchstart', ts);
+  box.addEventListener('touchend', te);
+
+  show(i);
+})();
+
+// ================================
+// 💅 ANIMAÇÃO POPUP "+1" AO ADICIONAR
+// ================================
+const style = document.createElement('style');
+style.textContent = `
+.added-popup {
+  position: fixed;
+  bottom: 100px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #ffcc00;
+  color: #111;
+  padding: 8px 14px;
+  border-radius: 10px;
+  font-weight: 700;
+  box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+  animation: popupFade 1.2s ease-out forwards;
+  z-index: 9999;
 }
-
-function closeModal() {
-    modal.classList.remove('active');
-    document.body.style.overflow = 'auto';
+@keyframes popupFade {
+  0% { opacity: 0; transform: translate(-50%, 20px); }
+  20% { opacity: 1; transform: translate(-50%, 0); }
+  80% { opacity: 1; transform: translate(-50%, -10px); }
+  100% { opacity: 0; transform: translate(-50%, -30px); }
 }
-
-function updateModalImage() {
-    modalImage.src = promoImages[currentModalImage];
-    imageCounter.textContent = `${currentModalImage + 1} / ${promoImages.length}`;
-}
-
-function nextModalImage() {
-    currentModalImage = (currentModalImage + 1) % promoImages.length;
-    updateModalImage();
-}
-
-function prevModalImage() {
-    currentModalImage = (currentModalImage - 1 + promoImages.length) % promoImages.length;
-    updateModalImage();
-}
-
-// Modal event listeners
-modalClose.addEventListener('click', closeModal);
-modalPrev.addEventListener('click', prevModalImage);
-modalNext.addEventListener('click', nextModalImage);
-
-// Close modal when clicking outside the image
-modal.addEventListener('click', (e) => {
-    if (e.target === modal) {
-        closeModal();
-    }
-});
-
-// Keyboard navigation
-document.addEventListener('keydown', (e) => {
-    if (!modal.classList.contains('active')) return;
-    
-    if (e.key === 'ArrowLeft') {
-        prevModalImage();
-    } else if (e.key === 'ArrowRight') {
-        nextModalImage();
-    } else if (e.key === 'Escape') {
-        closeModal();
-    }
-});
-
-// Touch/Swipe support for mobile
-let touchStartX = 0;
-let touchEndX = 0;
-
-modal.addEventListener('touchstart', (e) => {
-    touchStartX = e.changedTouches[0].screenX;
-}, false);
-
-modal.addEventListener('touchend', (e) => {
-    touchEndX = e.changedTouches[0].screenX;
-    handleSwipe();
-}, false);
-
-function handleSwipe() {
-    const swipeThreshold = 50;
-    const diff = touchStartX - touchEndX;
-    
-    if (Math.abs(diff) > swipeThreshold) {
-        if (diff > 0) {
-            nextModalImage();
-        } else {
-            prevModalImage();
-        }
-    }
-}
-
-// Countdown Timer
-function updateCountdown() {
-    const timer = setInterval(() => {
-        const now = new Date();
-        const today = new Date(now);
-        today.setHours(23, 59, 59, 999);
-        
-        const timeRemaining = today - now;
-
-        if (timeRemaining <= 0) {
-            // Reset for the next day
-            const timerElement = document.getElementById('timer');
-            if (timerElement) {
-                timerElement.textContent = '23:59:59';
-            }
-            return;
-        }
-
-        const hours = Math.floor((timeRemaining / (1000 * 60 * 60)) % 24);
-        const minutes = Math.floor((timeRemaining / (1000 * 60)) % 60);
-        const seconds = Math.floor((timeRemaining / 1000) % 60);
-
-        const timerElement = document.getElementById('timer');
-        if (timerElement) {
-            timerElement.textContent = 
-                `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
-        }
-    }, 1000);
-}
-
-// Initialize countdown on page load
-document.addEventListener('DOMContentLoaded', () => {
-    updateCountdown();
-    if (slideLinks.length > 0) {
-        showSlide(0);
-    }
-});
-
-// Smooth scroll for anchor links
-document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-    anchor.addEventListener('click', function (e) {
-        e.preventDefault();
-        const target = document.querySelector(this.getAttribute('href'));
-        if (target) {
-            target.scrollIntoView({
-                behavior: 'smooth',
-                block: 'start'
-            });
-        }
-    });
-});
-
+`;
+document.head.appendChild(style);
