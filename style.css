@@ -1,14 +1,10 @@
 /* ==========================================================
    🍔 DFL - Da Família Lanches
-   Tema Escuro BOOT + Correção FABs
+   Tema Escuro BOOT + Carrinho simples (WhatsApp)
    ========================================================== */
 
 /* ---------- RESET ---------- */
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
+* { margin: 0; padding: 0; box-sizing: border-box; }
 
 body {
   font-family: "Poppins", Arial, sans-serif;
@@ -18,15 +14,8 @@ body {
   overflow-x: hidden;
 }
 
-a {
-  color: #ffcc00;
-  text-decoration: none;
-}
-
-h1, h2, h3 {
-  color: #ffcc00;
-  letter-spacing: 0.5px;
-}
+a { color: #ffcc00; text-decoration: none; }
+h1, h2, h3 { color: #ffcc00; letter-spacing: 0.5px; }
 
 h2 {
   margin-bottom: 8px;
@@ -35,42 +24,17 @@ h2 {
   padding-bottom: 4px;
 }
 
-p {
-  color: #d9d9d9;
-  margin-bottom: 10px;
-}
+p { color: #d9d9d9; margin-bottom: 10px; }
 
-.container {
-  width: 90%;
-  max-width: 1000px;
-  margin: 0 auto;
-  padding-bottom: 80px;
-}
+.container { width: 90%; max-width: 1000px; margin: 0 auto; padding-bottom: 120px; }
 
 /* ---------- HEADER ---------- */
-.header {
-  text-align: center;
-  margin-top: 15px;
-}
-
-.header-content img {
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
-}
-
-.header-info h1 {
-  font-size: 1.8rem;
-  font-weight: 700;
-}
-
-.tagline {
-  font-size: 0.95rem;
-  color: #ccc;
-}
+.header { text-align: left; margin-top: 15px; }
+.header-info h1 { font-size: 1.8rem; font-weight: 700; }
+.tagline { font-size: 0.95rem; color: #ccc; }
 
 /* ---------- SECTIONS ---------- */
-.section {
-  margin: 24px 0;
-}
+.section { margin: 24px 0; }
 
 /* ---------- GRID DE PRODUTOS ---------- */
 .grid {
@@ -87,33 +51,25 @@ p {
   transition: transform 0.25s ease;
 }
 
-.card:hover {
-  transform: translateY(-4px);
-}
+.card:hover { transform: translateY(-4px); }
 
-.card strong {
-  color: #ffcc00;
-  font-size: 1.1rem;
-}
+.card strong { color: #ffcc00; font-size: 1.1rem; }
+.price { font-size: 1rem; font-weight: 700; color: #fff; margin-top: 4px; }
+.old { text-decoration: line-through; color: #999; margin-right: 6px; }
+.desc { font-size: 0.9rem; color: #cfcfcf; margin-top: 6px; }
 
-.price {
-  font-size: 1rem;
+.add-cart {
+  margin-top: 10px;
+  background: #ffcc00;
+  border: none;
+  color: #111;
   font-weight: 700;
-  color: #fff;
-  margin-top: 4px;
+  padding: 8px 12px;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: transform .2s ease, filter .2s ease;
 }
-
-.old {
-  text-decoration: line-through;
-  color: #999;
-  margin-right: 6px;
-}
-
-.desc {
-  font-size: 0.9rem;
-  color: #cfcfcf;
-  margin-top: 6px;
-}
+.add-cart:hover { transform: translateY(-1px); filter: brightness(1.05); }
 
 /* ---------- CARROSSEL ---------- */
 .carousel {
@@ -124,150 +80,127 @@ p {
   box-shadow: 0 6px 18px rgba(0,0,0,0.35);
   margin-top: 10px;
 }
-
-.carousel img {
-  width: 100%;
-  display: block;
-}
-
+.carousel img { width: 100%; display: block; }
 .c-btn {
-  position: absolute;
-  top: 50%;
-  transform: translateY(-50%);
-  border: 0;
-  background: rgba(0,0,0,0.5);
-  color: #ffcc00;
-  font-size: 22px;
-  padding: 10px 12px;
-  border-radius: 999px;
-  cursor: pointer;
-  z-index: 3;
-  transition: background 0.3s;
+  position: absolute; top: 50%; transform: translateY(-50%);
+  border: 0; background: rgba(0,0,0,0.5); color: #ffcc00;
+  font-size: 22px; padding: 10px 12px; border-radius: 999px;
+  cursor: pointer; z-index: 3; transition: background 0.3s;
 }
-
-.c-btn:hover {
-  background: rgba(0,0,0,0.7);
-}
-
-.c-prev { left: 10px; }
-.c-next { right: 10px; }
+.c-btn:hover { background: rgba(0,0,0,0.7); }
+.c-prev { left: 10px; } .c-next { right: 10px; }
 
 /* ---------- FOOTER ---------- */
 footer {
-  text-align: center;
-  padding: 20px 0;
-  margin-top: 20px;
+  text-align: center; padding: 20px 0; margin-top: 20px;
   border-top: 1px solid rgba(255,255,255,0.1);
 }
-
-footer a {
-  color: #ffcc00;
-  font-weight: 600;
-}
-
-footer a:hover {
-  text-decoration: underline;
-}
+footer a { color: #ffcc00; font-weight: 600; }
+footer a:hover { text-decoration: underline; }
 
 /* ---------- COUNTDOWN (faixa fixa) ---------- */
 .countdown-sticky {
-  position: sticky;
-  top: 0;
-  z-index: 40;
-  background: #E6B800;
-  color: #111;
-  text-align: center;
-  font-weight: 800;
-  border-radius: 12px;
-  padding: 12px 10px;
-  margin: 16px 0 0;
-  font-size: clamp(18px, 2.6vw, 22px);
-  animation: pulse 2s infinite;
+  position: sticky; top: 0; z-index: 40;
+  background: #E6B800; color: #111; text-align: center; font-weight: 800;
+  border-radius: 12px; padding: 12px 10px; margin: 16px 0 0;
+  font-size: clamp(18px, 2.6vw, 22px); animation: pulse 2s infinite;
 }
-
-@keyframes pulse {
-  0% { filter: brightness(100%); }
-  50% { filter: brightness(118%); }
-  100% { filter: brightness(100%); }
-}
+@keyframes pulse { 0% {filter:brightness(100%)} 50% {filter:brightness(118%)} 100% {filter:brightness(100%)} }
 
 /* ---------- HORÁRIO ---------- */
 .hours-banner {
-  display: flex;
-  gap: 12px;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: center;
+  display: flex; gap: 12px; flex-wrap: wrap; align-items: center; justify-content: center;
   background: rgba(27,28,31,.85);
-  color: #f5f5f7;
-  border: 1px solid #2a2d34;
-  border-radius: 10px;
-  padding: 8px 12px;
-  margin: 10px 0 18px;
+  color: #f5f5f7; border: 1px solid #2a2d34; border-radius: 10px; padding: 8px 12px; margin: 10px 0 18px;
 }
-
 .hours-banner b { color: #ffcc00; }
 .hours-banner .sep { opacity: .6; }
 .hours-banner .icon { font-size: 18px; margin-right: 6px; }
 
 /* ---------- BOTÕES FLUTUANTES ---------- */
-.fab,
-.fab--wa,
-.fab--ig,
-.fab--ifood {
-  display: grid !important;
-  place-items: center;
-  position: fixed !important;
-  right: 16px !important;
-  border-radius: 999px;
-  width: 48px;
-  height: 48px;
-  font-size: 22px;
-  z-index: 9999 !important;
-  box-shadow: 0 6px 20px rgba(0,0,0,0.35);
-  text-decoration: none !important;
-  cursor: pointer;
-  transition: transform 0.25s ease, filter 0.25s ease;
+.fab, .fab--wa, .fab--ig, .fab--ifood {
+  display: grid !important; place-items: center;
+  position: fixed !important; right: 16px !important;
+  border-radius: 999px; width: 56px; height: 56px;
+  font-size: 22px; z-index: 9999 !important;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.35);
+  text-decoration: none !important; cursor: pointer; overflow: hidden;
+  transition: transform .25s ease, filter .25s ease;
+}
+.fab:hover { transform: translateY(-2px); filter: brightness(1.08); }
+
+.fab--wa   { bottom: 16px;  background: #25d366; color: #fff; animation: waPulse 2.2s ease-in-out infinite; }
+.fab--ig   { bottom: 84px;  background: radial-gradient(circle at 30% 107%, #feda75 0%, #fa7e1e 30%, #d62976 62%, #962fbf 85%, #4f5bd5 100%); color: #fff; }
+.fab--ifood{ bottom: 152px; background: #EA1D2C; color: #fff; }
+
+.fab svg { width: 60%; height: 60%; }
+@keyframes waPulse { 0%{transform:scale(1)} 50%{transform:scale(1.06)} 100%{transform:scale(1)} }
+
+/* ---------- BEBIDAS COM TOQUE VINHO ---------- */
+#bebidas { background: linear-gradient(180deg, #0e0e0f 0%, #1c0d0d 100%); border-radius: 14px; padding: 16px; }
+#bebidas h2 { margin-bottom: 12px; }
+#bebidas .grid { margin-top: 10px; }
+#bebidas .card { background: #221214; border: 1px solid rgba(255,204,0,0.08); }
+#bebidas .card strong { color: #FFCC00; }
+
+/* ---------- ÍCONE DO CARRINHO (fixo topo direito) ---------- */
+#cart-icon {
+  position: fixed; top: 16px; right: 16px;
+  background: rgba(0,0,0,0.6); border: 1px solid rgba(255,255,255,0.1);
+  color: #ffcc00; font-weight: 800; border-radius: 999px;
+  padding: 8px 12px; cursor: pointer; z-index: 10000;
+  display: flex; align-items: center; gap: 8px;
+}
+#cart-count {
+  background: #ffcc00; color: #111; border-radius: 999px;
+  font-weight: 800; padding: 2px 8px; min-width: 24px; text-align: center;
 }
 
-.fab:hover {
-  transform: scale(1.08);
-  filter: brightness(1.1);
+/* ---------- MODAL DO CARRINHO ---------- */
+#cart-modal {
+  position: fixed; inset: 0; background: rgba(0,0,0,0.6);
+  display: none; align-items: center; justify-content: center;
+  z-index: 10001; padding: 16px;
 }
+#cart-modal[aria-hidden="false"] { display: flex; }
 
-.fab--wa {
-  bottom: 16px;
-  background: #25d366;
-  color: #fff;
+.cart-box {
+  width: min(560px, 95vw); background: #17181a; border: 1px solid #2a2d34;
+  border-radius: 14px; box-shadow: 0 12px 40px rgba(0,0,0,0.45);
+  padding: 14px;
 }
+.cart-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+.cart-header h3 { color: #ffcc00; font-size: 1.2rem; }
+#cart-close {
+  background: transparent; color: #fff; border: 0; font-size: 20px; cursor: pointer;
+}
+.cart-items { max-height: 50vh; overflow: auto; display: grid; gap: 10px; padding-right: 4px; }
+.cart-item {
+  display: grid; grid-template-columns: 1fr auto; gap: 10px; align-items: center;
+  background: #1e2023; border: 1px solid #2a2d34; border-radius: 10px; padding: 10px 12px;
+}
+.item-name { color: #fff; font-weight: 700; }
+.qty-controls { display: flex; align-items: center; gap: 8px; }
+.qty-controls button {
+  background: #2a2d34; color: #fff; border: 0; width: 28px; height: 28px; border-radius: 8px; cursor: pointer;
+}
+.qty { min-width: 22px; text-align: center; font-weight: 700; }
 
-.fab--ig {
-  bottom: 72px;
-  background: #ffcc00;
-  color: #111;
+.cart-actions {
+  display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-top: 12px;
 }
-
-.fab--ifood {
-  bottom: 128px;
-  background: #EA1D2C;
-  color: #fff;
+.btn-outline, .btn-primary {
+  padding: 10px 12px; border-radius: 10px; cursor: pointer; font-weight: 800; border: 0;
 }
+.btn-outline { background: transparent; color: #ffcc00; border: 1px solid #ffcc00; }
+.btn-outline:hover { filter: brightness(1.1); }
+.btn-primary { background: #ffcc00; color: #111; }
+.btn-primary:hover { filter: brightness(1.06); }
 
 /* ---------- RESPONSIVIDADE ---------- */
 @media (max-width: 520px) {
-  .grid {
-    grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
-  }
-  .countdown-sticky {
-    padding: 10px 8px;
-    font-size: clamp(16px, 4.5vw, 20px);
-  }
-  .fab {
-    width: 44px;
-    height: 44px;
-    font-size: 20px;
-  }
-  .fab--ifood { bottom: 116px; }
-  .fab--ig { bottom: 64px; }
-  .fab--wa { bottom: 12px; }
+  .grid { grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); }
+  .countdown-sticky { padding: 10px 8px; font-size: clamp(16px,4.5vw,20px); }
+  .fab { width: 52px; height: 52px; }
+  .fab--ifood { bottom: 146px; } .fab--ig { bottom: 80px; } .fab--wa { bottom: 14px; }
 }
