@@ -1,134 +1,105 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>DFL - Cardápio Oficial</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Da Família Lanches</title>
   <link rel="stylesheet" href="style.css" />
   <script defer src="script.js"></script>
 </head>
 <body>
-  <!-- Carrinho fixo -->
-  <button id="cart-icon" aria-label="Abrir carrinho">
-    🛒 <span id="cart-count">0</span>
-  </button>
-
-  <!-- Cabeçalho -->
-  <header class="header">
-    <div class="header-content">
-      <img src="logo.png" alt="DFL" class="logo" />
-      <div class="header-info">
-        <h1>Da Família Lanches</h1>
-        <p class="tagline">Hambúrgueres Artesanais e Deliciosos</p>
-      </div>
+  <header>
+    <img src="logo.png" alt="Logo DFL" class="logo">
+    <div class="header-text">
+      <h1>Da Família Lanches</h1>
+      <p>Hambúrgueres Artesanais e Deliciosos</p>
+    </div>
+    <div id="cart-icon">
+      🛒 <span id="cart-count">0</span>
     </div>
   </header>
 
-  <!-- Status de funcionamento -->
-  <div id="status-banner" class="status-banner">Carregando horário...</div>
-
-  <!-- Horário fixo da semana -->
-  <div class="hours-banner">
-    <span>🕒 Seg–Qui <b>18h–23h15</b></span> •
-    <span>Sex–Dom <b>17h30–23h30</b></span> •
-    <span>Ter <b>Fechado</b></span>
-  </div>
-
-  <!-- Promoções + Contagem -->
-  <section class="promo-section">
-    <h2>Confira as Promoções de Hoje</h2>
-    <p class="promo-sub">Estoque limitado • Poucas unidades disponíveis</p>
-
-    <div class="countdown-ticker">
-      ⚡ <b>Últimas horas!</b> TERMINA EM <span id="timer">00:00:00</span>
+  <!-- Contagem regressiva -->
+  <section class="promo-timer">
+    <div class="timer-box">
+      ⚡ Últimas horas! TERMINA EM <span id="countdown"></span>
     </div>
+  </section>
 
-    <div class="carousel" id="promoCarousel">
-      <button class="c-btn c-prev">◀</button>
-      <div class="slides">
-        <img class="slide active" src="promo1.jpg" alt="Promo 1" data-wa="Quero a promoção 1" />
-        <img class="slide" src="promo2.jpg" alt="Promo 2" data-wa="Quero a promoção 2" />
-        <img class="slide" src="promo3.jpg" alt="Promo 3" data-wa="Quero a promoção 3" />
-      </div>
-      <button class="c-btn c-next">▶</button>
+  <!-- Promoções -->
+  <section id="promocoes">
+    <h2>Confira as Promoções de Hoje</h2>
+    <div class="carousel">
+      <img src="promo1.jpg" alt="Promo 1">
+      <img src="promo2.jpg" alt="Promo 2">
+      <img src="promo3.jpg" alt="Promo 3">
+      <img src="promo4.jpg" alt="Promo 4">
+      <img src="promo5.jpg" alt="Promo 5">
+      <img src="promo6.jpg" alt="Promo 6">
+      <img src="promo7.jpg" alt="Promo 7">
+      <img src="promo8.jpg" alt="Promo 8">
+      <img src="promo9.jpg" alt="Promo 9">
     </div>
   </section>
 
   <!-- Hambúrgueres Tradicionais -->
   <section class="menu-section">
     <h2>Hambúrgueres Tradicionais</h2>
-    <div class="grid">
-      <article class="card" data-id="BAO" data-name="BÃO" data-price="11.00">
-        <h3>BÃO</h3><div class="price">R$ 11,00</div>
-        <p>Pão, alface, tomate, hambúrguer, presunto e mussarela.</p>
-        <button class="add-cart">Adicionar</button>
-      </article>
-      <article class="card" data-id="UAI" data-name="UAI" data-price="13.00">
-        <h3>UAI</h3><div class="price">R$ 13,00</div>
-        <p>Pão, alface, tomate, milho, bacon, hambúrguer, presunto e mussarela.</p>
-        <button class="add-cart">Adicionar</button>
-      </article>
-      <article class="card" data-id="TREM" data-name="TREM" data-price="14.00">
-        <h3>TREM</h3><div class="price">R$ 14,00</div>
-        <p>Pão, alface, tomate, milho, bacon, salsicha, hambúrguer, presunto e mussarela.</p>
-        <button class="add-cart">Adicionar</button>
-      </article>
+    <div class="menu-grid">
+      <div class="item"><h3>BÃO</h3><p class="price">R$11,00</p><p>Pão, alface, tomate, hambúrguer, presunto e mussarela.</p><button class="add-btn" data-name="BÃO" data-price="11.00">Adicionar</button></div>
+      <div class="item"><h3>UAI</h3><p class="price">R$13,00</p><p>Pão, alface, tomate, milho, bacon, hambúrguer, presunto e mussarela.</p><button class="add-btn" data-name="UAI" data-price="13.00">Adicionar</button></div>
+      <div class="item"><h3>TREM</h3><p class="price">R$14,00</p><p>Pão, alface, tomate, milho, bacon, salsicha, hambúrguer, presunto e mussarela.</p><button class="add-btn" data-name="TREM" data-price="14.00">Adicionar</button></div>
     </div>
   </section>
 
-  <!-- Artesanais -->
+  <!-- Hambúrgueres Artesanais -->
   <section class="menu-section">
     <h2>Hambúrgueres Artesanais</h2>
-    <div class="grid">
-      <article class="card" data-id="TUDIBOM" data-name="TUDIBOM" data-price="28.50">
-        <h3>TUDIBOM</h3><div class="price">R$ 28,50</div>
-        <p>Pão, alface, tomate, milho, bacon, 2 hambúrgueres artesanais 120g, filé de frango, presunto e mussarela.</p>
-        <button class="add-cart">Adicionar</button>
-      </article>
-      <article class="card" data-id="PELEJA" data-name="PELEJA" data-price="26.00">
-        <h3>PELEJA</h3><div class="price">R$ 26,00</div>
-        <p>Pão, alface, tomate, milho, bacon, hambúrguer artesanal 120g, filé de frango, presunto e mussarela.</p>
-        <button class="add-cart">Adicionar</button>
-      </article>
+    <div class="menu-grid">
+      <div class="item"><h3>PELEJA</h3><p class="price">R$26,00</p><p>Pão, alface, tomate, milho, bacon, hambúrguer artesanal 120g, filé de frango, presunto e mussarela.</p><button class="add-btn" data-name="PELEJA" data-price="26.00">Adicionar</button></div>
+      <div class="item"><h3>TUDIBOM</h3><p class="price">R$28,50</p><p>Pão, alface, tomate, milho, bacon, 2 hambúrgueres artesanais 120g, filé de frango, presunto e mussarela.</p><button class="add-btn" data-name="TUDIBOM" data-price="28.50">Adicionar</button></div>
+      <div class="item"><h3>CUSTOSO</h3><p class="price">R$31,00</p><p>Pão, alface, tomate, milho, bacon, 2 hambúrgueres artesanais 120g, filé de frango, cheddar cremoso, presunto e 2 fatias de mussarela.</p><button class="add-btn" data-name="CUSTOSO" data-price="31.00">Adicionar</button></div>
+    </div>
+  </section>
+
+  <!-- Hot Dog’s -->
+  <section class="menu-section">
+    <h2>🌭 Hot Dog’s</h2>
+    <div class="menu-grid">
+      <div class="item"><h3>NIGUCIM</h3><p class="price">R$10,00</p><p>Pão, molho, salsicha (Sadia/Perdigão), milho, batata palha, ketchup e maionese.</p><button class="add-btn" data-name="NIGUCIM" data-price="10.00">Adicionar</button></div>
+      <div class="item"><h3>SIMPRÃO</h3><p class="price">R$12,00</p><p>Pão, molho, salsicha (Sadia/Perdigão), milho, batata palha, bacon, ketchup e maionese.</p><button class="add-btn" data-name="SIMPRÃO" data-price="12.00">Adicionar</button></div>
+      <div class="item"><h3>NIMIM</h3><p class="price">R$13,00</p><p>Pão, molho, 2 salsichas (Sadia/Perdigão), milho, batata palha, bacon, ketchup, maionese e vinagrete.</p><button class="add-btn" data-name="NIMIM" data-price="13.00">Adicionar</button></div>
+      <div class="item"><h3>PADANÁ</h3><p class="price">R$15,00</p><p>Pão, molho, 2 salsichas (Sadia/Perdigão), milho, batata palha, bacon, vinagrete, mussarela, ketchup e maionese.</p><button class="add-btn" data-name="PADANÁ" data-price="15.00">Adicionar</button></div>
+      <div class="item"><h3>PURIZIM <span class="badge">Com Purê 🥔</span></h3><p class="price">R$14,00</p><p>Pão, molho, milho, purê de batata cremoso, 1 salsicha, batata palha, ketchup e maionese.</p><button class="add-btn" data-name="PURIZIM" data-price="14.00">Adicionar</button></div>
+      <div class="item"><h3>TREMBÃO <span class="badge">Com Purê 🥔</span></h3><p class="price">R$17,00</p><p>Pão, molho, milho, purê de batata cremoso, 2 salsichas, bacon crocante, mussarela, batata palha, vinagrete, ketchup e maionese.</p><button class="add-btn" data-name="TREMBÃO" data-price="17.00">Adicionar</button></div>
     </div>
   </section>
 
   <!-- Bebidas -->
   <section class="menu-section">
     <h2>Bebidas & Refrigerantes</h2>
-    <div class="grid">
-      <article class="card" data-id="coca1l" data-name="Coca-Cola 1L" data-price="9.00">
-        <h3>Coca-Cola 1L</h3><div class="price">R$ 9,00</div><button class="add-cart">Adicionar</button>
-      </article>
-      <article class="card" data-id="coca2l" data-name="Coca-Cola 2L" data-price="13.00">
-        <h3>Coca-Cola 2L</h3><div class="price">R$ 13,00</div><button class="add-cart">Adicionar</button>
-      </article>
+    <div class="menu-grid">
+      <div class="item"><h3>Coca-Cola 200ml</h3><p class="price">R$4,00</p><button class="add-btn" data-name="Coca-Cola 200ml" data-price="4.00">Adicionar</button></div>
+      <div class="item"><h3>Água com Gás</h3><p class="price">R$4,00</p><button class="add-btn" data-name="Água com Gás" data-price="4.00">Adicionar</button></div>
+      <div class="item"><h3>Dell-Vale Uva 450ml</h3><p class="price">R$5,00</p><button class="add-btn" data-name="Dell-Vale Uva 450ml" data-price="5.00">Adicionar</button></div>
+      <div class="item"><h3>Dell-Vale Laranja 450ml</h3><p class="price">R$5,00</p><button class="add-btn" data-name="Dell-Vale Laranja 450ml" data-price="5.00">Adicionar</button></div>
+      <div class="item"><h3>Coca-Cola 310ml</h3><p class="price">R$5,00</p><button class="add-btn" data-name="Coca-Cola 310ml" data-price="5.00">Adicionar</button></div>
+      <div class="item"><h3>Coca-Cola 310ml Zero</h3><p class="price">R$5,00</p><button class="add-btn" data-name="Coca-Cola 310ml Zero" data-price="5.00">Adicionar</button></div>
+      <div class="item"><h3>Fanta Laranja 1L</h3><p class="price">R$8,00</p><button class="add-btn" data-name="Fanta Laranja 1L" data-price="8.00">Adicionar</button></div>
+      <div class="item"><h3>Coca-Cola 1L</h3><p class="price">R$9,00</p><button class="add-btn" data-name="Coca-Cola 1L" data-price="9.00">Adicionar</button></div>
+      <div class="item"><h3>Coca-Cola 1L Zero</h3><p class="price">R$9,00</p><button class="add-btn" data-name="Coca-Cola 1L Zero" data-price="9.00">Adicionar</button></div>
+      <div class="item"><h3>Kuat Guaraná 2L</h3><p class="price">R$10,00</p><button class="add-btn" data-name="Kuat Guaraná 2L" data-price="10.00">Adicionar</button></div>
+      <div class="item"><h3>Coca-Cola 2L</h3><p class="price">R$13,00</p><button class="add-btn" data-name="Coca-Cola 2L" data-price="13.00">Adicionar</button></div>
     </div>
   </section>
 
   <!-- Rodapé -->
-  <footer class="footer">
-    <h2>Onde estamos</h2>
-    <p>Patos de Minas — Atendimento delivery e retirada.</p>
-    <p>
-      📍 <a href="https://maps.google.com/?q=Da%20Fam%C3%ADlia%20Lanches%20Patos%20de%20Minas" target="_blank">Abrir no Google Maps</a>
-    </p>
-    <p>📸 <a href="https://instagram.com/dafamilia_patos" target="_blank">@dafamilia_patos</a> • 🛒 <a href="https://www.ifood.com.br/delivery/patos-de-minas-mg/da-familia-lanches-caramuru/9aadff75-b014-4e7f-a9b4-b3e478e38af8" target="_blank">iFood</a></p>
-    <p>💬 <a href="https://wa.me/5534997178336" target="_blank">Fale no WhatsApp</a></p>
+  <footer>
+    <p>📍 Patos de Minas — Atendimento delivery e retirada.</p>
+    <a href="https://maps.app.goo.gl/" target="_blank" class="map-btn">Abrir no Google Maps</a>
+    <p>📸 Siga a gente no <a href="https://instagram.com/dafamilia_patos" target="_blank">@dafamilia_patos</a></p>
+    <p>🛍️ Peça também pelo <a href="https://www.ifood.com.br/delivery/patos-de-minas-mg/da-familia-lanches-caramuru/9aadff75-b014-4e7f-a9b4-b3e478e38af8" target="_blank">iFood</a> ou direto no <a href="https://wa.me/5534997178336" target="_blank">WhatsApp</a></p>
+    <p>© 2025 Da Família Lanches — Você faz parte disso!</p>
   </footer>
-
-  <!-- Mini Carrinho -->
-  <div id="cart-backdrop"></div>
-  <aside id="mini-cart" aria-hidden="true">
-    <header class="mini-head">
-      <h3>Seu Pedido</h3>
-      <button class="mini-close">✕</button>
-    </header>
-    <div id="mini-list" class="mini-list"></div>
-    <footer class="mini-foot">
-      <button id="mini-clear" class="btn-secondary">Limpar</button>
-      <button id="mini-checkout" class="btn-primary">Fechar pedido</button>
-    </footer>
-  </aside>
 </body>
 </html>
