@@ -1,15 +1,16 @@
 /* ================================
-   DFL – Script principal (v1.1-fix)
+   DFL – Script principal (v1.1.5)
    - Login (Email + Google)
    - Carrinho com quantidade
    - Adicionais, Carrossel, Status, Som
+   - Salvar pedidos no Firestore
    ================================ */
 
 /* 🔊 Som global */
 const clickSound = new Audio("click.wav");
 clickSound.volume = 0.4;
 
-/* Pequeno helper */
+/* Helper */
 const sleep = (ms) => new Promise(r => setTimeout(r, ms));
 
 /* =======================
@@ -59,7 +60,8 @@ function buildAuthUI() {
   userChip.style.cssText = `
     position: fixed; top: 12px; right: 12px; z-index: 1100;
     background:#f9d44b; color:#000; font-weight:700; border:none;
-    border-radius:999px; padding:8px 12px; cursor:pointer; box-shadow:0 2px 6px rgba(0,0,0,.4);
+    border-radius:999px; padding:8px 12px; cursor:pointer;
+    box-shadow:0 2px 6px rgba(0,0,0,.4);
   `;
   header.appendChild(userChip);
 
@@ -72,43 +74,33 @@ function buildAuthUI() {
   modal.id = "auth-modal";
   modal.style.cssText = `
     position:fixed; left:50%; top:50%; transform:translate(-50%,-50%);
-    background:#111; color:#fff; border:2px solid #f9d44b; border-radius:14px;
-    width:90%; max-width:420px; padding:18px; z-index:1210; display:none;
-    box-shadow:0 10px 30px rgba(0,0,0,.5);
+    background:#111; color:#fff; border:2px solid #f9d44b;
+    border-radius:14px; width:90%; max-width:420px; padding:18px;
+    z-index:1210; display:none; box-shadow:0 10px 30px rgba(0,0,0,.5);
   `;
   modal.innerHTML = `
     <h3 style="color:#f9d44b; margin:0 0 10px">Entrar / Criar conta</h3>
 
-  <button id="btn-google" style="
-  width:100%;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  gap:10px;
-  padding:10px;
-  border-radius:8px;
-  border:1px solid #ccc;
-  background:#fff;
-  color:#111;
-  font-weight:600;
-  margin-bottom:12px;
-  font-family: 'Inter', sans-serif;
-">
-  <img src='https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg'
-       alt='Google logo' width='20' height='20'
-       style='vertical-align:middle'>
-  <span>Continuar com Google</span>
-</button>
+    <button id="btn-google" style="
+      width:100%; display:flex; align-items:center; justify-content:center;
+      gap:10px; padding:10px; border-radius:8px; border:1px solid #ccc;
+      background:#fff; color:#111; font-weight:600; margin-bottom:12px;">
+      <img src='https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg'
+        alt='Google logo' width='20' height='20'>
+      <span>Continuar com Google</span>
+    </button>
 
     <div style="height:1px;background:#333;margin:10px 0;"></div>
 
     <label style="display:block; font-size:.9rem; margin-bottom:6px;">E-mail</label>
     <input id="auth-email" type="email" placeholder="seu@email.com"
-      style="width:100%; padding:10px; border-radius:8px; border:1px solid #333; background:#1a1a1a; color:#fff; margin-bottom:12px;" />
+      style="width:100%; padding:10px; border-radius:8px; border:1px solid #333;
+      background:#1a1a1a; color:#fff; margin-bottom:12px;" />
 
     <label style="display:block; font-size:.9rem; margin-bottom:6px;">Senha</label>
     <input id="auth-pass" type="password" placeholder="mínimo 6 caracteres"
-      style="width:100%; padding:10px; border-radius:8px; border:1px solid #333; background:#1a1a1a; color:#fff; margin-bottom:16px;" />
+      style="width:100%; padding:10px; border-radius:8px; border:1px solid #333;
+      background:#1a1a1a; color:#fff; margin-bottom:16px;" />
 
     <div style="display:flex; gap:8px; flex-wrap:wrap;">
       <button id="btn-login" style="flex:1; background:#f9d44b; color:#000; font-weight:700; border:none; border-radius:8px; padding:10px;">Entrar</button>
@@ -122,7 +114,7 @@ function buildAuthUI() {
 
   const msg = modal.querySelector("#auth-msg");
   const emailEl = modal.querySelector("#auth-email");
-  const passEl  = modal.querySelector("#auth-pass");
+  const passEl = modal.querySelector("#auth-pass");
   const btnGoogle = modal.querySelector("#btn-google");
 
   const openModal = () => { clickSound.currentTime = 0; clickSound.play().catch(()=>{}); backdrop.style.display = "block"; modal.style.display = "block"; };
@@ -132,7 +124,6 @@ function buildAuthUI() {
   backdrop.addEventListener("click", closeModal);
   modal.querySelector("#btn-close").addEventListener("click", closeModal);
 
-  // Email/senha
   async function doLogin() {
     msg.textContent = "Entrando...";
     try {
@@ -140,25 +131,22 @@ function buildAuthUI() {
       msg.textContent = "✅ Login realizado!";
       await sleep(600);
       closeModal();
-    } catch (e) {
-      msg.textContent = "⚠️ " + (e.message || "Erro ao entrar");
-    }
+    } catch (e) { msg.textContent = "⚠️ " + (e.message || "Erro ao entrar"); }
   }
+
   async function doSign() {
     msg.textContent = "Criando conta...";
     try {
       await auth.createUserWithEmailAndPassword(emailEl.value.trim(), passEl.value);
-      msg.textContent = "✅ Conta criada! Você já está logado.";
+      msg.textContent = "✅ Conta criada!";
       await sleep(700);
       closeModal();
-    } catch (e) {
-      msg.textContent = "⚠️ " + (e.message || "Erro ao criar conta");
-    }
+    } catch (e) { msg.textContent = "⚠️ " + (e.message || "Erro ao criar conta"); }
   }
+
   modal.querySelector("#btn-login").addEventListener("click", doLogin);
   modal.querySelector("#btn-sign").addEventListener("click", doSign);
 
-  // Google
   btnGoogle.addEventListener("click", async () => {
     try {
       const provider = new firebase.auth.GoogleAuthProvider();
@@ -166,12 +154,9 @@ function buildAuthUI() {
       msg.textContent = "✅ Logado com Google!";
       await sleep(500);
       closeModal();
-    } catch (e) {
-      msg.textContent = "⚠️ " + (e.message || "Erro no Google Sign-In");
-    }
+    } catch (e) { msg.textContent = "⚠️ " + (e.message || "Erro no Google Sign-In"); }
   });
 
-  // Observa login
   auth.onAuthStateChanged((user) => {
     if (user) {
       userChip.textContent = `Olá, ${user.email.split("@")[0]} (Sair)`;
@@ -199,13 +184,12 @@ const closeCartBtn = document.querySelector(".mini-close");
 const CART_KEY = "dflCartV2";
 let cart = [];
 
-/* Migração do formato antigo (array de itens repetidos) */
+/* Migração */
 function migrateCartIfNeeded() {
   const v2 = localStorage.getItem(CART_KEY);
   if (v2) {
     try { cart = JSON.parse(v2) || []; return; } catch {}
   }
-  // tenta pegar o antigo
   const old = localStorage.getItem("dflCart");
   if (!old) { cart = []; saveCart(); return; }
   try {
@@ -220,10 +204,7 @@ function migrateCartIfNeeded() {
     });
     cart = Array.from(map.values());
     saveCart();
-  } catch {
-    cart = [];
-    saveCart();
-  }
+  } catch { cart = []; saveCart(); }
 }
 
 function saveCart() {
@@ -296,7 +277,7 @@ function showAddedPopup(name) {
 }
 
 /* =======================
-   Adicionais (modal)
+   Adicionais
    ======================= */
 const extrasBackdrop = document.getElementById("extras-backdrop");
 const extrasModal = document.getElementById("extras-modal");
@@ -306,7 +287,6 @@ const extrasAdd = document.getElementById("extras-add");
 let produtoAtual = null;
 
 function openExtras(nomeProduto) {
-  // lista padrão
   extrasList.innerHTML = `
     <label><input type="checkbox" value="Cebola" data-price="0.99"> 🧅 Cebola — R$0,99</label>
     <label><input type="checkbox" value="Salada" data-price="1.99"> 🥬 Salada — R$1,99</label>
@@ -319,17 +299,15 @@ function openExtras(nomeProduto) {
   extrasModal.classList.add("show");
   extrasBackdrop.classList.add("show");
 }
-
 function closeExtras() {
   extrasModal.classList.remove("show");
   extrasBackdrop.classList.remove("show");
 }
-
 extrasCancel?.addEventListener("click", closeExtras);
 extrasBackdrop?.addEventListener("click", closeExtras);
 
 /* =======================
-   Pedido (WhatsApp / Firestore)
+   Pedido (Firestore + WhatsApp)
    ======================= */
 function montarObjetoPedido() {
   const itens = cart.map((it, idx) => ({
@@ -349,10 +327,18 @@ function montarObjetoPedido() {
     status: "aberto",
     uid: user ? user.uid : null,
     email: user ? user.email : null,
-    criadoEm: (window.firebase && window.firebase.firestore)
-      ? window.firebase.firestore.FieldValue.serverTimestamp()
-      : new Date(),
+    criadoEm: firebase.firestore.FieldValue.serverTimestamp(),
   };
+}
+
+async function salvarPedidoNoFirestore(pedido) {
+  try {
+    const ref = await db.collection("pedidos").add(pedido);
+    return { ok: true, id: ref.id };
+  } catch (err) {
+    console.error("Erro ao salvar pedido:", err);
+    return { ok: false, id: null };
+  }
 }
 
 function montarMensagemWhats(pedido) {
@@ -364,31 +350,18 @@ function montarMensagemWhats(pedido) {
   return msg;
 }
 
-async function salvarPedidoNoFirestore(pedido) {
-  try {
-    if (!window.db || !window.firebase) return { ok: false, id: null };
-    const ref = await window.db.collection("pedidos").add(pedido);
-    return { ok: true, id: ref.id };
-  } catch (err) {
-    console.error("Erro ao salvar no Firestore:", err);
-    return { ok: false, id: null };
-  }
-}
-
 async function handleFecharPedido() {
-  try {
-    clickSound.currentTime = 0; clickSound.play().catch(()=>{});
-    if (!cart.length) { alert("Seu carrinho está vazio!"); return; }
-    const pedido = montarObjetoPedido();
-    await salvarPedidoNoFirestore(pedido);
+  if (!cart.length) return alert("Seu carrinho está vazio!");
+  const pedido = montarObjetoPedido();
+  const salvar = await salvarPedidoNoFirestore(pedido);
+  if (salvar.ok) {
     const numero = "5534997178336";
     const mensagem = montarMensagemWhats(pedido);
     window.open(`https://wa.me/${numero}?text=${mensagem}`, "_blank");
     closeCart();
-    // clearCart(); // se quiser limpar depois do envio
-  } catch (e) {
-    console.error(e);
-    alert("Não foi possível finalizar o pedido agora. Tente novamente em instantes.");
+    clearCart();
+  } else {
+    alert("⚠️ Erro ao registrar o pedido no servidor.");
   }
 }
 
@@ -402,7 +375,7 @@ function atualizarContagem() {
   const fim = new Date();
   fim.setHours(23, 59, 59, 999);
   const diff = fim - agora;
-  if (diff <= 0) { el.textContent = "00:00:00"; return; }
+  if (diff <= 0) return (el.textContent = "00:00:00");
   const h = Math.floor(diff / 1000 / 60 / 60);
   const m = Math.floor((diff / 1000 / 60) % 60);
   const s = Math.floor((diff / 1000) % 60);
@@ -435,14 +408,12 @@ setInterval(atualizarStatus, 60000);
 function initCarousel() {
   const container = document.querySelector("#promoCarousel .slides");
   if (!container) return;
-  const prevBtn  = document.querySelector("#promoCarousel .c-prev");
-  const nextBtn  = document.querySelector("#promoCarousel .c-next");
-  const slides   = Array.from(container.querySelectorAll(".slide"));
+  const prevBtn = document.querySelector("#promoCarousel .c-prev");
+  const nextBtn = document.querySelector("#promoCarousel .c-next");
+  const slides = Array.from(container.querySelectorAll(".slide"));
   if (!slides.length) return;
   let index = 0;
-  function showSlide(i) {
-    slides.forEach((s, idx) => s.style.display = (idx === i ? "block" : "none"));
-  }
+  function showSlide(i) { slides.forEach((s, idx) => s.style.display = (idx === i ? "block" : "none")); }
   showSlide(index);
   prevBtn.addEventListener("click", () => {
     clickSound.currentTime = 0; clickSound.play().catch(()=>{});
@@ -456,10 +427,9 @@ function initCarousel() {
 }
 
 /* =======================
-   Bootstrap (único)
+   Inicialização
    ======================= */
 document.addEventListener("DOMContentLoaded", () => {
-  // Carrinho inicia fechado
   miniCart?.classList.remove("active");
   cartBackdrop?.classList.remove("show");
   document.body.classList.remove("no-scroll");
@@ -470,14 +440,12 @@ document.addEventListener("DOMContentLoaded", () => {
   atualizarStatus();
   initCarousel();
 
-  // Botões do carrinho
   cartBtn?.addEventListener("click", openCart);
   closeCartBtn?.addEventListener("click", closeCart);
   cartBackdrop?.addEventListener("click", closeCart);
   clearCartBtn?.addEventListener("click", clearCart);
   finishOrderBtn?.addEventListener("click", handleFecharPedido);
 
-  // Delegação de eventos para +, -, remover
   cartList?.addEventListener("click", (e) => {
     const t = e.target;
     if (t.classList.contains("qty-inc")) incItem(Number(t.dataset.idx));
@@ -485,19 +453,17 @@ document.addEventListener("DOMContentLoaded", () => {
     else if (t.classList.contains("remove-item")) removeItem(Number(t.dataset.idx));
   });
 
-  // Botões "Adicionar"
   document.querySelectorAll(".add-cart").forEach((btn) => {
     btn.addEventListener("click", () => {
       const card = btn.closest(".card");
       if (!card) return;
-      const id = (card.dataset.id || card.dataset.name);
+      const id = card.dataset.id || card.dataset.name;
       const name = card.dataset.name;
       const price = parseFloat(card.dataset.price);
       addItem({ id, name, price }, 1);
     });
   });
 
-  // Botões "Adicionais"
   document.querySelectorAll(".extras-btn").forEach((btn) => {
     btn.addEventListener("click", () => {
       produtoAtual = btn.closest(".card");
@@ -505,14 +471,12 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   });
 
-  // Confirmar adicionais
   extrasAdd?.addEventListener("click", () => {
     clickSound.currentTime = 0; clickSound.play().catch(()=>{});
     const checks = extrasList.querySelectorAll("input[type='checkbox']:checked");
     checks.forEach((cb) => {
       const name = cb.value;
       const price = parseFloat(cb.dataset.price);
-      // Usa um id com prefixo para agrupar corretamente
       addItem({ id: "extra:"+name, name, price }, 1);
     });
     closeExtras();
