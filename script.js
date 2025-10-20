@@ -1,272 +1,242 @@
-/* =======================================
-   DFL v1.3.1 – Script principal (COMPLETO E CORRIGIDO)
-   - Corrige botão "Fechar Pedido"
-   - Som click.wav
-   - Login Google
-   - Carrinho lateral funcional
-   - Contador + Status
-   - Carrossel clicável
-   ======================================= */
+/* ==================================================
+   DFL v1.3.4 – Script principal completo
+   Inclui: Login Modal, Carrinho, Adicionais, Countdown, Som
+   ================================================== */
 
+// ========================
+// CONFIGURAÇÃO FIREBASE
+// ========================
+const firebaseConfig = {
+  apiKey: "AIzaSyF-XXXXXX",
+  authDomain: "dafamilia-lanches.firebaseapp.com",
+  projectId: "dafamilia-lanches",
+  storageBucket: "dafamilia-lanches.appspot.com",
+  messagingSenderId: "XXXXXX",
+  appId: "1:XXXXXX:web:XXXXXX"
+};
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+
+// ========================
+// VARIÁVEIS GLOBAIS
+// ========================
+const cartIcon = document.getElementById("cart-icon");
+const cartCount = document.getElementById("cart-count");
 const clickSound = new Audio("click.wav");
-clickSound.volume = 0.4;
-const ding = () => { try { clickSound.currentTime = 0; clickSound.play(); } catch {} };
+clickSound.volume = 0.35;
+let cart = JSON.parse(localStorage.getItem("cart") || "[]");
 
-const $  = (sel, el=document) => el.querySelector(sel);
-const $$ = (sel, el=document) => Array.from(el.querySelectorAll(sel));
-const sleep = (ms)=> new Promise(r=>setTimeout(r,ms));
+// ========================
+// ATUALIZAÇÕES GERAIS
+// ========================
+function updateCartCount() {
+  cartCount.textContent = cart.length;
+}
+function saveCart() {
+  localStorage.setItem("cart", JSON.stringify(cart));
+  updateCartCount();
+}
+function showPopup(msg) {
+  const popup = document.createElement("div");
+  popup.className = "popup-add";
+  popup.textContent = msg;
+  document.body.appendChild(popup);
+  setTimeout(() => popup.remove(), 1500);
+}
+updateCartCount();
 
-(function ensureFirebase(){
-  if (!window.firebase) {
-    console.error("Firebase não carregado.");
+// ========================
+// ADIÇÃO AO CARRINHO
+// ========================
+document.querySelectorAll(".add-cart").forEach(btn => {
+  btn.addEventListener("click", e => {
+    const card = e.target.closest(".card");
+    const item = {
+      id: card.dataset.id,
+      name: card.dataset.name,
+      price: parseFloat(card.dataset.price),
+      quantidade: 1
+    };
+    cart.push(item);
+    saveCart();
+    showPopup(`🍔 ${item.name} adicionado!`);
+    clickSound.currentTime = 0;
+    clickSound.play().catch(() => {});
+  });
+});
+
+// ========================
+// CONTADOR DE PROMOÇÃO
+// ========================
+function updateCountdown() {
+  const now = new Date();
+  const end = new Date();
+  end.setHours(23, 59, 59, 999);
+  const diff = end - now;
+  if (diff <= 0) {
+    document.getElementById("timer").textContent = "00:00:00";
     return;
   }
-  if (!firebase.apps.length) {
-    const firebaseConfig = {
-      apiKey: "AIzaSyF-XXXXXX",
-      authDomain: "dafamilia-lanches.firebaseapp.com",
-      projectId: "dafamilia-lanches",
-      storageBucket: "dafamilia-lanches.appspot.com",
-      messagingSenderId: "XXXXXX",
-      appId: "1:XXXXXX:web:XXXXXX"
-    };
-    firebase.initializeApp(firebaseConfig);
-  }
-  window.auth = firebase.auth();
-  window.db   = firebase.firestore();
-})();
-
-function ensureBaseUI() {
-  if (!$("#cart-backdrop")) {
-    const bd = document.createElement("div");
-    bd.id = "cart-backdrop";
-    document.body.appendChild(bd);
-  }
-  if (!$("#mini-cart")) {
-    const aside = document.createElement("aside");
-    aside.id = "mini-cart";
-    aside.innerHTML = `
-      <header class="mini-head">
-        <h3>Seu Pedido</h3>
-        <button class="mini-close">✕</button>
-      </header>
-      <div id="mini-list" class="mini-list"></div>
-      <footer class="mini-foot">
-        <button id="mini-clear" class="btn-secondary">Limpar carrinho</button>
-        <button id="mini-checkout" class="btn-primary">Fechar pedido</button>
-      </footer>`;
-    document.body.appendChild(aside);
-  }
-  if (!$("#extras-backdrop")) {
-    const bd = document.createElement("div");
-    bd.id = "extras-backdrop";
-    document.body.appendChild(bd);
-  }
-  if (!$("#extras-modal")) {
-    const m = document.createElement("aside");
-    m.id = "extras-modal";
-    m.innerHTML = `
-      <header class="extras-head">
-        <h3>Adicionais</h3>
-        <button class="extras-close">✕</button>
-      </header>
-      <div id="extras-list" class="extras-list"></div>
-      <footer class="extras-foot">
-        <button id="extras-cancel" class="btn-secondary">Cancelar</button>
-        <button id="extras-add" class="btn-primary">Adicionar</button>
-      </footer>`;
-    document.body.appendChild(m);
-  }
-  if (!$("#user-chip")) {
-    const header = $(".header") || document.body;
-    const chip = document.createElement("button");
-    chip.id = "user-chip";
-    chip.textContent = "Entrar / Cadastro";
-    chip.style.cssText = `
-      position: fixed; top: 12px; right: 12px; z-index:1100;
-      background:#f9d44b; color:#000; font-weight:700;
-      border:none; border-radius:999px; padding:8px 12px; cursor:pointer;
-      box-shadow:0 2px 6px rgba(0,0,0,.4);`;
-    header.appendChild(chip);
-  }
+  const h = Math.floor(diff / (1000 * 60 * 60));
+  const m = Math.floor((diff / (1000 * 60)) % 60);
+  const s = Math.floor((diff / 1000) % 60);
+  document.getElementById("timer").textContent =
+    `${h.toString().padStart(2,"0")}:${m.toString().padStart(2,"0")}:${s.toString().padStart(2,"0")}`;
 }
-ensureBaseUI();
+setInterval(updateCountdown, 1000);
 
-function buildAuthLogic(){
-  const chip = $("#user-chip");
-  chip?.addEventListener("click", ()=>{
-    ding();
-    const provider = new firebase.auth.GoogleAuthProvider();
-    auth.signInWithPopup(provider).catch(e=>console.error(e));
-  });
-  auth.onAuthStateChanged((user)=>{
-    if(user){
-      chip.textContent = `Olá, ${user.displayName || user.email.split("@")[0]} (Sair)`;
-      chip.onclick = ()=>auth.signOut();
+// ========================
+// LOGIN E USUÁRIO (MODAL)
+// ========================
+function createLoginModal() {
+  if (document.getElementById("login-modal")) return;
+
+  const modal = document.createElement("div");
+  modal.id = "login-modal";
+  modal.innerHTML = `
+    <div class="login-backdrop" onclick="closeLoginModal()"></div>
+    <div class="login-box">
+      <h3>Bem-vindo(a) 😊</h3>
+      <p>Entre ou crie sua conta para continuar</p>
+      <input type="email" id="loginEmail" placeholder="E-mail" />
+      <input type="password" id="loginPass" placeholder="Senha" />
+      <button id="btnLoginEmail" class="btn-primario">Entrar</button>
+      <p class="divider">ou</p>
+      <button id="btnGoogle" class="btn-google">
+        <img src="google-icon.svg" alt=""> Entrar com Google
+      </button>
+      <button class="close-login" onclick="closeLoginModal()">✕</button>
+    </div>
+  `;
+  document.body.appendChild(modal);
+
+  document.getElementById("btnGoogle").onclick = loginGoogle;
+  document.getElementById("btnLoginEmail").onclick = loginEmail;
+}
+
+function openLoginModal() {
+  createLoginModal();
+  document.getElementById("login-modal").classList.add("show");
+}
+
+function closeLoginModal() {
+  document.getElementById("login-modal")?.classList.remove("show");
+}
+
+function buildAuthUI() {
+  const header = document.querySelector(".header");
+  let userBtn = document.querySelector("#user-btn");
+
+  if (!userBtn) {
+    userBtn = document.createElement("button");
+    userBtn.id = "user-btn";
+    userBtn.className = "user-button";
+    header.appendChild(userBtn);
+  }
+
+  auth.onAuthStateChanged(user => {
+    if (user) {
+      userBtn.innerHTML = `Olá, ${user.displayName || user.email.split("@")[0]} (Sair)`;
+      userBtn.onclick = () => auth.signOut();
     } else {
-      chip.textContent = "Entrar / Cadastro";
-      chip.onclick = ()=> {
-        ding();
-        const provider = new firebase.auth.GoogleAuthProvider();
-        auth.signInWithPopup(provider).catch(e=>console.error(e));
-      };
+      userBtn.innerHTML = "Entrar / Cadastro";
+      userBtn.onclick = openLoginModal;
     }
   });
 }
-buildAuthLogic();
-
-const cartBtn = $("#cart-icon");
-const miniCart = $("#mini-cart");
-const cartBackdrop = $("#cart-backdrop");
-const cartList = $("#mini-list");
-const clearCartBtn = $("#mini-clear");
-const finishOrderBtn = $("#mini-checkout");
-const closeCartBtn = $(".mini-close");
-
-const CART_KEY = "dflCartV2";
-let cart = [];
-function loadCart(){ try{cart=JSON.parse(localStorage.getItem(CART_KEY))||[]}catch{cart=[];} }
-function saveCart(){ localStorage.setItem(CART_KEY, JSON.stringify(cart)); updateCartCount(); }
-function updateCartCount(){
-  const countEl = $("#cart-count");
-  const totalQty = cart.reduce((s,x)=>s+(x.qty||0),0);
-  if(countEl) countEl.textContent = totalQty;
+buildAuthUI();
+// ========================
+// LOGIN COM GOOGLE / EMAIL
+// ========================
+function loginGoogle() {
+  const provider = new firebase.auth.GoogleAuthProvider();
+  auth.signInWithPopup(provider)
+    .then(() => closeLoginModal())
+    .catch(err => alert("Erro ao logar: " + err.message));
 }
-function openCart(){ ding(); miniCart.classList.add("active"); cartBackdrop.classList.add("show"); }
-function closeCart(){ miniCart.classList.remove("active"); cartBackdrop.classList.remove("show"); }
-function addItem({id,name,price},qty=1){
-  const key=id||name;
-  const i=cart.findIndex(x=>(x.id||x.name)===key&&Number(x.price)===Number(price));
-  if(i>=0)cart[i].qty+=qty; else cart.push({id:key,name,price:Number(price),qty:Number(qty)});
-  renderCart(); saveCart(); showAddedPopup(name);
-}
-function incItem(i){cart[i].qty+=1; renderCart(); saveCart();}
-function decItem(i){cart[i].qty-=1; if(cart[i].qty<=0)cart.splice(i,1); renderCart(); saveCart();}
-function removeItem(i){cart.splice(i,1); renderCart(); saveCart();}
-function clearCart(){cart=[]; renderCart(); saveCart();}
-function renderCart(){
-  if(!cartList)return;
-  cartList.innerHTML="";
-  cart.forEach((it,idx)=>{
-    const li=document.createElement("div");
-    li.className="cart-item";
-    li.innerHTML=`
-      <span>${it.name}</span>
-      <div>
-        <button class="qty-dec" data-idx="${idx}">–</button>
-        <strong>${it.qty}</strong>
-        <button class="qty-inc" data-idx="${idx}">+</button>
-        <strong>R$ ${(it.price*it.qty).toFixed(2)}</strong>
-        <button class="remove-item" data-idx="${idx}">✕</button>
-      </div>`;
-    cartList.appendChild(li);
-  });
-  updateCartCount();
-}
-function showAddedPopup(name){
-  const el=document.createElement("div");
-  el.className="popup-add";
-  el.textContent=`🍔 ${name} adicionado!`;
-  document.body.appendChild(el);
-  setTimeout(()=>el.remove(),1400);
-}
-
-cartBtn?.addEventListener("click", openCart);
-closeCartBtn?.addEventListener("click", closeCart);
-cartBackdrop?.addEventListener("click", closeCart);
-clearCartBtn?.addEventListener("click", ()=>{ ding(); clearCart(); });
-$("#mini-list")?.addEventListener("click",(e)=>{
-  const t=e.target;
-  if(t.classList.contains("qty-inc"))incItem(Number(t.dataset.idx));
-  else if(t.classList.contains("qty-dec"))decItem(Number(t.dataset.idx));
-  else if(t.classList.contains("remove-item"))removeItem(Number(t.dataset.idx));
-});
-$$(".add-cart").forEach(btn=>{
-  btn.addEventListener("click",()=>{
-    const card=btn.closest(".card"); if(!card)return;
-    const id=card.dataset.id||card.dataset.name;
-    const name=card.dataset.name;
-    const price=parseFloat(card.dataset.price);
-    ding(); addItem({id,name,price},1);
-  });
-});
-
-function montarPedido(){
-  const itens=cart.map((it,idx)=>({ordem:idx+1,nome:String(it.name),preco:Number(it.price),quantidade:Number(it.qty),subtotal:Number(it.price*it.qty)}));
-  const total=itens.reduce((s,x)=>s+x.subtotal,0);
-  const user=auth?.currentUser||null;
-  return {itens,total,uid:user?user.uid:null,email:user?user.email:null};
-}
-function msgWhats(pedido){
-  let m="🧾 *Pedido – Da Família Lanches*%0A%0A";
-  pedido.itens.forEach(i=>{m+=`${i.ordem}. ${i.nome} (${i.quantidade}x) — R$ ${i.subtotal.toFixed(2)}%0A`;});
-  m+=`%0A💰 *Total:* R$ ${pedido.total.toFixed(2)}%0A📍 Patos de Minas`;
-  return m;
-}
-async function handleCheckout(){
-  ding();
-  if(!cart.length){alert("Seu carrinho está vazio!");return;}
-  const pedido=montarPedido();
-  const numero="5534997178336";
-  const mensagem=msgWhats(pedido);
-  window.open(`https://wa.me/${numero}?text=${mensagem}`,"_blank");
-  closeCart();
-}
-finishOrderBtn?.addEventListener("click", handleCheckout);
-
-function atualizarContagem(){
-  const el=$("#timer"); if(!el)return;
-  const agora=new Date(); const fim=new Date(); fim.setHours(23,59,59,999);
-  const diff=fim-agora;
-  if(diff<=0){el.textContent="00:00:00";return;}
-  const h=Math.floor(diff/1000/60/60);
-  const m=Math.floor((diff/1000/60)%60);
-  const s=Math.floor((diff/1000)%60);
-  el.textContent=`${String(h).padStart(2,"0")}:${String(m).padStart(2,"0")}:${String(s).padStart(2,"0")}`;
-}
-function atualizarStatus(){
-  const banner=$("#status-banner"); if(!banner)return;
-  const agora=new Date(); const dia=agora.getDay();
-  const h=agora.getHours(), min=agora.getMinutes();
-  let aberto=false, msg="";
-  if(dia===2){msg="❌ Fechado — abrimos amanhã às 18h";}
-  else if([1,3,4].includes(dia)){
-    aberto=h>=18&&(h<23||(h===23&&min<=15));
-    msg=aberto?"🟢 Aberto até 23h15":"🔴 Fechado — abrimos às 18h";
-  }else if([5,6,0].includes(dia)){
-    aberto=h>=17&&(h<23||(h===23&&min<=30));
-    msg=aberto?"🟢 Aberto até 23h30":"🔴 Fechado — abrimos às 17h30";
-  }
-  banner.textContent=msg;
-  banner.className=aberto?"status-banner aberto":"status-banner fechado";
-}
-setInterval(atualizarContagem,1000);
-setInterval(atualizarStatus,60000);
-
-function initCarousel(){
-  const wrap=$("#promoCarousel");
-  if(!wrap)return;
-  const slides=$$(".slide",wrap);
-  const prev=$(".c-prev",wrap), next=$(".c-next",wrap);
-  let idx=0;
-  function show(i){slides.forEach((s,k)=>s.style.display=(k===i?"block":"none"));}
-  show(idx);
-  prev?.addEventListener("click",()=>{ding();idx=(idx-1+slides.length)%slides.length;show(idx);});
-  next?.addEventListener("click",()=>{ding();idx=(idx+1)%slides.length;show(idx);});
-  setInterval(()=>{idx=(idx+1)%slides.length;show(idx);},5000);
-  slides.forEach(img=>{
-    img.style.cursor="pointer";
-    img.addEventListener("click",()=>{
-      ding();
-      const label=img.getAttribute("data-wa")||`Quero a ${img.alt||"promoção"}`;
-      const numero="5534997178336";
-      const texto=encodeURIComponent(`Olá! ${label}`);
-      window.open(`https://wa.me/${numero}?text=${texto}`,"_blank");
+function loginEmail() {
+  const email = document.getElementById("loginEmail").value;
+  const pass = document.getElementById("loginPass").value;
+  auth.signInWithEmailAndPassword(email, pass)
+    .then(() => closeLoginModal())
+    .catch(err => {
+      if (err.code === "auth/user-not-found") {
+        firebase.auth().createUserWithEmailAndPassword(email, pass)
+          .then(() => alert("Conta criada com sucesso!"))
+          .catch(e => alert("Erro: " + e.message));
+      } else alert("Erro: " + err.message);
     });
-  });
 }
 
-document.addEventListener("DOMContentLoaded",()=>{
-  loadCart(); renderCart(); updateCartCount();
-  atualizarContagem(); atualizarStatus(); initCarousel();
+// ========================
+// MODAL DE ADICIONAIS
+// ========================
+const extrasModal = document.createElement("div");
+extrasModal.id = "extras-modal";
+document.body.appendChild(extrasModal);
+
+document.querySelectorAll(".extras-btn").forEach(btn => {
+  btn.addEventListener("click", () => {
+    extrasModal.innerHTML = `
+      <div class="extras-head">
+        <span>Escolha seus adicionais</span>
+        <button onclick="document.getElementById('extras-modal').classList.remove('show')">✕</button>
+      </div>
+      <div class="extras-list">
+        <label><span>Bacon</span><input type="checkbox" data-extra="Bacon" data-price="3"></label>
+        <label><span>Cheddar</span><input type="checkbox" data-extra="Cheddar" data-price="2"></label>
+        <label><span>Ovo</span><input type="checkbox" data-extra="Ovo" data-price="1.5"></label>
+      </div>
+      <div class="extras-foot">
+        <button id="extras-add" class="btn-primario">Adicionar</button>
+      </div>
+    `;
+    extrasModal.classList.add("show");
+  });
+});
+
+document.addEventListener("click", e => {
+  if (e.target.id === "extras-add") {
+    const checks = document.querySelectorAll("#extras-modal input:checked");
+    if (!checks.length) {
+      extrasModal.classList.remove("show");
+      return;
+    }
+
+    let extrasTotal = 0;
+    let extrasNames = [];
+
+    checks.forEach(chk => {
+      extrasTotal += parseFloat(chk.dataset.price);
+      extrasNames.push(chk.dataset.extra);
+    });
+
+    cart.push({
+      id: "extra-" + Date.now(),
+      name: "Adicionais: " + extrasNames.join(", "),
+      price: extrasTotal,
+      quantidade: 1
+    });
+
+    saveCart();
+    extrasModal.classList.remove("show");
+    showPopup("➕ Adicionais adicionados!");
+  }
+});
+
+// ========================
+// FECHAR PEDIDO
+// ========================
+document.addEventListener("click", e => {
+  if (e.target.classList.contains("close-cart")) {
+    document.getElementById("cart-panel")?.classList.remove("active");
+  }
+});
+
+// ========================
+// EXECUÇÃO INICIAL
+// ========================
+window.addEventListener("DOMContentLoaded", () => {
+  updateCartCount();
+  updateCountdown();
 });
