@@ -438,6 +438,13 @@ setTimeout(() => {
     return;
   }
 
+  /* Mostrar ou esconder botão “Meus Pedidos” */
+setTimeout(() => {
+  if (typeof auth === "undefined") {
+    console.warn("⚠️ Firebase ainda não carregou — aguardando...");
+    return;
+  }
+
   auth.onAuthStateChanged((user) => {
     let ordersBtn = document.getElementById("orders-btn");
 
@@ -446,13 +453,29 @@ setTimeout(() => {
       ordersBtn.id = "orders-btn";
       ordersBtn.textContent = "📜 Meus Pedidos";
       ordersBtn.style.cssText = `
-        position:fixed; bottom:80px; right:18px;
-        background:#f9d44b; color:#000; font-weight:700;
-        border:none; border-radius:999px;
-        padding:10px 14px;
-        box-shadow:0 8px 22px rgba(0,0,0,.35);
-        cursor:pointer; z-index:1100;
+        position: fixed;
+        bottom: 120px;  /* ficou escondido antes, agora sobe */
+        right: 18px;
+        background: #f9d44b;
+        color: #000;
+        font-weight: 700;
+        border: none;
+        border-radius: 999px;
+        padding: 10px 16px;
+        box-shadow: 0 4px 14px rgba(0,0,0,.4);
+        cursor: pointer;
+        z-index: 3000; /* mais alto que o carrinho */
+        transition: transform .2s ease, opacity .2s ease;
+        opacity: 0; transform: translateY(20px);
       `;
+      document.body.appendChild(ordersBtn);
+
+      // animação suave ao aparecer
+      setTimeout(() => {
+        ordersBtn.style.opacity = "1";
+        ordersBtn.style.transform = "translateY(0)";
+      }, 100);
+
       ordersBtn.onclick = () => {
         clickSound.play().catch(() => {});
         buildOrdersPanel();
@@ -460,7 +483,6 @@ setTimeout(() => {
         ordersBackdrop.style.opacity = "1";
         ordersBackdrop.style.visibility = "visible";
       };
-      document.body.appendChild(ordersBtn);
     }
 
     if (!user && ordersBtn) ordersBtn.remove();
