@@ -1,315 +1,480 @@
-/* =========================
-   Da Família Lanches – Estilo principal
-   ========================= */
+/* ==========================================================
+   DFL – Da Família Lanches 🍔
+   Versão 1.2 (com painel "Meus Pedidos")
+   ========================================================== */
 
-:root{
-  --gold:#ffd700;
-  --gold-2:#f9d44b;
-  --bg:#000;
-  --card:#111;
-  --text:#fff;
-  --muted:#ccc;
-  --border:#333;
+/* ===========================
+   RESET & BASE
+   =========================== */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
 }
 
-*{box-sizing:border-box}
-
-html,body{height:100%}
 body {
-  margin: 0;
-  font-family: "Poppins", sans-serif;
-  background-color: var(--bg);
-  color: var(--text);
+  font-family: "Inter", Arial, sans-serif;
+  background: #111;
+  color: #fff;
+  line-height: 1.5;
   overflow-x: hidden;
 }
 
-/* ============ Cabeçalho ============ */
+h1, h2, h3 {
+  color: #f9d44b;
+  font-weight: 700;
+}
+
+p {
+  color: #ddd;
+  margin-bottom: 0.5rem;
+}
+
+button {
+  cursor: pointer;
+  font-family: inherit;
+  transition: all 0.2s ease;
+}
+
+a {
+  color: #f9d44b;
+  text-decoration: none;
+}
+
+/* ===========================
+   HEADER
+   =========================== */
 .header {
-  background: var(--bg);
-  color: var(--text);
-  border-bottom: 2px solid var(--gold);
-  position: sticky;
-  top: 0;
-  z-index: 1000;
-}
-.header-content{
-  display:flex; align-items:center; gap:14px;
-  padding:12px 18px;
-}
-.logo{height:48px; width:auto}
-.header-info h1{margin:0; font-size:1.35rem}
-.tagline{margin:2px 0 0; color:var(--muted); font-size:.95rem}
-
-/* ============ Cart icon flutuante ============ */
-#cart-icon{
-  position:fixed;
-  bottom:18px; right:18px;
-  background:var(--gold);
-  color:#000;
-  border:none; border-radius:999px;
-  padding:10px 14px;
-  font-weight:700;
-  cursor:pointer;
-  z-index:1100;
-  box-shadow:0 8px 22px rgba(0,0,0,.35);
-  transition:transform .18s ease, box-shadow .18s ease;
-}
-#cart-icon:hover{ transform: translateY(-1px); box-shadow:0 10px 26px rgba(0,0,0,.45)}
-#cart-count{
-  display:inline-block; min-width:20px; padding:2px 6px; margin-left:6px;
-  background:#000; color:var(--gold);
-  border-radius:999px; font-size:.8rem; text-align:center;
+  background: #000;
+  border-bottom: 3px solid #f9d44b;
+  padding: 10px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
-/* ============ Status & horários ============ */
-.status-banner{
-  text-align:center; font-weight:600; padding:10px;
-  background:#111; border-bottom:1px solid var(--gold);
-}
-.status-banner.aberto{ color:#3cf57a }
-.status-banner.fechado{ color:#ff6060 }
-
-.hours-banner{
-  text-align:center; color:var(--muted);
-  padding:10px 12px; border-bottom:1px dashed #222; font-size:.95rem;
+.header-content {
+  display: flex;
+  align-items: center;
+  gap: 12px;
 }
 
-/* ============ Promoções ============ */
-.promo-section{padding:18px 14px}
-.promo-section h2{ color:var(--gold); text-align:center; margin:12px 0 2px; font-size:1.4rem}
-.promo-sub{ text-align:center; color:var(--muted); margin:0 0 10px}
-
-.countdown-ticker{
-  max-width:920px; margin:0 auto 14px; text-align:center;
-  background:#222; border:1px solid #444; border-radius:10px; padding:8px 12px;
-  color:#fff;
-}
-.countdown-ticker b{ color:var(--gold) }
-#timer{ font-weight:700 }
-
-/* ============ Carrossel ============ */
-.carousel{
-  position:relative; max-width:980px; margin:0 auto; overflow:hidden; border-radius:12px;
-  border:2px solid #2a2a2a; background:#0c0c0c;
-}
-.slides{ position:relative; width:100%; height:240px }
-.slide{
-  position:absolute; inset:0; width:100%; height:100%;
-  object-fit:cover; display:none;
-}
-.slide.active{ display:block }
-.c-btn{
-  position:absolute; top:50%; transform:translateY(-50%);
-  background:rgba(0,0,0,.55); color:#fff; border:1px solid #666;
-  padding:8px 10px; border-radius:10px; cursor:pointer; z-index:5;
-  transition:background .18s ease, transform .18s ease;
-}
-.c-btn:hover{ background:rgba(0,0,0,.72); transform:translateY(-50%) scale(1.04) }
-.c-prev{ left:8px }
-.c-next{ right:8px }
-
-/* ============ Seções e grid ============ */
-.menu-section{ padding:12px 10px 4px }
-.menu-section h2{ color:var(--gold); text-align:center; margin:16px 0 8px; font-size:1.35rem }
-
-.grid{
-  display:grid;
-  grid-template-columns: repeat( auto-fill, minmax(250px,1fr) );
-  gap:12px; max-width:1100px; margin:0 auto 16px;
+.logo {
+  width: 60px;
+  height: 60px;
 }
 
-/* ============ Card do produto ============ */
-.card{
-  background:var(--card);
-  border:1px solid var(--border);
-  border-radius:12px; padding:14px;
-  display:flex; flex-direction:column; gap:8px;
-  min-height:140px;
+.header-info h1 {
+  font-size: 1.4rem;
 }
-.card h3{ margin:0; color:var(--gold); font-size:1.05rem; display:flex; align-items:center; gap:8px; flex-wrap:wrap }
-.badge{
-  display:inline-block; background:var(--gold); color:#000;
-  font-size:.72rem; font-weight:700; border-radius:8px; padding:2px 6px;
-}
-.price{ color:#fff; font-weight:700 }
-.card p{ color:var(--muted); margin:0 0 6px; font-size:.92rem }
-.actions{ display:flex; gap:8px; margin-top:auto }
 
-button.add-cart, button.extras-btn, .btn-primary, .btn-secondary{
-  background:var(--gold); color:#000; border:none; border-radius:10px;
-  padding:8px 12px; font-weight:700; cursor:pointer;
-  transition: transform .15s ease, background .15s ease;
+.tagline {
+  font-size: 0.9rem;
+  color: #bbb;
 }
-button.add-cart:hover, button.extras-btn:hover, .btn-primary:hover, .btn-secondary:hover{
-  background:#ffcc00; transform:translateY(-1px)
-}
-.btn-secondary{ background:#2a2a2a; color:#fff; border:1px solid #444 }
-.btn-secondary:hover{ background:#333 }
 
-/* ============ Mini Carrinho (painel) ============ */
-#cart-backdrop {
+/* ===========================
+   STATUS / HORÁRIOS
+   =========================== */
+.status-banner {
+  text-align: center;
+  padding: 8px;
+  font-weight: bold;
+  color: #fff;
+  background: #333;
+}
+
+.status-banner.aberto {
+  background: #1d7a2e;
+}
+
+.status-banner.fechado {
+  background: #822;
+}
+
+.hours-banner {
+  text-align: center;
+  background: #222;
+  color: #ccc;
+  font-size: 0.9rem;
+  padding: 5px 0;
+}
+
+/* ===========================
+   PROMOÇÕES / CARROSSEL
+   =========================== */
+.promo-section {
+  padding: 20px;
+  text-align: center;
+}
+
+.promo-section h2 {
+  margin-bottom: 8px;
+}
+
+.promo-sub {
+  color: #aaa;
+  font-size: 0.9rem;
+}
+
+.countdown-ticker {
+  margin: 10px 0;
+  background: #222;
+  display: inline-block;
+  padding: 6px 12px;
+  border-radius: 8px;
+  font-weight: 600;
+  border: 1px solid #f9d44b;
+}
+
+.carousel {
+  position: relative;
+  overflow: hidden;
+  max-width: 600px;
+  margin: 20px auto;
+  border-radius: 12px;
+  border: 2px solid #f9d44b;
+}
+
+.slides img {
+  display: none;
+  width: 100%;
+  height: auto;
+  border-radius: 10px;
+}
+
+.c-btn {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background: rgba(0, 0, 0, 0.5);
+  color: #f9d44b;
+  border: none;
+  font-size: 1.5rem;
+  padding: 8px 12px;
+  cursor: pointer;
+  z-index: 10;
+  border-radius: 6px;
+}
+
+.c-prev { left: 8px; }
+.c-next { right: 8px; }
+
+/* ===========================
+   MENU / CARDS
+   =========================== */
+.menu-section {
+  padding: 20px;
+}
+
+.menu-section h2 {
+  margin-bottom: 10px;
+  text-align: center;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px;
+}
+
+.card {
+  background: #1b1b1b;
+  border-radius: 10px;
+  padding: 14px;
+  border: 2px solid #2a2a2a;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.5);
+}
+
+.card h3 {
+  color: #f9d44b;
+  font-size: 1.1rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.badge {
+  background: #333;
+  color: #ccc;
+  font-size: 0.75rem;
+  padding: 2px 6px;
+  border-radius: 5px;
+}
+
+.card p {
+  font-size: 0.9rem;
+  margin-top: 5px;
+  margin-bottom: 8px;
+}
+
+.price {
+  font-weight: 700;
+  color: #fff;
+  margin-top: 4px;
+}
+
+.actions {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 10px;
+}
+
+.add-cart,
+.extras-btn {
+  background: #f9d44b;
+  color: #000;
+  font-weight: 700;
+  border: none;
+  padding: 8px 10px;
+  border-radius: 6px;
+}
+
+.extras-btn {
+  background: #333;
+  color: #fff;
+  border: 1px solid #555;
+}
+
+/* ===========================
+   MAPA / FOOTER
+   =========================== */
+.mapa-titulo {
+  text-align: center;
+  margin-top: 30px;
+}
+
+.footer {
+  background: #000;
+  text-align: center;
+  padding: 20px;
+  border-top: 2px solid #f9d44b;
+}
+
+.footer h2 {
+  color: #f9d44b;
+  margin-bottom: 10px;
+}
+
+.map-link {
+  display: inline-block;
+  margin: 10px 0;
+  background: #f9d44b;
+  color: #000;
+  padding: 6px 10px;
+  border-radius: 6px;
+  font-weight: 600;
+}
+
+.copy {
+  font-size: 0.8rem;
+  color: #999;
+  margin-top: 12px;
+}
+
+/* ===========================
+   CARRINHO LATERAL
+   =========================== */
+#cart-icon {
   position: fixed;
-  inset: 0;
-  background: rgba(0,0,0,.55);
-  opacity: 0;
-  visibility: hidden;
-  transition: opacity .25s ease;
-  z-index: 9998;
+  bottom: 20px;
+  right: 20px;
+  background: #f9d44b;
+  color: #000;
+  border: none;
+  padding: 10px 14px;
+  font-size: 1rem;
+  border-radius: 999px;
+  z-index: 1000;
+  font-weight: 700;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
 }
-#cart-backdrop.show {
-  opacity: 1;
-  visibility: visible;
+
+#cart-count {
+  background: #000;
+  color: #f9d44b;
+  font-size: 0.8rem;
+  border-radius: 999px;
+  padding: 2px 6px;
+  margin-left: 5px;
 }
 
 #mini-cart {
   position: fixed;
   top: 0;
-  right: -100%; /* começa fora da tela */
-  width: 320px;
-  height: 100vh;
-  background: #111;
+  right: -420px;
+  width: 380px;
+  height: 100%;
+  background: #1a1a1a;
   color: #fff;
-  border-left: 2px solid var(--gold-2);
-  z-index: 9999;
+  border-left: 3px solid #f9d44b;
+  z-index: 1200;
   display: flex;
   flex-direction: column;
-  overflow: hidden;
-  transition: right .35s ease;
-}
-#mini-cart.active {
-  right: 0; /* só aparece quando ativo */
+  transition: right 0.3s ease;
 }
 
-.mini-head {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 12px 14px;
-  border-bottom: 1px solid #262626;
-  background: #000;
+#mini-cart.active {
+  right: 0;
 }
-.mini-head h3 {
-  margin: 0;
-  font-size: 1rem;
-  color: var(--gold);
+
+.mini-head, .mini-foot {
+  padding: 10px;
+  border-bottom: 1px solid #333;
 }
-.mini-close {
-  background: var(--gold);
-  color: #000;
-  border: none;
-  border-radius: 8px;
-  padding: 6px 10px;
-  font-weight: 800;
-  cursor: pointer;
+
+.mini-foot {
+  border-top: 1px solid #333;
+  border-bottom: none;
 }
 
 .mini-list {
   flex: 1;
-  padding: 12px;
-  overflow: auto;
+  overflow-y: auto;
+  padding: 10px;
 }
+
 .cart-item {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  border-bottom: 1px dashed #2a2a2a;
-  padding: 8px 0;
-  gap: 10px;
+  margin-bottom: 10px;
 }
+
 .cart-item button {
-  background: none;
+  background: #333;
   border: none;
-  color: #ff5b5b;
-  font-weight: 800;
-  cursor: pointer;
+  color: #fff;
+  border-radius: 5px;
+  padding: 4px 8px;
+  font-size: 0.9rem;
 }
 
-.mini-foot {
+#cart-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  display: none;
+  z-index: 1190;
+}
+
+#cart-backdrop.show {
+  display: block;
+}
+
+/* ===========================
+   MODAL DE ADICIONAIS
+   =========================== */
+#extras-modal {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) scale(0.8);
+  background: #1a1a1a;
+  border: 2px solid #f9d44b;
+  border-radius: 12px;
+  width: 90%;
+  max-width: 400px;
+  padding: 16px;
+  z-index: 1300;
+  display: none;
+  transition: all 0.3s ease;
+}
+
+#extras-modal.show {
+  display: block;
+  transform: translate(-50%, -50%) scale(1);
+}
+
+#extras-list label {
   display: flex;
-  gap: 10px;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 6px;
+  font-size: 0.9rem;
+}
+
+#extras-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.7);
+  display: none;
+  z-index: 1290;
+}
+
+#extras-backdrop.show {
+  display: block;
+}
+
+/* ===========================
+   NOVO PAINEL “📜 MEUS PEDIDOS”
+   =========================== */
+#orders-panel {
+  position: fixed;
+  top: 0;
+  right: -400px;
+  width: 380px;
+  height: 100%;
+  background: #141414;
+  color: #fff;
+  border-left: 3px solid #f9d44b;
+  z-index: 1250;
+  display: flex;
+  flex-direction: column;
+  transition: right 0.3s ease;
+}
+
+#orders-panel.active {
+  right: 0;
+}
+
+.orders-head {
   padding: 12px;
-  border-top: 1px solid #262626;
   background: #000;
+  border-bottom: 1px solid #333;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
-/* ============ Popup “+1 adicionado!” ============ */
-.popup-add{
-  position:fixed; bottom:80px; right:20px;
-  background:var(--gold); color:#000; font-weight:800;
-  padding:10px 16px; border-radius:12px; font-size:.9rem;
-  opacity:0; animation:popupSubir 1.4s ease forwards; z-index:10000;
-  box-shadow:0 6px 16px rgba(0,0,0,.45);
-}
-@keyframes popupSubir{
-  0%{ transform:translateY(30px); opacity:0 }
-  30%{ transform:translateY(0); opacity:1 }
-  70%{ transform:translateY(-10px); opacity:1 }
-  100%{ transform:translateY(-20px); opacity:0 }
+.orders-list {
+  flex: 1;
+  padding: 14px;
+  overflow-y: auto;
 }
 
-/* ============ Modal de Adicionais ============ */
-#extras-backdrop{
-  position:fixed; inset:0; background:rgba(0,0,0,.6);
-  opacity:0; visibility:hidden; transition:opacity .25s ease; z-index:1500;
-}
-#extras-backdrop.show{ opacity:1; visibility:visible }
-
-#extras-modal{
-  position:fixed; top:50%; left:50%;
-  transform:translate(-50%,-50%) scale(.9);
-  background:#1a1a1a; padding:18px; border-radius:12px;
-  width:90%; max-width:420px; opacity:0; visibility:hidden;
-  transition:transform .25s ease, opacity .25s ease, visibility .25s;
-  z-index:2000; border:1px solid #2a2a2a;
-}
-#extras-modal.show{ opacity:1; visibility:visible; transform:translate(-50%,-50%) scale(1) }
-.extras-head{ display:flex; justify-content:space-between; align-items:center; margin-bottom:10px }
-#extras-title{ margin:0; color:var(--gold) }
-.extras-close{
-  background:var(--gold); color:#000; border:none; border-radius:8px; padding:6px 10px; cursor:pointer; font-weight:800
-}
-.extras-list label{ display:block; color:#fff; margin-bottom:8px; font-size:.95rem }
-.extras-foot{ display:flex; gap:10px; margin-top:12px }
-
-/* ============ Rodapé & mapa ============ */
-.footer{ text-align:center; padding:18px 12px 28px; color:var(--muted) }
-.footer .map-link{ color:var(--gold) }
-.mapa-titulo{ text-align:center; font-size:1.2rem; margin:32px 0 10px; color:var(--gold-2) }
-
-/* ============ Responsividade ============ */
-@media (max-width: 900px){
-  .slides{ height:210px }
+.orders-list p {
+  color: #ccc;
+  font-size: 0.9rem;
 }
 
-/* ============ Mobile (Bottom Sheet) ============ */
-@media (max-width: 768px) {
-  #mini-cart {
-    left: 0;
-    right: 0;
-    width: 100vw;
-    height: 85vh;
-    top: auto;
-    bottom: -100%; /* escondido inicialmente */
-    border-left: 0;
-    border-top: 2px solid var(--gold-2);
-    border-radius: 16px 16px 0 0;
-    transition: bottom .35s ease;
-  }
-  #mini-cart.active {
-    bottom: 0; /* aparece ao ativar */
+#orders-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.6);
+  display: none;
+  z-index: 1240;
+}
+
+#orders-backdrop.show {
+  display: block;
+}
+
+/* ===========================
+   RESPONSIVIDADE
+   =========================== */
+@media (max-width: 600px) {
+  .grid {
+    grid-template-columns: 1fr;
   }
 
-  body.no-scroll {
-    overflow: hidden;
-    height: 100vh;
-    touch-action: none;
+  #mini-cart,
+  #orders-panel {
+    width: 100%;
   }
 
-  .popup-add {
-    bottom: 100px;
-    right: 50%;
-    transform: translateX(50%);
+  #cart-icon {
+    bottom: 10px;
+    right: 10px;
   }
 }
-
-/* ======= FIM ======= */
