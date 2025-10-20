@@ -1,12 +1,12 @@
 /* ================================
-   DFL – Script principal (com Login + Carrinho corrigido)
+   DFL – Script estável (Login + Carrinho + Adicionais + Carrossel)
    ================================ */
 
-/* 🔊 Som global */
+/* 🔊 clique */
 const clickSound = new Audio("click.wav");
 clickSound.volume = 0.4;
 
-/* ========= Helpers ========= */
+/* helpers */
 const sleep = (ms) => new Promise(r => setTimeout(r, ms));
 
 /* ========= Firebase ========= */
@@ -41,18 +41,19 @@ async function initFirebase() {
   window.auth = firebase.auth();
 }
 
-/* ========= UI de Login ========= */
+/* ========= UI de Login (email/senha) ========= */
 function buildAuthUI() {
   const header = document.querySelector(".header") || document.body;
+
   const userChip = document.createElement("button");
   userChip.id = "user-chip";
-  userChip.textContent = "Entrar / Cadastro";
+  userChip.type = "button";
   userChip.style.cssText = `
     position: fixed; top: 12px; right: 12px; z-index: 1100;
     background:#f9d44b; color:#000; font-weight:700; border:none;
-    border-radius:999px; padding:8px 12px; cursor:pointer;
-    box-shadow:0 2px 6px rgba(0,0,0,.4);
+    border-radius:999px; padding:8px 12px; cursor:pointer; box-shadow:0 2px 6px rgba(0,0,0,.4);
   `;
+  userChip.textContent = "Entrar / Cadastro";
   header.appendChild(userChip);
 
   const backdrop = document.createElement("div");
@@ -86,7 +87,7 @@ function buildAuthUI() {
 
   const msg = modal.querySelector("#auth-msg");
   const emailEl = modal.querySelector("#auth-email");
-  const passEl = modal.querySelector("#auth-pass");
+  const passEl  = modal.querySelector("#auth-pass");
 
   const openModal = () => { backdrop.style.display = "block"; modal.style.display = "block"; };
   const closeModal = () => { backdrop.style.display = "none"; modal.style.display = "none"; };
@@ -140,7 +141,7 @@ const closeCartBtn = document.querySelector(".mini-close");
 let cart = JSON.parse(localStorage.getItem("dflCart") || "[]");
 
 function abrirCarrinho() {
-  clickSound.currentTime = 0; clickSound.play().catch(() => {});
+  clickSound.currentTime = 0; clickSound.play().catch(()=>{});
   miniCart.classList.add("active");
   cartBackdrop.classList.add("show");
   document.body.classList.add("no-scroll");
@@ -150,12 +151,13 @@ function fecharCarrinho() {
   cartBackdrop.classList.remove("show");
   document.body.classList.remove("no-scroll");
 }
+
 function atualizarCarrinho() {
   cartList.innerHTML = "";
   let total = 0;
   cart.forEach((item, index) => {
     const li = document.createElement("li");
-    li.classList.add("cart-item");
+    li.className = "cart-item";
     li.innerHTML = `
       <span>${item.nome}</span>
       <strong>R$ ${item.preco.toFixed(2)}</strong>
@@ -174,6 +176,10 @@ function adicionarAoCarrinho(nome, preco) {
   mostrarPopupAdicionado(nome);
   if (!miniCart.classList.contains("active")) abrirCarrinho();
 }
+function removerDoCarrinho(index) { cart.splice(index, 1); atualizarCarrinho(); }
+function limparCarrinho() { cart = []; atualizarCarrinho(); }
+
+/* popup */
 function mostrarPopupAdicionado(nomeProduto = null) {
   const popup = document.createElement("div");
   popup.className = "popup-add";
@@ -181,218 +187,236 @@ function mostrarPopupAdicionado(nomeProduto = null) {
   document.body.appendChild(popup);
   setTimeout(() => popup.remove(), 1400);
 }
-function removerDoCarrinho(index) {
-  cart.splice(index, 1);
-  atualizarCarrinho();
-}
-function limparCarrinho() {
-  cart = [];
-  atualizarCarrinho();
-}
 
+/* ========= Adicionais ========= */
+const extrasBackdrop = document.getElementById("extras-backdrop");
+const extrasModal = document.getElementById("extras-modal");
+const extrasList = document.getElementById("extras-list");
+const extrasCancel = document.getElementById("extras-cancel");
+const extrasAdd = document.getElementById("extras-add");
+
+let extrasSelecionados = [];
+let produtoAtual = null;
+
+function abrirExtras(nomeProduto) {
+  extrasList.innerHTML = `
+    <label><input type="checkbox" value="Cebola" data-price="0.99"> 🧅 Cebola — R$0,99</label>
+    <label><input type="checkbox" value="Salada" data-price="1.99"> 🥬 Salada — R$1,99</label>
+    <label><input type="checkbox" value="Ovo" data-price="1.99"> 🥚 Ovo — R$1,99</label>
+    <label><input type="checkbox" value="Salsicha" data-price="1.99"> 🌭 Salsicha — R$1,99</label>
+    <label><input type="checkbox" value="Bacon" data-price="2.99"> 🥓 Bacon — R$2,99</label>
+    <label><input type="checkbox" value="Molho Verde" data-price="2.99"> 🌿 Molho Verde — R$2,99</label>
+    <label><input type="checkbox" value="Cheddar" data-price="3.99"> 🧀 Cheddar — R$3,99</label>
+  `;
+  extrasModal.classList.add("show");
+  extrasBackdrop.classList.add("show");
+}
+function fecharExtras() {
+  extrasModal.classList.remove("show");
+  extrasBackdrop.classList.remove("show");
+  extrasSelecionados = [];
+}
+extrasCancel.addEventListener("click", fecharExtras);
+extrasBackdrop.addEventListener("click", fecharExtras);
+extrasAdd.addEventListener("click", () => {
+  clickSound.currentTime = 0; clickSound.play().catch(()=>{});
+  const checkboxes = extrasList.querySelectorAll("input[type='checkbox']:checked");
+  extrasSelecionados = Array.from(checkboxes).map((cb) => ({
+    nome: cb.value,
+    preco: parseFloat(cb.dataset.price),
+  }));
+  extrasSelecionados.forEach((extra) => adicionarAoCarrinho(extra.nome, extra.preco));
+  mostrarPopupAdicionado("Adicional");
+  fecharExtras();
+});
+
+/* ========= Inicialização de UI ========= */
 document.addEventListener("DOMContentLoaded", () => {
+  // garante carrinho fechado no load
   fecharCarrinho();
   atualizarCarrinho();
+
   cartBtn.addEventListener("click", abrirCarrinho);
   closeCartBtn.addEventListener("click", fecharCarrinho);
   cartBackdrop.addEventListener("click", fecharCarrinho);
   clearCartBtn.addEventListener("click", limparCarrinho);
+
   cartList.addEventListener("click", (e) => {
-    if (e.target.classList.contains("remove-item")) removerDoCarrinho(e.target.dataset.index);
+    if (e.target.classList.contains("remove-item")) {
+      removerDoCarrinho(e.target.dataset.index);
+    }
   });
+
   document.querySelectorAll(".add-cart").forEach((btn) => {
     btn.addEventListener("click", () => {
+      clickSound.currentTime = 0; clickSound.play().catch(()=>{});
       const card = btn.closest(".card");
-      adicionarAoCarrinho(card.dataset.name, parseFloat(card.dataset.price));
+      const nome = card.dataset.name;
+      const preco = parseFloat(card.dataset.price);
+      adicionarAoCarrinho(nome, preco);
+    });
+  });
+
+  document.querySelectorAll(".extras-btn").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      produtoAtual = btn.closest(".card");
+      abrirExtras(produtoAtual.dataset.name);
     });
   });
 });
 
-(async function startDFL() {
+/* ========= Contagem regressiva ========= */
+function atualizarContagem() {
+  const el = document.getElementById("timer");
+  if (!el) return;
+  const agora = new Date();
+  const fim = new Date();
+  fim.setHours(23, 59, 59, 999);
+  const diff = fim - agora;
+  if (diff <= 0) return (el.textContent = "00:00:00");
+  const h = Math.floor(diff / 1000 / 60 / 60);
+  const m = Math.floor((diff / 1000 / 60) % 60);
+  const s = Math.floor((diff / 1000) % 60);
+  el.textContent = `${String(h).padStart(2,"0")}:${String(m).padStart(2,"0")}:${String(s).padStart(2,"0")}`;
+}
+setInterval(atualizarContagem, 1000);
+atualizarContagem();
+
+/* ========= Status aberto/fechado ========= */
+function atualizarStatus() {
+  const banner = document.getElementById("status-banner");
+  if (!banner) return;
+  const agora = new Date();
+  const dia = agora.getDay();
+  const hora = agora.getHours();
+  const minuto = agora.getMinutes();
+  let aberto = false, msg = "";
+
+  if (dia === 2) msg = "❌ Fechado — abrimos amanhã às 18h";
+  else if ([1, 3, 4].includes(dia)) {
+    aberto = hora >= 18 && (hora < 23 || (hora === 23 && minuto <= 15));
+    msg = aberto ? "🟢 Aberto até 23h15" : "🔴 Fechado — abrimos às 18h";
+  } else if ([5, 6, 0].includes(dia)) {
+    aberto = hora >= 17 && (hora < 23 || (hora === 23 && minuto <= 30));
+    msg = aberto ? "🟢 Aberto até 23h30" : "🔴 Fechado — abrimos às 17h30";
+  }
+
+  banner.textContent = msg;
+  banner.className = aberto ? "status-banner aberto" : "status-banner fechado";
+}
+setInterval(atualizarStatus, 60000);
+atualizarStatus();
+
+/* ========= Carrossel ========= */
+(function initCarousel() {
+  const container = document.querySelector("#promoCarousel .slides");
+  if (!container) return;
+  const prevBtn  = document.querySelector("#promoCarousel .c-prev");
+  const nextBtn  = document.querySelector("#promoCarousel .c-next");
+  const slides   = Array.from(container.querySelectorAll(".slide"));
+  let index = 0;
+  if (!slides.length) return;
+
+  function showSlide(i) {
+    slides.forEach((s, idx) => (s.style.display = idx === i ? "block" : "none"));
+  }
+  showSlide(index);
+
+  prevBtn?.addEventListener("click", () => {
+    clickSound.currentTime = 0; clickSound.play().catch(()=>{});
+    index = (index - 1 + slides.length) % slides.length;
+    showSlide(index);
+  });
+  nextBtn?.addEventListener("click", () => {
+    clickSound.currentTime = 0; clickSound.play().catch(()=>{});
+    index = (index + 1) % slides.length;
+    showSlide(index);
+  });
+  setInterval(() => { index = (index + 1) % slides.length; showSlide(index); }, 5000);
+
+  // clique no slide -> WhatsApp
+  slides.forEach((img) => {
+    img.addEventListener("click", async () => {
+      clickSound.currentTime = 0; clickSound.play().catch(()=>{});
+      const msg = encodeURIComponent(img.dataset.wa || "Olá! Quero aproveitar a promoção 🍔");
+      const phone = "5534997178336";
+      window.open(`https://wa.me/${phone}?text=${msg}`, "_blank");
+      try {
+        if (window.db) {
+          await window.db.collection("interacoes").add({
+            tipo: "clique_promo",
+            promo: img.getAttribute("alt") || "(sem alt)",
+            data: window.firebase.firestore.FieldValue.serverTimestamp(),
+            uid: window.auth?.currentUser?.uid || null,
+          });
+        }
+      } catch(_){}
+    });
+  });
+})();
+
+/* ========= Monta pedido + WhatsApp + Firestore ========= */
+function montarObjetoPedido() {
+  const itens = cart.map((it, idx) => ({
+    ordem: idx + 1,
+    nome: String(it.nome),
+    preco: Number(it.preco),
+  }));
+  const total = itens.reduce((s, x) => s + x.preco, 0);
+  const user = (window.auth && window.auth.currentUser) || null;
+
+  return {
+    itens, total, moeda: "BRL", origem: "site", status: "aberto",
+    uid: user ? user.uid : null, email: user ? user.email : null,
+    criadoEm: (window.firebase && window.firebase.firestore)
+      ? window.firebase.firestore.FieldValue.serverTimestamp()
+      : new Date(),
+  };
+}
+function montarMensagemWhats(pedido) {
+  let msg = "🧾 *Pedido – Da Família Lanches*%0A%0A";
+  pedido.itens.forEach((item) => {
+    msg += `${item.ordem}. ${item.nome} — R$ ${item.preco.toFixed(2)}%0A`;
+  });
+  msg += `%0A💰 *Total:* R$ ${pedido.total.toFixed(2)}%0A📍 Patos de Minas`;
+  return msg;
+}
+async function salvarPedidoNoFirestore(pedido) {
+  try {
+    if (!window.db || !window.firebase) return { ok:false, id:null };
+    const ref = await window.db.collection("pedidos").add(pedido);
+    return { ok:true, id:ref.id };
+  } catch (err) {
+    console.error("Erro ao salvar no Firestore:", err);
+    return { ok:false, id:null };
+  }
+}
+async function handleFecharPedido() {
+  try {
+    clickSound.currentTime = 0; clickSound.play().catch(()=>{});
+    if (!cart.length) { alert("Seu carrinho está vazio!"); return; }
+    const pedido = montarObjetoPedido();
+    await salvarPedidoNoFirestore(pedido);
+    const numero = "5534997178336";
+    const mensagem = montarMensagemWhats(pedido);
+    window.open(`https://wa.me/${numero}?text=${mensagem}`, "_blank");
+    fecharCarrinho();
+    // limparCarrinho(); // se quiser limpar após enviar
+  } catch (e) {
+    console.error(e);
+    alert("Não foi possível finalizar o pedido agora. Tente novamente em instantes.");
+  }
+}
+finishOrderBtn?.removeEventListener("click", handleFecharPedido);
+finishOrderBtn?.addEventListener("click", handleFecharPedido);
+
+/* ========= Bootstrap ========= */
+(async function start() {
   try {
     await initFirebase();
     buildAuthUI();
-    console.log("✅ Firebase e login ativos");
+    console.log("✅ Versão estável carregada.");
   } catch (e) {
     console.error("Erro ao iniciar Firebase/Login:", e);
   }
 })();
-
-/* ========= Contador regressivo ========= */
-function iniciarContador() {
-  const contadorEl = document.getElementById("contador");
-  if (!contadorEl) return;
-
-  function atualizarContador() {
-    const agora = new Date();
-    const fim = new Date();
-    fim.setHours(23, 59, 59, 999);
-    const diff = fim - agora;
-    if (diff <= 0) {
-      contadorEl.textContent = "00:00:00";
-      return;
-    }
-    const h = String(Math.floor(diff / 3600000)).padStart(2, "0");
-    const m = String(Math.floor((diff % 3600000) / 60000)).padStart(2, "0");
-    const s = String(Math.floor((diff % 60000) / 1000)).padStart(2, "0");
-    contadorEl.textContent = `${h}:${m}:${s}`;
-  }
-
-  atualizarContador();
-  setInterval(atualizarContador, 1000);
-}
-
-/* ========= Status aberto/fechado ========= */
-function atualizarStatus() {
-  const status = document.getElementById("status");
-  if (!status) return;
-
-  const agora = new Date();
-  const dia = agora.getDay();
-  const hora = agora.getHours();
-  const min = agora.getMinutes();
-  let aberto = false;
-
-  if (dia >= 1 && dia <= 4) {
-    aberto = (hora > 18 || (hora === 18 && min >= 0)) && hora < 23;
-  } else if (dia === 5 || dia === 6) {
-    aberto = (hora > 17 || (hora === 17 && min >= 30)) && hora < 23;
-  }
-
-  if (aberto) {
-    status.textContent = "🟢 Aberto — peça agora!";
-    status.style.color = "#00ff84";
-  } else {
-    status.textContent = "🔴 Fechado — abrimos às 17h30";
-    status.style.color = "#ff6464";
-  }
-}
-
-/* ========= Carrossel de promoções ========= */
-function iniciarCarrossel() {
-  const slides = document.querySelectorAll(".slide");
-  const btnPrev = document.querySelector(".prev");
-  const btnNext = document.querySelector(".next");
-  if (!slides.length) return;
-
-  let i = 0;
-  function mostrarSlide(idx) {
-    slides.forEach((s, j) => s.style.display = j === idx ? "block" : "none");
-  }
-  mostrarSlide(i);
-
-  btnNext?.addEventListener("click", () => {
-    i = (i + 1) % slides.length;
-    mostrarSlide(i);
-  });
-  btnPrev?.addEventListener("click", () => {
-    i = (i - 1 + slides.length) % slides.length;
-    mostrarSlide(i);
-  });
-  setInterval(() => { i = (i + 1) % slides.length; mostrarSlide(i); }, 6000);
-}
-
-/* ========= Painel "Meus Pedidos" ========= */
-function buildOrdersPanel() {
-  let existing = document.getElementById("orders-panel");
-  if (existing) existing.remove();
-
-  const backdrop = document.createElement("div");
-  backdrop.id = "orders-backdrop";
-  backdrop.style.cssText = `
-    position:fixed; inset:0; background:rgba(0,0,0,.55);
-    opacity:0; visibility:hidden; transition:.3s; z-index:1200;
-  `;
-
-  const panel = document.createElement("div");
-  panel.id = "orders-panel";
-  panel.style.cssText = `
-    position:fixed; top:0; right:-100%; height:100%; width:85%; max-width:420px;
-    background:#111; color:#fff; box-shadow:-4px 0 12px rgba(0,0,0,.6);
-    border-left:2px solid #f9d44b; transition:.4s ease; z-index:1210;
-    display:flex; flex-direction:column;
-  `;
-  panel.innerHTML = `
-    <div style="display:flex; justify-content:space-between; align-items:center; padding:14px;">
-      <h3 style="color:#f9d44b;">📜 Meus Pedidos</h3>
-      <button id="orders-close" style="background:none; border:none; color:#fff; font-size:1.4rem;">✕</button>
-    </div>
-    <div id="orders-content" style="flex:1; overflow-y:auto; padding:10px;">
-      <p>Seus pedidos recentes aparecerão aqui.</p>
-    </div>
-  `;
-  document.body.append(backdrop, panel);
-
-  const close = () => {
-    panel.style.right = "-100%";
-    backdrop.style.opacity = "0";
-    backdrop.style.visibility = "hidden";
-  };
-  document.getElementById("orders-close").onclick = close;
-  backdrop.onclick = close;
-
-  return { panel, backdrop };
-}
-
-/* ========= Botão “📜 Meus Pedidos” ========= */
-try {
-  auth.onAuthStateChanged((user) => {
-    let ordersBtn = document.getElementById("orders-btn");
-
-    if (user && !ordersBtn) {
-      ordersBtn = document.createElement("button");
-      ordersBtn.id = "orders-btn";
-      ordersBtn.textContent = "📜 Meus Pedidos";
-      ordersBtn.style.cssText = `
-        position:fixed; bottom:120px; right:18px;
-        background:#f9d44b; color:#000; font-weight:700;
-        border:none; border-radius:999px; padding:10px 16px;
-        box-shadow:0 4px 14px rgba(0,0,0,.4);
-        cursor:pointer; z-index:3000;
-        transition:transform .2s ease, opacity .2s ease;
-        opacity:0; transform:translateY(20px);
-      `;
-      document.body.appendChild(ordersBtn);
-
-      // animação suave
-      setTimeout(() => {
-        ordersBtn.style.opacity = "1";
-        ordersBtn.style.transform = "translateY(0)";
-      }, 100);
-
-      ordersBtn.onclick = () => {
-        clickSound.play().catch(() => {});
-        const { panel, backdrop } = buildOrdersPanel();
-        panel.style.right = "0";
-        backdrop.style.opacity = "1";
-        backdrop.style.visibility = "visible";
-      };
-    }
-
-    if (!user && ordersBtn) ordersBtn.remove();
-  });
-} catch (err) {
-  console.error("Erro ao exibir botão Meus Pedidos:", err);
-}
-
-/* ========= Teste simples de execução ========= */
-setTimeout(() => {
-  console.log("✅ Script carregado até o final!");
-  const marker = document.createElement("div");
-  marker.textContent = "⚡ OK";
-  marker.style.cssText = `
-    position:fixed; bottom:10px; left:10px;
-    background:#f9d44b; color:#000;
-    padding:6px 8px; border-radius:8px;
-    font-weight:bold; z-index:5000;
-  `;
-  document.body.appendChild(marker);
-}, 1500);
-
-/* ========= Inicialização ========= */
-document.addEventListener("DOMContentLoaded", () => {
-  iniciarContador();
-  atualizarStatus();
-  iniciarCarrossel();
-  setInterval(atualizarStatus, 60000);
-});
