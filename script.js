@@ -3,7 +3,7 @@
    Firebase + Autenticação + UI de Login
    ==================================== */
 
-/* 🔊 Som global (usado depois nas ações) */
+/* 🔊 Som global */
 const clickSound = new Audio("click.wav");
 clickSound.volume = 0.4;
 
@@ -11,7 +11,6 @@ clickSound.volume = 0.4;
 window.addEventListener("load", () => {
   const miniCart = document.getElementById("mini-cart");
   const cartBackdrop = document.getElementById("cart-backdrop");
-
   if (miniCart && cartBackdrop) {
     miniCart.classList.remove("active");
     cartBackdrop.classList.remove("show");
@@ -22,7 +21,7 @@ window.addEventListener("load", () => {
 /* ========= Helpers ========= */
 const sleep = (ms) => new Promise(r => setTimeout(r, ms));
 
-/* ========= Carregar Firebase (sem editar o HTML) ========= */
+/* ========= Carregar Firebase ========= */
 async function loadFirebase() {
   function inject(src) {
     return new Promise((resolve, reject) => {
@@ -33,7 +32,6 @@ async function loadFirebase() {
       document.head.appendChild(s);
     });
   }
-  // Compat SDK (permite usar window.firebase sem module bundler)
   await inject("https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js");
   await inject("https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js");
   await inject("https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js");
@@ -42,7 +40,6 @@ async function loadFirebase() {
 /* ========= Inicializar Firebase ========= */
 async function initFirebase() {
   await loadFirebase();
-
   const firebaseConfig = {
     apiKey: "AIzaSyATQBcbYuzKpKlSwNlbpRiAM1XyHqhGeak",
     authDomain: "da-familia-lanches.firebaseapp.com",
@@ -52,18 +49,13 @@ async function initFirebase() {
     appId: "1:106857147317:web:769c98aed26bb8fc9e87fc",
     measurementId: "G-TCZ18HFWGX"
   };
-
-  if (!firebase.apps.length) {
-    firebase.initializeApp(firebaseConfig);
-  }
-  // Firestore será usado na PARTE 3
+  if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
   window.db = firebase.firestore();
   window.auth = firebase.auth();
 }
 
-/* ========= UI de Login (criada via JS) ========= */
+/* ========= UI de Login ========= */
 function buildAuthUI() {
-  // Botão/indicador no topo (header)
   const header = document.querySelector(".header") || document.body;
 
   const userChip = document.createElement("button");
@@ -77,108 +69,71 @@ function buildAuthUI() {
   userChip.textContent = "Entrar / Cadastro";
   header.appendChild(userChip);
 
-  // Backdrop do modal
   const backdrop = document.createElement("div");
   backdrop.id = "auth-backdrop";
-  backdrop.style.cssText = `
-    position:fixed; inset:0; background:rgba(0,0,0,.55);
-    display:none; z-index:1200;
-  `;
+  backdrop.style.cssText = `position:fixed; inset:0; background:rgba(0,0,0,.55); display:none; z-index:1200;`;
   document.body.appendChild(backdrop);
 
-  // Modal
   const modal = document.createElement("div");
   modal.id = "auth-modal";
   modal.style.cssText = `
     position:fixed; left:50%; top:50%; transform:translate(-50%,-50%);
     background:#111; color:#fff; border:2px solid #f9d44b; border-radius:14px;
     width:90%; max-width:420px; padding:18px; z-index:1210; display:none;
-    box-shadow:0 10px 30px rgba(0,0,0,.6);
   `;
   modal.innerHTML = `
-    <h3 style="margin:0 0 10px; color:#f9d44b;">Entrar / Criar conta</h3>
-    <p style="margin:0 0 14px; color:#bbb; font-size:.95rem;">Ganhe praticidade e acumule pontos!</p>
-
-    <label style="display:block; font-size:.9rem; margin-bottom:6px;">E-mail</label>
+    <h3 style="color:#f9d44b;">Entrar / Criar conta</h3>
+    <label>Email</label>
     <input id="auth-email" type="email" placeholder="seu@email.com"
-      style="width:100%; padding:10px; border-radius:8px; border:1px solid #333; background:#1a1a1a; color:#fff; margin-bottom:12px;" />
-
-    <label style="display:block; font-size:.9rem; margin-bottom:6px;">Senha</label>
+      style="width:100%; padding:10px; margin-bottom:10px; border-radius:8px; border:1px solid #333; background:#1a1a1a; color:#fff;" />
+    <label>Senha</label>
     <input id="auth-pass" type="password" placeholder="mínimo 6 caracteres"
-      style="width:100%; padding:10px; border-radius:8px; border:1px solid #333; background:#1a1a1a; color:#fff; margin-bottom:16px;" />
-
-    <div style="display:flex; gap:8px; flex-wrap:wrap;">
+      style="width:100%; padding:10px; margin-bottom:16px; border-radius:8px; border:1px solid #333; background:#1a1a1a; color:#fff;" />
+    <div style="display:flex; gap:8px;">
       <button id="btn-login" style="flex:1; background:#f9d44b; color:#000; font-weight:700; border:none; border-radius:8px; padding:10px;">Entrar</button>
-      <button id="btn-sign"  style="flex:1; background:#f9d44b; color:#000; font-weight:700; border:none; border-radius:8px; padding:10px;">Criar conta</button>
+      <button id="btn-sign"  style="flex:1; background:#f9d44b; color:#000; font-weight:700; border:none; border-radius:8px; padding:10px;">Criar</button>
       <button id="btn-close" style="flex:1; background:#333; color:#fff; border:1px solid #444; border-radius:8px; padding:10px;">Fechar</button>
     </div>
-
-    <p id="auth-msg" style="margin-top:12px; min-height:20px; font-size:.9rem; color:#ffb13b;"></p>
+    <p id="auth-msg" style="margin-top:10px; font-size:.9rem; color:#ffb13b;"></p>
   `;
   document.body.appendChild(modal);
 
-  // Ações abrir/fechar
-  function openModal() {
-    clickSound.currentTime = 0; clickSound.play().catch(()=>{});
-    backdrop.style.display = "block";
-    modal.style.display = "block";
-    document.body.classList.add("no-scroll");
-  }
-  function closeModal() {
-    backdrop.style.display = "none";
-    modal.style.display = "none";
-    document.body.classList.remove("no-scroll");
-  }
+  const msg = modal.querySelector("#auth-msg");
+  const emailEl = modal.querySelector("#auth-email");
+  const passEl  = modal.querySelector("#auth-pass");
+
+  const openModal = () => { backdrop.style.display = "block"; modal.style.display = "block"; };
+  const closeModal = () => { backdrop.style.display = "none"; modal.style.display = "none"; };
 
   userChip.addEventListener("click", openModal);
   backdrop.addEventListener("click", closeModal);
   modal.querySelector("#btn-close").addEventListener("click", closeModal);
-
-  // Ações de autenticação
-  const msg = modal.querySelector("#auth-msg");
-  const emailEl = modal.querySelector("#auth-email");
-  const passEl  = modal.querySelector("#auth-pass");
 
   async function doLogin() {
     msg.textContent = "Entrando...";
     try {
       await auth.signInWithEmailAndPassword(emailEl.value.trim(), passEl.value);
       msg.textContent = "✅ Login realizado!";
-      await sleep(600);
-      closeModal();
-    } catch (e) {
-      msg.textContent = "⚠️ " + (e.message || "Erro ao entrar");
-    }
+      setTimeout(closeModal, 700);
+    } catch (e) { msg.textContent = "⚠️ " + (e.message || "Erro ao entrar"); }
   }
+
   async function doSign() {
     msg.textContent = "Criando conta...";
     try {
       await auth.createUserWithEmailAndPassword(emailEl.value.trim(), passEl.value);
-      msg.textContent = "✅ Conta criada! Você já está logado.";
-      await sleep(700);
-      closeModal();
-    } catch (e) {
-      msg.textContent = "⚠️ " + (e.message || "Erro ao criar conta");
-    }
+      msg.textContent = "✅ Conta criada!";
+      setTimeout(closeModal, 700);
+    } catch (e) { msg.textContent = "⚠️ " + (e.message || "Erro ao criar conta"); }
   }
 
-  modal.querySelector("#btn-login").addEventListener("click", () => {
-    clickSound.currentTime = 0; clickSound.play().catch(()=>{});
-    doLogin();
-  });
-  modal.querySelector("#btn-sign").addEventListener("click", () => {
-    clickSound.currentTime = 0; clickSound.play().catch(()=>{});
-    doSign();
-  });
+  modal.querySelector("#btn-login").addEventListener("click", doLogin);
+  modal.querySelector("#btn-sign").addEventListener("click", doSign);
 
-  // Observa estado de login e atualiza chip
   auth.onAuthStateChanged((user) => {
     if (user) {
       userChip.textContent = `Olá, ${user.email.split("@")[0]} (Sair)`;
-      userChip.onclick = async () => {
-        clickSound.currentTime = 0; clickSound.play().catch(()=>{});
-        await auth.signOut();
-      };
+      userChip.onclick = async () => { await auth.signOut(); };
     } else {
       userChip.textContent = "Entrar / Cadastro";
       userChip.onclick = openModal;
@@ -186,8 +141,7 @@ function buildAuthUI() {
   });
 }
 
-/* ========= Bootstrap da Parte 1 ========= */
-(async function bootstrapParte1(){
+(async function bootstrapParte1() {
   try {
     await initFirebase();
     buildAuthUI();
@@ -196,7 +150,6 @@ function buildAuthUI() {
     console.error("Erro ao iniciar Firebase/Auth:", err);
   }
 })();
-
 /* ================================
    DFL – Script principal (PARTE 2/3)
    Carrinho, popup, adicionais, contador etc.
@@ -240,8 +193,8 @@ function atualizarCarrinho() {
 function adicionarAoCarrinho(nome, preco) {
   cart.push({ nome, preco });
   atualizarCarrinho();
-  abrirCarrinho();
   mostrarPopupAdicionado(nome);
+  if (!miniCart.classList.contains("active")) abrirCarrinho();
 }
 
 function removerDoCarrinho(index) {
@@ -267,27 +220,42 @@ function fecharCarrinho() {
   document.body.classList.remove("no-scroll");
 }
 
-/* ========= Eventos ========= */
-cartBtn.addEventListener("click", abrirCarrinho);
-cartBackdrop.addEventListener("click", fecharCarrinho);
-closeCartBtn.addEventListener("click", fecharCarrinho);
-clearCartBtn.addEventListener("click", limparCarrinho);
+/* ========= Inicialização segura ========= */
+document.addEventListener("DOMContentLoaded", () => {
+  fecharCarrinho();
+  atualizarCarrinho();
 
-cartList.addEventListener("click", (e) => {
-  if (e.target.classList.contains("remove-item")) {
-    removerDoCarrinho(e.target.dataset.index);
-  }
-});
-
-/* ========= Adicionar produtos ========= */
-document.querySelectorAll(".add-cart").forEach((btn) => {
-  btn.addEventListener("click", () => {
+  cartBtn.addEventListener("click", () => {
     clickSound.currentTime = 0;
     clickSound.play().catch(() => {});
-    const card = btn.closest(".card");
-    const nome = card.dataset.name;
-    const preco = parseFloat(card.dataset.price);
-    adicionarAoCarrinho(nome, preco);
+    abrirCarrinho();
+  });
+
+  const fecharCarrinhoSeguro = () => {
+    clickSound.currentTime = 0;
+    clickSound.play().catch(() => {});
+    fecharCarrinho();
+  };
+
+  cartBackdrop.addEventListener("click", fecharCarrinhoSeguro);
+  closeCartBtn.addEventListener("click", fecharCarrinhoSeguro);
+  clearCartBtn.addEventListener("click", limparCarrinho);
+
+  cartList.addEventListener("click", (e) => {
+    if (e.target.classList.contains("remove-item")) {
+      removerDoCarrinho(e.target.dataset.index);
+    }
+  });
+
+  document.querySelectorAll(".add-cart").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      clickSound.currentTime = 0;
+      clickSound.play().catch(() => {});
+      const card = btn.closest(".card");
+      const nome = card.dataset.name;
+      const preco = parseFloat(card.dataset.price);
+      adicionarAoCarrinho(nome, preco);
+    });
   });
 });
 
@@ -306,6 +274,7 @@ const extrasModal = document.getElementById("extras-modal");
 const extrasList = document.getElementById("extras-list");
 const extrasCancel = document.getElementById("extras-cancel");
 const extrasAdd = document.getElementById("extras-add");
+
 let extrasSelecionados = [];
 let produtoAtual = null;
 
@@ -330,14 +299,14 @@ function abrirExtras(nomeProduto) {
   extrasBackdrop.classList.add("show");
 }
 
-extrasCancel.addEventListener("click", fecharExtras);
-extrasBackdrop.addEventListener("click", fecharExtras);
-
 function fecharExtras() {
   extrasModal.classList.remove("show");
   extrasBackdrop.classList.remove("show");
   extrasSelecionados = [];
 }
+
+extrasCancel.addEventListener("click", fecharExtras);
+extrasBackdrop.addEventListener("click", fecharExtras);
 
 extrasAdd.addEventListener("click", () => {
   clickSound.currentTime = 0;
@@ -363,7 +332,8 @@ function atualizarContagem() {
   const horas = Math.floor(diff / 1000 / 60 / 60);
   const minutos = Math.floor((diff / 1000 / 60) % 60);
   const segundos = Math.floor((diff / 1000) % 60);
-  document.getElementById("timer").textContent = `${String(horas).padStart(2, "0")}:${String(minutos).padStart(2, "0")}:${String(segundos).padStart(2, "0")}`;
+  document.getElementById("timer").textContent =
+    `${String(horas).padStart(2, "0")}:${String(minutos).padStart(2, "0")}:${String(segundos).padStart(2, "0")}`;
 }
 setInterval(atualizarContagem, 1000);
 atualizarContagem();
@@ -405,55 +375,34 @@ document.querySelectorAll(".carousel .slide").forEach((img) => {
   });
 });
 
-/* ========= Responsividade do carrinho ========= */
+/* ========= Ajuste mobile ========= */
 function ajustarCarrinhoMobile() {
   if (window.innerWidth <= 768) {
     miniCart.style.width = "100%";
     miniCart.style.height = "85vh";
     miniCart.style.bottom = "0";
-    miniCart.style.top = "auto";
     miniCart.style.borderRadius = "16px 16px 0 0";
   } else {
     miniCart.style.width = "320px";
     miniCart.style.height = "100vh";
     miniCart.style.top = "0";
-    miniCart.style.bottom = "";
     miniCart.style.borderRadius = "0";
   }
 }
 ajustarCarrinhoMobile();
 window.addEventListener("resize", ajustarCarrinhoMobile);
-cartBackdrop.addEventListener("touchstart", fecharCarrinho);
-
-/* ========= Inicialização ========= */
-document.addEventListener("DOMContentLoaded", () => {
-  atualizarCarrinho();
-  fecharCarrinho(); // garante que inicia fechado
-  
-  // Garante que o botão ✕ e o backdrop sempre fechem o carrinho
-  const fecharCarrinhoSeguro = () => {
-    miniCart.classList.remove("active");
-    cartBackdrop.classList.remove("show");
-    document.body.classList.remove("no-scroll");
-  };
-  closeCartBtn.addEventListener("click", fecharCarrinhoSeguro);
-  cartBackdrop.addEventListener("click", fecharCarrinhoSeguro);
-});
-
 /* ================================
    DFL – Script principal (PARTE 3/3)
    Firestore: salvar pedido + abrir WhatsApp
    ==================================== */
 
 /**
- * Esperados (da PARTE 1/3):
- * - firebase (SDK compat) já carregado no HTML
+ * Esperados da PARTE 1:
  * - window.db = firebase.firestore()
- * - window.auth = firebase.auth()   (opcional; salva uid se logado)
- * Se não existir db/auth, seguimos só com WhatsApp.
+ * - window.auth = firebase.auth()
  */
 
-// Util: monta objeto do pedido a partir do carrinho atual
+/* ========= Montar objeto do pedido ========= */
 function montarObjetoPedido() {
   const itens = cart.map((it, idx) => ({
     ordem: idx + 1,
@@ -462,7 +411,6 @@ function montarObjetoPedido() {
   }));
 
   const total = itens.reduce((s, x) => s + x.preco, 0);
-
   const user = (window.auth && window.auth.currentUser) || null;
 
   return {
@@ -475,11 +423,11 @@ function montarObjetoPedido() {
     email: user ? user.email : null,
     criadoEm: (window.firebase && window.firebase.firestore)
       ? window.firebase.firestore.FieldValue.serverTimestamp()
-      : new Date(), // fallback
+      : new Date(),
   };
 }
 
-// Util: monta a mensagem do WhatsApp
+/* ========= Montar mensagem do WhatsApp ========= */
 function montarMensagemWhats(pedido) {
   let msg = "🧾 *Pedido – Da Família Lanches*%0A%0A";
   pedido.itens.forEach((item) => {
@@ -489,22 +437,22 @@ function montarMensagemWhats(pedido) {
   return msg;
 }
 
-// Salva no Firestore (se disponível)
+/* ========= Salvar no Firestore ========= */
 async function salvarPedidoNoFirestore(pedido) {
   try {
     if (!window.db || !window.firebase) {
-      // Firestore não disponível – apenas retorna sem erro
-      return { ok: false, id: null, motivo: "Firestore indisponível" };
+      console.warn("Firestore não disponível, seguindo sem salvar.");
+      return { ok: false, id: null };
     }
     const ref = await window.db.collection("pedidos").add(pedido);
     return { ok: true, id: ref.id };
   } catch (err) {
     console.error("Erro ao salvar no Firestore:", err);
-    return { ok: false, id: null, motivo: err?.message || String(err) };
+    return { ok: false, id: null };
   }
 }
 
-// Handler do botão "Fechar pedido"
+/* ========= Finalizar Pedido ========= */
 async function handleFecharPedido() {
   try {
     clickSound.currentTime = 0;
@@ -515,43 +463,34 @@ async function handleFecharPedido() {
       return;
     }
 
-    // 1) Monta objeto do pedido
     const pedido = montarObjetoPedido();
-
-    // 2) Tenta salvar no Firestore (se houver)
     const resultado = await salvarPedidoNoFirestore(pedido);
-    if (!resultado.ok) {
-      console.warn("Pedido não salvo no Firestore:", resultado.motivo || "(motivo não informado)");
-    } else {
-      console.log("Pedido salvo com ID:", resultado.id);
+
+    if (resultado.ok) {
+      console.log("✅ Pedido salvo no Firestore com ID:", resultado.id);
     }
 
-    // 3) Abre WhatsApp com a mensagem pronta
     const numero = "5534997178336";
     const mensagem = montarMensagemWhats(pedido);
     const link = `https://wa.me/${numero}?text=${mensagem}`;
     window.open(link, "_blank");
 
-    // 4) Fecha carrinho e limpa (opcional)
     fecharCarrinho();
-    // limparCarrinho(); // se quiser já limpar após enviar
-
+    // limparCarrinho(); // descomente se quiser limpar após enviar
   } catch (e) {
     console.error(e);
     alert("Não foi possível finalizar o pedido agora. Tente novamente em instantes.");
   }
 }
 
-// Garante bind do botão (sobrepõe qualquer bind anterior)
+/* ========= Atribuir evento ao botão ========= */
 if (finishOrderBtn) {
-  finishOrderBtn.removeEventListener("click", handleFecharPedido); // evita duplicar
+  finishOrderBtn.removeEventListener("click", handleFecharPedido);
   finishOrderBtn.addEventListener("click", handleFecharPedido);
 }
 
-/* ===== Opcional: registrar clique nos combos/promos como 'interesse' =====
-   Exemplo de como você poderia salvar interações leves no Firestore,
-   sem atrapalhar nada, se quiser no futuro:
-
+/* ========= Registrar interesse em promoções (opcional) ========= */
+// Exemplo: salvar cliques em slides como interações
 document.querySelectorAll(".carousel .slide").forEach((img) => {
   img.addEventListener("click", async () => {
     try {
@@ -565,4 +504,5 @@ document.querySelectorAll(".carousel .slide").forEach((img) => {
     } catch (_) {}
   });
 });
-*/
+
+console.log("✅ Script principal (PARTE 3/3) carregado com sucesso.");
