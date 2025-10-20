@@ -1,11 +1,9 @@
 /* ==================================================
-   DFL v1.3.4 – Script principal completo
-   Inclui: Login Modal, Carrinho, Adicionais, Countdown, Som
+   DFL v1.3.7 – Script principal
+   Mantém visual atual + corrige: som, login (modal), extras
    ================================================== */
 
-// ========================
-// CONFIGURAÇÃO FIREBASE
-// ========================
+/* ------------ Firebase ------------ */
 const firebaseConfig = {
   apiKey: "AIzaSyF-XXXXXX",
   authDomain: "dafamilia-lanches.firebaseapp.com",
@@ -17,226 +15,281 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 
-// ========================
-// VARIÁVEIS GLOBAIS
-// ========================
-const cartIcon = document.getElementById("cart-icon");
-const cartCount = document.getElementById("cart-count");
-const clickSound = new Audio("click.wav");
+/* ------------ Estado global ------------ */
+const clickSound = new Audio("click.wav"); // <= você pediu .wav
 clickSound.volume = 0.35;
-let cart = JSON.parse(localStorage.getItem("cart") || "[]");
 
-// ========================
-// ATUALIZAÇÕES GERAIS
-// ========================
+let cart = JSON.parse(localStorage.getItem("cart") || "[]");
+const $ = sel => document.querySelector(sel);
+const $$ = sel => Array.from(document.querySelectorAll(sel));
+
+/* ------------ Util ------------ */
 function updateCartCount() {
-  cartCount.textContent = cart.length;
+  const el = $("#cart-count");
+  if (el) el.textContent = cart.length;
 }
 function saveCart() {
   localStorage.setItem("cart", JSON.stringify(cart));
   updateCartCount();
 }
-function showPopup(msg) {
-  const popup = document.createElement("div");
-  popup.className = "popup-add";
-  popup.textContent = msg;
-  document.body.appendChild(popup);
-  setTimeout(() => popup.remove(), 1500);
+function toast(msg) {
+  const div = document.createElement("div");
+  div.className = "popup-add";
+  div.textContent = msg;
+  document.body.appendChild(div);
+  setTimeout(() => div.remove(), 1500);
 }
-updateCartCount();
 
-// ========================
-// ADIÇÃO AO CARRINHO
-// ========================
-document.querySelectorAll(".add-cart").forEach(btn => {
-  btn.addEventListener("click", e => {
-    const card = e.target.closest(".card");
-    const item = {
-      id: card.dataset.id,
-      name: card.dataset.name,
-      price: parseFloat(card.dataset.price),
-      quantidade: 1
+/* ------------ Carrinho: adicionar ------------ */
+function wireAddToCart() {
+  $$(".add-cart").forEach(btn => {
+    btn.onclick = e => {
+      const card = e.currentTarget.closest(".card");
+      if (!card) return;
+
+      const item = {
+        id: card.dataset.id,
+        name: card.dataset.name,
+        price: parseFloat(card.dataset.price),
+        quantidade: 1
+      };
+
+      cart.push(item);
+      saveCart();
+
+      try { clickSound.currentTime = 0; clickSound.play(); } catch {}
+      toast(`🍔 ${item.name} adicionado!`);
     };
-    cart.push(item);
-    saveCart();
-    showPopup(`🍔 ${item.name} adicionado!`);
-    clickSound.currentTime = 0;
-    clickSound.play().catch(() => {});
   });
-});
+}
 
-// ========================
-// CONTADOR DE PROMOÇÃO
-// ========================
-function updateCountdown() {
+/* ------------ Adicionais (igual fluxo anterior) ------------ */
+function wireExtrasModal() {
+  // cria container 1x só
+  if (!$("#extras-modal")) {
+    const m = document.createElement("div");
+    m.id = "extras-modal";
+    document.body.appendChild(m);
+  }
+
+  $$(".extras-btn").forEach(btn => {
+    btn.onclick = () => {
+      $("#extras-modal").innerHTML = `
+        <div class="extras-head">
+          <span>Escolha seus adicionais</span>
+          <button onclick="document.getElementById('extras-modal').classList.remove('show')">✕</button>
+        </div>
+        <div class="extras-list">
+          <label><span>Bacon</span><input type="checkbox" data-extra="Bacon" data-price="3"></label>
+          <label><span>Cheddar</span><input type="checkbox" data-extra="Cheddar" data-price="2"></label>
+          <label><span>Ovo</span><input type="checkbox" data-extra="Ovo" data-price="1.5"></label>
+        </div>
+        <div class="extras-foot">
+          <button id="extras-add" class="btn-primario">Adicionar</button>
+        </div>
+      `;
+      $("#extras-modal").classList.add("show");
+
+      $("#extras-add").onclick = () => {
+        const checks = $$("#extras-modal input:checked");
+        if (!checks.length) return $("#extras-modal").classList.remove("show");
+
+        let total = 0;
+        const nomes = [];
+        checks.forEach(c => { total += parseFloat(c.dataset.price); nomes.push(c.dataset.extra); });
+
+        cart.push({
+          id: "extra-" + Date.now(),
+          name: "Adicionais: " + nomes.join(", "),
+          price: total,
+          quantidade: 1
+        });
+        saveCart();
+        $("#extras-modal").classList.remove("show");
+        toast("➕ Adicionais adicionados!");
+      };
+    };
+  });
+}
+
+/* ------------ “Fechar pedido” (seu painel atual) ------------ */
+function wireCloseOrder() {
+  document.addEventListener("click", (e) => {
+    if (e.target && e.target.matches(".close-cart")) {
+      $("#cart-panel")?.classList.remove("active");
+    }
+  });
+}
+
+/* ------------ Contador promoção (00:00:00) ------------ */
+function startPromoCountdown() {
+  const el = $("#timer");
+  if (!el) return;
+  function tick() {
+    const now = new Date();
+    const end = new Date(); end.setHours(23,59,59,999);
+    const diff = end - now;
+    if (diff <= 0) { el.textContent = "00:00:00"; return; }
+    const h = Math.floor(diff/3_600_000);
+    const m = Math.floor((diff % 3_600_000)/60_000);
+    const s = Math.floor((diff % 60_000)/1000);
+    el.textContent = `${String(h).padStart(2,"0")}:${String(m).padStart(2,"0")}:${String(s).padStart(2,"0")}`;
+  }
+  tick();
+  setInterval(tick, 1000);
+}
+
+/* ------------ Status “Aberto até …” ------------ */
+function updateOpenStatus() {
+  const el = $("#status-banner");
+  if (!el) return;
+
   const now = new Date();
-  const end = new Date();
-  end.setHours(23, 59, 59, 999);
-  const diff = end - now;
-  if (diff <= 0) {
-    document.getElementById("timer").textContent = "00:00:00";
+  const d = now.getDay(); // 0 dom, 1 seg...
+  // Seg–Qui 18:00–23:15 | Sex–Dom 17:30–23:30 | Ter fechado
+  const ranges = {
+    2: null, // terça: fechado
+    defaultWeek: { start: [18,0], end: [23,15] },   // seg(1), qua(3), qui(4)
+    weekend: { start: [17,30], end: [23,30] }       // sex(5) a dom(0)
+  };
+
+  let openRange = null;
+  if (d === 2) openRange = null;
+  else if (d === 5 || d === 6 || d === 0) openRange = ranges.weekend;
+  else openRange = ranges.defaultWeek;
+
+  if (!openRange) {
+    el.textContent = "Fechado hoje";
+    el.style.background = "#444";
+    el.style.color = "#fff";
     return;
   }
-  const h = Math.floor(diff / (1000 * 60 * 60));
-  const m = Math.floor((diff / (1000 * 60)) % 60);
-  const s = Math.floor((diff / 1000) % 60);
-  document.getElementById("timer").textContent =
-    `${h.toString().padStart(2,"0")}:${m.toString().padStart(2,"0")}:${s.toString().padStart(2,"0")}`;
+
+  const start = new Date(); start.setHours(openRange.start[0], openRange.start[1], 0, 0);
+  const end   = new Date(); end.setHours(openRange.end[0],   openRange.end[1],   0, 0);
+
+  if (now >= start && now <= end) {
+    el.textContent = `Aberto até ${openRange.end[0]}h${String(openRange.end[1]).padStart(2,"0")}`;
+    el.style.background = "#ffd34d";
+    el.style.color = "#111";
+  } else if (now < start) {
+    el.textContent = `Abre às ${openRange.start[0]}h${String(openRange.start[1]).padStart(2,"0")}`;
+    el.style.background = "#ffd34d";
+    el.style.color = "#111";
+  } else {
+    el.textContent = "Fechado";
+    el.style.background = "#444";
+    el.style.color = "#fff";
+  }
 }
-setInterval(updateCountdown, 1000);
 
-// ========================
-// LOGIN E USUÁRIO (MODAL)
-// ========================
-function createLoginModal() {
-  if (document.getElementById("login-modal")) return;
+/* ------------ Carrossel (setas + clique imagem) ------------ */
+function wireCarousel() {
+  const wrapper = $("#promoCarousel .slides") || $(".slides");
+  const prev = $(".c-prev");
+  const next = $(".c-next");
+  if (!wrapper) return;
 
-  const modal = document.createElement("div");
-  modal.id = "login-modal";
-  modal.innerHTML = `
-    <div class="login-backdrop" onclick="closeLoginModal()"></div>
+  const step = 260;
+  if (prev) prev.onclick = () => wrapper.scrollBy({ left: -step, behavior: "smooth" });
+  if (next) next.onclick = () => wrapper.scrollBy({ left:  step, behavior: "smooth" });
+
+  // clique na imagem -> se tiver data-wa, abre WhatsApp
+  $$(".slide").forEach(img => {
+    img.onclick = () => {
+      const msg = img.dataset.wa;
+      if (!msg) return;
+      const url = `https://wa.me/5534997178336?text=${encodeURIComponent(msg)}`;
+      window.open(url, "_blank");
+    };
+  });
+}
+
+/* ------------ Login (modal interno, sem quebrar extras) ------------ */
+function ensureLoginModalDOM() {
+  if ($("#login-modal")) return;
+
+  const html = `
+    <div class="login-backdrop" data-close="1"></div>
     <div class="login-box">
-      <h3>Bem-vindo(a) 😊</h3>
-      <p>Entre ou crie sua conta para continuar</p>
-      <input type="email" id="loginEmail" placeholder="E-mail" />
-      <input type="password" id="loginPass" placeholder="Senha" />
-      <button id="btnLoginEmail" class="btn-primario">Entrar</button>
-      <p class="divider">ou</p>
-      <button id="btnGoogle" class="btn-google">
-        <img src="google-icon.svg" alt=""> Entrar com Google
-      </button>
-      <button class="close-login" onclick="closeLoginModal()">✕</button>
+      <button class="login-x" data-close="1">✕</button>
+      <h3>Entrar / Cadastro</h3>
+      <p>Use seu e-mail ou entre com Google</p>
+      <div class="login-form">
+        <input type="email" id="loginEmail" placeholder="E-mail" autocomplete="email" />
+        <input type="password" id="loginPass" placeholder="Senha" autocomplete="current-password" />
+        <button id="btnLoginEmail" class="btn-primario">Entrar</button>
+      </div>
+      <div class="divider">ou</div>
+      <button id="btnGoogle" class="btn-google"><img src="google-icon.svg" alt=""> Entrar com Google</button>
     </div>
   `;
-  document.body.appendChild(modal);
+  const wrap = document.createElement("div");
+  wrap.id = "login-modal";
+  wrap.innerHTML = html;
+  document.body.appendChild(wrap);
 
-  document.getElementById("btnGoogle").onclick = loginGoogle;
-  document.getElementById("btnLoginEmail").onclick = loginEmail;
-}
+  wrap.addEventListener("click", (e) => {
+    if (e.target.dataset.close === "1") wrap.classList.remove("show");
+  });
 
-function openLoginModal() {
-  createLoginModal();
-  document.getElementById("login-modal").classList.add("show");
-}
-
-function closeLoginModal() {
-  document.getElementById("login-modal")?.classList.remove("show");
+  $("#btnGoogle").onclick = () => {
+    const prov = new firebase.auth.GoogleAuthProvider();
+    auth.signInWithPopup(prov)
+      .then(() => wrap.classList.remove("show"))
+      .catch(err => alert("Erro ao logar: " + err.message));
+  };
+  $("#btnLoginEmail").onclick = () => {
+    const email = $("#loginEmail").value.trim();
+    const pass = $("#loginPass").value;
+    if (!email || !pass) return alert("Informe e-mail e senha.");
+    auth.signInWithEmailAndPassword(email, pass)
+      .then(() => wrap.classList.remove("show"))
+      .catch(err => {
+        if (err.code === "auth/user-not-found") {
+          firebase.auth().createUserWithEmailAndPassword(email, pass)
+            .then(() => alert("Conta criada! Você já está logado."))
+            .catch(e => alert("Erro: " + e.message));
+        } else {
+          alert("Erro: " + err.message);
+        }
+      });
+  };
 }
 
 function buildAuthUI() {
-  const header = document.querySelector(".header");
-  let userBtn = document.querySelector("#user-btn");
-
-  if (!userBtn) {
-    userBtn = document.createElement("button");
-    userBtn.id = "user-btn";
-    userBtn.className = "user-button";
-    header.appendChild(userBtn);
+  const header = $(".header");
+  let btn = $("#user-btn");
+  if (!btn) {
+    btn = document.createElement("button");
+    btn.id = "user-btn";
+    btn.className = "user-button";
+    header.appendChild(btn);
   }
+  // diminui sem mudar seu tema (CSS final abaixo pode refinar)
+  btn.style.fontSize = "14px";
+  btn.style.padding = "8px 12px";
+  btn.style.borderRadius = "999px";
 
   auth.onAuthStateChanged(user => {
     if (user) {
-      userBtn.innerHTML = `Olá, ${user.displayName || user.email.split("@")[0]} (Sair)`;
-      userBtn.onclick = () => auth.signOut();
+      btn.textContent = `Olá, ${user.displayName || user.email.split("@")[0]} (Sair)`;
+      btn.onclick = () => auth.signOut();
     } else {
-      userBtn.innerHTML = "Entrar / Cadastro";
-      userBtn.onclick = openLoginModal;
+      btn.textContent = "Entrar / Cadastro";
+      btn.onclick = () => { ensureLoginModalDOM(); $("#login-modal").classList.add("show"); };
     }
   });
 }
-buildAuthUI();
-// ========================
-// LOGIN COM GOOGLE / EMAIL
-// ========================
-function loginGoogle() {
-  const provider = new firebase.auth.GoogleAuthProvider();
-  auth.signInWithPopup(provider)
-    .then(() => closeLoginModal())
-    .catch(err => alert("Erro ao logar: " + err.message));
-}
-function loginEmail() {
-  const email = document.getElementById("loginEmail").value;
-  const pass = document.getElementById("loginPass").value;
-  auth.signInWithEmailAndPassword(email, pass)
-    .then(() => closeLoginModal())
-    .catch(err => {
-      if (err.code === "auth/user-not-found") {
-        firebase.auth().createUserWithEmailAndPassword(email, pass)
-          .then(() => alert("Conta criada com sucesso!"))
-          .catch(e => alert("Erro: " + e.message));
-      } else alert("Erro: " + err.message);
-    });
-}
 
-// ========================
-// MODAL DE ADICIONAIS
-// ========================
-const extrasModal = document.createElement("div");
-extrasModal.id = "extras-modal";
-document.body.appendChild(extrasModal);
-
-document.querySelectorAll(".extras-btn").forEach(btn => {
-  btn.addEventListener("click", () => {
-    extrasModal.innerHTML = `
-      <div class="extras-head">
-        <span>Escolha seus adicionais</span>
-        <button onclick="document.getElementById('extras-modal').classList.remove('show')">✕</button>
-      </div>
-      <div class="extras-list">
-        <label><span>Bacon</span><input type="checkbox" data-extra="Bacon" data-price="3"></label>
-        <label><span>Cheddar</span><input type="checkbox" data-extra="Cheddar" data-price="2"></label>
-        <label><span>Ovo</span><input type="checkbox" data-extra="Ovo" data-price="1.5"></label>
-      </div>
-      <div class="extras-foot">
-        <button id="extras-add" class="btn-primario">Adicionar</button>
-      </div>
-    `;
-    extrasModal.classList.add("show");
-  });
-});
-
-document.addEventListener("click", e => {
-  if (e.target.id === "extras-add") {
-    const checks = document.querySelectorAll("#extras-modal input:checked");
-    if (!checks.length) {
-      extrasModal.classList.remove("show");
-      return;
-    }
-
-    let extrasTotal = 0;
-    let extrasNames = [];
-
-    checks.forEach(chk => {
-      extrasTotal += parseFloat(chk.dataset.price);
-      extrasNames.push(chk.dataset.extra);
-    });
-
-    cart.push({
-      id: "extra-" + Date.now(),
-      name: "Adicionais: " + extrasNames.join(", "),
-      price: extrasTotal,
-      quantidade: 1
-    });
-
-    saveCart();
-    extrasModal.classList.remove("show");
-    showPopup("➕ Adicionais adicionados!");
-  }
-});
-
-// ========================
-// FECHAR PEDIDO
-// ========================
-document.addEventListener("click", e => {
-  if (e.target.classList.contains("close-cart")) {
-    document.getElementById("cart-panel")?.classList.remove("active");
-  }
-});
-
-// ========================
-// EXECUÇÃO INICIAL
-// ========================
+/* ------------ Boot ------------ */
 window.addEventListener("DOMContentLoaded", () => {
   updateCartCount();
-  updateCountdown();
+  wireAddToCart();
+  wireExtrasModal();
+  wireCloseOrder();
+  startPromoCountdown();
+  updateOpenStatus();
+  wireCarousel();
+  buildAuthUI();
 });
