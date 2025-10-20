@@ -546,122 +546,48 @@ document.querySelectorAll(".carousel .slide").forEach((img) => {
 
 console.log("✅ Script principal (PARTE 3/3) carregado com sucesso.");
 
-/* ========= Correção final do carrinho bugado (mobile + desktop) ========= */
+/* ========= Correção FINAL — Carrinho estável (mobile + desktop) ========= */
 document.addEventListener("DOMContentLoaded", () => {
   const miniCart = document.getElementById("mini-cart");
   const cartBackdrop = document.getElementById("cart-backdrop");
   const closeCartBtn = document.querySelector(".mini-close");
+  const cartBtn = document.getElementById("cart-icon");
 
-  // 🔒 Garante que o carrinho comece fechado
-  if (miniCart && cartBackdrop) {
-    miniCart.classList.remove("active");
-    cartBackdrop.classList.remove("show");
-    document.body.classList.remove("no-scroll");
-  }
+  if (!miniCart || !cartBackdrop || !cartBtn) return;
 
-  // 🔄 Função segura de fechamento
-  function fecharCarrinhoSeguro() {
-    if (!miniCart || !cartBackdrop) return;
-    miniCart.classList.remove("active");
-    cartBackdrop.classList.remove("show");
-    document.body.classList.remove("no-scroll");
-  }
-
-  // 🔊 Reforço no evento de fechar (inclui som)
-  if (closeCartBtn) {
-    closeCartBtn.addEventListener("click", () => {
-      clickSound.currentTime = 0;
-      clickSound.play().catch(() => {});
-      fecharCarrinhoSeguro();
-    });
-  }
-
-  if (cartBackdrop) {
-    cartBackdrop.addEventListener("click", () => {
-      clickSound.currentTime = 0;
-      clickSound.play().catch(() => {});
-      fecharCarrinhoSeguro();
-    });
-  }
-
-  // ⚡ Corrige estado caso o script carregue com o carrinho visível
-  window.addEventListener("load", () => {
-    fecharCarrinhoSeguro();
-  });
-});
-
-/* ========= Correção HARD – Carrinho sempre fechado e funcional ========= */
-window.addEventListener("load", () => {
-  const miniCart = document.getElementById("mini-cart");
-  const cartBackdrop = document.getElementById("cart-backdrop");
-  const closeCartBtn = document.querySelector(".mini-close");
-
-  if (!miniCart || !cartBackdrop) return;
-
-  // 1️⃣ Garante que inicie fechado
+  // 🔒 Garante que o carrinho sempre inicie fechado
   miniCart.classList.remove("active");
   cartBackdrop.classList.remove("show");
   document.body.classList.remove("no-scroll");
 
-  // 2️⃣ Fecha sempre que clicar no X ou no fundo
-  function fecharCarrinhoSeguro() {
+  // Funções reutilizáveis
+  const abrirCarrinho = () => {
+    clickSound.currentTime = 0;
+    clickSound.play().catch(() => {});
+    miniCart.classList.add("active");
+    cartBackdrop.classList.add("show");
+    document.body.classList.add("no-scroll");
+  };
+
+  const fecharCarrinho = () => {
+    clickSound.currentTime = 0;
+    clickSound.play().catch(() => {});
     miniCart.classList.remove("active");
     cartBackdrop.classList.remove("show");
     document.body.classList.remove("no-scroll");
-  }
-
-  if (closeCartBtn) {
-    closeCartBtn.onclick = () => {
-      clickSound.currentTime = 0;
-      clickSound.play().catch(() => {});
-      fecharCarrinhoSeguro();
-    };
-  }
-
-  cartBackdrop.onclick = () => {
-    clickSound.currentTime = 0;
-    clickSound.play().catch(() => {});
-    fecharCarrinhoSeguro();
   };
 
-  // 3️⃣ Evita abertura automática indevida
-  setTimeout(() => {
-    if (miniCart.classList.contains("active")) {
-      miniCart.classList.remove("active");
-      cartBackdrop.classList.remove("show");
-      document.body.classList.remove("no-scroll");
-    }
-  }, 1000);
-});
+  // 🎯 Ligações de evento
+  cartBtn.addEventListener("click", abrirCarrinho);
+  closeCartBtn?.addEventListener("click", fecharCarrinho);
+  cartBackdrop.addEventListener("click", fecharCarrinho);
 
-/* ===== Blindagem extra do carrinho ===== */
-window.addEventListener("load", () => {
-  const cart = document.getElementById("mini-cart");
-  const backdrop = document.getElementById("cart-backdrop");
-  const closeBtn = document.querySelector(".mini-close");
-  const openBtn = document.getElementById("cart-icon");
-  if (!cart || !backdrop) return;
-
-  function closeCart() {
-    cart.classList.remove("active");
-    backdrop.classList.remove("show");
+  // ⚡ Segurança extra: garante estado fechado mesmo que algo quebre
+  window.addEventListener("load", () => {
+    miniCart.classList.remove("active");
+    cartBackdrop.classList.remove("show");
     document.body.classList.remove("no-scroll");
-  }
-  function openCart() {
-    cart.classList.add("active");
-    backdrop.classList.add("show");
-    document.body.classList.add("no-scroll");
-  }
-
-  // força iniciar fechado
-  closeCart();
-
-  // delegação simples (funciona mesmo com binds antigos)
-  document.addEventListener("click", (e) => {
-    if (e.target === backdrop || e.target.closest(".mini-close")) closeCart();
-    if (e.target.closest("#cart-icon")) openCart();
   });
 
-  // se algum CSS/JS tiver aberto, fecha 1s depois
-  setTimeout(closeCart, 1000);
+  console.log("✅ Carrinho blindado e funcional!");
 });
