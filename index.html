@@ -9,6 +9,11 @@
   <link rel="icon" type="image/png" href="favicon.png" />
   <link rel="stylesheet" href="style.css" />
 
+  <!-- Firebase -->
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+
   <!-- Script principal -->
   <script defer src="script.js"></script>
 
@@ -29,11 +34,6 @@
         <h1>Da Família Lanches</h1>
         <p class="tagline">O sabor que une a família 🍔</p>
       </div>
-    </div>
-
-    <!-- 🔹 Botão fixo de Meus Pedidos -->
-    <div class="header-actions">
-      <button id="btn-historico" class="btn-historico">📜 Meus Pedidos</button>
     </div>
   </header>
 
@@ -58,14 +58,14 @@
     <div class="carousel" id="promoCarousel">
       <button class="c-btn c-prev" aria-label="Anterior">◀</button>
       <div class="slides">
-        <img class="slide" src="promo1.jpg" alt="Promo 1" data-wa="Quero a promoção 1" />
-        <img class="slide" src="promo2.jpg" alt="Promo 2" data-wa="Quero a promoção 2" />
-        <img class="slide" src="promo3.jpg" alt="Promo 3" data-wa="Quero a promoção 3" />
-        <img class="slide" src="promo4.jpg" alt="Promo 4" data-wa="Quero a promoção 4" />
-        <img class="slide" src="promo5.jpg" alt="Promo 5" data-wa="Quero a promoção 5" />
-        <img class="slide" src="promo6.jpg" alt="Promo 6" data-wa="Quero a promoção 6" />
-        <img class="slide" src="promo7.jpg" alt="Promo 7" data-wa="Quero a promoção 7" />
-        <img class="slide" src="promo8.jpg" alt="Promo 8" data-wa="Quero a promoção 8" />
+        <img class="slide" src="promo1.jpg" alt="Promo 1" />
+        <img class="slide" src="promo2.jpg" alt="Promo 2" />
+        <img class="slide" src="promo3.jpg" alt="Promo 3" />
+        <img class="slide" src="promo4.jpg" alt="Promo 4" />
+        <img class="slide" src="promo5.jpg" alt="Promo 5" />
+        <img class="slide" src="promo6.jpg" alt="Promo 6" />
+        <img class="slide" src="promo7.jpg" alt="Promo 7" />
+        <img class="slide" src="promo8.jpg" alt="Promo 8" />
       </div>
       <button class="c-btn c-next" aria-label="Próxima">▶</button>
     </div>
@@ -117,7 +117,7 @@
         </div>
       </article>
 
-<article class="card" data-type="burger" data-id="ARMARIA" data-name="ARMARIA" data-price="18.00">
+      <article class="card" data-type="burger" data-id="ARMARIA" data-name="ARMARIA" data-price="18.00">
         <h3>ARMARIA <span class="badge">Com Molho Verde 🌿</span></h3>
         <div class="price">R$ 18,00</div>
         <p>Pão, alface, tomate, milho, bacon, salsicha, hambúrguer, filé de frango, batata palha, presunto e mussarela. <em>Acompanha sachê de ketchup.</em></p>
@@ -127,7 +127,7 @@
         </div>
       </article>
 
-      <article class="card" data-type="burger" data-id="BITELA" data-name="BITELA" data-price="22.00">
+<article class="card" data-type="burger" data-id="BITELA" data-name="BITELA" data-price="22.00">
         <h3>BITELA <span class="badge">Com Molho Verde 🌿</span></h3>
         <div class="price">R$ 22,00</div>
         <p>Pão, alface, tomate, milho, bacon, salsicha, 2 hambúrgueres, filé de frango, batata palha, presunto e mussarela. <em>Acompanha sachê de ketchup.</em></p>
@@ -239,7 +239,7 @@
     </div>
   </section>
 
-<!-- ======================== -->
+  <!-- ======================== -->
   <!-- Hot Dog’s -->
   <!-- ======================== -->
   <section class="menu-section">
@@ -255,7 +255,7 @@
         </div>
       </article>
 
-      <article class="card" data-type="hotdog" data-id="SIMPRAO" data-name="SIMPRÃO" data-price="12.00">
+<article class="card" data-type="hotdog" data-id="SIMPRAO" data-name="SIMPRÃO" data-price="12.00">
         <h3>SIMPRÃO <span class="badge">Com Molho Verde 🌿</span></h3>
         <div class="price">R$ 12,00</div>
         <p>Pão, molho, salsicha, milho, batata palha, bacon, ketchup e maionese.</p>
@@ -351,7 +351,7 @@
     <p class="copy">© 2025 Da Família Lanches — Você faz parte disso!</p>
   </footer>
 
-  <!-- Mapa script -->
+  <!-- Script do mapa -->
   <script>
   (function(){
     const el = document.getElementById('mapa-entregas');
