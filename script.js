@@ -1,6 +1,6 @@
 /* =======================================
-   DFL v1.1 – Script principal completo
-   Inclui: Login, Carrinho, Adicionais, Meus Pedidos, Countdown
+   🍔 DFL v1.2 – Script principal completo
+   Inclui: Login, Carrinho com Quantidade, Adicionais, Meus Pedidos, Firebase
    ======================================= */
 
 // ========================
@@ -23,20 +23,29 @@ const db = firebase.firestore();
 // ========================
 const cartIcon = document.getElementById("cart-icon");
 const cartCount = document.getElementById("cart-count");
+const backdrop = document.getElementById("cart-backdrop");
+const miniCart = document.getElementById("mini-cart");
+const cartList = document.getElementById("cart-items");
+const finalizeBtn = document.getElementById("finalize-order");
+const clearBtn = document.getElementById("clear-cart");
+const closeCart = document.getElementById("close-cart");
 const clickSound = new Audio("click.mp3");
 clickSound.volume = 0.3;
+
 let cart = JSON.parse(localStorage.getItem("cart") || "[]");
 
 // ========================
-// ATUALIZAÇÕES GERAIS
+// FUNÇÕES GERAIS
 // ========================
 function updateCartCount() {
-  cartCount.textContent = cart.length;
+  let totalQtd = cart.reduce((sum, item) => sum + item.quantidade, 0);
+  cartCount.textContent = totalQtd;
 }
 
 function saveCart() {
   localStorage.setItem("cart", JSON.stringify(cart));
   updateCartCount();
+  renderCart();
 }
 
 function showPopup(msg) {
@@ -50,28 +59,151 @@ function showPopup(msg) {
 updateCartCount();
 
 // ========================
-// ADIÇÃO AO CARRINHO
+// ABRIR E FECHAR CARRINHO
+// ========================
+cartIcon.addEventListener("click", () => {
+  miniCart.classList.add("show");
+  backdrop.classList.add("show");
+});
+
+if (closeCart) {
+  closeCart.addEventListener("click", () => {
+    miniCart.classList.remove("show");
+    backdrop.classList.remove("show");
+  });
+}
+
+if (backdrop) {
+  backdrop.addEventListener("click", () => {
+    miniCart.classList.remove("show");
+    backdrop.classList.remove("show");
+  });
+}
+
+// ========================
+// ADICIONAR AO CARRINHO
 // ========================
 document.querySelectorAll(".add-cart").forEach(btn => {
   btn.addEventListener("click", e => {
     const card = e.target.closest(".card");
-    const item = {
-      id: card.dataset.id,
-      name: card.dataset.name,
-      price: parseFloat(card.dataset.price),
-      quantidade: 1
-    };
+    const id = card.dataset.id;
+    const name = card.dataset.name;
+    const price = parseFloat(card.dataset.price);
 
-    cart.push(item);
+    // Se já existe o item, apenas aumenta a quantidade
+    const existing = cart.find(i => i.id === id);
+    if (existing) {
+      existing.quantidade += 1;
+    } else {
+      cart.push({ id, name, price, quantidade: 1 });
+    }
+
     saveCart();
-    showPopup(`🍔 ${item.name} adicionado!`);
+    showPopup(`🍔 ${name} adicionado!`);
     clickSound.currentTime = 0;
     clickSound.play().catch(() => {});
   });
 });
 
 // ========================
-// CONTADOR DE PROMOÇÃO
+// RENDERIZAR CARRINHO
+// ========================
+function renderCart() {
+  if (!cartList) return;
+
+  if (!cart.length) {
+    cartList.innerHTML = "<p>Seu carrinho está vazio 😔</p>";
+    return;
+  }
+
+  cartList.innerHTML = "";
+  cart.forEach((item, index) => {
+    const li = document.createElement("div");
+    li.className = "cart-item";
+    li.innerHTML = `
+      <div>
+        <strong>${item.name}</strong><br>
+        <small>${item.quantidade}x — R$ ${(item.price * item.quantidade).toFixed(2)}</small>
+      </div>
+      <div class="cart-actions">
+        <button class="dec">−</button>
+        <button class="inc">+</button>
+        <button class="rem">✕</button>
+      </div>
+    `;
+    li.querySelector(".dec").onclick = () => {
+      if (item.quantidade > 1) item.quantidade--;
+      else cart.splice(index, 1);
+      saveCart();
+    };
+    li.querySelector(".inc").onclick = () => {
+      item.quantidade++;
+      saveCart();
+    };
+    li.querySelector(".rem").onclick = () => {
+      cart.splice(index, 1);
+      saveCart();
+    };
+    cartList.appendChild(li);
+  });
+}
+
+renderCart();
+
+// ========================
+// LIMPAR CARRINHO
+// ========================
+clearBtn?.addEventListener("click", () => {
+  cart = [];
+  saveCart();
+  showPopup("Carrinho limpo 🧼");
+});
+
+// ========================
+// FECHAR PEDIDO (FINALIZAR)
+// ========================
+finalizeBtn?.addEventListener("click", async () => {
+  if (!cart.length) {
+    alert("Seu carrinho está vazio!");
+    return;
+  }
+
+  const user = auth.currentUser;
+  if (!user) {
+    alert("Por favor, entre com sua conta Google antes de finalizar o pedido 🙏");
+    return;
+  }
+
+  const total = cart.reduce((sum, item) => sum + item.price * item.quantidade, 0);
+  const pedido = {
+    uid: user.uid,
+    nome: user.displayName || user.email.split("@")[0],
+    itens: cart.map(i => ({
+      nome: i.name,
+      quantidade: i.quantidade,
+      subtotal: i.price * i.quantidade
+    })),
+    total,
+    criadoEm: firebase.firestore.FieldValue.serverTimestamp(),
+  };
+
+  try {
+    const ref = await db.collection("pedidos").add(pedido);
+    showPopup(`✅ Pedido enviado com sucesso! (#${ref.id.slice(-6).toUpperCase()})`);
+
+    cart = [];
+    saveCart();
+    miniCart.classList.remove("show");
+    backdrop.classList.remove("show");
+
+  } catch (e) {
+    console.error("Erro ao salvar pedido:", e);
+    alert("Erro ao enviar o pedido. Tente novamente mais tarde.");
+  }
+});
+
+// ========================
+// CONTADOR PROMOCIONAL (00:00 reset)
 // ========================
 function updateCountdown() {
   const now = new Date();
@@ -91,35 +223,10 @@ function updateCountdown() {
     `${h.toString().padStart(2, "0")}:${m.toString().padStart(2, "0")}:${s.toString().padStart(2, "0")}`;
 }
 setInterval(updateCountdown, 1000);
+updateCountdown();
 
 // ========================
-// FUNÇÃO GLOBAL: “MEUS PEDIDOS” FAB
-// ========================
-function ensureOrdersFab(user) {
-  let fab = document.getElementById("orders-fab");
-  if (user && !fab) {
-    fab = document.createElement("button");
-    fab.id = "orders-fab";
-    fab.innerHTML = "📜 <span>Meus Pedidos</span>";
-    document.body.appendChild(fab);
-    requestAnimationFrame(() => fab.classList.add("show"));
-
-    fab.onclick = async () => {
-      try {
-        const list = await loadUserOrders(user.uid);
-        renderOrders(list);
-        document.getElementById("orders-panel")?.classList.add("active");
-      } catch (e) {
-        console.error(e);
-        alert("Erro ao abrir seus pedidos.");
-      }
-    };
-  }
-  if (!user && fab) fab.remove();
-}
-
-// ========================
-// LOGIN E USUÁRIO
+// LOGIN COM GOOGLE
 // ========================
 function buildAuthUI() {
   const header = document.querySelector(".header");
@@ -147,68 +254,39 @@ function buildAuthUI() {
 
 function loginGoogle() {
   const provider = new firebase.auth.GoogleAuthProvider();
-  auth.signInWithPopup(provider).catch(err => alert("Erro: " + err.message));
+  auth.signInWithPopup(provider).catch(err => alert("Erro ao entrar: " + err.message));
 }
+
 buildAuthUI();
 
 // ========================
-// MODAL DE ADICIONAIS
+// BOTÃO FLUTUANTE “MEUS PEDIDOS”
 // ========================
-const extrasModal = document.createElement("div");
-extrasModal.id = "extras-modal";
-document.body.appendChild(extrasModal);
+function ensureOrdersFab(user) {
+  let fab = document.getElementById("orders-fab");
+  if (user && !fab) {
+    fab = document.createElement("button");
+    fab.id = "orders-fab";
+    fab.innerHTML = "📜 <span>Meus Pedidos</span>";
+    document.body.appendChild(fab);
+    requestAnimationFrame(() => fab.classList.add("show"));
 
-document.querySelectorAll(".extras-btn").forEach(btn => {
-  btn.addEventListener("click", () => {
-    extrasModal.innerHTML = `
-      <div class="extras-head">
-        <span>Escolha seus adicionais</span>
-        <button onclick="document.getElementById('extras-modal').classList.remove('show')">✕</button>
-      </div>
-      <div class="extras-list">
-        <label><span>Bacon</span><input type="checkbox" data-extra="Bacon" data-price="3"></label>
-        <label><span>Cheddar</span><input type="checkbox" data-extra="Cheddar" data-price="2"></label>
-        <label><span>Ovo</span><input type="checkbox" data-extra="Ovo" data-price="1.5"></label>
-      </div>
-      <div class="extras-foot">
-        <button id="extras-add" class="btn-primario">Adicionar</button>
-      </div>
-    `;
-    extrasModal.classList.add("show");
-  });
-});
-
-document.addEventListener("click", e => {
-  if (e.target.id === "extras-add") {
-    const checks = document.querySelectorAll("#extras-modal input:checked");
-    if (!checks.length) {
-      extrasModal.classList.remove("show");
-      return;
-    }
-
-    let extrasTotal = 0;
-    let extrasNames = [];
-
-    checks.forEach(chk => {
-      extrasTotal += parseFloat(chk.dataset.price);
-      extrasNames.push(chk.dataset.extra);
-    });
-
-    cart.push({
-      id: "extra-" + Date.now(),
-      name: "Adicionais: " + extrasNames.join(", "),
-      price: extrasTotal,
-      quantidade: 1
-    });
-
-    saveCart();
-    extrasModal.classList.remove("show");
-    showPopup("➕ Adicionais adicionados!");
+    fab.onclick = async () => {
+      try {
+        const list = await loadUserOrders(user.uid);
+        renderOrders(list);
+        document.getElementById("orders-panel")?.classList.add("active");
+      } catch (e) {
+        console.error(e);
+        alert("Erro ao abrir seus pedidos.");
+      }
+    };
   }
-});
+  if (!user && fab) fab.remove();
+}
 
 // ========================
-// PAINEL “MEUS PEDIDOS”
+// LISTAR PEDIDOS DO FIREBASE
 // ========================
 async function loadUserOrders(uid) {
   try {
@@ -228,6 +306,9 @@ async function loadUserOrders(uid) {
   }
 }
 
+// ========================
+// RENDERIZAR PEDIDOS
+// ========================
 function renderOrders(list) {
   const content = document.getElementById("orders-content");
   if (!content) return;
@@ -235,6 +316,7 @@ function renderOrders(list) {
     content.innerHTML = `<p class="empty-orders">Nenhum pedido foi encontrado.</p>`;
     return;
   }
+
   content.innerHTML = "";
   list.forEach(p => {
     const total = (p.total || 0).toFixed(2);
@@ -260,6 +342,9 @@ function renderOrders(list) {
   });
 }
 
+// ========================
+// FECHAR PAINEL “MEUS PEDIDOS”
+// ========================
 const closeBtn = document.querySelector(".orders-close");
 if (closeBtn) closeBtn.onclick = () => document.getElementById("orders-panel").classList.remove("active");
 
@@ -268,5 +353,6 @@ if (closeBtn) closeBtn.onclick = () => document.getElementById("orders-panel").c
 // ========================
 window.addEventListener("DOMContentLoaded", () => {
   updateCartCount();
+  renderCart();
   updateCountdown();
 });
