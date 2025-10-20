@@ -489,8 +489,12 @@ setTimeout(() => {
   });
 }, 2000);
 
+}, 2000);
+} catch (err) {
+  console.error("Erro ao exibir botão Meus Pedidos:", err);
+}
 
-// Teste simples de execução — não interfere em nada
+/* ===== Teste simples de execução – não interfere em nada ===== */
 setTimeout(() => {
   console.log("✅ Script carregado até o final!");
   const marker = document.createElement("div");
