@@ -726,3 +726,14 @@ a { color: inherit; }
   .menu-section h2 { font-size: 1.2em; }
   .slide { height: 130px; }
 }
+/* Ajuste de tamanho do botão de login no header */
+.user-button,
+#user-btn {
+  font-size: 14px !important;
+  padding: 8px 12px !important;
+  border-radius: 999px !important;
+  max-width: 48vw;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow: hidden;
+}
