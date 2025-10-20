@@ -493,8 +493,8 @@ setTimeout(() => {
 
 
 
-/* ====== TESTE VISUAL — força execução ====== */
-(() => {
+/* ====== TESTE VISUAL CORRIGIDO ====== */
+try {
   setTimeout(() => {
     const debugBox = document.createElement("div");
     debugBox.textContent = "⚡ Script ativo";
@@ -520,4 +520,8 @@ setTimeout(() => {
     to { opacity: 1; transform: scale(1); }
   }`;
   document.head.appendChild(style);
-})();
+
+  console.log("✅ Script carregado até o fim com sucesso!");
+} catch (err) {
+  console.error("❌ Erro no final do script:", err);
+}
