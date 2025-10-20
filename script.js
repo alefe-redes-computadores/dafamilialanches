@@ -88,11 +88,35 @@ function updateCountdown() {
   const m = Math.floor((diff / (1000 * 60)) % 60);
   const s = Math.floor((diff / 1000) % 60);
   document.getElementById("timer").textContent =
-    `${h.toString().padStart(2, "0")}:${m.toString().padStart(2, "0")}:${s
-      .toString()
-      .padStart(2, "0")}`;
+    `${h.toString().padStart(2, "0")}:${m.toString().padStart(2, "0")}:${s.toString().padStart(2, "0")}`;
 }
 setInterval(updateCountdown, 1000);
+
+// ========================
+// FUNÇÃO GLOBAL: “MEUS PEDIDOS” FAB
+// ========================
+function ensureOrdersFab(user) {
+  let fab = document.getElementById("orders-fab");
+  if (user && !fab) {
+    fab = document.createElement("button");
+    fab.id = "orders-fab";
+    fab.innerHTML = "📜 <span>Meus Pedidos</span>";
+    document.body.appendChild(fab);
+    requestAnimationFrame(() => fab.classList.add("show"));
+
+    fab.onclick = async () => {
+      try {
+        const list = await loadUserOrders(user.uid);
+        renderOrders(list);
+        document.getElementById("orders-panel")?.classList.add("active");
+      } catch (e) {
+        console.error(e);
+        alert("Erro ao abrir seus pedidos.");
+      }
+    };
+  }
+  if (!user && fab) fab.remove();
+}
 
 // ========================
 // LOGIN E USUÁRIO
@@ -184,91 +208,60 @@ document.addEventListener("click", e => {
 });
 
 // ========================
-// BOTÃO "MEUS PEDIDOS"
+// PAINEL “MEUS PEDIDOS”
 // ========================
-function buildOrdersUI() {
-  const panel = document.getElementById("orders-panel");
-  const content = document.getElementById("orders-content");
-  const closeBtn = document.querySelector(".orders-close");
-  if (closeBtn) closeBtn.onclick = () => panel.classList.remove("active");
+async function loadUserOrders(uid) {
+  try {
+    const snap = await db
+      .collection("pedidos")
+      .where("uid", "==", uid)
+      .orderBy("criadoEm", "desc")
+      .limit(20)
+      .get();
 
-  async function loadUserOrders(uid) {
-    try {
-      const snap = await db
-        .collection("pedidos")
-        .where("uid", "==", uid)
-        .orderBy("criadoEm", "desc")
-        .limit(20)
-        .get();
-
-      const arr = [];
-      snap.forEach(doc => arr.push({ id: doc.id, ...doc.data() }));
-      return arr;
-    } catch (e) {
-      console.error("Erro ao buscar pedidos:", e);
-      return [];
-    }
-  }
-
-  function renderOrders(list) {
-    if (!content) return;
-    if (!list.length) {
-      content.innerHTML = `<p class="empty-orders">Nenhum pedido foi encontrado.</p>`;
-      return;
-    }
-    content.innerHTML = "";
-    list.forEach(p => {
-      const total = (p.total || 0).toFixed(2);
-      const quando = p.criadoEm?.toDate
-        ? p.criadoEm.toDate().toLocaleString("pt-BR")
-        : new Date().toLocaleString("pt-BR");
-
-      const box = document.createElement("div");
-      box.className = "order-item";
-      box.innerHTML = `
-        <h4>Pedido #${p.id.slice(-6).toUpperCase()} <small>${quando}</small></h4>
-        <ul style="margin:4px 0 8px 16px;">
-          ${(p.itens || [])
-            .map(
-              (it, i) =>
-                `<li>${i + 1}. ${it.nome} — ${it.quantidade}x (R$ ${(it.subtotal || 0).toFixed(2)})</li>`
-            )
-            .join("")}
-        </ul>
-        <strong>Total: R$ ${total}</strong>
-      `;
-      content.appendChild(box);
-    });
-  }
-
-  function ensureOrdersFab(user) {
-    let fab = document.getElementById("orders-fab");
-    if (user && !fab) {
-      fab = document.createElement("button");
-      fab.id = "orders-fab";
-      fab.innerHTML = "📜 <span>Meus Pedidos</span>";
-      document.body.appendChild(fab);
-      requestAnimationFrame(() => fab.classList.add("show"));
-
-      fab.onclick = async () => {
-        try {
-          const list = await loadUserOrders(user.uid);
-          renderOrders(list);
-          panel?.classList.add("active");
-        } catch (e) {
-          console.error(e);
-          alert("Erro ao abrir seus pedidos.");
-        }
-      };
-    }
-    if (!user && fab) fab.remove();
-  }
-
-  if (window.auth) {
-    auth.onAuthStateChanged(user => ensureOrdersFab(user || null));
+    const arr = [];
+    snap.forEach(doc => arr.push({ id: doc.id, ...doc.data() }));
+    return arr;
+  } catch (e) {
+    console.error("Erro ao buscar pedidos:", e);
+    return [];
   }
 }
-buildOrdersUI();
+
+function renderOrders(list) {
+  const content = document.getElementById("orders-content");
+  if (!content) return;
+  if (!list.length) {
+    content.innerHTML = `<p class="empty-orders">Nenhum pedido foi encontrado.</p>`;
+    return;
+  }
+  content.innerHTML = "";
+  list.forEach(p => {
+    const total = (p.total || 0).toFixed(2);
+    const quando = p.criadoEm?.toDate
+      ? p.criadoEm.toDate().toLocaleString("pt-BR")
+      : new Date().toLocaleString("pt-BR");
+
+    const box = document.createElement("div");
+    box.className = "order-item";
+    box.innerHTML = `
+      <h4>Pedido #${p.id.slice(-6).toUpperCase()} <small>${quando}</small></h4>
+      <ul style="margin:4px 0 8px 16px;">
+        ${(p.itens || [])
+          .map(
+            (it, i) =>
+              `<li>${i + 1}. ${it.nome} — ${it.quantidade}x (R$ ${(it.subtotal || 0).toFixed(2)})</li>`
+          )
+          .join("")}
+      </ul>
+      <strong>Total: R$ ${total}</strong>
+    `;
+    content.appendChild(box);
+  });
+}
+
+const closeBtn = document.querySelector(".orders-close");
+if (closeBtn) closeBtn.onclick = () => document.getElementById("orders-panel").classList.remove("active");
 
 // ========================
 // EXECUÇÃO INICIAL
