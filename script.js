@@ -7,6 +7,18 @@
 const clickSound = new Audio("click.wav");
 clickSound.volume = 0.4;
 
+// --- Correção hard: garante que o carrinho nunca inicie aberto ---
+window.addEventListener("load", () => {
+  const miniCart = document.getElementById("mini-cart");
+  const cartBackdrop = document.getElementById("cart-backdrop");
+
+  if (miniCart && cartBackdrop) {
+    miniCart.classList.remove("active");
+    cartBackdrop.classList.remove("show");
+    document.body.classList.remove("no-scroll");
+  }
+});
+
 /* ========= Helpers ========= */
 const sleep = (ms) => new Promise(r => setTimeout(r, ms));
 
