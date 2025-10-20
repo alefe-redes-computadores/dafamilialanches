@@ -546,3 +546,47 @@ document.querySelectorAll(".carousel .slide").forEach((img) => {
 });
 
 console.log("✅ Script principal (PARTE 3/3) carregado com sucesso.");
+
+/* ========= Correção final do carrinho bugado (mobile + desktop) ========= */
+document.addEventListener("DOMContentLoaded", () => {
+  const miniCart = document.getElementById("mini-cart");
+  const cartBackdrop = document.getElementById("cart-backdrop");
+  const closeCartBtn = document.querySelector(".mini-close");
+
+  // 🔒 Garante que o carrinho comece fechado
+  if (miniCart && cartBackdrop) {
+    miniCart.classList.remove("active");
+    cartBackdrop.classList.remove("show");
+    document.body.classList.remove("no-scroll");
+  }
+
+  // 🔄 Função segura de fechamento
+  function fecharCarrinhoSeguro() {
+    if (!miniCart || !cartBackdrop) return;
+    miniCart.classList.remove("active");
+    cartBackdrop.classList.remove("show");
+    document.body.classList.remove("no-scroll");
+  }
+
+  // 🔊 Reforço no evento de fechar (inclui som)
+  if (closeCartBtn) {
+    closeCartBtn.addEventListener("click", () => {
+      clickSound.currentTime = 0;
+      clickSound.play().catch(() => {});
+      fecharCarrinhoSeguro();
+    });
+  }
+
+  if (cartBackdrop) {
+    cartBackdrop.addEventListener("click", () => {
+      clickSound.currentTime = 0;
+      clickSound.play().catch(() => {});
+      fecharCarrinhoSeguro();
+    });
+  }
+
+  // ⚡ Corrige estado caso o script carregue com o carrinho visível
+  window.addEventListener("load", () => {
+    fecharCarrinhoSeguro();
+  });
+});
