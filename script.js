@@ -1,31 +1,25 @@
-/* ================================
-   DFL – Script principal (v1.1.5)
+/* ===================================================
+   DFL – Script principal (v1.2)
    - Login (Email + Google)
-   - Carrinho com quantidade
-   - Adicionais, Carrossel, Status, Som
-   - Salvar pedidos no Firestore
-   ================================ */
+   - Carrinho com quantidade e extras
+   - Histórico de pedidos (painel lateral)
+   =================================================== */
 
-/* 🔊 Som global */
 const clickSound = new Audio("click.wav");
 clickSound.volume = 0.4;
-
-/* Helper */
 const sleep = (ms) => new Promise(r => setTimeout(r, ms));
 
 /* =======================
    Firebase
    ======================= */
 async function loadFirebase() {
-  function inject(src) {
-    return new Promise((resolve, reject) => {
-      const s = document.createElement("script");
-      s.src = src;
-      s.onload = resolve;
-      s.onerror = reject;
-      document.head.appendChild(s);
-    });
-  }
+  const inject = (src) => new Promise((resolve, reject) => {
+    const s = document.createElement("script");
+    s.src = src;
+    s.onload = resolve;
+    s.onerror = reject;
+    document.head.appendChild(s);
+  });
   await inject("https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js");
   await inject("https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js");
   await inject("https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js");
@@ -33,7 +27,7 @@ async function loadFirebase() {
 
 async function initFirebase() {
   await loadFirebase();
-  const firebaseConfig = {
+  const config = {
     apiKey: "AIzaSyATQBcbYuzKpKlSwNlbpRiAM1XyHqhGeak",
     authDomain: "da-familia-lanches.firebaseapp.com",
     projectId: "da-familia-lanches",
@@ -42,259 +36,193 @@ async function initFirebase() {
     appId: "1:106857147317:web:769c98aed26bb8fc9e87fc",
     measurementId: "G-TCZ18HFWGX"
   };
-  if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+  if (!firebase.apps.length) firebase.initializeApp(config);
   window.db = firebase.firestore();
   window.auth = firebase.auth();
 }
 
 /* =======================
-   Login UI (Email + Google)
+   Login UI
    ======================= */
 function buildAuthUI() {
-  const header = document.querySelector(".header") || document.body;
-
-  const userChip = document.createElement("button");
-  userChip.id = "user-chip";
-  userChip.type = "button";
-  userChip.textContent = "Entrar / Cadastro";
-  userChip.style.cssText = `
-    position: fixed; top: 12px; right: 12px; z-index: 1100;
-    background:#f9d44b; color:#000; font-weight:700; border:none;
-    border-radius:999px; padding:8px 12px; cursor:pointer;
-    box-shadow:0 2px 6px rgba(0,0,0,.4);
-  `;
-  header.appendChild(userChip);
-
-  const backdrop = document.createElement("div");
-  backdrop.id = "auth-backdrop";
-  backdrop.style.cssText = `position:fixed; inset:0; background:rgba(0,0,0,.55); display:none; z-index:1200;`;
-  document.body.appendChild(backdrop);
+  const header = document.querySelector(".header");
+  const chip = document.createElement("button");
+  chip.id = "user-chip";
+  chip.textContent = "Entrar / Cadastro";
+  chip.className = "user-chip";
+  header.appendChild(chip);
 
   const modal = document.createElement("div");
   modal.id = "auth-modal";
-  modal.style.cssText = `
-    position:fixed; left:50%; top:50%; transform:translate(-50%,-50%);
-    background:#111; color:#fff; border:2px solid #f9d44b;
-    border-radius:14px; width:90%; max-width:420px; padding:18px;
-    z-index:1210; display:none; box-shadow:0 10px 30px rgba(0,0,0,.5);
-  `;
   modal.innerHTML = `
-    <h3 style="color:#f9d44b; margin:0 0 10px">Entrar / Criar conta</h3>
-
-    <button id="btn-google" style="
-      width:100%; display:flex; align-items:center; justify-content:center;
-      gap:10px; padding:10px; border-radius:8px; border:1px solid #ccc;
-      background:#fff; color:#111; font-weight:600; margin-bottom:12px;">
-      <img src='https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg'
-        alt='Google logo' width='20' height='20'>
-      <span>Continuar com Google</span>
-    </button>
-
-    <div style="height:1px;background:#333;margin:10px 0;"></div>
-
-    <label style="display:block; font-size:.9rem; margin-bottom:6px;">E-mail</label>
-    <input id="auth-email" type="email" placeholder="seu@email.com"
-      style="width:100%; padding:10px; border-radius:8px; border:1px solid #333;
-      background:#1a1a1a; color:#fff; margin-bottom:12px;" />
-
-    <label style="display:block; font-size:.9rem; margin-bottom:6px;">Senha</label>
-    <input id="auth-pass" type="password" placeholder="mínimo 6 caracteres"
-      style="width:100%; padding:10px; border-radius:8px; border:1px solid #333;
-      background:#1a1a1a; color:#fff; margin-bottom:16px;" />
-
-    <div style="display:flex; gap:8px; flex-wrap:wrap;">
-      <button id="btn-login" style="flex:1; background:#f9d44b; color:#000; font-weight:700; border:none; border-radius:8px; padding:10px;">Entrar</button>
-      <button id="btn-sign"  style="flex:1; background:#f9d44b; color:#000; font-weight:700; border:none; border-radius:8px; padding:10px;">Criar conta</button>
-      <button id="btn-close" style="flex:1; background:#333; color:#fff; border:1px solid #444; border-radius:8px; padding:10px;">Fechar</button>
-    </div>
-
-    <p id="auth-msg" style="margin-top:12px; min-height:20px; font-size:.9rem; color:#ffb13b;"></p>
-  `;
+    <div class="auth-box">
+      <h3>Entrar / Criar conta</h3>
+      <button id="btn-google" class="google-btn">
+        <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" width="20">
+        <span>Entrar com Google</span>
+      </button>
+      <input id="auth-email" type="email" placeholder="E-mail" />
+      <input id="auth-pass" type="password" placeholder="Senha (mín. 6 caracteres)" />
+      <div class="auth-actions">
+        <button id="btn-login">Entrar</button>
+        <button id="btn-sign">Cadastrar</button>
+        <button id="btn-close">Fechar</button>
+      </div>
+      <p id="auth-msg"></p>
+    </div>`;
   document.body.appendChild(modal);
 
   const msg = modal.querySelector("#auth-msg");
   const emailEl = modal.querySelector("#auth-email");
   const passEl = modal.querySelector("#auth-pass");
-  const btnGoogle = modal.querySelector("#btn-google");
 
-  const openModal = () => { clickSound.currentTime = 0; clickSound.play().catch(()=>{}); backdrop.style.display = "block"; modal.style.display = "block"; };
-  const closeModal = () => { backdrop.style.display = "none"; modal.style.display = "none"; };
+  const openModal = () => modal.classList.add("show");
+  const closeModal = () => modal.classList.remove("show");
+  chip.onclick = openModal;
+  modal.querySelector("#btn-close").onclick = closeModal;
 
-  userChip.addEventListener("click", openModal);
-  backdrop.addEventListener("click", closeModal);
-  modal.querySelector("#btn-close").addEventListener("click", closeModal);
-
-  async function doLogin() {
+  async function login() {
     msg.textContent = "Entrando...";
     try {
       await auth.signInWithEmailAndPassword(emailEl.value.trim(), passEl.value);
-      msg.textContent = "✅ Login realizado!";
-      await sleep(600);
+      msg.textContent = "✅ Logado!";
+      await sleep(700);
       closeModal();
-    } catch (e) { msg.textContent = "⚠️ " + (e.message || "Erro ao entrar"); }
+    } catch (e) { msg.textContent = "⚠️ " + e.message; }
   }
 
-  async function doSign() {
+  async function signUp() {
     msg.textContent = "Criando conta...";
     try {
       await auth.createUserWithEmailAndPassword(emailEl.value.trim(), passEl.value);
       msg.textContent = "✅ Conta criada!";
       await sleep(700);
       closeModal();
-    } catch (e) { msg.textContent = "⚠️ " + (e.message || "Erro ao criar conta"); }
+    } catch (e) { msg.textContent = "⚠️ " + e.message; }
   }
 
-  modal.querySelector("#btn-login").addEventListener("click", doLogin);
-  modal.querySelector("#btn-sign").addEventListener("click", doSign);
+  modal.querySelector("#btn-login").onclick = login;
+  modal.querySelector("#btn-sign").onclick = signUp;
 
-  btnGoogle.addEventListener("click", async () => {
+  modal.querySelector("#btn-google").onclick = async () => {
     try {
       const provider = new firebase.auth.GoogleAuthProvider();
       await auth.signInWithPopup(provider);
       msg.textContent = "✅ Logado com Google!";
-      await sleep(500);
+      await sleep(700);
       closeModal();
-    } catch (e) { msg.textContent = "⚠️ " + (e.message || "Erro no Google Sign-In"); }
-  });
+    } catch (e) { msg.textContent = "⚠️ " + e.message; }
+  };
 
-  auth.onAuthStateChanged((user) => {
+  auth.onAuthStateChanged(user => {
     if (user) {
-      userChip.textContent = `Olá, ${user.email.split("@")[0]} (Sair)`;
-      userChip.onclick = async () => { clickSound.currentTime = 0; clickSound.play().catch(()=>{}); await auth.signOut(); };
+      chip.textContent = `${user.email.split("@")[0]} (Sair)`;
+      chip.onclick = () => auth.signOut();
     } else {
-      userChip.textContent = "Entrar / Cadastro";
-      userChip.onclick = openModal;
+      chip.textContent = "Entrar / Cadastro";
+      chip.onclick = openModal;
     }
   });
 }
 
 /* =======================
-   Carrinho com quantidade
+   Carrinho (v2)
    ======================= */
-const cartBtn = document.getElementById("cart-icon");
-const miniCart = document.getElementById("mini-cart");
-const cartBackdrop = document.getElementById("cart-backdrop");
-const cartList = document.getElementById("mini-list");
-const cartCount = document.getElementById("cart-count");
-const clearCartBtn = document.getElementById("mini-clear");
-const finishOrderBtn = document.getElementById("mini-checkout");
-const closeCartBtn = document.querySelector(".mini-close");
-
-/* Cart interno (v2 = com qty) */
 const CART_KEY = "dflCartV2";
 let cart = [];
 
-/* Migração */
-function migrateCartIfNeeded() {
-  const v2 = localStorage.getItem(CART_KEY);
-  if (v2) {
-    try { cart = JSON.parse(v2) || []; return; } catch {}
-  }
-  const old = localStorage.getItem("dflCart");
-  if (!old) { cart = []; saveCart(); return; }
-  try {
-    const arr = JSON.parse(old) || [];
-    const map = new Map();
-    arr.forEach(it => {
-      const id = (it.id || it.nome || it.name || "").toString();
-      const key = id || (it.nome + "|" + it.preco);
-      const existing = map.get(key);
-      if (existing) existing.qty += 1;
-      else map.set(key, { id: id || key, name: it.nome, price: Number(it.preco), qty: 1 });
-    });
-    cart = Array.from(map.values());
-    saveCart();
-  } catch { cart = []; saveCart(); }
+const els = {
+  btnCart: document.getElementById("cart-icon"),
+  mini: document.getElementById("mini-cart"),
+  backdrop: document.getElementById("cart-backdrop"),
+  list: document.getElementById("mini-list"),
+  count: document.getElementById("cart-count"),
+  clear: document.getElementById("mini-clear"),
+  checkout: document.getElementById("mini-checkout"),
+  close: document.querySelector(".mini-close")
+};
+
+function loadCart() {
+  try { cart = JSON.parse(localStorage.getItem(CART_KEY)) || []; } catch { cart = []; }
+  saveCart();
 }
 
 function saveCart() {
   localStorage.setItem(CART_KEY, JSON.stringify(cart));
-  cartCount.textContent = cart.reduce((s, x) => s + x.qty, 0);
+  els.count.textContent = cart.reduce((s, x) => s + x.qty, 0);
 }
 
 function openCart() {
-  clickSound.currentTime = 0; clickSound.play().catch(()=>{});
-  miniCart.classList.add("active");
-  cartBackdrop.classList.add("show");
-  document.body.classList.add("no-scroll");
+  clickSound.play().catch(()=>{});
+  els.mini.classList.add("active");
+  els.backdrop.classList.add("show");
 }
 function closeCart() {
-  miniCart.classList.remove("active");
-  cartBackdrop.classList.remove("show");
-  document.body.classList.remove("no-scroll");
+  els.mini.classList.remove("active");
+  els.backdrop.classList.remove("show");
 }
-
-function addItem({ id, name, price }, qty = 1) {
-  const key = id || name;
-  const i = cart.findIndex(x => (x.id || x.name) === key && x.price === price);
-  if (i >= 0) cart[i].qty += qty;
-  else cart.push({ id: key, name, price, qty });
-  renderCart();
-  saveCart();
-  showAddedPopup(name);
-  if (!miniCart.classList.contains("active")) openCart();
-}
-
-function incItem(index) { cart[index].qty += 1; renderCart(); saveCart(); }
-function decItem(index) {
-  cart[index].qty -= 1;
-  if (cart[index].qty <= 0) cart.splice(index, 1);
-  renderCart(); saveCart();
-}
-function removeItem(index) { cart.splice(index, 1); renderCart(); saveCart(); }
-function clearCart() { cart = []; renderCart(); saveCart(); }
 
 function renderCart() {
-  cartList.innerHTML = "";
+  els.list.innerHTML = "";
   let total = 0;
-  cart.forEach((it, idx) => {
+  cart.forEach((it, i) => {
     total += it.price * it.qty;
     const li = document.createElement("li");
-    li.className = "cart-item";
     li.innerHTML = `
       <span>${it.name}</span>
-      <div style="display:flex; align-items:center; gap:8px;">
-        <button class="qty-dec" data-idx="${idx}" aria-label="Diminuir">–</button>
-        <strong>${it.qty}x</strong>
-        <button class="qty-inc" data-idx="${idx}" aria-label="Aumentar">+</button>
-        <strong>R$ ${(it.price * it.qty).toFixed(2)}</strong>
-        <button class="remove-item" data-idx="${idx}" aria-label="Remover">✕</button>
-      </div>
-    `;
-    cartList.appendChild(li);
+      <div class="qty-box">
+        <button class="dec" data-i="${i}">-</button>
+        <strong>${it.qty}</strong>
+        <button class="inc" data-i="${i}">+</button>
+        <span>R$ ${(it.price * it.qty).toFixed(2)}</span>
+        <button class="rm" data-i="${i}">✕</button>
+      </div>`;
+    els.list.appendChild(li);
   });
-  cartCount.textContent = cart.reduce((s, x) => s + x.qty, 0);
-  clearCartBtn.style.display = cart.length ? "inline-block" : "none";
-  finishOrderBtn.style.display = cart.length ? "inline-block" : "none";
+  els.clear.style.display = cart.length ? "inline-block" : "none";
+  els.checkout.style.display = cart.length ? "inline-block" : "none";
+  els.count.textContent = cart.reduce((s, x) => s + x.qty, 0);
 }
 
+function addItem({ id, name, price }, qty=1) {
+  const i = cart.findIndex(x => x.id === id);
+  if (i >= 0) cart[i].qty += qty;
+  else cart.push({ id, name, price, qty });
+  saveCart(); renderCart();
+}
+
+function incItem(i) { cart[i].qty++; saveCart(); renderCart(); }
+function decItem(i) {
+  cart[i].qty--;
+  if (cart[i].qty <= 0) cart.splice(i, 1);
+  saveCart(); renderCart();
+}
+function removeItem(i) { cart.splice(i, 1); saveCart(); renderCart(); }
+function clearCart() { cart = []; saveCart(); renderCart(); }
+
 function showAddedPopup(name) {
-  const popup = document.createElement("div");
-  popup.className = "popup-add";
-  popup.textContent = `🍔 ${name} adicionado!`;
-  document.body.appendChild(popup);
-  setTimeout(() => popup.remove(), 1400);
+  const pop = document.createElement("div");
+  pop.className = "popup-add";
+  pop.textContent = `🍔 ${name} adicionado!`;
+  document.body.appendChild(pop);
+  setTimeout(() => pop.remove(), 1400);
 }
 
 /* =======================
    Adicionais
    ======================= */
-const extrasBackdrop = document.getElementById("extras-backdrop");
 const extrasModal = document.getElementById("extras-modal");
+const extrasBackdrop = document.getElementById("extras-backdrop");
 const extrasList = document.getElementById("extras-list");
-const extrasCancel = document.getElementById("extras-cancel");
 const extrasAdd = document.getElementById("extras-add");
+const extrasCancel = document.getElementById("extras-cancel");
 let produtoAtual = null;
 
-function openExtras(nomeProduto) {
+function openExtras(nome) {
   extrasList.innerHTML = `
-    <label><input type="checkbox" value="Cebola" data-price="0.99"> 🧅 Cebola — R$0,99</label>
-    <label><input type="checkbox" value="Salada" data-price="1.99"> 🥬 Salada — R$1,99</label>
-    <label><input type="checkbox" value="Ovo" data-price="1.99"> 🥚 Ovo — R$1,99</label>
-    <label><input type="checkbox" value="Salsicha" data-price="1.99"> 🌭 Salsicha — R$1,99</label>
     <label><input type="checkbox" value="Bacon" data-price="2.99"> 🥓 Bacon — R$2,99</label>
-    <label><input type="checkbox" value="Molho Verde" data-price="2.99"> 🌿 Molho Verde — R$2,99</label>
     <label><input type="checkbox" value="Cheddar" data-price="3.99"> 🧀 Cheddar — R$3,99</label>
+    <label><input type="checkbox" value="Molho Verde" data-price="2.99"> 🌿 Molho Verde — R$2,99</label>
   `;
   extrasModal.classList.add("show");
   extrasBackdrop.classList.add("show");
@@ -306,180 +234,139 @@ function closeExtras() {
 extrasCancel?.addEventListener("click", closeExtras);
 extrasBackdrop?.addEventListener("click", closeExtras);
 
-/* =======================
-   Pedido (Firestore + WhatsApp)
-   ======================= */
-function montarObjetoPedido() {
-  const itens = cart.map((it, idx) => ({
-    ordem: idx + 1,
-    nome: String(it.name),
-    preco: Number(it.price),
-    quantidade: Number(it.qty),
-    subtotal: Number(it.price * it.qty)
-  }));
-  const total = itens.reduce((s, x) => s + x.subtotal, 0);
-  const user = (window.auth && window.auth.currentUser) || null;
-  return {
-    itens,
-    total,
-    moeda: "BRL",
-    origem: "site",
-    status: "aberto",
-    uid: user ? user.uid : null,
-    email: user ? user.email : null,
-    criadoEm: firebase.firestore.FieldValue.serverTimestamp(),
-  };
-}
-
-async function salvarPedidoNoFirestore(pedido) {
-  try {
-    const ref = await db.collection("pedidos").add(pedido);
-    return { ok: true, id: ref.id };
-  } catch (err) {
-    console.error("Erro ao salvar pedido:", err);
-    return { ok: false, id: null };
-  }
-}
-
-function montarMensagemWhats(pedido) {
-  let msg = "🧾 *Pedido – Da Família Lanches*%0A%0A";
-  pedido.itens.forEach((item) => {
-    msg += `${item.ordem}. ${item.nome} (${item.quantidade}x) — R$ ${item.subtotal.toFixed(2)}%0A`;
+extrasAdd?.addEventListener("click", () => {
+  const checks = extrasList.querySelectorAll("input:checked");
+  checks.forEach(cb => {
+    addItem({ id: "extra-" + cb.value, name: cb.value, price: parseFloat(cb.dataset.price) }, 1);
   });
-  msg += `%0A💰 *Total:* R$ ${pedido.total.toFixed(2)}%0A📍 Patos de Minas`;
+  closeExtras();
+});
+
+/* =======================
+   Pedido (WhatsApp + Histórico)
+   ======================= */
+function montarPedido() {
+  const itens = cart.map((x, i) => ({
+    n: i + 1, nome: x.name, preco: x.price, qtd: x.qty, sub: x.qty * x.price
+  }));
+  const total = itens.reduce((s, x) => s + x.sub, 0);
+  return { itens, total, criado: new Date().toISOString() };
+}
+
+function gerarMensagemWhats(p) {
+  let msg = "🧾 *Pedido – Da Família Lanches*%0A%0A";
+  p.itens.forEach(i => msg += `${i.n}. ${i.nome} (${i.qtd}x) — R$ ${i.sub.toFixed(2)}%0A`);
+  msg += `%0A💰 *Total:* R$ ${p.total.toFixed(2)}%0A📍 Patos de Minas`;
   return msg;
 }
 
-async function handleFecharPedido() {
+async function handleCheckout() {
   if (!cart.length) return alert("Seu carrinho está vazio!");
-  const pedido = montarObjetoPedido();
-  const salvar = await salvarPedidoNoFirestore(pedido);
-  if (salvar.ok) {
-    const numero = "5534997178336";
-    const mensagem = montarMensagemWhats(pedido);
-    window.open(`https://wa.me/${numero}?text=${mensagem}`, "_blank");
-    closeCart();
-    clearCart();
-  } else {
-    alert("⚠️ Erro ao registrar o pedido no servidor.");
-  }
+  const pedido = montarPedido();
+  salvarNoHistorico(pedido);
+  const msg = gerarMensagemWhats(pedido);
+  const numero = "5534997178336";
+  window.open(`https://wa.me/${numero}?text=${msg}`, "_blank");
+  closeCart();
 }
 
 /* =======================
-   Carrossel, Status, Timer
+   Histórico de Pedidos
    ======================= */
-function atualizarContagem() {
-  const el = document.getElementById("timer");
-  if (!el) return;
-  const agora = new Date();
-  const fim = new Date();
-  fim.setHours(23, 59, 59, 999);
-  const diff = fim - agora;
-  if (diff <= 0) return (el.textContent = "00:00:00");
-  const h = Math.floor(diff / 1000 / 60 / 60);
-  const m = Math.floor((diff / 1000 / 60) % 60);
-  const s = Math.floor((diff / 1000) % 60);
-  el.textContent = `${String(h).padStart(2,"0")}:${String(m).padStart(2,"0")}:${String(s).padStart(2,"0")}`;
-}
-setInterval(atualizarContagem, 1000);
+const HIST_KEY = "dflPedidos";
+let historico = [];
 
-function atualizarStatus() {
-  const banner = document.getElementById("status-banner");
-  if (!banner) return;
-  const agora = new Date();
-  const dia = agora.getDay();
-  const hora = agora.getHours();
-  const minuto = agora.getMinutes();
-  let aberto = false;
-  let msg = "";
-  if (dia === 2) msg = "❌ Fechado — abrimos amanhã às 18h";
-  else if ([1,3,4].includes(dia)) {
-    aberto = hora >= 18 && (hora < 23 || (hora === 23 && minuto <= 15));
-    msg = aberto ? "🟢 Aberto até 23h15" : "🔴 Fechado — abrimos às 18h";
-  } else if ([5,6,0].includes(dia)) {
-    aberto = hora >= 17 && (hora < 23 || (hora === 23 && minuto <= 30));
-    msg = aberto ? "🟢 Aberto até 23h30" : "🔴 Fechado — abrimos às 17h30";
+function carregarHistorico() {
+  try { historico = JSON.parse(localStorage.getItem(HIST_KEY)) || []; }
+  catch { historico = []; }
+}
+function salvarNoHistorico(pedido) {
+  historico.unshift(pedido);
+  if (historico.length > 20) historico.pop();
+  localStorage.setItem(HIST_KEY, JSON.stringify(historico));
+}
+
+/* Painel lateral */
+function criarPainelHistorico() {
+  const painel = document.createElement("aside");
+  painel.id = "painel-historico";
+  painel.innerHTML = `
+    <div class="painel-head">
+      <h3>📜 Meus Pedidos</h3>
+      <button id="fechar-historico">✕</button>
+    </div>
+    <div id="lista-historico" class="painel-lista"></div>`;
+  document.body.appendChild(painel);
+
+  const botao = document.createElement("button");
+  botao.id = "btn-historico";
+  botao.textContent = "📜 Meus Pedidos";
+  botao.className = "btn-historico";
+  document.querySelector(".header").appendChild(botao);
+
+  botao.onclick = () => {
+    renderHistorico();
+    painel.classList.add("show");
+  };
+  document.getElementById("fechar-historico").onclick = () =>
+    painel.classList.remove("show");
+}
+
+function renderHistorico() {
+  const lista = document.getElementById("lista-historico");
+  if (!lista) return;
+  carregarHistorico();
+
+  if (!historico.length) {
+    lista.innerHTML = `<p style="color:#bbb;text-align:center;margin-top:20px;">
+      Nenhum pedido salvo ainda.</p>`;
+    return;
   }
-  banner.textContent = msg;
-  banner.className = aberto ? "status-banner aberto" : "status-banner fechado";
-}
-setInterval(atualizarStatus, 60000);
 
-function initCarousel() {
-  const container = document.querySelector("#promoCarousel .slides");
-  if (!container) return;
-  const prevBtn = document.querySelector("#promoCarousel .c-prev");
-  const nextBtn = document.querySelector("#promoCarousel .c-next");
-  const slides = Array.from(container.querySelectorAll(".slide"));
-  if (!slides.length) return;
-  let index = 0;
-  function showSlide(i) { slides.forEach((s, idx) => s.style.display = (idx === i ? "block" : "none")); }
-  showSlide(index);
-  prevBtn.addEventListener("click", () => {
-    clickSound.currentTime = 0; clickSound.play().catch(()=>{});
-    index = (index - 1 + slides.length) % slides.length; showSlide(index);
-  });
-  nextBtn.addEventListener("click", () => {
-    clickSound.currentTime = 0; clickSound.play().catch(()=>{});
-    index = (index + 1) % slides.length; showSlide(index);
-  });
-  setInterval(() => { index = (index + 1) % slides.length; showSlide(index); }, 5000);
+  lista.innerHTML = historico.map((p, idx) => `
+    <div class="pedido-item">
+      <h4>Pedido #${idx + 1}</h4>
+      <ul>${p.itens.map(i => `<li>${i.qtd}x ${i.nome} — R$ ${i.sub.toFixed(2)}</li>`).join("")}</ul>
+      <p><b>Total:</b> R$ ${p.total.toFixed(2)}</p>
+      <p class="data">${new Date(p.criado).toLocaleString("pt-BR")}</p>
+    </div>
+  `).join("");
 }
 
 /* =======================
-   Inicialização
+   Inicialização principal
    ======================= */
 document.addEventListener("DOMContentLoaded", () => {
-  miniCart?.classList.remove("active");
-  cartBackdrop?.classList.remove("show");
-  document.body.classList.remove("no-scroll");
+  loadCart(); renderCart(); carregarHistorico(); criarPainelHistorico();
 
-  migrateCartIfNeeded();
-  renderCart();
-  atualizarContagem();
-  atualizarStatus();
-  initCarousel();
+  els.btnCart.onclick = openCart;
+  els.close.onclick = closeCart;
+  els.backdrop.onclick = closeCart;
+  els.clear.onclick = clearCart;
+  els.checkout.onclick = handleCheckout;
 
-  cartBtn?.addEventListener("click", openCart);
-  closeCartBtn?.addEventListener("click", closeCart);
-  cartBackdrop?.addEventListener("click", closeCart);
-  clearCartBtn?.addEventListener("click", clearCart);
-  finishOrderBtn?.addEventListener("click", handleFecharPedido);
-
-  cartList?.addEventListener("click", (e) => {
+  els.list.onclick = (e) => {
     const t = e.target;
-    if (t.classList.contains("qty-inc")) incItem(Number(t.dataset.idx));
-    else if (t.classList.contains("qty-dec")) decItem(Number(t.dataset.idx));
-    else if (t.classList.contains("remove-item")) removeItem(Number(t.dataset.idx));
+    if (t.classList.contains("inc")) incItem(Number(t.dataset.i));
+    if (t.classList.contains("dec")) decItem(Number(t.dataset.i));
+    if (t.classList.contains("rm")) removeItem(Number(t.dataset.i));
+  };
+
+  document.querySelectorAll(".add-cart").forEach(btn => {
+    btn.onclick = () => {
+      const c = btn.closest(".card");
+      addItem({
+        id: c.dataset.id, name: c.dataset.name, price: parseFloat(c.dataset.price)
+      }, 1);
+      showAddedPopup(c.dataset.name);
+    };
   });
 
-  document.querySelectorAll(".add-cart").forEach((btn) => {
-    btn.addEventListener("click", () => {
-      const card = btn.closest(".card");
-      if (!card) return;
-      const id = card.dataset.id || card.dataset.name;
-      const name = card.dataset.name;
-      const price = parseFloat(card.dataset.price);
-      addItem({ id, name, price }, 1);
-    });
-  });
-
-  document.querySelectorAll(".extras-btn").forEach((btn) => {
-    btn.addEventListener("click", () => {
+  document.querySelectorAll(".extras-btn").forEach(btn => {
+    btn.onclick = () => {
       produtoAtual = btn.closest(".card");
-      openExtras(produtoAtual?.dataset?.name || "Produto");
-    });
-  });
-
-  extrasAdd?.addEventListener("click", () => {
-    clickSound.currentTime = 0; clickSound.play().catch(()=>{});
-    const checks = extrasList.querySelectorAll("input[type='checkbox']:checked");
-    checks.forEach((cb) => {
-      const name = cb.value;
-      const price = parseFloat(cb.dataset.price);
-      addItem({ id: "extra:"+name, name, price }, 1);
-    });
-    closeExtras();
+      openExtras(produtoAtual.dataset.name);
+    };
   });
 });
 
@@ -490,6 +377,6 @@ document.addEventListener("DOMContentLoaded", () => {
     buildAuthUI();
     console.log("✅ Firebase e Login prontos");
   } catch (e) {
-    console.error("Erro ao iniciar Firebase/Login:", e);
+    console.error("Erro Firebase/Login:", e);
   }
 })();
