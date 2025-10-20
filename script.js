@@ -486,13 +486,30 @@ setTimeout(() => {
     }
 
     if (!user && ordersBtn) ordersBtn.remove();
-  });
-}, 2000);
-
-}, 2000);
-} catch (err) {
-  console.error("Erro ao exibir botão Meus Pedidos:", err);
+  }, 2000);
+  } catch (err) {
+    console.error("Erro ao exibir botão Meus Pedidos:", err);
+  }
 }
+
+/* ===== Teste simples de execução – não interfere em nada ===== */
+setTimeout(() => {
+  console.log("✅ Script carregado até o final!");
+  const marker = document.createElement("div");
+  marker.textContent = "⚡ OK";
+  marker.style.cssText = `
+    position: fixed;
+    bottom: 10px;
+    left: 10px;
+    background: #f9d44b;
+    color: #000;
+    padding: 6px 8px;
+    border-radius: 8px;
+    font-weight: bold;
+    z-index: 5000;
+  `;
+  document.body.appendChild(marker);
+}, 1500);
 
 /* ===== Teste simples de execução – não interfere em nada ===== */
 setTimeout(() => {
