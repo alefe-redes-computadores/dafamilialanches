@@ -488,3 +488,35 @@ setTimeout(() => {
     if (!user && ordersBtn) ordersBtn.remove();
   });
 }, 2000);
+
+
+
+
+
+/* ====== TESTE VISUAL ====== */
+setTimeout(() => {
+  const debugBox = document.createElement("div");
+  debugBox.textContent = "⚡ Script ativo";
+  debugBox.style.cssText = `
+    position: fixed;
+    bottom: 10px;
+    left: 10px;
+    background: #f9d44b;
+    color: #000;
+    padding: 6px 10px;
+    border-radius: 8px;
+    font-weight: 600;
+    z-index: 5000;
+    animation: pulse 1s infinite alternate;
+  `;
+  document.body.appendChild(debugBox);
+}, 1500);
+
+/* animação pulsante */
+const style = document.createElement("style");
+style.textContent = `
+@keyframes pulse {
+  from { opacity: .3; transform: scale(.9); }
+  to { opacity: 1; transform: scale(1); }
+}`;
+document.head.appendChild(style);
