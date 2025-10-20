@@ -380,3 +380,20 @@ document.addEventListener("DOMContentLoaded", () => {
     console.error("Erro Firebase/Login:", e);
   }
 })();
+
+// 🔧 Garantia de renderização do botão "📜 Meus Pedidos"
+document.addEventListener("DOMContentLoaded", () => {
+  setTimeout(() => {
+    if (!document.getElementById("btn-historico")) {
+      const btnHistorico = document.createElement("button");
+      btnHistorico.id = "btn-historico";
+      btnHistorico.textContent = "📜 Meus Pedidos";
+      btnHistorico.className = "btn-historico";
+      btnHistorico.onclick = () => {
+        const painel = document.getElementById("painel-historico");
+        if (painel) painel.classList.toggle("show");
+      };
+      document.querySelector(".header").appendChild(btnHistorico);
+    }
+  }, 1000);
+});
