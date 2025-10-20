@@ -634,3 +634,35 @@ window.addEventListener("load", () => {
     }
   }, 1000);
 });
+
+/* ===== Blindagem extra do carrinho ===== */
+window.addEventListener("load", () => {
+  const cart = document.getElementById("mini-cart");
+  const backdrop = document.getElementById("cart-backdrop");
+  const closeBtn = document.querySelector(".mini-close");
+  const openBtn = document.getElementById("cart-icon");
+  if (!cart || !backdrop) return;
+
+  function closeCart() {
+    cart.classList.remove("active");
+    backdrop.classList.remove("show");
+    document.body.classList.remove("no-scroll");
+  }
+  function openCart() {
+    cart.classList.add("active");
+    backdrop.classList.add("show");
+    document.body.classList.add("no-scroll");
+  }
+
+  // força iniciar fechado
+  closeCart();
+
+  // delegação simples (funciona mesmo com binds antigos)
+  document.addEventListener("click", (e) => {
+    if (e.target === backdrop || e.target.closest(".mini-close")) closeCart();
+    if (e.target.closest("#cart-icon")) openCart();
+  });
+
+  // se algum CSS/JS tiver aberto, fecha 1s depois
+  setTimeout(closeCart, 1000);
+});
