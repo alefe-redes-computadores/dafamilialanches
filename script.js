@@ -1,12 +1,12 @@
 /* ================================
-   DFL – Script estável (Login + Carrinho + Adicionais + Carrossel)
+   DFL – Script principal (com Login Google + Carrinho corrigido)
    ================================ */
 
-/* 🔊 clique */
+/* 🔊 Som global */
 const clickSound = new Audio("click.wav");
 clickSound.volume = 0.4;
 
-/* helpers */
+/* ========= Helpers ========= */
 const sleep = (ms) => new Promise(r => setTimeout(r, ms));
 
 /* ========= Firebase ========= */
@@ -41,19 +41,18 @@ async function initFirebase() {
   window.auth = firebase.auth();
 }
 
-/* ========= UI de Login (email/senha) ========= */
+/* ========= UI de Login ========= */
 function buildAuthUI() {
   const header = document.querySelector(".header") || document.body;
-
   const userChip = document.createElement("button");
   userChip.id = "user-chip";
-  userChip.type = "button";
+  userChip.textContent = "Entrar / Cadastro";
   userChip.style.cssText = `
     position: fixed; top: 12px; right: 12px; z-index: 1100;
     background:#f9d44b; color:#000; font-weight:700; border:none;
-    border-radius:999px; padding:8px 12px; cursor:pointer; box-shadow:0 2px 6px rgba(0,0,0,.4);
+    border-radius:999px; padding:8px 12px; cursor:pointer;
+    box-shadow:0 2px 6px rgba(0,0,0,.4);
   `;
-  userChip.textContent = "Entrar / Cadastro";
   header.appendChild(userChip);
 
   const backdrop = document.createElement("div");
@@ -87,7 +86,7 @@ function buildAuthUI() {
 
   const msg = modal.querySelector("#auth-msg");
   const emailEl = modal.querySelector("#auth-email");
-  const passEl  = modal.querySelector("#auth-pass");
+  const passEl = modal.querySelector("#auth-pass");
 
   const openModal = () => { backdrop.style.display = "block"; modal.style.display = "block"; };
   const closeModal = () => { backdrop.style.display = "none"; modal.style.display = "none"; };
@@ -116,6 +115,33 @@ function buildAuthUI() {
 
   modal.querySelector("#btn-login").addEventListener("click", doLogin);
   modal.querySelector("#btn-sign").addEventListener("click", doSign);
+
+  /* ====== Google Login ====== */
+  const googleProvider = new firebase.auth.GoogleAuthProvider();
+  const btnGoogle = document.createElement("button");
+  btnGoogle.id = "btn-google";
+  btnGoogle.style.cssText = `
+    width:100%; margin-top:12px; background:#fff; color:#000;
+    font-weight:600; border:none; border-radius:8px;
+    padding:10px 12px; display:flex; align-items:center; justify-content:center;
+    gap:8px;
+  `;
+  btnGoogle.innerHTML = `
+    <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg"
+         style="width:20px; height:20px;"> Entrar com Google
+  `;
+  modal.appendChild(btnGoogle);
+
+  btnGoogle.addEventListener("click", async () => {
+    msg.textContent = "Conectando com Google...";
+    try {
+      await auth.signInWithPopup(googleProvider);
+      msg.textContent = "✅ Login com Google realizado!";
+      setTimeout(closeModal, 700);
+    } catch (e) {
+      msg.textContent = "⚠️ " + (e.message || "Erro ao entrar com Google");
+    }
+  });
 
   auth.onAuthStateChanged((user) => {
     if (user) {
@@ -151,13 +177,12 @@ function fecharCarrinho() {
   cartBackdrop.classList.remove("show");
   document.body.classList.remove("no-scroll");
 }
-
 function atualizarCarrinho() {
   cartList.innerHTML = "";
   let total = 0;
   cart.forEach((item, index) => {
     const li = document.createElement("li");
-    li.className = "cart-item";
+    li.classList.add("cart-item");
     li.innerHTML = `
       <span>${item.nome}</span>
       <strong>R$ ${item.preco.toFixed(2)}</strong>
@@ -176,10 +201,6 @@ function adicionarAoCarrinho(nome, preco) {
   mostrarPopupAdicionado(nome);
   if (!miniCart.classList.contains("active")) abrirCarrinho();
 }
-function removerDoCarrinho(index) { cart.splice(index, 1); atualizarCarrinho(); }
-function limparCarrinho() { cart = []; atualizarCarrinho(); }
-
-/* popup */
 function mostrarPopupAdicionado(nomeProduto = null) {
   const popup = document.createElement("div");
   popup.className = "popup-add";
@@ -187,16 +208,40 @@ function mostrarPopupAdicionado(nomeProduto = null) {
   document.body.appendChild(popup);
   setTimeout(() => popup.remove(), 1400);
 }
+function removerDoCarrinho(index) {
+  cart.splice(index, 1);
+  atualizarCarrinho();
+}
+function limparCarrinho() {
+  cart = [];
+  atualizarCarrinho();
+}
 
-/* ========= Adicionais ========= */
+document.addEventListener("DOMContentLoaded", () => {
+  fecharCarrinho();
+  atualizarCarrinho();
+  cartBtn.addEventListener("click", abrirCarrinho);
+  closeCartBtn.addEventListener("click", fecharCarrinho);
+  cartBackdrop.addEventListener("click", fecharCarrinho);
+  clearCartBtn.addEventListener("click", limparCarrinho);
+  cartList.addEventListener("click", (e) => {
+    if (e.target.classList.contains("remove-item"))
+      removerDoCarrinho(e.target.dataset.index);
+  });
+  document.querySelectorAll(".add-cart").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const card = btn.closest(".card");
+      adicionarAoCarrinho(card.dataset.name, parseFloat(card.dataset.price));
+    });
+  });
+});
+
+/* ========= Modal de Adicionais ========= */
 const extrasBackdrop = document.getElementById("extras-backdrop");
 const extrasModal = document.getElementById("extras-modal");
 const extrasList = document.getElementById("extras-list");
 const extrasCancel = document.getElementById("extras-cancel");
 const extrasAdd = document.getElementById("extras-add");
-
-let extrasSelecionados = [];
-let produtoAtual = null;
 
 function abrirExtras(nomeProduto) {
   extrasList.innerHTML = `
@@ -206,78 +251,44 @@ function abrirExtras(nomeProduto) {
     <label><input type="checkbox" value="Salsicha" data-price="1.99"> 🌭 Salsicha — R$1,99</label>
     <label><input type="checkbox" value="Bacon" data-price="2.99"> 🥓 Bacon — R$2,99</label>
     <label><input type="checkbox" value="Molho Verde" data-price="2.99"> 🌿 Molho Verde — R$2,99</label>
-    <label><input type="checkbox" value="Cheddar" data-price="3.99"> 🧀 Cheddar — R$3,99</label>
-  `;
+    <label><input type="checkbox" value="Cheddar" data-price="3.99"> 🧀 Cheddar — R$3,99</label>`;
   extrasModal.classList.add("show");
   extrasBackdrop.classList.add("show");
 }
 function fecharExtras() {
   extrasModal.classList.remove("show");
   extrasBackdrop.classList.remove("show");
-  extrasSelecionados = [];
 }
-extrasCancel.addEventListener("click", fecharExtras);
-extrasBackdrop.addEventListener("click", fecharExtras);
-extrasAdd.addEventListener("click", () => {
-  clickSound.currentTime = 0; clickSound.play().catch(()=>{});
+extrasCancel?.addEventListener("click", fecharExtras);
+extrasBackdrop?.addEventListener("click", fecharExtras);
+extrasAdd?.addEventListener("click", () => {
   const checkboxes = extrasList.querySelectorAll("input[type='checkbox']:checked");
-  extrasSelecionados = Array.from(checkboxes).map((cb) => ({
-    nome: cb.value,
-    preco: parseFloat(cb.dataset.price),
+  const extrasSelecionados = Array.from(checkboxes).map(cb => ({
+    nome: cb.value, preco: parseFloat(cb.dataset.price)
   }));
-  extrasSelecionados.forEach((extra) => adicionarAoCarrinho(extra.nome, extra.preco));
+  extrasSelecionados.forEach(extra => adicionarAoCarrinho(extra.nome, extra.preco));
   mostrarPopupAdicionado("Adicional");
   fecharExtras();
 });
-
-/* ========= Inicialização de UI ========= */
-document.addEventListener("DOMContentLoaded", () => {
-  // garante carrinho fechado no load
-  fecharCarrinho();
-  atualizarCarrinho();
-
-  cartBtn.addEventListener("click", abrirCarrinho);
-  closeCartBtn.addEventListener("click", fecharCarrinho);
-  cartBackdrop.addEventListener("click", fecharCarrinho);
-  clearCartBtn.addEventListener("click", limparCarrinho);
-
-  cartList.addEventListener("click", (e) => {
-    if (e.target.classList.contains("remove-item")) {
-      removerDoCarrinho(e.target.dataset.index);
-    }
-  });
-
-  document.querySelectorAll(".add-cart").forEach((btn) => {
-    btn.addEventListener("click", () => {
-      clickSound.currentTime = 0; clickSound.play().catch(()=>{});
-      const card = btn.closest(".card");
-      const nome = card.dataset.name;
-      const preco = parseFloat(card.dataset.price);
-      adicionarAoCarrinho(nome, preco);
-    });
-  });
-
-  document.querySelectorAll(".extras-btn").forEach((btn) => {
-    btn.addEventListener("click", () => {
-      produtoAtual = btn.closest(".card");
-      abrirExtras(produtoAtual.dataset.name);
-    });
+document.querySelectorAll(".extras-btn").forEach(btn => {
+  btn.addEventListener("click", () => {
+    const produto = btn.closest(".card").dataset.name;
+    abrirExtras(produto);
   });
 });
 
 /* ========= Contagem regressiva ========= */
 function atualizarContagem() {
-  const el = document.getElementById("timer");
-  if (!el) return;
   const agora = new Date();
   const fim = new Date();
   fim.setHours(23, 59, 59, 999);
   const diff = fim - agora;
-  if (diff <= 0) return (el.textContent = "00:00:00");
+  if (diff <= 0) return (document.getElementById("timer").textContent = "00:00:00");
   const h = Math.floor(diff / 1000 / 60 / 60);
   const m = Math.floor((diff / 1000 / 60) % 60);
   const s = Math.floor((diff / 1000) % 60);
-  el.textContent = `${String(h).padStart(2,"0")}:${String(m).padStart(2,"0")}:${String(s).padStart(2,"0")}`;
+  document.getElementById("timer").textContent =
+    `${String(h).padStart(2,"0")}:${String(m).padStart(2,"0")}:${String(s).padStart(2,"0")}`;
 }
 setInterval(atualizarContagem, 1000);
 atualizarContagem();
@@ -293,14 +304,13 @@ function atualizarStatus() {
   let aberto = false, msg = "";
 
   if (dia === 2) msg = "❌ Fechado — abrimos amanhã às 18h";
-  else if ([1, 3, 4].includes(dia)) {
+  else if ([1,3,4].includes(dia)) {
     aberto = hora >= 18 && (hora < 23 || (hora === 23 && minuto <= 15));
     msg = aberto ? "🟢 Aberto até 23h15" : "🔴 Fechado — abrimos às 18h";
-  } else if ([5, 6, 0].includes(dia)) {
+  } else if ([5,6,0].includes(dia)) {
     aberto = hora >= 17 && (hora < 23 || (hora === 23 && minuto <= 30));
     msg = aberto ? "🟢 Aberto até 23h30" : "🔴 Fechado — abrimos às 17h30";
   }
-
   banner.textContent = msg;
   banner.className = aberto ? "status-banner aberto" : "status-banner fechado";
 }
@@ -308,115 +318,35 @@ setInterval(atualizarStatus, 60000);
 atualizarStatus();
 
 /* ========= Carrossel ========= */
-(function initCarousel() {
+(function initCarouselFix() {
   const container = document.querySelector("#promoCarousel .slides");
   if (!container) return;
-  const prevBtn  = document.querySelector("#promoCarousel .c-prev");
-  const nextBtn  = document.querySelector("#promoCarousel .c-next");
-  const slides   = Array.from(container.querySelectorAll(".slide"));
+  const prevBtn = document.querySelector("#promoCarousel .c-prev");
+  const nextBtn = document.querySelector("#promoCarousel .c-next");
+  const slides = Array.from(container.querySelectorAll(".slide"));
   let index = 0;
-  if (!slides.length) return;
+  if (slides.length === 0) return;
 
-  function showSlide(i) {
-    slides.forEach((s, idx) => (s.style.display = idx === i ? "block" : "none"));
-  }
+  function showSlide(i){ slides.forEach((s,idx)=> s.style.display = idx===i?"block":"none"); }
   showSlide(index);
-
-  prevBtn?.addEventListener("click", () => {
-    clickSound.currentTime = 0; clickSound.play().catch(()=>{});
-    index = (index - 1 + slides.length) % slides.length;
-    showSlide(index);
+  prevBtn.addEventListener("click", ()=>{
+    clickSound.currentTime=0; clickSound.play().catch(()=>{});
+    index=(index-1+slides.length)%slides.length; showSlide(index);
   });
-  nextBtn?.addEventListener("click", () => {
-    clickSound.currentTime = 0; clickSound.play().catch(()=>{});
-    index = (index + 1) % slides.length;
-    showSlide(index);
+  nextBtn.addEventListener("click", ()=>{
+    clickSound.currentTime=0; clickSound.play().catch(()=>{});
+    index=(index+1)%slides.length; showSlide(index);
   });
-  setInterval(() => { index = (index + 1) % slides.length; showSlide(index); }, 5000);
-
-  // clique no slide -> WhatsApp
-  slides.forEach((img) => {
-    img.addEventListener("click", async () => {
-      clickSound.currentTime = 0; clickSound.play().catch(()=>{});
-      const msg = encodeURIComponent(img.dataset.wa || "Olá! Quero aproveitar a promoção 🍔");
-      const phone = "5534997178336";
-      window.open(`https://wa.me/${phone}?text=${msg}`, "_blank");
-      try {
-        if (window.db) {
-          await window.db.collection("interacoes").add({
-            tipo: "clique_promo",
-            promo: img.getAttribute("alt") || "(sem alt)",
-            data: window.firebase.firestore.FieldValue.serverTimestamp(),
-            uid: window.auth?.currentUser?.uid || null,
-          });
-        }
-      } catch(_){}
-    });
-  });
+  setInterval(()=>{ index=(index+1)%slides.length; showSlide(index); },5000);
 })();
 
-/* ========= Monta pedido + WhatsApp + Firestore ========= */
-function montarObjetoPedido() {
-  const itens = cart.map((it, idx) => ({
-    ordem: idx + 1,
-    nome: String(it.nome),
-    preco: Number(it.preco),
-  }));
-  const total = itens.reduce((s, x) => s + x.preco, 0);
-  const user = (window.auth && window.auth.currentUser) || null;
-
-  return {
-    itens, total, moeda: "BRL", origem: "site", status: "aberto",
-    uid: user ? user.uid : null, email: user ? user.email : null,
-    criadoEm: (window.firebase && window.firebase.firestore)
-      ? window.firebase.firestore.FieldValue.serverTimestamp()
-      : new Date(),
-  };
-}
-function montarMensagemWhats(pedido) {
-  let msg = "🧾 *Pedido – Da Família Lanches*%0A%0A";
-  pedido.itens.forEach((item) => {
-    msg += `${item.ordem}. ${item.nome} — R$ ${item.preco.toFixed(2)}%0A`;
-  });
-  msg += `%0A💰 *Total:* R$ ${pedido.total.toFixed(2)}%0A📍 Patos de Minas`;
-  return msg;
-}
-async function salvarPedidoNoFirestore(pedido) {
-  try {
-    if (!window.db || !window.firebase) return { ok:false, id:null };
-    const ref = await window.db.collection("pedidos").add(pedido);
-    return { ok:true, id:ref.id };
-  } catch (err) {
-    console.error("Erro ao salvar no Firestore:", err);
-    return { ok:false, id:null };
-  }
-}
-async function handleFecharPedido() {
-  try {
-    clickSound.currentTime = 0; clickSound.play().catch(()=>{});
-    if (!cart.length) { alert("Seu carrinho está vazio!"); return; }
-    const pedido = montarObjetoPedido();
-    await salvarPedidoNoFirestore(pedido);
-    const numero = "5534997178336";
-    const mensagem = montarMensagemWhats(pedido);
-    window.open(`https://wa.me/${numero}?text=${mensagem}`, "_blank");
-    fecharCarrinho();
-    // limparCarrinho(); // se quiser limpar após enviar
-  } catch (e) {
-    console.error(e);
-    alert("Não foi possível finalizar o pedido agora. Tente novamente em instantes.");
-  }
-}
-finishOrderBtn?.removeEventListener("click", handleFecharPedido);
-finishOrderBtn?.addEventListener("click", handleFecharPedido);
-
-/* ========= Bootstrap ========= */
-(async function start() {
+/* ========= Inicialização Firebase/Login ========= */
+(async function startDFL(){
   try {
     await initFirebase();
     buildAuthUI();
-    console.log("✅ Versão estável carregada.");
-  } catch (e) {
+    console.log("✅ Firebase + Login Google ativos");
+  } catch(e){
     console.error("Erro ao iniciar Firebase/Login:", e);
   }
 })();
