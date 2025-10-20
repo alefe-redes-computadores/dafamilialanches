@@ -7,15 +7,14 @@
 const clickSound = new Audio("click.wav");
 clickSound.volume = 0.4;
 
-// --- Correção hard: garante que o carrinho nunca inicie aberto ---
-window.addEventListener("load", () => {
+// --- Correção final: garante que o carrinho comece sempre fechado ---
+document.addEventListener("DOMContentLoaded", () => {
   const miniCart = document.getElementById("mini-cart");
   const cartBackdrop = document.getElementById("cart-backdrop");
-  if (miniCart && cartBackdrop) {
-    miniCart.classList.remove("active");
-    cartBackdrop.classList.remove("show");
-    document.body.classList.remove("no-scroll");
-  }
+
+  if (miniCart) miniCart.classList.remove("active");
+  if (cartBackdrop) cartBackdrop.classList.remove("show");
+  document.body.classList.remove("no-scroll");
 });
 
 /* ========= Helpers ========= */
