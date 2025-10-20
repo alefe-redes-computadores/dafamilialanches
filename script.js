@@ -376,3 +376,83 @@ async function handleFecharPedido() {
 }
 finishOrderBtn.addEventListener("click", handleFecharPedido);
 console.log("✅ Parte 2 carregada com sucesso");
+
+/* ================================
+   HISTÓRICO DE PEDIDOS – Etapa 1
+   ================================ */
+let ordersPanel, ordersBackdrop;
+
+function buildOrdersPanel() {
+  // Evita duplicar
+  if (document.getElementById("orders-panel")) return;
+
+  // Backdrop
+  ordersBackdrop = document.createElement("div");
+  ordersBackdrop.id = "orders-backdrop";
+  ordersBackdrop.style.cssText = `
+    position:fixed; inset:0; background:rgba(0,0,0,.55);
+    opacity:0; visibility:hidden; transition:.25s ease;
+    z-index:9998;
+  `;
+  document.body.appendChild(ordersBackdrop);
+
+  // Painel lateral
+  ordersPanel = document.createElement("aside");
+  ordersPanel.id = "orders-panel";
+  ordersPanel.style.cssText = `
+    position:fixed; top:0; right:-100%; width:340px; height:100vh;
+    background:#111; color:#fff; border-left:2px solid #f9d44b;
+    z-index:9999; display:flex; flex-direction:column;
+    transition:right .35s ease;
+  `;
+  ordersPanel.innerHTML = `
+    <header style="display:flex;justify-content:space-between;align-items:center;
+      padding:12px 14px;border-bottom:1px solid #262626;background:#000;">
+      <h3 style="margin:0;color:#f9d44b;">📜 Meus Pedidos</h3>
+      <button id="orders-close"
+        style="background:#f9d44b;color:#000;border:none;border-radius:8px;
+        padding:6px 10px;font-weight:800;cursor:pointer;">✕</button>
+    </header>
+    <div id="orders-list" style="flex:1;overflow:auto;padding:12px;">
+      <p style="color:#aaa;">Nenhum pedido ainda.</p>
+    </div>
+  `;
+  document.body.appendChild(ordersPanel);
+
+  // Fechar painel
+  const close = () => {
+    ordersPanel.style.right = "-100%";
+    ordersBackdrop.style.opacity = "0";
+    ordersBackdrop.style.visibility = "hidden";
+  };
+  document.getElementById("orders-close").onclick = close;
+  ordersBackdrop.onclick = close;
+
+  console.log("✅ Painel de pedidos criado");
+}
+
+/* Mostrar ou esconder botão “Meus Pedidos” */
+auth.onAuthStateChanged((user) => {
+  let ordersBtn = document.getElementById("orders-btn");
+  if (user && !ordersBtn) {
+    ordersBtn = document.createElement("button");
+    ordersBtn.id = "orders-btn";
+    ordersBtn.textContent = "📜 Meus Pedidos";
+    ordersBtn.style.cssText = `
+      position:fixed; bottom:80px; right:18px;
+      background:#f9d44b; color:#000; font-weight:700;
+      border:none; border-radius:999px; padding:10px 14px;
+      box-shadow:0 8px 22px rgba(0,0,0,.35);
+      cursor:pointer; z-index:1100;
+    `;
+    ordersBtn.onclick = () => {
+      clickSound.play().catch(()=>{});
+      buildOrdersPanel();
+      ordersPanel.style.right = "0";
+      ordersBackdrop.style.opacity = "1";
+      ordersBackdrop.style.visibility = "visible";
+    };
+    document.body.appendChild(ordersBtn);
+  }
+  if (!user && ordersBtn) ordersBtn.remove();
+});
