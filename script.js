@@ -590,3 +590,47 @@ document.addEventListener("DOMContentLoaded", () => {
     fecharCarrinhoSeguro();
   });
 });
+
+/* ========= Correção HARD – Carrinho sempre fechado e funcional ========= */
+window.addEventListener("load", () => {
+  const miniCart = document.getElementById("mini-cart");
+  const cartBackdrop = document.getElementById("cart-backdrop");
+  const closeCartBtn = document.querySelector(".mini-close");
+
+  if (!miniCart || !cartBackdrop) return;
+
+  // 1️⃣ Garante que inicie fechado
+  miniCart.classList.remove("active");
+  cartBackdrop.classList.remove("show");
+  document.body.classList.remove("no-scroll");
+
+  // 2️⃣ Fecha sempre que clicar no X ou no fundo
+  function fecharCarrinhoSeguro() {
+    miniCart.classList.remove("active");
+    cartBackdrop.classList.remove("show");
+    document.body.classList.remove("no-scroll");
+  }
+
+  if (closeCartBtn) {
+    closeCartBtn.onclick = () => {
+      clickSound.currentTime = 0;
+      clickSound.play().catch(() => {});
+      fecharCarrinhoSeguro();
+    };
+  }
+
+  cartBackdrop.onclick = () => {
+    clickSound.currentTime = 0;
+    clickSound.play().catch(() => {});
+    fecharCarrinhoSeguro();
+  };
+
+  // 3️⃣ Evita abertura automática indevida
+  setTimeout(() => {
+    if (miniCart.classList.contains("active")) {
+      miniCart.classList.remove("active");
+      cartBackdrop.classList.remove("show");
+      document.body.classList.remove("no-scroll");
+    }
+  }, 1000);
+});
