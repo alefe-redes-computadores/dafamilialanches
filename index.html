@@ -19,7 +19,9 @@
 
 <body>
   <!-- Ícone do carrinho fixo -->
-  <button id="cart-icon" aria-label="Abrir carrinho">🛒 <span id="cart-count">0</span></button>
+  <button id="cart-icon" aria-label="Abrir carrinho">
+    🛒 <span id="cart-count">0</span>
+  </button>
 
   <!-- Cabeçalho -->
   <header class="header">
@@ -65,8 +67,7 @@
       <button class="c-btn c-next" aria-label="Próxima">▶</button>
     </div>
   </section>
-
-  <!-- ======================== -->
+<!-- ======================== -->
   <!-- Hambúrgueres Tradicionais -->
   <!-- ======================== -->
   <section class="menu-section">
@@ -111,7 +112,8 @@
           <button class="extras-btn">➕ Adicionais</button>
         </div>
       </article>
-<article class="card" data-type="burger" data-id="ARMARIA" data-name="ARMARIA" data-price="18.00">
+
+      <article class="card" data-type="burger" data-id="ARMARIA" data-name="ARMARIA" data-price="18.00">
         <h3>ARMARIA <span class="badge">Com Molho Verde 🌿</span></h3>
         <div class="price">R$ 18,00</div>
         <p>Pão, alface, tomate, milho, bacon, salsicha, hambúrguer, filé de frango, batata palha, presunto e mussarela. <em>Acompanha sachê de ketchup.</em></p>
@@ -163,7 +165,9 @@
     </div>
   </section>
 
+  <!-- ======================== -->
   <!-- Hambúrgueres Artesanais -->
+  <!-- ======================== -->
   <section class="menu-section">
     <h2>Hambúrgueres Artesanais</h2>
     <div class="grid">
@@ -198,8 +202,9 @@
       </article>
     </div>
   </section>
-
+<!-- ======================== -->
   <!-- Combos -->
+  <!-- ======================== -->
   <section class="menu-section">
     <h2>Combos</h2>
     <div class="grid">
@@ -207,32 +212,45 @@
         <h3>Combo Casal (Tradicional)</h3>
         <div class="price">R$ 34,99</div>
         <p>2 Hambúrguer Trem + 1 Fanta 1L.</p>
-        <div class="actions"><button class="add-cart">Adicionar</button><button class="extras-btn">➕ Adicionais</button></div>
+        <div class="actions">
+          <button class="add-cart">Adicionar</button>
+          <button class="extras-btn">➕ Adicionais</button>
+        </div>
       </article>
 
       <article class="card" data-type="combo" data-id="CF_TRAD" data-name="Combo Família (Tradicional)" data-price="59.99">
         <h3>Combo Família (Tradicional)</h3>
         <div class="price">R$ 59,99</div>
         <p>4 Hambúrguer Trem + 1 Kuat 2L.</p>
-        <div class="actions"><button class="add-cart">Adicionar</button><button class="extras-btn">➕ Adicionais</button></div>
+        <div class="actions">
+          <button class="add-cart">Adicionar</button>
+          <button class="extras-btn">➕ Adicionais</button>
+        </div>
       </article>
 
       <article class="card" data-type="combo" data-id="CC_ART" data-name="Combo Casal (Artesanal)" data-price="54.99">
         <h3>Combo Casal (Artesanal)</h3>
         <div class="price">R$ 54,99</div>
         <p>2 Hambúrguer Peleja + 1 Coca 1L.</p>
-        <div class="actions"><button class="add-cart">Adicionar</button><button class="extras-btn">➕ Adicionais</button></div>
+        <div class="actions">
+          <button class="add-cart">Adicionar</button>
+          <button class="extras-btn">➕ Adicionais</button>
+        </div>
       </article>
 
       <article class="card" data-type="combo" data-id="CF_ART" data-name="Combo Família (Artesanal)" data-price="79.99">
         <h3>Combo Família (Artesanal)</h3>
         <div class="price">R$ 79,99</div>
         <p>4 Hambúrguer Peleja + 1 Coca 2L.</p>
-        <div class="actions"><button class="add-cart">Adicionar</button><button class="extras-btn">➕ Adicionais</button></div>
+        <div class="actions">
+          <button class="add-cart">Adicionar</button>
+          <button class="extras-btn">➕ Adicionais</button>
+        </div>
       </article>
     </div>
   </section>
-<!-- ======================== -->
+
+  <!-- ======================== -->
   <!-- Hot Dog’s -->
   <!-- ======================== -->
   <section class="menu-section">
@@ -300,31 +318,84 @@
     </div>
   </section>
 
+  <!-- ======================== -->
   <!-- Bebidas -->
+  <!-- ======================== -->
   <section class="menu-section">
     <h2>Bebidas & Refrigerantes</h2>
     <div class="grid">
-      <article class="card" data-type="beverage" data-id="coca200" data-name="Coca-Cola 200ml" data-price="4.00"><h3>Coca-Cola 200ml</h3><div class="price">R$ 4,00</div><div class="actions"><button class="add-cart">Adicionar</button></div></article>
-      <article class="card" data-type="beverage" data-id="aguaG" data-name="Água com Gás" data-price="4.00"><h3>Água com Gás</h3><div class="price">R$ 4,00</div><div class="actions"><button class="add-cart">Adicionar</button></div></article>
-      <article class="card" data-type="beverage" data-id="uva450" data-name="Del Valle Uva 450ml" data-price="5.00"><h3>Del Valle Uva 450ml</h3><div class="price">R$ 5,00</div><div class="actions"><button class="add-cart">Adicionar</button></div></article>
-      <article class="card" data-type="beverage" data-id="laranja450" data-name="Del Valle Laranja 450ml" data-price="5.00"><h3>Del Valle Laranja 450ml</h3><div class="price">R$ 5,00</div><div class="actions"><button class="add-cart">Adicionar</button></div></article>
-      <article class="card" data-type="beverage" data-id="coca310" data-name="Coca-Cola 310ml" data-price="5.00"><h3>Coca-Cola 310ml</h3><div class="price">R$ 5,00</div><div class="actions"><button class="add-cart">Adicionar</button></div></article>
-      <article class="card" data-type="beverage" data-id="fanta1l" data-name="Fanta Laranja 1L" data-price="8.00"><h3>Fanta Laranja 1L</h3><div class="price">R$ 8,00</div><div class="actions"><button class="add-cart">Adicionar</button></div></article>
-      <article class="card" data-type="beverage" data-id="coca1l" data-name="Coca-Cola 1L" data-price="9.00"><h3>Coca-Cola 1L</h3><div class="price">R$ 9,00</div><div class="actions"><button class="add-cart">Adicionar</button></div></article>
-      <article class="card" data-type="beverage" data-id="kuat2l" data-name="Kuat Guaraná 2L" data-price="10.00"><h3>Kuat Guaraná 2L</h3><div class="price">R$ 10,00</div><div class="actions"><button class="add-cart">Adicionar</button></div></article>
-      <article class="card" data-type="beverage" data-id="coca2l" data-name="Coca-Cola 2L" data-price="13.00"><h3>Coca-Cola 2L</h3><div class="price">R$ 13,00</div><div class="actions"><button class="add-cart">Adicionar</button></div></article>
+      <article class="card" data-type="beverage" data-id="coca200" data-name="Coca-Cola 200ml" data-price="4.00">
+        <h3>Coca-Cola 200ml</h3>
+        <div class="price">R$ 4,00</div>
+        <div class="actions"><button class="add-cart">Adicionar</button></div>
+      </article>
+
+      <article class="card" data-type="beverage" data-id="aguaG" data-name="Água com Gás" data-price="4.00">
+        <h3>Água com Gás</h3>
+        <div class="price">R$ 4,00</div>
+        <div class="actions"><button class="add-cart">Adicionar</button></div>
+      </article>
+
+      <article class="card" data-type="beverage" data-id="uva450" data-name="Del Valle Uva 450ml" data-price="5.00">
+        <h3>Del Valle Uva 450ml</h3>
+        <div class="price">R$ 5,00</div>
+        <div class="actions"><button class="add-cart">Adicionar</button></div>
+      </article>
+
+      <article class="card" data-type="beverage" data-id="laranja450" data-name="Del Valle Laranja 450ml" data-price="5.00">
+        <h3>Del Valle Laranja 450ml</h3>
+        <div class="price">R$ 5,00</div>
+        <div class="actions"><button class="add-cart">Adicionar</button></div>
+      </article>
+
+      <article class="card" data-type="beverage" data-id="coca310" data-name="Coca-Cola 310ml" data-price="5.00">
+        <h3>Coca-Cola 310ml</h3>
+        <div class="price">R$ 5,00</div>
+        <div class="actions"><button class="add-cart">Adicionar</button></div>
+      </article>
+
+      <article class="card" data-type="beverage" data-id="fanta1l" data-name="Fanta Laranja 1L" data-price="8.00">
+        <h3>Fanta Laranja 1L</h3>
+        <div class="price">R$ 8,00</div>
+        <div class="actions"><button class="add-cart">Adicionar</button></div>
+      </article>
+
+      <article class="card" data-type="beverage" data-id="coca1l" data-name="Coca-Cola 1L" data-price="9.00">
+        <h3>Coca-Cola 1L</h3>
+        <div class="price">R$ 9,00</div>
+        <div class="actions"><button class="add-cart">Adicionar</button></div>
+      </article>
+
+      <article class="card" data-type="beverage" data-id="kuat2l" data-name="Kuat Guaraná 2L" data-price="10.00">
+        <h3>Kuat Guaraná 2L</h3>
+        <div class="price">R$ 10,00</div>
+        <div class="actions"><button class="add-cart">Adicionar</button></div>
+      </article>
+
+      <article class="card" data-type="beverage" data-id="coca2l" data-name="Coca-Cola 2L" data-price="13.00">
+        <h3>Coca-Cola 2L</h3>
+        <div class="price">R$ 13,00</div>
+        <div class="actions"><button class="add-cart">Adicionar</button></div>
+      </article>
     </div>
   </section>
-
+<!-- ======================== -->
   <!-- Mapa -->
+  <!-- ======================== -->
   <h2 class="mapa-titulo">🚗 Entregamos em toda Patos de Minas 💛</h2>
-  <div id="mapa-entregas" style="height:300px;width:100%;border-radius:12px;margin:20px auto;border:2px solid #f9d44b;"></div>
+  <div id="mapa-entregas"
+       style="height:300px;width:100%;border-radius:12px;margin:20px auto;border:2px solid #f9d44b;">
+  </div>
 
+  <!-- ======================== -->
   <!-- Rodapé -->
+  <!-- ======================== -->
   <footer class="footer">
     <h2>Onde estamos</h2>
     <p>Patos de Minas — Atendimento delivery e retirada.</p>
-    <a class="map-link" href="https://maps.app.goo.gl/jQ1cYcmuZm8rU5Dk9" target="_blank">📍 Abrir no Google Maps</a>
+    <a class="map-link"
+       href="https://maps.app.goo.gl/jQ1cYcmuZm8rU5Dk9"
+       target="_blank">📍 Abrir no Google Maps</a>
     <p class="social-line">
       📸 <a href="https://www.instagram.com/dafamilia_patos" target="_blank">@dafamilia_patos</a> ·
       🛒 <a href="https://www.ifood.com.br/delivery/patos-de-minas-mg/da-familia-lanches-caramuru/9aadff75-b014-4e7f-a9b4-b3e478e38af8" target="_blank">iFood</a> ·
@@ -333,7 +404,9 @@
     <p class="copy">© 2025 Da Família Lanches — Você faz parte disso!</p>
   </footer>
 
+  <!-- ======================== -->
   <!-- Carrinho -->
+  <!-- ======================== -->
   <div id="cart-backdrop"></div>
   <aside id="mini-cart" aria-hidden="true">
     <header class="mini-head">
@@ -347,7 +420,9 @@
     </footer>
   </aside>
 
+  <!-- ======================== -->
   <!-- Modal de Adicionais -->
+  <!-- ======================== -->
   <div id="extras-backdrop"></div>
   <aside id="extras-modal" aria-hidden="true">
     <header class="extras-head">
@@ -361,34 +436,58 @@
     </footer>
   </aside>
 
-  <!-- Script principal -->
-  <script src="script.js"></script>
+  <!-- ======================== -->
+  <!-- Firebase (para login e pedidos) -->
+  <!-- ======================== -->
+  <script type="module">
+    // Import Firebase SDKs
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
+    import { getAnalytics } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-analytics.js";
 
-  <!-- Mapa -->
+    // Configuração do projeto
+    const firebaseConfig = {
+      apiKey: "AIzaSyATQBcbYuzKpKlSwNlbpRiAM1XyHqhGeak",
+      authDomain: "da-familia-lanches.firebaseapp.com",
+      projectId: "da-familia-lanches",
+      storageBucket: "da-familia-lanches.firebasestorage.app",
+      messagingSenderId: "106857147317",
+      appId: "1:106857147317:web:769c98aed26bb8fc9e87fc",
+      measurementId: "G-TCZ18HFWGX"
+    };
+
+    // Inicializa o Firebase
+    const app = initializeApp(firebaseConfig);
+    getAnalytics(app);
+  </script>
+
+  <!-- ======================== -->
+  <!-- Mapa Leaflet -->
+  <!-- ======================== -->
   <script>
-  (function(){
-    const el = document.getElementById('mapa-entregas');
-    if(!el) return;
+    (function() {
+      const el = document.getElementById('mapa-entregas');
+      if (!el) return;
 
-    const map = L.map('mapa-entregas', {
-      center: [-18.5783, -46.5187],
-      zoom: 13,
-      scrollWheelZoom: true
-    });
+      const map = L.map('mapa-entregas', {
+        center: [-18.5783, -46.5187],
+        zoom: 13,
+        scrollWheelZoom: true
+      });
 
-    L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png').addTo(map);
-    L.circle([-18.5783, -46.5187], {
-      radius: 6000,
-      color: '#d4af37',
-      fillColor: '#ffd700',
-      fillOpacity: 0.25,
-      weight: 2
-    }).addTo(map);
-    L.marker([-18.5783, -46.5187])
-      .addTo(map)
-      .bindPopup("<b>🍔 DFL</b><br>Entregamos em toda Patos de Minas 💛")
-      .openPopup();
-  })();
+      L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png').addTo(map);
+      L.circle([-18.5783, -46.5187], {
+        radius: 6000,
+        color: '#d4af37',
+        fillColor: '#ffd700',
+        fillOpacity: 0.25,
+        weight: 2
+      }).addTo(map);
+
+      L.marker([-18.5783, -46.5187])
+        .addTo(map)
+        .bindPopup("<b>🍔 DFL</b><br>Entregamos em toda Patos de Minas 💛")
+        .openPopup();
+    })();
   </script>
 </body>
 </html>
