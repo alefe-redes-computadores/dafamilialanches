@@ -391,6 +391,46 @@ function ajustarCarrinhoMobile() {
 }
 ajustarCarrinhoMobile();
 window.addEventListener("resize", ajustarCarrinhoMobile);
+
+/* ========= Correção do Carrossel ========= */
+(function initCarouselFix() {
+  const container = document.querySelector("#promoCarousel .slides");
+  const prevBtn  = document.querySelector("#promoCarousel .c-prev");
+  const nextBtn  = document.querySelector("#promoCarousel .c-next");
+  const slides   = Array.from(container.querySelectorAll(".slide"));
+  let index      = 0;
+
+  function showSlide(i) {
+    slides.forEach((s, idx) => {
+      s.style.display = (idx === i ? "block" : "none");
+    });
+  }
+
+  if (slides.length === 0) return;
+
+  showSlide(index);
+
+  prevBtn.addEventListener("click", () => {
+    clickSound.currentTime = 0;
+    clickSound.play().catch(()=>{});
+    index = (index - 1 + slides.length) % slides.length;
+    showSlide(index);
+  });
+  nextBtn.addEventListener("click", () => {
+    clickSound.currentTime = 0;
+    clickSound.play().catch(()=>{});
+    index = (index + 1) % slides.length;
+    showSlide(index);
+  });
+
+  // Opcional: auto-rota a cada 5s
+  setInterval(() => {
+    index = (index + 1) % slides.length;
+    showSlide(index);
+  }, 5000);
+})();
+
+
 /* ================================
    DFL – Script principal (PARTE 3/3)
    Firestore: salvar pedido + abrir WhatsApp
