@@ -414,7 +414,19 @@ window.addEventListener("resize", ajustarCarrinhoMobile);
 cartBackdrop.addEventListener("touchstart", fecharCarrinho);
 
 /* ========= Inicialização ========= */
-document.addEventListener("DOMContentLoaded", atualizarCarrinho);
+document.addEventListener("DOMContentLoaded", () => {
+  atualizarCarrinho();
+  fecharCarrinho(); // garante que inicia fechado
+  
+  // Garante que o botão ✕ e o backdrop sempre fechem o carrinho
+  const fecharCarrinhoSeguro = () => {
+    miniCart.classList.remove("active");
+    cartBackdrop.classList.remove("show");
+    document.body.classList.remove("no-scroll");
+  };
+  closeCartBtn.addEventListener("click", fecharCarrinhoSeguro);
+  cartBackdrop.addEventListener("click", fecharCarrinhoSeguro);
+});
 
 /* ================================
    DFL – Script principal (PARTE 3/3)
