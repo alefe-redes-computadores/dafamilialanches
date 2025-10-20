@@ -432,27 +432,37 @@ function buildOrdersPanel() {
 }
 
 /* Mostrar ou esconder botão “Meus Pedidos” */
-auth.onAuthStateChanged((user) => {
-  let ordersBtn = document.getElementById("orders-btn");
-  if (user && !ordersBtn) {
-    ordersBtn = document.createElement("button");
-    ordersBtn.id = "orders-btn";
-    ordersBtn.textContent = "📜 Meus Pedidos";
-    ordersBtn.style.cssText = `
-      position:fixed; bottom:80px; right:18px;
-      background:#f9d44b; color:#000; font-weight:700;
-      border:none; border-radius:999px; padding:10px 14px;
-      box-shadow:0 8px 22px rgba(0,0,0,.35);
-      cursor:pointer; z-index:1100;
-    `;
-    ordersBtn.onclick = () => {
-      clickSound.play().catch(()=>{});
-      buildOrdersPanel();
-      ordersPanel.style.right = "0";
-      ordersBackdrop.style.opacity = "1";
-      ordersBackdrop.style.visibility = "visible";
-    };
-    document.body.appendChild(ordersBtn);
+setTimeout(() => {
+  if (typeof auth === "undefined") {
+    console.warn("⚠️ Firebase ainda não carregou — aguardando...");
+    return;
   }
-  if (!user && ordersBtn) ordersBtn.remove();
-});
+
+  auth.onAuthStateChanged((user) => {
+    let ordersBtn = document.getElementById("orders-btn");
+
+    if (user && !ordersBtn) {
+      ordersBtn = document.createElement("button");
+      ordersBtn.id = "orders-btn";
+      ordersBtn.textContent = "📜 Meus Pedidos";
+      ordersBtn.style.cssText = `
+        position:fixed; bottom:80px; right:18px;
+        background:#f9d44b; color:#000; font-weight:700;
+        border:none; border-radius:999px;
+        padding:10px 14px;
+        box-shadow:0 8px 22px rgba(0,0,0,.35);
+        cursor:pointer; z-index:1100;
+      `;
+      ordersBtn.onclick = () => {
+        clickSound.play().catch(() => {});
+        buildOrdersPanel();
+        ordersPanel.style.right = "0";
+        ordersBackdrop.style.opacity = "1";
+        ordersBackdrop.style.visibility = "visible";
+      };
+      document.body.appendChild(ordersBtn);
+    }
+
+    if (!user && ordersBtn) ordersBtn.remove();
+  });
+}, 2000);
