@@ -79,8 +79,26 @@ function buildAuthUI() {
   modal.innerHTML = `
     <h3 style="color:#f9d44b; margin:0 0 10px">Entrar / Criar conta</h3>
 
-    <button id="btn-google" style="width:100%; padding:10px; border-radius:8px; border:1px solid #333;
-      background:#fff; color:#111; font-weight:700; margin-bottom:12px;">Continuar com Google</button>
+  <button id="btn-google" style="
+  width:100%;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:10px;
+  padding:10px;
+  border-radius:8px;
+  border:1px solid #ccc;
+  background:#fff;
+  color:#111;
+  font-weight:600;
+  margin-bottom:12px;
+  font-family: 'Inter', sans-serif;
+">
+  <img src='https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg'
+       alt='Google logo' width='20' height='20'
+       style='vertical-align:middle'>
+  <span>Continuar com Google</span>
+</button>
 
     <div style="height:1px;background:#333;margin:10px 0;"></div>
 
