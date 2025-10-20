@@ -1,5 +1,6 @@
 /* ================================
-   DFL – Script principal (com Login Google + Carrinho corrigido)
+   DFL v1.1 – Script principal
+   (Carrinho com Quantidade + Login + Som)
    ================================ */
 
 /* 🔊 Som global */
@@ -75,9 +76,10 @@ function buildAuthUI() {
     <label>Senha</label>
     <input id="auth-pass" type="password" placeholder="mínimo 6 caracteres"
       style="width:100%; padding:10px; margin-bottom:16px; border-radius:8px; border:1px solid #333; background:#1a1a1a; color:#fff;" />
-    <div style="display:flex; gap:8px;">
+    <div style="display:flex; gap:8px; flex-wrap:wrap;">
       <button id="btn-login" style="flex:1; background:#f9d44b; color:#000; font-weight:700; border:none; border-radius:8px; padding:10px;">Entrar</button>
       <button id="btn-sign"  style="flex:1; background:#f9d44b; color:#000; font-weight:700; border:none; border-radius:8px; padding:10px;">Criar</button>
+      <button id="btn-google" style="flex:1; background:#db4437; color:#fff; border:none; border-radius:8px; padding:10px;">Login Google</button>
       <button id="btn-close" style="flex:1; background:#333; color:#fff; border:1px solid #444; border-radius:8px; padding:10px;">Fechar</button>
     </div>
     <p id="auth-msg" style="margin-top:10px; font-size:.9rem; color:#ffb13b;"></p>
@@ -113,39 +115,22 @@ function buildAuthUI() {
     } catch (e) { msg.textContent = "⚠️ " + (e.message || "Erro ao criar conta"); }
   }
 
+  async function doGoogleLogin() {
+    const provider = new firebase.auth.GoogleAuthProvider();
+    try {
+      await auth.signInWithPopup(provider);
+      msg.textContent = "✅ Login Google realizado!";
+      setTimeout(closeModal, 700);
+    } catch (e) { msg.textContent = "⚠️ " + (e.message || "Erro no Google Login"); }
+  }
+
   modal.querySelector("#btn-login").addEventListener("click", doLogin);
   modal.querySelector("#btn-sign").addEventListener("click", doSign);
-
-  /* ====== Google Login ====== */
-  const googleProvider = new firebase.auth.GoogleAuthProvider();
-  const btnGoogle = document.createElement("button");
-  btnGoogle.id = "btn-google";
-  btnGoogle.style.cssText = `
-    width:100%; margin-top:12px; background:#fff; color:#000;
-    font-weight:600; border:none; border-radius:8px;
-    padding:10px 12px; display:flex; align-items:center; justify-content:center;
-    gap:8px;
-  `;
-  btnGoogle.innerHTML = `
-    <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg"
-         style="width:20px; height:20px;"> Entrar com Google
-  `;
-  modal.appendChild(btnGoogle);
-
-  btnGoogle.addEventListener("click", async () => {
-    msg.textContent = "Conectando com Google...";
-    try {
-      await auth.signInWithPopup(googleProvider);
-      msg.textContent = "✅ Login com Google realizado!";
-      setTimeout(closeModal, 700);
-    } catch (e) {
-      msg.textContent = "⚠️ " + (e.message || "Erro ao entrar com Google");
-    }
-  });
+  modal.querySelector("#btn-google").addEventListener("click", doGoogleLogin);
 
   auth.onAuthStateChanged((user) => {
     if (user) {
-      userChip.textContent = `Olá, ${user.email.split("@")[0]} (Sair)`;
+      userChip.textContent = `Olá, ${user.displayName || user.email.split("@")[0]} (Sair)`;
       userChip.onclick = async () => { await auth.signOut(); };
     } else {
       userChip.textContent = "Entrar / Cadastro";
@@ -155,198 +140,310 @@ function buildAuthUI() {
 }
 
 /* ========= Carrinho ========= */
-const cartBtn = document.getElementById("cart-icon");
-const miniCart = document.getElementById("mini-cart");
-const cartBackdrop = document.getElementById("cart-backdrop");
-const cartList = document.getElementById("mini-list");
-const cartCount = document.getElementById("cart-count");
-const clearCartBtn = document.getElementById("mini-clear");
-const finishOrderBtn = document.getElementById("mini-checkout");
-const closeCartBtn = document.querySelector(".mini-close");
+let cart = JSON.parse(localStorage.getItem("dfl_cart")) || [];
 
-let cart = JSON.parse(localStorage.getItem("dflCart") || "[]");
-
-function abrirCarrinho() {
-  clickSound.currentTime = 0; clickSound.play().catch(()=>{});
-  miniCart.classList.add("active");
-  cartBackdrop.classList.add("show");
-  document.body.classList.add("no-scroll");
-}
-function fecharCarrinho() {
-  miniCart.classList.remove("active");
-  cartBackdrop.classList.remove("show");
-  document.body.classList.remove("no-scroll");
-}
-function atualizarCarrinho() {
-  cartList.innerHTML = "";
-  let total = 0;
-  cart.forEach((item, index) => {
-    const li = document.createElement("li");
-    li.classList.add("cart-item");
-    li.innerHTML = `
-      <span>${item.nome}</span>
-      <strong>R$ ${item.preco.toFixed(2)}</strong>
-      <button class="remove-item" data-index="${index}">✕</button>`;
-    cartList.appendChild(li);
-    total += item.preco;
-  });
-  cartCount.textContent = cart.length;
-  clearCartBtn.style.display = cart.length ? "inline-block" : "none";
-  finishOrderBtn.style.display = cart.length ? "inline-block" : "none";
-  localStorage.setItem("dflCart", JSON.stringify(cart));
-}
-function adicionarAoCarrinho(nome, preco) {
-  cart.push({ nome, preco });
-  atualizarCarrinho();
-  mostrarPopupAdicionado(nome);
-  if (!miniCart.classList.contains("active")) abrirCarrinho();
-}
-function mostrarPopupAdicionado(nomeProduto = null) {
-  const popup = document.createElement("div");
-  popup.className = "popup-add";
-  popup.textContent = nomeProduto ? `🍔 ${nomeProduto} adicionado!` : "+1 adicionado!";
-  document.body.appendChild(popup);
-  setTimeout(() => popup.remove(), 1400);
-}
-function removerDoCarrinho(index) {
-  cart.splice(index, 1);
-  atualizarCarrinho();
-}
-function limparCarrinho() {
-  cart = [];
-  atualizarCarrinho();
+function saveCart() {
+  localStorage.setItem("dfl_cart", JSON.stringify(cart));
 }
 
-document.addEventListener("DOMContentLoaded", () => {
-  fecharCarrinho();
-  atualizarCarrinho();
-  cartBtn.addEventListener("click", abrirCarrinho);
-  closeCartBtn.addEventListener("click", fecharCarrinho);
-  cartBackdrop.addEventListener("click", fecharCarrinho);
-  clearCartBtn.addEventListener("click", limparCarrinho);
-  cartList.addEventListener("click", (e) => {
-    if (e.target.classList.contains("remove-item"))
-      removerDoCarrinho(e.target.dataset.index);
-  });
-  document.querySelectorAll(".add-cart").forEach((btn) => {
-    btn.addEventListener("click", () => {
-      const card = btn.closest(".card");
-      adicionarAoCarrinho(card.dataset.name, parseFloat(card.dataset.price));
-    });
-  });
+function playClick() {
+  try { clickSound.currentTime = 0; clickSound.play(); } catch {}
+}
+
+/* Atualiza contador e lista do mini-carrinho */
+function updateCartUI() {
+  const count = document.getElementById("cart-count");
+  const list = document.getElementById("mini-list");
+  const totalEl = document.querySelector("#mini-foot-total");
+  if (!count || !list) return;
+
+  count.textContent = cart.reduce((a, i) => a + i.qtd, 0);
+
+  if (cart.length === 0) {
+    list.innerHTML = "<p style='text-align:center;color:#888'>Carrinho vazio</p>";
+  } else {
+    list.innerHTML = cart.map((item, i) => `
+      <div class="mini-item">
+        <div class="info">
+          <strong>${item.nome}</strong><br>
+          <small>${item.qtd}x R$ ${item.preco.toFixed(2).replace('.', ',')}</small>
+        </div>
+        <div class="qtd">
+          <button class="qbtn minus" data-i="${i}">−</button>
+          <span>${item.qtd}</span>
+          <button class="qbtn plus" data-i="${i}">+</button>
+        </div>
+      </div>
+    `).join("");
+  }
+
+  const total = cart.reduce((a, i) => a + i.preco * i.qtd, 0);
+  const foot = document.querySelector(".mini-foot");
+  if (foot) {
+    foot.querySelector("#mini-checkout").textContent = `Fechar pedido – R$ ${total.toFixed(2).replace('.', ',')}`;
+  }
+
+  saveCart();
+}
+
+/* Adicionar item ao carrinho */
+function addToCart(el) {
+  playClick();
+  const card = el.closest(".card");
+  const id = card.dataset.id;
+  const nome = card.dataset.name;
+  const preco = parseFloat(card.dataset.price);
+
+  const existing = cart.find(i => i.id === id);
+  if (existing) {
+    existing.qtd++;
+  } else {
+    cart.push({ id, nome, preco, qtd: 1 });
+  }
+  updateCartUI();
+}
+
+/* Botões de quantidade dentro do carrinho */
+document.addEventListener("click", (e) => {
+  if (e.target.classList.contains("qbtn")) {
+    const i = e.target.dataset.i;
+    const item = cart[i];
+    if (e.target.classList.contains("plus")) {
+      item.qtd++;
+    } else if (e.target.classList.contains("minus")) {
+      item.qtd--;
+      if (item.qtd <= 0) cart.splice(i, 1);
+    }
+    updateCartUI();
+  }
 });
 
-/* ========= Modal de Adicionais ========= */
+/* Limpar carrinho */
+document.getElementById("mini-clear").addEventListener("click", () => {
+  playClick();
+  if (confirm("Limpar carrinho?")) {
+    cart = [];
+    updateCartUI();
+  }
+});
+
+/* Fechar pedido via WhatsApp */
+document.getElementById("mini-checkout").addEventListener("click", () => {
+  playClick();
+  if (cart.length === 0) return alert("Carrinho vazio!");
+
+  const texto = cart.map(i => `${i.qtd}x ${i.nome} - R$ ${(i.preco * i.qtd).toFixed(2).replace('.', ',')}`)
+    .join("%0A");
+  const total = cart.reduce((a, i) => a + i.preco * i.qtd, 0);
+  const msg = `🛒 *Pedido DFL*%0A${texto}%0A———————%0ATotal: *R$ ${total.toFixed(2).replace('.', ',')}*`;
+  window.open(`https://wa.me/5534997178336?text=${msg}`, "_blank");
+});
+
+/* Carrinho abre/fecha */
+const miniCart = document.getElementById("mini-cart");
+const backdrop = document.getElementById("cart-backdrop");
+const cartIcon = document.getElementById("cart-icon");
+
+function openCart() {
+  miniCart.classList.add("open");
+  backdrop.style.display = "block";
+}
+function closeCart() {
+  miniCart.classList.remove("open");
+  backdrop.style.display = "none";
+}
+
+cartIcon.addEventListener("click", () => { playClick(); openCart(); });
+document.querySelector(".mini-close").addEventListener("click", () => { playClick(); closeCart(); });
+backdrop.addEventListener("click", closeCart);
+
+updateCartUI();
+
+/* ========= ADICIONAIS (modal) ========= */
 const extrasBackdrop = document.getElementById("extras-backdrop");
 const extrasModal = document.getElementById("extras-modal");
 const extrasList = document.getElementById("extras-list");
 const extrasCancel = document.getElementById("extras-cancel");
 const extrasAdd = document.getElementById("extras-add");
 
+let produtoAtual = null;
+
+/* abre modal preenchendo opções de adicionais */
 function abrirExtras(nomeProduto) {
+  playClick();
+  // (pode ajustar os itens e preços aqui)
   extrasList.innerHTML = `
-    <label><input type="checkbox" value="Cebola" data-price="0.99"> 🧅 Cebola — R$0,99</label>
-    <label><input type="checkbox" value="Salada" data-price="1.99"> 🥬 Salada — R$1,99</label>
-    <label><input type="checkbox" value="Ovo" data-price="1.99"> 🥚 Ovo — R$1,99</label>
-    <label><input type="checkbox" value="Salsicha" data-price="1.99"> 🌭 Salsicha — R$1,99</label>
-    <label><input type="checkbox" value="Bacon" data-price="2.99"> 🥓 Bacon — R$2,99</label>
-    <label><input type="checkbox" value="Molho Verde" data-price="2.99"> 🌿 Molho Verde — R$2,99</label>
-    <label><input type="checkbox" value="Cheddar" data-price="3.99"> 🧀 Cheddar — R$3,99</label>`;
-  extrasModal.classList.add("show");
+    <label><input type="checkbox" value="Cebola" data-price="0.99"> 🧅 Cebola — R$ 0,99</label>
+    <label><input type="checkbox" value="Salada" data-price="1.99"> 🥬 Salada — R$ 1,99</label>
+    <label><input type="checkbox" value="Ovo" data-price="1.99"> 🥚 Ovo — R$ 1,99</label>
+    <label><input type="checkbox" value="Salsicha" data-price="1.99"> 🌭 Salsicha — R$ 1,99</label>
+    <label><input type="checkbox" value="Bacon" data-price="2.99"> 🥓 Bacon — R$ 2,99</label>
+    <label><input type="checkbox" value="Molho Verde" data-price="2.99"> 🌿 Molho Verde — R$ 2,99</label>
+    <label><input type="checkbox" value="Cheddar" data-price="3.99"> 🧀 Cheddar — R$ 3,99</label>
+  `;
   extrasBackdrop.classList.add("show");
+  extrasModal.classList.add("show");
 }
+
+/* fecha modal */
 function fecharExtras() {
-  extrasModal.classList.remove("show");
   extrasBackdrop.classList.remove("show");
+  extrasModal.classList.remove("show");
 }
-extrasCancel?.addEventListener("click", fecharExtras);
-extrasBackdrop?.addEventListener("click", fecharExtras);
-extrasAdd?.addEventListener("click", () => {
-  const checkboxes = extrasList.querySelectorAll("input[type='checkbox']:checked");
-  const extrasSelecionados = Array.from(checkboxes).map(cb => ({
-    nome: cb.value, preco: parseFloat(cb.dataset.price)
-  }));
-  extrasSelecionados.forEach(extra => adicionarAoCarrinho(extra.nome, extra.preco));
-  mostrarPopupAdicionado("Adicional");
-  fecharExtras();
-});
-document.querySelectorAll(".extras-btn").forEach(btn => {
+
+/* abre modal ao clicar em “➕ Adicionais” no card */
+document.querySelectorAll(".extras-btn").forEach((btn) => {
   btn.addEventListener("click", () => {
-    const produto = btn.closest(".card").dataset.name;
-    abrirExtras(produto);
+    const card = btn.closest(".card");
+    produtoAtual = {
+      id: card.dataset.id,
+      nome: card.dataset.name
+    };
+    abrirExtras(produtoAtual.nome);
   });
 });
 
-/* ========= Contagem regressiva ========= */
-function atualizarContagem() {
-  const agora = new Date();
-  const fim = new Date();
-  fim.setHours(23, 59, 59, 999);
-  const diff = fim - agora;
-  if (diff <= 0) return (document.getElementById("timer").textContent = "00:00:00");
-  const h = Math.floor(diff / 1000 / 60 / 60);
-  const m = Math.floor((diff / 1000 / 60) % 60);
-  const s = Math.floor((diff / 1000) % 60);
-  document.getElementById("timer").textContent =
-    `${String(h).padStart(2,"0")}:${String(m).padStart(2,"0")}:${String(s).padStart(2,"0")}`;
-}
-setInterval(atualizarContagem, 1000);
-atualizarContagem();
+/* botões do modal */
+extrasCancel?.addEventListener("click", () => { playClick(); fecharExtras(); });
+extrasBackdrop?.addEventListener("click", fecharExtras);
 
-/* ========= Status aberto/fechado ========= */
+/* adiciona extras no carrinho (agrupando por extra) */
+extrasAdd?.addEventListener("click", () => {
+  playClick();
+  const checks = extrasList.querySelectorAll("input[type='checkbox']:checked");
+  if (!checks.length) { fecharExtras(); return; }
+
+  checks.forEach(cb => {
+    const nomeExtra = `Adicional: ${cb.value}`;
+    const precoExtra = parseFloat(cb.dataset.price);
+    const idExtra = `extra-${cb.value.toLowerCase().replace(/\s+/g,'-')}`;
+
+    const existing = cart.find(i => i.id === idExtra);
+    if (existing) {
+      existing.qtd++;
+    } else {
+      cart.push({ id: idExtra, nome: nomeExtra, preco: precoExtra, qtd: 1 });
+    }
+  });
+
+  updateCartUI();
+  fecharExtras();
+  // abre o carrinho para o cliente ver os extras
+  const miniCart = document.getElementById("mini-cart");
+  const backdrop = document.getElementById("cart-backdrop");
+  miniCart.classList.add("open","active");
+  backdrop.style.display = "block";
+});
+
+/* ========= CARROSSEL PROMO ========= */
+(function initCarousel() {
+  const wrap = document.getElementById("promoCarousel");
+  if (!wrap) return;
+
+  const container = wrap.querySelector(".slides");
+  const prevBtn  = wrap.querySelector(".c-prev");
+  const nextBtn  = wrap.querySelector(".c-next");
+  const slides   = Array.from(container.querySelectorAll(".slide"));
+  if (!slides.length) return;
+
+  let index = 0;
+  function showSlide(i) {
+    slides.forEach((s, idx) => (s.style.display = idx === i ? "block" : "none"));
+  }
+  showSlide(index);
+
+  prevBtn.addEventListener("click", () => {
+    playClick();
+    index = (index - 1 + slides.length) % slides.length;
+    showSlide(index);
+  });
+  nextBtn.addEventListener("click", () => {
+    playClick();
+    index = (index + 1) % slides.length;
+    showSlide(index);
+  });
+
+  // clique no slide abre WhatsApp com texto da promoção
+  slides.forEach(img => {
+    img.addEventListener("click", () => {
+      playClick();
+      const msg = encodeURIComponent(img.dataset.wa || "Olá! Quero aproveitar a promoção 🍔");
+      window.open(`https://wa.me/5534997178336?text=${msg}`, "_blank");
+    });
+  });
+
+  // auto-rotaciona a cada 5s
+  setInterval(() => {
+    index = (index + 1) % slides.length;
+    showSlide(index);
+  }, 5000);
+})();
+
+/* ========= STATUS ABERTO / FECHADO ========= */
 function atualizarStatus() {
   const banner = document.getElementById("status-banner");
   if (!banner) return;
-  const agora = new Date();
-  const dia = agora.getDay();
-  const hora = agora.getHours();
-  const minuto = agora.getMinutes();
-  let aberto = false, msg = "";
 
-  if (dia === 2) msg = "❌ Fechado — abrimos amanhã às 18h";
-  else if ([1,3,4].includes(dia)) {
-    aberto = hora >= 18 && (hora < 23 || (hora === 23 && minuto <= 15));
+  const agora = new Date();
+  const dia = agora.getDay();   // 0=Dom … 6=Sáb
+  const h = agora.getHours();
+  const m = agora.getMinutes();
+
+  let aberto = false;
+  let msg = "";
+
+  if (dia === 2) { // terça
+    msg = "❌ Fechado — abrimos amanhã às 18h";
+  } else if ([1, 3, 4].includes(dia)) { // seg, qua, qui
+    aberto = h >= 18 && (h < 23 || (h === 23 && m <= 15));
     msg = aberto ? "🟢 Aberto até 23h15" : "🔴 Fechado — abrimos às 18h";
-  } else if ([5,6,0].includes(dia)) {
-    aberto = hora >= 17 && (hora < 23 || (hora === 23 && minuto <= 30));
+  } else { // sex, sáb, dom
+    aberto = h >= 17 && (h < 23 || (h === 23 && m <= 30));
     msg = aberto ? "🟢 Aberto até 23h30" : "🔴 Fechado — abrimos às 17h30";
   }
+
   banner.textContent = msg;
   banner.className = aberto ? "status-banner aberto" : "status-banner fechado";
 }
 setInterval(atualizarStatus, 60000);
 atualizarStatus();
 
-/* ========= Carrossel ========= */
-(function initCarouselFix() {
-  const container = document.querySelector("#promoCarousel .slides");
-  if (!container) return;
-  const prevBtn = document.querySelector("#promoCarousel .c-prev");
-  const nextBtn = document.querySelector("#promoCarousel .c-next");
-  const slides = Array.from(container.querySelectorAll(".slide"));
-  let index = 0;
-  if (slides.length === 0) return;
+/* ========= CONTAGEM REGRESSIVA (ticker promo) ========= */
+function atualizarContagem() {
+  const el = document.getElementById("timer");
+  if (!el) return;
 
-  function showSlide(i){ slides.forEach((s,idx)=> s.style.display = idx===i?"block":"none"); }
-  showSlide(index);
-  prevBtn.addEventListener("click", ()=>{
-    clickSound.currentTime=0; clickSound.play().catch(()=>{});
-    index=(index-1+slides.length)%slides.length; showSlide(index);
-  });
-  nextBtn.addEventListener("click", ()=>{
-    clickSound.currentTime=0; clickSound.play().catch(()=>{});
-    index=(index+1)%slides.length; showSlide(index);
-  });
-  setInterval(()=>{ index=(index+1)%slides.length; showSlide(index); },5000);
-})();
+  const agora = new Date();
+  const fim = new Date();
+  fim.setHours(23, 59, 59, 999);
 
-/* ========= Inicialização Firebase/Login ========= */
-(async function startDFL(){
-  try {
-    await initFirebase();
-    buildAuthUI();
-    console.log("✅ Firebase + Login Google ativos");
-  } catch(e){
-    console.error("Erro ao iniciar Firebase/Login:", e);
-  }
+  const diff = fim - agora;
+  if (diff <= 0) { el.textContent = "00:00:00"; return; }
+
+  const h = Math.floor(diff / 1000 / 60 / 60);
+  const m = Math.floor((diff / 1000 / 60) % 60);
+  const s = Math.floor((diff / 1000) % 60);
+  el.textContent = `${String(h).padStart(2,"0")}:${String(m).padStart(2,"0")}:${String(s).padStart(2,"0")}`;
+}
+setInterval(atualizarContagem, 1000);
+atualizarContagem();
+
+/* ========= REFORÇO COMPATIBILIDADE DO CARRINHO ========= */
+/* (em alguns CSS antigos a classe usada é .active. Mantemos as duas) */
+(function compatCartClasses(){
+  const miniCart = document.getElementById("mini-cart");
+  const backdrop = document.getElementById("cart-backdrop");
+  if (!miniCart || !backdrop) return;
+
+  // se alguém chamar .open, garantimos .active também
+  const observer = new MutationObserver(() => {
+    if (miniCart.classList.contains("open")) {
+      miniCart.classList.add("active");
+      backdrop.style.display = "block";
+    } else {
+      miniCart.classList.remove("active");
+      backdrop.style.display = "";
+    }
+  });
+  observer.observe(miniCart, { attributes: true, attributeFilter: ["class"] });
 })();
