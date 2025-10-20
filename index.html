@@ -18,8 +18,9 @@
 </head>
 
 <body>
-  <!-- Ícone do carrinho fixo -->
+  <!-- Ícones fixos -->
   <button id="cart-icon" aria-label="Abrir carrinho">🛒 <span id="cart-count">0</span></button>
+  <button id="orders-icon" aria-label="Ver pedidos" title="Meus pedidos">📜</button>
 
   <!-- Cabeçalho -->
   <header class="header">
@@ -207,28 +208,40 @@
         <h3>Combo Casal (Tradicional)</h3>
         <div class="price">R$ 34,99</div>
         <p>2 Hambúrguer Trem + 1 Fanta 1L.</p>
-        <div class="actions"><button class="add-cart">Adicionar</button><button class="extras-btn">➕ Adicionais</button></div>
+        <div class="actions">
+          <button class="add-cart">Adicionar</button>
+          <button class="extras-btn">➕ Adicionais</button>
+        </div>
       </article>
 
       <article class="card" data-type="combo" data-id="CF_TRAD" data-name="Combo Família (Tradicional)" data-price="59.99">
         <h3>Combo Família (Tradicional)</h3>
         <div class="price">R$ 59,99</div>
         <p>4 Hambúrguer Trem + 1 Kuat 2L.</p>
-        <div class="actions"><button class="add-cart">Adicionar</button><button class="extras-btn">➕ Adicionais</button></div>
+        <div class="actions">
+          <button class="add-cart">Adicionar</button>
+          <button class="extras-btn">➕ Adicionais</button>
+        </div>
       </article>
 
       <article class="card" data-type="combo" data-id="CC_ART" data-name="Combo Casal (Artesanal)" data-price="54.99">
         <h3>Combo Casal (Artesanal)</h3>
         <div class="price">R$ 54,99</div>
         <p>2 Hambúrguer Peleja + 1 Coca 1L.</p>
-        <div class="actions"><button class="add-cart">Adicionar</button><button class="extras-btn">➕ Adicionais</button></div>
+        <div class="actions">
+          <button class="add-cart">Adicionar</button>
+          <button class="extras-btn">➕ Adicionais</button>
+        </div>
       </article>
 
       <article class="card" data-type="combo" data-id="CF_ART" data-name="Combo Família (Artesanal)" data-price="79.99">
         <h3>Combo Família (Artesanal)</h3>
         <div class="price">R$ 79,99</div>
         <p>4 Hambúrguer Peleja + 1 Coca 2L.</p>
-        <div class="actions"><button class="add-cart">Adicionar</button><button class="extras-btn">➕ Adicionais</button></div>
+        <div class="actions">
+          <button class="add-cart">Adicionar</button>
+          <button class="extras-btn">➕ Adicionais</button>
+        </div>
       </article>
     </div>
   </section>
@@ -239,9 +252,8 @@
   <section class="menu-section">
     <h2>🌭 Hot Dog’s</h2>
     <div class="grid">
-      <!-- ... (continua na próxima parte) -->
 
-<article class="card" data-type="hotdog" data-id="NIGUCIM" data-name="NIGUCIM" data-price="10.00">
+      <article class="card" data-type="hotdog" data-id="NIGUCIM" data-name="NIGUCIM" data-price="10.00">
         <h3>NIGUCIM <span class="badge">Com Molho Verde 🌿</span></h3>
         <div class="price">R$ 10,00</div>
         <p>Pão, molho, salsicha (Sadia/Perdigão), milho, batata palha, ketchup e maionese. <em>Acompanha sachê de ketchup.</em></p>
@@ -271,7 +283,7 @@
         </div>
       </article>
 
-      <article class="card" data-type="hotdog" data-id="PADANA" data-name="PADANÁ" data-price="15.00">
+<article class="card" data-type="hotdog" data-id="PADANA" data-name="PADANÁ" data-price="15.00">
         <h3>PADANÁ <span class="badge">Com Molho Verde 🌿</span></h3>
         <div class="price">R$ 15,00</div>
         <p>Pão, molho, 2 salsichas, milho, batata palha, bacon, vinagrete, mussarela, ketchup e maionese. <em>Acompanha sachê de ketchup.</em></p>
@@ -307,15 +319,51 @@
   <section class="menu-section">
     <h2>Bebidas & Refrigerantes</h2>
     <div class="grid">
-      <article class="card" data-type="beverage" data-id="coca200" data-name="Coca-Cola 200ml" data-price="4.00"><h3>Coca-Cola 200ml</h3><div class="price">R$ 4,00</div><div class="actions"><button class="add-cart">Adicionar</button></div></article>
-      <article class="card" data-type="beverage" data-id="aguaG" data-name="Água com Gás" data-price="4.00"><h3>Água com Gás</h3><div class="price">R$ 4,00</div><div class="actions"><button class="add-cart">Adicionar</button></div></article>
-      <article class="card" data-type="beverage" data-id="uva450" data-name="Del Valle Uva 450ml" data-price="5.00"><h3>Del Valle Uva 450ml</h3><div class="price">R$ 5,00</div><div class="actions"><button class="add-cart">Adicionar</button></div></article>
-      <article class="card" data-type="beverage" data-id="laranja450" data-name="Del Valle Laranja 450ml" data-price="5.00"><h3>Del Valle Laranja 450ml</h3><div class="price">R$ 5,00</div><div class="actions"><button class="add-cart">Adicionar</button></div></article>
-      <article class="card" data-type="beverage" data-id="coca310" data-name="Coca-Cola 310ml" data-price="5.00"><h3>Coca-Cola 310ml</h3><div class="price">R$ 5,00</div><div class="actions"><button class="add-cart">Adicionar</button></div></article>
-      <article class="card" data-type="beverage" data-id="fanta1l" data-name="Fanta Laranja 1L" data-price="8.00"><h3>Fanta Laranja 1L</h3><div class="price">R$ 8,00</div><div class="actions"><button class="add-cart">Adicionar</button></div></article>
-      <article class="card" data-type="beverage" data-id="coca1l" data-name="Coca-Cola 1L" data-price="9.00"><h3>Coca-Cola 1L</h3><div class="price">R$ 9,00</div><div class="actions"><button class="add-cart">Adicionar</button></div></article>
-      <article class="card" data-type="beverage" data-id="kuat2l" data-name="Kuat Guaraná 2L" data-price="10.00"><h3>Kuat Guaraná 2L</h3><div class="price">R$ 10,00</div><div class="actions"><button class="add-cart">Adicionar</button></div></article>
-      <article class="card" data-type="beverage" data-id="coca2l" data-name="Coca-Cola 2L" data-price="13.00"><h3>Coca-Cola 2L</h3><div class="price">R$ 13,00</div><div class="actions"><button class="add-cart">Adicionar</button></div></article>
+      <article class="card" data-type="beverage" data-id="coca200" data-name="Coca-Cola 200ml" data-price="4.00">
+        <h3>Coca-Cola 200ml</h3>
+        <div class="price">R$ 4,00</div>
+        <div class="actions"><button class="add-cart">Adicionar</button></div>
+      </article>
+      <article class="card" data-type="beverage" data-id="aguaG" data-name="Água com Gás" data-price="4.00">
+        <h3>Água com Gás</h3>
+        <div class="price">R$ 4,00</div>
+        <div class="actions"><button class="add-cart">Adicionar</button></div>
+      </article>
+      <article class="card" data-type="beverage" data-id="uva450" data-name="Del Valle Uva 450ml" data-price="5.00">
+        <h3>Del Valle Uva 450ml</h3>
+        <div class="price">R$ 5,00</div>
+        <div class="actions"><button class="add-cart">Adicionar</button></div>
+      </article>
+      <article class="card" data-type="beverage" data-id="laranja450" data-name="Del Valle Laranja 450ml" data-price="5.00">
+        <h3>Del Valle Laranja 450ml</h3>
+        <div class="price">R$ 5,00</div>
+        <div class="actions"><button class="add-cart">Adicionar</button></div>
+      </article>
+      <article class="card" data-type="beverage" data-id="coca310" data-name="Coca-Cola 310ml" data-price="5.00">
+        <h3>Coca-Cola 310ml</h3>
+        <div class="price">R$ 5,00</div>
+        <div class="actions"><button class="add-cart">Adicionar</button></div>
+      </article>
+      <article class="card" data-type="beverage" data-id="fanta1l" data-name="Fanta Laranja 1L" data-price="8.00">
+        <h3>Fanta Laranja 1L</h3>
+        <div class="price">R$ 8,00</div>
+        <div class="actions"><button class="add-cart">Adicionar</button></div>
+      </article>
+      <article class="card" data-type="beverage" data-id="coca1l" data-name="Coca-Cola 1L" data-price="9.00">
+        <h3>Coca-Cola 1L</h3>
+        <div class="price">R$ 9,00</div>
+        <div class="actions"><button class="add-cart">Adicionar</button></div>
+      </article>
+      <article class="card" data-type="beverage" data-id="kuat2l" data-name="Kuat Guaraná 2L" data-price="10.00">
+        <h3>Kuat Guaraná 2L</h3>
+        <div class="price">R$ 10,00</div>
+        <div class="actions"><button class="add-cart">Adicionar</button></div>
+      </article>
+      <article class="card" data-type="beverage" data-id="coca2l" data-name="Coca-Cola 2L" data-price="13.00">
+        <h3>Coca-Cola 2L</h3>
+        <div class="price">R$ 13,00</div>
+        <div class="actions"><button class="add-cart">Adicionar</button></div>
+      </article>
     </div>
   </section>
 
@@ -335,6 +383,18 @@
     </p>
     <p class="copy">© 2025 Da Família Lanches — Você faz parte disso!</p>
   </footer>
+
+  <!-- Painel lateral de pedidos -->
+  <div id="orders-backdrop"></div>
+  <aside id="orders-panel" aria-hidden="true">
+    <header class="orders-head">
+      <h3>📜 Meus Pedidos</h3>
+      <button class="orders-close" aria-label="Fechar">✕</button>
+    </header>
+    <div id="orders-list" class="orders-list">
+      <p>Você ainda não possui pedidos recentes.</p>
+    </div>
+  </aside>
 
   <!-- Carrinho -->
   <div id="cart-backdrop"></div>
@@ -369,13 +429,11 @@
   (function(){
     const el = document.getElementById('mapa-entregas');
     if(!el) return;
-
     const map = L.map('mapa-entregas', {
       center: [-18.5783, -46.5187],
       zoom: 13,
       scrollWheelZoom: true
     });
-
     L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png').addTo(map);
     L.circle([-18.5783, -46.5187], {
       radius: 6000,
