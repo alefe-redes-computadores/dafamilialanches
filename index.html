@@ -267,296 +267,110 @@
       <article class="card" data-id="coca2l" data-name="Coca-Cola 2L" data-price="13.00"><h3>Coca-Cola 2L</h3><div class="price">R$ 13,00</div><div class="actions"><button class="add-cart">Adicionar</button></div></article>
     </div>
   </section>
-/* =========================================================
-   DFL – Script estável
-   - Som de clique
-   - Status aberto/fechado + countdown
-   - Carrossel (setas + clique -> WhatsApp)
-   - Carrinho com fechar (✕, backdrop e ESC)
-   - Adicionais (lista oficial)
-   - Modal de login (UI) + botão Google (placeholder)
-========================================================= */
+<!-- ======================= -->
+  <!-- Carrinho lateral -->
+  <!-- ======================= -->
+  <div id="cart-backdrop" aria-hidden="true"></div>
+  <aside id="mini-cart" class="mini-cart" aria-hidden="true">
+    <header class="mini-head">
+      <h3>🛍️ Seu Pedido</h3>
+      <button class="mini-close" aria-label="Fechar">✕</button>
+    </header>
+    <div id="mini-list" class="mini-list">
+      <p class="empty-cart">Seu carrinho está vazio.</p>
+    </div>
+    <footer class="mini-foot">
+      <button id="mini-clear" class="btn-secondary">Limpar</button>
+      <button id="mini-checkout" class="btn-primary">Fechar pedido</button>
+    </footer>
+  </aside>
 
-/* -------- Som de clique -------- */
-const clickSfx = new Audio("click.wav");
-clickSfx.volume = 0.35;
-function playClick(){ try{ clickSfx.currentTime=0; clickSfx.play(); }catch(_){} }
-document.addEventListener("click", playClick, { passive:true });
+  <!-- ======================= -->
+  <!-- Modal de Adicionais -->
+  <!-- ======================= -->
+  <div id="extras-backdrop" aria-hidden="true"></div>
+  <aside id="extras-modal" aria-hidden="true">
+    <header class="extras-head">
+      <h3>Adicionais</h3>
+      <button class="extras-close" aria-label="Fechar">✕</button>
+    </header>
+    <div id="extras-list" class="extras-list"></div>
+    <footer class="extras-foot">
+      <button id="extras-cancel" class="btn-secondary">Cancelar</button>
+      <button id="extras-add" class="btn-primary">Adicionar</button>
+    </footer>
+  </aside>
 
-/* -------- Estado do carrinho -------- */
-let cart = JSON.parse(localStorage.getItem("cart") || "[]");
-const cartCount = document.getElementById("cart-count");
-function saveCart(){ localStorage.setItem("cart", JSON.stringify(cart)); updateCartUI(); }
-function money(n){ return `R$ ${Number(n).toFixed(2).replace(".", ",")}`; }
-function updateCartUI(){
-  // badge
-  cartCount.textContent = cart.reduce((a,i)=>a+(i.qtd||1),0);
+  <!-- ======================= -->
+  <!-- Modal de Login -->
+  <!-- ======================= -->
+  <div id="login-modal" aria-hidden="true">
+    <div class="login-box">
+      <button class="login-x" aria-label="Fechar">✕</button>
+      <h3>Entrar ou Cadastrar</h3>
+      <p>Acesse sua conta para agilizar seus pedidos.</p>
 
-  // lista
-  const list = document.getElementById("mini-list");
-  if (!list) return;
+      <form class="login-form" onsubmit="return false;">
+        <input type="email" placeholder="E-mail (em breve)" disabled />
+        <input type="password" placeholder="Senha (em breve)" disabled />
+        <button class="btn-primario" disabled>Entrar</button>
+      </form>
 
-  if (!cart.length){
-    list.innerHTML = `<p class="empty-cart">Seu carrinho está vazio.</p>`;
-  } else {
-    list.innerHTML = "";
-    cart.forEach((it,idx)=>{
-      const row = document.createElement("div");
-      row.className = "cart-item";
-      row.innerHTML = `
-        <div style="flex:1;min-width:0">
-          <span>${it.nome}</span><br>
-          <small>${money(it.preco)}</small>
-        </div>
-        <div style="display:flex;align-items:center;gap:6px;">
-          <button class="qty-dec" data-i="${idx}">−</button>
-          <span>${it.qtd}</span>
-          <button class="qty-inc" data-i="${idx}">+</button>
-          <strong>${money(it.preco*it.qtd)}</strong>
-          <button class="remove-item" data-i="${idx}" title="Remover">x</button>
-        </div>
-      `;
-      list.appendChild(row);
+      <div class="divider">ou</div>
+
+      <button class="btn-google">
+        <img src="google.png" alt="Google" />
+        Entrar com Google
+      </button>
+    </div>
+  </div>
+
+  <!-- ======================= -->
+  <!-- Mapa -->
+  <!-- ======================= -->
+  <h2 class="mapa-titulo">🚗 Entregamos em toda Patos de Minas</h2>
+  <div id="mapa-entregas"
+       style="height:300px;width:100%;border-radius:12px;margin:20px auto;border:2px solid #f9d44b;">
+  </div>
+
+  <!-- ======================= -->
+  <!-- Rodapé -->
+  <!-- ======================= -->
+  <footer class="footer">
+    <h2>Onde estamos</h2>
+    <p>📍 Patos de Minas — Delivery e retirada</p>
+    <a href="https://maps.app.goo.gl/jQ1cYcmuZm8rU5Dk9" target="_blank">Ver no Google Maps</a>
+    <p class="social-line">
+      📸 <a href="https://www.instagram.com/dafamilia_patos" target="_blank">@dafamilia_patos</a> ·
+      💬 <a href="https://wa.me/5534997178336" target="_blank">WhatsApp</a> ·
+      🛒 <a href="https://www.ifood.com.br/delivery/patos-de-minas-mg/da-familia-lanches-caramuru/9aadff75-b014-4e7f-a9b4-b3e478e38af8" target="_blank">iFood</a>
+    </p>
+    <p class="copy">© 2025 Da Família Lanches — Você faz parte disso! 💛</p>
+  </footer>
+
+  <!-- ======================= -->
+  <!-- Script do Mapa -->
+  <!-- ======================= -->
+  <script>
+  (function() {
+    const el = document.getElementById('mapa-entregas');
+    if (!el) return;
+    const map = L.map('mapa-entregas', {
+      center: [-18.5783, -46.5187],
+      zoom: 13
     });
-  }
-
-  // total + ações
-  const foot = document.querySelector(".mini-foot");
-  const total = cart.reduce((a,i)=>a+i.preco*i.qtd,0);
-  foot.innerHTML = `
-    <button id="mini-clear" class="btn-secondary">Limpar</button>
-    <button id="mini-checkout" class="btn-primary">Fechar pedido (${money(total)})</button>
-  `;
-}
-
-/* -------- Abertura/fechamento do mini-carrinho -------- */
-const miniCart = document.getElementById("mini-cart");
-const cartBackdrop = document.getElementById("cart-backdrop");
-function openMiniCart(){
-  updateCartUI();
-  miniCart.classList.add("active");
-  cartBackdrop.classList.add("show");
-  document.body.classList.add("no-scroll");
-}
-function closeMiniCart(){
-  miniCart.classList.remove("active");
-  cartBackdrop.classList.remove("show");
-  document.body.classList.remove("no-scroll");
-}
-document.getElementById("cart-icon")?.addEventListener("click", openMiniCart);
-document.addEventListener("click",(e)=>{
-  if (e.target.closest(".mini-close")) closeMiniCart();
-  if (e.target === cartBackdrop) closeMiniCart();
-});
-document.addEventListener("keydown",(e)=>{ if(e.key==="Escape") closeMiniCart(); });
-
-/* Delegação de eventos dentro do carrinho */
-document.addEventListener("click",(e)=>{
-  // qty +
-  if (e.target.matches(".qty-inc")){
-    const i = Number(e.target.dataset.i);
-    cart[i].qtd++; saveCart();
-  }
-  // qty -
-  if (e.target.matches(".qty-dec")){
-    const i = Number(e.target.dataset.i);
-    cart[i].qtd = Math.max(1, cart[i].qtd-1); saveCart();
-  }
-  // remover
-  if (e.target.matches(".remove-item")){
-    const i = Number(e.target.dataset.i);
-    cart.splice(i,1); saveCart();
-  }
-  // limpar
-  if (e.target.matches("#mini-clear")){
-    cart = []; saveCart();
-  }
-  // checkout -> WhatsApp
-  if (e.target.matches("#mini-checkout")){
-    if (!cart.length) return;
-    const linhas = cart.map(i=>`• ${i.nome}${i.qtd>1?` x${i.qtd}`:""} — ${money(i.preco*i.qtd)}`);
-    const total = money(cart.reduce((a,i)=>a+i.preco*i.qtd,0));
-    const txt = `🍔 Pedido DFL:%0A%0A${linhas.join("%0A")}%0A%0ATotal: ${total}`;
-    window.open(`https://wa.me/5534997178336?text=${txt}`,"_blank");
-  }
-});
-
-/* -------- Adicionar ao carrinho / Extras -------- */
-const ADICIONAIS = [
-  { nome: "Cebola", preco: 0.99 },
-  { nome: "Salada", preco: 1.99 },
-  { nome: "Ovo", preco: 1.99 },
-  { nome: "Bacon", preco: 2.99 },
-  { nome: "Hambúrguer Tradicional 56g", preco: 2.99 },
-  { nome: "Cheddar Cremoso", preco: 3.99 },
-  { nome: "Filé de frango", preco: 5.99 },
-  { nome: "Hambúrguer Artesanal 120g", preco: 7.99 }
-];
-
-const extrasModal = document.getElementById("extras-modal");
-const extrasList  = document.getElementById("extras-list");
-
-function bindAddButtons(){
-  document.querySelectorAll(".add-cart").forEach(btn=>{
-    btn.addEventListener("click", ()=>{
-      const card = btn.closest(".card");
-      const nome = card.dataset.name || card.querySelector("h3")?.textContent?.trim() || "Item";
-      const preco = parseFloat(card.dataset.price || "0");
-      const found = cart.find(i=>i.nome===nome && i.preco===preco);
-      if (found) found.qtd += 1;
-      else cart.push({ nome, preco, qtd: 1 });
-      saveCart();
-
-      // popup
-      const pop = document.createElement("div");
-      pop.className = "popup-add";
-      pop.textContent = `${nome} adicionado!`;
-      document.body.appendChild(pop);
-      setTimeout(()=>pop.remove(), 1400);
-    });
-  });
-}
-
-function bindExtrasButtons(){
-  document.querySelectorAll(".extras-btn").forEach(btn=>{
-    btn.addEventListener("click", ()=>{
-      const card = btn.closest(".card");
-      extrasModal.dataset.produto = card.dataset.name || card.querySelector("h3")?.textContent?.trim() || "Item";
-      // monta lista
-      extrasList.innerHTML = ADICIONAIS.map((a, i)=>`
-        <label>
-          <span>${a.nome} — ${money(a.preco)}</span>
-          <input type="checkbox" value="${i}">
-        </label>
-      `).join("");
-      extrasModal.classList.add("show");
-      document.body.classList.add("no-scroll");
-    });
-  });
-
-  // fechar/cancelar
-  document.addEventListener("click",(e)=>{
-    if (e.target.closest(".extras-close") || e.target.matches("#extras-cancel")){
-      extrasModal.classList.remove("show");
-      document.body.classList.remove("no-scroll");
-    }
-  });
-  // confirmar
-  document.getElementById("extras-add").addEventListener("click", ()=>{
-    const nomeBase = extrasModal.dataset.produto || "Item";
-    const sel = [...extrasList.querySelectorAll("input:checked")];
-    if (sel.length){
-      sel.forEach(c=>{
-        const a = ADICIONAIS[Number(c.value)];
-        cart.push({ nome: `${nomeBase} + ${a.nome}`, preco: a.preco, qtd: 1 });
-      });
-      saveCart();
-    }
-    extrasModal.classList.remove("show");
-    document.body.classList.remove("no-scroll");
-  });
-}
-
-/* -------- Carrossel (setas + clique -> WhatsApp) -------- */
-function initCarousel(){
-  const rail = document.querySelector(".slides");
-  if (!rail) return;
-  const prev = document.querySelector(".c-prev");
-  const next = document.querySelector(".c-next");
-  const step = ()=> Math.min(rail.clientWidth*0.9, 320);
-  prev?.addEventListener("click", ()=> rail.scrollBy({left:-step(), behavior:"smooth"}));
-  next?.addEventListener("click", ()=> rail.scrollBy({left: step(), behavior:"smooth"}));
-  rail.querySelectorAll(".slide").forEach(img=>{
-    img.addEventListener("click", ()=>{
-      const wa = img.getAttribute("data-wa") || "Quero a promoção!";
-      window.open(`https://wa.me/5534997178336?text=${encodeURIComponent(wa)}`,"_blank");
-    });
-  });
-}
-
-/* -------- Status/Countdown -------- */
-function setStatusBanner(){
-  const el = document.getElementById("status-banner");
-  if (!el) return;
-  const d = new Date();
-  const dow = d.getDay(); // 0 Dom ... 6 Sáb
-  if (dow === 2){ el.textContent = "Fechado hoje (Terça) — voltamos amanhã!"; return; }
-  let openM = 0, closeM = 0, label = "";
-  if (dow>=1 && dow<=4){ openM = 18*60; closeM = 23*60+15; label="Aberto até 23h15"; }
-  else { openM = 17*60+30; closeM = 23*60+30; label="Aberto até 23h30"; }
-  const nowM = d.getHours()*60 + d.getMinutes();
-  if (nowM < openM){
-    const h = Math.floor((openM-nowM)/60), m=(openM-nowM)%60;
-    el.textContent = `Abrimos às ${label.includes("23h15")?"18h":"17h30"} • falta ${h}h${String(m).padStart(2,"0")}m`;
-  } else if (nowM <= closeM){
-    el.textContent = `🟢 ${label}`;
-  } else {
-    el.textContent = "Fechado agora — abrimos no próximo horário.";
-  }
-}
-function updateCountdown(){
-  const box = document.getElementById("timer");
-  if (!box) return;
-  const end = new Date(); end.setHours(23,59,59,999);
-  const diff = end - new Date();
-  if (diff<=0){ box.textContent="00:00:00"; return; }
-  const h = Math.floor(diff/3_600_000);
-  const m = Math.floor((diff%3_600_000)/60_000);
-  const s = Math.floor((diff%60_000)/1000);
-  box.textContent = `${String(h).padStart(2,"0")}:${String(m).padStart(2,"0")}:${String(s).padStart(2,"0")}`;
-}
-
-/* -------- Login (UI + placeholder Google) -------- */
-function setupLoginUI(){
-  // cria o botão no header se não existir
-  let userBtn = document.getElementById("user-btn");
-  if (!userBtn){
-    userBtn = document.createElement("button");
-    userBtn.id = "user-btn";
-    userBtn.className = "user-button";
-    userBtn.textContent = "Entrar / Cadastrar";
-    document.querySelector(".header")?.appendChild(userBtn);
-  }
-  const loginModal = document.getElementById("login-modal");
-  userBtn.addEventListener("click", ()=>{
-    loginModal.classList.add("show");
-    document.body.classList.add("no-scroll");
-  });
-  loginModal.querySelector(".login-x").addEventListener("click", ()=>{
-    loginModal.classList.remove("show");
-    document.body.classList.remove("no-scroll");
-  });
-  loginModal.addEventListener("click",(e)=>{
-    if (e.target === loginModal){
-      loginModal.classList.remove("show");
-      document.body.classList.remove("no-scroll");
-    }
-  });
-
-  // Botão Google (placeholder: mostra alerta até configurar Firebase real)
-  loginModal.querySelector(".btn-google").addEventListener("click",(e)=>{
-    e.preventDefault();
-    alert("Login com Google será ativado quando conectarmos ao seu Firebase (visual ok).");
-    // Quando quiser ativar de verdade:
-    // const provider = new firebase.auth.GoogleAuthProvider();
-    // firebase.auth().signInWithPopup(provider)...
-  });
-}
-
-/* -------- Inicialização -------- */
-window.addEventListener("DOMContentLoaded", ()=>{
-  // status/contador
-  setStatusBanner(); setInterval(setStatusBanner, 60_000);
-  updateCountdown(); setInterval(updateCountdown, 1000);
-
-  // carrinho e botões
-  updateCartUI();
-  bindAddButtons();
-  bindExtrasButtons();
-
-  // carrossel
-  initCarousel();
-
-  // login (UI)
-  setupLoginUI();
-});
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png')
+      .addTo(map);
+    L.circle([-18.5783, -46.5187], {
+      radius: 6000,
+      color: '#d4af37',
+      fillColor: '#ffd700',
+      fillOpacity: 0.25
+    }).addTo(map);
+    L.marker([-18.5783, -46.5187])
+      .addTo(map)
+      .bindPopup("<b>🍔 DFL</b><br>Entregamos em toda Patos de Minas");
+  })();
+  </script>
+</body>
+</html>
