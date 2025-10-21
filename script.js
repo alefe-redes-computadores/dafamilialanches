@@ -130,8 +130,11 @@ function atualizarCarrinho() {
     cart.length = 0;
     atualizarCarrinho();
   };
-}
 
+  // garante que o botão "Fechar Pedido" funcione
+  const fecharBtn = document.getElementById("close-order");
+  if (fecharBtn) fecharBtn.onclick = fecharPedido;
+}
 // ===============================
 // 🔥 FIREBASE + LOGIN
 // ===============================
@@ -209,7 +212,7 @@ document.querySelector(".btn-google").addEventListener("click", () => {
     .catch(err => alert("Erro no login com Google: " + err.message));
 });
 
-// mantém o login ativo
+// mantém login ativo
 auth.onAuthStateChanged(user => {
   if (user) {
     currentUser = user;
@@ -219,7 +222,7 @@ auth.onAuthStateChanged(user => {
 });
 
 // ===============================
-// 📦 FINALIZAR PEDIDO (Firestore)
+// 📦 PEDIDOS
 // ===============================
 function fecharPedido() {
   if (cart.length === 0) return alert("Carrinho vazio!");
@@ -243,7 +246,7 @@ function fecharPedido() {
   db.collection("Pedidos")
     .add(pedido)
     .then(() => {
-      alert("Pedido salvo com sucesso no sistema ✅");
+      alert("Pedido salvo com sucesso ✅");
       const texto = encodeURIComponent(
         "🍔 *Pedido DFL*\n" +
           cart.map(i => `• ${i.nome} x${i.qtd}`).join("\n") +
@@ -255,77 +258,6 @@ function fecharPedido() {
     })
     .catch(err => alert("Erro ao salvar pedido: " + err.message));
 }
-
-document.addEventListener("click", e => {
-  if (e.target.id === "close-order") fecharPedido();
-});
-
-// ===============================
-// ➕ ADICIONAIS
-// ===============================
-const adicionais = [
-  { nome: "Cebola", preco: 0.99 },
-  { nome: "Salada", preco: 1.99 },
-  { nome: "Ovo", preco: 1.99 },
-  { nome: "Bacon", preco: 2.99 },
-  { nome: "Hambúrguer Tradicional 56g", preco: 2.99 },
-  { nome: "Cheddar Cremoso", preco: 3.99 },
-  { nome: "Filé de Frango", preco: 5.99 },
-  { nome: "Hambúrguer Artesanal 120g", preco: 7.99 },
-];
-
-document.querySelectorAll(".extras-btn").forEach(btn =>
-  btn.addEventListener("click", e => {
-    const card = e.target.closest(".card");
-    extrasModal.dataset.produto = card.dataset.name;
-    extrasList.innerHTML = adicionais
-      .map(
-        (a, i) => `
-      <label>
-        <span>${a.nome} — R$ ${a.preco.toFixed(2)}</span>
-        <input type="checkbox" value="${i}">
-      </label>`
-      )
-      .join("");
-    extrasModal.classList.add("show");
-    document.body.classList.add("no-scroll");
-  })
-);
-
-document.querySelectorAll(".extras-close").forEach(btn =>
-  btn.addEventListener("click", () => {
-    extrasModal.classList.remove("show");
-    document.body.classList.remove("no-scroll");
-  })
-);
-
-extrasAdd.addEventListener("click", () => {
-  const nome = extrasModal.dataset.produto;
-  const selecionados = [...extrasList.querySelectorAll("input:checked")];
-  if (selecionados.length) {
-    selecionados.forEach(c => {
-      const extra = adicionais[c.value];
-      cart.push({ nome: `${nome} + ${extra.nome}`, preco: extra.preco, qtd: 1 });
-    });
-  }
-  extrasModal.classList.remove("show");
-  document.body.classList.remove("no-scroll");
-  atualizarCarrinho();
-});
-
-// ===============================
-// 🖼️ CARROSSEL
-// ===============================
-const slides = document.querySelector(".slides");
-document.querySelector(".c-prev").onclick = () => (slides.scrollLeft -= 320);
-document.querySelector(".c-next").onclick = () => (slides.scrollLeft += 320);
-
-document.querySelectorAll(".slide").forEach(img => {
-  img.addEventListener("click", () => {
-    const msg = encodeURIComponent(img.dataset.wa);
-    window.open(`https://wa.me/5534997178336?text=${msg}`, "_blank");
-  });
-});
 
 // ===============================
 // 📋 MEUS PEDIDOS
