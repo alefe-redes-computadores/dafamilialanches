@@ -548,3 +548,15 @@ a {
   .grid { grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); }
   #mini-cart { width: 100%; }
 }
+/* 🔖 Etiqueta “Com Molho Verde” */
+.badge {
+  display: inline-block;
+  background: #ffe66b; /* amarelo etiqueta */
+  color: #333;
+  font-size: 0.8em;
+  font-weight: 600;
+  padding: 2px 6px;
+  margin-left: 6px;
+  border-radius: 6px;
+  vertical-align: middle;
+}
