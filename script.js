@@ -1,9 +1,12 @@
+
+// ✅ DFL v1.2 – Estável + Meus Pedidos Robusto
 document.addEventListener("DOMContentLoaded", () => {
+
 /* ===============================
    🔧 CONFIGURAÇÃO INICIAL
 =============================== */
 const sound = new Audio("click.wav");
-let cart = []; // mantém em memória (pode persistir depois, se quiser)
+let cart = [];
 const cartCount   = document.getElementById("cart-count");
 const miniCart    = document.getElementById("mini-cart");
 const cartBackdrop= document.getElementById("cart-backdrop");
@@ -16,7 +19,7 @@ let currentUser   = null;
 const money = n => `R$ ${Number(n).toFixed(2).replace(".", ",")}`;
 
 /* ===============================
-   🔔 SOM DE CLIQUE (tolerante)
+   🔔 SOM DE CLIQUE
 =============================== */
 document.addEventListener("click", () => {
   try { sound.currentTime = 0; sound.play(); } catch(_) {}
@@ -34,11 +37,10 @@ function atualizarStatus() {
   const minuto = agora.getMinutes();
 
   let aberto = false;
-  if (dia >= 1 && dia <= 4) {
+  if (dia >= 1 && dia <= 4)
     aberto = hora >= 18 && (hora < 23 || (hora === 23 && minuto <= 15));
-  } else if (dia === 5 || dia === 6 || dia === 0) {
+  else if (dia === 5 || dia === 6 || dia === 0)
     aberto = hora >= 17 && (hora < 23 || (hora === 23 && minuto <= 30));
-  }
 
   banner.textContent = aberto
     ? "✅ Estamos abertos! Faça seu pedido 🍔"
@@ -105,7 +107,6 @@ function renderMiniCart() {
         const i = Number(e.currentTarget.dataset.i);
         cart[i].qtd++;
         renderMiniCart();
-        updateCartCount();
       });
     });
     lista.querySelectorAll(".qty-dec").forEach(b => {
@@ -113,7 +114,6 @@ function renderMiniCart() {
         const i = Number(e.currentTarget.dataset.i);
         cart[i].qtd = Math.max(1, cart[i].qtd - 1);
         renderMiniCart();
-        updateCartCount();
       });
     });
     lista.querySelectorAll(".remove-item").forEach(b => {
@@ -121,7 +121,6 @@ function renderMiniCart() {
         const i = Number(e.currentTarget.dataset.i);
         cart.splice(i, 1);
         renderMiniCart();
-        updateCartCount();
       });
     });
   }
@@ -130,34 +129,35 @@ function renderMiniCart() {
     <button id="close-order" class="btn-primary">Fechar Pedido (${money(total)})</button>
     <button id="clear-cart" class="btn-secondary">Limpar</button>
   `;
-  const clearBtn = document.getElementById("clear-cart");
-  const closeBtn = document.getElementById("close-order");
-  clearBtn?.addEventListener("click", () => { cart = []; renderMiniCart(); updateCartCount(); });
-  closeBtn?.addEventListener("click", fecharPedido);
-
+  document.getElementById("clear-cart")?.addEventListener("click", () => {
+    cart = [];
+    renderMiniCart();
+    updateCartCount();
+  });
+  document.getElementById("close-order")?.addEventListener("click", fecharPedido);
   updateCartCount();
 }
+
 function updateCartCount() {
   if (!cartCount) return;
-  cartCount.textContent = cart.reduce((acc, i) => acc + i.qtd, 0);
+  const totalItens = cart.reduce((acc, i) => acc + i.qtd, 0);
+  cartCount.textContent = totalItens;
 }
 
 const openCartBtn = document.getElementById("cart-icon");
 openCartBtn?.addEventListener("click", () => {
-  if (!miniCart || !cartBackdrop) return;
   miniCart.classList.toggle("active");
   cartBackdrop.classList.toggle("show");
   document.body.classList.toggle("no-scroll");
   renderMiniCart();
 });
 cartBackdrop?.addEventListener("click", () => {
-  miniCart?.classList.remove("active");
-  cartBackdrop?.classList.remove("show");
+  miniCart.classList.remove("active");
+  cartBackdrop.classList.remove("show");
   document.body.classList.remove("no-scroll");
 });
-
 /* ===============================
-   ➕ ADICIONAR AO CARRINHO
+   ➕ ADICIONAR AO CARRINHO (botões)
 =============================== */
 function popupAdd(msg) {
   const pop = document.createElement("div");
@@ -180,18 +180,25 @@ document.querySelectorAll(".add-cart").forEach(btn => {
   });
 });
 
+// Botão X dentro do mini-cart (no seu HTML ele tem classe "extras-close")
+document.querySelector("#mini-cart .extras-close")?.addEventListener("click", () => {
+  miniCart.classList.remove("active");
+  cartBackdrop.classList.remove("show");
+  document.body.classList.remove("no-scroll");
+});
+
 /* ===============================
-   ⚙️ ADICIONAIS
+   ⚙️ ADICIONAIS (modal)
 =============================== */
 const adicionais = [
-  { nome: "Cebola",                       preco: 0.99 },
-  { nome: "Salada",                       preco: 1.99 },
-  { nome: "Ovo",                          preco: 1.99 },
-  { nome: "Bacon",                        preco: 2.99 },
-  { nome: "Hambúrguer Tradicional 56g",   preco: 2.99 },
-  { nome: "Cheddar Cremoso",              preco: 3.99 },
-  { nome: "Filé de Frango",               preco: 5.99 },
-  { nome: "Hambúrguer Artesanal 120g",    preco: 7.99 },
+  { nome: "Cebola",                     preco: 0.99 },
+  { nome: "Salada",                     preco: 1.99 },
+  { nome: "Ovo",                        preco: 1.99 },
+  { nome: "Bacon",                      preco: 2.99 },
+  { nome: "Hambúrguer Tradicional 56g", preco: 2.99 },
+  { nome: "Cheddar Cremoso",            preco: 3.99 },
+  { nome: "Filé de Frango",             preco: 5.99 },
+  { nome: "Hambúrguer Artesanal 120g",  preco: 7.99 },
 ];
 
 document.querySelectorAll(".extras-btn").forEach(btn => {
@@ -210,18 +217,26 @@ document.querySelectorAll(".extras-btn").forEach(btn => {
     document.body.classList.add("no-scroll");
   });
 });
+
 document.querySelectorAll(".extras-close").forEach(btn => {
   btn.addEventListener("click", () => {
     extrasModal?.classList.remove("show");
     document.body.classList.remove("no-scroll");
   });
 });
+
 extrasAdd?.addEventListener("click", () => {
   if (!extrasModal) return;
   const nomeProduto = extrasModal.dataset.produto || "Produto";
   const selecionados = [...(extrasList?.querySelectorAll("input:checked") || [])];
+  if (!selecionados.length) {
+    extrasModal.classList.remove("show");
+    document.body.classList.remove("no-scroll");
+    return;
+  }
   selecionados.forEach(c => {
     const extra = adicionais[Number(c.value)];
+    if (!extra) return;
     cart.push({ nome: `${nomeProduto} + ${extra.nome}`, preco: extra.preco, qtd: 1 });
   });
   extrasModal.classList.remove("show");
@@ -230,23 +245,24 @@ extrasAdd?.addEventListener("click", () => {
 });
 
 /* ===============================
-   🖼️ CARROSSEL (tolerante)
+   🖼️ CARROSSEL
 =============================== */
 const slides = document.querySelector(".slides");
 const prev = document.querySelector(".c-prev");
 const next = document.querySelector(".c-next");
-prev?.addEventListener("click", () => { if (slides) slides.scrollLeft -= Math.min(slides.clientWidth*0.9, 320); });
-next?.addEventListener("click", () => { if (slides) slides.scrollLeft += Math.min(slides.clientWidth*0.9, 320); });
+prev?.addEventListener("click", () => { if (slides) slides.scrollLeft -= Math.min(slides.clientWidth * 0.9, 320); });
+next?.addEventListener("click", () => { if (slides) slides.scrollLeft += Math.min(slides.clientWidth * 0.9, 320); });
+
 document.querySelectorAll(".slide").forEach(img => {
   img.addEventListener("click", () => {
-    const msg = img.dataset.wa ? encodeURIComponent(img.dataset.wa) : "";
-    if (msg) window.open(`https://wa.me/5534997178336?text=${msg}`, "_blank");
+    const wa = img.dataset.wa ? encodeURIComponent(img.dataset.wa) : "";
+    if (wa) window.open(`https://wa.me/5534997178336?text=${wa}`, "_blank");
     else window.open(img.src, "_blank");
   });
 });
 
 /* ===============================
-   🔥 FIREBASE + LOGIN (v8)
+   🔥 FIREBASE v8 + LOGIN
 =============================== */
 const firebaseConfig = {
   apiKey: "AIzaSyATQBcbYuzKpKlSwNlbpRiAM1XyHqhGeak",
@@ -274,9 +290,10 @@ if (!userBtn) {
   userBtn.textContent = "Entrar / Cadastrar";
   document.querySelector(".header")?.appendChild(userBtn);
 }
+
+// Abrir/fechar modal login
 userBtn.addEventListener("click", () => {
-  if (!loginModal) return;
-  loginModal.classList.add("show");
+  loginModal?.classList.add("show");
   document.body.classList.add("no-scroll");
 });
 document.querySelector(".login-x")?.addEventListener("click", () => {
@@ -284,7 +301,7 @@ document.querySelector(".login-x")?.addEventListener("click", () => {
   document.body.classList.remove("no-scroll");
 });
 
-// e-mail/senha
+// Entrar ou criar conta com e-mail/senha
 document.querySelector(".btn-primario")?.addEventListener("click", () => {
   if (!auth) return alert("Auth indisponível");
   const email = document.getElementById("login-email")?.value?.trim();
@@ -328,6 +345,7 @@ document.querySelector(".btn-google")?.addEventListener("click", () => {
     .catch(err => alert("Erro no login com Google: " + err.message));
 });
 
+// Persistência
 auth?.onAuthStateChanged(user => {
   if (user) {
     currentUser = user;
@@ -353,9 +371,10 @@ function fecharPedido() {
     nome: currentUser.displayName || currentUser.email.split("@")[0] || "Usuário",
     itens: cart.map(i => `${i.nome} x${i.qtd}`),
     total: total.toFixed(2),
-    data: new Date().toISOString(), // ISO ordena certinho
+    data: new Date().toISOString(), // ISO (ordena certinho como string)
   };
 
+  // ⚠️ Coleção com P maiúsculo: "Pedidos"
   db.collection("Pedidos").add(pedido)
     .then(() => {
       alert("Pedido salvo com sucesso ✅");
@@ -372,7 +391,7 @@ function fecharPedido() {
 }
 
 /* ===============================
-   📦 MEUS PEDIDOS (painel)
+   📋 MEUS PEDIDOS (painel)
 =============================== */
 const ordersFab = document.createElement("button");
 ordersFab.id = "orders-fab";
@@ -392,13 +411,14 @@ ordersPanel.innerHTML = `
 `;
 document.body.appendChild(ordersPanel);
 
-document.querySelector(".orders-close")?.addEventListener("click", () => {
-  ordersPanel.classList.remove("active");
-});
+// Abrir/fechar
 ordersFab.addEventListener("click", () => {
   if (!currentUser) return alert("Faça login para ver seus pedidos.");
   ordersPanel.classList.add("active");
-  carregarPedidosSeguro();
+  carregarPedidos();
+});
+document.querySelector(".orders-close")?.addEventListener("click", () => {
+  ordersPanel.classList.remove("active");
 });
 
 function showOrdersFabIfLogged() {
@@ -406,15 +426,13 @@ function showOrdersFabIfLogged() {
   else ordersFab.classList.remove("show");
 }
 
-function carregarPedidosSeguro() {
+// Buscar pedidos do usuário logado
+function carregarPedidos() {
   const container = document.getElementById("orders-content");
   if (!db || !container) return;
   container.innerHTML = `<p class="empty-orders">Carregando pedidos...</p>`;
-  if (!currentUser) {
-    container.innerHTML = `<p class="empty-orders">Você precisa estar logado para ver seus pedidos.</p>`;
-    return;
-  }
-  // ⚠️ Coleção exatamente "Pedidos" (P maiúsculo)
+
+  // ⚠️ Mesma coleção "Pedidos" com P maiúsculo
   db.collection("Pedidos")
     .where("usuario", "==", currentUser.email)
     .orderBy("data", "desc")
@@ -443,5 +461,5 @@ function carregarPedidosSeguro() {
     });
 }
 
-console.log("✅ DFL v1.1 – Estável + Meus Pedidos (robusto)");
-}); // ← fecha o DOMContentLoaded
+console.log("✅ DFL v1.2 – Estável + Meus Pedidos Robusto (sem pasta de imagens)");
+}); // ⬅️ fim do DOMContentLoaded
