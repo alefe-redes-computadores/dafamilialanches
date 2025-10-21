@@ -73,7 +73,7 @@ function setStatusBanner() {
   }
 
   let openMins, closeMins, label;
-  if (dow >= 1 && dow <= 4) { // Seg-Qua-Qui
+  if (dow >= 1 && dow <= 4) { // Seg–Qui
     openMins = 18 * 60;
     closeMins = 23 * 60 + 15;
     label = "Aberto até 23h15";
@@ -124,20 +124,18 @@ function initCarousel() {
   prev?.addEventListener("click", () => rail.scrollBy({ left: -step(), behavior: "smooth" }));
   next?.addEventListener("click", () => rail.scrollBy({ left:  step(), behavior: "smooth" }));
 
+  // Agora sempre manda para o WhatsApp (usa o alt como nome da oferta)
   rail.querySelectorAll(".slide").forEach(img => {
     img.addEventListener("click", () => {
-      const wa = img.getAttribute("data-wa");
-      if (wa) {
-        window.open(`https://wa.me/5534997178336?text=${encodeURIComponent(wa)}`, "_blank");
-      } else {
-        window.open(img.src, "_blank");
-      }
+      const oferta = img.alt?.trim() || "Promoção DFL";
+      const txt = `Olá! Vi a oferta "${oferta}" no site e quero saber mais.`;
+      window.open(`https://wa.me/5534997178336?text=${encodeURIComponent(txt)}`, "_blank");
     });
   });
 }
 
 /* ---------------------------
-   MINI-CARRINHO (usa o HTML que já existe)
+   MINI-CARRINHO
 --------------------------- */
 function openMiniCart() {
   document.getElementById("cart-backdrop")?.classList.add("show");
@@ -207,8 +205,6 @@ function bindAddButtons() {
       const id    = card.dataset.id || card.querySelector("h3")?.textContent?.trim() || Math.random().toString(36).slice(2);
       const nome  = card.dataset.name || card.querySelector("h3")?.textContent?.trim() || "Item";
       const preco = parseFloat(card.dataset.price || "0");
-
-      // Proteção: se não veio preço válido, não adiciona corrompido
       const precoVal = Number.isFinite(preco) ? preco : 0;
 
       const found = cart.find(i => i.id === id && i.preco === precoVal);
@@ -224,17 +220,13 @@ function bindAddButtons() {
 }
 
 /* ---------------------------
-   ADICIONAIS (usa seu modal existente no HTML)
+   ADICIONAIS (Lista correta)
 --------------------------- */
 const EXTRAS = [
   { nome: "Cheddar cremoso", preco: 2.00, emoji: "🧀" },
   { nome: "Bacon crocante",  preco: 3.00, emoji: "🥓" },
   { nome: "Ovo",             preco: 1.50, emoji: "🍳" },
-  { nome: "Cebola crispy",   preco: 2.00, emoji: "🧅" },
-  { nome: "Catupiry",        preco: 2.50, emoji: "🥛" },
-  { nome: "Molho verde",     preco: 1.50, emoji: "🌿" },
-  { nome: "Milho",           preco: 1.50, emoji: "🌽" },
-  { nome: "Barbecue",        preco: 2.00, emoji: "🥣" }
+  { nome: "Cebola crispy",   preco: 2.00, emoji: "🧅" }
 ];
 
 function populateExtrasList() {
@@ -279,10 +271,31 @@ function bindExtras() {
 }
 
 /* ---------------------------
-   LOGIN COM GOOGLE (Firebase v8)
+   LOGIN (Modal + Google)
 --------------------------- */
+function ensureLoginModal() {
+  if (document.getElementById("login-modal")) return;
+
+  const modal = document.createElement("div");
+  modal.id = "login-modal";
+  modal.className = "";
+  modal.innerHTML = `
+    <div class="login-backdrop"></div>
+    <div class="login-box">
+      <button class="login-x" aria-label="Fechar">✕</button>
+      <h3>Entrar / Cadastro</h3>
+      <p>Acesse sua conta para acompanhar pedidos.</p>
+      <div class="divider">ou</div>
+      <button id="btn-google" class="btn-google">
+        <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt=""> Entrar com Google
+      </button>
+    </div>
+  `;
+  document.body.appendChild(modal);
+}
+
 function setupLogin() {
-  // Cria o botão no header se não existir
+  // Botão no header
   let userBtn = document.querySelector("#user-btn");
   if (!userBtn) {
     userBtn = document.createElement("button");
@@ -292,25 +305,27 @@ function setupLogin() {
     document.querySelector(".header")?.appendChild(userBtn);
   }
 
-  // Abre o modal visual
+  // Garante que exista um modal
+  ensureLoginModal();
+
+  // Abrir/fechar modal
   userBtn.addEventListener("click", () => {
     document.getElementById("login-modal")?.classList.add("show");
   });
-
-  // Fecha modal
   document.querySelector(".login-x")?.addEventListener("click", () =>
     document.getElementById("login-modal")?.classList.remove("show")
   );
   document.getElementById("login-modal")?.addEventListener("click", (e) => {
-    if (e.target.id === "login-modal") e.currentTarget.classList.remove("show");
+    if (e.target.id === "login-modal" || e.target.classList.contains("login-backdrop")) {
+      e.currentTarget.classList.remove("show");
+    }
   });
 
-  // Firebase (reutiliza seus <script src="firebase-*.js"> do HTML)
+  // Firebase (usa os scripts v8 do HTML)
   try {
-    // Se já estiver inicializado, não faça de novo
     if (!firebase.apps.length) {
       const firebaseConfig = {
-        // === COLE AQUI SUA CONFIG REAL ===
+        // === SUBSTITUA PELO SEU CONFIG REAL ===
         apiKey: "AIzaSyF-XXXXXX",
         authDomain: "dafamilia-lanches.firebaseapp.com",
         projectId: "dafamilia-lanches",
@@ -322,19 +337,23 @@ function setupLogin() {
     }
     const auth = firebase.auth();
 
-    // Botão "Entrar com Google"
-    document.getElementById("btn-google")?.addEventListener("click", async (e) => {
-      e.preventDefault();
-      try {
-        const provider = new firebase.auth.GoogleAuthProvider();
-        await auth.signInWithPopup(provider);
-        document.getElementById("login-modal")?.classList.remove("show");
-      } catch (err) {
-        alert("Falha ao autenticar com o Google:\n" + (err?.message || err));
-      }
-    });
+    // Botão Google (classe ou id)
+    const bindGoogle = () => {
+      const gbtn = document.querySelector("#btn-google") || document.querySelector(".btn-google");
+      if (!gbtn) return;
+      gbtn.addEventListener("click", async (e) => {
+        e.preventDefault();
+        try {
+          const provider = new firebase.auth.GoogleAuthProvider();
+          await auth.signInWithPopup(provider);
+          document.getElementById("login-modal")?.classList.remove("show");
+        } catch (err) {
+          alert("Falha ao autenticar com o Google:\n" + (err?.message || err));
+        }
+      });
+    };
+    bindGoogle();
 
-    // Estado do usuário → atualiza o botão
     auth.onAuthStateChanged((user) => {
       if (user) {
         const nome = user.displayName || (user.email ? user.email.split("@")[0] : "Cliente");
@@ -346,7 +365,6 @@ function setupLogin() {
       }
     });
   } catch (e) {
-    // Se Firebase não carregar, mantemos só o visual — sem quebrar o site.
     console.warn("Firebase indisponível. Mantendo login apenas visual.", e);
   }
 }
@@ -355,7 +373,7 @@ function setupLogin() {
    INICIALIZAÇÃO GERAL
 --------------------------- */
 window.addEventListener("DOMContentLoaded", () => {
-  // Badge inicial + normalização salva
+  // Badge inicial + salva migração
   saveCart();
 
   // Status e countdown
@@ -373,7 +391,7 @@ window.addEventListener("DOMContentLoaded", () => {
   // Extras
   bindExtras();
 
-  // Mini-cart: abrir/fechar/limpar/fechar pedido
+  // Mini-cart
   document.getElementById("cart-icon")?.addEventListener("click", () => { playClick(); renderMiniCart(); openMiniCart(); });
   document.getElementById("mini-clear")?.addEventListener("click", () => { cart = []; saveCart(); renderMiniCart(); });
   document.querySelector(".mini-close")?.addEventListener("click", closeMiniCart);
@@ -384,7 +402,7 @@ window.addEventListener("DOMContentLoaded", () => {
     const linhas = cart.map(i => `• ${i.nome}${i.qtd>1?` x${i.qtd}`:""} — ${money(i.preco*i.qtd)}`);
     const total = cart.reduce((a,i)=>a+i.preco*i.qtd,0);
     const txt = `Olá! Quero finalizar meu pedido:%0A%0A${linhas.join("%0A")}%0A%0ATotal: ${money(total)}`;
-    window.open(`https://wa.me/5534997178336?text=${txt}`, "_blank");
+    window.open(`https://wa.me/5534997178336?text=${encodeURIComponent(txt)}`, "_blank");
   });
 
   // Login
