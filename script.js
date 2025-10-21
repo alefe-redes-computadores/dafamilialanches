@@ -1,3 +1,4 @@
+document.addEventListener("DOMContentLoaded", () => {
 // ===============================
 // 🔧 CONFIGURAÇÃO INICIAL
 // ===============================
@@ -243,29 +244,4 @@ document.querySelector(".login-x").addEventListener("click", () => {
   loginModal.classList.remove("show");
   document.body.classList.remove("no-scroll");
 });
-
-// Firebase config (preencha com seus dados)
-const firebaseConfig = {
-  apiKey: "SUA-CHAVE-AQUI",
-  authDomain: "SEU-PROJETO.firebaseapp.com",
-  projectId: "SEU-PROJETO",
-  storageBucket: "SEU-PROJETO.appspot.com",
-  messagingSenderId: "XXXXXXX",
-  appId: "X:XXXXXXX:web:XXXXXXX"
-};
-
-firebase.initializeApp(firebaseConfig);
-const auth = firebase.auth();
-
-document.querySelector(".btn-google").addEventListener("click", () => {
-  const provider = new firebase.auth.GoogleAuthProvider();
-  auth.signInWithPopup(provider)
-    .then(result => {
-      const user = result.user;
-      alert(`Bem-vindo, ${user.displayName}!`);
-      loginModal.classList.remove("show");
-      document.body.classList.remove("no-scroll");
-      userBtn.textContent = user.displayName.split(" ")[0];
-    })
-    .catch(err => alert("Erro no login com Google: " + err.message));
-});
+}); // 🔚 DOMContentLoaded
