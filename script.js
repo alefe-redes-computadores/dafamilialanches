@@ -279,3 +279,38 @@ document.querySelector(".mini-close")?.addEventListener("click", () => {
 });
 
 });
+
+// ======= Corrigir botão de login (visual + funcional) =======
+function fixLoginButton() {
+  const userBtn = document.getElementById("user-btn");
+  const loginModal = document.getElementById("login-modal");
+
+  if (!userBtn || !loginModal) return;
+
+  userBtn.addEventListener("click", () => {
+    loginModal.classList.add("show");
+    document.body.classList.add("no-scroll");
+  });
+
+  // fechar com X
+  loginModal.querySelector(".login-x")?.addEventListener("click", () => {
+    loginModal.classList.remove("show");
+    document.body.classList.remove("no-scroll");
+  });
+
+  // fechar clicando fora
+  loginModal.addEventListener("click", (e) => {
+    if (e.target === loginModal) {
+      loginModal.classList.remove("show");
+      document.body.classList.remove("no-scroll");
+    }
+  });
+
+  // botão Google (placeholder)
+  loginModal.querySelector(".btn-google")?.addEventListener("click", (e) => {
+    e.preventDefault();
+    alert("Login com Google será reativado na próxima atualização (DFL v2.0).");
+  });
+}
+
+fixLoginButton();
