@@ -209,7 +209,7 @@ document.querySelector(".btn-google").addEventListener("click", () => {
     .catch(err => alert("Erro no login com Google: " + err.message));
 });
 
-// mantém o login
+// mantém o login ativo
 auth.onAuthStateChanged(user => {
   if (user) {
     currentUser = user;
@@ -219,7 +219,116 @@ auth.onAuthStateChanged(user => {
 });
 
 // ===============================
-// 📋 MEUS PEDIDOS (CORRIGIDO)
+// 📦 FINALIZAR PEDIDO (Firestore)
+// ===============================
+function fecharPedido() {
+  if (cart.length === 0) return alert("Carrinho vazio!");
+  const total = cart.reduce((acc, i) => acc + i.preco * i.qtd, 0);
+
+  if (!currentUser) {
+    alert("Você precisa estar logado para enviar o pedido!");
+    loginModal.classList.add("show");
+    return;
+  }
+
+  const pedido = {
+    usuario: currentUser.email,
+    nome: currentUser.displayName || "Usuário",
+    itens: cart.map(i => `${i.nome} x${i.qtd}`),
+    total: total.toFixed(2),
+    data: new Date().toISOString(),
+    userid: currentUser.uid,
+  };
+
+  db.collection("Pedidos")
+    .add(pedido)
+    .then(() => {
+      alert("Pedido salvo com sucesso no sistema ✅");
+      const texto = encodeURIComponent(
+        "🍔 *Pedido DFL*\n" +
+          cart.map(i => `• ${i.nome} x${i.qtd}`).join("\n") +
+          `\n\nTotal: R$ ${total.toFixed(2)}`
+      );
+      window.open(`https://wa.me/5534997178336?text=${texto}`, "_blank");
+      cart.length = 0;
+      atualizarCarrinho();
+    })
+    .catch(err => alert("Erro ao salvar pedido: " + err.message));
+}
+
+document.addEventListener("click", e => {
+  if (e.target.id === "close-order") fecharPedido();
+});
+
+// ===============================
+// ➕ ADICIONAIS
+// ===============================
+const adicionais = [
+  { nome: "Cebola", preco: 0.99 },
+  { nome: "Salada", preco: 1.99 },
+  { nome: "Ovo", preco: 1.99 },
+  { nome: "Bacon", preco: 2.99 },
+  { nome: "Hambúrguer Tradicional 56g", preco: 2.99 },
+  { nome: "Cheddar Cremoso", preco: 3.99 },
+  { nome: "Filé de Frango", preco: 5.99 },
+  { nome: "Hambúrguer Artesanal 120g", preco: 7.99 },
+];
+
+document.querySelectorAll(".extras-btn").forEach(btn =>
+  btn.addEventListener("click", e => {
+    const card = e.target.closest(".card");
+    extrasModal.dataset.produto = card.dataset.name;
+    extrasList.innerHTML = adicionais
+      .map(
+        (a, i) => `
+      <label>
+        <span>${a.nome} — R$ ${a.preco.toFixed(2)}</span>
+        <input type="checkbox" value="${i}">
+      </label>`
+      )
+      .join("");
+    extrasModal.classList.add("show");
+    document.body.classList.add("no-scroll");
+  })
+);
+
+document.querySelectorAll(".extras-close").forEach(btn =>
+  btn.addEventListener("click", () => {
+    extrasModal.classList.remove("show");
+    document.body.classList.remove("no-scroll");
+  })
+);
+
+extrasAdd.addEventListener("click", () => {
+  const nome = extrasModal.dataset.produto;
+  const selecionados = [...extrasList.querySelectorAll("input:checked")];
+  if (selecionados.length) {
+    selecionados.forEach(c => {
+      const extra = adicionais[c.value];
+      cart.push({ nome: `${nome} + ${extra.nome}`, preco: extra.preco, qtd: 1 });
+    });
+  }
+  extrasModal.classList.remove("show");
+  document.body.classList.remove("no-scroll");
+  atualizarCarrinho();
+});
+
+// ===============================
+// 🖼️ CARROSSEL
+// ===============================
+const slides = document.querySelector(".slides");
+document.querySelector(".c-prev").onclick = () => (slides.scrollLeft -= 320);
+document.querySelector(".c-next").onclick = () => (slides.scrollLeft += 320);
+
+document.querySelectorAll(".slide").forEach(img => {
+  img.addEventListener("click", () => {
+    const msg = encodeURIComponent(img.dataset.wa);
+    window.open(`https://wa.me/5534997178336?text=${msg}`, "_blank");
+  });
+});
+
+// ===============================
+// 📋 MEUS PEDIDOS
 // ===============================
 const fab = document.createElement("button");
 fab.id = "orders-fab";
@@ -251,7 +360,7 @@ function carregarPedidos() {
   const content = panel.querySelector(".orders-content");
   content.innerHTML = "<p>Carregando...</p>";
 
-  db.collection("pedidos")
+  db.collection("Pedidos")
     .where("usuario", "==", currentUser.email)
     .orderBy("data", "desc")
     .get()
@@ -264,13 +373,14 @@ function carregarPedidos() {
       content.innerHTML = "";
       snapshot.forEach(doc => {
         const p = doc.data();
-        // ✅ CORREÇÃO: aceita string OU array
-        const itensList = Array.isArray(p.itens) ? p.itens.join("<br>") : p.itens;
+        const itensLista = Array.isArray(p.itens)
+          ? p.itens.join("<br>")
+          : p.itens || "Sem itens";
         const div = document.createElement("div");
         div.className = "order-item";
         div.innerHTML = `
-          <h4>${p.nome}</h4>
-          <p>${itensList}</p>
+          <h4>${p.nome || "Pedido"}</h4>
+          <p>${itensLista}</p>
           <p><b>Total:</b> R$ ${p.total}</p>
           <small>${new Date(p.data).toLocaleString("pt-BR")}</small>
         `;
