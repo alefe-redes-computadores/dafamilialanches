@@ -271,4 +271,11 @@ window.addEventListener("DOMContentLoaded",()=>{
   bindExtrasButtons();
   initCarousel();
   setupLoginUI();
+// ======= Corrige botão X do carrinho =======
+document.querySelector(".mini-close")?.addEventListener("click", () => {
+  miniCart.classList.remove("active");
+  cartBackdrop.classList.remove("show");
+  document.body.classList.remove("no-scroll");
+});
+
 });
