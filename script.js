@@ -1,3 +1,10 @@
+
+// ✅ Garante que o JS só rode depois do HTML estar carregado
+
+}); // ← fecha o DOMContentLoaded
+document.addEventListener("DOMContentLoaded", () => {
+
+
 /* ===============================
    🔧 CONFIGURAÇÃO INICIAL
 =============================== */
@@ -405,3 +412,4 @@ auth.onAuthStateChanged(user => {
 });
 
 console.log("✅ DFL v1.1 – Estável + Meus Pedidos Compatível");
+}); // ← fecha o DOMContentLoaded
