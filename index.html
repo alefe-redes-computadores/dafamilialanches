@@ -4,26 +4,31 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>🍔 Da Família Lanches</title>
+
   <link rel="stylesheet" href="style.css" />
+
+  <!-- Firebase v8 (compat com nosso JS) -->
   <script defer src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
   <script defer src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
   <script defer src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+
   <script defer src="script.js"></script>
 </head>
 <body>
   <!-- ================= CABEÇALHO ================= -->
   <header class="header">
     <div class="header-content">
-      <img src="imagens/logo-dfl.png" alt="Logo DFL" class="logo" />
+      <img src="logo-dfl.png" alt="Logo DFL" class="logo" />
       <div class="header-info">
         <h1>Da Família Lanches</h1>
         <p class="tagline">Aqui o sabor é de casa ❤️</p>
       </div>
     </div>
+    <!-- botão de login é injetado via JS (#user-btn) -->
   </header>
 
   <!-- Botão de carrinho -->
-  <button id="cart-icon">🛒 <span id="cart-count">0</span></button>
+  <button id="cart-icon" aria-label="Abrir carrinho">🛒 <span id="cart-count">0</span></button>
 
   <!-- ================= STATUS ================= -->
   <div id="status-banner" class="status-banner"></div>
@@ -36,35 +41,39 @@
     <h2>🔥 Promoções do Dia</h2>
     <p class="promo-sub">Aproveite antes que acabe!</p>
     <div class="countdown-ticker">
-      ⏳ Tempo restante: <span id="timer"></span>
+      ⏳ Tempo restante: <span id="timer-2"></span>
     </div>
 
     <!-- Carrossel -->
     <div class="carousel">
-      <button class="c-btn c-prev">‹</button>
+      <button class="c-btn c-prev" aria-label="Anterior">‹</button>
       <div class="slides">
-        <img class="slide" src="imagens/promo1.jpg"
-          data-wa="Promoção especial! 🍔 Combo Casal Trem por R$34,99!" />
-        <img class="slide" src="imagens/promo2.jpg"
-          data-wa="Peça já o Combo Família Artesanal + Coca 2L por R$79,99!" />
-        <img class="slide" src="imagens/promo3.jpg"
-          data-wa="4 Trembão + Fanta 1L por apenas R$59,99!" />
+        <img class="slide" src="promo1.jpg"
+             alt="Promoção 1"
+             data-wa="Promoção especial! 🍔 Combo Casal Trem por R$ 34,99!" />
+        <img class="slide" src="promo2.jpg"
+             alt="Promoção 2"
+             data-wa="Peça já o Combo Família Artesanal + Coca 2L por R$ 79,99!" />
+        <img class="slide" src="promo3.jpg"
+             alt="Promoção 3"
+             data-wa="4 Trembão + Fanta 1L por apenas R$ 59,99!" />
       </div>
-      <button class="c-btn c-next">›</button>
+      <button class="c-btn c-next" aria-label="Próximo">›</button>
     </div>
   </section>
 
   <!-- ================= MINI-CARRINHO ================= -->
-  <div id="cart-backdrop"></div>
-  <aside id="mini-cart" class="mini-cart">
+  <div id="cart-backdrop" aria-hidden="true"></div>
+  <aside id="mini-cart" class="mini-cart" aria-label="Carrinho">
     <div class="mini-head">
       <h3>🛍 Seu Pedido</h3>
-      <button class="extras-close">✖</button>
+      <button class="cart-close" aria-label="Fechar carrinho">✖</button>
     </div>
     <div class="mini-list"></div>
     <div class="mini-foot"></div>
   </aside>
-<!-- ================= CARDÁPIO ================= -->
+
+  <!-- ================= CARDÁPIO (Tradicionais) ================= -->
   <section class="menu-section">
     <h2>🍔 Nossos Lanches Tradicionais</h2>
     <div class="grid">
@@ -133,7 +142,7 @@
     </div>
   </section>
 
-  <!-- ================= LANCHES ARTESANAIS ================= -->
+<!-- ================= LANCHES ARTESANAIS ================= -->
   <section class="menu-section">
     <h2>🍔 Lanches Artesanais</h2>
     <div class="grid">
@@ -280,12 +289,13 @@
       </div>
     </div>
   </section>
-<!-- ================= MODAL ADICIONAIS ================= -->
-  <div id="extras-modal" class="modal">
+
+  <!-- ============= MODAL ADICIONAIS ============= -->
+  <div id="extras-modal" class="modal" aria-hidden="true">
     <div class="modal-content">
       <div class="modal-head">
         <h3>Adicionais</h3>
-        <button class="extras-close">✖</button>
+        <button class="extras-close" aria-label="Fechar">✖</button>
       </div>
       <div id="extras-list" class="extras-list"></div>
       <div class="modal-foot">
@@ -294,16 +304,18 @@
     </div>
   </div>
 
-  <!-- ================= MODAL LOGIN ================= -->
-  <div id="login-modal" class="modal">
+  <!-- =============== MODAL LOGIN =============== -->
+  <div id="login-modal" class="modal" aria-hidden="true">
     <div class="modal-content login-box">
-      <button class="login-x">✖</button>
+      <button class="login-x" aria-label="Fechar">✖</button>
       <h3>👋 Bem-vindo(a)!</h3>
       <p>Entre ou cadastre-se para finalizar seu pedido.</p>
-      <input type="email" id="login-email" placeholder="E-mail" />
-      <input type="password" id="login-senha" placeholder="Senha" />
-      <button class="btn-primario">Entrar / Cadastrar</button>
-      <hr />
+      <div class="login-form">
+        <input type="email" id="login-email" placeholder="E-mail" />
+        <input type="password" id="login-senha" placeholder="Senha" />
+        <button class="btn-primario">Entrar / Cadastrar</button>
+      </div>
+      <div class="divider">ou</div>
       <button class="btn-google">🔐 Entrar com Google</button>
     </div>
   </div>
@@ -315,7 +327,7 @@
         <h3>Da Família Lanches</h3>
         <p>📍 Patos de Minas – MG</p>
         <p>📞 (34) 99717-8336</p>
-        <p>🕓 Seg–Qui: 18h às 23h15 <br>Sex–Dom: 17h às 23h30</p>
+        <p>🕓 Seg–Qui: 18h às 23h15 • Sex–Dom: 17h às 23h30</p>
       </div>
 
       <div class="footer-map">
