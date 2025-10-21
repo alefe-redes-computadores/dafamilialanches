@@ -1,5 +1,5 @@
 /* ===========================
-   GERAIS
+   BASE GERAL
 =========================== */
 * {
   box-sizing: border-box;
@@ -10,22 +10,9 @@
 
 html, body {
   height: 100%;
-}
-
-body {
   background: #fff8e7;
   color: #222;
-  line-height: 1.6;
   overflow-x: hidden;
-}
-
-a {
-  color: inherit;
-  text-decoration: none;
-}
-
-.no-scroll {
-  overflow: hidden !important;
 }
 
 /* ===========================
@@ -33,40 +20,29 @@ a {
 =========================== */
 .header {
   background: linear-gradient(90deg, #ffcc00 0%, #ff9900 100%);
-  padding: 15px 10px;
-  text-align: center;
   color: #111;
+  text-align: center;
+  padding: 15px 10px;
   position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-direction: column;
 }
-
 .header-content {
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 10px;
 }
-
 .logo {
-  height: 60px;
+  height: 55px;
   border-radius: 12px;
 }
-
 .header-info h1 {
-  font-size: 1.8em;
+  font-size: 1.7em;
   font-weight: 800;
 }
-
 .tagline {
   font-size: 0.9em;
-  font-weight: 500;
-  opacity: 0.85;
+  opacity: 0.8;
 }
-
-/* botão de login */
 .user-button {
   position: absolute;
   top: 14px;
@@ -80,11 +56,11 @@ a {
   font-weight: 700;
   font-size: 0.9em;
   box-shadow: 0 2px 6px rgba(0,0,0,0.25);
-  transition: all 0.2s ease;
+  transition: 0.2s ease;
 }
 .user-button:hover {
-  background: #222;
-  transform: translateY(-1px);
+  background: #ffcc00;
+  color: #111;
 }
 
 /* ===========================
@@ -94,19 +70,18 @@ a {
   text-align: center;
   background: #ffcc00;
   color: #111;
-  padding: 10px;
   font-weight: 600;
+  padding: 10px;
   border-bottom: 2px solid #000;
 }
-
 .hours-banner {
+  text-align: center;
   background: #222;
   color: #fff;
-  padding: 6px 0;
-  text-align: center;
   font-size: 0.85em;
+  padding: 5px;
 }
-.hours-banner span b {
+.hours-banner b {
   color: #ffcc00;
 }
 
@@ -119,22 +94,25 @@ a {
 }
 .promo-section h2 {
   font-size: 1.7em;
-  margin-bottom: 8px;
+  margin-bottom: 5px;
 }
 .promo-sub {
-  color: #555;
   font-size: 0.9em;
+  color: #555;
 }
 .countdown-ticker {
   background: #222;
   color: #fff;
-  padding: 8px 12px;
   border-radius: 8px;
+  padding: 8px 12px;
   display: inline-block;
-  margin: 10px auto 15px;
+  margin: 10px auto;
   font-weight: 600;
 }
 
+/* ===========================
+   CARROSSEL
+=========================== */
 .carousel {
   display: flex;
   align-items: center;
@@ -144,20 +122,20 @@ a {
 .slides {
   display: flex;
   overflow-x: auto;
-  scroll-behavior: smooth;
   gap: 8px;
+  scroll-behavior: smooth;
   padding: 2px;
 }
 .slide {
   height: 180px;
+  width: 320px;
   border-radius: 10px;
   cursor: pointer;
-  transition: transform 0.3s ease, box-shadow 0.2s ease;
   box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+  transition: 0.3s ease;
 }
 .slide:hover {
   transform: scale(1.03);
-  box-shadow: 0 6px 14px rgba(0,0,0,0.2);
 }
 .c-btn {
   background: #222;
@@ -167,8 +145,6 @@ a {
   font-size: 1.2em;
   cursor: pointer;
   border-radius: 6px;
-  min-width: 40px;
-  height: 40px;
 }
 .c-btn:hover {
   background: #ffcc00;
@@ -194,18 +170,17 @@ a {
 .card {
   background: #fff;
   border-radius: 12px;
-  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+  box-shadow: 0 4px 10px rgba(0,0,0,0.12);
   padding: 15px;
-  text-align: left;
-  transition: transform 0.25s ease, box-shadow 0.25s ease;
+  transition: 0.25s;
 }
 .card:hover {
   transform: translateY(-4px);
-  box-shadow: 0 8px 18px rgba(0,0,0,0.12);
+  box-shadow: 0 8px 18px rgba(0,0,0,0.15);
 }
 .card h3 {
-  font-size: 1.2em;
-  margin-bottom: 5px;
+  font-size: 1.1em;
+  margin-bottom: 4px;
 }
 .price {
   color: #ff6600;
@@ -216,17 +191,16 @@ a {
   display: flex;
   justify-content: center;
   gap: 8px;
-  margin-top: 10px;
 }
 .add-cart, .extras-btn {
-  background: #222;
+  background: #111;
   color: #fff;
   border: none;
   border-radius: 6px;
   padding: 8px 12px;
   font-weight: 700;
   cursor: pointer;
-  transition: all 0.25s ease;
+  transition: 0.2s;
 }
 .add-cart:hover, .extras-btn:hover {
   background: #ffcc00;
@@ -234,33 +208,109 @@ a {
 }
 
 /* ===========================
-   BOTÃO FLOTANTE “MEUS PEDIDOS”
+   ETIQUETA “COM MOLHO VERDE”
+=========================== */
+.badge {
+  background: #dfff9b;
+  color: #1b4419;
+  font-size: 0.75em;
+  font-weight: 600;
+  padding: 2px 6px;
+  margin-left: 6px;
+  border-radius: 6px;
+  vertical-align: middle;
+}
+
+/* ===========================
+   CARRINHO
+=========================== */
+#cart-icon {
+  position: fixed;
+  top: 15px;
+  left: 15px;
+  background: #ffcc00;
+  border: none;
+  border-radius: 50%;
+  padding: 10px;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 3px 6px rgba(0,0,0,0.25);
+  z-index: 1000;
+}
+#cart-count {
+  background: #111;
+  color: #fff;
+  border-radius: 8px;
+  padding: 2px 6px;
+  font-size: 0.75em;
+  margin-left: 3px;
+}
+#cart-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.55);
+  display: none;
+  z-index: 1999;
+}
+#cart-backdrop.show { display: block; }
+
+.mini-cart {
+  position: fixed;
+  right: -100%;
+  top: 0;
+  width: 85%;
+  max-width: 420px;
+  height: 100dvh;
+  background: #fff;
+  box-shadow: -4px 0 14px rgba(0,0,0,0.28);
+  transition: right 0.35s ease;
+  z-index: 2000;
+  display: flex;
+  flex-direction: column;
+}
+.mini-cart.active { right: 0; }
+
+.mini-head {
+  background: #222;
+  color: #fff;
+  padding: 14px 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.mini-list {
+  flex: 1;
+  padding: 10px;
+  overflow-y: auto;
+}
+.mini-foot {
+  padding: 12px;
+  border-top: 1px solid #ddd;
+  display: flex;
+  gap: 8px;
+}
+
+/* ===========================
+   BOTÃO “MEUS PEDIDOS”
 =========================== */
 #orders-fab {
   position: fixed;
-  bottom: 80px;
+  bottom: 90px;
   right: 20px;
   background: #f4c430;
   color: #000;
   font-weight: 800;
-  font-size: 14px;
   border: none;
+  border-radius: 30px;
   padding: 12px 18px;
-  border-radius: 50px;
-  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.25);
-  display: flex;
+  box-shadow: 0 3px 8px rgba(0,0,0,0.25);
+  display: none;
   align-items: center;
   gap: 6px;
   cursor: pointer;
-  opacity: 0;
-  transform: translateY(40px);
-  transition: all 0.3s ease;
   z-index: 1200;
 }
-#orders-fab.show {
-  opacity: 1;
-  transform: translateY(0);
-}
+#orders-fab.show { display: flex; }
 #orders-fab:hover {
   background: #ffd84a;
 }
@@ -270,24 +320,20 @@ a {
 =========================== */
 .orders-panel {
   position: fixed;
-  top: 0;
   right: -100%;
-  width: 90%;
-  max-width: 440px;
-  height: 100vh;
-  background: #fff;
-  color: #111;
-  z-index: 1500;
-  box-shadow: -2px 0 14px rgba(0,0,0,0.3);
+  top: 0;
+  width: 85%;
+  max-width: 420px;
+  height: 100dvh;
+  background: #111;
+  color: #fff;
+  box-shadow: -2px 0 14px rgba(0,0,0,0.4);
   transition: right 0.4s ease;
   display: flex;
   flex-direction: column;
-  border-radius: 12px 0 0 12px;
+  z-index: 1500;
 }
-
-.orders-panel.active {
-  right: 0;
-}
+.orders-panel.active { right: 0; }
 
 .orders-head {
   background: #f4c430;
@@ -295,11 +341,30 @@ a {
   padding: 15px;
   font-weight: 800;
   display: flex;
-  align-items: center;
   justify-content: space-between;
-  border-radius: 12px 0 0 0;
+  align-items: center;
 }
-
+.orders-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 15px;
+}
+.order-item {
+  background: #1c1c1c;
+  border: 1px solid #333;
+  border-radius: 8px;
+  padding: 10px;
+  margin-bottom: 10px;
+}
+.order-item h4 {
+  color: #ffcc00;
+  margin-bottom: 5px;
+  font-size: 1rem;
+}
+.order-item p {
+  font-size: 0.9em;
+  color: #ccc;
+}
 .orders-close {
   background: none;
   border: none;
@@ -309,65 +374,80 @@ a {
   font-weight: bold;
 }
 
-.orders-content {
-  flex: 1;
-  overflow-y: auto;
-  padding: 15px;
-  background: #fff;
-  border-radius: 0 0 0 12px;
+/* ===========================
+   POPUP “ADICIONADO”
+=========================== */
+.popup-add {
+  position: fixed;
+  bottom: 30px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #111;
+  color: #fff;
+  padding: 10px 18px;
+  border-radius: 30px;
+  animation: fadePop 1.4s ease;
+  font-weight: 600;
+  z-index: 3000;
 }
-
-.empty-orders {
-  text-align: center;
-  color: #777;
-  font-size: .95rem;
-  margin-top: 10px;
-}
-
-.order-item {
-  background: #f9f9f9;
-  border-radius: 8px;
-  padding: 12px;
-  margin-bottom: 10px;
-  border: 1px solid #eee;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.05);
-}
-
-.order-item h4 {
-  color: #111;
-  margin-bottom: 6px;
-  font-size: 1rem;
-  font-weight: 700;
-}
-
-.order-item p {
-  font-size: 0.9em;
-  color: #333;
-  margin-bottom: 3px;
-}
-
-.order-item small {
-  display: block;
-  margin-top: 6px;
-  font-size: 0.8em;
-  color: #666;
-}
-
-/* Scrollbar mais discreta */
-.orders-content::-webkit-scrollbar {
-  width: 6px;
-}
-.orders-content::-webkit-scrollbar-thumb {
-  background: #ccc;
-  border-radius: 10px;
+@keyframes fadePop {
+  0% { opacity: 0; transform: translate(-50%, 40px); }
+  10%, 90% { opacity: 1; transform: translate(-50%, 0); }
+  100% { opacity: 0; transform: translate(-50%, 40px); }
 }
 
 /* ===========================
-   RESPONSIVIDADE
+   MODAIS
+=========================== */
+.modal {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.6);
+  justify-content: center;
+  align-items: center;
+  z-index: 3000;
+}
+.modal.show { display: flex; }
+
+.modal-content {
+  background: #fff8e7;
+  color: #111;
+  border-radius: 14px;
+  padding: 20px;
+  width: 90%;
+  max-width: 380px;
+  box-shadow: 0 8px 18px rgba(0,0,0,0.25);
+}
+
+/* ===========================
+   RODAPÉ
+=========================== */
+.footer {
+  background: #111;
+  color: #fff;
+  text-align: center;
+  padding: 25px 10px;
+  margin-top: 40px;
+}
+.footer h3 {
+  color: #ffcc00;
+  margin-bottom: 5px;
+}
+.footer a {
+  color: #ffcc00;
+}
+.footer-copy {
+  font-size: 0.8em;
+  opacity: 0.7;
+  margin-top: 10px;
+}
+
+/* ===========================
+   RESPONSIVO
 =========================== */
 @media (max-width: 768px) {
-  .header-info h1 { font-size: 1.4em; }
   .slide { height: 150px; }
+  .header-info h1 { font-size: 1.4em; }
   .grid { grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); }
-  #mini-cart { width: 100%; }
 }
