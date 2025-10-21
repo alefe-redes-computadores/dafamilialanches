@@ -451,3 +451,42 @@ html, body {
   .header-info h1 { font-size: 1.4em; }
   .grid { grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); }
 }
+/* Correção modal adicionais */
+#extras-modal .modal-content {
+  background: #fff;
+  color: #000;
+  border-radius: 14px;
+  width: 90%;
+  max-width: 360px;
+}
+#extras-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin: 10px 0;
+}
+#extras-list label {
+  background: #f9f9f9;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  padding: 6px 8px;
+  font-size: 0.9em;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+#extras-add {
+  background: #111;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 8px 10px;
+  font-weight: 700;
+  width: 100%;
+  cursor: pointer;
+  transition: 0.2s;
+}
+#extras-add:hover {
+  background: #ffcc00;
+  color: #111;
+}
