@@ -9,10 +9,10 @@ let currentUser = null;
 const cartCount    = document.getElementById("cart-count");
 const miniCart     = document.getElementById("mini-cart");
 const cartBackdrop = document.getElementById("cart-backdrop");
+const loginModal   = document.getElementById("login-modal");
 const extrasModal  = document.getElementById("extras-modal");
 const extrasList   = document.getElementById("extras-list");
 const extrasAdd    = document.getElementById("extras-add");
-const loginModal   = document.getElementById("login-modal");
 
 const money = n => `R$ ${Number(n).toFixed(2).replace(".", ",")}`;
 
@@ -24,7 +24,7 @@ document.addEventListener("click", () => {
 });
 
 /* ===============================
-   🕒 STATUS DE FUNCIONAMENTO
+   🕒 STATUS & TIMER
 =============================== */
 function atualizarStatus() {
   const banner = document.getElementById("status-banner");
@@ -43,37 +43,41 @@ function atualizarStatus() {
     : "⏰ Fechado no momento — Voltamos em breve!";
   banner.style.background = aberto ? "#00c853" : "#ff3d00";
 }
-setInterval(atualizarStatus, 60000);
-atualizarStatus();
+setInterval(atualizarStatus, 60000); atualizarStatus();
 
-/* ===============================
-   ⏳ CONTAGEM REGRESSIVA
-=============================== */
 function atualizarTimer() {
-  const box = document.getElementById("timer");
-  if (!box) return;
+  const box1 = document.getElementById("timer");
+  const box2 = document.getElementById("promo-timer"); // espelha no ticker das promoções
   const agora = new Date();
-  const fim = new Date();
-  fim.setHours(23, 59, 59, 999);
+  const fim = new Date(); fim.setHours(23,59,59,999);
   const diff = fim - agora;
-  if (diff <= 0) { box.textContent = "00:00:00"; return; }
-  const h = String(Math.floor(diff / 3600000)).padStart(2, "0");
-  const m = String(Math.floor((diff % 3600000) / 60000)).padStart(2, "0");
-  const s = String(Math.floor((diff % 60000) / 1000)).padStart(2, "0");
-  box.textContent = `${h}:${m}:${s}`;
+  const fmt = diff <= 0
+    ? "00:00:00"
+    : [
+        String(Math.floor(diff/3600000)).padStart(2,"0"),
+        String(Math.floor((diff%3600000)/60000)).padStart(2,"0"),
+        String(Math.floor((diff%60000)/1000)).padStart(2,"0"),
+      ].join(":");
+  if (box1) box1.textContent = fmt;
+  if (box2) box2.textContent = fmt;
 }
-setInterval(atualizarTimer, 1000);
-atualizarTimer();
+setInterval(atualizarTimer, 1000); atualizarTimer();
 
 /* ===============================
    🛒 CARRINHO
 =============================== */
+function updateCartCount() {
+  if (!cartCount) return;
+  cartCount.textContent = cart.reduce((acc, i) => acc + i.qtd, 0);
+}
 function renderMiniCart() {
   const lista = document.querySelector(".mini-list");
   const foot  = document.querySelector(".mini-foot");
   if (!lista || !foot) return;
+
   lista.innerHTML = "";
   let total = 0;
+
   if (!cart.length) {
     lista.innerHTML = `<p class="empty-cart">Seu carrinho está vazio 😢</p>`;
   } else {
@@ -92,26 +96,30 @@ function renderMiniCart() {
       `;
       lista.appendChild(li);
     });
-    lista.querySelectorAll(".qty-inc").forEach(b =>
+
+    lista.querySelectorAll(".qty-inc").forEach(b => {
       b.addEventListener("click", e => {
         const i = +e.currentTarget.dataset.i;
-        cart[i].qtd++; renderMiniCart(); updateCartCount();
-      })
-    );
-    lista.querySelectorAll(".qty-dec").forEach(b =>
+        cart[i].qtd++;
+        renderMiniCart(); updateCartCount();
+      });
+    });
+    lista.querySelectorAll(".qty-dec").forEach(b => {
       b.addEventListener("click", e => {
         const i = +e.currentTarget.dataset.i;
         cart[i].qtd = Math.max(1, cart[i].qtd - 1);
         renderMiniCart(); updateCartCount();
-      })
-    );
-    lista.querySelectorAll(".remove-item").forEach(b =>
+      });
+    });
+    lista.querySelectorAll(".remove-item").forEach(b => {
       b.addEventListener("click", e => {
-        cart.splice(+e.currentTarget.dataset.i, 1);
+        const i = +e.currentTarget.dataset.i;
+        cart.splice(i, 1);
         renderMiniCart(); updateCartCount();
-      })
-    );
+      });
+    });
   }
+
   foot.innerHTML = `
     <button id="close-order" class="btn-primary">Fechar Pedido (${money(total)})</button>
     <button id="clear-cart" class="btn-secondary">Limpar</button>
@@ -120,69 +128,86 @@ function renderMiniCart() {
     cart = []; renderMiniCart(); updateCartCount();
   });
   document.getElementById("close-order")?.addEventListener("click", fecharPedido);
-  updateCartCount();
 }
-function updateCartCount() {
-  cartCount.textContent = cart.reduce((a, i) => a + i.qtd, 0);
-}
+
 const openCartBtn = document.getElementById("cart-icon");
 openCartBtn?.addEventListener("click", () => {
-  miniCart.classList.toggle("active");
-  cartBackdrop.classList.toggle("show");
-  document.body.classList.toggle("no-scroll");
+  miniCart.classList.add("active");
+  cartBackdrop.classList.add("show");
+  document.body.classList.add("no-scroll");
   renderMiniCart();
 });
+// fechar por backdrop
 cartBackdrop?.addEventListener("click", () => {
   miniCart.classList.remove("active");
   cartBackdrop.classList.remove("show");
   document.body.classList.remove("no-scroll");
 });
+// fechar pelo X do cabeçalho (classe alinhada ao CSS)
+document.querySelector(".cart-close")?.addEventListener("click", () => {
+  miniCart.classList.remove("active");
+  cartBackdrop.classList.remove("show");
+  document.body.classList.remove("no-scroll");
+});
+
+/* add ao carrinho + popup */
+function popupAdd(msg){ const d=document.createElement("div"); d.className="popup-add"; d.textContent=msg; document.body.appendChild(d); setTimeout(()=>d.remove(),1400); }
+document.querySelectorAll(".add-cart").forEach(btn => {
+  btn.addEventListener("click", e => {
+    const card = e.currentTarget.closest(".card");
+    if (!card) return;
+    const nome  = card.dataset.name || card.querySelector("h3")?.textContent?.trim() || "Item";
+    const preco = parseFloat(card.dataset.price || "0");
+    const found = cart.find(i => i.nome === nome && i.preco === preco);
+    if (found) found.qtd++; else cart.push({ nome, preco, qtd: 1 });
+    renderMiniCart(); updateCartCount(); popupAdd(`${nome} adicionado!`);
+  });
+});
+
 /* ===============================
-   ➕ ADICIONAIS
+   ⚙️ ADICIONAIS (abre/fecha e adiciona)
 =============================== */
 const adicionais = [
-  { nome: "Cebola", preco: 0.99 },
-  { nome: "Salada", preco: 1.99 },
-  { nome: "Ovo", preco: 1.99 },
-  { nome: "Bacon", preco: 2.99 },
+  { nome: "Cebola",                     preco: 0.99 },
+  { nome: "Salada",                     preco: 1.99 },
+  { nome: "Ovo",                        preco: 1.99 },
+  { nome: "Bacon",                      preco: 2.99 },
   { nome: "Hambúrguer Tradicional 56g", preco: 2.99 },
-  { nome: "Cheddar Cremoso", preco: 3.99 },
-  { nome: "Filé de Frango", preco: 5.99 },
-  { nome: "Hambúrguer Artesanal 120g", preco: 7.99 }
+  { nome: "Cheddar Cremoso",            preco: 3.99 },
+  { nome: "Filé de Frango",             preco: 5.99 },
+  { nome: "Hambúrguer Artesanal 120g",  preco: 7.99 },
 ];
 
 document.querySelectorAll(".extras-btn").forEach(btn => {
   btn.addEventListener("click", e => {
     const card = e.currentTarget.closest(".card");
     if (!card) return;
-    const produto = card.dataset.name;
-    extrasModal.dataset.produto = produto;
-    extrasList.innerHTML = adicionais.map((a, i) => `
+    extrasModal.dataset.produto = card.dataset.name || "Produto";
+    extrasList.innerHTML = adicionais.map((a,i)=>`
       <label>
         <span>${a.nome} — ${money(a.preco)}</span>
         <input type="checkbox" value="${i}">
-      </label>
-    `).join("");
+      </label>`).join("");
     extrasModal.classList.add("show");
     document.body.classList.add("no-scroll");
   });
 });
-document.querySelectorAll(".extras-close").forEach(btn => {
-  btn.addEventListener("click", () => {
+document.querySelectorAll(".extras-close").forEach(btn=>{
+  btn.addEventListener("click",()=>{
     extrasModal.classList.remove("show");
     document.body.classList.remove("no-scroll");
   });
 });
 extrasAdd?.addEventListener("click", () => {
-  const nomeProduto = extrasModal.dataset.produto;
-  const selecionados = [...extrasList.querySelectorAll("input:checked")];
-  selecionados.forEach(c => {
-    const extra = adicionais[Number(c.value)];
-    cart.push({ nome: `${nomeProduto} + ${extra.nome}`, preco: extra.preco, qtd: 1 });
+  const produto = extrasModal.dataset.produto || "Produto";
+  const marcados = [...extrasList.querySelectorAll("input:checked")];
+  marcados.forEach(c => {
+    const extra = adicionais[+c.value];
+    cart.push({ nome: `${produto} + ${extra.nome}`, preco: extra.preco, qtd: 1 });
   });
   extrasModal.classList.remove("show");
   document.body.classList.remove("no-scroll");
-  renderMiniCart();
+  renderMiniCart(); updateCartCount();
 });
 
 /* ===============================
@@ -190,20 +215,20 @@ extrasAdd?.addEventListener("click", () => {
 =============================== */
 const slides = document.querySelector(".slides");
 document.querySelector(".c-prev")?.addEventListener("click", () => {
-  slides.scrollLeft -= 320;
+  if (!slides) return; slides.scrollLeft -= Math.min(slides.clientWidth*0.9, 320);
 });
 document.querySelector(".c-next")?.addEventListener("click", () => {
-  slides.scrollLeft += 320;
+  if (!slides) return; slides.scrollLeft += Math.min(slides.clientWidth*0.9, 320);
 });
 document.querySelectorAll(".slide").forEach(img => {
   img.addEventListener("click", () => {
-    const msg = encodeURIComponent(img.dataset.wa || "");
+    const msg = img.dataset.wa ? encodeURIComponent(img.dataset.wa) : "";
     if (msg) window.open(`https://wa.me/5534997178336?text=${msg}`, "_blank");
   });
 });
 
 /* ===============================
-   🔥 FIREBASE + LOGIN
+   🔥 FIREBASE + LOGIN (v8)
 =============================== */
 const firebaseConfig = {
   apiKey: "AIzaSyATQBcbYuzKpKlSwNlbpRiAM1XyHqhGeak",
@@ -214,42 +239,40 @@ const firebaseConfig = {
   appId: "1:106857147317:web:769c98aed26bb8fc9e87fc",
   measurementId: "G-TCZ18HFWGX"
 };
-if (window.firebase && !firebase.apps.length) {
-  firebase.initializeApp(firebaseConfig);
-}
+if (window.firebase && !firebase.apps.length) firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
-const db = firebase.firestore();
+const db   = firebase.firestore();
 
-/* ===============================
-   👤 LOGIN / CADASTRO
-=============================== */
-const userBtn = document.createElement("button");
-userBtn.id = "user-btn";
-userBtn.className = "user-button";
-userBtn.textContent = "Entrar / Cadastrar";
-document.querySelector(".header").appendChild(userBtn);
-
+/* Botão usuário (injetado) */
+let userBtn = document.getElementById("user-btn");
+if (!userBtn) {
+  userBtn = document.createElement("button");
+  userBtn.id = "user-btn";
+  userBtn.className = "user-button";
+  userBtn.textContent = "Entrar / Cadastrar";
+  document.querySelector(".header")?.appendChild(userBtn);
+}
 userBtn.addEventListener("click", () => {
   loginModal.classList.add("show");
   document.body.classList.add("no-scroll");
 });
-document.querySelector(".login-x").addEventListener("click", () => {
+document.querySelector(".login-x")?.addEventListener("click", () => {
   loginModal.classList.remove("show");
   document.body.classList.remove("no-scroll");
 });
 
-// e-mail/senha
-document.querySelector(".btn-primario").addEventListener("click", () => {
-  const email = document.getElementById("login-email").value.trim();
-  const senha = document.getElementById("login-senha").value.trim();
+/* E-mail/senha */
+document.querySelector(".btn-primario")?.addEventListener("click", () => {
+  const email = document.getElementById("login-email")?.value?.trim();
+  const senha = document.getElementById("login-senha")?.value?.trim();
   if (!email || !senha) return alert("Preencha e-mail e senha.");
-
   auth.signInWithEmailAndPassword(email, senha)
     .then(cred => {
       currentUser = cred.user;
       userBtn.textContent = `Olá, ${currentUser.email.split("@")[0]}`;
       loginModal.classList.remove("show");
       document.body.classList.remove("no-scroll");
+      showOrdersFabIfLogged();
     })
     .catch(() => {
       auth.createUserWithEmailAndPassword(email, senha)
@@ -259,13 +282,14 @@ document.querySelector(".btn-primario").addEventListener("click", () => {
           loginModal.classList.remove("show");
           document.body.classList.remove("no-scroll");
           alert("Conta criada com sucesso! 🎉");
+          showOrdersFabIfLogged();
         })
         .catch(err => alert("Erro: " + err.message));
     });
 });
 
-// Google
-document.querySelector(".btn-google").addEventListener("click", () => {
+/* Google */
+document.querySelector(".btn-google")?.addEventListener("click", () => {
   const provider = new firebase.auth.GoogleAuthProvider();
   auth.signInWithPopup(provider)
     .then(result => {
@@ -273,27 +297,30 @@ document.querySelector(".btn-google").addEventListener("click", () => {
       userBtn.textContent = `Olá, ${currentUser.displayName?.split(" ")[0] || "Cliente"}`;
       loginModal.classList.remove("show");
       document.body.classList.remove("no-scroll");
+      showOrdersFabIfLogged();
     })
     .catch(err => alert("Erro no login com Google: " + err.message));
 });
 
+/* Estado de auth */
 auth.onAuthStateChanged(user => {
   if (user) {
     currentUser = user;
     userBtn.textContent = `Olá, ${user.displayName?.split(" ")[0] || user.email.split("@")[0]}`;
+    showOrdersFabIfLogged();
   }
 });
+
 /* ===============================
-   📦 FECHAR PEDIDO (Firestore)
+   📦 FINALIZAR PEDIDO (Firestore)
 =============================== */
 function fecharPedido() {
-  if (cart.length === 0) return alert("Carrinho vazio!");
+  if (!cart.length) return alert("Carrinho vazio!");
   if (!currentUser) {
     alert("Você precisa estar logado para enviar o pedido!");
     loginModal.classList.add("show");
     return;
   }
-
   const total = cart.reduce((acc, i) => acc + i.preco * i.qtd, 0);
   const pedido = {
     usuario: currentUser.email,
@@ -302,7 +329,6 @@ function fecharPedido() {
     total: total.toFixed(2),
     data: new Date().toISOString(),
   };
-
   db.collection("Pedidos").add(pedido)
     .then(() => {
       alert("Pedido salvo com sucesso ✅");
@@ -312,14 +338,13 @@ function fecharPedido() {
         `\n\nTotal: ${money(total)}`
       );
       window.open(`https://wa.me/5534997178336?text=${texto}`, "_blank");
-      cart = [];
-      renderMiniCart();
+      cart = []; renderMiniCart(); updateCartCount();
     })
     .catch(err => alert("Erro ao salvar pedido: " + err.message));
 }
 
 /* ===============================
-   📦 MEUS PEDIDOS (painel)
+   📦 MEUS PEDIDOS (FAB + painel)
 =============================== */
 const ordersFab = document.createElement("button");
 ordersFab.id = "orders-fab";
@@ -339,67 +364,44 @@ ordersPanel.innerHTML = `
 `;
 document.body.appendChild(ordersPanel);
 
-document.querySelector(".orders-close").addEventListener("click", () => {
+document.querySelector(".orders-close")?.addEventListener("click", () => {
   ordersPanel.classList.remove("active");
 });
-
 ordersFab.addEventListener("click", () => {
   if (!currentUser) return alert("Faça login para ver seus pedidos.");
   ordersPanel.classList.add("active");
   carregarPedidosSeguro();
 });
 
+function showOrdersFabIfLogged(){ if (currentUser) ordersFab.classList.add("show"); else ordersFab.classList.remove("show"); }
+
 function carregarPedidosSeguro() {
   const container = document.getElementById("orders-content");
   container.innerHTML = `<p class="empty-orders">Carregando pedidos...</p>`;
-  if (!currentUser) {
-    container.innerHTML = `<p class="empty-orders">Você precisa estar logado para ver seus pedidos.</p>`;
-    return;
-  }
+  if (!currentUser) { container.innerHTML = `<p class="empty-orders">Você precisa estar logado para ver seus pedidos.</p>`; return; }
 
   db.collection("Pedidos")
     .where("usuario", "==", currentUser.email)
     .orderBy("data", "desc")
     .get()
     .then(snapshot => {
-      if (snapshot.empty) {
-        container.innerHTML = `<p class="empty-orders">Nenhum pedido encontrado 😢</p>`;
-        return;
-      }
+      if (snapshot.empty) { container.innerHTML = `<p class="empty-orders">Nenhum pedido encontrado 😢</p>`; return; }
       container.innerHTML = "";
       snapshot.forEach(doc => {
         const p = doc.data();
-        const itens = Array.isArray(p.itens) ? p.itens.join(", ") : p.itens;
-        const bloco = document.createElement("div");
-        bloco.className = "order-item";
-        bloco.innerHTML = `
+        const itens = Array.isArray(p.itens) ? p.itens.join("<br>") : (p.itens || "");
+        const div = document.createElement("div");
+        div.className = "order-item";
+        div.innerHTML = `
           <h4>${new Date(p.data).toLocaleString("pt-BR")}</h4>
-          <p><b>Itens:</b> ${itens}</p>
+          <p>${itens}</p>
           <p><b>Total:</b> R$ ${p.total}</p>
         `;
-        container.appendChild(bloco);
+        container.appendChild(div);
       });
     })
-    .catch(err => {
-      container.innerHTML = `<p class="empty-orders">Erro ao carregar pedidos: ${err.message}</p>`;
-    });
+    .catch(err => { container.innerHTML = `<p class="empty-orders">Erro ao carregar pedidos: ${err.message}</p>`; });
 }
 
-auth.onAuthStateChanged(user => {
-  if (user) ordersFab.classList.add("show");
-  else ordersFab.classList.remove("show");
-});
-
-/* ===============================
-   ✅ POPUP DE ITEM ADICIONADO
-=============================== */
-function popupAdd(msg) {
-  const pop = document.createElement("div");
-  pop.className = "popup-add";
-  pop.textContent = msg;
-  document.body.appendChild(pop);
-  setTimeout(() => pop.remove(), 1400);
-}
-
-console.log("🔥 DFL v1.1.5 – Estável + Meus Pedidos Corrigido");
-}); // ← fecha DOMContentLoaded
+console.log("✅ DFL v1.2 – Estável (logo raiz, carrossel 9 imgs, carrinho X, etiquetas)");
+}); // DOMContentLoaded
