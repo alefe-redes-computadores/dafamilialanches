@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>🍔 Da Família Lanches</title>
   <link rel="stylesheet" href="style.css" />
-  <!-- Firebase v8 (compatível com seu JS atual) -->
   <script defer src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
   <script defer src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
   <script defer src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
@@ -15,7 +14,6 @@
   <!-- ================= CABEÇALHO ================= -->
   <header class="header">
     <div class="header-content">
-      <!-- LOGO na raiz -->
       <img src="logo.png" alt="Logo DFL" class="logo" />
       <div class="header-info">
         <h1>Da Família Lanches</h1>
@@ -41,19 +39,19 @@
       ⏳ Tempo restante: <span id="promo-timer"></span>
     </div>
 
-    <!-- Carrossel com 9 imagens na raiz -->
+    <!-- Carrossel -->
     <div class="carousel">
       <button class="c-btn c-prev">‹</button>
       <div class="slides">
-        <img class="slide" src="promo1.jpg" data-wa="Promoção 1 imperdível! 🍔" />
-        <img class="slide" src="promo2.jpg" data-wa="Promoção 2 exclusiva! 🌭" />
-        <img class="slide" src="promo3.jpg" data-wa="Promoção 3 só hoje! 🥤" />
-        <img class="slide" src="promo4.jpg" data-wa="Promoção 4 da casa! 🍟" />
-        <img class="slide" src="promo5.jpg" data-wa="Promoção 5 sensacional! 🔥" />
-        <img class="slide" src="promo6.jpg" data-wa="Promoção 6 com desconto! 💥" />
-        <img class="slide" src="promo7.jpg" data-wa="Promoção 7 exclusiva do site! 💛" />
-        <img class="slide" src="promo8.jpg" data-wa="Promoção 8 limitadíssima! 🚨" />
-        <img class="slide" src="promo9.jpg" data-wa="Promoção 9 — última chance! 🏁" />
+        <img class="slide" src="promocoes/promo1.jpg" data-wa="Promoção 1 imperdível! 🍔" />
+        <img class="slide" src="promocoes/promo2.jpg" data-wa="Promoção 2 exclusiva! 🌭" />
+        <img class="slide" src="promocoes/promo3.jpg" data-wa="Promoção 3 só hoje! 🥤" />
+        <img class="slide" src="promocoes/promo4.jpg" data-wa="Promoção 4 da casa! 🍟" />
+        <img class="slide" src="promocoes/promo5.jpg" data-wa="Promoção 5 sensacional! 🔥" />
+        <img class="slide" src="promocoes/promo6.jpg" data-wa="Promoção 6 com desconto! 💥" />
+        <img class="slide" src="promocoes/promo7.jpg" data-wa="Promoção 7 exclusiva do site! 💛" />
+        <img class="slide" src="promocoes/promo8.jpg" data-wa="Promoção 8 limitadíssima! 🚨" />
+        <img class="slide" src="promocoes/promo9.jpg" data-wa="Promoção 9 — última chance! 🏁" />
       </div>
       <button class="c-btn c-next">›</button>
     </div>
@@ -64,8 +62,7 @@
   <aside id="mini-cart" class="mini-cart">
     <div class="mini-head">
       <h3>🛍 Seu Pedido</h3>
-      <!-- Usa a classe que seu CSS já estiliza -->
-      <button class="cart-close" aria-label="Fechar carrinho">✖</button>
+      <button class="extras-close">✖</button>
     </div>
     <div class="mini-list"></div>
     <div class="mini-foot"></div>
@@ -76,100 +73,131 @@
     <h2>🧡 Combos</h2>
     <div class="grid">
       <div class="card" data-name="Combo Casal Tradicional" data-price="34.99">
+        <img src="imagens/combo1.png" alt="Combo Casal Tradicional" class="card-img" />
         <h3>Combo Casal Tradicional <span class="badge">💸 Economia de R$ 5,01</span></h3>
         <p class="price">De R$ 39,99 por <b>R$ 34,99</b></p>
-        <p>2 Burger <b>Trem</b> + 1 Fanta 1L. Opções de troca da bebida com acréscimo. Acompanha ketchup sachê.</p>
+        <p>2 Burger <b>Trem</b> + 1 Fanta 1L.  
+        Opções de troca da bebida com acréscimo.  
+        Acompanha ketchup sachê.</p>
         <div class="actions"><button class="add-cart">Adicionar</button></div>
       </div>
 
       <div class="card" data-name="Combo Casal Artesanal" data-price="49.99">
+        <img src="imagens/combo2.png" alt="Combo Casal Artesanal" class="card-img" />
         <h3>Combo Casal Artesanal <span class="badge">💸 Economia de R$ 11,01</span></h3>
         <p class="price">De R$ 61,00 por <b>R$ 49,99</b></p>
-        <p>2 Burger <b>Peleja</b> + 1 Fanta 1L. Opções de troca da bebida com acréscimo. Acompanha ketchup sachê.</p>
+        <p>2 Burger <b>Peleja</b> + 1 Fanta 1L.  
+        Opções de troca da bebida com acréscimo.  
+        Acompanha ketchup sachê.</p>
         <div class="actions"><button class="add-cart">Adicionar</button></div>
       </div>
 
       <div class="card" data-name="Combo Família Tradicional" data-price="59.99">
+        <img src="imagens/combo3.png" alt="Combo Família Tradicional" class="card-img" />
         <h3>Combo Família Tradicional <span class="badge">💸 Economia de R$ 10,01</span></h3>
         <p class="price">De R$ 70,00 por <b>R$ 59,99</b></p>
-        <p>4 Burger <b>Trem</b> + 1 Kuat 2L. Opções de troca da bebida com acréscimo. Acompanha ketchup sachê.</p>
+        <p>4 Burger <b>Trem</b> + 1 Kuat 2L.  
+        Opções de troca da bebida com acréscimo.  
+        Acompanha ketchup sachê.</p>
         <div class="actions"><button class="add-cart">Adicionar</button></div>
       </div>
 
       <div class="card" data-name="Combo Família Artesanal" data-price="84.99">
+        <img src="imagens/combo4.png" alt="Combo Família Artesanal" class="card-img" />
         <h3>Combo Família Artesanal <span class="badge">💸 Economia de R$ 29,01</span></h3>
         <p class="price">De R$ 114,00 por <b>R$ 84,99</b></p>
-        <p>4 Burger <b>Peleja</b> + 1 Kuat 2L. Opções de troca da bebida com acréscimo. Acompanha ketchup sachê.</p>
+        <p>4 Burger <b>Peleja</b> + 1 Kuat 2L.  
+        Opções de troca da bebida com acréscimo.  
+        Acompanha ketchup sachê.</p>
         <div class="actions"><button class="add-cart">Adicionar</button></div>
       </div>
     </div>
   </section>
-
-  <!-- ================= LANCHES TRADICIONAIS ================= -->
+<!-- ================= LANCHES TRADICIONAIS ================= -->
   <section class="menu-section">
     <h2>🍔 Nossos Lanches Tradicionais</h2>
     <div class="grid">
       <div class="card" data-name="Bão" data-price="11.00">
+        <img src="imagens/bao.png" alt="Bão" class="card-img" />
         <h3>Bão <span class="badge">Com Molho Verde</span></h3>
         <p class="price">R$ 11,00</p>
-        <p>Pão, hambúrguer, alface, tomate, presunto e mussarela. Acompanha ketchup sachê.</p>
-        <div class="actions"><button class="add-cart">Adicionar</button><button class="extras-btn">Adicionais</button></div>
+        <p>Pão, hambúrguer, alface, tomate, presunto e mussarela.  
+        Acompanha ketchup sachê.</p>
+        <div class="actions"><button class="add-cart">Adicionar</button></div>
       </div>
 
       <div class="card" data-name="Uai" data-price="13.00">
+        <img src="imagens/uai.png" alt="Uai" class="card-img" />
         <h3>Uai <span class="badge">Com Molho Verde</span></h3>
         <p class="price">R$ 13,00</p>
-        <p>Pão, hambúrguer, milho, bacon, alface, tomate, presunto e mussarela. Acompanha ketchup sachê.</p>
-        <div class="actions"><button class="add-cart">Adicionar</button><button class="extras-btn">Adicionais</button></div>
+        <p>Pão, hambúrguer, milho, bacon, alface, tomate, presunto e mussarela.  
+        Acompanha ketchup sachê.</p>
+        <div class="actions"><button class="add-cart">Adicionar</button></div>
       </div>
 
       <div class="card" data-name="Trem" data-price="14.00">
+        <img src="imagens/trem.png" alt="Trem" class="card-img" />
         <h3>Trem <span class="badge">Com Molho Verde</span></h3>
         <p class="price">R$ 14,00</p>
-        <p>Pão, hambúrguer, salsicha, bacon, milho, alface, tomate, presunto e mussarela. Acompanha ketchup sachê.</p>
-        <div class="actions"><button class="add-cart">Adicionar</button><button class="extras-btn">Adicionais</button></div>
+        <p>Pão, hambúrguer, salsicha, bacon, milho, alface, tomate, presunto e mussarela.  
+        Acompanha ketchup sachê.</p>
+        <div class="actions"><button class="add-cart">Adicionar</button></div>
       </div>
 
       <div class="card" data-name="Cadim" data-price="17.00">
+        <img src="imagens/cadim.png" alt="Cadim" class="card-img" />
         <h3>Cadim <span class="badge">Com Molho Verde</span></h3>
         <p class="price">R$ 17,00</p>
-        <p>Pão, hambúrguer, filé de frango, bacon, milho, batata palha e mussarela. Acompanha ketchup sachê.</p>
-        <div class="actions"><button class="add-cart">Adicionar</button><button class="extras-btn">Adicionais</button></div>
+        <p>Pão, hambúrguer, filé de frango, bacon, milho, batata palha e mussarela.  
+        Acompanha ketchup sachê.</p>
+        <div class="actions"><button class="add-cart">Adicionar</button></div>
       </div>
 
       <div class="card" data-name="Armaria" data-price="18.00">
+        <img src="imagens/armaria.png" alt="Armaria" class="card-img" />
         <h3>Armaria <span class="badge">Com Molho Verde</span></h3>
         <p class="price">R$ 18,00</p>
-        <p>Pão, 1 hambúrguer e 1 filé de frango, bacon, milho, batata palha e mussarela. Acompanha ketchup sachê.</p>
-        <div class="actions"><button class="add-cart">Adicionar</button><button class="extras-btn">Adicionais</button></div>
+        <p>Pão, 1 hambúrguer e 1 filé de frango, bacon, milho, batata palha e mussarela.  
+        Acompanha ketchup sachê.</p>
+        <div class="actions"><button class="add-cart">Adicionar</button></div>
       </div>
 
       <div class="card" data-name="Bitela" data-price="22.00">
+        <img src="imagens/bitela.png" alt="Bitela" class="card-img" />
         <h3>Bitela <span class="badge">Com Molho Verde</span></h3>
         <p class="price">R$ 22,00</p>
-        <p>Pão, 2 hambúrgueres, filé de frango, bacon, milho, batata palha, 2 salsichas, presunto e mussarela. Acompanha ketchup sachê.</p>
-        <div class="actions"><button class="add-cart">Adicionar</button><button class="extras-btn">Adicionais</button></div>
+        <p>Pão, 2 hambúrgueres, filé de frango, bacon, milho, batata palha, 2 salsichas, presunto e mussarela.  
+        Acompanha ketchup sachê.</p>
+        <div class="actions"><button class="add-cart">Adicionar</button></div>
       </div>
 
       <div class="card" data-name="Apruma" data-price="25.00">
+        <img src="imagens/apruma.png" alt="Apruma" class="card-img" />
         <h3>Apruma <span class="badge">Com Molho Verde</span></h3>
         <p class="price">R$ 25,00</p>
-        <p>Pão, 2 hambúrgueres artesanais, 2 filés de frango, bacon, milho, batata palha e cheddar. Acompanha ketchup sachê.</p>
-        <div class="actions"><button class="add-cart">Adicionar</button><button class="extras-btn">Adicionais</button></div>
+        <p>Pão, 2 hambúrgueres artesanais, 2 filés de frango, bacon, milho, batata palha e cheddar.  
+        Acompanha ketchup sachê.</p>
+        <div class="actions"><button class="add-cart">Adicionar</button></div>
       </div>
 
       <div class="card" data-name="Gradicido" data-price="28.00">
+        <img src="imagens/gradicido.png" alt="Gradicido" class="card-img" />
         <h3>Gradicido <span class="badge">Com Molho Verde</span></h3>
         <p class="price">R$ 28,00</p>
-        <p>Pão, 3 hambúrgueres, filé de frango, bacon, ovo, 1 salsicha, milho, batata palha, alface, tomate, 2 presuntos e 2 mussarelas. Acompanha ketchup sachê.</p>
-        <div class="actions"><button class="add-cart">Adicionar</button><button class="extras-btn">Adicionais</button></div>
+        <p>Pão, 3 hambúrgueres, filé de frango, bacon, ovo, 1 salsicha, milho, batata palha, alface, tomate,  
+        2 presuntos e 2 mussarelas.  
+        Acompanha ketchup sachê.</p>
+        <div class="actions"><button class="add-cart">Adicionar</button></div>
       </div>
 
       <div class="card" data-name="Varadifome" data-price="30.00">
+        <img src="imagens/varadifome.png" alt="Varadifome" class="card-img" />
         <h3>Varadifome <span class="badge">Com Molho Verde</span></h3>
         <p class="price">R$ 30,00</p>
-        <p>Pão, 4 hambúrgueres, filé de frango, bacon, ovo, cheddar, milho, batata palha, 2 salsichas, alface, tomate, presunto e mussarela. Acompanha ketchup sachê.</p>
-        <div class="actions"><button class="add-cart">Adicionar</button><button class="extras-btn">Adicionais</button></div>
+        <p>Pão, 4 hambúrgueres, filé de frango, bacon, ovo, cheddar, milho, batata palha,  
+        2 salsichas, alface, tomate, presunto e mussarela.  
+        Acompanha ketchup sachê.</p>
+        <div class="actions"><button class="add-cart">Adicionar</button></div>
       </div>
     </div>
   </section>
@@ -179,71 +207,92 @@
     <h2>🍔 Lanches Artesanais</h2>
     <div class="grid">
       <div class="card" data-name="Peleja" data-price="26.00">
+        <img src="imagens/peleja.png" alt="Peleja" class="card-img" />
         <h3>Peleja <span class="badge">Com Molho Verde</span></h3>
         <p class="price">R$ 26,00</p>
-        <p>Pão, 1 hambúrguer artesanal, 1 filé de frango, bacon, milho, batata palha, alface, tomate, presunto e mussarela. Acompanha ketchup sachê.</p>
-        <div class="actions"><button class="add-cart">Adicionar</button><button class="extras-btn">Adicionais</button></div>
+        <p>Pão, 1 hambúrguer artesanal, 1 filé de frango, bacon, milho, batata palha, alface, tomate,  
+        presunto e mussarela.  
+        Acompanha ketchup sachê.</p>
+        <div class="actions"><button class="add-cart">Adicionar</button></div>
       </div>
 
       <div class="card" data-name="Tudibom" data-price="28.50">
+        <img src="imagens/tudibom.png" alt="Tudibom" class="card-img" />
         <h3>Tudibom <span class="badge">Com Molho Verde</span></h3>
         <p class="price">R$ 28,50</p>
-        <p>Pão, 2 hambúrgueres artesanais, 2 filés de frango, bacon, milho, batata palha, alface, tomate, 2 presuntos e 2 mussarelas. Acompanha ketchup sachê.</p>
-        <div class="actions"><button class="add-cart">Adicionar</button><button class="extras-btn">Adicionais</button></div>
+        <p>Pão, 2 hambúrgueres artesanais, 2 filés de frango, bacon, milho, batata palha, alface, tomate,  
+        2 presuntos e 2 mussarelas.  
+        Acompanha ketchup sachê.</p>
+        <div class="actions"><button class="add-cart">Adicionar</button></div>
       </div>
 
       <div class="card" data-name="Custoso" data-price="31.00">
+        <img src="imagens/custoso.png" alt="Custoso" class="card-img" />
         <h3>Custoso <span class="badge">Com Molho Verde</span></h3>
         <p class="price">R$ 31,00</p>
-        <p>Pão, 2 hambúrgueres artesanais, 2 filés de frango, bacon, milho, batata palha, alface, tomate, 2 presuntos e 2 cheddar. Acompanha ketchup sachê.</p>
-        <div class="actions"><button class="add-cart">Adicionar</button><button class="extras-btn">Adicionais</button></div>
+        <p>Pão, 2 hambúrgueres artesanais, 2 filés de frango, bacon, milho, batata palha, alface, tomate,  
+        2 presuntos e 2 cheddar.  
+        Acompanha ketchup sachê.</p>
+        <div class="actions"><button class="add-cart">Adicionar</button></div>
       </div>
     </div>
   </section>
-
-  <!-- ================= HOT DOGS ================= -->
+<!-- ================= HOT DOGS ================= -->
   <section class="menu-section">
     <h2>🌭 Hot Dogs</h2>
     <div class="grid">
       <div class="card" data-name="Nigucim" data-price="10.00">
+        <img src="imagens/nigucim.png" alt="Nigucim" class="card-img" />
         <h3>Nigucim <span class="badge">Com Molho Verde</span></h3>
         <p class="price">R$ 10,00</p>
-        <p>Pão, molho, salsicha (Sadia/Perdigão), milho, batata palha, ketchup e maionese. Acompanha ketchup sachê.</p>
+        <p>Pão, molho, salsicha (Sadia/Perdigão), milho, batata palha, ketchup e maionese.  
+        Acompanha ketchup sachê.</p>
         <div class="actions"><button class="add-cart">Adicionar</button></div>
       </div>
 
       <div class="card" data-name="Simprão" data-price="12.00">
+        <img src="imagens/simprao.png" alt="Simprão" class="card-img" />
         <h3>Simprão <span class="badge">Com Molho Verde</span></h3>
         <p class="price">R$ 12,00</p>
-        <p>Pão, molho, salsicha (Sadia/Perdigão), milho, batata palha, bacon, ketchup e maionese. Acompanha ketchup sachê.</p>
+        <p>Pão, molho, salsicha (Sadia/Perdigão), milho, batata palha, bacon, ketchup e maionese.  
+        Acompanha ketchup sachê.</p>
         <div class="actions"><button class="add-cart">Adicionar</button></div>
       </div>
 
       <div class="card" data-name="Nimin" data-price="13.00">
+        <img src="imagens/nimin.png" alt="Nimin" class="card-img" />
         <h3>Nimin <span class="badge">Com Molho Verde</span></h3>
         <p class="price">R$ 13,00</p>
-        <p>Pão, molho, 2 salsichas (Sadia/Perdigão), milho, batata palha, bacon, ketchup, maionese e vinagrete. Acompanha ketchup sachê.</p>
+        <p>Pão, molho, 2 salsichas (Sadia/Perdigão), milho, batata palha, bacon, ketchup, maionese e vinagrete.  
+        Acompanha ketchup sachê.</p>
         <div class="actions"><button class="add-cart">Adicionar</button></div>
       </div>
 
       <div class="card" data-name="Padaná" data-price="15.00">
+        <img src="imagens/padana.png" alt="Padaná" class="card-img" />
         <h3>Padaná <span class="badge">Com Molho Verde</span></h3>
         <p class="price">R$ 15,00</p>
-        <p>Pão, molho, 2 salsichas (Sadia/Perdigão), milho, batata palha, bacon, vinagrete, mussarela, ketchup e maionese. Acompanha ketchup sachê.</p>
+        <p>Pão, molho, 2 salsichas (Sadia/Perdigão), milho, batata palha, bacon, vinagrete, mussarela, ketchup e maionese.  
+        Acompanha ketchup sachê.</p>
         <div class="actions"><button class="add-cart">Adicionar</button></div>
       </div>
 
       <div class="card" data-name="Purizin" data-price="14.00">
+        <img src="imagens/purizin.png" alt="Purizin" class="card-img" />
         <h3>Purizin <span class="badge">Com Molho Verde</span> <span class="badge">Com Purê</span></h3>
         <p class="price">R$ 14,00</p>
-        <p>Pão, molho, milho, purê de batata cremoso, 1 salsicha, batata palha, ketchup e maionese. Acompanha ketchup sachê.</p>
+        <p>Pão, molho, milho, purê de batata cremoso, 1 salsicha, batata palha, ketchup e maionese.  
+        Acompanha ketchup sachê.</p>
         <div class="actions"><button class="add-cart">Adicionar</button></div>
       </div>
 
       <div class="card" data-name="Trembão" data-price="17.00">
+        <img src="imagens/trembao.png" alt="Trembão" class="card-img" />
         <h3>Trembão <span class="badge">Com Molho Verde</span> <span class="badge">Com Purê</span></h3>
         <p class="price">R$ 17,00</p>
-        <p>Pão, molho, milho, purê de batata cremoso, 2 salsichas, bacon crocante, mussarela, batata palha, vinagrete, ketchup e maionese. Acompanha ketchup sachê.</p>
+        <p>Pão, molho, milho, purê de batata cremoso, 2 salsichas, bacon crocante, mussarela, batata palha,  
+        vinagrete, ketchup e maionese.  
+        Acompanha ketchup sachê.</p>
         <div class="actions"><button class="add-cart">Adicionar</button></div>
       </div>
     </div>
@@ -254,67 +303,48 @@
     <h2>🥤 Bebidas</h2>
     <div class="grid">
       <div class="card" data-name="Coca 200ml" data-price="4.00">
+        <img src="imagens/coca200.png" alt="Coca 200ml" class="card-img" />
         <h3>Coca 200ml</h3>
         <p class="price">R$ 4,00</p>
         <div class="actions"><button class="add-cart">Adicionar</button></div>
       </div>
+
       <div class="card" data-name="Fanta Laranja 1L" data-price="8.00">
+        <img src="imagens/fanta1l.png" alt="Fanta Laranja 1L" class="card-img" />
         <h3>Fanta Laranja 1L</h3>
         <p class="price">R$ 8,00</p>
         <div class="actions"><button class="add-cart">Adicionar</button></div>
       </div>
+
       <div class="card" data-name="Coca 1L" data-price="9.00">
+        <img src="imagens/coca1l.png" alt="Coca 1L" class="card-img" />
         <h3>Coca-Cola 1L</h3>
         <p class="price">R$ 9,00</p>
         <div class="actions"><button class="add-cart">Adicionar</button></div>
       </div>
+
       <div class="card" data-name="Coca 1L Zero" data-price="9.00">
+        <img src="imagens/coca1lzero.png" alt="Coca 1L Zero" class="card-img" />
         <h3>Coca-Cola 1L Zero</h3>
         <p class="price">R$ 9,00</p>
         <div class="actions"><button class="add-cart">Adicionar</button></div>
       </div>
+
       <div class="card" data-name="Kuat 2L" data-price="10.00">
+        <img src="imagens/kuat2l.png" alt="Kuat 2L" class="card-img" />
         <h3>Kuat 2L</h3>
         <p class="price">R$ 10,00</p>
         <div class="actions"><button class="add-cart">Adicionar</button></div>
       </div>
+
       <div class="card" data-name="Coca 2L" data-price="13.00">
+        <img src="imagens/coca2l.png" alt="Coca 2L" class="card-img" />
         <h3>Coca-Cola 2L</h3>
         <p class="price">R$ 13,00</p>
         <div class="actions"><button class="add-cart">Adicionar</button></div>
       </div>
     </div>
   </section>
-
-  <!-- ================= MODAL ADICIONAIS ================= -->
-  <div id="extras-modal" class="modal">
-    <div class="modal-content">
-      <div class="modal-head">
-        <h3>Adicionais</h3>
-        <button class="extras-close">✖</button>
-      </div>
-      <div id="extras-list" class="extras-list"></div>
-      <div class="modal-foot">
-        <button id="extras-add" class="btn-primary">Adicionar ao Pedido</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- ================= MODAL LOGIN ================= -->
-  <div id="login-modal" class="modal">
-    <div class="modal-content login-box">
-      <button class="login-x">✖</button>
-      <h3>👋 Bem-vindo(a)!</h3>
-      <p>Entre ou cadastre-se para finalizar seu pedido.</p>
-      <div class="login-form">
-        <input type="email" id="login-email" placeholder="E-mail" />
-        <input type="password" id="login-senha" placeholder="Senha" />
-      </div>
-      <button class="btn-primario">Entrar / Cadastrar</button>
-      <div class="divider">ou</div>
-      <button class="btn-google">🔐 Entrar com Google</button>
-    </div>
-  </div>
 
   <!-- ================= RODAPÉ ================= -->
   <footer class="footer">
