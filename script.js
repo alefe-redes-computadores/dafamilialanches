@@ -1,26 +1,49 @@
 /* =========================================================
-   DFL – Script v1.2 (com Login Google + Carrinho + Som)
-   Totalmente compatível com o HTML e CSS atuais.
+   DFL – Script estável (Firebase + Carrinho + Extras + UI)
    ========================================================= */
 
-// ✅ SOM DO CLIQUE
+/* ---------------------------
+   ÁUDIO DE CLIQUE
+--------------------------- */
 const clickSfx = new Audio("click.wav");
 clickSfx.volume = 0.35;
 function playClick() {
   try { clickSfx.currentTime = 0; clickSfx.play(); } catch (_) {}
 }
 
-// ✅ ESTADO GERAL DO CARRINHO
+/* ---------------------------
+   ESTADO DO CARRINHO
+--------------------------- */
 let cart = JSON.parse(localStorage.getItem("cart") || "[]");
+
+// Migra itens antigos (name/price → nome/preco)
+cart = cart.map(it => {
+  const nome = it.nome ?? it.name ?? "Item";
+  const precoNum = typeof it.preco === "number"
+    ? it.preco
+    : (typeof it.price === "number" ? it.price : parseFloat(it.preco ?? it.price ?? "0"));
+  const preco = Number.isFinite(precoNum) ? precoNum : 0;
+  const qtd = Math.max(1, parseInt(it.qtd ?? it.quantidade ?? 1, 10) || 1);
+  const id = it.id ?? nome.toLowerCase().replace(/\s+/g, "-") + "-" + Math.random().toString(36).slice(2,7);
+  return { id, nome, preco, qtd };
+});
+
 function saveCart() {
   localStorage.setItem("cart", JSON.stringify(cart));
   updateCartBadge();
 }
+
 function updateCartBadge() {
-  const badge = document.getElementById("cart-count");
-  if (badge) badge.textContent = cart.reduce((a, i) => a + (i.qtd || 1), 0);
+  const el = document.getElementById("cart-count");
+  if (!el) return;
+  const totalQtd = cart.reduce((acc, i) => acc + (i.qtd || 1), 0);
+  el.textContent = totalQtd;
 }
-function money(n) { return `R$ ${Number(n).toFixed(2).replace(".", ",")}`; }
+
+function money(n) {
+  return `R$ ${Number(n).toFixed(2).replace(".", ",")}`;
+}
+
 function popup(msg) {
   const el = document.createElement("div");
   el.className = "popup-add";
@@ -29,29 +52,44 @@ function popup(msg) {
   setTimeout(() => el.remove(), 1400);
 }
 
-/* =========================================================
-   🔹 STATUS E COUNTDOWN
-========================================================= */
+/* ---------------------------
+   ABERTO/FECHADO + COUNTDOWN
+--------------------------- */
 function nowInMinutes() {
   const d = new Date();
   return d.getHours() * 60 + d.getMinutes();
 }
+
 function setStatusBanner() {
   const el = document.getElementById("status-banner");
   if (!el) return;
+
   const d = new Date();
-  const dow = d.getDay();
-  let openMins = null, closeMins = null, label = "";
-  if (dow === 2) { el.textContent = "Fechado hoje (Terça) — voltamos amanhã!"; return; }
-  if (dow >= 1 && dow <= 4) {
-    openMins = 18 * 60; closeMins = 23 * 60 + 15; label = "Aberto até 23h15";
-  } else { openMins = 17 * 60 + 30; closeMins = 23 * 60 + 30; label = "Aberto até 23h30"; }
+  const dow = d.getDay(); // 0 Dom … 6 Sáb
+
+  if (dow === 2) { // Terça
+    el.textContent = "Fechado hoje (Terça) — voltamos amanhã!";
+    return;
+  }
+
+  let openMins, closeMins, label;
+  if (dow >= 1 && dow <= 4) { // Seg-Qua-Qui
+    openMins = 18 * 60;
+    closeMins = 23 * 60 + 15;
+    label = "Aberto até 23h15";
+  } else { // Sex–Dom
+    openMins = 17 * 60 + 30;
+    closeMins = 23 * 60 + 30;
+    label = "Aberto até 23h30";
+  }
+
   const now = nowInMinutes();
   if (now < openMins) {
-    const h = Math.floor((openMins - now) / 60);
-    const m = (openMins - now) % 60;
-    el.textContent = `Abrimos às ${label.includes("23h15") ? "18h" : "17h30"} • falta ${h}h${m.toString().padStart(2, "0")}m`;
-  } else if (now >= openMins && now <= closeMins) {
+    const mins = openMins - now;
+    const h = Math.floor(mins / 60);
+    const m = mins % 60;
+    el.textContent = `Abre às ${openMins === 18*60 ? "18h" : "17h30"} • falta ${h}h${String(m).padStart(2,"0")}m`;
+  } else if (now <= closeMins) {
     el.textContent = `🟢 ${label}`;
   } else {
     el.textContent = "Fechado agora — abrimos no próximo horário.";
@@ -68,250 +106,183 @@ function updateCountdown() {
   const h = Math.floor(diff / 3_600_000);
   const m = Math.floor((diff % 3_600_000) / 60_000);
   const s = Math.floor((diff % 60_000) / 1000);
-  box.textContent = `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
+  box.textContent = `${String(h).padStart(2,"0")}:${String(m).padStart(2,"0")}:${String(s).padStart(2,"0")}`;
 }
 
-/* =========================================================
-   🔹 CARROSSEL
-========================================================= */
+/* ---------------------------
+   CARROSSEL
+--------------------------- */
 function initCarousel() {
   const rail = document.querySelector(".slides");
   if (!rail) return;
+
   const prev = document.querySelector(".c-prev");
   const next = document.querySelector(".c-next");
+
   const step = () => Math.min(rail.clientWidth * 0.9, 320);
+
   prev?.addEventListener("click", () => rail.scrollBy({ left: -step(), behavior: "smooth" }));
-  next?.addEventListener("click", () => rail.scrollBy({ left: step(), behavior: "smooth" }));
+  next?.addEventListener("click", () => rail.scrollBy({ left:  step(), behavior: "smooth" }));
 
   rail.querySelectorAll(".slide").forEach(img => {
     img.addEventListener("click", () => {
-      playClick();
       const wa = img.getAttribute("data-wa");
-      if (wa)
+      if (wa) {
         window.open(`https://wa.me/5534997178336?text=${encodeURIComponent(wa)}`, "_blank");
-      else
+      } else {
         window.open(img.src, "_blank");
+      }
     });
   });
 }
 
-/* =========================================================
-   🔹 MINI CARRINHO
-========================================================= */
-function ensureMiniCart() {
-  const backdrop = document.getElementById("cart-backdrop");
-  const panel = document.getElementById("mini-cart");
-  if (!backdrop || !panel) return;
-
-  const closeAll = () => {
-    panel.classList.remove("active");
-    backdrop.classList.remove("show");
-    document.body.classList.remove("no-scroll");
-  };
-  backdrop.addEventListener("click", closeAll);
-  panel.querySelector(".mini-close")?.addEventListener("click", closeAll);
-
-  document.getElementById("mini-clear")?.addEventListener("click", () => {
-    cart = []; saveCart(); renderMiniCart();
-  });
-
-  document.getElementById("mini-checkout")?.addEventListener("click", () => {
-    if (!cart.length) return;
-    const linhas = cart.map(i => `• ${i.nome} ${i.qtd > 1 ? `x${i.qtd}` : ""} — ${money(i.preco * i.qtd)}`);
-    const total = cart.reduce((a, i) => a + i.preco * i.qtd, 0);
-    const txt = `Olá! Quero finalizar meu pedido:%0A%0A${linhas.join("%0A")}%0A%0ATotal: ${money(total)}`;
-    window.open(`https://wa.me/5534997178336?text=${txt}`, "_blank");
-  });
+/* ---------------------------
+   MINI-CARRINHO (usa o HTML que já existe)
+--------------------------- */
+function openMiniCart() {
+  document.getElementById("cart-backdrop")?.classList.add("show");
+  document.getElementById("mini-cart")?.classList.add("active");
+  document.body.classList.add("no-scroll");
 }
 
-function openMiniCart() {
-  renderMiniCart();
-  document.getElementById("cart-backdrop").classList.add("show");
-  document.getElementById("mini-cart").classList.add("active");
-  document.body.classList.add("no-scroll");
+function closeMiniCart() {
+  document.getElementById("cart-backdrop")?.classList.remove("show");
+  document.getElementById("mini-cart")?.classList.remove("active");
+  document.body.classList.remove("no-scroll");
 }
 
 function renderMiniCart() {
   const list = document.getElementById("mini-list");
   if (!list) return;
-  if (!cart.length) { list.innerHTML = `<p class="empty-cart">Seu carrinho está vazio.</p>`; return; }
+
+  if (!cart.length) {
+    list.innerHTML = `<p class="empty-cart">Seu carrinho está vazio.</p>`;
+    return;
+  }
+
   list.innerHTML = "";
   cart.forEach((it, idx) => {
     const li = document.createElement("div");
     li.className = "cart-item";
+    const precoLinha = Number.isFinite(it.preco) ? it.preco : 0;
+    const subtotal = precoLinha * (it.qtd || 1);
+
     li.innerHTML = `
       <div style="flex:1;min-width:0">
-        <span>${it.nome}</span><br>
-        <small>${money(it.preco)}</small>
+        <span>${it.nome || "Item"}</span><br>
+        <small>${money(precoLinha)}</small>
       </div>
       <div style="display:flex;align-items:center;gap:6px;">
-        <button class="qty-dec">−</button>
+        <button class="qty-dec" aria-label="Diminuir">−</button>
         <span>${it.qtd}</span>
-        <button class="qty-inc">+</button>
-        <strong>${money(it.preco * it.qtd)}</strong>
+        <button class="qty-inc" aria-label="Aumentar">+</button>
+        <strong>${money(subtotal)}</strong>
         <button class="remove-item" title="Remover">x</button>
       </div>
     `;
-    li.querySelector(".qty-inc").addEventListener("click", () => { it.qtd++; saveCart(); renderMiniCart(); });
-    li.querySelector(".qty-dec").addEventListener("click", () => { it.qtd = Math.max(1, it.qtd - 1); saveCart(); renderMiniCart(); });
-    li.querySelector(".remove-item").addEventListener("click", () => { cart.splice(idx, 1); saveCart(); renderMiniCart(); });
+
+    li.querySelector(".qty-inc").addEventListener("click", () => {
+      it.qtd++; saveCart(); renderMiniCart();
+    });
+    li.querySelector(".qty-dec").addEventListener("click", () => {
+      it.qtd = Math.max(1, it.qtd - 1); saveCart(); renderMiniCart();
+    });
+    li.querySelector(".remove-item").addEventListener("click", () => {
+      cart.splice(idx, 1); saveCart(); renderMiniCart();
+    });
+
     list.appendChild(li);
   });
 }
-/* =========================================================
-   DFL – Script v1.2 (Parte 2/2)
-   - Login Google real (Firebase v8)
-   - Adicionais com ícones (usando #extras-modal do seu HTML)
-   - Ajustes finais de binds e UI
-   ========================================================= */
 
-/* ---------------------------------------------------------
-   🔁 OVERRIDE: ensureExtrasModal (usa o SEU #extras-modal)
---------------------------------------------------------- */
-function ensureExtrasModal() {
-  const modal = document.getElementById("extras-modal");
-  const backdrop = document.getElementById("extras-backdrop");
-  const list = document.getElementById("extras-list");
-  const btnAdd = document.getElementById("extras-add");
-  const btnCancel = document.getElementById("extras-cancel");
-  const x = modal?.querySelector(".extras-close");
-
-  if (!modal || !backdrop || !list || !btnAdd) return modal;
-
-  // Itens bonitos com ícones (restaurado)
-  list.innerHTML = `
-    <label><span>🧀 Cheddar cremoso</span><input type="checkbox" data-extra="Cheddar" data-price="2"></label>
-    <label><span>🥓 Bacon crocante</span><input type="checkbox" data-extra="Bacon" data-price="3"></label>
-    <label><span>🍳 Ovo</span><input type="checkbox" data-extra="Ovo" data-price="1.5"></label>
-    <label><span>🧅 Cebola crispy</span><input type="checkbox" data-extra="Cebola crispy" data-price="2"></label>
-  `;
-
-  const close = () => { modal.classList.remove("show"); backdrop.classList.remove("show"); document.body.classList.remove("no-scroll"); };
-  x?.addEventListener("click", close);
-  btnCancel?.addEventListener("click", close);
-  backdrop.addEventListener("click", close);
-
-  btnAdd.addEventListener("click", () => {
-    const checks = modal.querySelectorAll("input:checked");
-    if (!checks.length) return close();
-
-    let total = 0; const nomes = [];
-    checks.forEach(c => { total += parseFloat(c.dataset.price || "0"); nomes.push(c.dataset.extra); });
-
-    cart.push({ id:`extra-${Date.now()}`, nome:`Adicionais: ${nomes.join(", ")}`, preco: total, qtd: 1 });
-    saveCart(); popup("➕ Adicionais adicionados!");
-    close();
-  });
-
-  return modal;
-}
-
-/* ---------------------------------------------------------
-   📎 Re-bind do botão “Adicionais” para usar esse modal
---------------------------------------------------------- */
-function bindExtrasButtons() {
-  const modal = ensureExtrasModal();
-  const backdrop = document.getElementById("extras-backdrop");
-  document.querySelectorAll(".extras-btn").forEach(btn => {
+/* ---------------------------
+   BOTÕES “ADICIONAR”
+--------------------------- */
+function bindAddButtons() {
+  document.querySelectorAll(".add-cart").forEach(btn => {
     btn.addEventListener("click", () => {
-      if (!modal) return;
-      modal.classList.add("show");
-      backdrop?.classList.add("show");
-      document.body.classList.add("no-scroll");
+      const card = btn.closest(".card");
+      if (!card) return;
+
+      const id    = card.dataset.id || card.querySelector("h3")?.textContent?.trim() || Math.random().toString(36).slice(2);
+      const nome  = card.dataset.name || card.querySelector("h3")?.textContent?.trim() || "Item";
+      const preco = parseFloat(card.dataset.price || "0");
+
+      // Proteção: se não veio preço válido, não adiciona corrompido
+      const precoVal = Number.isFinite(preco) ? preco : 0;
+
+      const found = cart.find(i => i.id === id && i.preco === precoVal);
+      if (found) found.qtd += 1;
+      else cart.push({ id, nome, preco: precoVal, qtd: 1 });
+
+      saveCart();
+      renderMiniCart();
       playClick();
+      popup(`🍔 ${nome} adicionado!`);
     });
   });
 }
 
-/* =========================================================
-   🔐 LOGIN GOOGLE (Firebase v8)
-   - Usa os scripts que já estão no seu HTML
-   - Mostra modal de login simples (com botão Google)
-   - Troca o botão do header para “Sair” quando logado
-========================================================= */
+/* ---------------------------
+   ADICIONAIS (usa seu modal existente no HTML)
+--------------------------- */
+const EXTRAS = [
+  { nome: "Cheddar cremoso", preco: 2.00, emoji: "🧀" },
+  { nome: "Bacon crocante",  preco: 3.00, emoji: "🥓" },
+  { nome: "Ovo",             preco: 1.50, emoji: "🍳" },
+  { nome: "Cebola crispy",   preco: 2.00, emoji: "🧅" },
+  { nome: "Catupiry",        preco: 2.50, emoji: "🥛" },
+  { nome: "Molho verde",     preco: 1.50, emoji: "🌿" },
+  { nome: "Milho",           preco: 1.50, emoji: "🌽" },
+  { nome: "Barbecue",        preco: 2.00, emoji: "🥣" }
+];
 
-// 👉 COLE AQUI O MESMO CONFIG QUE VOCÊ JÁ UTILIZAVA (o seu, real):
-// Se já estiver inicializado, não reinicializa.
-(function initFirebaseOnce() {
-  if (window.firebase && !firebase.apps.length) {
-    const firebaseConfig = {
-      apiKey: "AIzaSyF-XXXXXX",
-      authDomain: "dafamilia-lanches.firebaseapp.com",
-      projectId: "dafamilia-lanches",
-      storageBucket: "dafamilia-lanches.appspot.com",
-      messagingSenderId: "XXXXXX",
-      appId: "1:XXXXXX:web:XXXXXX"
-    };
-    try { firebase.initializeApp(firebaseConfig); } catch(_) {}
-  }
-})();
-
-function ensureLoginModal() {
-  // Se já existe no HTML, apenas complementa com o botão Google.
-  let modal = document.getElementById("login-modal");
-  if (!modal) {
-    // Cria modal compatível com seu CSS
-    modal = document.createElement("div");
-    modal.id = "login-modal";
-    modal.innerHTML = `
-      <div class="login-backdrop"></div>
-      <div class="login-box">
-        <button class="login-x" aria-label="Fechar">✕</button>
-        <h3>Entrar / Cadastro</h3>
-        <p>Acesse sua conta para acompanhar pedidos.</p>
-        <div class="divider">ou</div>
-        <button class="btn-google" id="btn-google">
-          <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google" />
-          Entrar com Google
-        </button>
-      </div>
-    `;
-    document.body.appendChild(modal);
-  } else {
-    // Garante que exista o botão Google
-    const hasBtn = modal.querySelector("#btn-google");
-    if (!hasBtn) {
-      const box = modal.querySelector(".login-box") || modal;
-      const div = document.createElement("div");
-      div.innerHTML = `
-        <div class="divider">ou</div>
-        <button class="btn-google" id="btn-google">
-          <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google" />
-          Entrar com Google
-        </button>
-      `;
-      box.appendChild(div);
-    }
-  }
-
-  // Fechar modal
-  const backdrop = modal.querySelector(".login-backdrop");
-  const closeBtn = modal.querySelector(".login-x");
-  const close = () => modal.classList.remove("show");
-  backdrop?.addEventListener("click", close);
-  closeBtn?.addEventListener("click", close);
-
-  // Botão Google
-  const gBtn = modal.querySelector("#btn-google");
-  gBtn?.addEventListener("click", async (e) => {
-    e.preventDefault();
-    try {
-      const provider = new firebase.auth.GoogleAuthProvider();
-      // Força seleção de conta se quiser:
-      provider.setCustomParameters({ prompt: "select_account" });
-      await firebase.auth().signInWithPopup(provider);
-      popup("✅ Login realizado!");
-      close();
-    } catch (err) {
-      console.error("Auth error:", err);
-      alert("Não foi possível fazer login. Verifique o bloqueio de pop-up e as credenciais do Firebase.");
-    }
-  });
-
-  return modal;
+function populateExtrasList() {
+  const list = document.getElementById("extras-list");
+  if (!list) return;
+  list.innerHTML = EXTRAS.map(ex =>
+    `<label>
+       <span>${ex.emoji} ${ex.nome}</span>
+       <input type="checkbox" data-extra="${ex.nome}" data-price="${ex.preco}">
+     </label>`
+  ).join("");
 }
 
-function setupLoginButton() {
+function bindExtras() {
+  document.querySelectorAll(".extras-btn").forEach(btn => {
+    btn.addEventListener("click", () => {
+      populateExtrasList();
+      document.getElementById("extras-modal")?.classList.add("show");
+    });
+  });
+
+  document.querySelector(".extras-close")?.addEventListener("click", () =>
+    document.getElementById("extras-modal")?.classList.remove("show")
+  );
+  document.getElementById("extras-cancel")?.addEventListener("click", () =>
+    document.getElementById("extras-modal")?.classList.remove("show")
+  );
+
+  document.getElementById("extras-add")?.addEventListener("click", () => {
+    const checks = document.querySelectorAll("#extras-list input:checked");
+    if (!checks.length) { document.getElementById("extras-modal")?.classList.remove("show"); return; }
+
+    let total = 0; const nomes = [];
+    checks.forEach(c => { total += parseFloat(c.dataset.price || "0"); nomes.push(c.dataset.extra); });
+
+    cart.push({ id: "extra-" + Date.now(), nome: "Adicionais: " + nomes.join(", "), preco: total, qtd: 1 });
+    saveCart();
+    renderMiniCart();
+    document.getElementById("extras-modal")?.classList.remove("show");
+    popup("➕ Adicionais adicionados!");
+  });
+}
+
+/* ---------------------------
+   LOGIN COM GOOGLE (Firebase v8)
+--------------------------- */
+function setupLogin() {
+  // Cria o botão no header se não existir
   let userBtn = document.querySelector("#user-btn");
   if (!userBtn) {
     userBtn = document.createElement("button");
@@ -321,59 +292,101 @@ function setupLoginButton() {
     document.querySelector(".header")?.appendChild(userBtn);
   }
 
-  // Abre modal ao clicar
+  // Abre o modal visual
   userBtn.addEventListener("click", () => {
-    const modal = ensureLoginModal();
-    modal.classList.add("show");
-    playClick();
+    document.getElementById("login-modal")?.classList.add("show");
   });
 
-  // Observa estado do usuário
-  if (window.firebase?.auth) {
-    firebase.auth().onAuthStateChanged((user) => {
-      if (user) {
-        const nome = user.displayName || (user.email ? user.email.split("@")[0] : "Usuário");
-        userBtn.textContent = `Olá, ${nome} (Sair)`;
-        userBtn.onclick = async () => {
-          playClick();
-          await firebase.auth().signOut();
-          popup("Você saiu.");
-          // volta a abrir modal no próximo clique
-          userBtn.textContent = "Entrar / Cadastro";
-          userBtn.onclick = () => {
-            const modal = ensureLoginModal();
-            modal.classList.add("show");
-            playClick();
-          };
-        };
-      } else {
-        userBtn.textContent = "Entrar / Cadastro";
-        userBtn.onclick = () => {
-          const modal = ensureLoginModal();
-          modal.classList.add("show");
-          playClick();
-        };
+  // Fecha modal
+  document.querySelector(".login-x")?.addEventListener("click", () =>
+    document.getElementById("login-modal")?.classList.remove("show")
+  );
+  document.getElementById("login-modal")?.addEventListener("click", (e) => {
+    if (e.target.id === "login-modal") e.currentTarget.classList.remove("show");
+  });
+
+  // Firebase (reutiliza seus <script src="firebase-*.js"> do HTML)
+  try {
+    // Se já estiver inicializado, não faça de novo
+    if (!firebase.apps.length) {
+      const firebaseConfig = {
+        // === COLE AQUI SUA CONFIG REAL ===
+        apiKey: "AIzaSyF-XXXXXX",
+        authDomain: "dafamilia-lanches.firebaseapp.com",
+        projectId: "dafamilia-lanches",
+        storageBucket: "dafamilia-lanches.appspot.com",
+        messagingSenderId: "XXXXXX",
+        appId: "1:XXXXXX:web:XXXXXX"
+      };
+      firebase.initializeApp(firebaseConfig);
+    }
+    const auth = firebase.auth();
+
+    // Botão "Entrar com Google"
+    document.getElementById("btn-google")?.addEventListener("click", async (e) => {
+      e.preventDefault();
+      try {
+        const provider = new firebase.auth.GoogleAuthProvider();
+        await auth.signInWithPopup(provider);
+        document.getElementById("login-modal")?.classList.remove("show");
+      } catch (err) {
+        alert("Falha ao autenticar com o Google:\n" + (err?.message || err));
       }
     });
+
+    // Estado do usuário → atualiza o botão
+    auth.onAuthStateChanged((user) => {
+      if (user) {
+        const nome = user.displayName || (user.email ? user.email.split("@")[0] : "Cliente");
+        userBtn.textContent = `Olá, ${nome} (Sair)`;
+        userBtn.onclick = () => auth.signOut();
+      } else {
+        userBtn.textContent = "Entrar / Cadastro";
+        userBtn.onclick = () => document.getElementById("login-modal")?.classList.add("show");
+      }
+    });
+  } catch (e) {
+    // Se Firebase não carregar, mantemos só o visual — sem quebrar o site.
+    console.warn("Firebase indisponível. Mantendo login apenas visual.", e);
   }
 }
 
-/* =========================================================
-   🚀 BOOT FINAL (segundo listener, é tranquilo)
-========================================================= */
+/* ---------------------------
+   INICIALIZAÇÃO GERAL
+--------------------------- */
 window.addEventListener("DOMContentLoaded", () => {
-  // Reforça binds com as versões corrigidas desta parte
-  ensureExtrasModal();
-  bindExtrasButtons();
-  ensureLoginModal();
-  setupLoginButton();
+  // Badge inicial + normalização salva
+  saveCart();
 
-  // Garante badge correta na primeira carga
-  updateCartBadge();
+  // Status e countdown
+  setStatusBanner();
+  setInterval(setStatusBanner, 60_000);
+  updateCountdown();
+  setInterval(updateCountdown, 1000);
 
-  // Ícone do carrinho abre painel (já definido na Parte 1, aqui só reforço)
-  document.getElementById("cart-icon")?.addEventListener("click", () => {
-    playClick();
-    openMiniCart();
+  // Carrossel
+  initCarousel();
+
+  // Botões adicionar
+  bindAddButtons();
+
+  // Extras
+  bindExtras();
+
+  // Mini-cart: abrir/fechar/limpar/fechar pedido
+  document.getElementById("cart-icon")?.addEventListener("click", () => { playClick(); renderMiniCart(); openMiniCart(); });
+  document.getElementById("mini-clear")?.addEventListener("click", () => { cart = []; saveCart(); renderMiniCart(); });
+  document.querySelector(".mini-close")?.addEventListener("click", closeMiniCart);
+  document.getElementById("cart-backdrop")?.addEventListener("click", closeMiniCart);
+
+  document.getElementById("mini-checkout")?.addEventListener("click", () => {
+    if (!cart.length) return;
+    const linhas = cart.map(i => `• ${i.nome}${i.qtd>1?` x${i.qtd}`:""} — ${money(i.preco*i.qtd)}`);
+    const total = cart.reduce((a,i)=>a+i.preco*i.qtd,0);
+    const txt = `Olá! Quero finalizar meu pedido:%0A%0A${linhas.join("%0A")}%0A%0ATotal: ${money(total)}`;
+    window.open(`https://wa.me/5534997178336?text=${txt}`, "_blank");
   });
+
+  // Login
+  setupLogin();
 });
