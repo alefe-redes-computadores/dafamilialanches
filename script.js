@@ -138,7 +138,6 @@ function fecharPedido() {
   if (cart.length === 0) return alert("Carrinho vazio!");
   const total = cart.reduce((acc, i) => acc + i.preco * i.qtd, 0);
 
-  // se o usuário não estiver logado
   if (!currentUser) {
     alert("Você precisa estar logado para enviar o pedido!");
     loginModal.classList.add("show");
@@ -147,14 +146,14 @@ function fecharPedido() {
 
   const pedido = {
     usuario: currentUser.email,
+    userid: currentUser.uid,
     nome: currentUser.displayName || "Usuário",
     itens: cart.map(i => `${i.nome} x${i.qtd}`),
     total: total.toFixed(2),
     data: new Date().toISOString(),
   };
 
-  // salvar no Firestore
-  db.collection("pedidos")
+  db.collection("Pedidos")
     .add(pedido)
     .then(() => {
       alert("Pedido salvo com sucesso no sistema ✅");
@@ -170,7 +169,6 @@ function fecharPedido() {
     .catch(err => alert("Erro ao salvar pedido: " + err.message));
 }
 
-// botão principal
 document.addEventListener("click", e => {
   if (e.target.id === "close-order") fecharPedido();
 });
@@ -241,6 +239,7 @@ document.querySelectorAll(".slide").forEach(img => {
     window.open(`https://wa.me/5534997178336?text=${msg}`, "_blank");
   });
 });
+
 // ===============================
 // 🔥 FIREBASE + LOGIN
 // ===============================
@@ -254,7 +253,6 @@ const firebaseConfig = {
   measurementId: "G-TCZ18HFWGX",
 };
 
-// Inicializa Firebase
 firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 const db = firebase.firestore();
@@ -272,13 +270,11 @@ userBtn.addEventListener("click", () => {
   loginModal.classList.add("show");
   document.body.classList.add("no-scroll");
 });
-
 document.querySelector(".login-x").addEventListener("click", () => {
   loginModal.classList.remove("show");
   document.body.classList.remove("no-scroll");
 });
 
-// login com e-mail
 document.querySelector(".btn-primario").addEventListener("click", () => {
   const email = document.getElementById("login-email").value;
   const senha = document.getElementById("login-senha").value;
@@ -293,7 +289,6 @@ document.querySelector(".btn-primario").addEventListener("click", () => {
       carregarPedidos();
     })
     .catch(() => {
-      // se o usuário não existir, cria uma conta
       auth.createUserWithEmailAndPassword(email, senha)
         .then(cred => {
           currentUser = cred.user;
@@ -306,7 +301,6 @@ document.querySelector(".btn-primario").addEventListener("click", () => {
     });
 });
 
-// login com Google
 document.querySelector(".btn-google").addEventListener("click", () => {
   const provider = new firebase.auth.GoogleAuthProvider();
   auth.signInWithPopup(provider)
@@ -320,7 +314,6 @@ document.querySelector(".btn-google").addEventListener("click", () => {
     .catch(err => alert("Erro no login com Google: " + err.message));
 });
 
-// mantém o login
 auth.onAuthStateChanged(user => {
   if (user) {
     currentUser = user;
@@ -348,7 +341,6 @@ panel.innerHTML = `
 `;
 document.body.appendChild(panel);
 
-// abrir/fechar
 fab.addEventListener("click", () => {
   if (!currentUser) return alert("Faça login para ver seus pedidos.");
   panel.classList.add("active");
@@ -358,14 +350,13 @@ panel.querySelector(".orders-close").addEventListener("click", () => {
   panel.classList.remove("active");
 });
 
-// carregar pedidos do Firestore
 function carregarPedidos() {
   if (!currentUser) return;
   const content = panel.querySelector(".orders-content");
   content.innerHTML = "<p>Carregando...</p>";
 
-  db.collection("pedidos")
-    .where("usuario", "==", currentUser.email)
+  db.collection("Pedidos")
+    .where("userid", "==", currentUser.uid)
     .orderBy("data", "desc")
     .get()
     .then(snapshot => {
@@ -393,7 +384,6 @@ function carregarPedidos() {
     });
 }
 
-// mostra o botão “Meus Pedidos” após login
 auth.onAuthStateChanged(user => {
   if (user) fab.classList.add("show");
   else fab.classList.remove("show");
