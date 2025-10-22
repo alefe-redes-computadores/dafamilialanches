@@ -1,9 +1,7 @@
 // ==================================================
-// DFL – script.js (v1.5)
-// Combos com bebidas + Adicionais restaurados
+// DFL – script.js v1.5 (estável + adicionais restaurados)
 // ==================================================
 document.addEventListener("DOMContentLoaded", () => {
-
 /* ===============================
    🔧 CONFIGURAÇÃO INICIAL
 =============================== */
@@ -29,7 +27,7 @@ document.addEventListener("click", () => {
 });
 
 /* ===============================
-   🕒 STATUS DE FUNCIONAMENTO
+   🕒 STATUS ABERTO/FECHADO
 =============================== */
 function atualizarStatus() {
   const banner = document.getElementById("status-banner");
@@ -39,12 +37,11 @@ function atualizarStatus() {
   const hora = agora.getHours();
   const minuto = agora.getMinutes();
   let aberto = false;
-
-  if (dia >= 1 && dia <= 4)
+  if (dia >= 1 && dia <= 4) {
     aberto = hora >= 18 && (hora < 23 || (hora === 23 && minuto <= 15));
-  else if (dia === 5 || dia === 6 || dia === 0)
+  } else if (dia === 5 || dia === 6 || dia === 0) {
     aberto = hora >= 17 && (hora < 23 || (hora === 23 && minuto <= 30));
-
+  }
   banner.textContent = aberto
     ? "✅ Estamos abertos! Faça seu pedido 🍔"
     : "⏰ Fechado no momento — Voltamos em breve!";
@@ -150,7 +147,9 @@ function updateCartCount() {
   const q = cart.reduce((a, i) => a + i.qtd, 0);
   if (cartCount) cartCount.textContent = q;
 }
-
+/* ===============================
+   🔄 AÇÕES DO CARRINHO
+=============================== */
 const openCartBtn = document.getElementById("cart-icon");
 openCartBtn?.addEventListener("click", () => {
   miniCart?.classList.toggle("active");
@@ -170,7 +169,7 @@ document.querySelector("#mini-cart .extras-close")?.addEventListener("click", ()
 });
 
 /* ===============================
-   ⚙️ ADICIONAIS (lanches)
+   ⚙️ ADICIONAIS (LANCHES)
 =============================== */
 const adicionais = [
   { nome: "Cebola", preco: 0.99 },
@@ -182,7 +181,6 @@ const adicionais = [
   { nome: "Filé de Frango", preco: 5.99 },
   { nome: "Hambúrguer Artesanal 120g", preco: 7.99 }
 ];
-/* ===== Fim da lista `adicionais` ===== */
 
 document.querySelectorAll(".extras-btn").forEach(btn => {
   btn.addEventListener("click", e => {
@@ -190,26 +188,22 @@ document.querySelectorAll(".extras-btn").forEach(btn => {
     if (!card || !extrasModal || !extrasList) return;
     const produto = card.dataset.name || "Produto";
     extrasModal.dataset.produto = produto;
-
     extrasList.innerHTML = adicionais.map((a, i) => `
       <label>
         <span>${a.nome} — ${money(a.preco)}</span>
         <input type="checkbox" value="${i}">
       </label>
     `).join("");
-
     extrasModal.classList.add("show");
     document.body.classList.add("no-scroll");
   });
 });
-
 document.querySelectorAll(".extras-close").forEach(btn => {
   btn.addEventListener("click", () => {
     extrasModal?.classList.remove("show");
     document.body.classList.remove("no-scroll");
   });
 });
-
 extrasAdd?.addEventListener("click", () => {
   if (!extrasModal) return;
   const produto = extrasModal.dataset.produto || "Produto";
@@ -224,25 +218,20 @@ extrasAdd?.addEventListener("click", () => {
 });
 
 /* ===============================
-   🥤 ADICIONAIS (refrigerantes dos COMBOS)
-   - Padrão custa R$ 0,01 (preço simbólico)
-   - Modal criado dinamicamente
+   🥤 ADICIONAIS (REFRIGERANTES COMBO)
 =============================== */
 const comboDrinkOptions = {
-  // Casal Tradicional / Casal Artesanal
   casal: [
     { rotulo: "Fanta 1L (padrão)", delta: 0.01 },
-    { rotulo: "Coca 1L",           delta: 3.01 },
-    { rotulo: "Coca 1L Zero",      delta: 3.01 },
+    { rotulo: "Coca 1L", delta: 3.01 },
+    { rotulo: "Coca 1L Zero", delta: 3.01 },
   ],
-  // Família Tradicional / Família Artesanal
   familia: [
-    { rotulo: "Kuat 2L (padrão)",  delta: 0.01 },
-    { rotulo: "Coca 2L",           delta: 5.01 },
+    { rotulo: "Kuat 2L (padrão)", delta: 0.01 },
+    { rotulo: "Coca 2L", delta: 5.01 },
   ],
 };
 
-// cria modal 1x
 let comboModal = document.getElementById("combo-modal");
 if (!comboModal) {
   comboModal = document.createElement("div");
@@ -278,7 +267,7 @@ function openComboModal(nomeCombo, precoBase) {
     nome.includes("casal") ? "casal" :
     (nome.includes("família") || nome.includes("familia")) ? "familia" : null;
 
-  if (!grupo) { // fallback: não reconhecido como combo
+  if (!grupo) {
     addCommonItem(nomeCombo, precoBase);
     return;
   }
@@ -309,18 +298,21 @@ comboConfirm.addEventListener("click", () => {
   document.body.classList.remove("no-scroll");
   renderMiniCart();
 });
-
 /* ===============================
    ➕ ADICIONAR AO CARRINHO
+   (detecta COMBOS para abrir o modal de bebidas)
 =============================== */
-function addCommonItem(nome, preco) {
-  const found = cart.find(i => i.nome === nome && i.preco === preco);
-  if (found) found.qtd += 1;
-  else cart.push({ nome, preco, qtd: 1 });
-  renderMiniCart();
-  popupAdd(`${nome} adicionado!`);
+if (!window.addCommonItem) {
+  window.addCommonItem = function addCommonItem(nome, preco) {
+    const found = cart.find(i => i.nome === nome && i.preco === preco);
+    if (found) found.qtd += 1;
+    else cart.push({ nome, preco, qtd: 1 });
+    renderMiniCart();
+    if (window.popupAdd) popupAdd(`${nome} adicionado!`);
+  };
 }
 
+// liga todos os botões “Adicionar”
 document.querySelectorAll(".add-cart").forEach(btn => {
   btn.addEventListener("click", e => {
     const card = e.currentTarget.closest(".card");
@@ -328,8 +320,8 @@ document.querySelectorAll(".add-cart").forEach(btn => {
     const nome  = card.dataset.name || card.querySelector("h3")?.textContent?.trim() || "Item";
     const preco = parseFloat(card.dataset.price || "0");
 
-    // Se for Combo (nome começa com "Combo")
-    if (/^combo/i.test(nome)) {
+    // se for combo, abre o modal de refrigerantes
+    if (/^combo/i.test(nome) && typeof openComboModal === "function") {
       openComboModal(nome, preco);
     } else {
       addCommonItem(nome, preco);
@@ -338,181 +330,242 @@ document.querySelectorAll(".add-cart").forEach(btn => {
 });
 
 /* ===============================
-   🖼️ CARROSSEL
+   🖼️ CARROSSEL DE PROMOÇÕES
 =============================== */
-const slides = document.querySelector(".slides");
-document.querySelector(".c-prev")?.addEventListener("click", () => { if (slides) slides.scrollLeft -= 320; });
-document.querySelector(".c-next")?.addEventListener("click", () => { if (slides) slides.scrollLeft += 320; });
-document.querySelectorAll(".slide").forEach(img => {
-  img.addEventListener("click", () => {
-    const msg = encodeURIComponent(img.dataset.wa || "");
-    if (msg) window.open(`https://wa.me/5534997178336?text=${msg}`, "_blank");
+(() => {
+  const slides = document.querySelector(".slides");
+  document.querySelector(".c-prev")?.addEventListener("click", () => {
+    if (slides) slides.scrollLeft -= Math.min(slides.clientWidth * 0.9, 320);
   });
-});
-/* ===== Fim da lista `adicionais` ===== */
-
-document.querySelectorAll(".extras-btn").forEach(btn => {
-  btn.addEventListener("click", e => {
-    const card = e.currentTarget.closest(".card");
-    if (!card || !extrasModal || !extrasList) return;
-    const produto = card.dataset.name || "Produto";
-    extrasModal.dataset.produto = produto;
-
-    extrasList.innerHTML = adicionais.map((a, i) => `
-      <label>
-        <span>${a.nome} — ${money(a.preco)}</span>
-        <input type="checkbox" value="${i}">
-      </label>
-    `).join("");
-
-    extrasModal.classList.add("show");
-    document.body.classList.add("no-scroll");
+  document.querySelector(".c-next")?.addEventListener("click", () => {
+    if (slides) slides.scrollLeft += Math.min(slides.clientWidth * 0.9, 320);
   });
-});
-
-document.querySelectorAll(".extras-close").forEach(btn => {
-  btn.addEventListener("click", () => {
-    extrasModal?.classList.remove("show");
-    document.body.classList.remove("no-scroll");
+  document.querySelectorAll(".slide").forEach(img => {
+    img.addEventListener("click", () => {
+      const msg = encodeURIComponent(img.dataset.wa || "");
+      if (msg) window.open(`https://wa.me/5534997178336?text=${msg}`, "_blank");
+      else if (img.src) window.open(img.src, "_blank");
+    });
   });
-});
-
-extrasAdd?.addEventListener("click", () => {
-  if (!extrasModal) return;
-  const produto = extrasModal.dataset.produto || "Produto";
-  const selecionados = [...(extrasList?.querySelectorAll("input:checked") || [])];
-  selecionados.forEach(c => {
-    const extra = adicionais[Number(c.value)];
-    cart.push({ nome: `${produto} + ${extra.nome}`, preco: extra.preco, qtd: 1 });
-  });
-  extrasModal.classList.remove("show");
-  document.body.classList.remove("no-scroll");
-  renderMiniCart();
-});
+})();
 
 /* ===============================
-   🥤 ADICIONAIS (refrigerantes dos COMBOS)
-   - Padrão custa R$ 0,01 (preço simbólico)
-   - Modal criado dinamicamente
+   🔥 FIREBASE (v8) + LOGIN
 =============================== */
-const comboDrinkOptions = {
-  // Casal Tradicional / Casal Artesanal
-  casal: [
-    { rotulo: "Fanta 1L (padrão)", delta: 0.01 },
-    { rotulo: "Coca 1L",           delta: 3.01 },
-    { rotulo: "Coca 1L Zero",      delta: 3.01 },
-  ],
-  // Família Tradicional / Família Artesanal
-  familia: [
-    { rotulo: "Kuat 2L (padrão)",  delta: 0.01 },
-    { rotulo: "Coca 2L",           delta: 5.01 },
-  ],
+const firebaseConfig = {
+  apiKey: "AIzaSyATQBcbYuzKpKlSwNlbpRiAM1XyHqhGeak",
+  authDomain: "da-familia-lanches.firebaseapp.com",
+  projectId: "da-familia-lanches",
+  storageBucket: "da-familia-lanches.appspot.com",
+  messagingSenderId: "106857147317",
+  appId: "1:106857147317:web:769c98aed26bb8fc9e87fc",
+  measurementId: "G-TCZ18HFWGX"
 };
 
-// cria modal 1x
-let comboModal = document.getElementById("combo-modal");
-if (!comboModal) {
-  comboModal = document.createElement("div");
-  comboModal.id = "combo-modal";
-  comboModal.className = "modal";
-  comboModal.innerHTML = `
-    <div class="modal-content">
-      <div class="modal-head">
-        <h3>Escolher Refrigerante</h3>
-        <button class="combo-close" title="Fechar">✖</button>
-      </div>
-      <div id="combo-body" style="display:flex;flex-direction:column;gap:8px;margin:12px 0;"></div>
-      <div class="modal-foot" style="display:flex;gap:8px;">
-        <button id="combo-confirm" class="btn-primary">Confirmar</button>
-        <button class="combo-close btn-secondary">Cancelar</button>
-      </div>
-    </div>`;
-  document.body.appendChild(comboModal);
+// inicializa só uma vez
+if (window.firebase && !firebase.apps.length) {
+  firebase.initializeApp(firebaseConfig);
 }
-const comboBody    = comboModal.querySelector("#combo-body");
-const comboConfirm = comboModal.querySelector("#combo-confirm");
-comboModal.querySelectorAll(".combo-close").forEach(b=>{
-  b.addEventListener("click", () => {
-    comboModal.classList.remove("show");
-    document.body.classList.remove("no-scroll");
-  });
+const auth = window.firebase ? firebase.auth() : null;
+const db   = window.firebase ? firebase.firestore() : null;
+
+/* ===============================
+   👤 BOTÃO DE LOGIN / MODAL
+=============================== */
+let userBtn = document.getElementById("user-btn");
+if (!userBtn) {
+  userBtn = document.createElement("button");
+  userBtn.id = "user-btn";
+  userBtn.className = "user-button";
+  userBtn.textContent = "Entrar / Cadastrar";
+  document.querySelector(".header")?.appendChild(userBtn);
+}
+userBtn.addEventListener("click", () => {
+  loginModal?.classList.add("show");
+  document.body.classList.add("no-scroll");
+});
+document.querySelector(".login-x")?.addEventListener("click", () => {
+  loginModal?.classList.remove("show");
+  document.body.classList.remove("no-scroll");
 });
 
-let _comboContext = null;
-function openComboModal(nomeCombo, precoBase) {
-  const nome = (nomeCombo || "").toLowerCase();
-  const grupo =
-    nome.includes("casal") ? "casal" :
-    (nome.includes("família") || nome.includes("familia")) ? "familia" : null;
+// e-mail/senha
+document.querySelector(".btn-primario")?.addEventListener("click", () => {
+  if (!auth) return alert("Auth indisponível");
+  const email = document.getElementById("login-email")?.value?.trim();
+  const senha = document.getElementById("login-senha")?.value?.trim();
+  if (!email || !senha) return alert("Preencha e-mail e senha.");
 
-  if (!grupo) { // fallback: não reconhecido como combo
-    addCommonItem(nomeCombo, precoBase);
+  auth.signInWithEmailAndPassword(email, senha)
+    .then(cred => {
+      currentUser = cred.user;
+      userBtn.textContent = `Olá, ${currentUser.email.split("@")[0]}`;
+      loginModal?.classList.remove("show");
+      document.body.classList.remove("no-scroll");
+      showOrdersFabIfLogged();
+    })
+    .catch(() => {
+      auth.createUserWithEmailAndPassword(email, senha)
+        .then(cred => {
+          currentUser = cred.user;
+          userBtn.textContent = `Olá, ${currentUser.email.split("@")[0]}`;
+          loginModal?.classList.remove("show");
+          document.body.classList.remove("no-scroll");
+          alert("Conta criada com sucesso! 🎉");
+          showOrdersFabIfLogged();
+        })
+        .catch(err => alert("Erro: " + err.message));
+    });
+});
+
+// Google
+document.querySelector(".btn-google")?.addEventListener("click", () => {
+  if (!auth) return alert("Auth indisponível");
+  const provider = new firebase.auth.GoogleAuthProvider();
+  auth.signInWithPopup(provider)
+    .then(result => {
+      currentUser = result.user;
+      userBtn.textContent = `Olá, ${currentUser.displayName?.split(" ")[0] || "Cliente"}`;
+      loginModal?.classList.remove("show");
+      document.body.classList.remove("no-scroll");
+      showOrdersFabIfLogged();
+    })
+    .catch(err => alert("Erro no login com Google: " + err.message));
+});
+
+// mantém UI atualizada
+auth?.onAuthStateChanged(user => {
+  if (user) {
+    currentUser = user;
+    userBtn.textContent = `Olá, ${user.displayName?.split(" ")[0] || user.email.split("@")[0]}`;
+  }
+  showOrdersFabIfLogged();
+});
+
+/* ===============================
+   📦 FECHAR PEDIDO (salva no Firestore)
+=============================== */
+function fecharPedido() {
+  if (!db) return alert("Banco indisponível");
+  if (!cart.length) return alert("Carrinho vazio!");
+  if (!currentUser) {
+    alert("Você precisa estar logado para enviar o pedido!");
+    loginModal?.classList.add("show");
     return;
   }
+  const total = cart.reduce((acc, i) => acc + i.preco * i.qtd, 0);
+  const pedido = {
+    usuario: currentUser.email,                 // usado no índice
+    userId: currentUser.uid,                    // útil no futuro
+    nome: currentUser.displayName || currentUser.email.split("@")[0],
+    itens: cart.map(i => `${i.nome} x${i.qtd}`),
+    total: Number(total.toFixed(2)),
+    data: new Date().toISOString(),             // ISO p/ ordenar e comparar
+  };
 
-  const opts = comboDrinkOptions[grupo] || [];
-  comboBody.innerHTML = opts.map((o, idx) => `
-    <label style="display:flex;justify-content:space-between;align-items:center;background:#f9f9f9;border:1px solid #eee;border-radius:8px;padding:8px 10px;">
-      <span>${o.rotulo} — + ${money(o.delta)}</span>
-      <input type="radio" name="combo-drink" value="${idx}" ${idx===0?"checked":""}>
-    </label>
-  `).join("");
-
-  _comboContext = { nomeCombo, precoBase, grupo };
-  comboModal.classList.add("show");
-  document.body.classList.add("no-scroll");
+  db.collection("Pedidos").add(pedido)
+    .then(() => {
+      alert("Pedido salvo com sucesso ✅");
+      const texto = encodeURIComponent(
+        "🍔 *Pedido DFL*\n" +
+        cart.map(i => `• ${i.nome} x${i.qtd}`).join("\n") +
+        `\n\nTotal: ${money(total)}`
+      );
+      window.open(`https://wa.me/5534997178336?text=${texto}`, "_blank");
+      cart = [];
+      renderMiniCart();
+    })
+    .catch(err => alert("Erro ao salvar pedido: " + err.message));
 }
 
-comboConfirm.addEventListener("click", () => {
-  const sel = comboBody.querySelector('input[name="combo-drink"]:checked');
-  if (!_comboContext || !sel) return;
-  const { nomeCombo, precoBase, grupo } = _comboContext;
-  const opt = comboDrinkOptions[grupo][Number(sel.value)];
-  const finalName  = `${nomeCombo} + ${opt.rotulo}`;
-  const finalPrice = Number(precoBase) + (opt.delta || 0);
-  cart.push({ nome: finalName, preco: finalPrice, qtd: 1 });
-  popupAdd(`${finalName} adicionado!`);
-  comboModal.classList.remove("show");
-  document.body.classList.remove("no-scroll");
-  renderMiniCart();
-});
-
 /* ===============================
-   ➕ ADICIONAR AO CARRINHO
+   📋 MEUS PEDIDOS (FAB + painel)
 =============================== */
-function addCommonItem(nome, preco) {
-  const found = cart.find(i => i.nome === nome && i.preco === preco);
-  if (found) found.qtd += 1;
-  else cart.push({ nome, preco, qtd: 1 });
-  renderMiniCart();
-  popupAdd(`${nome} adicionado!`);
+let ordersFab = document.getElementById("orders-fab");
+if (!ordersFab) {
+  ordersFab = document.createElement("button");
+  ordersFab.id = "orders-fab";
+  ordersFab.innerHTML = "📦 Meus Pedidos";
+  document.body.appendChild(ordersFab);
+}
+let ordersPanel = document.querySelector(".orders-panel");
+if (!ordersPanel) {
+  ordersPanel = document.createElement("div");
+  ordersPanel.className = "orders-panel";
+  ordersPanel.innerHTML = `
+    <div class="orders-head">
+      <span>📦 Meus Pedidos</span>
+      <button class="orders-close">✖</button>
+    </div>
+    <div class="orders-content" id="orders-content">
+      <p class="empty-orders">Faça login para ver seus pedidos.</p>
+    </div>
+  `;
+  document.body.appendChild(ordersPanel);
 }
 
-document.querySelectorAll(".add-cart").forEach(btn => {
-  btn.addEventListener("click", e => {
-    const card = e.currentTarget.closest(".card");
-    if (!card) return;
-    const nome  = card.dataset.name || card.querySelector("h3")?.textContent?.trim() || "Item";
-    const preco = parseFloat(card.dataset.price || "0");
-
-    // Se for Combo (nome começa com "Combo")
-    if (/^combo/i.test(nome)) {
-      openComboModal(nome, preco);
-    } else {
-      addCommonItem(nome, preco);
-    }
-  });
+document.querySelector(".orders-close")?.addEventListener("click", () => {
+  ordersPanel.classList.remove("active");
 });
+ordersFab.addEventListener("click", () => {
+  if (!currentUser) return alert("Faça login para ver seus pedidos.");
+  ordersPanel.classList.add("active");
+  carregarPedidosSeguro();
+});
+
+function showOrdersFabIfLogged() {
+  if (currentUser) ordersFab.classList.add("show");
+  else ordersFab.classList.remove("show");
+}
+
+function carregarPedidosSeguro() {
+  const container = document.getElementById("orders-content");
+  if (!db || !container) return;
+  container.innerHTML = `<p class="empty-orders">Carregando pedidos...</p>`;
+  if (!currentUser) {
+    container.innerHTML = `<p class="empty-orders">Você precisa estar logado para ver seus pedidos.</p>`;
+    return;
+  }
+  // ⚠️ Consulta exige índice composto: usuario (==) + data (orderBy desc)
+  db.collection("Pedidos")
+    .where("usuario", "==", currentUser.email)
+    .orderBy("data", "desc")
+    .get()
+    .then(snapshot => {
+      if (snapshot.empty) {
+        container.innerHTML = `<p class="empty-orders">Nenhum pedido encontrado 😢</p>`;
+        return;
+      }
+      container.innerHTML = "";
+      snapshot.forEach(doc => {
+        const p = doc.data();
+        const itens = Array.isArray(p.itens) ? p.itens.join(", ") : (p.itens || "");
+        const bloco = document.createElement("div");
+        bloco.className = "order-item";
+        bloco.innerHTML = `
+          <h4>${new Date(p.data).toLocaleString("pt-BR")}</h4>
+          <p><b>Itens:</b> ${itens}</p>
+          <p><b>Total:</b> R$ ${Number(p.total).toFixed(2).replace(".", ",")}</p>
+        `;
+        container.appendChild(bloco);
+      });
+    })
+    .catch(err => {
+      container.innerHTML = `<p class="empty-orders">Erro ao carregar pedidos: ${err.message}</p>`;
+    });
+}
 
 /* ===============================
-   🖼️ CARROSSEL
+   ✅ POPUP “adicionado” (fallback)
 =============================== */
-const slides = document.querySelector(".slides");
-document.querySelector(".c-prev")?.addEventListener("click", () => { if (slides) slides.scrollLeft -= 320; });
-document.querySelector(".c-next")?.addEventListener("click", () => { if (slides) slides.scrollLeft += 320; });
-document.querySelectorAll(".slide").forEach(img => {
-  img.addEventListener("click", () => {
-    const msg = encodeURIComponent(img.dataset.wa || "");
-    if (msg) window.open(`https://wa.me/5534997178336?text=${msg}`, "_blank");
-  });
-});
+if (!window.popupAdd) {
+  window.popupAdd = function popupAdd(msg) {
+    const pop = document.createElement("div");
+    pop.className = "popup-add";
+    pop.textContent = msg;
+    document.body.appendChild(pop);
+    setTimeout(() => pop.remove(), 1400);
+  };
+}
+
+console.log("✅ DFL v1.4 — extras restaurados + combos com bebida + login/pedidos OK");
