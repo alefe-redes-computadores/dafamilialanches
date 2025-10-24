@@ -1,447 +1,410 @@
-
-/* ================================================
-   🌟 BASE GERAL
-================================================ */
+/* ==============================
+   BASE GERAL
+============================== */
 * {
+  box-sizing: border-box;
   margin: 0;
   padding: 0;
-  box-sizing: border-box;
   font-family: "Poppins", Arial, sans-serif;
 }
 
 body {
-  background-color: #fffaf3;
+  background-color: #fffaf0;
   color: #222;
   overflow-x: hidden;
 }
 
-/* ================================================
-   🧭 CABEÇALHO
-================================================ */
+h1, h2, h3 {
+  font-weight: 600;
+}
+
+.no-scroll {
+  overflow: hidden;
+}
+
+/* ==============================
+   CABEÇALHO
+============================== */
 .header {
+  background: #ffd54f;
+  border-bottom: 3px solid #000;
+  padding: 10px 15px;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 15px 20px;
-  background: #ffcc00;
-  border-bottom: 4px solid #000;
-  position: sticky;
-  top: 0;
-  z-index: 1000;
 }
 
 .header-content {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 12px;
 }
 
 .logo {
-  width: 60px;
-  height: 60px;
-  object-fit: contain;
+  width: 50px;
+  height: auto;
 }
 
 .header-info h1 {
-  font-size: 1.8em;
-  color: #000;
-  text-shadow: 1px 1px 0px #fff;
-  letter-spacing: 1px;
+  font-size: 1.3rem;
 }
 
 .header-info .tagline {
-  font-size: 0.9em;
-  color: #333;
+  font-size: 0.85rem;
+  color: #ff4081;
 }
 
+/* botões login/carrinho */
 .user-button, #cart-icon {
   background: #000;
   color: #fff;
   border: none;
-  padding: 10px 15px;
-  border-radius: 10px;
-  cursor: pointer;
+  border-radius: 8px;
+  padding: 6px 12px;
   font-weight: 600;
-  transition: 0.3s;
+  cursor: pointer;
+  transition: all 0.2s ease;
 }
 
 .user-button:hover, #cart-icon:hover {
-  background: #333;
+  background: #ff4081;
 }
 
-#cart-count {
-  background: red;
-  color: white;
-  border-radius: 50%;
-  padding: 2px 6px;
-  font-size: 0.8em;
-  margin-left: 5px;
-}
-
-/* ================================================
-   ⏰ STATUS + HORÁRIO
-================================================ */
+/* ==============================
+   STATUS E HORÁRIO
+============================== */
 .status-banner {
   text-align: center;
-  padding: 10px;
-  font-weight: bold;
+  padding: 5px;
   color: #fff;
+  font-weight: 600;
 }
+.status-banner.open { background: #4caf50; }
+.status-banner.closed { background: #d32f2f; }
 
 .hours-banner {
-  text-align: center;
-  font-size: 0.95em;
   background: #000;
   color: #fff;
-  padding: 8px 0;
+  text-align: center;
+  font-size: 0.9rem;
+  padding: 5px 0;
 }
 
-/* ================================================
-   🛍️ PROMOÇÕES / CARROSSEL
-================================================ */
+/* ==============================
+   PROMOÇÕES
+============================== */
 .promo-section {
   text-align: center;
-  padding: 20px;
-  background: #fff6da;
+  padding: 15px 10px;
 }
 
+.promo-section h2 {
+  color: #ff5722;
+}
+
+.countdown-ticker {
+  background: #fff;
+  display: inline-block;
+  padding: 5px 10px;
+  border-radius: 10px;
+  margin: 5px 0;
+  font-weight: 600;
+}
+
+/* carrossel */
 .carousel {
   position: relative;
+  width: 100%;
   overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
-
 .slides {
   display: flex;
-  overflow-x: auto;
-  scroll-behavior: smooth;
-  gap: 10px;
-  padding: 10px 0;
+  transition: transform 0.4s ease;
 }
-
 .slide {
+  width: 250px;
+  margin: 0 5px;
   border-radius: 12px;
-  flex: 0 0 auto;
-  width: 280px;
-  height: 280px;
-  object-fit: cover;
-  transition: transform 0.3s;
-  cursor: pointer;
+  box-shadow: 0 3px 10px rgba(0,0,0,0.2);
 }
-
-.slide:hover {
-  transform: scale(1.05);
-}
-
 .c-btn {
+  background: rgba(0,0,0,0.6);
+  color: #fff;
+  border: none;
+  font-size: 22px;
+  width: 35px;
+  height: 35px;
+  border-radius: 50%;
+  cursor: pointer;
   position: absolute;
   top: 50%;
   transform: translateY(-50%);
-  font-size: 2em;
-  background: rgba(0, 0, 0, 0.6);
-  color: #fff;
-  border: none;
-  border-radius: 50%;
-  padding: 5px 10px;
-  cursor: pointer;
 }
+.c-prev { left: 5px; }
+.c-next { right: 5px; }
 
-.c-prev { left: 10px; }
-.c-next { right: 10px; }
-
-/* ================================================
-   🍔 CARDS DE LANCHES
-================================================ */
+/* ==============================
+   SEÇÕES DE MENU
+============================== */
 .menu-section {
-  padding: 25px 20px;
+  text-align: center;
+  padding: 20px 10px;
 }
 
 .menu-section h2 {
-  text-align: center;
-  font-size: 1.7em;
-  margin-bottom: 15px;
-  color: #000;
+  color: #ff7043;
+  margin-bottom: 10px;
 }
 
 .grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-  gap: 20px;
+  grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+  gap: 15px;
+  padding: 10px;
 }
 
 .card {
   background: #fff;
   border-radius: 15px;
-  padding: 15px;
-  text-align: center;
-  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-  transition: transform 0.2s;
+  box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+  overflow: hidden;
+  transition: transform 0.2s ease;
+  padding: 10px;
 }
-
 .card:hover {
-  transform: scale(1.03);
+  transform: scale(1.02);
 }
-
 .card img {
-  width: 180px;
-  height: 180px;
-  object-fit: cover;
-  border-radius: 50%;
-  margin-bottom: 10px;
+  width: 100%;
+  height: 120px;
+  object-fit: contain;
+  border-radius: 12px;
 }
-
 .card h3 {
-  font-size: 1.2em;
-  margin-bottom: 5px;
+  font-size: 1rem;
+  margin: 5px 0;
 }
-
-.card .price {
-  color: #ff0000;
-  font-weight: bold;
-  margin-bottom: 8px;
+.card p {
+  font-size: 0.85rem;
+  color: #333;
 }
-
+.price b {
+  color: #e53935;
+}
 .badge {
-  background: #ffcc00;
+  background: #fff176;
   color: #000;
-  padding: 3px 6px;
-  border-radius: 8px;
-  font-size: 0.8em;
-  margin-left: 4px;
+  font-weight: 600;
+  border-radius: 5px;
+  padding: 1px 5px;
+  font-size: 0.75rem;
 }
 
+/* botões dos cards */
 .actions {
+  margin-top: 10px;
   display: flex;
   justify-content: center;
   gap: 8px;
-  margin-top: 8px;
 }
-
-.add-cart, .extras-btn {
-  background: #000;
-  color: #fff;
+.actions button {
   border: none;
-  border-radius: 10px;
-  padding: 8px 12px;
+  border-radius: 8px;
+  padding: 5px 10px;
   font-weight: 600;
   cursor: pointer;
-  transition: 0.3s;
 }
-
-.add-cart:hover, .extras-btn:hover {
-  background: #333;
-}
-
-/* ================================================
-   🧾 MINI-CARRINHO
-================================================ */
-.mini-cart {
-  position: fixed;
-  right: -400px;
-  top: 0;
-  width: 320px;
-  height: 100%;
-  background: #fff;
-  box-shadow: -4px 0 10px rgba(0,0,0,0.2);
-  transition: right 0.3s;
-  z-index: 1001;
-  display: flex;
-  flex-direction: column;
-}
-
-.mini-cart.active { right: 0; }
-
-.mini-head {
+.add-cart {
   background: #000;
   color: #fff;
-  padding: 10px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
+}
+.extras-btn {
+  background: #ff4081;
+  color: #fff;
 }
 
-.mini-list {
-  flex: 1;
-  overflow-y: auto;
-  padding: 10px;
-}
-
-.mini-foot {
-  padding: 10px;
-  border-top: 1px solid #ddd;
-  text-align: center;
-}
-
-#cart-backdrop {
-  display: none;
-  position: fixed;
-  top:0; left:0; width:100%; height:100%;
-  background: rgba(0,0,0,0.4);
-  z-index: 999;
-}
-#cart-backdrop.show { display: block; }
-
-/* ================================================
-   💬 MODAIS (Adicionais, Combo, Login)
-================================================ */
+/* ==============================
+   MODAIS GERAIS
+============================== */
 .modal {
   display: none;
   position: fixed;
-  top:0; left:0;
-  width:100%; height:100%;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
   background: rgba(0,0,0,0.6);
   justify-content: center;
   align-items: center;
-  z-index: 1100;
+  z-index: 1000;
 }
-
 .modal.show {
   display: flex;
 }
-
 .modal-content {
   background: #fff;
   border-radius: 15px;
+  padding: 20px;
   width: 90%;
   max-width: 400px;
-  padding: 20px;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.2);
-  animation: fadeIn 0.3s;
-  position: relative;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+  animation: zoomIn 0.2s ease;
+}
+@keyframes zoomIn {
+  from { transform: scale(0.9); opacity: 0; }
+  to   { transform: scale(1); opacity: 1; }
 }
 
-.modal-head {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
+/* extras */
+.extras-list label {
+  display: block;
+  text-align: left;
+  margin: 5px 0;
 }
-
-.modal-head h3 {
-  font-size: 1.4em;
-  color: #000;
-}
-
-.modal-head button {
-  background: none;
-  border: none;
-  font-size: 1.3em;
-  cursor: pointer;
-  color: #444;
-}
-
-.extras-list label,
-#combo-body label {
-  display: flex;
-  justify-content: space-between;
-  background: #f8f8f8;
-  margin-bottom: 8px;
-  padding: 8px 10px;
-  border-radius: 8px;
-  border: 1px solid #ddd;
-}
-
 .modal-foot {
   display: flex;
   justify-content: space-between;
-  gap: 10px;
-  margin-top: 15px;
+  margin-top: 10px;
 }
-
-.btn-primary, .btn-secondary, .btn-primario, .btn-google {
-  flex: 1;
-  padding: 10px;
-  border: none;
-  border-radius: 10px;
-  font-weight: 600;
-  cursor: pointer;
-}
-
-.btn-primary, .btn-primario {
+.btn-primary {
   background: #000;
   color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 6px 12px;
+  font-weight: 600;
 }
-
 .btn-secondary {
-  background: #ddd;
+  background: #ccc;
+  border: none;
+  border-radius: 8px;
+  padding: 6px 12px;
+  font-weight: 600;
 }
 
+/* login modal */
+.login-form input {
+  width: 100%;
+  margin: 5px 0;
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+}
 .btn-google {
+  width: 100%;
   background: #fff;
   border: 1px solid #ccc;
+  border-radius: 8px;
+  padding: 8px;
+  font-weight: 600;
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 8px;
 }
-
-.google-icon {
+.btn-google::before {
+  content: url('https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg');
   width: 18px;
   height: 18px;
 }
 
-/* ================================================
-   🗺️ MAPA DE COBERTURA
-================================================ */
-.coverage {
-  padding: 30px 15px;
-  background: #fff8e1;
-  text-align: center;
+/* ==============================
+   MINI-CARRINHO E PEDIDOS
+============================== */
+#orders-fab {
+  position: fixed;
+  bottom: 25px;
+  right: 20px;
+  background: #ff9800;
+  border: none;
+  color: #fff;
+  font-weight: 600;
+  border-radius: 20px;
+  padding: 10px 15px;
+  cursor: pointer;
+  display: none;
+  box-shadow: 0 3px 10px rgba(0,0,0,0.3);
+}
+#orders-fab.show {
+  display: block;
 }
 
-.coverage h2 {
-  margin-bottom: 10px;
-  color: #000;
+.orders-panel {
+  position: fixed;
+  top: 0;
+  right: -100%;
+  width: 90%;
+  max-width: 350px;
+  height: 100%;
+  background: #fff;
+  transition: right 0.3s ease;
+  z-index: 1100;
+  box-shadow: -2px 0 8px rgba(0,0,0,0.2);
+}
+.orders-panel.active {
+  right: 0;
+}
+.orders-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #ff9800;
+  color: #fff;
+  padding: 10px;
+  font-weight: 600;
+}
+.order-item {
+  border-bottom: 1px solid #eee;
+  padding: 10px;
+  font-size: 0.85rem;
 }
 
-/* ================================================
-   🦶 RODAPÉ
-================================================ */
+/* ==============================
+   POPUP DE ADIÇÃO
+============================== */
+.popup-add {
+  position: fixed;
+  bottom: 60px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #4caf50;
+  color: #fff;
+  padding: 10px 20px;
+  border-radius: 20px;
+  opacity: 0;
+  transition: all 0.3s ease;
+  z-index: 2000;
+}
+.popup-add.show {
+  opacity: 1;
+  bottom: 80px;
+}
+
+/* ==============================
+   RODAPÉ
+============================== */
 .footer {
+  text-align: center;
   background: #000;
   color: #fff;
-  text-align: center;
-  padding: 20px 10px;
+  padding: 15px 10px;
+  font-size: 0.85rem;
 }
-
 .footer a {
-  color: #ffcc00;
+  color: #ffd54f;
   text-decoration: none;
+  margin: 0 5px;
 }
 
-.footer-links {
-  display: flex;
-  justify-content: center;
-  flex-wrap: wrap;
-  gap: 10px;
-  margin: 10px 0;
-}
-
-.footer-btn {
-  background: #ffcc00;
-  color: #000;
-  padding: 8px 14px;
-  border-radius: 8px;
-  font-weight: bold;
-  transition: 0.3s;
-}
-
-.footer-btn:hover {
-  background: #fff;
-}
-
-/* ================================================
-   ✨ ANIMAÇÕES
-================================================ */
-@keyframes fadeIn {
-  from { opacity: 0; transform: scale(0.95); }
-  to { opacity: 1; transform: scale(1); }
-}
-
-/* ================================================
-   📱 RESPONSIVIDADE
-================================================ */
-@media (max-width: 768px) {
-  .header-info h1 { font-size: 1.4em; }
-  .grid { grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); }
-  .card img { width: 130px; height: 130px; }
-  .modal-content { width: 95%; }
+/* ==============================
+   RESPONSIVIDADE
+============================== */
+@media (max-width: 600px) {
+  .grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .card img {
+    height: 100px;
+  }
 }
