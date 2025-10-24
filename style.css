@@ -262,3 +262,59 @@ body {
 .mini-cart{ z-index: 2310; }
 
 /* ===== FIM DO PATCH ===== */
+
+/* ===== PATCH 1.4.8 (layout & brand) ===== */
+
+/* Marca “DFL” 3D + subtítulo */
+.header-info h1{
+  font-weight:900;
+  letter-spacing: 2px;
+  font-size: 28px;
+  text-transform: uppercase;
+  /* “falso 3D” com sombras */
+  text-shadow:
+    0 1px 0 #222,
+    0 2px 0 #111,
+    0 3px 0 #000,
+    0 3px 6px rgba(0,0,0,.35);
+}
+.brand-sub{
+  margin-top: 4px;
+  font-size: 14px;
+  font-weight: 700;
+  opacity: .9;
+}
+
+/* Centralização já garantida, só reafirmando o conjunto */
+.header-content{ justify-content:center; gap:12px; }
+.header-info{ align-items:center; text-align:center; }
+
+/* Cluster à direita (login + carrinho) permanece fixo */
+.header-right{ position:absolute; right:12px; top:10px; display:flex; gap:10px; align-items:center; }
+
+/* Ícones padronizados dos cards: menores no mobile */
+.card .thumb{ width:100%; height:150px; border-radius:14px; overflow:hidden; border:1px solid #eee; background:#fff; display:flex; align-items:center; justify-content:center; }
+.card .thumb img{ width:100%; height:100%; object-fit:contain; }
+.card > img{ width:100%; height:150px; object-fit:contain; border-radius:14px; border:1px solid #eee; }
+
+/* Mobile: reduzir altura para caber mais itens na tela */
+@media (max-width: 480px){
+  .card .thumb,
+  .card > img{ height:120px; }
+  .card{ padding:14px; }
+}
+
+/* Botão Google sempre com ícone */
+.btn-google{ position:relative; padding-left:44px; }
+.btn-google::before{
+  content:""; position:absolute; left:12px; top:50%; transform:translateY(-50%);
+  width:22px; height:22px;
+  background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48"><path fill="%23FFC107" d="M43.6 20.5H42v-.1H24v7.2h11.2C33.5 31.7 29.1 35 24 35 17.4 35 12 29.6 12 23s5.4-12 12-12c3 0 5.7 1.1 7.8 3l5.1-5.1C33.4 5 28.9 3 24 3 12.3 3 3 12.3 3 24s9.3 21 21 21 21-9.3 21-21c0-1.2-.1-2.3-.4-3.5z"/><path fill="%23FF3D00" d="M6.3 14.7l5.9 4.3C14.3 15.2 18.8 12 24 12c3 0 5.7 1.1 7.8 3l5.1-5.1C33.4 5 28.9 3 24 3 16 3 9.2 7.6 6.3 14.7z"/><path fill="%2300A344" d="M24 45c5 0 9.5-1.9 12.9-5.1l-5.9-4.9C29 36.7 26.6 37.5 24 37.5c-5 0-9.3-3.2-10.9-7.7l-6.1 4.7C9.9 40.3 16.4 45 24 45z"/><path fill="%233197F3" d="M43.6 20.5H42v-.1H24v7.2h11.2c-1.3 3.1-4.1 5.6-7.3 6.5l5.9 4.9C36 37.4 39 31.5 39 24c0-1.2-.1-2.3-.4-3.5z"/></svg>') no-repeat center / contain;
+}
+
+/* Garantir z-index das camadas do app */
+.orders-panel{ z-index: 2400; }
+#cart-backdrop{ z-index: 2300; }
+.mini-cart{ z-index: 2310; }
+
+/* ===== FIM PATCH CSS ===== */
