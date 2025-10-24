@@ -538,13 +538,83 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function carregarPedidosSeguro() {
-    const container = document.getElementById("orders-content");
-    if (!container) return;
-    container.innerHTML = `<p class="empty-orders">Carregando pedidos...</p>`;
-    if (!currentUser) {
-      container.innerHTML = `<p class="empty-orders">Você precisa estar logado.</p>`;
-      return;
-    }
+  const container = document.getElementById("orders-content");
+  if (!container) return;
+  
+  container.innerHTML = `<p class="empty-orders">Carregando pedidos...</p>`;
+  
+  if (!currentUser) {
+    container.innerHTML = `<p class="empty-orders">Você precisa estar logado.</p>`;
+    return;
+  }
+
+  // CORREÇÃO: Removido orderBy para evitar erro de índice
+  db.collection("Pedidos")
+    .where("usuario", "==", currentUser.email)
+    .get()
+    .then((snap) => {
+      if (snap.empty) {
+        container.innerHTML = `<p class="empty-orders">Nenhum pedido encontrado 😢<br><br>Faça seu primeiro pedido!</p>`;
+        return;
+      }
+      
+      // Ordenar manualmente por data (mais recente primeiro)
+      const pedidos = [];
+      snap.forEach((doc) => {
+        pedidos.push({ id: doc.id, ...doc.data() });
+      });
+      
+      pedidos.sort((a, b) => {
+        const dateA = new Date(a.data);
+        const dateB = new Date(b.data);
+        return dateB - dateA; // mais recente primeiro
+      });
+      
+      container.innerHTML = "";
+      
+      pedidos.forEach((p) => {
+        const itens = Array.isArray(p.itens) ? p.itens.join("<br>• ") : p.itens || "";
+        const dataFormatada = new Date(p.data).toLocaleString("pt-BR", {
+          day: '2-digit',
+          month: '2-digit', 
+          year: 'numeric',
+          hour: '2-digit',
+          minute: '2-digit'
+        });
+        
+        const box = document.createElement("div");
+        box.className = "order-item";
+        box.innerHTML = `
+          <h4>📅 ${dataFormatada}</h4>
+          <p><b>Itens:</b><br>• ${itens}</p>
+          <p style="font-size:1.1rem;color:#4caf50;font-weight:600;margin-top:8px;">
+            <b>Total:</b> ${money(p.total)}
+          </p>`;
+        container.appendChild(box);
+      });
+      
+      console.log(`✅ ${pedidos.length} pedido(s) carregado(s)`);
+    })
+    .catch((err) => {
+      console.error("❌ Erro ao carregar pedidos:", err);
+      
+      // Mensagem mais clara do erro
+      if (err.code === 'failed-precondition') {
+        container.innerHTML = `
+          <p class="empty-orders" style="color:#d32f2f;">
+            ⚠️ Erro de configuração do Firebase.<br><br>
+            É necessário criar um índice no Firestore.<br><br>
+            Clique no link que apareceu no Console (F12).
+          </p>`;
+      } else {
+        container.innerHTML = `
+          <p class="empty-orders" style="color:#d32f2f;">
+            ❌ Erro ao carregar pedidos:<br><br>
+            ${err.message}
+          </p>`;
+      }
+    });
+}
 
     db.collection("Pedidos")
       .where("usuario", "==", currentUser.email)
