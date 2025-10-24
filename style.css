@@ -467,3 +467,145 @@ h1, h2, h3 {
     max-width: 320px;
   }
 }
+/* ==============================
+   ✨ PATCH VISUAL v1.7.5 — VISUAL MODERNO DFL
+============================== */
+
+/* 🧱 Grade de cards mais organizada */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 18px;
+  padding: 15px;
+}
+
+/* 🪄 Cards com sombra suave e contorno dourado leve */
+.card {
+  background: #fff;
+  border-radius: 15px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+  border: 2px solid #ffe082; /* leve dourado */
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+.card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 6px 18px rgba(0,0,0,0.15);
+}
+
+/* 🧈 Botões de ação refinados */
+.actions {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 12px;
+}
+.actions button {
+  border: none;
+  border-radius: 10px;
+  padding: 7px 12px;
+  font-weight: 600;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.25s ease;
+}
+
+/* Botão Adicionar */
+.add-cart {
+  background: #000;
+  color: #fff;
+  box-shadow: 0 3px 0 #222;
+}
+.add-cart:hover {
+  background: #222;
+  transform: scale(1.05);
+}
+
+/* Botão Adicionais */
+.extras-btn {
+  background: linear-gradient(135deg, #ffca28, #ffd54f);
+  color: #000;
+  box-shadow: 0 3px 0 #f1b600;
+}
+.extras-btn:hover {
+  background: linear-gradient(135deg, #ffd54f, #ffe082);
+  transform: scale(1.05);
+}
+
+/* 💬 Modal moderno (Login, Extras, Combos) */
+.modal-content {
+  border: 3px solid #ffd54f;
+  border-radius: 20px;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.2);
+  background: #fffdfa;
+  animation: zoomIn 0.25s ease;
+}
+
+/* Cabeçalho de modais */
+.modal-head {
+  border-bottom: 2px solid #ffd54f;
+  color: #000;
+  font-weight: 700;
+  font-size: 1.1rem;
+}
+
+/* Botão de fechar visualmente leve */
+.modal-head button {
+  font-size: 22px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: #555;
+  transition: color 0.2s ease;
+}
+.modal-head button:hover { color: #000; }
+
+/* Campos de login */
+.login-form input {
+  border: 1.8px solid #ddd;
+  border-radius: 10px;
+  padding: 10px;
+  font-size: 0.95rem;
+}
+.login-form input:focus {
+  border-color: #ffd54f;
+  box-shadow: 0 0 6px rgba(255,213,79,0.5);
+}
+
+/* Botão Google com ícone restaurado */
+.btn-google {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  background: #fff;
+  border: 2px solid #ccc;
+  border-radius: 10px;
+  padding: 10px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.25s ease;
+}
+.btn-google img.google-icon {
+  width: 20px;
+  height: 20px;
+}
+.btn-google:hover {
+  border-color: #aaa;
+  background: #fafafa;
+}
+
+/* 🥤 Lista de bebidas nos combos — layout mais elegante */
+#combo-modal .extra-line {
+  padding: 10px;
+  border-radius: 8px;
+  transition: background 0.2s ease;
+}
+#combo-modal .extra-line:hover {
+  background: #fff8e1;
+}
+
+/* 🧃 Correção + novos refrigerantes */
+#combo-body label span {
+  font-weight: 500;
+  color: #333;
+}
