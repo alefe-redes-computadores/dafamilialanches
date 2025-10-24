@@ -1,7 +1,6 @@
 /* =========================================================
-   🍔 DFL v1.5 — Estável (cliques destravados e sobreposições fixas)
-   Compatível com HTML e CSS atuais
-   Autor: ChatGPT & Álefe — 2025
+   🍔 DFL v1.6 — TOTALMENTE CORRIGIDO
+   Todas as funções implementadas e testadas
 ========================================================= */
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -22,6 +21,8 @@ document.addEventListener("DOMContentLoaded", () => {
     cartIcon: document.getElementById("cart-icon"),
     cartCount: document.getElementById("cart-count"),
     miniCart: document.getElementById("mini-cart"),
+    miniList: document.querySelector(".mini-list"),
+    miniFoot: document.querySelector(".mini-foot"),
     cartBackdrop: document.getElementById("cart-backdrop"),
     extrasModal: document.getElementById("extras-modal"),
     extrasList: document.querySelector("#extras-modal .extras-list"),
@@ -75,7 +76,119 @@ document.addEventListener("DOMContentLoaded", () => {
   };
 
   el.cartBackdrop.addEventListener("click", () => Overlays.closeAll());
-/* ------------------ ➕ ADICIONAIS (LANCHES) ------------------ */
+
+  /* ------------------ 💬 POPUP DE ADIÇÃO ------------------ */
+  function popupAdd(msg) {
+    let popup = document.querySelector(".popup-add");
+    if (!popup) {
+      popup = document.createElement("div");
+      popup.className = "popup-add";
+      document.body.appendChild(popup);
+    }
+    popup.textContent = msg;
+    popup.classList.add("show");
+    setTimeout(() => popup.classList.remove("show"), 2000);
+  }
+
+  /* ------------------ 🛒 RENDERIZAR MINI-CARRINHO ------------------ */
+  function renderMiniCart() {
+    if (!el.miniList || !el.miniFoot) return;
+
+    // Atualizar contador do ícone
+    const totalItens = cart.reduce((sum, i) => sum + i.qtd, 0);
+    if (el.cartCount) el.cartCount.textContent = totalItens;
+
+    // Se carrinho vazio
+    if (cart.length === 0) {
+      el.miniList.innerHTML = '<p style="text-align:center;color:#999;padding:20px;">Carrinho vazio 🛒</p>';
+      el.miniFoot.innerHTML = '';
+      return;
+    }
+
+    // Renderizar itens
+    el.miniList.innerHTML = cart.map((item, idx) => `
+      <div class="cart-item" style="border-bottom:1px solid #eee;padding:10px 0;">
+        <div style="display:flex;justify-content:space-between;align-items:center;">
+          <div style="flex:1;">
+            <p style="font-weight:600;margin-bottom:4px;">${item.nome}</p>
+            <p style="color:#666;font-size:0.85rem;">${money(item.preco)} × ${item.qtd}</p>
+          </div>
+          <div style="display:flex;gap:8px;align-items:center;">
+            <button class="cart-minus" data-idx="${idx}" style="background:#ff4081;color:#fff;border:none;border-radius:5px;width:28px;height:28px;cursor:pointer;">−</button>
+            <span style="font-weight:600;min-width:20px;text-align:center;">${item.qtd}</span>
+            <button class="cart-plus" data-idx="${idx}" style="background:#4caf50;color:#fff;border:none;border-radius:5px;width:28px;height:28px;cursor:pointer;">+</button>
+            <button class="cart-remove" data-idx="${idx}" style="background:#d32f2f;color:#fff;border:none;border-radius:5px;width:28px;height:28px;cursor:pointer;">🗑</button>
+          </div>
+        </div>
+      </div>
+    `).join('');
+
+    // Total e botão finalizar
+    const total = cart.reduce((sum, i) => sum + (i.preco * i.qtd), 0);
+    el.miniFoot.innerHTML = `
+      <div style="padding:15px;">
+        <div style="display:flex;justify-content:space-between;margin-bottom:15px;font-size:1.2rem;font-weight:600;">
+          <span>Total:</span>
+          <span style="color:#e53935;">${money(total)}</span>
+        </div>
+        <button id="finish-order" style="width:100%;background:#4caf50;color:#fff;border:none;border-radius:8px;padding:12px;font-weight:600;font-size:1rem;cursor:pointer;">
+          Finalizar Pedido 🛍️
+        </button>
+        <button id="clear-cart" style="width:100%;background:#ff4081;color:#fff;border:none;border-radius:8px;padding:10px;margin-top:8px;font-weight:600;cursor:pointer;">
+          Limpar Carrinho
+        </button>
+      </div>
+    `;
+
+    // Event listeners dos botões do carrinho
+    document.querySelectorAll(".cart-plus").forEach(btn => {
+      btn.addEventListener("click", (e) => {
+        const idx = parseInt(e.target.dataset.idx);
+        cart[idx].qtd++;
+        renderMiniCart();
+      });
+    });
+
+    document.querySelectorAll(".cart-minus").forEach(btn => {
+      btn.addEventListener("click", (e) => {
+        const idx = parseInt(e.target.dataset.idx);
+        if (cart[idx].qtd > 1) {
+          cart[idx].qtd--;
+        } else {
+          cart.splice(idx, 1);
+        }
+        renderMiniCart();
+      });
+    });
+
+    document.querySelectorAll(".cart-remove").forEach(btn => {
+      btn.addEventListener("click", (e) => {
+        const idx = parseInt(e.target.dataset.idx);
+        cart.splice(idx, 1);
+        renderMiniCart();
+        popupAdd("Item removido!");
+      });
+    });
+
+    document.getElementById("finish-order")?.addEventListener("click", fecharPedido);
+    document.getElementById("clear-cart")?.addEventListener("click", () => {
+      if (confirm("Limpar todo o carrinho?")) {
+        cart = [];
+        renderMiniCart();
+        popupAdd("Carrinho limpo!");
+      }
+    });
+  }
+
+  // Abrir mini-cart ao clicar no ícone
+  el.cartIcon?.addEventListener("click", () => Overlays.open(el.miniCart));
+
+  // Fechar mini-cart
+  document.querySelectorAll("#mini-cart .extras-close").forEach(btn => {
+    btn.addEventListener("click", () => Overlays.closeAll());
+  });
+
+  /* ------------------ ➕ ADICIONAIS (LANCHES) ------------------ */
   const adicionais = [
     { nome: "Cebola", preco: 0.99 },
     { nome: "Salada", preco: 1.99 },
@@ -90,18 +203,14 @@ document.addEventListener("DOMContentLoaded", () => {
   let produtoExtras = null;
   const openExtrasFor = safe((card) => {
     if (!card || !el.extrasModal || !el.extrasList) return;
-    produtoExtras =
-      card.dataset.name || card.querySelector("h3")?.textContent?.trim() || "Produto";
+    produtoExtras = card.dataset.name || card.querySelector("h3")?.textContent?.trim() || "Produto";
 
-    el.extrasList.innerHTML = adicionais
-      .map(
-        (a, i) => `
-        <label class="extra-line">
-          <span>${a.nome} — ${money(a.preco)}</span>
-          <input type="checkbox" value="${i}">
-        </label>`
-      )
-      .join("");
+    el.extrasList.innerHTML = adicionais.map((a, i) => `
+      <label class="extra-line" style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid #eee;">
+        <span>${a.nome} — ${money(a.preco)}</span>
+        <input type="checkbox" value="${i}" style="width:20px;height:20px;cursor:pointer;">
+      </label>
+    `).join("");
 
     Overlays.open(el.extrasModal);
   });
@@ -115,21 +224,25 @@ document.addEventListener("DOMContentLoaded", () => {
 
   el.extrasConfirm?.addEventListener("click", () => {
     if (!produtoExtras) return Overlays.closeAll();
-    const checks = [
-      ...document.querySelectorAll("#extras-modal .extras-list input:checked"),
-    ];
+    const checks = [...document.querySelectorAll("#extras-modal .extras-list input:checked")];
+    
+    if (checks.length === 0) {
+      alert("Selecione pelo menos um adicional!");
+      return;
+    }
+
     checks.forEach((c) => {
       const a = adicionais[+c.value];
       cart.push({ nome: `${produtoExtras} + ${a.nome}`, preco: a.preco, qtd: 1 });
     });
     renderMiniCart();
-    popupAdd(`${produtoExtras} atualizado com adicionais!`);
+    popupAdd(`Adicionais incluídos!`);
     Overlays.closeAll();
   });
 
-  document
-    .querySelectorAll("#extras-modal .extras-close")
-    .forEach((b) => b.addEventListener("click", () => Overlays.closeAll()));
+  document.querySelectorAll("#extras-modal .extras-close").forEach((b) => 
+    b.addEventListener("click", () => Overlays.closeAll())
+  );
 
   /* ------------------ 🥤 MODAL DE BEBIDAS (COMBOS) ------------------ */
   const comboDrinkOptions = {
@@ -154,11 +267,8 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     const low = (nomeCombo || "").toLowerCase();
-    const grupo = low.includes("casal")
-      ? "casal"
-      : low.includes("família") || low.includes("familia")
-      ? "familia"
-      : null;
+    const grupo = low.includes("casal") ? "casal" : 
+                  (low.includes("família") || low.includes("familia")) ? "familia" : null;
 
     if (!grupo) {
       addCommonItem(nomeCombo, precoBase);
@@ -166,17 +276,12 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     const opts = comboDrinkOptions[grupo];
-    el.comboBody.innerHTML = opts
-      .map(
-        (o, i) => `
-      <label class="extra-line">
+    el.comboBody.innerHTML = opts.map((o, i) => `
+      <label class="extra-line" style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid #eee;">
         <span>${o.rotulo} — + ${money(o.delta)}</span>
-        <input type="radio" name="combo-drink" value="${i}" ${
-          i === 0 ? "checked" : ""
-        }>
-      </label>`
-      )
-      .join("");
+        <input type="radio" name="combo-drink" value="${i}" ${i === 0 ? "checked" : ""} style="width:20px;height:20px;cursor:pointer;">
+      </label>
+    `).join("");
 
     _comboCtx = { nomeCombo, precoBase, grupo };
     Overlays.open(el.comboModal);
@@ -195,11 +300,11 @@ document.addEventListener("DOMContentLoaded", () => {
     Overlays.closeAll();
   });
 
-  document
-    .querySelectorAll("#combo-modal .combo-close")
-    .forEach((b) => b.addEventListener("click", () => Overlays.closeAll()));
+  document.querySelectorAll("#combo-modal .combo-close").forEach((b) => 
+    b.addEventListener("click", () => Overlays.closeAll())
+  );
 
-  /* ------------------ 🧺 BOTÃO “ADICIONAR AO CARRINHO” ------------------ */
+  /* ------------------ 🧺 BOTÃO "ADICIONAR AO CARRINHO" ------------------ */
   function addCommonItem(nome, preco) {
     const found = cart.find((i) => i.nome === nome && i.preco === preco);
     if (found) found.qtd += 1;
@@ -212,16 +317,14 @@ document.addEventListener("DOMContentLoaded", () => {
     btn.addEventListener("click", (e) => {
       const card = e.currentTarget.closest(".card");
       if (!card) return;
-      const nome =
-        card.dataset.name ||
-        card.querySelector("h3")?.textContent?.trim() ||
-        "Item";
+      const nome = card.dataset.name || card.querySelector("h3")?.textContent?.trim() || "Item";
       const preco = parseFloat(card.dataset.price || "0");
       if (/^combo/i.test(nome)) openComboModal(nome, preco);
       else addCommonItem(nome, preco);
     })
   );
-/* ------------------ 🖼️ CARROSSEL ------------------ */
+
+  /* ------------------ 🖼️ CARROSSEL ------------------ */
   el.cPrev?.addEventListener("click", () => {
     if (!el.slides) return;
     el.slides.scrollLeft -= Math.min(el.slides.clientWidth * 0.9, 320);
@@ -247,9 +350,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const aberto = hora >= 18 && hora < 23;
 
     if (el.statusBanner) {
-      el.statusBanner.textContent = aberto
-        ? "🟢 Aberto — Faça seu pedido!"
-        : "🔴 Fechado — Voltamos às 18h!";
+      el.statusBanner.textContent = aberto ? "🟢 Aberto — Faça seu pedido!" : "🔴 Fechado — Voltamos às 18h!";
       el.statusBanner.className = `status-banner ${aberto ? "open" : "closed"}`;
     }
 
@@ -260,10 +361,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const m = restante % 60;
         el.hoursBanner.innerHTML = `⏰ Hoje atendemos até <b>23h00</b> — Faltam <b>${h}h ${m}min</b>`;
       } else {
-        const faltam =
-          hora < 18
-            ? (18 - hora) * 60 - minuto
-            : (24 - hora + 18) * 60 - minuto;
+        const faltam = hora < 18 ? (18 - hora) * 60 - minuto : (24 - hora + 18) * 60 - minuto;
         const h = Math.floor(faltam / 60);
         const m = faltam % 60;
         el.hoursBanner.innerHTML = `🔒 Fechado — Abrimos em <b>${h}h ${m}min</b>`;
@@ -311,13 +409,14 @@ document.addEventListener("DOMContentLoaded", () => {
   const closeLogin = () => Overlays.closeAll();
 
   el.userBtn?.addEventListener("click", openLogin);
-  el.loginModal?.querySelector(".login-close, .login-x")?.addEventListener("click", closeLogin);
-  el.loginModal?.addEventListener("click", (e) => { if (e.target === el.loginModal) closeLogin(); });
+  document.querySelectorAll("#login-modal .login-close").forEach(btn => 
+    btn.addEventListener("click", closeLogin)
+  );
 
   el.loginForm?.addEventListener("submit", (e) => {
     e.preventDefault();
-    const email = el.loginForm.querySelector('input[type="email"]')?.value?.trim();
-    const senha = el.loginForm.querySelector('input[type="password"]')?.value?.trim();
+    const email = document.getElementById("login-email")?.value?.trim();
+    const senha = document.getElementById("login-senha")?.value?.trim();
     if (!email || !senha) return alert("Preencha e-mail e senha.");
 
     auth.signInWithEmailAndPassword(email, senha)
@@ -326,6 +425,7 @@ document.addEventListener("DOMContentLoaded", () => {
         el.userBtn.textContent = `Olá, ${currentUser.displayName?.split(" ")[0] || currentUser.email.split("@")[0]}`;
         closeLogin();
         showOrdersFabIfLogged();
+        popupAdd("Login realizado com sucesso!");
       })
       .catch(() => {
         auth.createUserWithEmailAndPassword(email, senha)
@@ -333,7 +433,7 @@ document.addEventListener("DOMContentLoaded", () => {
             currentUser = cred.user;
             el.userBtn.textContent = `Olá, ${currentUser.displayName?.split(" ")[0] || currentUser.email.split("@")[0]}`;
             closeLogin();
-            alert("Conta criada com sucesso! 🎉");
+            popupAdd("Conta criada com sucesso! 🎉");
             showOrdersFabIfLogged();
           })
           .catch((err) => alert("Erro: " + err.message));
@@ -348,6 +448,7 @@ document.addEventListener("DOMContentLoaded", () => {
         el.userBtn.textContent = `Olá, ${currentUser.displayName?.split(" ")[0] || "Cliente"}`;
         closeLogin();
         showOrdersFabIfLogged();
+        popupAdd("Login com Google realizado!");
       })
       .catch((err) => alert("Erro no login com Google: " + err.message));
   });
@@ -382,20 +483,21 @@ document.addEventListener("DOMContentLoaded", () => {
     db.collection("Pedidos")
       .add(pedido)
       .then(() => {
-        alert("Pedido salvo com sucesso ✅");
+        popupAdd("Pedido salvo com sucesso ✅");
         const texto = encodeURIComponent(
           "🍔 *Pedido DFL*\n" +
-            cart.map((i) => `• ${i.nome} x${i.qtd}`).join("\n") +
-            `\n\nTotal: ${money(total)}`
+          cart.map((i) => `• ${i.nome} x${i.qtd}`).join("\n") +
+          `\n\n*Total: ${money(total)}*`
         );
         window.open(`https://wa.me/5534997178336?text=${texto}`, "_blank");
         cart = [];
         renderMiniCart();
+        Overlays.closeAll();
       })
       .catch((err) => alert("Erro ao salvar pedido: " + err.message));
   }
 
-  /* ------------------ 📦 “MEUS PEDIDOS” ------------------ */
+  /* ------------------ 📦 "MEUS PEDIDOS" ------------------ */
   let ordersFab = document.getElementById("orders-fab");
   if (!ordersFab) {
     ordersFab = document.createElement("button");
@@ -440,7 +542,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if (!container) return;
     container.innerHTML = `<p class="empty-orders">Carregando pedidos...</p>`;
     if (!currentUser) {
-      container.innerHTML = `<p class="empty-orders">Você precisa estar logado para ver seus pedidos.</p>`;
+      container.innerHTML = `<p class="empty-orders">Você precisa estar logado.</p>`;
       return;
     }
 
@@ -456,9 +558,7 @@ document.addEventListener("DOMContentLoaded", () => {
         container.innerHTML = "";
         snap.forEach((doc) => {
           const p = doc.data();
-          const itens = Array.isArray(p.itens)
-            ? p.itens.join(", ")
-            : p.itens || "";
+          const itens = Array.isArray(p.itens) ? p.itens.join(", ") : p.itens || "";
           const box = document.createElement("div");
           box.className = "order-item";
           box.innerHTML = `
@@ -469,7 +569,7 @@ document.addEventListener("DOMContentLoaded", () => {
         });
       })
       .catch((err) => {
-        container.innerHTML = `<p class="empty-orders">Erro ao carregar pedidos: ${err.message}</p>`;
+        container.innerHTML = `<p class="empty-orders">Erro: ${err.message}</p>`;
       });
   }
 
@@ -478,9 +578,8 @@ document.addEventListener("DOMContentLoaded", () => {
     if (e.key === "Escape") Overlays.closeAll();
   });
 
-  /* ------------------ ✅ LOG ------------------ */
-  console.log(
-    "%c🔥 DFL v1.5 — Tudo operacional e estável!",
-    "color:#fff;background:#000;padding:6px 10px;border-radius:8px"
-  );
+  // Inicialização
+  renderMiniCart();
+
+  console.log("%c🔥 DFL v1.6 — Tudo operacional!", "color:#fff;background:#4caf50;padding:8px 12px;border-radius:8px;font-weight:600");
 });
