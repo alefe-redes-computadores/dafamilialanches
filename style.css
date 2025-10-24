@@ -473,3 +473,11 @@ h1, h2, h3 {
   font-size: 0.8rem;
   margin-left: 4px;
 }
+/* Corrigir tamanho do ícone do Google */
+.btn-google::before {
+  content: "";
+  background: url('https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg') center/contain no-repeat;
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+}
