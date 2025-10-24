@@ -1,6 +1,5 @@
 /* =========================================================
-   🍔 DFL v1.6 — TOTALMENTE CORRIGIDO
-   Todas as funções implementadas e testadas
+   🍔 DFL v1.7 — MEUS PEDIDOS CORRIGIDO
 ========================================================= */
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -94,18 +93,15 @@ document.addEventListener("DOMContentLoaded", () => {
   function renderMiniCart() {
     if (!el.miniList || !el.miniFoot) return;
 
-    // Atualizar contador do ícone
     const totalItens = cart.reduce((sum, i) => sum + i.qtd, 0);
     if (el.cartCount) el.cartCount.textContent = totalItens;
 
-    // Se carrinho vazio
     if (cart.length === 0) {
       el.miniList.innerHTML = '<p style="text-align:center;color:#999;padding:20px;">Carrinho vazio 🛒</p>';
       el.miniFoot.innerHTML = '';
       return;
     }
 
-    // Renderizar itens
     el.miniList.innerHTML = cart.map((item, idx) => `
       <div class="cart-item" style="border-bottom:1px solid #eee;padding:10px 0;">
         <div style="display:flex;justify-content:space-between;align-items:center;">
@@ -123,7 +119,6 @@ document.addEventListener("DOMContentLoaded", () => {
       </div>
     `).join('');
 
-    // Total e botão finalizar
     const total = cart.reduce((sum, i) => sum + (i.preco * i.qtd), 0);
     el.miniFoot.innerHTML = `
       <div style="padding:15px;">
@@ -140,7 +135,6 @@ document.addEventListener("DOMContentLoaded", () => {
       </div>
     `;
 
-    // Event listeners dos botões do carrinho
     document.querySelectorAll(".cart-plus").forEach(btn => {
       btn.addEventListener("click", (e) => {
         const idx = parseInt(e.target.dataset.idx);
@@ -180,15 +174,13 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  // Abrir mini-cart ao clicar no ícone
   el.cartIcon?.addEventListener("click", () => Overlays.open(el.miniCart));
 
-  // Fechar mini-cart
   document.querySelectorAll("#mini-cart .extras-close").forEach(btn => {
     btn.addEventListener("click", () => Overlays.closeAll());
   });
 
-  /* ------------------ ➕ ADICIONAIS (LANCHES) ------------------ */
+  /* ------------------ ➕ ADICIONAIS ------------------ */
   const adicionais = [
     { nome: "Cebola", preco: 0.99 },
     { nome: "Salada", preco: 1.99 },
@@ -244,7 +236,7 @@ document.addEventListener("DOMContentLoaded", () => {
     b.addEventListener("click", () => Overlays.closeAll())
   );
 
-  /* ------------------ 🥤 MODAL DE BEBIDAS (COMBOS) ------------------ */
+  /* ------------------ 🥤 MODAL DE BEBIDAS ------------------ */
   const comboDrinkOptions = {
     casal: [
       { rotulo: "Fanta 1L (padrão)", delta: 0.0 },
@@ -304,7 +296,7 @@ document.addEventListener("DOMContentLoaded", () => {
     b.addEventListener("click", () => Overlays.closeAll())
   );
 
-  /* ------------------ 🧺 BOTÃO "ADICIONAR AO CARRINHO" ------------------ */
+  /* ------------------ 🧺 ADICIONAR ITEM ------------------ */
   function addCommonItem(nome, preco) {
     const found = cart.find((i) => i.nome === nome && i.preco === preco);
     if (found) found.qtd += 1;
@@ -342,7 +334,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   });
 
-  /* ------------------ ⏰ STATUS E HORÁRIOS ------------------ */
+  /* ------------------ ⏰ STATUS ------------------ */
   const atualizarStatus = safe(() => {
     const agora = new Date();
     const hora = agora.getHours();
@@ -371,7 +363,7 @@ document.addEventListener("DOMContentLoaded", () => {
   atualizarStatus();
   setInterval(atualizarStatus, 60000);
 
-  /* ------------------ ⏳ CONTAGEM REGRESSIVA PROMOÇÕES ------------------ */
+  /* ------------------ ⏳ TIMER PROMOÇÕES ------------------ */
   const atualizarTimer = safe(() => {
     const agora = new Date();
     const fim = new Date();
@@ -389,7 +381,7 @@ document.addEventListener("DOMContentLoaded", () => {
   atualizarTimer();
   setInterval(atualizarTimer, 1000);
 
-  /* ------------------ 🔥 FIREBASE v8 LOGIN ------------------ */
+  /* ------------------ 🔥 FIREBASE ------------------ */
   const firebaseConfig = {
     apiKey: "AIzaSyATQBcbYuzKpKlSwNlbpRiAM1XyHqhGeak",
     authDomain: "da-familia-lanches.firebaseapp.com",
@@ -404,7 +396,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const auth = firebase.auth();
   const db = firebase.firestore();
 
-  /* ------------------ LOGIN / CADASTRO ------------------ */
+  /* ------------------ LOGIN ------------------ */
   const openLogin = () => Overlays.open(el.loginModal);
   const closeLogin = () => Overlays.closeAll();
 
@@ -425,7 +417,7 @@ document.addEventListener("DOMContentLoaded", () => {
         el.userBtn.textContent = `Olá, ${currentUser.displayName?.split(" ")[0] || currentUser.email.split("@")[0]}`;
         closeLogin();
         showOrdersFabIfLogged();
-        popupAdd("Login realizado com sucesso!");
+        popupAdd("Login realizado!");
       })
       .catch(() => {
         auth.createUserWithEmailAndPassword(email, senha)
@@ -433,7 +425,7 @@ document.addEventListener("DOMContentLoaded", () => {
             currentUser = cred.user;
             el.userBtn.textContent = `Olá, ${currentUser.displayName?.split(" ")[0] || currentUser.email.split("@")[0]}`;
             closeLogin();
-            popupAdd("Conta criada com sucesso! 🎉");
+            popupAdd("Conta criada! 🎉");
             showOrdersFabIfLogged();
           })
           .catch((err) => alert("Erro: " + err.message));
@@ -448,9 +440,9 @@ document.addEventListener("DOMContentLoaded", () => {
         el.userBtn.textContent = `Olá, ${currentUser.displayName?.split(" ")[0] || "Cliente"}`;
         closeLogin();
         showOrdersFabIfLogged();
-        popupAdd("Login com Google realizado!");
+        popupAdd("Login com Google!");
       })
-      .catch((err) => alert("Erro no login com Google: " + err.message));
+      .catch((err) => alert("Erro: " + err.message));
   });
 
   auth.onAuthStateChanged((user) => {
@@ -465,7 +457,7 @@ document.addEventListener("DOMContentLoaded", () => {
   function fecharPedido() {
     if (!cart.length) return alert("Carrinho vazio!");
     if (!currentUser) {
-      alert("Você precisa estar logado para enviar o pedido!");
+      alert("Faça login para enviar o pedido!");
       openLogin();
       return;
     }
@@ -483,7 +475,7 @@ document.addEventListener("DOMContentLoaded", () => {
     db.collection("Pedidos")
       .add(pedido)
       .then(() => {
-        popupAdd("Pedido salvo com sucesso ✅");
+        popupAdd("Pedido salvo ✅");
         const texto = encodeURIComponent(
           "🍔 *Pedido DFL*\n" +
           cart.map((i) => `• ${i.nome} x${i.qtd}`).join("\n") +
@@ -494,10 +486,10 @@ document.addEventListener("DOMContentLoaded", () => {
         renderMiniCart();
         Overlays.closeAll();
       })
-      .catch((err) => alert("Erro ao salvar pedido: " + err.message));
+      .catch((err) => alert("Erro ao salvar: " + err.message));
   }
 
-  /* ------------------ 📦 "MEUS PEDIDOS" ------------------ */
+  /* ------------------ 📦 MEUS PEDIDOS - CORRIGIDO ------------------ */
   let ordersFab = document.getElementById("orders-fab");
   if (!ordersFab) {
     ordersFab = document.createElement("button");
@@ -521,11 +513,19 @@ document.addEventListener("DOMContentLoaded", () => {
     document.body.appendChild(ordersPanel);
   }
 
-  function openOrdersPanel() { Overlays.open(ordersPanel); }
+  function openOrdersPanel() { 
+    Overlays.open(ordersPanel); 
+    console.log("📦 Painel de pedidos aberto");
+  }
+  
   function closeOrdersPanel() { Overlays.closeAll(); }
 
   ordersFab.addEventListener("click", () => {
-    if (!currentUser) return alert("Faça login para ver seus pedidos.");
+    console.log("🖱️ Clique em Meus Pedidos");
+    if (!currentUser) {
+      alert("Faça login para ver seus pedidos.");
+      return;
+    }
     openOrdersPanel();
     carregarPedidosSeguro();
   });
@@ -538,112 +538,99 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function carregarPedidosSeguro() {
-  const container = document.getElementById("orders-content");
-  if (!container) return;
-  
-  container.innerHTML = `<p class="empty-orders">Carregando pedidos...</p>`;
-  
-  if (!currentUser) {
-    container.innerHTML = `<p class="empty-orders">Você precisa estar logado.</p>`;
-    return;
-  }
+    const container = document.getElementById("orders-content");
+    if (!container) {
+      console.error("❌ Container orders-content não encontrado!");
+      return;
+    }
+    
+    container.innerHTML = `<p class="empty-orders">⏳ Carregando pedidos...</p>`;
+    
+    if (!currentUser) {
+      container.innerHTML = `<p class="empty-orders">Faça login para ver seus pedidos.</p>`;
+      return;
+    }
 
-  // CORREÇÃO: Removido orderBy para evitar erro de índice
-  db.collection("Pedidos")
-    .where("usuario", "==", currentUser.email)
-    .get()
-    .then((snap) => {
-      if (snap.empty) {
-        container.innerHTML = `<p class="empty-orders">Nenhum pedido encontrado 😢<br><br>Faça seu primeiro pedido!</p>`;
-        return;
-      }
-      
-      // Ordenar manualmente por data (mais recente primeiro)
-      const pedidos = [];
-      snap.forEach((doc) => {
-        pedidos.push({ id: doc.id, ...doc.data() });
-      });
-      
-      pedidos.sort((a, b) => {
-        const dateA = new Date(a.data);
-        const dateB = new Date(b.data);
-        return dateB - dateA; // mais recente primeiro
-      });
-      
-      container.innerHTML = "";
-      
-      pedidos.forEach((p) => {
-        const itens = Array.isArray(p.itens) ? p.itens.join("<br>• ") : p.itens || "";
-        const dataFormatada = new Date(p.data).toLocaleString("pt-BR", {
-          day: '2-digit',
-          month: '2-digit', 
-          year: 'numeric',
-          hour: '2-digit',
-          minute: '2-digit'
-        });
-        
-        const box = document.createElement("div");
-        box.className = "order-item";
-        box.innerHTML = `
-          <h4>📅 ${dataFormatada}</h4>
-          <p><b>Itens:</b><br>• ${itens}</p>
-          <p style="font-size:1.1rem;color:#4caf50;font-weight:600;margin-top:8px;">
-            <b>Total:</b> ${money(p.total)}
-          </p>`;
-        container.appendChild(box);
-      });
-      
-      console.log(`✅ ${pedidos.length} pedido(s) carregado(s)`);
-    })
-    .catch((err) => {
-      console.error("❌ Erro ao carregar pedidos:", err);
-      
-      // Mensagem mais clara do erro
-      if (err.code === 'failed-precondition') {
-        container.innerHTML = `
-          <p class="empty-orders" style="color:#d32f2f;">
-            ⚠️ Erro de configuração do Firebase.<br><br>
-            É necessário criar um índice no Firestore.<br><br>
-            Clique no link que apareceu no Console (F12).
-          </p>`;
-      } else {
-        container.innerHTML = `
-          <p class="empty-orders" style="color:#d32f2f;">
-            ❌ Erro ao carregar pedidos:<br><br>
-            ${err.message}
-          </p>`;
-      }
-    });
-}
+    console.log(`🔍 Buscando pedidos de: ${currentUser.email}`);
 
+    // CORREÇÃO: Removido orderBy para evitar erro de índice
     db.collection("Pedidos")
       .where("usuario", "==", currentUser.email)
-      .orderBy("data", "desc")
       .get()
       .then((snap) => {
+        console.log(`📊 Encontrados ${snap.size} pedido(s)`);
+        
         if (snap.empty) {
-          container.innerHTML = `<p class="empty-orders">Nenhum pedido encontrado 😢</p>`;
+          container.innerHTML = `
+            <p class="empty-orders">
+              😢 Nenhum pedido encontrado
+              <br><br>
+              Faça seu primeiro pedido!
+            </p>`;
           return;
         }
-        container.innerHTML = "";
+        
+        // Ordenar manualmente
+        const pedidos = [];
         snap.forEach((doc) => {
-          const p = doc.data();
-          const itens = Array.isArray(p.itens) ? p.itens.join(", ") : p.itens || "";
+          pedidos.push({ id: doc.id, ...doc.data() });
+        });
+        
+        pedidos.sort((a, b) => {
+          const dateA = new Date(a.data);
+          const dateB = new Date(b.data);
+          return dateB - dateA;
+        });
+        
+        container.innerHTML = "";
+        
+        pedidos.forEach((p) => {
+          const itens = Array.isArray(p.itens) ? p.itens.join("<br>• ") : p.itens || "";
+          const dataFormatada = new Date(p.data).toLocaleString("pt-BR", {
+            day: '2-digit',
+            month: '2-digit', 
+            year: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
+          });
+          
           const box = document.createElement("div");
           box.className = "order-item";
           box.innerHTML = `
-            <h4>${new Date(p.data).toLocaleString("pt-BR")}</h4>
-            <p><b>Itens:</b> ${itens}</p>
-            <p><b>Total:</b> ${money(p.total)}</p>`;
+            <h4>📅 ${dataFormatada}</h4>
+            <p style="margin:8px 0;"><b>Itens:</b><br>• ${itens}</p>
+            <p style="font-size:1.1rem;color:#4caf50;font-weight:600;margin-top:8px;">
+              <b>Total:</b> ${money(p.total)}
+            </p>`;
           container.appendChild(box);
         });
+        
+        console.log(`✅ ${pedidos.length} pedido(s) carregado(s)`);
       })
       .catch((err) => {
-        container.innerHTML = `<p class="empty-orders">Erro: ${err.message}</p>`;
+        console.error("❌ Erro ao carregar pedidos:", err);
+        
+        if (err.code === 'failed-precondition') {
+          container.innerHTML = `
+            <p class="empty-orders" style="color:#d32f2f;padding:20px;line-height:1.6;">
+              ⚠️ <b>Erro de configuração</b>
+              <br><br>
+              É necessário criar um índice no Firestore.
+              <br><br>
+              Abra o Console (F12) e clique no link do erro.
+            </p>`;
+        } else {
+          container.innerHTML = `
+            <p class="empty-orders" style="color:#d32f2f;padding:20px;">
+              ❌ Erro ao carregar pedidos:
+              <br><br>
+              ${err.message}
+            </p>`;
+        }
       });
   }
 
-  /* ------------------ ⎋ ESC para fechar tudo ------------------ */
+  /* ------------------ ⎋ ESC ------------------ */
   document.addEventListener("keydown", (e) => {
     if (e.key === "Escape") Overlays.closeAll();
   });
@@ -651,5 +638,5 @@ document.addEventListener("DOMContentLoaded", () => {
   // Inicialização
   renderMiniCart();
 
-  console.log("%c🔥 DFL v1.6 — Tudo operacional!", "color:#fff;background:#4caf50;padding:8px 12px;border-radius:8px;font-weight:600");
+  console.log("%c🔥 DFL v1.7 — Sistema completo!", "color:#fff;background:#4caf50;padding:8px 12px;border-radius:8px;font-weight:600");
 });
