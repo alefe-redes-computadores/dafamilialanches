@@ -403,3 +403,67 @@ h1, h2, h3 {
 #mini-cart.active {
   pointer-events: auto;
 }
+/* ==============================
+   🧩 PATCH v1.7.4b — CARROSSEL REFINADO (tamanho fixo + setas visíveis)
+============================== */
+.carousel {
+  position: relative;
+  width: 100%;
+  max-width: 900px;
+  margin: 20px auto;
+  overflow: hidden;
+}
+
+.slides {
+  display: flex;
+  gap: 12px;
+  overflow-x: auto;
+  scroll-behavior: smooth;
+  padding: 5px;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.slides::-webkit-scrollbar { display: none; }
+
+.slide {
+  flex: 0 0 90%;
+  max-width: 380px;
+  height: auto;
+  border-radius: 12px;
+  object-fit: cover;
+  cursor: pointer;
+  transition: transform 0.3s ease;
+}
+.slide:hover {
+  transform: scale(1.03);
+}
+
+/* 🔘 Botões de navegação (setas) */
+.c-btn {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background: rgba(0, 0, 0, 0.5);
+  color: #fff;
+  border: none;
+  border-radius: 50%;
+  width: 36px;
+  height: 36px;
+  font-size: 1.3rem;
+  cursor: pointer;
+  z-index: 5;
+  transition: background 0.3s;
+}
+.c-btn:hover {
+  background: rgba(0, 0, 0, 0.8);
+}
+.c-prev { left: 10px; }
+.c-next { right: 10px; }
+
+/* Garante responsividade suave */
+@media (max-width: 600px) {
+  .slide {
+    flex: 0 0 85%;
+    max-width: 320px;
+  }
+}
