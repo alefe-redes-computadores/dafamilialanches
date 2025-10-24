@@ -419,3 +419,51 @@ document.addEventListener("DOMContentLoaded", () => {
 
   console.log("✅ DFL v1.4.7 carregado");
 });
+
+/* ===== HOTFIX 1.4.8 (extras + marca DFL) ===== */
+(function(){
+  // 1) Forçar listeners explícitos nos botões "Adicionais"
+  function bindExtrasButtons(){
+    document.querySelectorAll(".extras-btn").forEach(btn=>{
+      if (btn.dataset.boundExtras) return;
+      btn.dataset.boundExtras = "1";
+      btn.addEventListener("click", (e)=>{
+        e.preventDefault(); e.stopPropagation();
+        const card = btn.closest(".card"); if (!card) return;
+        // Usa a mesma função já existente no arquivo
+        if (typeof openExtrasFor === "function") openExtrasFor(card);
+      });
+    });
+  }
+  bindExtrasButtons();
+  // Caso os cards sejam re-renderizados por qualquer motivo:
+  const obs = new MutationObserver(bindExtrasButtons);
+  obs.observe(document.body, {subtree:true, childList:true});
+
+  // 2) Marca “DFL” sem mexer no HTML
+  const title = document.querySelector(".header-info h1");
+  if (title && !title.dataset.dflApplied){
+    title.dataset.dflApplied = "1";
+    title.textContent = "DFL";
+    title.classList.add("brand-dfl");
+    // Adiciona o subtítulo logo abaixo do H1
+    if (!document.querySelector(".brand-sub")){
+      const sub = document.createElement("div");
+      sub.className = "brand-sub";
+      sub.textContent = "Da Família Lanches";
+      title.after(sub);
+    }
+  }
+
+  // 3) Fechar modais ao clicar fora – garante em todos
+  document.querySelectorAll(".modal").forEach(mod=>{
+    if (mod.dataset.boundBackdrop) return;
+    mod.dataset.boundBackdrop="1";
+    mod.addEventListener("click", (e)=>{
+      if (e.target === mod) {
+        mod.classList.remove("show");
+        document.body.classList.remove("no-scroll");
+      }
+    });
+  });
+})();
