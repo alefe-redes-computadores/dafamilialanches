@@ -1,117 +1,160 @@
 /* ============================================================
-   🌭🍔 DFL v1.4.4 – Style.css Corrigido e Modernizado
+   🍔 DFL v1.4.5 – Correção visual topo + modais estáveis
    ============================================================ */
 
-/* RESET E BASE */
+/* RESET */
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
   font-family: "Poppins", sans-serif;
 }
+
 body {
   background-color: #fff8ed;
   color: #333;
   overflow-x: hidden;
 }
 
-/* CABEÇALHO */
+/* TOPO PADRÃO DFL */
 header {
   background: #ffd54f;
   color: #222;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 8px 16px;
+  padding: 8px 18px;
   border-bottom: 3px solid #000;
   position: sticky;
   top: 0;
   z-index: 1000;
 }
-header img {
+
+header .logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+header .logo img {
   height: 48px;
 }
-header h1 {
+
+header .logo-text {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.1;
+}
+
+header .logo-text h1 {
   font-size: 20px;
   font-weight: 700;
 }
-header p {
-  font-size: 14px;
+
+header .logo-text p {
+  font-size: 13px;
   color: #d35400;
 }
+
+/* SAUDAÇÃO */
+#user-greeting {
+  font-size: 14px;
+  font-weight: 500;
+  background: #fff3cd;
+  border: 1px solid #ffeeba;
+  border-radius: 8px;
+  padding: 2px 8px;
+  color: #444;
+  margin-right: 10px;
+}
+
+/* BOTÕES TOPO */
+.top-buttons {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.login-btn,
 .cart-btn {
-  background: none;
   border: 2px solid #000;
-  border-radius: 12px;
-  padding: 6px 10px;
+  background: #fff;
+  border-radius: 10px;
+  padding: 6px 12px;
+  cursor: pointer;
+  transition: 0.2s;
   display: flex;
   align-items: center;
   gap: 6px;
-  cursor: pointer;
 }
+
+.login-btn:hover,
 .cart-btn:hover {
   background: #000;
   color: #fff;
 }
 
-/* BOTÃO LOGIN */
-.login-btn {
-  background: #fff;
-  border: 2px solid #000;
-  border-radius: 12px;
-  padding: 6px 12px;
-  cursor: pointer;
-  transition: 0.2s;
-}
-.login-btn:hover {
-  background: #000;
-  color: #fff;
-}
-
-/* PROMOÇÕES */
+/* PROMOÇÕES DO DIA */
 .promocoes {
   text-align: center;
-  margin-top: 20px;
+  margin-top: 15px;
 }
 .promocoes h2 {
   color: #ff6600;
   font-size: 22px;
 }
 .promocoes p {
-  color: #333;
+  color: #444;
+  font-size: 15px;
   margin-top: 5px;
 }
 
-/* CARDS DOS LANCHES */
+/* SEÇÃO COMBOS E LANCHES */
+section h2 {
+  font-size: 22px;
+  text-align: center;
+  margin: 30px 0 10px;
+}
+
+.card-container {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 15px;
+}
+
+/* CARD DE LANCHES */
 .lanche-card {
   background: #fff;
   border: 2px solid #000;
   border-radius: 18px;
-  width: 320px;
-  margin: 12px auto;
-  box-shadow: 0px 3px 10px rgba(0,0,0,0.1);
+  width: 300px;
+  text-align: center;
+  box-shadow: 0px 4px 8px rgba(0,0,0,0.1);
   transition: transform 0.2s;
 }
+
 .lanche-card:hover {
   transform: scale(1.02);
 }
+
 .lanche-card img {
   width: 100%;
   height: 200px;
   object-fit: cover;
-  border-top-left-radius: 16px;
-  border-top-right-radius: 16px;
+  border-radius: 18px 18px 0 0;
 }
+
 .lanche-card h3 {
   font-size: 18px;
-  margin: 10px 0;
-  text-align: center;
+  margin-top: 8px;
 }
+
 .lanche-card p {
   font-size: 14px;
-  text-align: center;
-  padding: 0 10px 10px;
+  padding: 6px 10px 10px;
 }
+
 .lanche-card button {
   width: 90%;
   margin: 8px auto;
@@ -159,7 +202,7 @@ header p {
   border-radius: 16px;
   padding: 24px;
   width: 90%;
-  max-width: 420px;
+  max-width: 400px;
   position: relative;
   box-shadow: 0px 5px 20px rgba(0,0,0,0.25);
   animation: popup 0.3s ease;
@@ -176,9 +219,7 @@ header p {
   display: block;
   margin: 8px 0;
 }
-.modal-content input[type="text"],
-.modal-content input[type="email"],
-.modal-content input[type="password"] {
+.modal-content input {
   width: 100%;
   padding: 8px;
   border-radius: 8px;
@@ -192,6 +233,7 @@ header p {
   border-radius: 8px;
   margin-top: 10px;
   font-weight: 600;
+  cursor: pointer;
 }
 .modal-close {
   position: absolute;
@@ -203,13 +245,9 @@ header p {
   cursor: pointer;
 }
 
-/* LOGIN */
+/* LOGIN MODAL */
 #login-modal .modal-content {
-  max-width: 380px;
   text-align: center;
-}
-#login-modal input {
-  margin-bottom: 12px;
 }
 #login-modal .google-login {
   display: flex;
@@ -229,37 +267,15 @@ header p {
   height: 22px;
 }
 
-/* ADICIONAIS */
-#adicionais-modal .modal-content {
-  max-width: 420px;
-}
-#adicionais-modal label {
-  display: block;
-  font-size: 15px;
-  margin-bottom: 5px;
-}
-#adicionais-modal button {
-  background: #000;
-  color: #fff;
-}
-#adicionais-modal button:hover {
-  background: #ff6600;
-}
-
-/* ESCOLHER REFRIGERANTE */
+/* MODAL ADICIONAIS / REFRI */
+#adicionais-modal label,
 #refrigerante-modal label {
   display: block;
+  font-size: 15px;
   margin: 6px 0;
 }
-#refrigerante-modal button {
-  background: #000;
-  color: #fff;
-}
-#refrigerante-modal button:hover {
-  background: #ff6600;
-}
 
-/* PEDIDOS – PAINEL LATERAL */
+/* PEDIDOS LATERAL */
 .orders-panel {
   position: fixed;
   right: -100%;
@@ -284,31 +300,12 @@ header p {
   background: #000;
   color: #fff;
 }
-.orders-close {
-  background: none;
-  border: none;
-  color: #fff;
-  font-size: 18px;
-  cursor: pointer;
-}
 .orders-content {
   padding: 12px;
   overflow-y: auto;
 }
-.order-item {
-  border-bottom: 1px solid #eee;
-  padding: 10px 0;
-}
-.order-item h4 {
-  color: #000;
-  font-size: 15px;
-  margin-bottom: 4px;
-}
-.order-item p {
-  font-size: 14px;
-}
 
-/* BOTÃO FLOTANTE MEUS PEDIDOS */
+/* BOTÃO MEUS PEDIDOS */
 #orders-fab {
   position: fixed;
   bottom: 25px;
@@ -329,13 +326,7 @@ header p {
 
 /* RESPONSIVIDADE */
 @media (max-width: 768px) {
-  header h1 {
-    font-size: 18px;
-  }
-  .lanche-card {
-    width: 95%;
-  }
-  .orders-panel {
-    width: 100%;
-  }
+  header .logo-text h1 { font-size: 18px; }
+  .lanche-card { width: 95%; }
+  .orders-panel { width: 100%; }
 }
