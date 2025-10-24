@@ -1,242 +1,246 @@
+/* ==============================
+   🍔 Da Família Lanches – style.css
+   Versão 1.4.2 – correção completa
+============================== */
 
-/* ===== RESET ===== */
+/* ======== RESET ======== */
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
+  font-family: "Poppins", Arial, sans-serif;
 }
 
 body {
-  font-family: "Poppins", Arial, sans-serif;
-  background-color: #fff8ec;
+  background: #fff8f0;
   color: #222;
-  line-height: 1.5;
-  scroll-behavior: smooth;
+  overflow-x: hidden;
 }
 
-/* ===== CABEÇALHO ===== */
+/* ======== HEADER ======== */
 .header {
-  background-color: #ffcb05;
+  background: #ffca28;
+  color: #222;
   border-bottom: 4px solid #000;
-  padding: 10px 0;
-  text-align: center;
+  padding: 8px 12px;
 }
 
 .header-content {
   display: flex;
   align-items: center;
-  justify-content: center;
-  gap: 10px;
+  justify-content: space-between;
+  flex-wrap: wrap;
 }
 
 .logo {
   width: 60px;
-  height: auto;
+  height: 60px;
+}
+
+.header-info {
+  flex: 1;
+  padding-left: 10px;
 }
 
 .header-info h1 {
-  font-size: 1.6rem;
+  font-size: 1.4rem;
   font-weight: 700;
-  color: #000;
 }
 
-.tagline {
-  color: #e74c3c;
+.header-info .tagline {
   font-size: 0.9rem;
+  color: #d62828;
 }
 
-/* ===== BOTÃO CARRINHO ===== */
-#cart-icon {
-  position: fixed;
-  right: 20px;
-  top: 15px;
-  background: #ffcb05;
-  border: 2px solid #000;
-  border-radius: 50px;
-  padding: 8px 14px;
-  font-size: 18px;
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+#user-btn {
+  background: #fff;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 8px 12px;
+  font-weight: 600;
   cursor: pointer;
-  z-index: 999;
-  transition: all 0.3s ease;
+  transition: 0.2s;
 }
 
-#cart-icon:hover {
-  transform: scale(1.08);
-  background-color: #ffda33;
+#user-btn:hover {
+  background: #f4f4f4;
 }
 
-/* ===== STATUS E HORÁRIO ===== */
+#cart-icon {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 12px;
+  border-radius: 999px;
+  background: #fff;
+  border: 1px solid #ddd;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+/* ======== STATUS BANNERS ======== */
 .status-banner {
-  background-color: #ff3b30;
+  padding: 6px;
+  text-align: center;
   color: #fff;
   font-weight: 600;
-  text-align: center;
-  padding: 8px 0;
 }
 
 .hours-banner {
-  text-align: center;
   background: #000;
   color: #fff;
-  padding: 6px 0;
-  font-size: 0.9rem;
+  text-align: center;
+  padding: 4px 0;
+  font-size: 0.85rem;
 }
 
-/* ===== PROMOÇÕES ===== */
+/* ======== PROMOÇÕES ======== */
 .promo-section {
+  padding: 16px;
   text-align: center;
-  padding: 20px 0;
 }
 
 .promo-section h2 {
-  color: #ff7300;
-  font-size: 1.6rem;
-  margin-bottom: 5px;
+  font-size: 1.4rem;
 }
 
 .promo-sub {
-  font-size: 0.95rem;
-  color: #444;
-  margin-bottom: 10px;
+  color: #555;
+  margin-bottom: 6px;
 }
 
 .countdown-ticker {
   background: #000;
   color: #fff;
   display: inline-block;
-  padding: 6px 10px;
-  border-radius: 6px;
-  font-size: 0.9rem;
-  margin-bottom: 15px;
+  padding: 4px 10px;
+  border-radius: 8px;
+  font-weight: 600;
+  margin-bottom: 8px;
 }
 
-/* ===== CARROSSEL ===== */
+/* ======== CARROSSEL ======== */
 .carousel {
+  display: flex;
+  align-items: center;
+  justify-content: center;
   position: relative;
   overflow: hidden;
-  margin: 0 auto;
-  width: 95%;
-  max-width: 1000px;
-  border-radius: 12px;
-  border: 2px solid #000;
 }
 
 .slides {
   display: flex;
-  transition: transform 0.4s ease;
+  overflow-x: auto;
+  scroll-behavior: smooth;
 }
 
 .slide {
-  width: 100%;
+  width: 240px;
+  margin: 6px;
+  border-radius: 10px;
   cursor: pointer;
+  transition: transform 0.2s;
+}
+
+.slide:hover {
+  transform: scale(1.04);
 }
 
 .c-btn {
-  position: absolute;
-  top: 50%;
-  transform: translateY(-50%);
   background: #000;
   color: #fff;
+  font-size: 1.6rem;
   border: none;
-  font-size: 2rem;
+  border-radius: 50%;
+  padding: 4px 10px;
   cursor: pointer;
-  padding: 5px 10px;
-  opacity: 0.7;
-}
-
-.c-btn:hover {
-  opacity: 1;
+  z-index: 3;
 }
 
 .c-prev {
-  left: 5px;
+  position: absolute;
+  left: 0;
 }
 
 .c-next {
-  right: 5px;
+  position: absolute;
+  right: 0;
 }
 
-/* ===== SEÇÕES ===== */
+/* ======== SEÇÕES ======== */
 .menu-section {
-  padding: 25px 15px;
+  padding: 20px 14px;
 }
 
 .menu-section h2 {
   text-align: center;
-  font-size: 1.5rem;
-  margin-bottom: 15px;
+  margin-bottom: 14px;
 }
 
-/* ===== GRID DE PRODUTOS ===== */
 .grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-  gap: 15px;
-  justify-content: center;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 12px;
 }
 
-/* ===== CARD ===== */
+/* ======== CARDS ======== */
 .card {
-  background-color: #fff;
-  border-radius: 14px;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+  background: #fff;
+  border: 1px solid #ddd;
+  border-radius: 12px;
   padding: 10px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
   text-align: center;
-  border: 2px solid #000;
-  transition: transform 0.2s ease;
 }
 
-.card:hover {
-  transform: translateY(-3px);
-}
-
-/* ===== MINIATURAS (IMAGENS DOS LANCHES) ===== */
 .card .thumb {
-  width: 120px;
-  height: 120px;
+  width: 100%;
+  aspect-ratio: 1 / 1;
   object-fit: contain;
-  display: block;
-  margin: 10px auto;
-  border-radius: 50%;
-  border: 2px solid #ffcb05;
-  background: #fff8ec;
+  margin-bottom: 8px;
 }
 
-/* ===== TÍTULOS E TEXTO ===== */
 .card h3 {
-  font-size: 1.1rem;
-  margin-bottom: 4px;
-}
-
-.price {
-  color: #ff6a00;
-  font-weight: 600;
-  margin: 3px 0 8px;
+  font-size: 1rem;
+  font-weight: 700;
 }
 
 .badge {
-  background: #d9fdd3;
-  color: #008000;
+  background: #c8e6c9;
+  color: #1b5e20;
+  font-size: 0.75rem;
+  padding: 2px 6px;
   border-radius: 6px;
-  padding: 3px 6px;
-  font-size: 0.8rem;
-  margin-left: 4px;
 }
 
-/* ===== BOTÕES ===== */
+.price {
+  margin: 4px 0;
+  color: #000;
+}
+
 .actions {
   display: flex;
   justify-content: center;
   gap: 8px;
-  margin-top: 10px;
+  margin-top: 6px;
 }
 
 .actions button {
+  padding: 6px 10px;
   border: none;
-  border-radius: 6px;
-  padding: 6px 12px;
-  font-weight: 600;
+  border-radius: 8px;
   cursor: pointer;
+  font-weight: 600;
+  transition: 0.2s;
 }
 
 .add-cart {
@@ -245,40 +249,195 @@ body {
 }
 
 .extras-btn {
-  background: #ffcb05;
+  background: #fdd835;
   color: #000;
 }
 
-/* ===== MODAIS ===== */
-.modal {
-  display: none;
+/* ======== MINI CARRINHO ======== */
+#cart-backdrop {
   position: fixed;
-  top: 0; left: 0;
-  width: 100%; height: 100%;
-  background-color: rgba(0, 0, 0, 0.6);
-  justify-content: center;
-  align-items: center;
-  z-index: 9999;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+  z-index: 90;
+}
+#cart-backdrop.show {
+  opacity: 0.6;
+  pointer-events: auto;
 }
 
-.modal-content {
+.mini-cart {
+  position: fixed;
+  top: 0;
+  right: 0;
+  height: 100dvh;
+  width: min(420px, 92vw);
   background: #fff;
-  border-radius: 10px;
-  padding: 15px;
-  width: 90%;
-  max-width: 400px;
+  box-shadow: -12px 0 24px rgba(0, 0, 0, 0.2);
+  transform: translateX(110%);
+  transition: transform 0.28s ease;
+  z-index: 100;
 }
 
-/* ===== RODAPÉ ===== */
+.mini-cart.active {
+  transform: translateX(0);
+}
+
+.mini-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 14px;
+  border-bottom: 1px solid #eee;
+}
+
+.cart-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 6px 0;
+}
+
+.mini-foot {
+  padding: 10px;
+  border-top: 1px solid #eee;
+}
+
+.btn-primary {
+  background: #000;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 8px 12px;
+  cursor: pointer;
+}
+
+.btn-secondary {
+  background: #ddd;
+  border: none;
+  border-radius: 8px;
+  padding: 8px 12px;
+  cursor: pointer;
+}
+
+/* ======== MODAIS ======== */
+.modal {
+  position: fixed;
+  inset: 0;
+  display: none;
+  z-index: 110;
+}
+.modal.show {
+  display: block;
+}
+.modal::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+}
+.modal .modal-content {
+  position: relative;
+  z-index: 1;
+  background: #fff;
+  border-radius: 14px;
+  max-width: 480px;
+  width: calc(100% - 24px);
+  margin: 8vh auto 0;
+  padding: 14px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+}
+
+/* ======== MEUS PEDIDOS ======== */
+#orders-fab {
+  position: fixed;
+  right: 16px;
+  bottom: 16px;
+  padding: 10px 14px;
+  border-radius: 999px;
+  background: #ffb300;
+  color: #231f20;
+  font-weight: 700;
+  border: none;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
+  display: none;
+  z-index: 104;
+}
+#orders-fab.show {
+  display: inline-flex;
+}
+
+.orders-panel {
+  position: fixed;
+  right: 12px;
+  top: 74px;
+  width: min(460px, 94vw);
+  background: #101010;
+  color: #fff;
+  border-radius: 12px;
+  display: none;
+  z-index: 105;
+}
+.orders-panel.active {
+  display: block;
+}
+
+.orders-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 12px;
+  border-bottom: 1px solid #222;
+}
+
+.orders-content {
+  max-height: 65vh;
+  overflow: auto;
+  padding: 10px 12px;
+}
+
+.order-item {
+  background: #181818;
+  border-radius: 8px;
+  padding: 8px 10px;
+  margin-bottom: 8px;
+}
+
+/* ======== FOOTER ======== */
 .footer {
-  background-color: #ffcb05;
-  border-top: 4px solid #000;
+  background: #000;
+  color: #fff;
+  padding: 14px;
   text-align: center;
-  padding: 20px 10px;
+  font-size: 0.9rem;
 }
 
 .footer-copy {
-  margin-top: 10px;
-  font-size: 0.85rem;
-  color: #333;
+  font-size: 0.8rem;
+  margin-top: 6px;
+}
+
+/* ======== POPUP ITEM ADICIONADO ======== */
+.popup-add {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #000;
+  color: #fff;
+  padding: 10px 20px;
+  border-radius: 999px;
+  font-weight: 600;
+  opacity: 0.9;
+  z-index: 200;
+  animation: popfade 1.4s ease forwards;
+}
+
+@keyframes popfade {
+  0% { transform: translate(-50%, 20px); opacity: 0; }
+  10% { transform: translate(-50%, 0); opacity: 1; }
+  90% { opacity: 1; }
+  100% { opacity: 0; transform: translate(-50%, -20px); }
 }
