@@ -585,3 +585,32 @@ h1, h2, h3 {
     max-width: 100%;
   }
 }
+/* ======================================
+   🔧 HOTFIX FINAL — PAINEL MEUS PEDIDOS
+   Corrige tela borrada e falta de clique
+====================================== */
+#cart-backdrop {
+  z-index: 900 !important; /* fica atrás de tudo */
+  pointer-events: none;
+}
+
+#cart-backdrop.show {
+  display: block;
+  backdrop-filter: blur(3px);
+  pointer-events: auto;
+}
+
+.orders-panel {
+  z-index: 2000 !important; /* acima do backdrop e mini-cart */
+  opacity: 1 !important;
+  pointer-events: auto !important;
+  transition: left 0.35s ease, opacity 0.35s ease;
+}
+
+.orders-panel.active {
+  left: 0 !important;
+}
+
+body.no-scroll {
+  overflow: hidden !important;
+}
