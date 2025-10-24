@@ -600,3 +600,17 @@ h1, h2, h3 {
 #orders-fab, #cart-icon {
   z-index: 1200;
 }
+/* 🔧 HOTFIX FINAL — BOTÕES CLICÁVEIS E BACKDROP INVISÍVEL */
+#cart-backdrop {
+  pointer-events: none;
+}
+#cart-backdrop.show {
+  pointer-events: auto;
+}
+#extras-modal,
+#combo-modal,
+#login-modal,
+#mini-cart,
+.orders-panel {
+  pointer-events: auto;
+}
