@@ -380,3 +380,26 @@ h1, h2, h3 {
 #mini-cart.active {
   pointer-events: auto;
 }
+/* === HOTFIX: backdrop nunca bloqueia quando escondido === */
+#cart-backdrop {
+  display: none;
+  opacity: 0;
+  pointer-events: none;   /* NÃO captura cliques quando escondido */
+}
+#cart-backdrop.show {
+  display: block;
+  opacity: 1;
+  pointer-events: auto;   /* só captura quando realmente aberto */
+}
+
+/* Evita painéis invisíveis bloquearem cliques */
+.modal,
+.orders-panel,
+#mini-cart {
+  pointer-events: none;
+}
+.modal.show,
+.orders-panel.active,
+#mini-cart.active {
+  pointer-events: auto;
+}
