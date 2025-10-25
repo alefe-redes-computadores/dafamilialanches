@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -5,15 +6,12 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>🍔 Da Família Lanches</title>
   <link rel="stylesheet" href="style.css" />
-
-  <!-- Firebase v8 -->
   <script defer src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
   <script defer src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
   <script defer src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
   <script defer src="script.js"></script>
 </head>
 <body>
-  <!-- ================= CABEÇALHO ================= -->
   <header class="header">
     <div class="header-content">
       <img src="logo.png" alt="Logo DFL" class="logo" />
@@ -22,26 +20,21 @@
         <p class="tagline">Aqui o sabor é de casa ❤️</p>
       </div>
     </div>
-
     <div style="display:flex;align-items:center;gap:10px;">
-      <button id="user-btn" class="user-button">Olá, Álefe 🔒</button>
+      <button id="user-btn" class="user-button">Entrar / Cadastrar</button>
       <button id="cart-icon">🛒 <span id="cart-count">0</span></button>
     </div>
   </header>
 
-  <!-- ================= STATUS ================= -->
   <div id="status-banner" class="status-banner"></div>
   <div class="hours-banner">
     ⏰ Hoje atendemos até <b>23h30</b> — Faltam <span id="timer"></span>
   </div>
 
-  <!-- ================= PROMOÇÕES ================= -->
   <section class="promo-section">
     <h2>🔥 Promoções do Dia</h2>
     <p class="promo-sub">Aproveite antes que acabe!</p>
-    <div class="countdown-ticker">
-      ⏳ Tempo restante: <span id="promo-timer"></span>
-    </div>
+    <div class="countdown-ticker">⏳ Tempo restante: <span id="promo-timer"></span></div>
 
     <div class="carousel">
       <button class="c-btn c-prev">‹</button>
@@ -51,12 +44,15 @@
         <img class="slide" src="promocoes/promo3.jpg" data-wa="Promoção 3 só hoje! 🥤" />
         <img class="slide" src="promocoes/promo4.jpg" data-wa="Promoção 4 da casa! 🍟" />
         <img class="slide" src="promocoes/promo5.jpg" data-wa="Promoção 5 sensacional! 🔥" />
+        <img class="slide" src="promocoes/promo6.jpg" data-wa="Promoção 6 com desconto! 💥" />
+        <img class="slide" src="promocoes/promo7.jpg" data-wa="Promoção 7 exclusiva do site! 💛" />
+        <img class="slide" src="promocoes/promo8.jpg" data-wa="Promoção 8 limitadíssima! 🚨" />
+        <img class="slide" src="promocoes/promo9.jpg" data-wa="Promoção 9 — última chance! 🏁" />
       </div>
       <button class="c-btn c-next">›</button>
     </div>
   </section>
 
-  <!-- ================= MINI-CARRINHO ================= -->
   <div id="cart-backdrop"></div>
   <aside id="mini-cart" class="mini-cart">
     <div class="mini-head">
@@ -66,112 +62,304 @@
     <div class="mini-list"></div>
     <div class="mini-foot"></div>
   </aside>
-
-  <!-- ================= COMBOS ================= -->
-  <section class="menu-section">
-    <h2>🧡 Combos</h2>
+<!-- =========================================================
+       🍟 SEÇÃO COMBOS — com etiqueta de economia
+  ========================================================= -->
+  <section id="combos">
+    <h2>🍔 Combos Especiais</h2>
     <div class="grid">
-      <div class="card" data-name="Combo Casal Tradicional" data-price="34.99">
-        <img src="imagens/combo1.png" alt="Combo Casal Tradicional">
-        <h3>Combo Casal Tradicional <span class="badge economia">💸 Economia de R$ 5,01</span></h3>
-        <p>2 Burger <b>Trem</b> + 1 Fanta 1 L</p>
-      </div>
-
-      <div class="card" data-name="Combo Casal Artesanal" data-price="49.99">
-        <img src="imagens/combo2.png" alt="Combo Casal Artesanal">
-        <h3>Combo Casal Artesanal <span class="badge economia">💸 Economia de R$ 11,01</span></h3>
-        <p>2 Burger <b>Peleja</b> + 1 Fanta 1 L</p>
+      <div class="card" data-name="Combo Casal Artesanal" data-price="54.99">
+        <h3>Combo Casal Artesanal <span class="badge economia">💸 Economia de R$ 5,01</span></h3>
+        <p>2 Peleja + Coca 1L</p>
+        <div class="actions">
+          <button class="add-cart">Adicionar</button>
+          <button class="extras-btn">Adicionais</button>
+        </div>
       </div>
 
       <div class="card" data-name="Combo Família Tradicional" data-price="59.99">
-        <img src="imagens/combo3.png" alt="Combo Família Tradicional">
-        <h3>Combo Família Tradicional <span class="badge economia">💸 Economia de R$ 10,01</span></h3>
-        <p>4 Burger <b>Trem</b> + 1 Kuat 2 L</p>
+        <h3>Combo Família Tradicional <span class="badge economia">💸 Economia de R$ 7,01</span></h3>
+        <p>4 Tradicionais + Kuat 2L</p>
+        <div class="actions">
+          <button class="add-cart">Adicionar</button>
+          <button class="extras-btn">Adicionais</button>
+        </div>
       </div>
 
-      <div class="card" data-name="Combo Família Artesanal" data-price="84.99">
-        <img src="imagens/combo4.png" alt="Combo Família Artesanal">
-        <h3>Combo Família Artesanal <span class="badge economia">💸 Economia de R$ 29,01</span></h3>
-        <p>4 Burger <b>Peleja</b> + 1 Kuat 2 L</p>
+      <div class="card" data-name="Combo Família Artesanal" data-price="79.99">
+        <h3>Combo Família Artesanal <span class="badge economia">💸 Economia de R$ 9,01</span></h3>
+        <p>4 Peleja + Coca 2L</p>
+        <div class="actions">
+          <button class="add-cart">Adicionar</button>
+          <button class="extras-btn">Adicionais</button>
+        </div>
+      </div>
+
+      <div class="card" data-name="Combo 4 Trembão + Fanta 1L" data-price="59.99">
+        <h3>Combo 4 Trembão <span class="badge economia">💸 Economia de R$ 17,01</span></h3>
+        <p>4 Trembão + Fanta 1L</p>
+        <div class="actions">
+          <button class="add-cart">Adicionar</button>
+          <button class="extras-btn">Adicionais</button>
+        </div>
       </div>
     </div>
   </section>
 
-  <!-- ================= LANCHES TRADICIONAIS ================= -->
-  <section class="menu-section">
-    <h2>🍔 Nossos Lanches Tradicionais</h2>
+  <!-- =========================================================
+       🍔 LANCHES TRADICIONAIS — com etiqueta de molho verde
+  ========================================================= -->
+  <section id="tradicionais">
+    <h2>🍔 Lanches Tradicionais</h2>
     <div class="grid">
-      <div class="card"><img src="imagens/bao.png"><h3>Bão <span class="badge">Com Molho Verde</span></h3></div>
-      <div class="card"><img src="imagens/uai.png"><h3>Uai <span class="badge">Com Molho Verde</span></h3></div>
-      <div class="card"><img src="imagens/trem.png"><h3>Trem <span class="badge">Com Molho Verde</span></h3></div>
-      <div class="card"><img src="imagens/cadim.png"><h3>Cadim <span class="badge">Com Molho Verde</span></h3></div>
-      <div class="card"><img src="imagens/armaria.png"><h3>Armaria <span class="badge">Com Molho Verde</span></h3></div>
-      <div class="card"><img src="imagens/bitela.png"><h3>Bitela <span class="badge">Com Molho Verde</span></h3></div>
+      <div class="card" data-name="Bão" data-price="14.99">
+        <h3>Bão <span class="badge">🌿 Com Molho Verde</span></h3>
+        <p>Pão, hambúrguer, queijo, alface e tomate</p>
+        <div class="actions">
+          <button class="add-cart">Adicionar</button>
+          <button class="extras-btn">Adicionais</button>
+        </div>
+      </div>
+
+      <div class="card" data-name="Uai" data-price="15.99">
+        <h3>Uai <span class="badge">🌿 Com Molho Verde</span></h3>
+        <p>Pão, hambúrguer, presunto, queijo, ovo e alface</p>
+        <div class="actions">
+          <button class="add-cart">Adicionar</button>
+          <button class="extras-btn">Adicionais</button>
+        </div>
+      </div>
+
+      <div class="card" data-name="Trem" data-price="17.99">
+        <h3>Trem <span class="badge">🌿 Com Molho Verde</span></h3>
+        <p>Pão, hambúrguer duplo, bacon, queijo e molho especial</p>
+        <div class="actions">
+          <button class="add-cart">Adicionar</button>
+          <button class="extras-btn">Adicionais</button>
+        </div>
+      </div>
+
+      <div class="card" data-name="Bitela" data-price="19.99">
+        <h3>Bitela <span class="badge">🌿 Com Molho Verde</span></h3>
+        <p>Pão, hambúrguer duplo, cheddar, ovo e alface</p>
+        <div class="actions">
+          <button class="add-cart">Adicionar</button>
+          <button class="extras-btn">Adicionais</button>
+        </div>
+      </div>
     </div>
   </section>
 
-  <!-- ================= HOT DOGS ================= -->
-  <section class="menu-section">
+  <!-- =========================================================
+       🍔 LANCHES ARTESANAIS
+  ========================================================= -->
+  <section id="artesanais">
+    <h2>🍔 Lanches Artesanais</h2>
+    <div class="grid">
+      <div class="card" data-name="Peleja" data-price="24.99">
+        <h3>Peleja <span class="badge">🌿 Com Molho Verde</span></h3>
+        <p>Pão brioche, hambúrguer artesanal, queijo, bacon e molho verde</p>
+        <div class="actions">
+          <button class="add-cart">Adicionar</button>
+          <button class="extras-btn">Adicionais</button>
+        </div>
+      </div>
+
+      <div class="card" data-name="Tudibom" data-price="26.99">
+        <h3>Tudibom <span class="badge">🌿 Com Molho Verde</span></h3>
+        <p>Hambúrguer artesanal duplo, cheddar, bacon e maionese temperada</p>
+        <div class="actions">
+          <button class="add-cart">Adicionar</button>
+          <button class="extras-btn">Adicionais</button>
+        </div>
+      </div>
+
+      <div class="card" data-name="Custoso" data-price="27.99">
+        <h3>Custoso <span class="badge">🌿 Com Molho Verde</span></h3>
+        <p>Hambúrguer artesanal 120g, ovo, bacon e cheddar cremoso</p>
+        <div class="actions">
+          <button class="add-cart">Adicionar</button>
+          <button class="extras-btn">Adicionais</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- =========================================================
+       🌭 HOT DOGS — com Molho Verde e Com Purê
+  ========================================================= -->
+  <section id="hotdogs">
     <h2>🌭 Hot Dogs</h2>
     <div class="grid">
-      <div class="card"><img src="imagens/nigucim.png"><h3>Nigucim <span class="badge">Com Molho Verde</span></h3></div>
-      <div class="card"><img src="imagens/simprao.png"><h3>Simprão <span class="badge">Com Molho Verde</span></h3></div>
-      <div class="card"><img src="imagens/nimin.png"><h3>Nimin <span class="badge">Com Molho Verde</span></h3></div>
-      <div class="card"><img src="imagens/padana.png"><h3>Padaná <span class="badge">Com Molho Verde</span></h3></div>
-      <div class="card"><img src="imagens/purizin.png"><h3>Purizin <span class="badge">Com Molho Verde</span><span class="badge">Com Purê</span></h3></div>
-      <div class="card"><img src="imagens/trembao.png"><h3>Trembão <span class="badge">Com Molho Verde</span><span class="badge">Com Purê</span></h3></div>
-    </div>
-  </section>
-
-  <!-- ================= BEBIDAS ================= -->
-  <section class="menu-section" id="bebidas-section">
-    <h2>🥤 Bebidas</h2>
-    <div class="grid">
-      <div class="card"><h3>Coca-Cola 200ml</h3><p>R$ 4,00</p></div>
-      <div class="card"><h3>Coca-Cola 310ml</h3><p>R$ 5,00</p></div>
-      <div class="card"><h3>Coca-Cola 310ml Zero</h3><p>R$ 5,00</p></div>
-      <div class="card"><h3>Del Valle Uva 450ml</h3><p>R$ 5,00</p></div>
-      <div class="card"><h3>Del Valle Laranja 450ml</h3><p>R$ 5,00</p></div>
-      <div class="card"><h3>Fanta 1L</h3><p>R$ 8,00</p></div>
-      <div class="card"><h3>Coca-Cola 1L</h3><p>R$ 9,00</p></div>
-      <div class="card"><h3>Coca-Cola 1L Zero</h3><p>R$ 9,00</p></div>
-      <div class="card"><h3>Kuat 2L</h3><p>R$ 10,00</p></div>
-      <div class="card"><h3>Coca-Cola 2L</h3><p>R$ 13,00</p></div>
-    </div>
-  </section>
-
-  <!-- ================= LOGIN MODAL ================= -->
-  <div id="login-modal" class="modal">
-    <div class="modal-content login-box">
-      <div class="modal-head">
-        <h3>Entrar / Cadastrar</h3>
-        <button class="login-close">✖</button>
+      <div class="card" data-name="Nigucim" data-price="9.99">
+        <h3>Nigucim <span class="badge">🌿 Com Molho Verde</span></h3>
+        <p>Pão, salsicha, vinagrete e molho verde</p>
+        <div class="actions">
+          <button class="add-cart">Adicionar</button>
+          <button class="extras-btn">Adicionais</button>
+        </div>
       </div>
 
-      <button id="google-login" class="btn-google">
-        <img src="imagens/google-icon.png" alt="Google" class="google-icon">
-        Login seguro com Google 🔒
-      </button>
+      <div class="card" data-name="Padaná" data-price="12.99">
+        <h3>Padaná <span class="badge">🌿 Com Molho Verde</span></h3>
+        <p>Duas salsichas, vinagrete, batata palha e molho verde</p>
+        <div class="actions">
+          <button class="add-cart">Adicionar</button>
+          <button class="extras-btn">Adicionais</button>
+        </div>
+      </div>
 
-      <div class="divider">ou</div>
+      <div class="card" data-name="Purizin" data-price="13.99">
+        <h3>Purizin 
+          <span class="badge">🌿 Com Molho Verde</span>
+          <span class="badge">🥔 Com Purê</span>
+        </h3>
+        <p>Duas salsichas, purê cremoso e batata palha</p>
+        <div class="actions">
+          <button class="add-cart">Adicionar</button>
+          <button class="extras-btn">Adicionais</button>
+        </div>
+      </div>
 
-      <form id="login-form" class="login-form">
-        <input id="login-email" type="email" placeholder="E-mail" required>
-        <input id="login-senha" type="password" placeholder="Senha" required>
-        <button type="submit" class="btn-primario">Entrar</button>
-      </form>
+      <div class="card" data-name="Trembão" data-price="15.99">
+        <h3>Trembão 
+          <span class="badge">🌿 Com Molho Verde</span>
+          <span class="badge">🥔 Com Purê</span>
+        </h3>
+        <p>Duas salsichas, bacon, vinagrete, purê e batata palha</p>
+        <div class="actions">
+          <button class="add-cart">Adicionar</button>
+          <button class="extras-btn">Adicionais</button>
+        </div>
+      </div>
+    </div>
+  </section>
+<!-- =========================================================
+       🥤 BEBIDAS — sem imagens
+  ========================================================= -->
+  <section id="bebidas-section">
+    <h2>🥤 Bebidas</h2>
+    <div class="grid">
+      <div class="card" data-name="Coca-Cola 200ml" data-price="4.00">
+        <h3>Coca-Cola 200ml</h3>
+        <p><strong>R$ 4,00</strong></p>
+        <div class="actions"><button class="add-cart">Adicionar</button></div>
+      </div>
+
+      <div class="card" data-name="Coca-Cola 310ml" data-price="5.00">
+        <h3>Coca-Cola 310ml</h3>
+        <p><strong>R$ 5,00</strong></p>
+        <div class="actions"><button class="add-cart">Adicionar</button></div>
+      </div>
+
+      <div class="card" data-name="Coca-Cola 310ml Zero" data-price="5.00">
+        <h3>Coca-Cola 310ml Zero</h3>
+        <p><strong>R$ 5,00</strong></p>
+        <div class="actions"><button class="add-cart">Adicionar</button></div>
+      </div>
+
+      <div class="card" data-name="Del Valle Uva 450ml" data-price="5.00">
+        <h3>Del Valle Uva 450ml</h3>
+        <p><strong>R$ 5,00</strong></p>
+        <div class="actions"><button class="add-cart">Adicionar</button></div>
+      </div>
+
+      <div class="card" data-name="Del Valle Laranja 450ml" data-price="5.00">
+        <h3>Del Valle Laranja 450ml</h3>
+        <p><strong>R$ 5,00</strong></p>
+        <div class="actions"><button class="add-cart">Adicionar</button></div>
+      </div>
+
+      <div class="card" data-name="Fanta 1L" data-price="8.00">
+        <h3>Fanta 1L</h3>
+        <p><strong>R$ 8,00</strong></p>
+        <div class="actions"><button class="add-cart">Adicionar</button></div>
+      </div>
+
+      <div class="card" data-name="Coca-Cola 1L" data-price="9.00">
+        <h3>Coca-Cola 1L</h3>
+        <p><strong>R$ 9,00</strong></p>
+        <div class="actions"><button class="add-cart">Adicionar</button></div>
+      </div>
+
+      <div class="card" data-name="Coca-Cola 1L Zero" data-price="9.00">
+        <h3>Coca-Cola 1L Zero</h3>
+        <p><strong>R$ 9,00</strong></p>
+        <div class="actions"><button class="add-cart">Adicionar</button></div>
+      </div>
+
+      <div class="card" data-name="Kuat 2L" data-price="10.00">
+        <h3>Kuat 2L</h3>
+        <p><strong>R$ 10,00</strong></p>
+        <div class="actions"><button class="add-cart">Adicionar</button></div>
+      </div>
+
+      <div class="card" data-name="Coca-Cola 2L" data-price="13.00">
+        <h3>Coca-Cola 2L</h3>
+        <p><strong>R$ 13,00</strong></p>
+        <div class="actions"><button class="add-cart">Adicionar</button></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- =========================================================
+       💬 MODAL DE ADICIONAIS
+  ========================================================= -->
+  <div id="extras-modal" class="modal">
+    <div class="modal-content">
+      <h3>🧀 Escolha seus adicionais</h3>
+      <div class="extras-list"></div>
+      <button id="extras-confirm">Adicionar ao Pedido</button>
+      <button class="extras-close">Cancelar</button>
     </div>
   </div>
 
-  <!-- ================= RODAPÉ ================= -->
-  <footer class="footer">
-    <p>📍 <a href="https://www.google.com/maps?q=Rua+dos+Caiçaras,+212,+Patos+de+Minas,+MG" target="_blank">Rua dos Caiçaras, 212 — Patos de Minas/MG</a></p>
-    <div class="footer-links">
-      <a href="https://wa.me/5534997178336" target="_blank" class="footer-btn">💬 WhatsApp</a>
-      <a href="https://www.instagram.com/dafamilialanches" target="_blank" class="footer-btn">📸 Instagram</a>
-      <a href="https://www.ifood.com.br/delivery/patos-de-minas/dafamilialanches" target="_blank" class="footer-btn">🍔 iFood</a>
+  <!-- =========================================================
+       🥤 MODAL DE OPÇÃO DE BEBIDAS (COMBOS)
+  ========================================================= -->
+  <div id="combo-modal" class="modal">
+    <div class="modal-content">
+      <h3>🥤 Escolha sua bebida</h3>
+      <div id="combo-body"></div>
+      <button id="combo-confirm">Confirmar</button>
+      <button class="combo-close">Cancelar</button>
     </div>
-    <div class="footer-copy">© 2025 Da Família Lanches — Todos os direitos reservados 🍔</div>
+  </div>
+
+  <!-- =========================================================
+       🔐 MODAL DE LOGIN — moderno e com botão Google
+  ========================================================= -->
+  <div id="login-modal" class="modal">
+    <div class="modal-content login-modern">
+      <h3>🔐 Login Seguro</h3>
+      <p class="subtext">Entre para salvar e acompanhar seus pedidos</p>
+
+      <button id="google-login" class="btn-google">
+        <img src="https://www.svgrepo.com/show/355037/google.svg" alt="Google" />
+        Entrar com Google
+      </button>
+
+      <div class="divider">
+        <span>ou</span>
+      </div>
+
+      <form id="login-form">
+        <input type="email" placeholder="E-mail" required />
+        <input type="password" placeholder="Senha" required />
+        <button type="submit" class="btn-login">Entrar</button>
+      </form>
+
+      <small class="login-note">🔒 Suas informações são criptografadas</small>
+      <button class="login-close">Fechar</button>
+    </div>
+  </div>
+
+  <!-- =========================================================
+       ⚡ RODAPÉ
+  ========================================================= -->
+  <footer class="footer">
+    <p>© 2025 Da Família Lanches — Todos os direitos reservados</p>
+    <p>🍔 Feito com ❤️ em Minas Gerais</p>
   </footer>
 </body>
 </html>
