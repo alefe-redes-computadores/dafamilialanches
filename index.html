@@ -1,12 +1,10 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="UTF-8"> <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>🍔 Da Família Lanches</title>
   <link rel="stylesheet" href="style.css" />
 
-  <!-- Firebase -->
   <script defer src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
   <script defer src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
   <script defer src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
@@ -14,7 +12,6 @@
 </head>
 
 <body>
-  <!-- ================= CABEÇALHO ================= -->
   <header class="header">
     <div class="header-content">
       <img src="logo.png" alt="Logo DFL" class="logo" />
@@ -30,13 +27,11 @@
     </div>
   </header>
 
-  <!-- ================= STATUS ================= -->
   <div id="status-banner" class="status-banner"></div>
   <div class="hours-banner">
     ⏰ Hoje atendemos até <b>23h30</b> — Faltam <span id="timer"></span>
   </div>
 
-  <!-- ================= PROMOÇÕES ================= -->
   <section class="promo-section">
     <h2>🔥 Promoções do Dia</h2>
     <p class="promo-sub">Aproveite antes que acabe!</p>
@@ -55,7 +50,6 @@
     </div>
   </section>
 
-  <!-- ================= MINI-CARRINHO ================= -->
   <div id="cart-backdrop"></div>
   <aside id="mini-cart" class="mini-cart">
     <div class="mini-head">
@@ -66,7 +60,6 @@
     <div class="mini-foot"></div>
   </aside>
 
-  <!-- ================= COMBOS ================= -->
   <section class="menu-section">
     <h2>🧡 Combos</h2>
     <div class="grid">
@@ -88,7 +81,6 @@
     </div>
   </section>
 
-  <!-- ================= LANCHES TRADICIONAIS ================= -->
   <section class="menu-section">
     <h2>🍔 Nossos Lanches Tradicionais</h2>
     <div class="grid">
@@ -110,7 +102,6 @@
     </div>
   </section>
 
-  <!-- ================= HOT DOGS ================= -->
   <section class="menu-section">
     <h2>🌭 Hot Dogs</h2>
     <div class="grid">
@@ -132,24 +123,11 @@
     </div>
   </section>
 
-  <!-- ================= BEBIDAS COMPLETAS ================= -->
   <section id="bebidas-section" class="menu-section">
     <h2>🥤 Bebidas</h2>
-    <div class="grid">
-      <div class="card" data-name="Coca-Cola 200ml" data-price="4.00"><h3>Coca-Cola 200ml</h3><p>R$ 4,00</p></div>
-      <div class="card" data-name="Coca-Cola 310ml" data-price="5.00"><h3>Coca-Cola 310ml</h3><p>R$ 5,00</p></div>
-      <div class="card" data-name="Coca-Cola 310ml Zero" data-price="5.00"><h3>Coca-Cola 310ml Zero</h3><p>R$ 5,00</p></div>
-      <div class="card" data-name="Del Valle Uva 450ml" data-price="5.00"><h3>Del Valle Uva 450ml</h3><p>R$ 5,00</p></div>
-      <div class="card" data-name="Del Valle Laranja 450ml" data-price="5.00"><h3>Del Valle Laranja 450ml</h3><p>R$ 5,00</p></div>
-      <div class="card" data-name="Fanta 1L" data-price="8.00"><h3>Fanta 1L</h3><p>R$ 8,00</p></div>
-      <div class="card" data-name="Coca-Cola 1L" data-price="9.00"><h3>Coca-Cola 1L</h3><p>R$ 9,00</p></div>
-      <div class="card" data-name="Coca-Cola 1L Zero" data-price="9.00"><h3>Coca-Cola 1L Zero</h3><p>R$ 9,00</p></div>
-      <div class="card" data-name="Kuat 2L" data-price="10.00"><h3>Kuat 2L</h3><p>R$ 10,00</p></div>
-      <div class="card" data-name="Coca-Cola 2L" data-price="13.00"><h3>Coca-Cola 2L</h3><p>R$ 13,00</p></div>
-    </div>
+    <div class="grid" id="bebidas-grid"></div>
   </section>
 
-  <!-- ================= LOGIN ================= -->
   <div id="login-modal" class="modal">
     <div class="modal-content login-box">
       <div class="modal-head">
@@ -166,14 +144,18 @@
       <div class="divider">ou</div>
 
       <button id="google-login" class="btn-google">
-        <img src="imagens/google-icon.png" alt="Google" class="google-icon">
+        <svg class="google-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="22px" height="22px">
+          <path fill="#FFC107" d="M43.6 20.1H24v7.7h11c-.5 2.4-2 4.5-4.5 6v5h6.5c3.8-3.5 6-8.7 6-14.7.1-2.2-.2-4.4-.9-6.5z"/>
+          <path fill="#FF3D00" d="M24 44c5.2 0 9.7-1.7 13-4.5l-6.5-5c-1.7 1.2-4 1.8-6.5 1.8-5 0-9.2-3.4-10.7-8H6.3v5.3C9.8 40.5 16.5 44 24 44z"/>
+          <path fill="#4CAF50" d="M13.3 29c-.3-1-.4-2-.4-3s.1-2 .4-3v-5.3H6.3C4.9 20.6 4 23.2 4 26s.9 5.4 2.3 7.7L13.3 29z"/>
+          <path fill="#1976D2" d="M24 10.3c2.8 0 5.3 1 7.2 2.7l5.8-5.8C33.6 3.7 29.1 1 24 1 16.5 1 9.8 4.5 6.3 8.7l7 5.3c1.5-4.6 5.7-8 10.7-8z"/>
+        </svg>
         Entrar com Google
         <small class="login-safe">🔒 Login seguro e criptografado</small>
       </button>
     </div>
   </div>
 
-  <!-- ================= RODAPÉ ================= -->
   <footer class="footer">
     <p>📍 <a href="https://www.google.com/maps?q=Rua+dos+Caiçaras,+212,+Patos+de+Minas,+MG" target="_blank">
       Rua dos Caiçaras, 212 — Patos de Minas/MG
