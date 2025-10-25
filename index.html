@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>🍔 Da Família Lanches</title>
+  <link rel="stylesheet" href="style.css" />
+  <script defer src="script.js"></script>
+</head>
+<body>
+  <header class="header">
+    <div class="header-content">
+      <img src="logo.png" alt="Logo DFL" class="logo" />
+      <div class="header-info">
+        <h1>Da Família Lanches</h1>
+        <p class="tagline">Aqui o sabor é de casa ❤️</p>
+      </div>
+    </div>
+    <div style="display:flex;align-items:center;gap:10px;">
+      <button id="user-btn" class="user-button">Entrar / Cadastrar</button>
+      <button id="cart-icon">🛒 <span id="cart-count">0</span></button>
+    </div>
+  </header>
+
+  <div id="login-modal" class="modal">
+    <div class="modal-content login-box">
+      <div class="modal-head">
+        <h3>Entrar / Cadastrar</h3>
+        <button class="login-close">✖</button>
+      </div>
+      <form id="login-form" class="login-form">
+        <input id="login-email" type="email" placeholder="E-mail" required />
+        <input id="login-senha" type="password" placeholder="Senha" required />
+        <button type="submit" class="btn-primario">Entrar</button>
+      </form>
+      <div class="divider">ou</div>
+      <button id="google-login" class="btn-google">
+        <img src="imagens/google-icon.png" alt="Google" class="google-icon">
+        Entrar com Google
+        <small class="login-safe">🔒 Login seguro e criptografado</small>
+      </button>
+    </div>
+  </div>
+</body>
+</html>

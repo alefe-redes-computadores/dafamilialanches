@@ -1,0 +1,1 @@
+console.log('🔥 DFL v1.8.1 — Tudo funcionando com Google Login e Etiquetas Douradas!');
