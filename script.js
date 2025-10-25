@@ -582,4 +582,16 @@ document.addEventListener("DOMContentLoaded", () => {
 
   renderMiniCart();
   console.log("%c🔥 DFL v1.9 — TODAS CORREÇÕES OK!", "color:#fff;background:#4caf50;padding:8px 12px;border-radius:8px;font-weight:700");
+
+/* ------------------ 🖱️ FECHAR MODAL AO CLICAR FORA ------------------ */
+document.addEventListener("click", (e) => {
+  const aberto = document.querySelector(".modal.show, #mini-cart.active, .orders-panel.active");
+  if (!aberto) return;
+
+  // Verifica se o clique foi fora do conteúdo visível do modal/painel
+  const dentro = e.target.closest(".modal-content, #mini-cart, .orders-panel");
+  if (!dentro && !e.target.closest("#cart-icon")) {
+    Overlays.closeAll();
+  }
+});
 });
