@@ -530,3 +530,51 @@ document.addEventListener("DOMContentLoaded", () => {
   renderMiniCart();
   console.log("%c🔥 DFL v1.7.6 — Visual refinado + bebidas OK!", "color:#fff;background:#4caf50;padding:8px 12px;border-radius:8px;font-weight:600");
 });
+/* ------------------ 🥤 SEÇÃO BEBIDAS ------------------ */
+  const bebidas = [
+    { nome: "Coca-Cola 200ml", preco: 4.00 },
+    { nome: "Coca-Cola 310ml", preco: 5.00 },
+    { nome: "Coca-Cola 310ml Zero", preco: 5.00 },
+    { nome: "Del Valle Uva 450ml", preco: 5.00 },
+    { nome: "Del Valle Laranja 450ml", preco: 5.00 },
+    { nome: "Fanta 1L", preco: 8.00 },
+    { nome: "Coca-Cola 1L", preco: 9.00 },
+    { nome: "Coca-Cola 1L Zero", preco: 9.00 },
+    { nome: "Kuat 2L", preco: 10.00 },
+    { nome: "Coca-Cola 2L", preco: 13.00 },
+  ];
+
+  const bebidasSection = document.getElementById("bebidas-section");
+  if (bebidasSection) {
+    const grid = document.createElement("div");
+    grid.className = "grid";
+
+    bebidas.forEach(b => {
+      const card = document.createElement("div");
+      card.className = "card";
+      card.dataset.name = b.nome;
+      card.dataset.price = b.preco;
+
+      card.innerHTML = `
+        <h3>${b.nome}</h3>
+        <p>${money(b.preco)}</p>
+        <div class="actions">
+          <button class="add-cart">Adicionar</button>
+        </div>
+      `;
+
+      grid.appendChild(card);
+    });
+
+    bebidasSection.appendChild(grid);
+
+    // adiciona evento de clique
+    grid.querySelectorAll(".add-cart").forEach(btn => {
+      btn.addEventListener("click", (e) => {
+        const card = e.currentTarget.closest(".card");
+        const nome = card.dataset.name;
+        const preco = parseFloat(card.dataset.price);
+        addCommonItem(nome, preco);
+      });
+    });
+  }
