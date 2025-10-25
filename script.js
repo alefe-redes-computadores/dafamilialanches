@@ -1,9 +1,12 @@
+
 /* =========================================================
-   🍔 DFL v1.9 — TODAS CORREÇÕES APLICADAS
+   🍔 DFL v2.0 — ESTÁVEL (JS completo corrigido)
    - Badges corrigidas
    - Bebidas completas
    - Adicionais somam corretamente
    - Combos com refrigerantes corretos
+   - Modais fecham clicando fora
+   - "Meus Pedidos" exibindo pedidos (email e uid)
 ========================================================= */
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -160,7 +163,8 @@ document.addEventListener("DOMContentLoaded", () => {
   document.querySelectorAll("#mini-cart .extras-close").forEach(btn => {
     btn.addEventListener("click", () => Overlays.closeAll());
   });
-/* ------------------ ➕ ADICIONAIS (CORRIGIDO) ------------------ */
+
+  /* ------------------ ➕ ADICIONAIS ------------------ */
   const adicionais = [
     { nome: "Cebola", preco: 0.99 },
     { nome: "Salada", preco: 1.99 },
@@ -178,7 +182,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if (!card || !el.extrasModal || !el.extrasList) return;
     produtoExtras = card.dataset.name;
     produtoPrecoBase = parseFloat(card.dataset.price) || 0;
-    
+
     el.extrasList.innerHTML = adicionais.map((a, i) => `
       <label class="extra-line" style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid #eee;cursor:pointer;">
         <span>${a.nome} — <b>${money(a.preco)}</b></span>
@@ -196,7 +200,6 @@ document.addEventListener("DOMContentLoaded", () => {
     const checks = [...document.querySelectorAll("#extras-modal .extras-list input:checked")];
     if (!checks.length) return alert("Selecione pelo menos um adicional!");
 
-    // Agrupa adicionais iguais
     const extrasContagem = {};
     checks.forEach(c => {
       const idx = +c.value;
@@ -208,7 +211,6 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     });
 
-    // Monta nome completo e calcula preço total
     const extrasNomes = Object.keys(extrasContagem).map(nome => {
       const qtd = extrasContagem[nome].qtd;
       return qtd > 1 ? `${qtd}x ${nome}` : nome;
@@ -218,7 +220,6 @@ document.addEventListener("DOMContentLoaded", () => {
     const precoTotal = produtoPrecoBase + precoExtras;
     const nomeCompleto = `${produtoExtras} + ${extrasNomes}`;
 
-    // Adiciona ao carrinho
     const existente = cart.find(i => i.nome === nomeCompleto);
     if (existente) existente.qtd++;
     else cart.push({ nome: nomeCompleto, preco: precoTotal, qtd: 1 });
@@ -232,7 +233,7 @@ document.addEventListener("DOMContentLoaded", () => {
     b.addEventListener("click", () => Overlays.closeAll())
   );
 
-  /* ------------------ 🥤 MODAL DE BEBIDAS (COMBOS CORRIGIDOS) ------------------ */
+  /* ------------------ 🥤 MODAL DE BEBIDAS (COMBOS) ------------------ */
   const comboDrinkOptions = {
     casal: [
       { rotulo: "Fanta 1L (padrão)", delta: 0.01 },
@@ -253,7 +254,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     const low = (nomeCombo || "").toLowerCase();
-    const grupo = low.includes("casal") ? "casal" : 
+    const grupo = low.includes("casal") ? "casal" :
                   (low.includes("família") || low.includes("familia")) ? "familia" : null;
 
     if (!grupo) {
@@ -280,11 +281,11 @@ document.addEventListener("DOMContentLoaded", () => {
     const opt = comboDrinkOptions[_comboCtx.grupo][+sel.value];
     const finalName = `${_comboCtx.nomeCombo} + ${opt.rotulo}`;
     const finalPrice = Number(_comboCtx.precoBase) + (opt.delta || 0);
-    
+
     const existente = cart.find(i => i.nome === finalName);
     if (existente) existente.qtd++;
     else cart.push({ nome: finalName, preco: finalPrice, qtd: 1 });
-    
+
     popupAdd("Combo adicionado!");
     renderMiniCart();
     Overlays.closeAll();
@@ -296,12 +297,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
   /* ------------------ 🧺 ADD ITEM ------------------ */
   function addCommonItem(nome, preco) {
-    // Verifica se é combo
     if (/^combo/i.test(nome)) {
       openComboModal(nome, preco);
       return;
     }
-    
+
     const found = cart.find((i) => i.nome === nome && i.preco === preco);
     if (found) found.qtd++;
     else cart.push({ nome, preco, qtd: 1 });
@@ -335,7 +335,8 @@ document.addEventListener("DOMContentLoaded", () => {
       window.open(`https://wa.me/5534997178336?text=${msg}`, "_blank");
     });
   });
-/* ------------------ ⏰ STATUS + TIMER ------------------ */
+
+  /* ------------------ ⏰ STATUS + TIMER ------------------ */
   const atualizarStatus = safe(() => {
     const agora = new Date();
     const h = agora.getHours();
@@ -483,79 +484,123 @@ document.addEventListener("DOMContentLoaded", () => {
       .catch((err) => alert("Erro: " + err.message));
   }
 
-  /* ------------------ 📦 MEUS PEDIDOS (CORRIGIDO) ------------------ */
-let ordersFab = document.getElementById("orders-fab");
-if (!ordersFab) {
-  ordersFab = document.createElement("button");
-  ordersFab.id = "orders-fab";
-  ordersFab.innerHTML = "📦 Meus Pedidos";
-  document.body.appendChild(ordersFab);
-}
-
-let ordersPanel = document.querySelector(".orders-panel");
-if (!ordersPanel) {
-  ordersPanel = document.createElement("div");
-  ordersPanel.className = "orders-panel";
-  ordersPanel.innerHTML = `
-    <div class="orders-head">
-      <span>📦 Meus Pedidos</span>
-      <button class="orders-close">✖</button>
-    </div>
-    <div class="orders-content" id="orders-content">
-      <p class="empty-orders">Faça login para ver seus pedidos.</p>
-    </div>`;
-  document.body.appendChild(ordersPanel);
-}
-
-function openOrdersPanel() { Overlays.open(ordersPanel); }
-function closeOrdersPanel() { Overlays.closeAll(); }
-
-ordersFab.addEventListener("click", () => {
-  if (!currentUser) return alert("Faça login para ver seus pedidos.");
-  openOrdersPanel();
-  carregarPedidosSeguro();
-});
-
-ordersPanel.querySelector(".orders-close")?.addEventListener("click", closeOrdersPanel);
-
-function showOrdersFabIfLogged() {
-  if (currentUser) ordersFab.classList.add("show");
-  else ordersFab.classList.remove("show");
-}
-
-function carregarPedidosSeguro() {
-  const container = document.getElementById("orders-content");
-  if (!container) return;
-
-  container.innerHTML = `<p class="empty-orders">Carregando pedidos...</p>`;
-
-  // Aguarda dados do usuário estarem prontos (especialmente no login Google)
-  if (!currentUser || !currentUser.email) {
-    setTimeout(carregarPedidosSeguro, 300);
-    return;
+  /* ------------------ 📦 MEUS PEDIDOS (UI) ------------------ */
+  let ordersFab = document.getElementById("orders-fab");
+  if (!ordersFab) {
+    ordersFab = document.createElement("button");
+    ordersFab.id = "orders-fab";
+    ordersFab.innerHTML = "📦 Meus Pedidos";
+    document.body.appendChild(ordersFab);
   }
 
-  // Helper para renderizar a lista
-  const render = (snap) => {
-    if (snap.empty) {
-      container.innerHTML = `<p class="empty-orders">Nenhum pedido encontrado 😢</p>`;
+  let ordersPanel = document.querySelector(".orders-panel");
+  if (!ordersPanel) {
+    ordersPanel = document.createElement("div");
+    ordersPanel.className = "orders-panel";
+    ordersPanel.innerHTML = `
+      <div class="orders-head">
+        <span>📦 Meus Pedidos</span>
+        <button class="orders-close">✖</button>
+      </div>
+      <div class="orders-content" id="orders-content">
+        <p class="empty-orders">Faça login para ver seus pedidos.</p>
+      </div>`;
+    document.body.appendChild(ordersPanel);
+  }
+
+  function openOrdersPanel() { Overlays.open(ordersPanel); }
+  function closeOrdersPanel() { Overlays.closeAll(); }
+
+  ordersFab.addEventListener("click", () => {
+    if (!currentUser) return alert("Faça login para ver seus pedidos.");
+    openOrdersPanel();
+    carregarPedidosSeguro();
+  });
+
+  ordersPanel.querySelector(".orders-close")?.addEventListener("click", closeOrdersPanel);
+
+  function showOrdersFabIfLogged() {
+    if (currentUser) ordersFab.classList.add("show");
+    else ordersFab.classList.remove("show");
+  }
+/* ------------------ 📦 MEUS PEDIDOS (LÓGICA) ------------------ */
+  function carregarPedidosSeguro() {
+    const container = document.getElementById("orders-content");
+    if (!container) return;
+
+    container.innerHTML = `<p class="empty-orders">Carregando pedidos...</p>`;
+
+    // garante que currentUser/email já estejam disponíveis (especialmente logo após login Google)
+    if (!currentUser || !currentUser.email) {
+      setTimeout(carregarPedidosSeguro, 300);
       return;
     }
-    
-/* ------------------ ⎋ ESC ------------------ */
-document.addEventListener("keydown", (e) => { 
-  if (e.key === "Escape") Overlays.closeAll(); 
-});
 
-/* ------------------ 🖱️ FECHAR MODAL AO CLICAR FORA (CORRIGIDO) ------------------ */
-document.addEventListener("click", (e) => {
-  const aberto = document.querySelector(".modal.show, #mini-cart.active, .orders-panel.active");
-  if (!aberto) return;
-  if (e.target.closest(".modal-content, #mini-cart, .orders-panel")) return;
-  if (e.target.closest("#cart-icon, .add-cart, .extras-btn, .user-button, #orders-fab")) return;
-  Overlays.closeAll();
-});
+    // helper de renderização
+    const render = (snap) => {
+      if (snap.empty) {
+        container.innerHTML = `<p class="empty-orders">Nenhum pedido encontrado 😢</p>`;
+        return;
+      }
 
-renderMiniCart();
-console.log("%c🔥 DFL v2.0 — ESTÁVEL E OTIMIZADO!", "color:#fff;background:#4caf50;padding:8px 12px;border-radius:8px;font-weight:700");
+      const pedidos = [];
+      snap.forEach((doc) => pedidos.push({ id: doc.id, ...doc.data() }));
+      pedidos.sort((a, b) => new Date(b.data) - new Date(a.data));
+
+      container.innerHTML = "";
+      pedidos.forEach((p) => {
+        const itens = Array.isArray(p.itens) ? p.itens.join("<br>• ") : p.itens || "";
+        const dataFormatada = new Date(p.data).toLocaleString("pt-BR", {
+          day: "2-digit",
+          month: "2-digit",
+          year: "numeric",
+          hour: "2-digit",
+          minute: "2-digit",
+        });
+
+        const box = document.createElement("div");
+        box.className = "order-item";
+        box.innerHTML = `
+          <h4>📅 ${dataFormatada}</h4>
+          <p style="margin:8px 0;"><b>Itens:</b><br>• ${itens}</p>
+          <p style="font-size:1.1rem;color:#4caf50;font-weight:600;margin-top:8px;">
+            <b>Total:</b> ${money(p.total)}
+          </p>`;
+        container.appendChild(box);
+      });
+    };
+
+    // busca por e-mail; se vazio, tenta por UID
+    db.collection("Pedidos")
+      .where("usuario", "==", currentUser.email)
+      .get()
+      .then((snap) => {
+        if (!snap.empty) return render(snap);
+        return db.collection("Pedidos")
+          .where("userId", "==", currentUser.uid)
+          .get()
+          .then(render);
+      })
+      .catch((err) => {
+        container.innerHTML = `<p class="empty-orders" style="color:#d32f2f;">Erro: ${err.message}</p>`;
+      });
+  }
+
+  /* ------------------ ⎋ ESC ------------------ */
+  document.addEventListener("keydown", (e) => { 
+    if (e.key === "Escape") Overlays.closeAll(); 
+  });
+
+  /* ------------------ 🖱️ FECHAR MODAL AO CLICAR FORA ------------------ */
+  document.addEventListener("click", (e) => {
+    const aberto = document.querySelector(".modal.show, #mini-cart.active, .orders-panel.active");
+    if (!aberto) return;
+    if (e.target.closest(".modal-content, #mini-cart, .orders-panel")) return; // clique interno
+    if (e.target.closest("#cart-icon, .add-cart, .extras-btn, .user-button, #orders-fab")) return; // botões que abrem
+    Overlays.closeAll();
+  });
+
+  /* ------------------ INIT ------------------ */
+  renderMiniCart();
+  console.log("%c🔥 DFL v2.0 — ESTÁVEL E OTIMIZADO!", "color:#fff;background:#4caf50;padding:8px 12px;border-radius:8px;font-weight:700");
 });
