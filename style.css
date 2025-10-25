@@ -379,3 +379,7 @@ section h2{font-size:1.3rem;text-align:center;margin-bottom:15px;color:#ff7043}
   display: block;
   pointer-events: auto; /* ✅ ativa clique apenas quando visível */
 }
+/* ✅ Correção: permitir que o painel apareça também com .show */
+.orders-panel.show {
+  transform: translateY(0);
+}
