@@ -6,7 +6,7 @@
   <title>🍔 Da Família Lanches</title>
   <link rel="stylesheet" href="style.css" />
 
-  <!-- Firebase v8 -->
+  <!-- Firebase -->
   <script defer src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
   <script defer src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
   <script defer src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
@@ -22,7 +22,6 @@
         <p class="tagline">Aqui o sabor é de casa ❤️</p>
       </div>
     </div>
-
     <div style="display:flex;align-items:center;gap:10px;">
       <button id="user-btn" class="user-button">Entrar / Cadastrar</button>
       <button id="cart-icon">🛒 <span id="cart-count">0</span></button>
@@ -52,7 +51,6 @@
         <img class="slide" src="promocoes/promo6.jpg" data-wa="Promoção 6 com desconto! 💥" />
         <img class="slide" src="promocoes/promo7.jpg" data-wa="Promoção 7 exclusiva do site! 💛" />
         <img class="slide" src="promocoes/promo8.jpg" data-wa="Promoção 8 limitadíssima! 🚨" />
-        <img class="slide" src="promocoes/promo9.jpg" data-wa="Promoção 9 — última chance! 🏁" />
       </div>
       <button class="c-btn c-next">›</button>
     </div>
@@ -70,81 +68,132 @@
   </aside>
 
   <!-- ================= COMBOS ================= -->
-  <section class="menu-section" id="combos-section">
-    <h2>🔥 Combos</h2>
+  <section class="menu-section">
+    <h2>🧡 Combos</h2>
     <div class="grid">
       <div class="card" data-name="Combo Casal Tradicional" data-price="34.99">
         <img src="imagens/combo1.png" alt="Combo Casal Tradicional">
-        <h3>Combo Casal Tradicional</h3>
-        <p><em>💸 Economia de R$ 5,01</em></p>
+        <h3>Combo Casal Tradicional <span class="badge economia">💸 Economia de R$ 5,01</span></h3>
         <p class="price">De R$ 39,99 por <b>R$ 34,99</b></p>
-        <p>2 Burger <b>Trem</b> + 1 Fanta 1 L. Pão, hambúrguer, salsicha, bacon, milho, alface, tomate, presunto e mussarela.</p>
+        <p>2 Burger Trem + 1 Fanta 1L. Pão, hambúrguer, salsicha, bacon, milho, alface, tomate, presunto e mussarela.</p>
         <div class="actions"><button class="add-cart">Adicionar</button></div>
       </div>
 
       <div class="card" data-name="Combo Casal Artesanal" data-price="49.99">
         <img src="imagens/combo2.png" alt="Combo Casal Artesanal">
-        <h3>Combo Casal Artesanal</h3>
-        <p><em>💸 Economia de R$ 11,01</em></p>
+        <h3>Combo Casal Artesanal <span class="badge economia">💸 Economia de R$ 11,01</span></h3>
         <p class="price">De R$ 61,00 por <b>R$ 49,99</b></p>
-        <p>2 Burger <b>Peleja</b> + 1 Fanta 1 L. Pão, hambúrguer artesanal 120g, filé de frango, bacon, milho, batata palha, presunto e mussarela.</p>
+        <p>2 Burger Peleja + 1 Fanta 1L. Pão, hambúrguer artesanal 120g, filé de frango, bacon, milho, batata palha, presunto e mussarela.</p>
         <div class="actions"><button class="add-cart">Adicionar</button></div>
       </div>
 
       <div class="card" data-name="Combo Família Tradicional" data-price="59.99">
         <img src="imagens/combo3.png" alt="Combo Família Tradicional">
-        <h3>Combo Família Tradicional</h3>
-        <p><em>💸 Economia de R$ 10,01</em></p>
+        <h3>Combo Família Tradicional <span class="badge economia">💸 Economia de R$ 10,01</span></h3>
         <p class="price">De R$ 70,00 por <b>R$ 59,99</b></p>
-        <p>4 Burger <b>Trem</b> + 1 Kuat 2 L. Pão, hambúrguer, salsicha, bacon, milho, alface, tomate, presunto e mussarela.</p>
+        <p>4 Burger Trem + 1 Kuat 2L. Pão, hambúrguer, salsicha, bacon, milho, alface, tomate, presunto e mussarela.</p>
         <div class="actions"><button class="add-cart">Adicionar</button></div>
       </div>
 
       <div class="card" data-name="Combo Família Artesanal" data-price="84.99">
         <img src="imagens/combo4.png" alt="Combo Família Artesanal">
-        <h3>Combo Família Artesanal</h3>
-        <p><em>💸 Economia de R$ 29,01</em></p>
+        <h3>Combo Família Artesanal <span class="badge economia">💸 Economia de R$ 29,01</span></h3>
         <p class="price">De R$ 114,00 por <b>R$ 84,99</b></p>
-        <p>4 Burger <b>Peleja</b> + 1 Kuat 2 L. Pão, hambúrguer artesanal 120g, filé de frango, bacon, milho, batata palha, presunto e mussarela.</p>
+        <p>4 Burger Peleja + 1 Kuat 2L. Pão, hambúrguer artesanal 120g, filé de frango, bacon, milho, batata palha, presunto e mussarela.</p>
         <div class="actions"><button class="add-cart">Adicionar</button></div>
       </div>
     </div>
   </section>
 
-  <!-- ================= BEBIDAS (NOVO PADRÃO DOURADO) ================= -->
-  <section id="bebidas-section">
-    <h2>🥤 Bebidas</h2>
+  <!-- ================= LANCHES TRADICIONAIS ================= -->
+  <section class="menu-section">
+    <h2>🍔 Nossos Lanches Tradicionais</h2>
     <div class="grid">
-      <!-- Gerado pelo script.js -->
+      <div class="card" data-name="Bão" data-price="11.00">
+        <img src="imagens/bao.png" alt="Bão">
+        <h3>Bão <span class="badge">Com Molho Verde</span></h3>
+        <p class="price">R$ 11,00</p>
+        <p>Pão, hambúrguer, alface, tomate, presunto e mussarela.</p>
+        <div class="actions"><button class="add-cart">Adicionar</button><button class="extras-btn">Adicionais</button></div>
+      </div>
+
+      <div class="card" data-name="Uai" data-price="13.00">
+        <img src="imagens/uai.png" alt="Uai">
+        <h3>Uai <span class="badge">Com Molho Verde</span></h3>
+        <p class="price">R$ 13,00</p>
+        <p>Pão, hambúrguer, milho, bacon, alface, tomate, presunto e mussarela.</p>
+        <div class="actions"><button class="add-cart">Adicionar</button><button class="extras-btn">Adicionais</button></div>
+      </div>
+
+      <div class="card" data-name="Trem" data-price="14.00">
+        <img src="imagens/trem.png" alt="Trem">
+        <h3>Trem <span class="badge">Com Molho Verde</span></h3>
+        <p class="price">R$ 14,00</p>
+        <p>Pão, hambúrguer, salsicha, bacon, milho, alface, tomate, presunto e mussarela.</p>
+        <div class="actions"><button class="add-cart">Adicionar</button><button class="extras-btn">Adicionais</button></div>
+      </div>
     </div>
   </section>
 
-  <!-- ================= COBERTURA ================= -->
+  <!-- ================= HOT DOGS ================= -->
+  <section class="menu-section">
+    <h2>🌭 Hot Dogs</h2>
+    <div class="grid">
+      <div class="card" data-name="Purizin" data-price="14.00">
+        <img src="imagens/purizin.png" alt="Purizin">
+        <h3>Purizin <span class="badge">Com Purê</span></h3>
+        <p class="price">R$ 14,00</p>
+        <p>Pão, molho, milho, purê cremoso, 1 salsicha, batata palha, ketchup e maionese.</p>
+        <div class="actions"><button class="add-cart">Adicionar</button><button class="extras-btn">Adicionais</button></div>
+      </div>
+
+      <div class="card" data-name="Trembão" data-price="17.00">
+        <img src="imagens/trembao.png" alt="Trembão">
+        <h3>Trembão <span class="badge">Com Purê</span></h3>
+        <p class="price">R$ 17,00</p>
+        <p>Pão, molho, milho, purê cremoso, 2 salsichas, bacon crocante, mussarela, batata palha e vinagrete.</p>
+        <div class="actions"><button class="add-cart">Adicionar</button><button class="extras-btn">Adicionais</button></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= BEBIDAS ================= -->
+  <section class="menu-section">
+    <h2>🥤 Bebidas</h2>
+    <div class="grid">
+      <div class="card" data-name="Coca-Cola 2L" data-price="12.00">
+        <h3>Coca-Cola 2L</h3>
+        <p class="price">R$ 12,00</p>
+        <div class="actions"><button class="add-cart">Adicionar</button></div>
+      </div>
+      <div class="card" data-name="Fanta Laranja 1L" data-price="8.00">
+        <h3>Fanta Laranja 1L</h3>
+        <p class="price">R$ 8,00</p>
+        <div class="actions"><button class="add-cart">Adicionar</button></div>
+      </div>
+      <div class="card" data-name="Kuat 2L" data-price="10.00">
+        <h3>Kuat 2L</h3>
+        <p class="price">R$ 10,00</p>
+        <div class="actions"><button class="add-cart">Adicionar</button></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= COBERTURA DE ENTREGA ================= -->
   <section class="coverage">
     <h2>🗺️ Atendemos em toda Patos de Minas!</h2>
-    <iframe
-      src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3785.564292595651!2d-46.51823842398731!3d-18.579795787368847!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0xa556c9343f2f65%3A0xa86de502e5acb58b!2sPatos%20de%20Minas%20-%20MG!5e0!3m2!1spt-BR!2sbr!4v1729530000000!5m2!1spt-BR!2sbr"
-      width="100%" height="320"
-      style="border:0; border-radius:15px; filter: hue-rotate(30deg) brightness(1.1);"
-      allowfullscreen="" loading="lazy">
-    </iframe>
+    <iframe src="https://www.google.com/maps/embed?pb=!1m18!..." width="100%" height="320" style="border:0; border-radius:15px;" allowfullscreen="" loading="lazy"></iframe>
   </section>
 
   <!-- ================= RODAPÉ ================= -->
   <footer class="footer">
-    <p>📍 <a href="https://www.google.com/maps?q=Rua+dos+Caiçaras,+212,+Patos+de+Minas,+MG" target="_blank">
-      Rua dos Caiçaras, 212 — Patos de Minas/MG
-    </a></p>
-
+    <p>📍 <a href="https://www.google.com/maps?q=Rua+dos+Caiçaras,+212,+Patos+de+Minas,+MG" target="_blank">Rua dos Caiçaras, 212 — Patos de Minas/MG</a></p>
     <div class="footer-links">
       <a href="https://wa.me/5534997178336" target="_blank" class="footer-btn">💬 WhatsApp</a>
       <a href="https://www.instagram.com/dafamilialanches" target="_blank" class="footer-btn">📸 Instagram</a>
       <a href="https://www.ifood.com.br/delivery/patos-de-minas/dafamilialanches" target="_blank" class="footer-btn">🍔 iFood</a>
     </div>
-
-    <div class="footer-copy">
-      © 2025 Da Família Lanches — Todos os direitos reservados 🍔
-    </div>
+    <div class="footer-copy">© 2025 Da Família Lanches — Todos os direitos reservados 🍔</div>
   </footer>
 </body>
 </html>
