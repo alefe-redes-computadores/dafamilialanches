@@ -335,3 +335,251 @@ document.addEventListener("DOMContentLoaded", () => {
       window.open(`https://wa.me/5534997178336?text=${msg}`, "_blank");
     });
   });
+/* ------------------ ⏰ STATUS + TIMER ------------------ */
+  const atualizarStatus = safe(() => {
+    const agora = new Date();
+    const h = agora.getHours();
+    const m = agora.getMinutes();
+    const aberto = h >= 18 && h < 23;
+    if (el.statusBanner) {
+      el.statusBanner.textContent = aberto ? "🟢 Aberto — Faça seu pedido!" : "🔴 Fechado — Voltamos às 18h!";
+      el.statusBanner.className = `status-banner ${aberto ? "open" : "closed"}`;
+    }
+    if (el.hoursBanner) {
+      if (aberto) {
+        const rest = (23 - h) * 60 - m;
+        el.hoursBanner.innerHTML = `⏰ Hoje atendemos até <b>23h00</b> — Faltam <b>${Math.floor(rest / 60)}h ${rest % 60}min</b>`;
+      } else {
+        const faltam = h < 18 ? (18 - h) * 60 - m : (24 - h + 18) * 60 - m;
+        el.hoursBanner.innerHTML = `🔒 Fechado — Abrimos em <b>${Math.floor(faltam / 60)}h ${faltam % 60}min</b>`;
+      }
+    }
+  });
+  atualizarStatus();
+  setInterval(atualizarStatus, 60000);
+
+  const atualizarTimer = safe(() => {
+    const agora = new Date();
+    const fim = new Date();
+    fim.setHours(23, 59, 59, 999);
+    const diff = fim - agora;
+    const elTimer = document.getElementById("promo-timer");
+    if (!elTimer) return;
+    if (diff <= 0) return (elTimer.textContent = "00:00:00");
+
+    const h = String(Math.floor(diff / 3600000)).padStart(2, "0");
+    const m = String(Math.floor((diff % 3600000) / 60000)).padStart(2, "0");
+    const s = String(Math.floor((diff % 60000) / 1000)).padStart(2, "0");
+    elTimer.textContent = `${h}:${m}:${s}`;
+  });
+  atualizarTimer();
+  setInterval(atualizarTimer, 1000);
+
+  /* ------------------ 🔥 FIREBASE ------------------ */
+  const firebaseConfig = {
+    apiKey: "AIzaSyATQBcbYuzKpKlSwNlbpRiAM1XyHqhGeak",
+    authDomain: "da-familia-lanches.firebaseapp.com",
+    projectId: "da-familia-lanches",
+    storageBucket: "da-familia-lanches.appspot.com",
+    messagingSenderId: "106857147317",
+    appId: "1:106857147317:web:769c98aed26bb8fc9e87fc",
+    measurementId: "G-TCZ18HFWGX",
+  };
+
+  if (window.firebase && !firebase.apps.length) firebase.initializeApp(firebaseConfig);
+  const auth = firebase.auth();
+  const db = firebase.firestore();
+
+  /* ------------------ LOGIN ------------------ */
+  const openLogin = () => Overlays.open(el.loginModal);
+  const closeLogin = () => Overlays.closeAll();
+
+  el.userBtn?.addEventListener("click", openLogin);
+  document.querySelectorAll("#login-modal .login-close").forEach(btn => 
+    btn.addEventListener("click", closeLogin)
+  );
+
+  el.loginForm?.addEventListener("submit", (e) => {
+    e.preventDefault();
+    const email = document.getElementById("login-email")?.value?.trim();
+    const senha = document.getElementById("login-senha")?.value?.trim();
+    if (!email || !senha) return alert("Preencha e-mail e senha.");
+
+    auth.signInWithEmailAndPassword(email, senha)
+      .then((cred) => {
+        currentUser = cred.user;
+        el.userBtn.textContent = `Olá, ${currentUser.displayName?.split(" ")[0] || currentUser.email.split("@")[0]}`;
+        closeLogin();
+        showOrdersFabIfLogged();
+        popupAdd("Login realizado!");
+      })
+      .catch(() => {
+        auth.createUserWithEmailAndPassword(email, senha)
+          .then((cred) => {
+            currentUser = cred.user;
+            el.userBtn.textContent = `Olá, ${currentUser.displayName?.split(" ")[0] || currentUser.email.split("@")[0]}`;
+            closeLogin();
+            popupAdd("Conta criada! 🎉");
+            showOrdersFabIfLogged();
+          })
+          .catch((err) => alert("Erro: " + err.message));
+      });
+  });
+
+  el.googleBtn?.addEventListener("click", () => {
+    const provider = new firebase.auth.GoogleAuthProvider();
+    auth.signInWithPopup(provider)
+      .then((res) => {
+        currentUser = res.user;
+        el.userBtn.textContent = `Olá, ${currentUser.displayName?.split(" ")[0] || "Cliente"}`;
+        closeLogin();
+        showOrdersFabIfLogged();
+        popupAdd("Login com Google!");
+      })
+      .catch((err) => alert("Erro: " + err.message));
+  });
+
+  auth.onAuthStateChanged((user) => {
+    if (user) {
+      currentUser = user;
+      el.userBtn.textContent = `Olá, ${user.displayName?.split(" ")[0] || user.email.split("@")[0]}`;
+    }
+    showOrdersFabIfLogged();
+  });
+
+  /* ------------------ 💾 FECHAR PEDIDO ------------------ */
+  function fecharPedido() {
+    if (!cart.length) return alert("Carrinho vazio!");
+    if (!currentUser) {
+      alert("Faça login para enviar o pedido!");
+      openLogin();
+      return;
+    }
+
+    const total = cart.reduce((a, i) => a + i.preco * i.qtd, 0);
+    const pedido = {
+      usuario: currentUser.email,
+      userId: currentUser.uid,
+      nome: currentUser.displayName || currentUser.email.split("@")[0],
+      itens: cart.map((i) => `${i.nome} x${i.qtd}`),
+      total: Number(total.toFixed(2)),
+      data: new Date().toISOString(),
+    };
+
+    db.collection("Pedidos")
+      .add(pedido)
+      .then(() => {
+        popupAdd("Pedido salvo ✅");
+        const texto = encodeURIComponent(
+          "🍔 *Pedido DFL*\n" +
+          cart.map((i) => `• ${i.nome} x${i.qtd}`).join("\n") +
+          `\n\n*Total: ${money(total)}*`
+        );
+        window.open(`https://wa.me/5534997178336?text=${texto}`, "_blank");
+        cart = [];
+        renderMiniCart();
+        Overlays.closeAll();
+      })
+      .catch((err) => alert("Erro: " + err.message));
+  }
+
+  /* ------------------ 📦 MEUS PEDIDOS ------------------ */
+  let ordersFab = document.getElementById("orders-fab");
+  if (!ordersFab) {
+    ordersFab = document.createElement("button");
+    ordersFab.id = "orders-fab";
+    ordersFab.innerHTML = "📦 Meus Pedidos";
+    document.body.appendChild(ordersFab);
+  }
+
+  let ordersPanel = document.querySelector(".orders-panel");
+  if (!ordersPanel) {
+    ordersPanel = document.createElement("div");
+    ordersPanel.className = "orders-panel";
+    ordersPanel.innerHTML = `
+      <div class="orders-head">
+        <span>📦 Meus Pedidos</span>
+        <button class="orders-close">✖</button>
+      </div>
+      <div class="orders-content" id="orders-content">
+        <p class="empty-orders">Faça login para ver seus pedidos.</p>
+      </div>`;
+    document.body.appendChild(ordersPanel);
+  }
+
+  function openOrdersPanel() { Overlays.open(ordersPanel); }
+  function closeOrdersPanel() { Overlays.closeAll(); }
+
+  ordersFab.addEventListener("click", () => {
+    if (!currentUser) return alert("Faça login para ver seus pedidos.");
+    openOrdersPanel();
+    carregarPedidosSeguro();
+  });
+
+  ordersPanel.querySelector(".orders-close")?.addEventListener("click", closeOrdersPanel);
+
+  function showOrdersFabIfLogged() {
+    if (currentUser) ordersFab.classList.add("show");
+    else ordersFab.classList.remove("show");
+  }
+
+  function carregarPedidosSeguro() {
+    const container = document.getElementById("orders-content");
+    if (!container) return;
+    container.innerHTML = `<p class="empty-orders">Carregando pedidos...</p>`;
+    if (!currentUser) {
+      container.innerHTML = `<p class="empty-orders">Você precisa estar logado.</p>`;
+      return;
+    }
+
+    db.collection("Pedidos")
+      .where("usuario", "==", currentUser.email)
+      .get()
+      .then((snap) => {
+        if (snap.empty) {
+          container.innerHTML = `<p class="empty-orders">Nenhum pedido encontrado 😢</p>`;
+          return;
+        }
+        
+        const pedidos = [];
+        snap.forEach((doc) => {
+          pedidos.push({ id: doc.id, ...doc.data() });
+        });
+        
+        pedidos.sort((a, b) => new Date(b.data) - new Date(a.data));
+        
+        container.innerHTML = "";
+        pedidos.forEach((p) => {
+          const itens = Array.isArray(p.itens) ? p.itens.join("<br>• ") : p.itens || "";
+          const dataFormatada = new Date(p.data).toLocaleString("pt-BR", {
+            day: '2-digit',
+            month: '2-digit', 
+            year: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
+          });
+          
+          const box = document.createElement("div");
+          box.className = "order-item";
+          box.innerHTML = `
+            <h4>📅 ${dataFormatada}</h4>
+            <p style="margin:8px 0;"><b>Itens:</b><br>• ${itens}</p>
+            <p style="font-size:1.1rem;color:#4caf50;font-weight:600;margin-top:8px;">
+              <b>Total:</b> ${money(p.total)}
+            </p>`;
+          container.appendChild(box);
+        });
+      })
+      .catch((err) => {
+        container.innerHTML = `<p class="empty-orders" style="color:#d32f2f;">Erro: ${err.message}</p>`;
+      });
+  }
+
+  /* ------------------ ⎋ ESC ------------------ */
+  document.addEventListener("keydown", (e) => { 
+    if (e.key === "Escape") Overlays.closeAll(); 
+  });
+
+  renderMiniCart();
+  console.log("%c🔥 DFL v1.9 — TODAS CORREÇÕES OK!", "color:#fff;background:#4caf50;padding:8px 12px;border-radius:8px;font-weight:700");
+});
