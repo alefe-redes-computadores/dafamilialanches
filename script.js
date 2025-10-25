@@ -1,10 +1,8 @@
 /* =========================================================
-   🍔 DFL v1.7.6 — VISUAL REFINADO + SEÇÃO BEBIDAS
-   Totalmente funcional + melhorias visuais + novos produtos
+   🍔 DFL v1.8.1 — VISUAL REFINADO + BEBIDAS + BADGES
 ========================================================= */
 
 document.addEventListener("DOMContentLoaded", () => {
-
   /* ------------------ ⚙️ BASE ------------------ */
   const sound = new Audio("click.wav");
   let cart = [];
@@ -13,9 +11,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const money = (n) => `R$ ${Number(n).toFixed(2).replace(".", ",")}`;
   const safe = (fn) => (...a) => { try { fn(...a); } catch (e) { console.error(e); } };
 
-  document.addEventListener("click", () => {
-    try { sound.currentTime = 0; sound.play(); } catch (_) {}
-  });
+  document.addEventListener("click", () => { try { sound.currentTime = 0; sound.play(); } catch (_) {} });
 
   /* ------------------ 🎯 ELEMENTOS ------------------ */
   const el = {
@@ -39,7 +35,8 @@ document.addEventListener("DOMContentLoaded", () => {
     cNext: document.querySelector(".c-next"),
     userBtn: document.getElementById("user-btn"),
     statusBanner: document.getElementById("status-banner"),
-    hoursBanner: document.querySelector(".hours-banner")
+    hoursBanner: document.querySelector(".hours-banner"),
+    bebidasSection: document.getElementById("bebidas-section"),
   };
 
   /* ------------------ 🌫️ BACKDROP ------------------ */
@@ -51,60 +48,48 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   const Backdrop = {
-    show() {
-      el.cartBackdrop.classList.add("show");
-      document.body.classList.add("no-scroll");
-    },
-    hide() {
-      el.cartBackdrop.classList.remove("show");
-      document.body.classList.remove("no-scroll");
-    },
+    show(){ el.cartBackdrop.classList.add("show"); document.body.classList.add("no-scroll"); },
+    hide(){ el.cartBackdrop.classList.remove("show"); document.body.classList.remove("no-scroll"); },
   };
 
   /* ------------------ 🧩 OVERLAYS ------------------ */
   const Overlays = {
-    closeAll() {
+    closeAll(){
       document.querySelectorAll(".modal.show, #mini-cart.active, .orders-panel.active")
-        .forEach((el) => el.classList.remove("show", "active"));
+        .forEach((e)=> e.classList.remove("show","active"));
       Backdrop.hide();
     },
-    open(modalLike) {
+    open(modalLike){
       Overlays.closeAll();
       if (!modalLike) return;
       modalLike.classList.add(modalLike.id === "mini-cart" ? "active" : "show");
       Backdrop.show();
     },
   };
-
   el.cartBackdrop.addEventListener("click", () => Overlays.closeAll());
 
-  /* ------------------ 💬 POPUP DE ADIÇÃO ------------------ */
-  function popupAdd(msg) {
-    let popup = document.querySelector(".popup-add");
-    if (!popup) {
-      popup = document.createElement("div");
-      popup.className = "popup-add";
-      document.body.appendChild(popup);
-    }
-    popup.textContent = msg;
-    popup.classList.add("show");
-    setTimeout(() => popup.classList.remove("show"), 2000);
+  /* ------------------ 💬 POPUP ------------------ */
+  function popupAdd(msg){
+    let pop = document.querySelector(".popup-add");
+    if(!pop){ pop = document.createElement("div"); pop.className="popup-add"; document.body.appendChild(pop); }
+    pop.textContent = msg; pop.classList.add("show");
+    setTimeout(()=> pop.classList.remove("show"), 2000);
   }
 
-  /* ------------------ 🛒 RENDERIZAR MINI-CARRINHO ------------------ */
-  function renderMiniCart() {
-    if (!el.miniList || !el.miniFoot) return;
+  /* ------------------ 🛒 MINI-CARRINHO ------------------ */
+  function renderMiniCart(){
+    if(!el.miniList || !el.miniFoot) return;
 
-    const totalItens = cart.reduce((sum, i) => sum + i.qtd, 0);
+    const totalItens = cart.reduce((s,i)=>s+i.qtd,0);
     if (el.cartCount) el.cartCount.textContent = totalItens;
 
-    if (cart.length === 0) {
+    if(!cart.length){
       el.miniList.innerHTML = '<p style="text-align:center;color:#999;padding:20px;">Carrinho vazio 🛒</p>';
-      el.miniFoot.innerHTML = '';
+      el.miniFoot.innerHTML = "";
       return;
     }
 
-    el.miniList.innerHTML = cart.map((item, idx) => `
+    el.miniList.innerHTML = cart.map((item,idx)=>`
       <div class="cart-item" style="border-bottom:1px solid #eee;padding:10px 0;">
         <div style="display:flex;justify-content:space-between;align-items:center;">
           <div style="flex:1;">
@@ -119,58 +104,36 @@ document.addEventListener("DOMContentLoaded", () => {
           </div>
         </div>
       </div>
-    `).join('');
+    `).join("");
 
-    const total = cart.reduce((sum, i) => sum + (i.preco * i.qtd), 0);
+    const total = cart.reduce((s,i)=>s + i.preco*i.qtd, 0);
     el.miniFoot.innerHTML = `
       <div style="padding:15px;">
         <div style="display:flex;justify-content:space-between;margin-bottom:15px;font-size:1.2rem;font-weight:600;">
-          <span>Total:</span>
-          <span style="color:#e53935;">${money(total)}</span>
+          <span>Total:</span><span style="color:#e53935;">${money(total)}</span>
         </div>
         <button id="finish-order" class="btn-primary full">Finalizar Pedido 🛍️</button>
         <button id="clear-cart" class="btn-secondary full">Limpar Carrinho</button>
-      </div>
-    `;
+      </div>`;
 
-    document.querySelectorAll(".cart-plus").forEach(btn => {
-      btn.addEventListener("click", (e) => {
-        const idx = parseInt(e.target.dataset.idx);
-        cart[idx].qtd++;
-        renderMiniCart();
-      });
-    });
-
-    document.querySelectorAll(".cart-minus").forEach(btn => {
-      btn.addEventListener("click", (e) => {
-        const idx = parseInt(e.target.dataset.idx);
-        if (cart[idx].qtd > 1) cart[idx].qtd--;
-        else cart.splice(idx, 1);
-        renderMiniCart();
-      });
-    });
-
-    document.querySelectorAll(".cart-remove").forEach(btn => {
-      btn.addEventListener("click", (e) => {
-        const idx = parseInt(e.target.dataset.idx);
-        cart.splice(idx, 1);
-        renderMiniCart();
-        popupAdd("Item removido!");
-      });
-    });
+    document.querySelectorAll(".cart-plus").forEach(b=>b.addEventListener("click",e=>{
+      const i = +e.target.dataset.idx; cart[i].qtd++; renderMiniCart();
+    }));
+    document.querySelectorAll(".cart-minus").forEach(b=>b.addEventListener("click",e=>{
+      const i = +e.target.dataset.idx; cart[i].qtd>1 ? cart[i].qtd-- : cart.splice(i,1); renderMiniCart();
+    }));
+    document.querySelectorAll(".cart-remove").forEach(b=>b.addEventListener("click",e=>{
+      const i = +e.target.dataset.idx; cart.splice(i,1); renderMiniCart(); popupAdd("Item removido!");
+    }));
 
     document.getElementById("finish-order")?.addEventListener("click", fecharPedido);
-    document.getElementById("clear-cart")?.addEventListener("click", () => {
-      if (confirm("Limpar todo o carrinho?")) {
-        cart = [];
-        renderMiniCart();
-        popupAdd("Carrinho limpo!");
-      }
+    document.getElementById("clear-cart")?.addEventListener("click", ()=>{
+      if(confirm("Limpar todo o carrinho?")){ cart=[]; renderMiniCart(); popupAdd("Carrinho limpo!"); }
     });
   }
+  el.cartIcon?.addEventListener("click", ()=> Overlays.open(el.miniCart));
 
-  el.cartIcon?.addEventListener("click", () => Overlays.open(el.miniCart));
-/* ------------------ ➕ ADICIONAIS ------------------ */
+  /* ------------------ ➕ ADICIONAIS ------------------ */
   const adicionais = [
     { nome: "Cebola", preco: 0.99 },
     { nome: "Salada", preco: 1.99 },
@@ -181,50 +144,31 @@ document.addEventListener("DOMContentLoaded", () => {
     { nome: "Filé de Frango", preco: 5.99 },
     { nome: "Hambúrguer Artesanal 120g", preco: 7.99 },
   ];
-
   let produtoExtras = null;
-  const openExtrasFor = safe((card) => {
-    if (!card || !el.extrasModal || !el.extrasList) return;
-    produtoExtras = card.dataset.name || card.querySelector("h3")?.textContent?.trim() || "Produto";
 
-    el.extrasList.innerHTML = adicionais.map((a, i) => `
+  const openExtrasFor = safe((card)=>{
+    if(!card || !el.extrasModal || !el.extrasList) return;
+    produtoExtras = card.dataset.name || card.querySelector("h3")?.textContent?.trim() || "Produto";
+    el.extrasList.innerHTML = adicionais.map((a,i)=>`
       <label class="extra-line modern-line">
         <span>${a.nome} — <b>${money(a.preco)}</b></span>
         <input type="checkbox" value="${i}" class="modern-check">
-      </label>
-    `).join("");
-
+      </label>`).join("");
     Overlays.open(el.extrasModal);
   });
 
-  document.querySelectorAll(".extras-btn").forEach((btn) =>
-    btn.addEventListener("click", (e) => {
-      const card = e.currentTarget.closest(".card");
-      openExtrasFor(card);
-    })
-  );
+  document.querySelectorAll(".extras-btn").forEach(btn=>btn.addEventListener("click",(e)=>{
+    const card = e.currentTarget.closest(".card"); openExtrasFor(card);
+  }));
 
-  el.extrasConfirm?.addEventListener("click", () => {
-    if (!produtoExtras) return Overlays.closeAll();
+  el.extrasConfirm?.addEventListener("click", ()=>{
+    if(!produtoExtras) return Overlays.closeAll();
     const checks = [...document.querySelectorAll("#extras-modal .extras-list input:checked")];
-
-    if (checks.length === 0) {
-      alert("Selecione pelo menos um adicional!");
-      return;
-    }
-
-    checks.forEach((c) => {
-      const a = adicionais[+c.value];
-      cart.push({ nome: `${produtoExtras} + ${a.nome}`, preco: a.preco, qtd: 1 });
-    });
-    renderMiniCart();
-    popupAdd(`Adicionais incluídos!`);
-    Overlays.closeAll();
+    if(!checks.length) return alert("Selecione pelo menos um adicional!");
+    checks.forEach(c=>{ const a = adicionais[+c.value]; cart.push({ nome:`${produtoExtras} + ${a.nome}`, preco:a.preco, qtd:1 }); });
+    renderMiniCart(); popupAdd("Adicionais incluídos!"); Overlays.closeAll();
   });
-
-  document.querySelectorAll("#extras-modal .extras-close").forEach((b) =>
-    b.addEventListener("click", () => Overlays.closeAll())
-  );
+  document.querySelectorAll("#extras-modal .extras-close").forEach(b=>b.addEventListener("click",()=>Overlays.closeAll()));
 
   /* ------------------ 🥤 MODAL DE BEBIDAS (COMBOS) ------------------ */
   const comboDrinkOptions = {
@@ -240,162 +184,98 @@ document.addEventListener("DOMContentLoaded", () => {
       { rotulo: "Guaraná 2L", delta: 4.5 },
     ],
   };
-
   let _comboCtx = null;
-  const openComboModal = safe((nomeCombo, precoBase) => {
-    if (!el.comboModal || !el.comboBody) {
-      addCommonItem(nomeCombo, precoBase);
-      return;
-    }
 
-    const low = (nomeCombo || "").toLowerCase();
-    const grupo = low.includes("casal") ? "casal" :
-                  (low.includes("família") || low.includes("familia")) ? "familia" : null;
-
-    if (!grupo) {
-      addCommonItem(nomeCombo, precoBase);
-      return;
-    }
-
+  const openComboModal = safe((nomeCombo, precoBase)=>{
+    if(!el.comboModal || !el.comboBody){ addCommonItem(nomeCombo, precoBase); return; }
+    const low = (nomeCombo||"").toLowerCase();
+    const grupo = low.includes("casal") ? "casal" : ((low.includes("família")||low.includes("familia")) ? "familia" : null);
+    if(!grupo){ addCommonItem(nomeCombo, precoBase); return; }
     const opts = comboDrinkOptions[grupo];
-    el.comboBody.innerHTML = opts.map((o, i) => `
+    el.comboBody.innerHTML = opts.map((o,i)=>`
       <label class="extra-line modern-line">
         <span>${o.rotulo} — <b>+${money(o.delta)}</b></span>
-        <input type="radio" name="combo-drink" value="${i}" ${i === 0 ? "checked" : ""} class="modern-check">
-      </label>
-    `).join("");
-
-    _comboCtx = { nomeCombo, precoBase, grupo };
-    Overlays.open(el.comboModal);
+        <input type="radio" name="combo-drink" value="${i}" ${i===0?"checked":""} class="modern-check">
+      </label>`).join("");
+    _comboCtx = { nomeCombo, precoBase, grupo }; Overlays.open(el.comboModal);
   });
 
-  el.comboConfirm?.addEventListener("click", () => {
-    if (!_comboCtx) return Overlays.closeAll();
-    const sel = el.comboBody?.querySelector('input[name="combo-drink"]:checked');
-    if (!sel) return;
+  el.comboConfirm?.addEventListener("click", ()=>{
+    if(!_comboCtx) return Overlays.closeAll();
+    const sel = el.comboBody?.querySelector('input[name="combo-drink"]:checked'); if(!sel) return;
     const opt = comboDrinkOptions[_comboCtx.grupo][+sel.value];
     const finalName = `${_comboCtx.nomeCombo} + ${opt.rotulo}`;
-    const finalPrice = Number(_comboCtx.precoBase) + (opt.delta || 0);
-    cart.push({ nome: finalName, preco: finalPrice, qtd: 1 });
-    popupAdd(`${finalName} adicionado!`);
-    renderMiniCart();
-    Overlays.closeAll();
+    const finalPrice = Number(_comboCtx.precoBase) + (opt.delta||0);
+    cart.push({ nome:finalName, preco:finalPrice, qtd:1 }); popupAdd(`${finalName} adicionado!`);
+    renderMiniCart(); Overlays.closeAll();
   });
+  document.querySelectorAll("#combo-modal .combo-close").forEach(b=>b.addEventListener("click",()=>Overlays.closeAll()));
 
-  document.querySelectorAll("#combo-modal .combo-close").forEach((b) =>
-    b.addEventListener("click", () => Overlays.closeAll())
-  );
-
-  /* ------------------ 🧺 ADICIONAR ITEM ------------------ */
-  function addCommonItem(nome, preco) {
-    const found = cart.find((i) => i.nome === nome && i.preco === preco);
-    if (found) found.qtd += 1;
-    else cart.push({ nome, preco, qtd: 1 });
-    renderMiniCart();
-    popupAdd(`${nome} adicionado!`);
+  /* ------------------ 🧺 ADD ITEM ------------------ */
+  function addCommonItem(nome, preco){
+    const found = cart.find((i)=> i.nome===nome && i.preco===preco);
+    if(found) found.qtd += 1; else cart.push({ nome, preco, qtd:1 });
+    renderMiniCart(); popupAdd(`${nome} adicionado!`);
   }
+  document.querySelectorAll(".add-cart").forEach(btn=>btn.addEventListener("click",(e)=>{
+    const card = e.currentTarget.closest(".card"); if(!card) return;
+    const nome = card.dataset.name || card.querySelector("h3")?.textContent?.trim() || "Item";
+    const preco = parseFloat(card.dataset.price || "0");
+    if(/^combo/i.test(nome)) openComboModal(nome, preco); else addCommonItem(nome, preco);
+  }));
 
-  document.querySelectorAll(".add-cart").forEach((btn) =>
-    btn.addEventListener("click", (e) => {
-      const card = e.currentTarget.closest(".card");
-      if (!card) return;
-      const nome = card.dataset.name || card.querySelector("h3")?.textContent?.trim() || "Item";
-      const preco = parseFloat(card.dataset.price || "0");
-      if (/^combo/i.test(nome)) openComboModal(nome, preco);
-      else addCommonItem(nome, preco);
-    })
-  );
-
-  /* ------------------ 🍾 SEÇÃO BEBIDAS (NOVA) ------------------ */
+  /* ------------------ 🍾 BEBIDAS (não sobrescrever HTML já existente) ------------------ */
   const bebidas = [
-    { nome: "Coca-Cola 200ml", preco: 4.00 },
-    { nome: "Coca-Cola 310ml", preco: 5.00 },
-    { nome: "Coca-Cola 310ml Zero", preco: 5.00 },
-    { nome: "Del Valle Uva 450ml", preco: 5.00 },
-    { nome: "Del Valle Laranja 450ml", preco: 5.00 },
-    { nome: "Fanta 1L", preco: 8.00 },
-    { nome: "Coca-Cola 1L", preco: 9.00 },
-    { nome: "Coca-Cola 1L Zero", preco: 9.00 },
-    { nome: "Kuat 2L", preco: 10.00 },
-    { nome: "Coca-Cola 2L", preco: 13.00 },
+    { nome:"Coca-Cola 200ml", preco:4.00 }, { nome:"Coca-Cola 310ml", preco:5.00 },
+    { nome:"Coca-Cola 310ml Zero", preco:5.00 }, { nome:"Del Valle Uva 450ml", preco:5.00 },
+    { nome:"Del Valle Laranja 450ml", preco:5.00 }, { nome:"Fanta 1L", preco:8.00 },
+    { nome:"Coca-Cola 1L", preco:9.00 }, { nome:"Coca-Cola 1L Zero", preco:9.00 },
+    { nome:"Kuat 2L", preco:10.00 }, { nome:"Coca-Cola 2L", preco:13.00 },
   ];
-
-  const bebidasSection = document.getElementById("bebidas-section");
-  if (bebidasSection) {
-    bebidasSection.innerHTML = bebidas.map(b => `
-      <div class="card" data-name="${b.nome}" data-price="${b.preco}">
-        <h3>${b.nome}</h3>
-        <p><b>${money(b.preco)}</b></p>
-        <div class="actions">
-          <button class="add-cart">Adicionar</button>
-        </div>
-      </div>
-    `).join("");
-  }
-/* ------------------ 🖼️ CARROSSEL ------------------ */
-  el.cPrev?.addEventListener("click", () => {
-    if (!el.slides) return;
-    el.slides.scrollLeft -= Math.min(el.slides.clientWidth * 0.9, 320);
-  });
-
-  el.cNext?.addEventListener("click", () => {
-    if (!el.slides) return;
-    el.slides.scrollLeft += Math.min(el.slides.clientWidth * 0.9, 320);
-  });
-
-  document.querySelectorAll(".slide").forEach((img) => {
-    img.addEventListener("click", () => {
-      const msg = encodeURIComponent(img.dataset.wa || "Quero essa promoção! 🍔");
-      window.open(`https://wa.me/5534997178336?text=${msg}`, "_blank");
+  if (el.bebidasSection && el.bebidasSection.querySelectorAll(".card").length === 0){
+    // Só preenche dinamicamente se você NÃO listou no HTML.
+    const grid = document.createElement("div"); grid.className="grid";
+    bebidas.forEach(b=>{
+      const c = document.createElement("div"); c.className="card"; c.dataset.name=b.nome; c.dataset.price=b.preco;
+      c.innerHTML = `<h3>${b.nome}</h3><p><b>${money(b.preco)}</b></p><div class="actions"><button class="add-cart">Adicionar</button></div>`;
+      grid.appendChild(c);
     });
-  });
+    el.bebidasSection.appendChild(grid);
+    grid.querySelectorAll(".add-cart").forEach(btn=>btn.addEventListener("click",(e)=>{
+      const card = e.currentTarget.closest(".card"); addCommonItem(card.dataset.name, parseFloat(card.dataset.price));
+    }));
+  }
 
-  /* ------------------ ⏰ STATUS ------------------ */
-  const atualizarStatus = safe(() => {
-    const agora = new Date();
-    const hora = agora.getHours();
-    const minuto = agora.getMinutes();
-    const aberto = hora >= 18 && hora < 23;
+  /* ------------------ 🖼️ CARROSSEL ------------------ */
+  el.cPrev?.addEventListener("click", ()=>{ if(!el.slides) return; el.slides.scrollLeft -= Math.min(el.slides.clientWidth*.9, 320); });
+  el.cNext?.addEventListener("click", ()=>{ if(!el.slides) return; el.slides.scrollLeft += Math.min(el.slides.clientWidth*.9, 320); });
+  document.querySelectorAll(".slide").forEach(img=>img.addEventListener("click", ()=>{
+    const msg = encodeURIComponent(img.dataset.wa || "Quero essa promoção! 🍔");
+    window.open(`https://wa.me/5534997178336?text=${msg}`, "_blank");
+  }));
 
-    if (el.statusBanner) {
-      el.statusBanner.textContent = aberto ? "🟢 Aberto — Faça seu pedido!" : "🔴 Fechado — Voltamos às 18h!";
-      el.statusBanner.className = `status-banner ${aberto ? "open" : "closed"}`;
-    }
-
-    if (el.hoursBanner) {
-      if (aberto) {
-        const restante = (23 - hora) * 60 - minuto;
-        const h = Math.floor(restante / 60);
-        const m = restante % 60;
-        el.hoursBanner.innerHTML = `⏰ Hoje atendemos até <b>23h00</b> — Faltam <b>${h}h ${m}min</b>`;
-      } else {
-        const faltam = hora < 18 ? (18 - hora) * 60 - minuto : (24 - hora + 18) * 60 - minuto;
-        const h = Math.floor(faltam / 60);
-        const m = faltam % 60;
-        el.hoursBanner.innerHTML = `🔒 Fechado — Abrimos em <b>${h}h ${m}min</b>`;
-      }
+  /* ------------------ ⏰ STATUS + TIMER ------------------ */
+  const atualizarStatus = safe(()=>{
+    const agora = new Date(); const h = agora.getHours(); const m = agora.getMinutes();
+    const aberto = h>=18 && h<23;
+    if(el.statusBanner){ el.statusBanner.textContent = aberto ? "🟢 Aberto — Faça seu pedido!" : "🔴 Fechado — Voltamos às 18h!"; el.statusBanner.className = `status-banner ${aberto?"open":"closed"}`; }
+    if(el.hoursBanner){
+      if(aberto){ const rest = (23-h)*60 - m; el.hoursBanner.innerHTML = `⏰ Hoje atendemos até <b>23h00</b> — Faltam <b>${Math.floor(rest/60)}h ${rest%60}min</b>`; }
+      else { const faltam = h<18 ? (18-h)*60 - m : (24-h+18)*60 - m; el.hoursBanner.innerHTML = `🔒 Fechado — Abrimos em <b>${Math.floor(faltam/60)}h ${faltam%60}min</b>`; }
     }
   });
-  atualizarStatus();
-  setInterval(atualizarStatus, 60000);
+  atualizarStatus(); setInterval(atualizarStatus, 60000);
 
-  /* ------------------ ⏳ TIMER PROMOÇÕES ------------------ */
-  const atualizarTimer = safe(() => {
-    const agora = new Date();
-    const fim = new Date();
-    fim.setHours(23, 59, 59, 999);
-    const diff = fim - agora;
-    const elTimer = document.getElementById("promo-timer");
-    if (!elTimer) return;
-    if (diff <= 0) return (elTimer.textContent = "00:00:00");
-
-    const h = String(Math.floor(diff / 3600000)).padStart(2, "0");
-    const m = String(Math.floor((diff % 3600000) / 60000)).padStart(2, "0");
-    const s = String(Math.floor((diff % 60000) / 1000)).padStart(2, "0");
-    elTimer.textContent = `${h}:${m}:${s}`;
+  const atualizarTimer = safe(()=>{
+    const agora = new Date(); const fim = new Date(); fim.setHours(23,59,59,999);
+    const diff = fim - agora; const elTimer = document.getElementById("promo-timer"); if(!elTimer) return;
+    if(diff<=0) return elTimer.textContent="00:00:00";
+    const hh = String(Math.floor(diff/3600000)).padStart(2,"0");
+    const mm = String(Math.floor((diff%3600000)/60000)).padStart(2,"0");
+    const ss = String(Math.floor((diff%60000)/1000)).padStart(2,"0");
+    elTimer.textContent = `${hh}:${mm}:${ss}`;
   });
-  atualizarTimer();
-  setInterval(atualizarTimer, 1000);
+  atualizarTimer(); setInterval(atualizarTimer, 1000);
 
   /* ------------------ 🔥 FIREBASE ------------------ */
   const firebaseConfig = {
@@ -407,173 +287,92 @@ document.addEventListener("DOMContentLoaded", () => {
     appId: "1:106857147317:web:769c98aed26bb8fc9e87fc",
     measurementId: "G-TCZ18HFWGX",
   };
-
   if (window.firebase && !firebase.apps.length) firebase.initializeApp(firebaseConfig);
-  const auth = firebase.auth();
-  const db = firebase.firestore();
+  const auth = firebase.auth(); const db = firebase.firestore();
 
   /* ------------------ LOGIN ------------------ */
-  const openLogin = () => Overlays.open(el.loginModal);
-  const closeLogin = () => Overlays.closeAll();
+  const openLogin = ()=> Overlays.open(el.loginModal);
+  const closeLogin = ()=> Overlays.closeAll();
+  document.getElementById("user-btn")?.addEventListener("click", openLogin);
+  document.querySelectorAll("#login-modal .login-close").forEach(b=>b.addEventListener("click", closeLogin));
 
-  el.userBtn?.addEventListener("click", openLogin);
-  document.querySelectorAll("#login-modal .login-close").forEach(btn =>
-    btn.addEventListener("click", closeLogin)
-  );
-
-  el.googleBtn?.addEventListener("click", () => {
+  // Google
+  el.googleBtn?.addEventListener("click", ()=>{
     const provider = new firebase.auth.GoogleAuthProvider();
     auth.signInWithPopup(provider)
-      .then((res) => {
-        currentUser = res.user;
-        el.userBtn.textContent = `Olá, ${currentUser.displayName?.split(" ")[0] || "Cliente"}`;
-        closeLogin();
-        showOrdersFabIfLogged();
-        popupAdd("Login com Google!");
-      })
-      .catch((err) => alert("Erro: " + err.message));
+      .then((res)=>{ currentUser = res.user; el.userBtn.textContent = `Olá, ${currentUser.displayName?.split(" ")[0] || "Cliente"}`; closeLogin(); showOrdersFabIfLogged(); popupAdd("Login com Google!"); })
+      .catch((err)=> alert("Erro: " + err.message));
   });
 
-  /* ------------------ 📦 MEUS PEDIDOS ------------------ */
+  // Email/senha (login ou cria)
+  el.loginForm?.addEventListener("submit",(e)=>{
+    e.preventDefault();
+    const email = document.getElementById("login-email")?.value?.trim();
+    const senha = document.getElementById("login-senha")?.value?.trim();
+    if(!email || !senha) return alert("Preencha e-mail e senha.");
+
+    auth.signInWithEmailAndPassword(email, senha)
+      .then((cred)=>{ currentUser = cred.user; el.userBtn.textContent = `Olá, ${currentUser.displayName?.split(" ")[0] || currentUser.email.split("@")[0]}`; closeLogin(); showOrdersFabIfLogged(); popupAdd("Login realizado!"); })
+      .catch(()=> {
+        auth.createUserWithEmailAndPassword(email, senha)
+          .then((cred)=>{ currentUser = cred.user; el.userBtn.textContent = `Olá, ${currentUser.displayName?.split(" ")[0] || currentUser.email.split("@")[0]}`; closeLogin(); showOrdersFabIfLogged(); popupAdd("Conta criada! 🎉"); })
+          .catch((err)=> alert("Erro: " + err.message));
+      });
+  });
+
+  auth.onAuthStateChanged((user)=>{
+    if(user){ currentUser=user; el.userBtn.textContent = `Olá, ${user.displayName?.split(" ")[0] || user.email.split("@")[0]}`; }
+    showOrdersFabIfLogged();
+  });
+
+  /* ------------------ PEDIDOS ------------------ */
   let ordersFab = document.getElementById("orders-fab");
-  if (!ordersFab) {
-    ordersFab = document.createElement("button");
-    ordersFab.id = "orders-fab";
-    ordersFab.innerHTML = "📦 Meus Pedidos";
-    document.body.appendChild(ordersFab);
-  }
+  if(!ordersFab){ ordersFab = document.createElement("button"); ordersFab.id="orders-fab"; ordersFab.innerHTML="📦 Meus Pedidos"; document.body.appendChild(ordersFab); }
 
   let ordersPanel = document.querySelector(".orders-panel");
-  if (!ordersPanel) {
+  if(!ordersPanel){
     ordersPanel = document.createElement("div");
     ordersPanel.className = "orders-panel";
     ordersPanel.innerHTML = `
-      <div class="orders-head">
-        <span>📦 Meus Pedidos</span>
-        <button class="orders-close">✖</button>
-      </div>
-      <div class="orders-content" id="orders-content">
-        <p class="empty-orders">Faça login para ver seus pedidos.</p>
-      </div>`;
+      <div class="orders-head"><span>📦 Meus Pedidos</span><button class="orders-close">✖</button></div>
+      <div class="orders-content" id="orders-content"><p class="empty-orders">Faça login para ver seus pedidos.</p></div>`;
     document.body.appendChild(ordersPanel);
   }
-
-  function openOrdersPanel() {
-    Overlays.closeAll();
-    ordersPanel.classList.add("active");
-    el.cartBackdrop.classList.add("show");
-    document.body.classList.add("no-scroll");
-  }
-
-  function closeOrdersPanel() {
-    ordersPanel.classList.remove("active");
-    el.cartBackdrop.classList.remove("show");
-    document.body.classList.remove("no-scroll");
-  }
-
-  ordersFab.addEventListener("click", () => {
-    if (!currentUser) {
-      alert("Faça login para ver seus pedidos.");
-      return;
-    }
-    openOrdersPanel();
-    carregarPedidosSeguro();
-  });
-
+  function openOrdersPanel(){ Overlays.closeAll(); ordersPanel.classList.add("active"); el.cartBackdrop.classList.add("show"); document.body.classList.add("no-scroll"); }
+  function closeOrdersPanel(){ ordersPanel.classList.remove("active"); el.cartBackdrop.classList.remove("show"); document.body.classList.remove("no-scroll"); }
   ordersPanel.querySelector(".orders-close")?.addEventListener("click", closeOrdersPanel);
 
-  function showOrdersFabIfLogged() {
-    if (currentUser) ordersFab.classList.add("show");
-    else ordersFab.classList.remove("show");
-  }
+  ordersFab.addEventListener("click", ()=>{
+    if(!currentUser){ alert("Faça login para ver seus pedidos."); return; }
+    openOrdersPanel(); carregarPedidosSeguro();
+  });
 
-  function carregarPedidosSeguro() {
-    const container = document.getElementById("orders-content");
-    if (!container) return;
+  function showOrdersFabIfLogged(){ currentUser ? ordersFab.classList.add("show") : ordersFab.classList.remove("show"); }
+
+  function carregarPedidosSeguro(){
+    const container = document.getElementById("orders-content"); if(!container) return;
     container.innerHTML = `<p class="empty-orders">⏳ Carregando pedidos...</p>`;
+    if(!currentUser){ container.innerHTML = `<p class="empty-orders">Faça login para ver seus pedidos.</p>`; return; }
 
-    if (!currentUser) {
-      container.innerHTML = `<p class="empty-orders">Faça login para ver seus pedidos.</p>`;
-      return;
-    }
-
-    db.collection("Pedidos")
-      .where("usuario", "==", currentUser.email)
-      .get()
-      .then((snap) => {
-        if (snap.empty) {
-          container.innerHTML = `<p class="empty-orders">😢 Nenhum pedido encontrado.</p>`;
-          return;
-        }
-        const pedidos = [];
-        snap.forEach((doc) => pedidos.push({ id: doc.id, ...doc.data() }));
-        pedidos.sort((a, b) => new Date(b.data) - new Date(a.data));
-
-        container.innerHTML = pedidos.map(p => `
+    db.collection("Pedidos").where("usuario","==", currentUser.email).get()
+      .then((snap)=>{
+        if(snap.empty){ container.innerHTML = `<p class="empty-orders">😢 Nenhum pedido encontrado.</p>`; return; }
+        const pedidos=[]; snap.forEach(d=>pedidos.push({id:d.id, ...d.data()}));
+        pedidos.sort((a,b)=> new Date(b.data) - new Date(a.data));
+        container.innerHTML = pedidos.map(p=>`
           <div class="order-item">
             <h4>📅 ${new Date(p.data).toLocaleString("pt-BR")}</h4>
-            <p><b>Itens:</b><br>• ${Array.isArray(p.itens) ? p.itens.join("<br>• ") : p.itens}</p>
+            <p><b>Itens:</b><br>• ${Array.isArray(p.itens)? p.itens.join("<br>• ") : p.itens}</p>
             <p style="color:#4caf50;margin-top:5px;"><b>Total:</b> ${money(p.total)}</p>
-          </div>
-        `).join("");
+          </div>`).join("");
       })
-      .catch((err) => {
-        container.innerHTML = `<p class="empty-orders" style="color:red;">Erro: ${err.message}</p>`;
-      });
+      .catch(err=> container.innerHTML = `<p class="empty-orders" style="color:red;">Erro: ${err.message}</p>`);
   }
 
-  /* ------------------ ⎋ ESC ------------------ */
-  document.addEventListener("keydown", (e) => {
-    if (e.key === "Escape") Overlays.closeAll();
-  });
+  /* ------------------ ESC fecha overlays ------------------ */
+  document.addEventListener("keydown",(e)=>{ if(e.key==="Escape") Overlays.closeAll(); });
 
+  // Inicializa
   renderMiniCart();
-  console.log("%c🔥 DFL v1.7.6 — Visual refinado + bebidas OK!", "color:#fff;background:#4caf50;padding:8px 12px;border-radius:8px;font-weight:600");
+  console.log("%c🔥 DFL v1.8.1 — Visual + Badges + Bebidas OK!", "color:#fff;background:#4caf50;padding:8px 12px;border-radius:8px;font-weight:700");
 });
-/* ------------------ 🥤 SEÇÃO BEBIDAS (CORRIGIDA) ------------------ */
-const bebidas = [
-  { nome: "Coca-Cola 200ml", preco: 4.00 },
-  { nome: "Coca-Cola 310ml", preco: 5.00 },
-  { nome: "Coca-Cola 310ml Zero", preco: 5.00 },
-  { nome: "Del Valle Uva 450ml", preco: 5.00 },
-  { nome: "Del Valle Laranja 450ml", preco: 5.00 },
-  { nome: "Fanta 1L", preco: 8.00 },
-  { nome: "Coca-Cola 1L", preco: 9.00 },
-  { nome: "Coca-Cola 1L Zero", preco: 9.00 },
-  { nome: "Kuat 2L", preco: 10.00 },
-  { nome: "Coca-Cola 2L", preco: 13.00 },
-];
-
-const bebidasSection = document.getElementById("bebidas-section");
-if (bebidasSection) {
-  const grid = document.createElement("div");
-  grid.className = "grid";
-
-  bebidas.forEach(b => {
-    const card = document.createElement("div");
-    card.className = "card";
-    card.dataset.name = b.nome;
-    card.dataset.price = b.preco;
-
-    card.innerHTML = `
-      <h3>${b.nome}</h3>
-      <p><strong>${money(b.preco)}</strong></p>
-      <div class="actions">
-        <button class="add-cart">Adicionar</button>
-      </div>
-    `;
-
-    grid.appendChild(card);
-  });
-
-  bebidasSection.appendChild(grid);
-
-  grid.querySelectorAll(".add-cart").forEach(btn => {
-    btn.addEventListener("click", (e) => {
-      const card = e.currentTarget.closest(".card");
-      const nome = card.dataset.name;
-      const preco = parseFloat(card.dataset.price);
-      addCommonItem(nome, preco);
-    });
-  });
-}
