@@ -273,3 +273,63 @@ h2 span {
   color: #4caf50;
   font-weight: 600;
 }
+/* =========================================================
+   🥤 Faixa Dourada — Seção de Bebidas
+========================================================= */
+
+#bebidas-section {
+  margin: 40px auto 60px auto;
+  text-align: center;
+}
+
+#bebidas-section h2 {
+  display: inline-block;
+  background: linear-gradient(135deg, #ffca28, #ffd54f);
+  color: #222;
+  font-weight: 700;
+  font-size: 1.3rem;
+  padding: 10px 26px;
+  border-radius: 50px;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.15);
+  letter-spacing: 0.3px;
+  margin-bottom: 20px;
+  position: relative;
+}
+
+#bebidas-section h2::before {
+  content: "🥤 ";
+}
+
+#bebidas-section .grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+  gap: 16px;
+  margin-top: 10px;
+  padding: 0 10px;
+}
+
+#bebidas-section .card {
+  background: #fff;
+  border-radius: 14px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.08);
+  padding: 14px;
+  transition: transform 0.2s ease;
+}
+
+#bebidas-section .card:hover {
+  transform: translateY(-3px);
+}
+
+#bebidas-section .card h3 {
+  font-size: 1rem;
+  color: #333;
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+#bebidas-section .card p {
+  font-size: 0.95rem;
+  color: #4caf50;
+  font-weight: 600;
+  margin-bottom: 10px;
+}
