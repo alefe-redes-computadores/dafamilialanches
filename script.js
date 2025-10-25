@@ -576,26 +576,18 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   /* ------------------ ⎋ ESC ------------------ */
-  document.addEventListener("keydown", (e) => { 
-    if (e.key === "Escape") Overlays.closeAll(); 
-  });
-
-  renderMiniCart();
-  console.log("%c🔥 DFL v1.9 — TODAS CORREÇÕES OK!", "color:#fff;background:#4caf50;padding:8px 12px;border-radius:8px;font-weight:700");
+document.addEventListener("keydown", (e) => { 
+  if (e.key === "Escape") Overlays.closeAll(); 
+});
 
 /* ------------------ 🖱️ FECHAR MODAL AO CLICAR FORA (CORRIGIDO) ------------------ */
 document.addEventListener("click", (e) => {
-  // Seleciona modais e painéis abertos
   const aberto = document.querySelector(".modal.show, #mini-cart.active, .orders-panel.active");
   if (!aberto) return;
-
-  // Ignora cliques dentro do modal, mini-cart ou orders-panel
   if (e.target.closest(".modal-content, #mini-cart, .orders-panel")) return;
-
-  // Ignora cliques no botão do carrinho ou outros botões de abrir modal
-  if (e.target.closest("#cart-icon, .add-cart, .extras-btn, .user-button")) return;
-
-  // Fecha tudo se o clique foi fora
+  if (e.target.closest("#cart-icon, .add-cart, .extras-btn, .user-button, #orders-fab")) return;
   Overlays.closeAll();
 });
-});
+
+renderMiniCart();
+console.log("%c🔥 DFL v2.0 — ESTÁVEL E OTIMIZADO!", "color:#fff;background:#4caf50;padding:8px 12px;border-radius:8px;font-weight:700");
