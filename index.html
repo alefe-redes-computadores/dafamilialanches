@@ -1,12 +1,12 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-">
+  <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>🍔 Da Família Lanches</title>
   <link rel="stylesheet" href="style.css" />
 
-  <!-- Firebase -->
+  <!-- Firebase v8 -->
   <script defer src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
   <script defer src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
   <script defer src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
@@ -50,6 +50,8 @@
         <img class="slide" src="promocoes/promo1.jpg" data-wa="Promoção 1 imperdível! 🍔" />
         <img class="slide" src="promocoes/promo2.jpg" data-wa="Promoção 2 exclusiva! 🌭" />
         <img class="slide" src="promocoes/promo3.jpg" data-wa="Promoção 3 só hoje! 🥤" />
+        <img class="slide" src="promocoes/promo4.jpg" data-wa="Promoção 4 da casa! 🍟" />
+        <img class="slide" src="promocoes/promo5.jpg" data-wa="Promoção 5 sensacional! 🔥" />
       </div>
       <button class="c-btn c-next">›</button>
     </div>
@@ -78,6 +80,22 @@
         <div class="actions"><button class="add-cart">Adicionar</button></div>
       </div>
 
+      <div class="card" data-name="Combo Casal Artesanal" data-price="49.99">
+        <img src="imagens/combo2.png" alt="Combo Casal Artesanal">
+        <h3>Combo Casal Artesanal <span class="badge economia">💸 Economia de R$ 11,01</span></h3>
+        <p class="price">De R$ 61,00 por <b>R$ 49,99</b></p>
+        <p>2 Burger <b>Peleja</b> + 1 Fanta 1L.</p>
+        <div class="actions"><button class="add-cart">Adicionar</button></div>
+      </div>
+
+      <div class="card" data-name="Combo Família Tradicional" data-price="59.99">
+        <img src="imagens/combo3.png" alt="Combo Família Tradicional">
+        <h3>Combo Família Tradicional <span class="badge economia">💸 Economia de R$ 10,01</span></h3>
+        <p class="price">De R$ 70,00 por <b>R$ 59,99</b></p>
+        <p>4 Burger <b>Trem</b> + 1 Kuat 2L.</p>
+        <div class="actions"><button class="add-cart">Adicionar</button></div>
+      </div>
+
       <div class="card" data-name="Combo Família Artesanal" data-price="84.99">
         <img src="imagens/combo4.png" alt="Combo Família Artesanal">
         <h3>Combo Família Artesanal <span class="badge economia">💸 Economia de R$ 29,01</span></h3>
@@ -100,6 +118,14 @@
         <div class="actions"><button class="add-cart">Adicionar</button><button class="extras-btn">Adicionais</button></div>
       </div>
 
+      <div class="card" data-name="Uai" data-price="13.00">
+        <img src="imagens/uai.png" alt="Uai">
+        <h3>Uai <span class="badge">Com Molho Verde</span></h3>
+        <p class="price">R$ 13,00</p>
+        <p>Pão, hambúrguer, milho, bacon, alface, tomate, presunto e mussarela.</p>
+        <div class="actions"><button class="add-cart">Adicionar</button><button class="extras-btn">Adicionais</button></div>
+      </div>
+
       <div class="card" data-name="Trem" data-price="14.00">
         <img src="imagens/trem.png" alt="Trem">
         <h3>Trem <span class="badge">Com Molho Verde</span></h3>
@@ -110,15 +136,61 @@
     </div>
   </section>
 
+  <!-- ================= LANCHES ARTESANAIS ================= -->
+  <section class="menu-section">
+    <h2>🍔 Lanches Artesanais</h2>
+    <div class="grid">
+      <div class="card" data-name="Peleja" data-price="26.00">
+        <img src="imagens/peleja.png" alt="Peleja">
+        <h3>Peleja <span class="badge">Com Molho Verde</span></h3>
+        <p class="price">R$ 26,00</p>
+        <p>Pão, hambúrguer artesanal, filé de frango, bacon, milho, batata palha, alface, tomate, presunto e mussarela.</p>
+        <div class="actions"><button class="add-cart">Adicionar</button><button class="extras-btn">Adicionais</button></div>
+      </div>
+
+      <div class="card" data-name="Tudibom" data-price="28.50">
+        <img src="imagens/tudibom.png" alt="Tudibom">
+        <h3>Tudibom <span class="badge">Com Molho Verde</span></h3>
+        <p class="price">R$ 28,50</p>
+        <p>Pão, 2 hambúrgueres artesanais, 2 filés de frango, bacon, milho, batata palha, alface, tomate, 2 presuntos e 2 mussarelas.</p>
+        <div class="actions"><button class="add-cart">Adicionar</button><button class="extras-btn">Adicionais</button></div>
+      </div>
+
+      <div class="card" data-name="Custoso" data-price="31.00">
+        <img src="imagens/custoso.png" alt="Custoso">
+        <h3>Custoso <span class="badge">Com Molho Verde</span></h3>
+        <p class="price">R$ 31,00</p>
+        <p>Pão, 2 hambúrgueres artesanais, 2 filés de frango, bacon, milho, batata palha, alface, tomate, 2 presuntos e 2 cheddar.</p>
+        <div class="actions"><button class="add-cart">Adicionar</button><button class="extras-btn">Adicionais</button></div>
+      </div>
+    </div>
+  </section>
+
   <!-- ================= HOT DOGS ================= -->
   <section class="menu-section">
     <h2>🌭 Hot Dogs</h2>
     <div class="grid">
+      <div class="card" data-name="Nigucim" data-price="10.00">
+        <img src="imagens/nigucim.png" alt="Nigucim">
+        <h3>Nigucim <span class="badge">Com Molho Verde</span></h3>
+        <p class="price">R$ 10,00</p>
+        <p>Pão, molho, salsicha (Sadia/Perdigão), milho, batata palha, ketchup e maionese.</p>
+        <div class="actions"><button class="add-cart">Adicionar</button><button class="extras-btn">Adicionais</button></div>
+      </div>
+
+      <div class="card" data-name="Simprão" data-price="12.00">
+        <img src="imagens/simprao.png" alt="Simprão">
+        <h3>Simprão <span class="badge">Com Molho Verde</span></h3>
+        <p class="price">R$ 12,00</p>
+        <p>Pão, molho, salsicha, milho, batata palha, bacon, ketchup e maionese.</p>
+        <div class="actions"><button class="add-cart">Adicionar</button><button class="extras-btn">Adicionais</button></div>
+      </div>
+
       <div class="card" data-name="Purizin" data-price="14.00">
         <img src="imagens/purizin.png" alt="Purizin">
         <h3>Purizin <span class="badge">Com Molho Verde</span> <span class="badge">Com Purê</span></h3>
         <p class="price">R$ 14,00</p>
-        <p>Pão, molho, purê de batata, milho, batata palha e maionese.</p>
+        <p>Pão, molho, purê de batata cremoso, 1 salsicha, milho, batata palha, ketchup e maionese.</p>
         <div class="actions"><button class="add-cart">Adicionar</button><button class="extras-btn">Adicionais</button></div>
       </div>
 
@@ -126,26 +198,26 @@
         <img src="imagens/trembao.png" alt="Trembão">
         <h3>Trembão <span class="badge">Com Molho Verde</span> <span class="badge">Com Purê</span></h3>
         <p class="price">R$ 17,00</p>
-        <p>Pão, purê de batata, bacon, salsicha e milho.</p>
+        <p>Pão, molho, purê de batata cremoso, 2 salsichas, bacon crocante, mussarela, batata palha, vinagrete, ketchup e maionese.</p>
         <div class="actions"><button class="add-cart">Adicionar</button><button class="extras-btn">Adicionais</button></div>
       </div>
     </div>
   </section>
 
-  <!-- ================= BEBIDAS COMPLETAS ================= -->
+  <!-- ================= BEBIDAS (SEM IMAGENS) ================= -->
   <section id="bebidas-section" class="menu-section">
     <h2>🥤 Bebidas</h2>
     <div class="grid">
-      <div class="card" data-name="Coca-Cola 200ml" data-price="4.00"><h3>Coca-Cola 200ml</h3><p>R$ 4,00</p></div>
-      <div class="card" data-name="Coca-Cola 310ml" data-price="5.00"><h3>Coca-Cola 310ml</h3><p>R$ 5,00</p></div>
-      <div class="card" data-name="Coca-Cola 310ml Zero" data-price="5.00"><h3>Coca-Cola 310ml Zero</h3><p>R$ 5,00</p></div>
-      <div class="card" data-name="Del Valle Uva 450ml" data-price="5.00"><h3>Del Valle Uva 450ml</h3><p>R$ 5,00</p></div>
-      <div class="card" data-name="Del Valle Laranja 450ml" data-price="5.00"><h3>Del Valle Laranja 450ml</h3><p>R$ 5,00</p></div>
-      <div class="card" data-name="Fanta 1L" data-price="8.00"><h3>Fanta 1L</h3><p>R$ 8,00</p></div>
-      <div class="card" data-name="Coca-Cola 1L" data-price="9.00"><h3>Coca-Cola 1L</h3><p>R$ 9,00</p></div>
-      <div class="card" data-name="Coca-Cola 1L Zero" data-price="9.00"><h3>Coca-Cola 1L Zero</h3><p>R$ 9,00</p></div>
-      <div class="card" data-name="Kuat 2L" data-price="10.00"><h3>Kuat 2L</h3><p>R$ 10,00</p></div>
-      <div class="card" data-name="Coca-Cola 2L" data-price="13.00"><h3>Coca-Cola 2L</h3><p>R$ 13,00</p></div>
+      <div class="card" data-name="Coca-Cola 200ml" data-price="4.00"><h3>Coca-Cola 200ml</h3><p><b>R$ 4,00</b></p><div class="actions"><button class="add-cart">Adicionar</button></div></div>
+      <div class="card" data-name="Coca-Cola 310ml" data-price="5.00"><h3>Coca-Cola 310ml</h3><p><b>R$ 5,00</b></p><div class="actions"><button class="add-cart">Adicionar</button></div></div>
+      <div class="card" data-name="Coca-Cola 310ml Zero" data-price="5.00"><h3>Coca-Cola 310ml Zero</h3><p><b>R$ 5,00</b></p><div class="actions"><button class="add-cart">Adicionar</button></div></div>
+      <div class="card" data-name="Del Valle Uva 450ml" data-price="5.00"><h3>Del Valle Uva 450ml</h3><p><b>R$ 5,00</b></p><div class="actions"><button class="add-cart">Adicionar</button></div></div>
+      <div class="card" data-name="Del Valle Laranja 450ml" data-price="5.00"><h3>Del Valle Laranja 450ml</h3><p><b>R$ 5,00</b></p><div class="actions"><button class="add-cart">Adicionar</button></div></div>
+      <div class="card" data-name="Fanta 1L" data-price="8.00"><h3>Fanta 1L</h3><p><b>R$ 8,00</b></p><div class="actions"><button class="add-cart">Adicionar</button></div></div>
+      <div class="card" data-name="Coca-Cola 1L" data-price="9.00"><h3>Coca-Cola 1L</h3><p><b>R$ 9,00</b></p><div class="actions"><button class="add-cart">Adicionar</button></div></div>
+      <div class="card" data-name="Coca-Cola 1L Zero" data-price="9.00"><h3>Coca-Cola 1L Zero</h3><p><b>R$ 9,00</b></p><div class="actions"><button class="add-cart">Adicionar</button></div></div>
+      <div class="card" data-name="Kuat 2L" data-price="10.00"><h3>Kuat 2L</h3><p><b>R$ 10,00</b></p><div class="actions"><button class="add-cart">Adicionar</button></div></div>
+      <div class="card" data-name="Coca-Cola 2L" data-price="13.00"><h3>Coca-Cola 2L</h3><p><b>R$ 13,00</b></p><div class="actions"><button class="add-cart">Adicionar</button></div></div>
     </div>
   </section>
 
@@ -157,19 +229,19 @@
         <button class="login-close">✖</button>
       </div>
 
+      <button id="google-login" class="btn-google">
+        <img src="imagens/google-icon.png" alt="Google" class="google-icon" />
+        Entrar com Google
+      </button>
+      <small class="login-safe">🔒 Login seguro e criptografado</small>
+
+      <div class="divider">ou</div>
+
       <form id="login-form" class="login-form">
         <input id="login-email" type="email" placeholder="E-mail" required />
         <input id="login-senha" type="password" placeholder="Senha" required />
         <button type="submit" class="btn-primario">Entrar</button>
       </form>
-
-      <div class="divider">ou</div>
-
-      <button id="google-login" class="btn-google">
-        <img src="imagens/google-icon.png" alt="Google" class="google-icon">
-        Entrar com Google
-        <small class="login-safe">🔒 Login seguro e criptografado</small>
-      </button>
     </div>
   </div>
 
