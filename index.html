@@ -23,7 +23,6 @@
       </div>
     </div>
 
-    <!-- Botões de login e carrinho -->
     <div style="display:flex;align-items:center;gap:10px;">
       <button id="user-btn" class="user-button">Entrar / Cadastrar</button>
       <button id="cart-icon">🛒 <span id="cart-count">0</span></button>
@@ -40,9 +39,7 @@
   <section class="promo-section">
     <h2>🔥 Promoções do Dia</h2>
     <p class="promo-sub">Aproveite antes que acabe!</p>
-    <div class="countdown-ticker">
-      ⏳ Tempo restante: <span id="promo-timer"></span>
-    </div>
+    <div class="countdown-ticker">⏳ Tempo restante: <span id="promo-timer"></span></div>
 
     <div class="carousel">
       <button class="c-btn c-prev">‹</button>
@@ -73,12 +70,13 @@
   </aside>
 
   <!-- ================= COMBOS ================= -->
-  <section class="menu-section">
-    <h2>🧡 Combos</h2>
+  <section class="menu-section" id="combos-section">
+    <h2>🔥 Combos</h2>
     <div class="grid">
       <div class="card" data-name="Combo Casal Tradicional" data-price="34.99">
         <img src="imagens/combo1.png" alt="Combo Casal Tradicional">
-        <h3>Combo Casal Tradicional <span class="badge">💸 Economia de R$ 5,01</span></h3>
+        <h3>Combo Casal Tradicional</h3>
+        <p><em>💸 Economia de R$ 5,01</em></p>
         <p class="price">De R$ 39,99 por <b>R$ 34,99</b></p>
         <p>2 Burger <b>Trem</b> + 1 Fanta 1 L. Pão, hambúrguer, salsicha, bacon, milho, alface, tomate, presunto e mussarela.</p>
         <div class="actions"><button class="add-cart">Adicionar</button></div>
@@ -86,7 +84,8 @@
 
       <div class="card" data-name="Combo Casal Artesanal" data-price="49.99">
         <img src="imagens/combo2.png" alt="Combo Casal Artesanal">
-        <h3>Combo Casal Artesanal <span class="badge">💸 Economia de R$ 11,01</span></h3>
+        <h3>Combo Casal Artesanal</h3>
+        <p><em>💸 Economia de R$ 11,01</em></p>
         <p class="price">De R$ 61,00 por <b>R$ 49,99</b></p>
         <p>2 Burger <b>Peleja</b> + 1 Fanta 1 L. Pão, hambúrguer artesanal 120g, filé de frango, bacon, milho, batata palha, presunto e mussarela.</p>
         <div class="actions"><button class="add-cart">Adicionar</button></div>
@@ -94,7 +93,8 @@
 
       <div class="card" data-name="Combo Família Tradicional" data-price="59.99">
         <img src="imagens/combo3.png" alt="Combo Família Tradicional">
-        <h3>Combo Família Tradicional <span class="badge">💸 Economia de R$ 10,01</span></h3>
+        <h3>Combo Família Tradicional</h3>
+        <p><em>💸 Economia de R$ 10,01</em></p>
         <p class="price">De R$ 70,00 por <b>R$ 59,99</b></p>
         <p>4 Burger <b>Trem</b> + 1 Kuat 2 L. Pão, hambúrguer, salsicha, bacon, milho, alface, tomate, presunto e mussarela.</p>
         <div class="actions"><button class="add-cart">Adicionar</button></div>
@@ -102,289 +102,24 @@
 
       <div class="card" data-name="Combo Família Artesanal" data-price="84.99">
         <img src="imagens/combo4.png" alt="Combo Família Artesanal">
-        <h3>Combo Família Artesanal <span class="badge">💸 Economia de R$ 29,01</span></h3>
+        <h3>Combo Família Artesanal</h3>
+        <p><em>💸 Economia de R$ 29,01</em></p>
         <p class="price">De R$ 114,00 por <b>R$ 84,99</b></p>
         <p>4 Burger <b>Peleja</b> + 1 Kuat 2 L. Pão, hambúrguer artesanal 120g, filé de frango, bacon, milho, batata palha, presunto e mussarela.</p>
         <div class="actions"><button class="add-cart">Adicionar</button></div>
       </div>
     </div>
   </section>
-<!-- ================= LANCHES TRADICIONAIS ================= -->
-  <section class="menu-section">
-    <h2>🍔 Nossos Lanches Tradicionais</h2>
-    <div class="grid">
-      <div class="card" data-name="Bão" data-price="11.00">
-        <img src="imagens/bao.png" alt="Bão">
-        <h3>Bão <span class="badge">Com Molho Verde</span></h3>
-        <p class="price">R$ 11,00</p>
-        <p>Pão, hambúrguer, alface, tomate, presunto e mussarela.</p>
-        <div class="actions">
-          <button class="add-cart">Adicionar</button>
-          <button class="extras-btn">Adicionais</button>
-        </div>
-      </div>
 
-      <div class="card" data-name="Uai" data-price="13.00">
-        <img src="imagens/uai.png" alt="Uai">
-        <h3>Uai <span class="badge">Com Molho Verde</span></h3>
-        <p class="price">R$ 13,00</p>
-        <p>Pão, hambúrguer, milho, bacon, alface, tomate, presunto e mussarela.</p>
-        <div class="actions">
-          <button class="add-cart">Adicionar</button>
-          <button class="extras-btn">Adicionais</button>
-        </div>
-      </div>
-
-      <div class="card" data-name="Trem" data-price="14.00">
-        <img src="imagens/trem.png" alt="Trem">
-        <h3>Trem <span class="badge">Com Molho Verde</span></h3>
-        <p class="price">R$ 14,00</p>
-        <p>Pão, hambúrguer, salsicha, bacon, milho, alface, tomate, presunto e mussarela.</p>
-        <div class="actions">
-          <button class="add-cart">Adicionar</button>
-          <button class="extras-btn">Adicionais</button>
-        </div>
-      </div>
-
-      <div class="card" data-name="Cadim" data-price="17.00">
-        <img src="imagens/cadim.png" alt="Cadim">
-        <h3>Cadim <span class="badge">Com Molho Verde</span></h3>
-        <p class="price">R$ 17,00</p>
-        <p>Pão, hambúrguer, filé de frango, bacon, milho, batata palha e mussarela.</p>
-        <div class="actions">
-          <button class="add-cart">Adicionar</button>
-          <button class="extras-btn">Adicionais</button>
-        </div>
-      </div>
-
-      <div class="card" data-name="Armaria" data-price="18.00">
-        <img src="imagens/armaria.png" alt="Armaria">
-        <h3>Armaria <span class="badge">Com Molho Verde</span></h3>
-        <p class="price">R$ 18,00</p>
-        <p>Pão, 1 hambúrguer e 1 filé de frango, bacon, milho, batata palha e mussarela.</p>
-        <div class="actions">
-          <button class="add-cart">Adicionar</button>
-          <button class="extras-btn">Adicionais</button>
-        </div>
-      </div>
-
-      <div class="card" data-name="Bitela" data-price="22.00">
-        <img src="imagens/bitela.png" alt="Bitela">
-        <h3>Bitela <span class="badge">Com Molho Verde</span></h3>
-        <p class="price">R$ 22,00</p>
-        <p>Pão, 2 hambúrgueres, filé de frango, bacon, milho, batata palha, 2 salsichas, presunto e mussarela.</p>
-        <div class="actions">
-          <button class="add-cart">Adicionar</button>
-          <button class="extras-btn">Adicionais</button>
-        </div>
-      </div>
-
-      <div class="card" data-name="Apruma" data-price="25.00">
-        <img src="imagens/apruma.png" alt="Apruma">
-        <h3>Apruma <span class="badge">Com Molho Verde</span></h3>
-        <p class="price">R$ 25,00</p>
-        <p>Pão, 2 hambúrgueres artesanais, 2 filés de frango, bacon, milho, batata palha e cheddar.</p>
-        <div class="actions">
-          <button class="add-cart">Adicionar</button>
-          <button class="extras-btn">Adicionais</button>
-        </div>
-      </div>
-
-      <div class="card" data-name="Gradicido" data-price="28.00">
-        <img src="imagens/gradicido.png" alt="Gradicido">
-        <h3>Gradicido <span class="badge">Com Molho Verde</span></h3>
-        <p class="price">R$ 28,00</p>
-        <p>Pão, 3 hambúrgueres, filé de frango, bacon, ovo, 1 salsicha, milho, batata palha, alface, tomate, 2 presuntos e 2 mussarelas.</p>
-        <div class="actions">
-          <button class="add-cart">Adicionar</button>
-          <button class="extras-btn">Adicionais</button>
-        </div>
-      </div>
-
-      <div class="card" data-name="Varadifome" data-price="30.00">
-        <img src="imagens/varadifome.png" alt="Varadifome">
-        <h3>Varadifome <span class="badge">Com Molho Verde</span></h3>
-        <p class="price">R$ 30,00</p>
-        <p>Pão, 4 hambúrgueres, filé de frango, bacon, ovo, cheddar, milho, batata palha, 2 salsichas, alface, tomate, presunto e mussarela.</p>
-        <div class="actions">
-          <button class="add-cart">Adicionar</button>
-          <button class="extras-btn">Adicionais</button>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- ================= LANCHES ARTESANAIS ================= -->
-  <section class="menu-section">
-    <h2>🍔 Lanches Artesanais</h2>
-    <div class="grid">
-      <div class="card" data-name="Peleja" data-price="26.00">
-        <img src="imagens/peleja.png" alt="Peleja">
-        <h3>Peleja <span class="badge">Com Molho Verde</span></h3>
-        <p class="price">R$ 26,00</p>
-        <p>Pão, hambúrguer artesanal, filé de frango, bacon, milho, batata palha, alface, tomate, presunto e mussarela.</p>
-        <div class="actions"><button class="add-cart">Adicionar</button><button class="extras-btn">Adicionais</button></div>
-      </div>
-
-      <div class="card" data-name="Tudibom" data-price="28.50">
-        <img src="imagens/tudibom.png" alt="Tudibom">
-        <h3>Tudibom <span class="badge">Com Molho Verde</span></h3>
-        <p class="price">R$ 28,50</p>
-        <p>Pão, 2 hambúrgueres artesanais, 2 filés de frango, bacon, milho, batata palha, alface, tomate, 2 presuntos e 2 mussarelas.</p>
-        <div class="actions"><button class="add-cart">Adicionar</button><button class="extras-btn">Adicionais</button></div>
-      </div>
-
-      <div class="card" data-name="Custoso" data-price="31.00">
-        <img src="imagens/custoso.png" alt="Custoso">
-        <h3>Custoso <span class="badge">Com Molho Verde</span></h3>
-        <p class="price">R$ 31,00</p>
-        <p>Pão, 2 hambúrgueres artesanais, 2 filés de frango, bacon, milho, batata palha, alface, tomate, 2 presuntos e 2 cheddar.</p>
-        <div class="actions"><button class="add-cart">Adicionar</button><button class="extras-btn">Adicionais</button></div>
-      </div>
-    </div>
-  </section>
-
-  <!-- ================= HOT DOGS ================= -->
-  <section class="menu-section">
-    <h2>🌭 Hot Dogs</h2>
-    <div class="grid">
-      <div class="card" data-name="Nigucim" data-price="10.00">
-        <img src="imagens/nigucim.png" alt="Nigucim">
-        <h3>Nigucim</h3>
-        <p class="price">R$ 10,00</p>
-        <p>Pão, molho, salsicha (Sadia/Perdigão), milho, batata palha, ketchup e maionese.</p>
-        <div class="actions"><button class="add-cart">Adicionar</button><button class="extras-btn">Adicionais</button></div>
-      </div>
-
-      <div class="card" data-name="Simprão" data-price="12.00">
-        <img src="imagens/simprao.png" alt="Simprão">
-        <h3>Simprão</h3>
-        <p class="price">R$ 12,00</p>
-        <p>Pão, molho, salsicha, milho, batata palha, bacon, ketchup e maionese.</p>
-        <div class="actions"><button class="add-cart">Adicionar</button><button class="extras-btn">Adicionais</button></div>
-      </div>
-
-      <div class="card" data-name="Nimin" data-price="13.00">
-        <img src="imagens/nimin.png" alt="Nimin">
-        <h3>Nimin</h3>
-        <p class="price">R$ 13,00</p>
-        <p>Pão, molho, 2 salsichas, milho, batata palha, bacon, ketchup, maionese e vinagrete.</p>
-        <div class="actions"><button class="add-cart">Adicionar</button><button class="extras-btn">Adicionais</button></div>
-      </div>
-
-      <div class="card" data-name="Padaná" data-price="15.00">
-        <img src="imagens/padana.png" alt="Padaná">
-        <h3>Padaná</h3>
-        <p class="price">R$ 15,00</p>
-        <p>Pão, molho, 2 salsichas, milho, batata palha, bacon, vinagrete, mussarela, ketchup e maionese.</p>
-        <div class="actions"><button class="add-cart">Adicionar</button><button class="extras-btn">Adicionais</button></div>
-      </div>
-
-      <div class="card" data-name="Purizin" data-price="14.00">
-        <img src="imagens/purizin.png" alt="Purizin">
-        <h3>Purizin <span class="badge">Com Purê</span></h3>
-        <p class="price">R$ 14,00</p>
-        <p>Pão, molho, milho, purê de batata cremoso, 1 salsicha, batata palha, ketchup e maionese.</p>
-        <div class="actions"><button class="add-cart">Adicionar</button><button class="extras-btn">Adicionais</button></div>
-      </div>
-
-      <div class="card" data-name="Trembão" data-price="17.00">
-        <img src="imagens/trembao.png" alt="Trembão">
-        <h3>Trembão <span class="badge">Com Purê</span></h3>
-        <p class="price">R$ 17,00</p>
-        <p>Pão, molho, milho, purê de batata cremoso, 2 salsichas, bacon crocante, mussarela, batata palha, vinagrete, ketchup e maionese.</p>
-        <div class="actions"><button class="add-cart">Adicionar</button><button class="extras-btn">Adicionais</button></div>
-      </div>
-    </div>
-  </section>
-
-  <!-- ================= BEBIDAS ================= -->
-  <section class="menu-section">
+  <!-- ================= BEBIDAS (NOVO PADRÃO DOURADO) ================= -->
+  <section id="bebidas-section">
     <h2>🥤 Bebidas</h2>
     <div class="grid">
-      <div class="card" data-name="Coca-Cola 2L" data-price="12.00">
-        <img src="imagens/coca2l.png" alt="Coca-Cola 2L">
-        <h3>Coca-Cola 2L</h3>
-        <p class="price">R$ 12,00</p>
-        <div class="actions"><button class="add-cart">Adicionar</button></div>
-      </div>
-      <div class="card" data-name="Fanta Laranja 1L" data-price="8.00">
-        <img src="imagens/fanta1l.png" alt="Fanta Laranja 1L">
-        <h3>Fanta Laranja 1L</h3>
-        <p class="price">R$ 8,00</p>
-        <div class="actions"><button class="add-cart">Adicionar</button></div>
-      </div>
-      <div class="card" data-name="Kuat 2L" data-price="10.00">
-        <img src="imagens/kuat2l.png" alt="Kuat 2L">
-        <h3>Kuat 2L</h3>
-        <p class="price">R$ 10,00</p>
-        <div class="actions"><button class="add-cart">Adicionar</button></div>
-      </div>
+      <!-- Gerado pelo script.js -->
     </div>
   </section>
- <!-- ================= MODAL DE ADICIONAIS ================= -->
-  <div id="extras-modal" class="modal">
-    <div class="modal-content">
-      <div class="modal-head">
-        <h3>Adicionais</h3>
-        <button class="extras-close">✖</button>
-      </div>
-      <div class="extras-list">
-        <label><input type="checkbox" value="0.99"> Cebola — R$ 0,99</label>
-        <label><input type="checkbox" value="1.99"> Salada — R$ 1,99</label>
-        <label><input type="checkbox" value="1.99"> Ovo — R$ 1,99</label>
-        <label><input type="checkbox" value="2.99"> Bacon — R$ 2,99</label>
-        <label><input type="checkbox" value="2.99"> Hambúrguer Tradicional — R$ 2,99</label>
-        <label><input type="checkbox" value="3.99"> Cheddar Cremoso — R$ 3,99</label>
-        <label><input type="checkbox" value="5.99"> Filé de Frango — R$ 5,99</label>
-        <label><input type="checkbox" value="7.99"> Hambúrguer Artesanal — R$ 7,99</label>
-      </div>
-      <div class="modal-foot">
-        <button id="extras-confirm" class="btn-primary">Adicionar ao Pedido</button>
-        <button class="btn-secondary extras-close">Cancelar</button>
-      </div>
-    </div>
-  </div>
 
-  <!-- ================= MODAL DE REFRIGERANTE ================= -->
-  <div id="combo-modal" class="modal">
-    <div class="modal-content">
-      <div class="modal-head">
-        <h3>Escolher Refrigerante</h3>
-        <button class="combo-close">✖</button>
-      </div>
-      <div id="combo-body">
-        <label><input type="radio" name="drink" value="Fanta 1L" checked> Fanta 1L (padrão) — + R$ 0,00</label>
-        <label><input type="radio" name="drink" value="Coca 1L"> Coca 1L — + R$ 3,00</label>
-        <label><input type="radio" name="drink" value="Coca 1L Zero"> Coca 1L Zero — + R$ 3,00</label>
-      </div>
-      <div class="modal-foot">
-        <button id="combo-confirm" class="btn-primary">Confirmar</button>
-        <button class="btn-secondary combo-close">Cancelar</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- ================= MODAL DE LOGIN ================= -->
-  <div id="login-modal" class="modal">
-    <div class="modal-content login-box">
-      <div class="modal-head">
-        <h3>Entrar / Cadastrar</h3>
-        <button class="login-close">✖</button>
-      </div>
-      <form id="login-form" class="login-form">
-        <input id="login-email" type="email" placeholder="E-mail" required>
-        <input id="login-senha" type="password" placeholder="Senha" required>
-        <button type="submit" class="btn-primario">Entrar</button>
-      </form>
-      <div class="divider">ou</div>
-      <button id="google-login" class="btn-google">
-        <img src="imagens/google-icon.png" alt="Google" class="google-icon"> Entrar com Google
-      </button>
-    </div>
-  </div>
-
-  <!-- ================= COBERTURA DE ENTREGA ================= -->
+  <!-- ================= COBERTURA ================= -->
   <section class="coverage">
     <h2>🗺️ Atendemos em toda Patos de Minas!</h2>
     <iframe
