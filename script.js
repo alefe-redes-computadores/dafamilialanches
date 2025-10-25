@@ -169,8 +169,45 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
+  // ****** CORREÇÃO: Função "Finalizar Pedido" ADICIONADA ******
+  function fecharPedido() {
+    if (cart.length === 0) {
+      alert("Seu carrinho está vazio!");
+      return;
+    }
+    
+    const total = cart.reduce((sum, i) => sum + (i.preco * i.qtd), 0);
+    
+    let mensagem = "Olá, Da Família Lanches! 🍔\n\nGostaria de fazer o seguinte pedido:\n\n";
+    
+    cart.forEach(item => {
+      // Formata cada item do carrinho
+      let nomeItem = item.nome.replace(/<span class="badge.*?<\/span>/gi, "").trim(); // Limpa tags HTML se houver
+      mensagem += `*${item.qtd}x* ${nomeItem} - ${money(item.preco * item.qtd)}\n`;
+    });
+    
+    mensagem += `\n*Total:* *${money(total)}*`;
+    
+    if (currentUser) {
+      mensagem += `\n\n*Cliente:* ${currentUser.displayName || currentUser.email}`;
+    }
+    
+    mensagem += "\n\nAguardando confirmação. Obrigado!";
+
+    const fone = "5534997178336"; // Seu número do WhatsApp
+    const link = `https://wa.me/${fone}?text=${encodeURIComponent(mensagem)}`;
+    
+    window.open(link, "_blank");
+    
+    // Opcional: descomente as linhas abaixo para limpar o carrinho após enviar
+    // cart = [];
+    // renderMiniCart();
+    // Overlays.closeAll();
+  }
+  // ****** FIM DA NOVA FUNÇÃO ******
+
   el.cartIcon?.addEventListener("click", () => Overlays.open(el.miniCart));
-/* ------------------ ➕ ADICIONAIS ------------------ */
+  /* ------------------ ➕ ADICIONAIS ------------------ */
   const adicionais = [
     { nome: "Cebola", preco: 0.99 },
     { nome: "Salada", preco: 1.99 },
@@ -288,25 +325,37 @@ document.addEventListener("DOMContentLoaded", () => {
 
   /* ------------------ 🧺 ADICIONAR ITEM ------------------ */
   function addCommonItem(nome, preco) {
-    const found = cart.find((i) => i.nome === nome && i.preco === preco);
-    if (found) found.qtd += 1;
-    else cart.push({ nome, preco, qtd: 1 });
+    // Limpa o nome de tags HTML (como as badges) antes de comparar
+    const nomeLimpo = nome.replace(/<span class="badge.*?<\/span>/gi, "").trim();
+    
+    const found = cart.find((i) => i.nome === nomeLimpo && i.preco === preco);
+    if (found) {
+      found.qtd += 1;
+    } else {
+      cart.push({ nome: nomeLimpo, preco: preco, qtd: 1 });
+    }
     renderMiniCart();
-    popupAdd(`${nome} adicionado!`);
+    popupAdd(`${nomeLimpo} adicionado!`);
   }
+
 
   document.querySelectorAll(".add-cart").forEach((btn) =>
     btn.addEventListener("click", (e) => {
       const card = e.currentTarget.closest(".card");
       if (!card) return;
+      // Pega o NOME do data-name, que é mais limpo
       const nome = card.dataset.name || card.querySelector("h3")?.textContent?.trim() || "Item";
       const preco = parseFloat(card.dataset.price || "0");
-      if (/^combo/i.test(nome)) openComboModal(nome, preco);
-      else addCommonItem(nome, preco);
+      
+      if (/^combo/i.test(nome)) {
+        openComboModal(nome, preco);
+      } else {
+        addCommonItem(nome, preco);
+      }
     })
   );
 
-  /* ------------------ 🍾 SEÇÃO BEBIDAS (NOVA) ------------------ */
+  /* ------------------ 🍾 SEÇÃO BEBIDAS (CORRIGIDA) ------------------ */
   const bebidas = [
     { nome: "Coca-Cola 200ml", preco: 4.00 },
     { nome: "Coca-Cola 310ml", preco: 5.00 },
@@ -320,9 +369,11 @@ document.addEventListener("DOMContentLoaded", () => {
     { nome: "Coca-Cola 2L", preco: 13.00 },
   ];
 
-  const bebidasSection = document.getElementById("bebidas-section");
-  if (bebidasSection) {
-    bebidasSection.innerHTML = bebidas.map(b => `
+  // 1. Pega a DIV correta que você criou no HTML
+  const bebidasGrid = document.getElementById("bebidas-grid");
+  if (bebidasGrid) {
+    // 2. Preenche SÓ A DIV com os cards
+    bebidasGrid.innerHTML = bebidas.map(b => `
       <div class="card" data-name="${b.nome}" data-price="${b.preco}">
         <h3>${b.nome}</h3>
         <p><b>${money(b.preco)}</b></p>
@@ -331,8 +382,19 @@ document.addEventListener("DOMContentLoaded", () => {
         </div>
       </div>
     `).join("");
+
+    // 3. IMPORTANTE: Adiciona os cliques DEPOIS de criar os cards
+    bebidasGrid.querySelectorAll(".add-cart").forEach(btn => {
+      btn.addEventListener("click", (e) => {
+        const card = e.currentTarget.closest(".card");
+        const nome = card.dataset.name;
+        const preco = parseFloat(card.dataset.price);
+        addCommonItem(nome, preco); // A função addCommonItem() agora funciona
+      });
+    });
   }
-/* ------------------ 🖼️ CARROSSEL ------------------ */
+
+  /* ------------------ 🖼️ CARROSSEL ------------------ */
   el.cPrev?.addEventListener("click", () => {
     if (!el.slides) return;
     el.slides.scrollLeft -= Math.min(el.slides.clientWidth * 0.9, 320);
@@ -530,50 +592,7 @@ document.addEventListener("DOMContentLoaded", () => {
   renderMiniCart();
   console.log("%c🔥 DFL v1.7.6 — Visual refinado + bebidas OK!", "color:#fff;background:#4caf50;padding:8px 12px;border-radius:8px;font-weight:600");
 });
-/* ------------------ 🥤 SEÇÃO BEBIDAS (CORRIGIDA) ------------------ */
-const bebidas = [
-  { nome: "Coca-Cola 200ml", preco: 4.00 },
-  { nome: "Coca-Cola 310ml", preco: 5.00 },
-  { nome: "Coca-Cola 310ml Zero", preco: 5.00 },
-  { nome: "Del Valle Uva 450ml", preco: 5.00 },
-  { nome: "Del Valle Laranja 450ml", preco: 5.00 },
-  { nome: "Fanta 1L", preco: 8.00 },
-  { nome: "Coca-Cola 1L", preco: 9.00 },
-  { nome: "Coca-Cola 1L Zero", preco: 9.00 },
-  { nome: "Kuat 2L", preco: 10.00 },
-  { nome: "Coca-Cola 2L", preco: 13.00 },
-];
 
-const bebidasSection = document.getElementById("bebidas-section");
-if (bebidasSection) {
-  const grid = document.createElement("div");
-  grid.className = "grid";
-
-  bebidas.forEach(b => {
-    const card = document.createElement("div");
-    card.className = "card";
-    card.dataset.name = b.nome;
-    card.dataset.price = b.preco;
-
-    card.innerHTML = `
-      <h3>${b.nome}</h3>
-      <p><strong>${money(b.preco)}</strong></p>
-      <div class="actions">
-        <button class="add-cart">Adicionar</button>
-      </div>
-    `;
-
-    grid.appendChild(card);
-  });
-
-  bebidasSection.appendChild(grid);
-
-  grid.querySelectorAll(".add-cart").forEach(btn => {
-    btn.addEventListener("click", (e) => {
-      const card = e.currentTarget.closest(".card");
-      const nome = card.dataset.name;
-      const preco = parseFloat(card.dataset.price);
-      addCommonItem(nome, preco);
-    });
-  });
-}
+/* CORREÇÃO: Bloco duplicado e quebrado de "Bebidas" foi removido daqui.
+  A lógica correta já está dentro do 'DOMContentLoaded' acima.
+*/
