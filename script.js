@@ -483,98 +483,93 @@ document.addEventListener("DOMContentLoaded", () => {
       .catch((err) => alert("Erro: " + err.message));
   }
 
-  /* ------------------ 📦 MEUS PEDIDOS ------------------ */
-  let ordersFab = document.getElementById("orders-fab");
-  if (!ordersFab) {
-    ordersFab = document.createElement("button");
-    ordersFab.id = "orders-fab";
-    ordersFab.innerHTML = "📦 Meus Pedidos";
-    document.body.appendChild(ordersFab);
+  /* ------------------ 📦 MEUS PEDIDOS (CORRIGIDO) ------------------ */
+let ordersFab = document.getElementById("orders-fab");
+if (!ordersFab) {
+  ordersFab = document.createElement("button");
+  ordersFab.id = "orders-fab";
+  ordersFab.innerHTML = "📦 Meus Pedidos";
+  document.body.appendChild(ordersFab);
+}
+
+let ordersPanel = document.querySelector(".orders-panel");
+if (!ordersPanel) {
+  ordersPanel = document.createElement("div");
+  ordersPanel.className = "orders-panel";
+  ordersPanel.innerHTML = `
+    <div class="orders-head">
+      <span>📦 Meus Pedidos</span>
+      <button class="orders-close">✖</button>
+    </div>
+    <div class="orders-content" id="orders-content">
+      <p class="empty-orders">Faça login para ver seus pedidos.</p>
+    </div>`;
+  document.body.appendChild(ordersPanel);
+}
+
+function openOrdersPanel() { Overlays.open(ordersPanel); }
+function closeOrdersPanel() { Overlays.closeAll(); }
+
+ordersFab.addEventListener("click", () => {
+  if (!currentUser) return alert("Faça login para ver seus pedidos.");
+  openOrdersPanel();
+  carregarPedidosSeguro();
+});
+
+ordersPanel.querySelector(".orders-close")?.addEventListener("click", closeOrdersPanel);
+
+function showOrdersFabIfLogged() {
+  if (currentUser) ordersFab.classList.add("show");
+  else ordersFab.classList.remove("show");
+}
+
+function carregarPedidosSeguro() {
+  const container = document.getElementById("orders-content");
+  if (!container) return;
+  container.innerHTML = `<p class="empty-orders">Carregando pedidos...</p>`;
+  if (!currentUser) {
+    container.innerHTML = `<p class="empty-orders">Você precisa estar logado.</p>`;
+    return;
   }
 
-  let ordersPanel = document.querySelector(".orders-panel");
-  if (!ordersPanel) {
-    ordersPanel = document.createElement("div");
-    ordersPanel.className = "orders-panel";
-    ordersPanel.innerHTML = `
-      <div class="orders-head">
-        <span>📦 Meus Pedidos</span>
-        <button class="orders-close">✖</button>
-      </div>
-      <div class="orders-content" id="orders-content">
-        <p class="empty-orders">Faça login para ver seus pedidos.</p>
-      </div>`;
-    document.body.appendChild(ordersPanel);
-  }
+  db.collection("Pedidos")
+    .where("usuario", "==", currentUser.email)
+    .get()
+    .then((snap) => {
+      if (snap.empty) {
+        container.innerHTML = `<p class="empty-orders">Nenhum pedido encontrado 😢</p>`;
+        return;
+      }
 
-  function openOrdersPanel() { Overlays.open(ordersPanel); }
-  function closeOrdersPanel() { Overlays.closeAll(); }
+      const pedidos = [];
+      snap.forEach((doc) => pedidos.push({ id: doc.id, ...doc.data() }));
+      pedidos.sort((a, b) => new Date(b.data) - new Date(a.data));
 
-  ordersFab.addEventListener("click", () => {
-    if (!currentUser) return alert("Faça login para ver seus pedidos.");
-    openOrdersPanel();
-    carregarPedidosSeguro();
-  });
-
-  ordersPanel.querySelector(".orders-close")?.addEventListener("click", closeOrdersPanel);
-
-  function showOrdersFabIfLogged() {
-    if (currentUser) ordersFab.classList.add("show");
-    else ordersFab.classList.remove("show");
-  }
-
-  function carregarPedidosSeguro() {
-    const container = document.getElementById("orders-content");
-    if (!container) return;
-    container.innerHTML = `<p class="empty-orders">Carregando pedidos...</p>`;
-    if (!currentUser) {
-      container.innerHTML = `<p class="empty-orders">Você precisa estar logado.</p>`;
-      return;
-    }
-
-    db.collection("Pedidos")
-      .where("usuario", "==", currentUser.email)
-      .get()
-      .then((snap) => {
-        if (snap.empty) {
-          container.innerHTML = `<p class="empty-orders">Nenhum pedido encontrado 😢</p>`;
-          return;
-        }
-        
-        const pedidos = [];
-        snap.forEach((doc) => {
-          pedidos.push({ id: doc.id, ...doc.data() });
+      container.innerHTML = "";
+      pedidos.forEach((p) => {
+        const itens = Array.isArray(p.itens) ? p.itens.join("<br>• ") : p.itens || "";
+        const dataFormatada = new Date(p.data).toLocaleString("pt-BR", {
+          day: '2-digit',
+          month: '2-digit',
+          year: 'numeric',
+          hour: '2-digit',
+          minute: '2-digit'
         });
-        
-        pedidos.sort((a, b) => new Date(b.data) - new Date(a.data));
-        
-        container.innerHTML = "";
-        pedidos.forEach((p) => {
-          const itens = Array.isArray(p.itens) ? p.itens.join("<br>• ") : p.itens || "";
-          const dataFormatada = new Date(p.data).toLocaleString("pt-BR", {
-            day: '2-digit',
-            month: '2-digit', 
-            year: 'numeric',
-            hour: '2-digit',
-            minute: '2-digit'
-          });
-          
-          const box = document.createElement("div");
-          box.className = "order-item";
-          box.innerHTML = `
-            <h4>📅 ${dataFormatada}</h4>
-            <p style="margin:8px 0;"><b>Itens:</b><br>• ${itens}</p>
-            <p style="font-size:1.1rem;color:#4caf50;font-weight:600;margin-top:8px;">
-              <b>Total:</b> ${money(p.total)}
-            </p>`;
-          container.appendChild(box);
-        });
-      })
-      .catch((err) => {
-        container.innerHTML = `<p class="empty-orders" style="color:#d32f2f;">Erro: ${err.message}</p>`;
+        const box = document.createElement("div");
+        box.className = "order-item";
+        box.innerHTML = `
+          <h4>📅 ${dataFormatada}</h4>
+          <p style="margin:8px 0;"><b>Itens:</b><br>• ${itens}</p>
+          <p style="font-size:1.1rem;color:#4caf50;font-weight:600;margin-top:8px;">
+            <b>Total:</b> ${money(p.total)}
+          </p>`;
+        container.appendChild(box);
       });
-  }
-
+    })
+    .catch((err) => {
+      container.innerHTML = `<p class="empty-orders" style="color:#d32f2f;">Erro: ${err.message}</p>`;
+    });
+}
 /* ------------------ ⎋ ESC ------------------ */
 document.addEventListener("keydown", (e) => { 
   if (e.key === "Escape") Overlays.closeAll(); 
