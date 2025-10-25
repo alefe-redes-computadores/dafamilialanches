@@ -575,7 +575,7 @@ document.addEventListener("DOMContentLoaded", () => {
       });
   }
 
-  /* ------------------ ⎋ ESC ------------------ */
+/* ------------------ ⎋ ESC ------------------ */
 document.addEventListener("keydown", (e) => { 
   if (e.key === "Escape") Overlays.closeAll(); 
 });
@@ -591,3 +591,4 @@ document.addEventListener("click", (e) => {
 
 renderMiniCart();
 console.log("%c🔥 DFL v2.0 — ESTÁVEL E OTIMIZADO!", "color:#fff;background:#4caf50;padding:8px 12px;border-radius:8px;font-weight:700");
+});
