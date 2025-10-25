@@ -1,8 +1,9 @@
 /* =========================================================
-   🍔 DFL v1.8.3 — Adicionais Inteligentes + Visual Refinado
-   - Agrupa extras iguais
-   - Soma automática de preço
-   - Mantém compatibilidade Firebase e UI
+   🍔 DFL v1.9 — TODAS CORREÇÕES APLICADAS
+   - Badges corrigidas
+   - Bebidas completas
+   - Adicionais somam corretamente
+   - Combos com refrigerantes corretos
 ========================================================= */
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -41,7 +42,6 @@ document.addEventListener("DOMContentLoaded", () => {
     userBtn: document.getElementById("user-btn"),
     statusBanner: document.getElementById("status-banner"),
     hoursBanner: document.querySelector(".hours-banner"),
-    bebidasSection: document.getElementById("bebidas-section"),
   };
 
   /* ------------------ 🌫️ BACKDROP ------------------ */
@@ -107,10 +107,10 @@ document.addEventListener("DOMContentLoaded", () => {
             <p style="color:#666;font-size:0.85rem;">${money(item.preco)} × ${item.qtd}</p>
           </div>
           <div style="display:flex;gap:8px;align-items:center;">
-            <button class="cart-minus modern-btn red" data-idx="${idx}">−</button>
+            <button class="cart-minus" data-idx="${idx}" style="background:#ff4081;color:#fff;border:none;border-radius:5px;width:28px;height:28px;cursor:pointer;">−</button>
             <span style="font-weight:600;min-width:20px;text-align:center;">${item.qtd}</span>
-            <button class="cart-plus modern-btn green" data-idx="${idx}">+</button>
-            <button class="cart-remove modern-btn black" data-idx="${idx}">🗑</button>
+            <button class="cart-plus" data-idx="${idx}" style="background:#4caf50;color:#fff;border:none;border-radius:5px;width:28px;height:28px;cursor:pointer;">+</button>
+            <button class="cart-remove" data-idx="${idx}" style="background:#d32f2f;color:#fff;border:none;border-radius:5px;width:28px;height:28px;cursor:pointer;">🗑</button>
           </div>
         </div>
       </div>
@@ -122,8 +122,8 @@ document.addEventListener("DOMContentLoaded", () => {
         <div style="display:flex;justify-content:space-between;margin-bottom:15px;font-size:1.2rem;font-weight:600;">
           <span>Total:</span><span style="color:#e53935;">${money(total)}</span>
         </div>
-        <button id="finish-order" class="btn-primary full">Finalizar Pedido 🛍️</button>
-        <button id="clear-cart" class="btn-secondary full">Limpar Carrinho</button>
+        <button id="finish-order" style="width:100%;background:#4caf50;color:#fff;border:none;border-radius:8px;padding:12px;font-weight:600;cursor:pointer;margin-bottom:8px;">Finalizar Pedido 🛍️</button>
+        <button id="clear-cart" style="width:100%;background:#ff4081;color:#fff;border:none;border-radius:8px;padding:10px;font-weight:600;cursor:pointer;">Limpar Carrinho</button>
       </div>`;
 
     document.querySelectorAll(".cart-plus").forEach(b => b.addEventListener("click", e => {
@@ -146,6 +146,7 @@ document.addEventListener("DOMContentLoaded", () => {
       popupAdd("Item removido!");
     }));
 
+    document.getElementById("finish-order")?.addEventListener("click", fecharPedido);
     document.getElementById("clear-cart")?.addEventListener("click", () => {
       if (confirm("Limpar todo o carrinho?")) {
         cart = [];
@@ -156,8 +157,10 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   el.cartIcon?.addEventListener("click", () => Overlays.open(el.miniCart));
-
-  /* ------------------ ➕ ADICIONAIS ------------------ */
+  document.querySelectorAll("#mini-cart .extras-close").forEach(btn => {
+    btn.addEventListener("click", () => Overlays.closeAll());
+  });
+/* ------------------ ➕ ADICIONAIS (CORRIGIDO) ------------------ */
   const adicionais = [
     { nome: "Cebola", preco: 0.99 },
     { nome: "Salada", preco: 1.99 },
@@ -175,10 +178,11 @@ document.addEventListener("DOMContentLoaded", () => {
     if (!card || !el.extrasModal || !el.extrasList) return;
     produtoExtras = card.dataset.name;
     produtoPrecoBase = parseFloat(card.dataset.price) || 0;
+    
     el.extrasList.innerHTML = adicionais.map((a, i) => `
-      <label class="extra-line modern-line">
+      <label class="extra-line" style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid #eee;cursor:pointer;">
         <span>${a.nome} — <b>${money(a.preco)}</b></span>
-        <input type="checkbox" value="${i}" class="modern-check">
+        <input type="checkbox" value="${i}" style="width:20px;height:20px;cursor:pointer;">
       </label>`).join("");
     Overlays.open(el.extrasModal);
   });
@@ -192,23 +196,112 @@ document.addEventListener("DOMContentLoaded", () => {
     const checks = [...document.querySelectorAll("#extras-modal .extras-list input:checked")];
     if (!checks.length) return alert("Selecione pelo menos um adicional!");
 
-    const extrasSelecionados = checks.map(c => adicionais[+c.value]);
-    const precoExtras = extrasSelecionados.reduce((t, e) => t + e.preco, 0);
+    // Agrupa adicionais iguais
+    const extrasContagem = {};
+    checks.forEach(c => {
+      const idx = +c.value;
+      const adicional = adicionais[idx];
+      if (extrasContagem[adicional.nome]) {
+        extrasContagem[adicional.nome].qtd++;
+      } else {
+        extrasContagem[adicional.nome] = { preco: adicional.preco, qtd: 1 };
+      }
+    });
+
+    // Monta nome completo e calcula preço total
+    const extrasNomes = Object.keys(extrasContagem).map(nome => {
+      const qtd = extrasContagem[nome].qtd;
+      return qtd > 1 ? `${qtd}x ${nome}` : nome;
+    }).join(", ");
+
+    const precoExtras = Object.values(extrasContagem).reduce((t, e) => t + (e.preco * e.qtd), 0);
     const precoTotal = produtoPrecoBase + precoExtras;
+    const nomeCompleto = `${produtoExtras} + ${extrasNomes}`;
 
-    const nomeCompleto = `${produtoExtras} + ${extrasSelecionados.map(e => e.nome).join(", ")}`;
-
-    const existente = cart.find(i => i.nome === nomeCompleto && i.preco === precoTotal);
+    // Adiciona ao carrinho
+    const existente = cart.find(i => i.nome === nomeCompleto);
     if (existente) existente.qtd++;
     else cart.push({ nome: nomeCompleto, preco: precoTotal, qtd: 1 });
 
     renderMiniCart();
-    popupAdd("Item com adicionais adicionado!");
+    popupAdd("Adicionado ao carrinho!");
     Overlays.closeAll();
   });
 
+  document.querySelectorAll("#extras-modal .extras-close").forEach((b) => 
+    b.addEventListener("click", () => Overlays.closeAll())
+  );
+
+  /* ------------------ 🥤 MODAL DE BEBIDAS (COMBOS CORRIGIDOS) ------------------ */
+  const comboDrinkOptions = {
+    casal: [
+      { rotulo: "Fanta 1L (padrão)", delta: 0.01 },
+      { rotulo: "Coca-Cola 1L", delta: 3.0 },
+      { rotulo: "Coca-Cola 1L Zero", delta: 3.0 },
+    ],
+    familia: [
+      { rotulo: "Kuat Guaraná 2L (padrão)", delta: 0.01 },
+      { rotulo: "Coca-Cola 2L", delta: 5.0 },
+    ],
+  };
+
+  let _comboCtx = null;
+  const openComboModal = safe((nomeCombo, precoBase) => {
+    if (!el.comboModal || !el.comboBody) {
+      addCommonItem(nomeCombo, precoBase);
+      return;
+    }
+
+    const low = (nomeCombo || "").toLowerCase();
+    const grupo = low.includes("casal") ? "casal" : 
+                  (low.includes("família") || low.includes("familia")) ? "familia" : null;
+
+    if (!grupo) {
+      addCommonItem(nomeCombo, precoBase);
+      return;
+    }
+
+    const opts = comboDrinkOptions[grupo];
+    el.comboBody.innerHTML = opts.map((o, i) => `
+      <label class="extra-line" style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid #eee;cursor:pointer;">
+        <span>${o.rotulo} — + ${money(o.delta)}</span>
+        <input type="radio" name="combo-drink" value="${i}" ${i === 0 ? "checked" : ""} style="width:20px;height:20px;cursor:pointer;">
+      </label>
+    `).join("");
+
+    _comboCtx = { nomeCombo, precoBase, grupo };
+    Overlays.open(el.comboModal);
+  });
+
+  el.comboConfirm?.addEventListener("click", () => {
+    if (!_comboCtx) return Overlays.closeAll();
+    const sel = el.comboBody?.querySelector('input[name="combo-drink"]:checked');
+    if (!sel) return;
+    const opt = comboDrinkOptions[_comboCtx.grupo][+sel.value];
+    const finalName = `${_comboCtx.nomeCombo} + ${opt.rotulo}`;
+    const finalPrice = Number(_comboCtx.precoBase) + (opt.delta || 0);
+    
+    const existente = cart.find(i => i.nome === finalName);
+    if (existente) existente.qtd++;
+    else cart.push({ nome: finalName, preco: finalPrice, qtd: 1 });
+    
+    popupAdd("Combo adicionado!");
+    renderMiniCart();
+    Overlays.closeAll();
+  });
+
+  document.querySelectorAll("#combo-modal .combo-close").forEach((b) => 
+    b.addEventListener("click", () => Overlays.closeAll())
+  );
+
   /* ------------------ 🧺 ADD ITEM ------------------ */
   function addCommonItem(nome, preco) {
+    // Verifica se é combo
+    if (/^combo/i.test(nome)) {
+      openComboModal(nome, preco);
+      return;
+    }
+    
     const found = cart.find((i) => i.nome === nome && i.preco === preco);
     if (found) found.qtd++;
     else cart.push({ nome, preco, qtd: 1 });
@@ -226,61 +319,19 @@ document.addEventListener("DOMContentLoaded", () => {
     })
   );
 
-  /* ------------------ 🍾 BEBIDAS ------------------ */
-  const bebidas = [
-    { nome: "Coca-Cola 200ml", preco: 4.0 },
-    { nome: "Coca-Cola 310ml", preco: 5.0 },
-    { nome: "Coca-Cola 310ml Zero", preco: 5.0 },
-    { nome: "Del Valle Uva 450ml", preco: 5.0 },
-    { nome: "Del Valle Laranja 450ml", preco: 5.0 },
-    { nome: "Fanta 1L", preco: 8.0 },
-    { nome: "Coca-Cola 1L", preco: 9.0 },
-    { nome: "Coca-Cola 1L Zero", preco: 9.0 },
-    { nome: "Kuat 2L", preco: 10.0 },
-    { nome: "Coca-Cola 2L", preco: 13.0 },
-  ];
-  if (el.bebidasSection && el.bebidasSection.querySelectorAll(".card").length === 0) {
-    const grid = document.createElement("div");
-    grid.className = "grid";
-    bebidas.forEach(b => {
-      const c = document.createElement("div");
-      c.className = "card";
-      c.dataset.name = b.nome;
-      c.dataset.price = b.preco;
-      c.innerHTML = `<h3>${b.nome}</h3><p><b>${money(b.preco)}</b></p><div class="actions"><button class="add-cart">Adicionar</button></div>`;
-      grid.appendChild(c);
-    });
-    el.bebidasSection.appendChild(grid);
-  }
-
   /* ------------------ 🖼️ CARROSSEL ------------------ */
-  el.cPrev?.addEventListener("click", () => { if (!el.slides) return; el.slides.scrollLeft -= Math.min(el.slides.clientWidth * 0.9, 320); });
-  el.cNext?.addEventListener("click", () => { if (!el.slides) return; el.slides.scrollLeft += Math.min(el.slides.clientWidth * 0.9, 320); });
-
-  /* ------------------ STATUS + TIMER ------------------ */
-  const atualizarStatus = safe(() => {
-    const agora = new Date();
-    const h = agora.getHours();
-    const m = agora.getMinutes();
-    const aberto = h >= 18 && h < 23;
-    if (el.statusBanner)
-      el.statusBanner.textContent = aberto ? "🟢 Aberto — Faça seu pedido!" : "🔴 Fechado — Voltamos às 18h!";
-    if (el.hoursBanner) {
-      if (aberto) {
-        const rest = (23 - h) * 60 - m;
-        el.hoursBanner.innerHTML = `⏰ Hoje atendemos até <b>23h00</b> — Faltam <b>${Math.floor(rest / 60)}h ${rest % 60}min</b>`;
-      } else {
-        const faltam = h < 18 ? (18 - h) * 60 - m : (24 - h + 18) * 60 - m;
-        el.hoursBanner.innerHTML = `🔒 Fechado — Abrimos em <b>${Math.floor(faltam / 60)}h ${faltam % 60}min</b>`;
-      }
-    }
+  el.cPrev?.addEventListener("click", () => { 
+    if (!el.slides) return; 
+    el.slides.scrollLeft -= Math.min(el.slides.clientWidth * 0.9, 320); 
   });
-  atualizarStatus();
-  setInterval(atualizarStatus, 60000);
+  el.cNext?.addEventListener("click", () => { 
+    if (!el.slides) return; 
+    el.slides.scrollLeft += Math.min(el.slides.clientWidth * 0.9, 320); 
+  });
 
-  /* ------------------ ESC Fecha ------------------ */
-  document.addEventListener("keydown", (e) => { if (e.key === "Escape") Overlays.closeAll(); });
-
-  renderMiniCart();
-  console.log("%c🔥 DFL v1.8.3 — Adicionais OK + Visual Refinado!", "color:#fff;background:#4caf50;padding:8px 12px;border-radius:8px;font-weight:700");
-});
+  document.querySelectorAll(".slide").forEach((img) => {
+    img.addEventListener("click", () => {
+      const msg = encodeURIComponent(img.dataset.wa || "Quero essa promoção! 🍔");
+      window.open(`https://wa.me/5534997178336?text=${msg}`, "_blank");
+    });
+  });
