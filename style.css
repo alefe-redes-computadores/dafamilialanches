@@ -333,3 +333,44 @@ h2 span {
   font-weight: 600;
   margin-bottom: 10px;
 }
+/* =========================================================
+   🔖 Etiquetas - Lanches, Hot Dogs e Combos
+========================================================= */
+
+/* Título dos cards */
+.card h3 {
+  font-weight: 700;
+  color: #2c2c2c;
+  font-size: 1.05rem;
+  text-transform: none;
+  margin-bottom: 6px;
+  line-height: 1.2;
+}
+
+/* “Com Molho Verde” / “Com Purê” */
+.card h3::after {
+  content: " 🌿";
+  color: #43a047;
+  font-size: 1rem;
+}
+
+/* Descrição de economia nos combos */
+.card p {
+  font-size: 0.9rem;
+  color: #444;
+  margin-bottom: 8px;
+}
+
+.card p strong {
+  color: #d84315;
+}
+
+/* Valor de economia (Ex: Economia de R$ 5,01) */
+.card p em {
+  background: #fff3cd;
+  color: #795548;
+  font-style: normal;
+  padding: 2px 8px;
+  border-radius: 8px;
+  font-weight: 600;
+}
