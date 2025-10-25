@@ -1,6 +1,6 @@
 /* =========================================================
-   🎨 DFL STYLE — v1.9 CORRIGIDO
-   Badges menores + Login moderno + Todas correções
+   🎨 DFL STYLE — v1.9.1 CORRIGIDO (Z-INDEX)
+   Backdrop e modais clicáveis
 ========================================================= */
 
 body{background:#fffaf3;font-family:"Inter","Poppins",sans-serif;color:#222;margin:0;scroll-behavior:smooth}
@@ -56,12 +56,10 @@ section h2{font-size:1.3rem;text-align:center;margin-bottom:15px;color:#ff7043}
 .card p{font-size:.9rem;color:#555}
 .price{font-weight:600;color:#4caf50;margin:8px 0}
 
-/* ===== BADGES CORRIGIDAS ===== */
-/* Badge grande (economia nos combos) */
+/* ===== BADGES ===== */
 .badge{display:inline-block;font-size:.72rem;font-weight:700;line-height:1;padding:3px 8px;border-radius:999px;color:#000;background:linear-gradient(135deg,#f8e08b,#eac13f);border:1px solid #d4af37;box-shadow:inset 0 -1px 0 rgba(0,0,0,.08),0 1px 2px rgba(0,0,0,.08);white-space:nowrap;vertical-align:middle}
 .badge.economia{background:linear-gradient(135deg,#ffd480,#ffb74d);border-color:#e09000;color:#000}
 
-/* Badge pequena (Com Molho Verde / Com Purê) */
 .badge-small{display:inline-block;font-size:.68rem;font-weight:600;line-height:1.2;padding:2px 7px;border-radius:6px;color:#000;background:linear-gradient(135deg,#ffd54f,#ffca28);border:1px solid #d4af37;box-shadow:0 1px 3px rgba(0,0,0,.1);white-space:nowrap;vertical-align:middle;margin-left:4px}
 .badge-small.pure{background:linear-gradient(135deg,#a5d6a7,#81c784);border-color:#66bb6a;color:#1b5e20}
 
@@ -73,7 +71,7 @@ section h2{font-size:1.3rem;text-align:center;margin-bottom:15px;color:#ff7043}
   .badge-small{font-size:.62rem;padding:2px 6px}
 }
 
-/* Botões de ação nos cards */
+/* Botões de ação */
 .actions{margin-top:10px;display:flex;justify-content:center;gap:8px;flex-wrap:wrap}
 .actions button{border:none;border-radius:10px;font-weight:700;cursor:pointer;padding:8px 14px;font-size:.9rem;transition:.25s}
 .actions .add-cart{background:linear-gradient(135deg,#4caf50,#43a047);color:#fff;box-shadow:0 2px 4px rgba(0,0,0,.2)}
@@ -88,10 +86,29 @@ section h2{font-size:1.3rem;text-align:center;margin-bottom:15px;color:#ff7043}
 #bebidas-section .card:hover{transform:translateY(-3px)}
 #bebidas-section h3{color:#444;font-size:.95rem;font-weight:700}
 #bebidas-section p{color:#43a047;font-weight:700;font-size:.9rem}
-/* Modais / Login */
-.modal{background:rgba(0,0,0,.5);position:fixed;inset:0;display:none;align-items:center;justify-content:center;z-index:200}
+
+/* Modais CORRIGIDO */
+.modal{
+  background:rgba(0,0,0,.5);
+  position:fixed;
+  inset:0;
+  display:none;
+  align-items:center;
+  justify-content:center;
+  z-index:1200;
+}
 .modal.show{display:flex}
-.modal-content{background:#fff;border-radius:14px;padding:20px;width:90%;max-width:400px;box-shadow:0 4px 12px rgba(0,0,0,.2);animation:fadeUp .3s ease}
+.modal-content{
+  background:#fff;
+  border-radius:14px;
+  padding:20px;
+  width:90%;
+  max-width:400px;
+  box-shadow:0 4px 12px rgba(0,0,0,.2);
+  animation:fadeUp .3s ease;
+  position:relative;
+  z-index:1201;
+}
 @keyframes fadeUp{from{transform:translateY(20px);opacity:0}to{transform:translateY(0);opacity:1}}
 
 .modal-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:15px;padding-bottom:10px;border-bottom:2px solid #ffd54f}
@@ -109,77 +126,6 @@ section h2{font-size:1.3rem;text-align:center;margin-bottom:15px;color:#ff7043}
 .btn-secondary{background:#ccc;border:none;border-radius:8px;padding:8px 16px;font-weight:600;cursor:pointer;flex:1}
 .btn-secondary:hover{background:#bbb}
 
-/* Login moderno */
-.login-box{max-width:380px}
-.btn-google{display:flex;align-items:center;justify-content:center;gap:10px;background:linear-gradient(135deg,#fff,#fefaf0);border:2px solid #ffd54f;border-radius:12px;padding:12px;font-weight:600;font-size:.95rem;cursor:pointer;transition:.25s;width:100%;margin-bottom:8px;color:#222;box-shadow:0 3px 8px rgba(0,0,0,.15),inset 0 1px 0 rgba(255,255,255,.6)}
-.btn-google:hover{background:linear-gradient(135deg,#fff6d4,#ffec9f);transform:translateY(-2px);box-shadow:0 4px 12px rgba(0,0,0,.2)}
-.google-icon{width:22px;height:22px}
-.login-safe{display:block;font-size:.75rem;color:#4caf50;margin-top:3px;text-align:center;font-weight:500}
-.divider{text-align:center;color:#aaa;margin:12px 0;font-size:.85rem;position:relative}
-.divider::before,.divider::after{content:'';position:absolute;top:50%;width:40%;height:1px;background:#ddd}
-.divider::before{left:0}
-.divider::after{right:0}
-.login-form{display:flex;flex-direction:column;gap:10px;margin-bottom:15px}
-.login-form input{width:100%;padding:10px;border:1px solid #ccc;border-radius:8px;font-size:.95rem}
-.login-form input:focus{outline:none;border-color:#ffd54f}
-.btn-primario{width:100%;background:linear-gradient(135deg,#4caf50,#43a047);color:#fff;border:none;border-radius:10px;padding:12px;font-size:1rem;margin-top:5px;cursor:pointer;transition:.25s}
-.btn-primario:hover{background:linear-gradient(135deg,#43a047,#2e7d32)}
-
-/* Mini-carrinho e Backdrop */
-#cart-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.6);backdrop-filter:blur(3px);z-index:900;display:none;pointer-events:none}
-#cart-backdrop.show{display:block;pointer-events:auto}
-
-#mini-cart{position:fixed;top:0;right:-100%;width:360px;max-width:95%;height:100vh;background:#fff;box-shadow:-3px 0 12px rgba(0,0,0,.3);z-index:1000;display:flex;flex-direction:column;transition:right .35s ease;pointer-events:auto}
-#mini-cart.active{right:0}
-
-.mini-head{padding:15px;background:#ffd54f;display:flex;justify-content:space-between;align-items:center;border-bottom:2px solid #000}
-.mini-head h3{margin:0}
-
-.mini-list{flex:1;overflow-y:auto;padding:10px 15px}
-.mini-foot{border-top:1px solid #ddd;background:#fafafa}
-.empty-orders{text-align:center;color:#999;padding:20px}
-
-/* Botão carrinho flutuante */
-#cart-icon{position:fixed;bottom:25px;right:20px;background:#000;color:#fff;border:none;border-radius:50px;padding:12px 18px;font-weight:600;font-size:1rem;z-index:1200;box-shadow:0 4px 12px rgba(0,0,0,.3);cursor:pointer;transition:all .2s ease}
-#cart-icon:hover{background:#ff4081;transform:scale(1.05)}
-#cart-icon span{background:#ff4081;color:#fff;border-radius:50%;padding:2px 7px;font-size:.85rem;margin-left:5px}
-
-/* Painel de Pedidos */
-#orders-fab{position:fixed;bottom:85px;right:20px;background:linear-gradient(135deg,#ffb300,#ffca28);border:none;color:#000;font-weight:600;border-radius:25px;padding:12px 18px;cursor:pointer;display:none;box-shadow:0 4px 12px rgba(0,0,0,.3);z-index:1200;transition:all .2s ease}
-#orders-fab.show{display:block}
-#orders-fab:hover{background:linear-gradient(135deg,#ffd54f,#ffe082);transform:scale(1.05)}
-
-.orders-panel{position:fixed;bottom:0;left:0;right:0;max-height:80vh;background:#fff;border-radius:20px 20px 0 0;box-shadow:0 -4px 20px rgba(0,0,0,.2);transform:translateY(100%);transition:transform .4s ease;overflow-y:auto;z-index:300;pointer-events:auto}
-.orders-panel.active{transform:translateY(0)}
-.orders-head{padding:14px;font-weight:700;font-size:1.1rem;background:#ffb300;color:#222;border-radius:20px 20px 0 0;display:flex;justify-content:space-between;align-items:center}
-.orders-close{background:transparent;border:none;font-size:24px;cursor:pointer;color:#000}
-.orders-content{padding:15px}
-.order-item{padding:12px 16px;border-bottom:1px solid #eee}
-.order-item h4{color:#ff7043;margin-bottom:6px}
-
-/* Popup de adição */
-.popup-add{position:fixed;bottom:60px;left:50%;transform:translateX(-50%);background:#4caf50;color:#fff;padding:12px 24px;border-radius:25px;opacity:0;transition:all .3s ease;z-index:2000;font-weight:600;box-shadow:0 4px 12px rgba(0,0,0,.3);pointer-events:none}
-.popup-add.show{opacity:1;bottom:90px}
-
-/* Rodapé */
-.footer{background:#fff3e0;text-align:center;padding:20px;font-size:.9rem;color:#444}
-.footer a{color:#ff7043;text-decoration:none;transition:color .2s ease}
-.footer a:hover{color:#ff5722}
-.footer-links{display:flex;justify-content:center;gap:10px;flex-wrap:wrap;margin:8px 0}
-.footer-btn{background:#ffb300;color:#222;padding:6px 14px;border-radius:6px;font-weight:700;text-decoration:none;transition:.25s}
-.footer-btn:hover{background:#ffca28;transform:scale(1.03)}
-.footer-copy{font-size:.8rem;color:#555;margin-top:10px}
-
-/* Responsivo */
-@media (max-width:600px){
-  .grid{grid-template-columns:repeat(2,1fr)}
-  .card img{height:100px}
-  .slide{min-width:200px;max-width:200px;height:150px}
-  .c-btn{width:32px;height:32px;font-size:20px}
-  .c-prev{left:5px}
-  .c-next{right:5px}
-  #mini-cart,.orders-panel{width:100%;max-width:100%}
-}
 /* Login moderno */
 .login-box{max-width:380px}
 .btn-google{
