@@ -1,6 +1,6 @@
 /* =========================================================
-   🎨 DFL VISUAL REFINADO v1.7.6
-   Estilo moderno — Botões, Cards, Etiquetas e Modais
+   🎨 DFL STYLE — v1.8 FINAL
+   Etiquetas Douradas + Login Google + Visual Refinado
 ========================================================= */
 
 /* 🔹 Estrutura geral */
@@ -9,75 +9,64 @@ body {
   font-family: "Inter", "Poppins", sans-serif;
   color: #222;
   scroll-behavior: smooth;
+  margin: 0;
 }
 
-/* 🔹 Cards */
-.card {
-  background: #fff;
-  border-radius: 16px;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.08);
-  padding: 14px;
-  text-align: center;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
-}
-
-.card:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 4px 10px rgba(0,0,0,0.12);
-}
-
-.card h3 {
-  font-weight: 600;
-  font-size: 1.05rem;
-  margin-bottom: 6px;
-}
-
-.card p {
-  font-size: 0.9rem;
-  color: #555;
-}
-
-/* 🔹 Ações (botões) */
-.actions {
-  margin-top: 10px;
+/* 🔹 Cabeçalho */
+.header {
   display: flex;
-  justify-content: center;
-  gap: 8px;
+  justify-content: space-between;
+  align-items: center;
+  background: #ffca28;
+  padding: 10px 16px;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.15);
+}
+.header-content {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.logo {
+  width: 52px;
+  height: 52px;
+}
+.header-info h1 {
+  font-size: 1.2rem;
+  margin: 0;
+}
+.tagline {
+  font-size: 0.85rem;
+  color: #d84315;
+  margin: 0;
 }
 
-.actions button {
-  border: none;
-  border-radius: 10px;
+/* 🔹 Botões superiores */
+.user-button {
+  background: linear-gradient(135deg, #fff, #f7f7f7);
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 8px 12px;
   font-weight: 600;
   cursor: pointer;
-  padding: 8px 14px;
-  font-size: 0.9rem;
-  transition: all 0.25s ease;
+  transition: 0.2s ease;
+}
+.user-button:hover {
+  background: #fafafa;
+}
+#cart-icon {
+  background: #ffb300;
+  border: none;
+  border-radius: 8px;
+  padding: 8px 12px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: 0.2s ease;
+}
+#cart-icon:hover {
+  background: #ffc107;
 }
 
-/* Botão principal (Adicionar) */
-.actions .add-cart {
-  background: linear-gradient(135deg, #4caf50, #43a047);
-  color: #fff;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-}
-.actions .add-cart:hover {
-  background: linear-gradient(135deg, #43a047, #388e3c);
-  transform: scale(1.03);
-}
-
-/* Botão secundário (Adicionais) */
-.actions .extras-btn {
-  background: linear-gradient(135deg, #ffb300, #ffca28);
-  color: #222;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.15);
-}
-.actions .extras-btn:hover {
-  background: linear-gradient(135deg, #ffca28, #ffd54f);
-  transform: scale(1.03);
-}
-
-/* 🔹 Grade de cards */
+/* 🔹 Seções */
 section {
   margin: 25px auto;
   width: 95%;
@@ -89,45 +78,118 @@ section h2 {
   margin-bottom: 15px;
   color: #ff7043;
 }
-section h2::before {
-  content: "🍔 ";
-}
-section .grid {
+
+/* 🔹 Cards */
+.grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
   gap: 14px;
 }
-
-/* 🔹 Etiquetas */
-h2 span {
-  background: #fff4e0;
-  padding: 4px 10px;
-  border-radius: 8px;
-  font-size: 1rem;
-  color: #d84315;
+.card {
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+  padding: 14px;
+  text-align: center;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
-
-/* 🔹 Popup Add */
-.popup-add {
-  position: fixed;
-  bottom: 80px;
-  left: 50%;
-  transform: translateX(-50%) scale(0.9);
-  background: #4caf50;
-  color: white;
-  padding: 10px 18px;
+.card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 4px 10px rgba(0,0,0,0.12);
+}
+.card img {
+  width: 100%;
   border-radius: 12px;
-  font-weight: 600;
-  opacity: 0;
-  transition: all 0.3s ease;
-  z-index: 1000;
+  margin-bottom: 8px;
 }
-.popup-add.show {
-  opacity: 1;
-  transform: translateX(-50%) scale(1);
+.card h3 {
+  font-weight: 700;
+  font-size: 1rem;
+  margin: 0 0 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+.card p {
+  font-size: 0.9rem;
+  color: #555;
 }
 
-/* 🔹 Modais refinados */
+/* =========================================================
+   🔖 ETIQUETAS DOURADAS (BADGES)
+========================================================= */
+.badge {
+  display: inline-block;
+  background: linear-gradient(135deg, #f8e08b, #eac13f);
+  color: #222;
+  font-size: 0.7rem;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: 999px;
+  border: 1px solid #d4af37;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+  text-transform: none;
+  vertical-align: middle;
+}
+.badge.economia {
+  background: linear-gradient(135deg, #ffd480, #ffb74d);
+  color: #000;
+  border-color: #e09000;
+}
+@media (max-width: 600px) {
+  .badge {
+    font-size: 0.65rem;
+    padding: 3px 6px;
+  }
+}
+
+/* =========================================================
+   🥤 SEÇÃO DE BEBIDAS
+========================================================= */
+#bebidas-section h2 {
+  display: inline-block;
+  background: linear-gradient(135deg, #ffca28, #ffd54f);
+  color: #222;
+  font-weight: 700;
+  font-size: 1.3rem;
+  padding: 10px 26px;
+  border-radius: 50px;
+  box-shadow: 0 3px 8px rgba(0,0,0,0.15);
+  letter-spacing: 0.3px;
+  margin-bottom: 20px;
+}
+#bebidas-section .grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 14px;
+  margin-top: 10px;
+}
+#bebidas-section .card {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.08);
+  padding: 10px;
+  transition: transform 0.2s ease;
+}
+#bebidas-section .card:hover {
+  transform: translateY(-3px);
+}
+#bebidas-section h3 {
+  color: #444;
+  font-size: 0.95rem;
+  font-weight: 600;
+}
+#bebidas-section p {
+  color: #43a047;
+  font-weight: 700;
+  font-size: 0.9rem;
+}
+
+/* =========================================================
+   🔐 LOGIN MODAL — COM GOOGLE
+========================================================= */
 .modal {
   background: rgba(0,0,0,0.5);
   position: fixed;
@@ -154,389 +216,92 @@ h2 span {
   from { transform: translateY(20px); opacity: 0; }
   to { transform: translateY(0); opacity: 1; }
 }
-
-/* 🔹 Inputs modernos nos modais */
-.modern-line {
+.btn-google {
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  padding: 10px 0;
-  border-bottom: 1px solid #eee;
+  justify-content: center;
+  gap: 10px;
+  background: linear-gradient(135deg, #fff, #f9f9f9);
+  color: #444;
+  border: 1px solid #ddd;
+  border-radius: 10px;
+  padding: 10px;
+  font-weight: 600;
   font-size: 0.95rem;
-}
-.modern-line span b {
-  color: #4caf50;
-}
-.modern-check {
-  width: 20px;
-  height: 20px;
-  accent-color: #ffb300;
-}
-
-/* 🔹 Botões do modal */
-#extras-confirm, #combo-confirm {
+  cursor: pointer;
+  transition: all 0.25s ease;
   width: 100%;
-  background: linear-gradient(135deg, #4caf50, #388e3c);
+  margin-bottom: 10px;
+}
+.btn-google:hover {
+  background: #fffde7;
+  border-color: #ffca28;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+}
+.google-icon {
+  width: 22px;
+  height: 22px;
+}
+.divider {
+  text-align: center;
+  color: #aaa;
+  margin: 8px 0;
+  font-size: 0.85rem;
+}
+.login-form input {
+  width: 100%;
+  padding: 10px;
+  margin-bottom: 8px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+}
+.btn-primario {
+  width: 100%;
+  background: linear-gradient(135deg, #4caf50, #43a047);
   color: #fff;
   border: none;
   border-radius: 10px;
   padding: 12px;
   font-size: 1rem;
-  margin-top: 15px;
+  margin-top: 5px;
   cursor: pointer;
   transition: 0.25s ease;
 }
-#extras-confirm:hover, #combo-confirm:hover {
-  transform: scale(1.03);
+.btn-primario:hover {
   background: linear-gradient(135deg, #43a047, #2e7d32);
 }
 
-/* 🔹 Painel de pedidos */
-.orders-panel {
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  max-height: 80vh;
-  background: #fff;
-  border-radius: 20px 20px 0 0;
-  box-shadow: 0 -4px 20px rgba(0,0,0,0.2);
-  transform: translateY(100%);
-  transition: transform 0.4s ease;
-  overflow-y: auto;
-  z-index: 300;
-}
-.orders-panel.active {
-  transform: translateY(0);
-}
-.orders-head {
-  padding: 14px;
-  font-weight: 600;
-  font-size: 1.1rem;
-  background: #ffb300;
-  color: #222;
-  border-radius: 20px 20px 0 0;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-.order-item {
-  padding: 12px 16px;
-  border-bottom: 1px solid #eee;
-}
-.order-item h4 {
-  color: #ff7043;
-  margin-bottom: 6px;
-}
-
-/* 🔹 Botão flutuante "Meus Pedidos" */
-#orders-fab {
-  position: fixed;
-  bottom: 24px;
-  right: 20px;
-  background: linear-gradient(135deg, #ffb300, #ffca28);
-  color: #000;
-  border: none;
-  padding: 14px 22px;
-  border-radius: 30px;
-  box-shadow: 0 4px 10px rgba(0,0,0,0.3);
-  font-weight: 600;
-  cursor: pointer;
-  opacity: 0;
-  pointer-events: none;
-  transform: translateY(10px);
-  transition: all 0.3s ease;
-  z-index: 400;
-}
-#orders-fab.show {
-  opacity: 1;
-  pointer-events: all;
-  transform: translateY(0);
-}
-#orders-fab:hover {
-  background: linear-gradient(135deg, #ffd54f, #ffe082);
-  transform: scale(1.05);
-}
-
-/* 🔹 Grade de Bebidas */
-#bebidas-section .card {
-  background: #fff;
-  border-radius: 12px;
-  box-shadow: 0 2px 5px rgba(0,0,0,0.08);
-  padding: 10px;
-}
-#bebidas-section h3 {
-  color: #444;
-  font-size: 1rem;
-}
-#bebidas-section p {
-  color: #4caf50;
-  font-weight: 600;
-}
 /* =========================================================
-   🥤 Faixa Dourada — Seção de Bebidas
+   🦶 Rodapé
 ========================================================= */
-
-#bebidas-section {
-  margin: 40px auto 60px auto;
+.footer {
+  background: #fff3e0;
   text-align: center;
-}
-
-#bebidas-section h2 {
-  display: inline-block;
-  background: linear-gradient(135deg, #ffca28, #ffd54f);
-  color: #222;
-  font-weight: 700;
-  font-size: 1.3rem;
-  padding: 10px 26px;
-  border-radius: 50px;
-  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.15);
-  letter-spacing: 0.3px;
-  margin-bottom: 20px;
-  position: relative;
-}
-
-#bebidas-section h2::before {
-  content: "🥤 ";
-}
-
-#bebidas-section .grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
-  gap: 16px;
-  margin-top: 10px;
-  padding: 0 10px;
-}
-
-#bebidas-section .card {
-  background: #fff;
-  border-radius: 14px;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.08);
-  padding: 14px;
-  transition: transform 0.2s ease;
-}
-
-#bebidas-section .card:hover {
-  transform: translateY(-3px);
-}
-
-#bebidas-section .card h3 {
-  font-size: 1rem;
-  color: #333;
-  font-weight: 600;
-  margin-bottom: 4px;
-}
-
-#bebidas-section .card p {
-  font-size: 0.95rem;
-  color: #4caf50;
-  font-weight: 600;
-  margin-bottom: 10px;
-}
-/* =========================================================
-   🔖 Etiquetas - Lanches, Hot Dogs e Combos
-========================================================= */
-
-/* Título dos cards */
-.card h3 {
-  font-weight: 700;
-  color: #2c2c2c;
-  font-size: 1.05rem;
-  text-transform: none;
-  margin-bottom: 6px;
-  line-height: 1.2;
-}
-
-/* “Com Molho Verde” / “Com Purê” */
-.card h3::after {
-  content: " 🌿";
-  color: #43a047;
-  font-size: 1rem;
-}
-
-/* Descrição de economia nos combos */
-.card p {
+  padding: 20px;
   font-size: 0.9rem;
   color: #444;
-  margin-bottom: 8px;
 }
-
-.card p strong {
-  color: #d84315;
-}
-
-/* Valor de economia (Ex: Economia de R$ 5,01) */
-.card p em {
-  background: #fff3cd;
-  color: #795548;
-  font-style: normal;
-  padding: 2px 8px;
-  border-radius: 8px;
-  font-weight: 600;
-}
-/* ==============================
-   ETIQUETAS (BADGES) — VISUAL AJUSTADO
-   Aplica a todas as etiquetas: "Economia de...", "Com Molho Verde", "Com Purê", etc.
-============================== */
-
-/* Faz o título aceitar a etiqueta ao lado, com boa quebra de linha */
-.card h3 {
+.footer-links {
   display: flex;
-  align-items: center;
-  gap: 8px;
+  justify-content: center;
+  gap: 10px;
   flex-wrap: wrap;
+  margin: 8px 0;
 }
-
-/* Estilo base da etiqueta (pílula dourada) */
-.badge {
-  display: inline-block;
-  font-size: 0.75rem;            /* menor que o título */
-  font-weight: 700;
-  line-height: 1;
-  padding: 3px 10px;
-  border-radius: 999px;
-  color: #000;
-  background: linear-gradient(135deg, #FFE59A, #FFD54F 55%, #FFCA28);
-  border: 1px solid #E6B400;
-  box-shadow:
-    inset 0 -1px 0 rgba(0,0,0,0.08),
-    0 1px 2px rgba(0,0,0,0.08);
-  white-space: nowrap;
-  vertical-align: middle;
-}
-
-/* Pequeno “respiro” quando a badge fica logo após o título */
-.card h3 > .badge {
-  margin-left: 2px;
-}
-
-/* Variedade para “Economia de ...” (levemente mais laranja) */
-.badge.economia,
-.card h3 .badge:has(> b),           /* cobre casos com números em negrito dentro */
-.card h3 .badge:has(> strong) {
-  background: linear-gradient(135deg, #FFD08A, #FFB74D 55%, #FFA726);
-  border-color: #E09000;
-}
-
-/* Opcional: se quiser separar tipos explicitamente via data-atributos no futuro
-.badge[data-variant="economia"] { ... }
-.badge[data-variant="molho"]    { ... }
-.badge[data-variant="pure"]     { ... }
-*/
-
-/* Responsividade das etiquetas */
-@media (max-width: 600px) {
-  .badge {
-    font-size: 0.7rem;
-    padding: 3px 8px;
-  }
-}
-/* ==============================
-   ETIQUETAS (BADGES) — VISUAL AJUSTADO
-   Aplica a todas as etiquetas: "Economia de...", "Com Molho Verde", "Com Purê", etc.
-============================== */
-
-/* Faz o título aceitar a etiqueta ao lado, com boa quebra de linha */
-.card h3 {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  flex-wrap: wrap;
-}
-
-/* Estilo base da etiqueta (pílula dourada) */
-.badge {
-  display: inline-block;
-  font-size: 0.75rem;            /* menor que o título */
-  font-weight: 700;
-  line-height: 1;
-  padding: 3px 10px;
-  border-radius: 999px;
-  color: #000;
-  background: linear-gradient(135deg, #FFE59A, #FFD54F 55%, #FFCA28);
-  border: 1px solid #E6B400;
-  box-shadow:
-    inset 0 -1px 0 rgba(0,0,0,0.08),
-    0 1px 2px rgba(0,0,0,0.08);
-  white-space: nowrap;
-  vertical-align: middle;
-}
-
-/* Pequeno “respiro” quando a badge fica logo após o título */
-.card h3 > .badge {
-  margin-left: 2px;
-}
-
-/* Variedade para “Economia de ...” (levemente mais laranja) */
-.badge.economia,
-.card h3 .badge:has(> b),           /* cobre casos com números em negrito dentro */
-.card h3 .badge:has(> strong) {
-  background: linear-gradient(135deg, #FFD08A, #FFB74D 55%, #FFA726);
-  border-color: #E09000;
-}
-
-/* Opcional: se quiser separar tipos explicitamente via data-atributos no futuro
-.badge[data-variant="economia"] { ... }
-.badge[data-variant="molho"]    { ... }
-.badge[data-variant="pure"]     { ... }
-*/
-
-/* Responsividade das etiquetas */
-@media (max-width: 600px) {
-  .badge {
-    font-size: 0.7rem;
-    padding: 3px 8px;
-  }
-}
-/* === ETIQUETAS DOURADAS (BADGES) === */
-.badge {
-  background: linear-gradient(135deg, #d4af37, #b8860b);
-  color: #fff;
-  font-size: 0.8em;
-  font-weight: 600;
-  padding: 3px 8px;
+.footer-btn {
+  background: #ffb300;
+  color: #222;
+  padding: 6px 14px;
   border-radius: 6px;
-  margin-left: 6px;
-  vertical-align: middle;
-  box-shadow: 0 1px 2px rgba(0,0,0,0.25);
+  font-weight: 600;
+  text-decoration: none;
+  transition: 0.25s ease;
 }
-
-.badge.economia {
-  background: linear-gradient(135deg, #f2c94c, #c69a00);
-  color: #222;
-  font-weight: 700;
-  font-size: 0.85em;
+.footer-btn:hover {
+  background: #ffca28;
 }
-/* ✅ Correção final das ETIQUETAS — Fundo Dourado e Fonte Menor */
-.badge {
-  display: inline-block;
-  background: linear-gradient(135deg, #d4af37, #b8860b);
-  color: #fff;
-  font-size: 0.75rem; /* menor que o nome do lanche */
-  font-weight: 700;
-  padding: 3px 8px;
-  border-radius: 999px;
-  margin-left: 6px;
-  vertical-align: middle;
-  box-shadow: 0 1px 2px rgba(0,0,0,0.25);
-  border: 1px solid #8b7500;
-  white-space: nowrap;
-}
-
-/* Ajuste para “Economia de ...” */
-.badge.gold,
-.badge.economia {
-  background: linear-gradient(135deg, #f2c94c, #c69a00);
-  color: #222;
+.footer-copy {
   font-size: 0.8rem;
-  font-weight: 700;
-  border: 1px solid #8b6500;
-}
-
-/* Responsividade */
-@media (max-width: 600px) {
-  .badge {
-    font-size: 0.7rem;
-    padding: 3px 6px;
-  }
+  color: #555;
+  margin-top: 10px;
 }
