@@ -364,3 +364,18 @@ section h2{font-size:1.3rem;text-align:center;margin-bottom:15px;color:#ff7043}
   .c-next{right:5px}
   #mini-cart,.orders-panel{width:100%;max-width:100%}
 }
+/* Backdrop CORRIGIDO */
+#cart-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,.6);
+  backdrop-filter: blur(3px);
+  z-index: 900;
+  display: none;
+  pointer-events: none; /* ✅ impede bloqueio de cliques quando oculto */
+}
+
+#cart-backdrop.show {
+  display: block;
+  pointer-events: auto; /* ✅ ativa clique apenas quando visível */
+}
