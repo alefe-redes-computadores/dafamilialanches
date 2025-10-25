@@ -1,4 +1,4 @@
-# 🍔 Da Família Lanches  
+4# 🍔 Da Família Lanches  
 
 Site oficial da **Da Família Lanches**, criado para apresentar nossos hambúrgueres, hot dogs e combos irresistíveis.  
 Feito com ❤️ e muito sabor, direto de Minas Gerais!
@@ -57,4 +57,4 @@ Desenvolvido por **Álefe Jôhsefe de Brito Gomes**
 
 ---
 
-💚 Atualizado via **navegador GitHub + Pages**
+💚 Atualizado via **navegador GitHub + Vercel**
