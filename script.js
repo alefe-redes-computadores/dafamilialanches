@@ -604,3 +604,166 @@ document.addEventListener("DOMContentLoaded", () => {
   renderMiniCart();
   console.log("%c🔥 DFL v2.0 — ESTÁVEL E OTIMIZADO!", "color:#fff;background:#4caf50;padding:8px 12px;border-radius:8px;font-weight:700");
 });
+
+/* =========================================================
+   📊 DFL v2.1 — Dashboard de Relatórios e Estatísticas
+   ✅ Compatível com v2.0 (sem alterar HTML/CSS)
+   ✅ Somente para administradores autorizados
+   ✅ Reutiliza o sistema de modais e backdrop existente
+========================================================= */
+
+(() => {
+  const ADMINS = [
+    "alefejohsefe@gmail.com",
+    "kalebhstanley650@gmail.com",
+    "contato@dafamilialanches.com.br"
+  ];
+
+  function isAdmin(user) {
+    return user && ADMINS.includes(user.email);
+  }
+
+  // injeta Chart.js apenas quando o admin abre o painel
+  function ensureChartJS(cb) {
+    if (window.Chart) return cb();
+    const s = document.createElement("script");
+    s.src = "https://cdn.jsdelivr.net/npm/chart.js";
+    s.onload = cb;
+    document.head.appendChild(s);
+  }
+
+  // cria modal do dashboard se ainda não existir
+  function createDashboard() {
+    if (document.getElementById("admin-dashboard")) return;
+
+    const div = document.createElement("div");
+    div.id = "admin-dashboard";
+    div.className = "modal";
+    div.innerHTML = `
+      <div class="modal-content" style="max-width:1000px;width:95%;height:85vh;overflow:auto;">
+        <div class="modal-head">
+          <h3>📊 Relatórios e Estatísticas</h3>
+          <button class="dashboard-close">✖</button>
+        </div>
+        <div class="dashboard-body" style="padding:12px;">
+          <div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:12px;">
+            <div id="card-total" style="flex:1;min-width:200px;padding:12px;background:#fff;border-radius:8px;box-shadow:0 2px 8px rgba(0,0,0,.08)">Total Arrecadado: —</div>
+            <div id="card-pedidos" style="flex:1;min-width:200px;padding:12px;background:#fff;border-radius:8px;box-shadow:0 2px 8px rgba(0,0,0,.08)">Pedidos: —</div>
+            <div id="card-ticket" style="flex:1;min-width:200px;padding:12px;background:#fff;border-radius:8px;box-shadow:0 2px 8px rgba(0,0,0,.08)">Ticket Médio: —</div>
+          </div>
+          <canvas id="chart-pedidos" style="width:100%;height:240px;"></canvas>
+          <canvas id="chart-produtos" style="width:100%;height:240px;margin-top:16px;"></canvas>
+          <div style="margin-top:12px;">
+            <button id="export-csv" class="btn-secondary">Exportar CSV</button>
+          </div>
+        </div>
+      </div>`;
+    document.body.appendChild(div);
+    div.querySelector(".dashboard-close").addEventListener("click", () => Overlays.closeAll());
+  }
+
+  // cria botão flutuante do admin (acima de “Meus Pedidos”)
+  function createAdminFab() {
+    if (document.getElementById("admin-fab")) return;
+    const btn = document.createElement("button");
+    btn.id = "admin-fab";
+    btn.innerHTML = "📊 Relatórios";
+    btn.style.position = "fixed";
+    btn.style.bottom = "150px"; // logo acima do botão de Meus Pedidos
+    btn.style.right = "20px";
+    btn.style.background = "linear-gradient(135deg,#ffca28,#ffd54f)";
+    btn.style.border = "none";
+    btn.style.color = "#000";
+    btn.style.fontWeight = "600";
+    btn.style.borderRadius = "25px";
+    btn.style.padding = "12px 18px";
+    btn.style.cursor = "pointer";
+    btn.style.boxShadow = "0 4px 12px rgba(0,0,0,.3)";
+    btn.style.zIndex = "1300";
+    btn.addEventListener("click", () => {
+      createDashboard();
+      ensureChartJS(carregarRelatorios);
+      Overlays.open(document.getElementById("admin-dashboard"));
+    });
+    document.body.appendChild(btn);
+  }
+
+  // gera os gráficos e cards
+  function gerarResumoECharts(pedidos) {
+    if (!window.Chart) return;
+    const total = pedidos.reduce((s, p) => s + p.total, 0);
+    const ticket = pedidos.length ? total / pedidos.length : 0;
+
+    document.getElementById("card-total").textContent = `Total Arrecadado: R$ ${total.toFixed(2).replace('.', ',')}`;
+    document.getElementById("card-pedidos").textContent = `Pedidos: ${pedidos.length}`;
+    document.getElementById("card-ticket").textContent = `Ticket Médio: R$ ${ticket.toFixed(2).replace('.', ',')}`;
+
+    // gráfico de pedidos por dia
+    const porDia = {};
+    pedidos.forEach(p => {
+      const dia = (p.data || "").split("T")[0];
+      porDia[dia] = (porDia[dia] || 0) + p.total;
+    });
+    const dias = Object.keys(porDia).sort();
+    const valores = dias.map(d => porDia[d]);
+
+    new Chart(document.getElementById("chart-pedidos"), {
+      type: "line",
+      data: { labels: dias, datasets: [{ label: "Total por Dia", data: valores, borderColor: "#4caf50", fill: false }] },
+      options: { responsive: true, scales: { y: { beginAtZero: true } } }
+    });
+
+    // produtos mais vendidos
+    const produtos = {};
+    pedidos.forEach(p => {
+      (p.itens || []).forEach(i => {
+        const nome = i.split(" x")[0];
+        produtos[nome] = (produtos[nome] || 0) + 1;
+      });
+    });
+    const top = Object.entries(produtos).sort((a,b)=>b[1]-a[1]).slice(0,8);
+    new Chart(document.getElementById("chart-produtos"), {
+      type: "bar",
+      data: {
+        labels: top.map(t => t[0]),
+        datasets: [{ label: "Itens mais vendidos", data: top.map(t => t[1]), backgroundColor: "#ffb300" }]
+      },
+      options: { responsive: true, scales: { y: { beginAtZero: true } } }
+    });
+
+    // exportar CSV
+    document.getElementById("export-csv").onclick = () => {
+      const linhas = ["Data,Total,Itens"];
+      pedidos.forEach(p => {
+        const itens = Array.isArray(p.itens) ? p.itens.join("; ") : p.itens;
+        linhas.push(`${p.data},${p.total},"${itens}"`);
+      });
+      const blob = new Blob([linhas.join("\n")], { type: "text/csv" });
+      const link = document.createElement("a");
+      link.href = URL.createObjectURL(blob);
+      link.download = "pedidos_dfl.csv";
+      link.click();
+    };
+  }
+
+  // consulta ao Firestore
+  function carregarRelatorios() {
+    db.collection("Pedidos").orderBy("data", "desc").limit(200).get()
+      .then(snap => {
+        const pedidos = snap.docs.map(d => d.data());
+        gerarResumoECharts(pedidos);
+      })
+      .catch(err => alert("Erro ao carregar relatórios: " + err.message));
+  }
+
+  // observa login e cria FAB apenas se for admin
+  auth.onAuthStateChanged(user => {
+    const fab = document.getElementById("admin-fab");
+    if (user && isAdmin(user)) {
+      if (!fab) createAdminFab();
+    } else {
+      fab?.remove();
+      document.getElementById("admin-dashboard")?.remove();
+    }
+  });
+})();
