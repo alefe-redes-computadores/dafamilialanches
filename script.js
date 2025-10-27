@@ -160,8 +160,7 @@ document.addEventListener("DOMContentLoaded", () => {
   document.querySelectorAll("#mini-cart .extras-close").forEach(btn => {
     btn.addEventListener("click", () => Overlays.closeAll());
   });
-
-  /* ------------------ ➕ ADICIONAIS ------------------ */
+/* ------------------ ➕ ADICIONAIS ------------------ */
   const adicionais = [
     { nome: "Cebola", preco: 0.99 },
     { nome: "Salada", preco: 1.99 },
@@ -174,7 +173,8 @@ document.addEventListener("DOMContentLoaded", () => {
   ];
   let produtoExtras = null;
   let produtoPrecoBase = 0;
-const openExtrasFor = safe((card) => {
+
+  const openExtrasFor = safe((card) => {
     if (!card || !el.extrasModal || !el.extrasList) return;
     produtoExtras = card.dataset.name;
     produtoPrecoBase = parseFloat(card.dataset.price) || 0;
@@ -331,8 +331,7 @@ const openExtrasFor = safe((card) => {
       window.open(`https://wa.me/5534997178336?text=${msg}`, "_blank");
     });
   });
-
-  /* ------------------ ⏰ STATUS + TIMER ------------------ */
+/* ------------------ ⏰ STATUS + TIMER ------------------ */
   const atualizarStatus = safe(() => {
     const agora = new Date();
     const h = agora.getHours();
@@ -386,7 +385,8 @@ const openExtrasFor = safe((card) => {
   if (window.firebase && !firebase.apps.length) firebase.initializeApp(firebaseConfig);
   const auth = firebase.auth();
   const db = firebase.firestore();
-/* ------------------ LOGIN ------------------ */
+
+  /* ------------------ LOGIN ------------------ */
   const openLogin = () => Overlays.open(el.loginModal);
   const closeLogin = () => Overlays.closeAll();
 
@@ -523,8 +523,7 @@ const openExtrasFor = safe((card) => {
     if (currentUser) ordersFab.classList.add("show");
     else ordersFab.classList.remove("show");
   }
-
-  /* ------------------ 📦 MEUS PEDIDOS (LÓGICA) ------------------ */
+/* ------------------ 📦 MEUS PEDIDOS (LÓGICA) ------------------ */
   function carregarPedidosSeguro() {
     const container = document.getElementById("orders-content");
     if (!container) return;
@@ -586,7 +585,8 @@ const openExtrasFor = safe((card) => {
         container.innerHTML = `<p class="empty-orders" style="color:#d32f2f;">Erro: ${err.message}</p>`;
       });
   }
-/* ------------------ ⎋ ESC ------------------ */
+
+  /* ------------------ ⎋ ESC ------------------ */
   document.addEventListener("keydown", (e) => { 
     if (e.key === "Escape") Overlays.closeAll(); 
   });
@@ -609,7 +609,7 @@ const openExtrasFor = safe((card) => {
    📊 DFL v2.1 — Painel Administrativo (Relatórios e Estatísticas)
    ✅ Correções:
       - Fechamento por X e clique-fora restaurados
-      - E-mails verificados com toLowerCase()
+      - E-mails verificados com toLowerCase() + trim()
       - Painel acima do botão “Meus Pedidos”
 ========================================================= */
 
@@ -620,8 +620,11 @@ const openExtrasFor = safe((card) => {
     "contato@dafamilialanches.com.br"
   ];
 
+  // ✅ Função corrigida
   function isAdmin(user) {
-    return user && ADMINS.includes(user.email.toLowerCase());
+    if (!user || !user.email) return false;
+    const email = user.email.trim().toLowerCase();
+    return ADMINS.some(a => a.toLowerCase() === email);
   }
 
   // injeta Chart.js apenas quando o admin abre o painel
@@ -660,8 +663,6 @@ const openExtrasFor = safe((card) => {
         </div>
       </div>`;
     document.body.appendChild(div);
-
-    // botão X agora funcional
     div.querySelector(".dashboard-close").addEventListener("click", () => Overlays.closeAll());
   }
 
@@ -672,7 +673,7 @@ const openExtrasFor = safe((card) => {
     btn.id = "admin-fab";
     btn.innerHTML = "📊 Relatórios";
     btn.style.position = "fixed";
-    btn.style.bottom = "210px"; // acima do botão de Meus Pedidos
+    btn.style.bottom = "210px";
     btn.style.right = "20px";
     btn.style.background = "linear-gradient(135deg,#ffca28,#ffd54f)";
     btn.style.border = "none";
@@ -701,7 +702,6 @@ const openExtrasFor = safe((card) => {
     document.getElementById("card-pedidos").textContent = `Pedidos: ${pedidos.length}`;
     document.getElementById("card-ticket").textContent = `Ticket Médio: R$ ${ticket.toFixed(2).replace('.', ',')}`;
 
-    // gráfico de pedidos por dia
     const porDia = {};
     pedidos.forEach(p => {
       const dia = (p.data || "").split("T")[0];
@@ -716,7 +716,6 @@ const openExtrasFor = safe((card) => {
       options: { responsive: true, scales: { y: { beginAtZero: true } } }
     });
 
-    // produtos mais vendidos
     const produtos = {};
     pedidos.forEach(p => {
       (p.itens || []).forEach(i => {
@@ -734,7 +733,6 @@ const openExtrasFor = safe((card) => {
       options: { responsive: true, scales: { y: { beginAtZero: true } } }
     });
 
-    // exportar CSV
     document.getElementById("export-csv").onclick = () => {
       const linhas = ["Data,Total,Itens"];
       pedidos.forEach(p => {
@@ -749,7 +747,6 @@ const openExtrasFor = safe((card) => {
     };
   }
 
-  // consulta ao Firestore
   function carregarRelatorios() {
     db.collection("Pedidos").orderBy("data", "desc").limit(200).get()
       .then(snap => {
@@ -759,7 +756,6 @@ const openExtrasFor = safe((card) => {
       .catch(err => alert("Erro ao carregar relatórios: " + err.message));
   }
 
-  // observa login e cria FAB apenas se for admin
   auth.onAuthStateChanged(user => {
     const fab = document.getElementById("admin-fab");
     if (user && isAdmin(user)) {
