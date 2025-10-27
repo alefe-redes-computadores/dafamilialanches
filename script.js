@@ -1,10 +1,9 @@
 /* =========================================================
-   🍔 DFL v2.2 — ESTÁVEL FINAL (Login Seguro + Admin Pro)
-   - Corrige bug de login com senha incorreta
-   - Corrige erro split() no painel admin
-   - Corrige erro total.toFixed() (tratamento numérico)
-   - Adiciona agrupamento diário e filtros
-   - Mantém compatibilidade total com v2.1
+   🍔 DFL v2.3 — ESTÁVEL (LGPD + UX Login)
+   - Banner de cookies com link para política
+   - Confirmação clara de criação de conta
+   - Feedback visual para login/cadastro
+   - Correções leves e sem alterar estrutura v2.2
 ========================================================= */
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -129,7 +128,6 @@ document.addEventListener("DOMContentLoaded", () => {
       </div>`;
   }
 
-  // 🔧 rebind de botões para evitar bugs após render
   function bindMiniCartButtons() {
     document.querySelectorAll(".cart-plus").forEach(b => b.addEventListener("click", e => {
       const i = +e.currentTarget.dataset.idx;
@@ -184,7 +182,7 @@ document.addEventListener("DOMContentLoaded", () => {
     btn.addEventListener("click", () => Overlays.closeAll())
   );
 
-  // ✅ Login seguro (sem criar conta automaticamente)
+  // ✅ Login seguro (com feedback visual aprimorado)
   el.loginForm?.addEventListener("submit", (e) => {
     e.preventDefault();
     const email = document.getElementById("login-email")?.value?.trim();
@@ -205,7 +203,7 @@ document.addEventListener("DOMContentLoaded", () => {
               .then((cred) => {
                 currentUser = cred.user;
                 el.userBtn.textContent = `Olá, ${currentUser.email.split("@")[0]}`;
-                popupAdd("Conta criada com sucesso!");
+                popupAdd("Conta criada com sucesso! 🎉");
                 Overlays.closeAll();
               })
               .catch((e) => alert("Erro: " + e.message));
@@ -225,7 +223,7 @@ document.addEventListener("DOMContentLoaded", () => {
       .then((res) => {
         currentUser = res.user;
         el.userBtn.textContent = `Olá, ${currentUser.displayName?.split(" ")[0] || "Cliente"}`;
-        popupAdd("Login com Google!");
+        popupAdd("Login com Google realizado!");
         Overlays.closeAll();
       })
       .catch((err) => alert("Erro: " + err.message));
@@ -310,8 +308,7 @@ document.addEventListener("DOMContentLoaded", () => {
   document.querySelectorAll("#extras-modal .extras-close").forEach((b) => 
     b.addEventListener("click", () => Overlays.closeAll())
   );
-
-  /* ------------------ 🥤 Combos (modal de bebidas) ------------------ */
+/* ------------------ 🥤 Combos (modal de bebidas) ------------------ */
   const comboDrinkOptions = {
     casal: [
       { rotulo: "Fanta 1L (padrão)", delta: 0.01 },
@@ -351,7 +348,8 @@ document.addEventListener("DOMContentLoaded", () => {
     _comboCtx = { nomeCombo, precoBase, grupo };
     Overlays.open(el.comboModal);
   });
-el.comboConfirm?.addEventListener("click", () => {
+
+  el.comboConfirm?.addEventListener("click", () => {
     if (!_comboCtx) return Overlays.closeAll();
     const sel = el.comboBody?.querySelector('input[name="combo-drink"]:checked');
     if (!sel) return;
@@ -487,7 +485,8 @@ el.comboConfirm?.addEventListener("click", () => {
       })
       .catch((err) => alert("Erro: " + err.message));
   }
-/* ------------------ 📦 Meus Pedidos (UI) ------------------ */
+
+  /* ------------------ 📦 Meus Pedidos (UI + lógica) ------------------ */
   let ordersFab = document.getElementById("orders-fab");
   if (!ordersFab) {
     ordersFab = document.createElement("button");
@@ -511,6 +510,7 @@ el.comboConfirm?.addEventListener("click", () => {
     document.body.appendChild(ordersPanel);
   }
 
+// ------------------ 📦 Meus Pedidos (continuação) ------------------
   function openOrdersPanel() {
     Overlays.closeAll();
     ordersPanel.classList.add("active");
@@ -531,7 +531,6 @@ el.comboConfirm?.addEventListener("click", () => {
     else ordersFab.classList.remove("show");
   }
 
-  /* ------------------ 📦 Meus Pedidos (lógica) ------------------ */
   function carregarPedidosSeguro() {
     const container = document.getElementById("orders-content");
     if (!container) return;
@@ -606,7 +605,7 @@ el.comboConfirm?.addEventListener("click", () => {
   /* ------------------ INIT (parte final do app) ------------------ */
   renderMiniCart();
   showOrdersFabIfLogged();
-  console.log("%c🔥 DFL v2.2 — ESTÁVEL (App pronto)", "color:#fff;background:#4caf50;padding:6px 10px;border-radius:8px;font-weight:700");
+  console.log("%c🔥 DFL v2.2 — ESTÁVEL (App pronto)", "color:#fff;background:#4caf50;padding:6px 10px;border-radius:8px;font-weight:700]");
 
 
   /* =========================================================
@@ -723,7 +722,7 @@ el.comboConfirm?.addEventListener("click", () => {
     if (elQtd)   elQtd.textContent   = `Pedidos: ${pedidos.length}`;
     if (elTick)  elTick.textContent  = `Ticket Médio: R$ ${ticket.toFixed(2).replace('.', ',')}`;
 
-    // grafico por dia
+    // gráfico por dia
     const porDia = {};
     pedidos.forEach(p => {
       const iso = typeof p.data === "string" ? p.data : (p.data?.toDate?.() ? p.data.toDate().toISOString() : "");
@@ -742,7 +741,7 @@ el.comboConfirm?.addEventListener("click", () => {
       });
     }
 
-    // produtos mais vendidos (contagem)
+    // produtos mais vendidos
     const produtos = {};
     pedidos.forEach(p => {
       const itensArr = Array.isArray(p.itens) ? p.itens : (typeof p.itens === "string" ? p.itens.split("; ") : []);
@@ -803,7 +802,6 @@ el.comboConfirm?.addEventListener("click", () => {
       })
       .catch(err => alert("Erro ao carregar relatórios: " + err.message));
 
-    // rebind seguro do filtro
     const sel = document.getElementById("filter-period");
     if (sel && !sel._bound) {
       sel.addEventListener("change", e => carregarRelatorios(e.target.value));
@@ -823,7 +821,6 @@ el.comboConfirm?.addEventListener("click", () => {
   });
 
   /* ------------------ Logs e segurança final ------------------ */
-  // Evita estado zombie ao voltar do cache
   window.addEventListener("pageshow", (e) => {
     if (e.persisted) {
       console.warn("↻ Página reaberta via cache, recarregando...");
@@ -831,14 +828,12 @@ el.comboConfirm?.addEventListener("click", () => {
     }
   });
 
-  // Sinalização para e-mails do domínio admin
   auth.onAuthStateChanged((user) => {
     if (user?.email?.toLowerCase()?.includes("dafamilialanches.com.br")) {
       console.log("%c👑 Painel Admin ativo", "color:#ffb300;font-weight:700;");
     }
   });
 
-  // Handler global de erros (evita travar UI)
   window.addEventListener("error", (e) => {
     if (String(e?.message || "").toLowerCase().includes("split")) {
       popupAdd("Humm… houve um pequeno erro ao ler dados. Atualize a página.");
@@ -849,14 +844,25 @@ el.comboConfirm?.addEventListener("click", () => {
   console.log("%c🍔 DFL v2.2 FINAL — LOGIN SEGURO + ADMIN PRO + GRÁFICOS 🔥",
               "background:#4caf50;color:#fff;padding:8px 12px;border-radius:8px;font-weight:700;");
 }); // <-- fim do DOMContentLoaded
-// Banner de cookies
+
+
+/* =========================================================
+   🍪 Banner de Cookies (LGPD) + link Política de Privacidade
+   - Não bloqueia a tela
+   - Abre a política em nova aba
+========================================================= */
 if (!localStorage.getItem("dflCookiesAccepted")) {
   const banner = document.createElement("div");
   banner.id = "cookie-banner";
   banner.innerHTML = `
-    <p>Usamos cookies para melhorar sua experiência. 
-    <a href="/politica-privacidade.html" target="_blank" rel="noopener">Leia nossa Política de Privacidade</a>.</p>
-    <button id="accept-cookies">Aceitar</button>`;
+    <p style="margin:0 0 8px 0;">Usamos cookies para melhorar sua experiência.
+      <a href="/politica-privacidade.html" target="_blank" rel="noopener" style="text-decoration:underline;font-weight:700;">
+        Leia nossa Política de Privacidade
+      </a>.
+    </p>
+    <button id="accept-cookies" style="border:none;border-radius:8px;padding:8px 14px;font-weight:700;cursor:pointer;">
+      Aceitar
+    </button>`;
   Object.assign(banner.style, {
     position: "fixed", bottom: "0", left: "0", right: "0", zIndex: "9999",
     background: "#ffca28", color: "#000", padding: "12px", textAlign: "center",
