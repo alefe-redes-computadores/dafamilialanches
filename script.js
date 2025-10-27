@@ -849,3 +849,22 @@ el.comboConfirm?.addEventListener("click", () => {
   console.log("%c🍔 DFL v2.2 FINAL — LOGIN SEGURO + ADMIN PRO + GRÁFICOS 🔥",
               "background:#4caf50;color:#fff;padding:8px 12px;border-radius:8px;font-weight:700;");
 }); // <-- fim do DOMContentLoaded
+// Banner de cookies
+if (!localStorage.getItem("dflCookiesAccepted")) {
+  const banner = document.createElement("div");
+  banner.id = "cookie-banner";
+  banner.innerHTML = `
+    <p>Usamos cookies para melhorar sua experiência. 
+    <a href="/politica-privacidade.html" target="_blank" rel="noopener">Leia nossa Política de Privacidade</a>.</p>
+    <button id="accept-cookies">Aceitar</button>`;
+  Object.assign(banner.style, {
+    position: "fixed", bottom: "0", left: "0", right: "0", zIndex: "9999",
+    background: "#ffca28", color: "#000", padding: "12px", textAlign: "center",
+    fontWeight: "600", boxShadow: "0 -2px 10px rgba(0,0,0,.2)"
+  });
+  document.body.appendChild(banner);
+  document.getElementById("accept-cookies").onclick = () => {
+    localStorage.setItem("dflCookiesAccepted", "true");
+    banner.remove();
+  };
+}
