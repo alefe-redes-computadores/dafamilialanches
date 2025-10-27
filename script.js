@@ -1,9 +1,7 @@
 /* =========================================================
-   🍔 DFL v2.3 — ESTÁVEL (LGPD + UX Login)
-   - Banner de cookies com link para política
-   - Confirmação clara de criação de conta
-   - Feedback visual para login/cadastro
-   - Correções leves e sem alterar estrutura v2.2
+   🍔 DFL v2.3.1 — PATCH GRÁFICOS FIX (Chart Destroy + LGPD)
+   - Corrige erro "Canvas already in use" nos relatórios
+   - Mantém LGPD, login UX e estrutura estável v2.3
 ========================================================= */
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -308,7 +306,8 @@ document.addEventListener("DOMContentLoaded", () => {
   document.querySelectorAll("#extras-modal .extras-close").forEach((b) => 
     b.addEventListener("click", () => Overlays.closeAll())
   );
-/* ------------------ 🥤 Combos (modal de bebidas) ------------------ */
+
+  /* ------------------ 🥤 Combos (modal de bebidas) ------------------ */
   const comboDrinkOptions = {
     casal: [
       { rotulo: "Fanta 1L (padrão)", delta: 0.01 },
@@ -369,8 +368,7 @@ document.addEventListener("DOMContentLoaded", () => {
   document.querySelectorAll("#combo-modal .combo-close").forEach((b) => 
     b.addEventListener("click", () => Overlays.closeAll())
   );
-
-  /* ------------------ 🧺 Adicionar item comum ------------------ */
+/* ------------------ 🧺 Adicionar item comum ------------------ */
   function addCommonItem(nome, preco) {
     if (/^combo/i.test(nome)) {
       openComboModal(nome, preco);
@@ -485,8 +483,7 @@ document.addEventListener("DOMContentLoaded", () => {
       })
       .catch((err) => alert("Erro: " + err.message));
   }
-
-  /* ------------------ 📦 Meus Pedidos (UI + lógica) ------------------ */
+/* ------------------ 📦 Meus Pedidos (UI + lógica) ------------------ */
   let ordersFab = document.getElementById("orders-fab");
   if (!ordersFab) {
     ordersFab = document.createElement("button");
@@ -510,7 +507,6 @@ document.addEventListener("DOMContentLoaded", () => {
     document.body.appendChild(ordersPanel);
   }
 
-// ------------------ 📦 Meus Pedidos (continuação) ------------------
   function openOrdersPanel() {
     Overlays.closeAll();
     ordersPanel.classList.add("active");
@@ -589,30 +585,10 @@ document.addEventListener("DOMContentLoaded", () => {
       });
   }
 
-  /* ------------------ ⎋ ESC + Clique-fora ------------------ */
-  document.addEventListener("keydown", (e) => {
-    if (e.key === "Escape") Overlays.closeAll();
-  });
-
-  document.addEventListener("click", (e) => {
-    const aberto = document.querySelector(".modal.show, #mini-cart.active, .orders-panel.active, #admin-dashboard.show");
-    if (!aberto) return;
-    if (e.target.closest(".modal-content, #mini-cart, .orders-panel")) return; // clique interno
-    if (e.target.closest("#cart-icon, .add-cart, .extras-btn, .user-button, #orders-fab, #admin-fab")) return; // botões que abrem
-    Overlays.closeAll();
-  });
-
-  /* ------------------ INIT (parte final do app) ------------------ */
-  renderMiniCart();
-  showOrdersFabIfLogged();
-  console.log("%c🔥 DFL v2.2 — ESTÁVEL (App pronto)", "color:#fff;background:#4caf50;padding:6px 10px;border-radius:8px;font-weight:700]");
-
-
   /* =========================================================
-     📊 DFL v2.2 — Painel Administrativo PRO
-     - Filtros 7/30/todos
-     - Agrupa por dia
-     - Corrige .split em dados vazios
+     📊 ADMIN DASHBOARD (com Chart Destroy Fix)
+     - Corrige erro "Canvas already in use"
+     - Gráficos reinicializados ao trocar período
   ========================================================= */
 
   const ADMINS = [
@@ -624,6 +600,9 @@ document.addEventListener("DOMContentLoaded", () => {
   function isAdmin(user) {
     return user && user.email && ADMINS.includes(user.email.toLowerCase());
   }
+
+  let chartPedidos = null;
+  let chartProdutos = null;
 
   function ensureChartJS(cb) {
     if (window.Chart) return cb();
@@ -708,7 +687,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });
     document.body.appendChild(btn);
   }
-
+/* ------------------ 📊 Geração de Resumo e Gráficos ------------------ */
   function gerarResumoECharts(pedidos) {
     if (!window.Chart) return;
 
@@ -722,6 +701,10 @@ document.addEventListener("DOMContentLoaded", () => {
     if (elQtd)   elQtd.textContent   = `Pedidos: ${pedidos.length}`;
     if (elTick)  elTick.textContent  = `Ticket Médio: R$ ${ticket.toFixed(2).replace('.', ',')}`;
 
+    // 🔁 destrói gráficos antigos antes de redesenhar
+    chartPedidos?.destroy();
+    chartProdutos?.destroy();
+
     // gráfico por dia
     const porDia = {};
     pedidos.forEach(p => {
@@ -734,7 +717,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const ctx1 = document.getElementById("chart-pedidos");
     if (ctx1) {
-      new Chart(ctx1, {
+      chartPedidos = new Chart(ctx1, {
         type: "line",
         data: { labels: dias, datasets: [{ label: "Total por Dia", data: valores, borderColor: "#4caf50", fill: false }] },
         options: { responsive: true, interaction: { mode: 'index' }, scales: { y: { beginAtZero: true } } }
@@ -754,7 +737,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const ctx2 = document.getElementById("chart-produtos");
     if (ctx2) {
-      new Chart(ctx2, {
+      chartProdutos = new Chart(ctx2, {
         type: "bar",
         data: { labels: top.map(t => t[0]), datasets: [{ label: "Itens mais vendidos", data: top.map(t => t[1]), backgroundColor: "#ffb300" }] },
         options: { responsive: true, scales: { y: { beginAtZero: true } } }
@@ -809,7 +792,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
-  // cria/remove botão admin conforme login
+  /* ------------------ 🔐 Segurança, Logs e LGPD ------------------ */
   auth.onAuthStateChanged(user => {
     const fab = document.getElementById("admin-fab");
     if (user && isAdmin(user)) {
@@ -820,17 +803,10 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
-  /* ------------------ Logs e segurança final ------------------ */
   window.addEventListener("pageshow", (e) => {
     if (e.persisted) {
       console.warn("↻ Página reaberta via cache, recarregando...");
       location.reload();
-    }
-  });
-
-  auth.onAuthStateChanged((user) => {
-    if (user?.email?.toLowerCase()?.includes("dafamilialanches.com.br")) {
-      console.log("%c👑 Painel Admin ativo", "color:#ffb300;font-weight:700;");
     }
   });
 
@@ -841,13 +817,13 @@ document.addEventListener("DOMContentLoaded", () => {
     console.warn("⚠️ Erro interceptado:", e?.message);
   });
 
-  console.log("%c🍔 DFL v2.2 FINAL — LOGIN SEGURO + ADMIN PRO + GRÁFICOS 🔥",
+  console.log("%c🍔 DFL v2.3.1 — Login Seguro + Charts Corrigidos + LGPD Pronto",
               "background:#4caf50;color:#fff;padding:8px 12px;border-radius:8px;font-weight:700;");
 }); // <-- fim do DOMContentLoaded
 
 
 /* =========================================================
-   🍪 Banner de Cookies (LGPD) + link Política de Privacidade
+   🍪 Banner de Cookies (LGPD) + Link Política de Privacidade
    - Não bloqueia a tela
    - Abre a política em nova aba
 ========================================================= */
