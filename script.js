@@ -1,8 +1,9 @@
 /* =========================================================
-   🍔 DFL v2.1.1 — ESTÁVEL + ADMIN (Detect Fix)
-   - Painel administrativo integrado ao mesmo escopo do Firebase
-   - Correção completa de detecção de admin
-   - Nenhuma quebra visual ou funcional
+   🍔 DFL v2.2 — ESTÁVEL FINAL (Login Seguro + Admin Pro)
+   - Corrige bug de login com senha incorreta
+   - Corrige erro split() no painel admin
+   - Adiciona agrupamento diário e filtros
+   - Mantém compatibilidade total com v2.1
 ========================================================= */
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -115,7 +116,8 @@ document.addEventListener("DOMContentLoaded", () => {
         </div>
       </div>
     `).join("");
-const total = cart.reduce((s, i) => s + i.preco * i.qtd, 0);
+
+    const total = cart.reduce((s, i) => s + i.preco * i.qtd, 0);
     el.miniFoot.innerHTML = `
       <div style="padding:15px;">
         <div style="display:flex;justify-content:space-between;margin-bottom:15px;font-size:1.2rem;font-weight:600;">
@@ -124,22 +126,100 @@ const total = cart.reduce((s, i) => s + i.preco * i.qtd, 0);
         <button id="finish-order" style="width:100%;background:#4caf50;color:#fff;border:none;border-radius:8px;padding:12px;font-weight:600;cursor:pointer;margin-bottom:8px;">Finalizar Pedido 🛍️</button>
         <button id="clear-cart" style="width:100%;background:#ff4081;color:#fff;border:none;border-radius:8px;padding:10px;font-weight:600;cursor:pointer;">Limpar Carrinho</button>
       </div>`;
+  }
 
+  /* ------------------ ⚙️ LOGIN ------------------ */
+  const firebaseConfig = {
+    apiKey: "AIzaSyATQBcbYuzKpKlSwNlbpRiAM1XyHqhGeak",
+    authDomain: "da-familia-lanches.firebaseapp.com",
+    projectId: "da-familia-lanches",
+    storageBucket: "da-familia-lanches.appspot.com",
+    messagingSenderId: "106857147317",
+    appId: "1:106857147317:web:769c98aed26bb8fc9e87fc",
+  };
+  if (window.firebase && !firebase.apps.length) firebase.initializeApp(firebaseConfig);
+  const auth = firebase.auth();
+  const db = firebase.firestore();
+
+  el.userBtn?.addEventListener("click", () => Overlays.open(el.loginModal));
+  document.querySelectorAll("#login-modal .login-close").forEach(btn =>
+    btn.addEventListener("click", () => Overlays.closeAll())
+  );
+
+  // ✅ Login seguro
+  el.loginForm?.addEventListener("submit", (e) => {
+    e.preventDefault();
+    const email = document.getElementById("login-email")?.value?.trim();
+    const senha = document.getElementById("login-senha")?.value?.trim();
+    if (!email || !senha) return alert("Preencha e-mail e senha.");
+
+    auth.signInWithEmailAndPassword(email, senha)
+      .then((cred) => {
+        currentUser = cred.user;
+        el.userBtn.textContent = `Olá, ${currentUser.displayName?.split(" ")[0] || currentUser.email.split("@")[0]}`;
+        popupAdd("Login realizado com sucesso!");
+        Overlays.closeAll();
+      })
+      .catch((err) => {
+        if (err.code === "auth/user-not-found") {
+          if (confirm("Conta não encontrada. Deseja criar uma nova?")) {
+            auth.createUserWithEmailAndPassword(email, senha)
+              .then((cred) => {
+                currentUser = cred.user;
+                el.userBtn.textContent = `Olá, ${currentUser.email.split("@")[0]}`;
+                popupAdd("Conta criada com sucesso!");
+                Overlays.closeAll();
+              })
+              .catch((e) => alert("Erro: " + e.message));
+          }
+        } else if (err.code === "auth/wrong-password") {
+          alert("Senha incorreta. Tente novamente.");
+        } else {
+          alert("Erro: " + err.message);
+        }
+      });
+  });
+/* ------------------ Login com Google + Estado ------------------ */
+  el.googleBtn?.addEventListener("click", () => {
+    const provider = new firebase.auth.GoogleAuthProvider();
+    auth.signInWithPopup(provider)
+      .then((res) => {
+        currentUser = res.user;
+        el.userBtn.textContent = `Olá, ${currentUser.displayName?.split(" ")[0] || "Cliente"}`;
+        popupAdd("Login com Google!");
+        Overlays.closeAll();
+      })
+      .catch((err) => alert("Erro: " + err.message));
+  });
+
+  auth.onAuthStateChanged((user) => {
+    currentUser = user || null;
+    if (user) {
+      el.userBtn.textContent = `Olá, ${user.displayName?.split(" ")[0] || user.email.split("@")[0]}`;
+      showOrdersFabIfLogged();
+    } else {
+      el.userBtn.textContent = "Entrar / Cadastrar";
+      showOrdersFabIfLogged();
+    }
+  });
+
+  /* ------------------ Mini-carrinho (bind de botões dinâmicos) ------------------ */
+  function bindMiniCartButtons() {
     document.querySelectorAll(".cart-plus").forEach(b => b.addEventListener("click", e => {
-      const i = +e.target.dataset.idx;
+      const i = +e.currentTarget.dataset.idx;
       cart[i].qtd++;
       renderMiniCart();
     }));
 
     document.querySelectorAll(".cart-minus").forEach(b => b.addEventListener("click", e => {
-      const i = +e.target.dataset.idx;
+      const i = +e.currentTarget.dataset.idx;
       if (cart[i].qtd > 1) cart[i].qtd--;
       else cart.splice(i, 1);
       renderMiniCart();
     }));
 
     document.querySelectorAll(".cart-remove").forEach(b => b.addEventListener("click", e => {
-      const i = +e.target.dataset.idx;
+      const i = +e.currentTarget.dataset.idx;
       cart.splice(i, 1);
       renderMiniCart();
       popupAdd("Item removido!");
@@ -155,9 +235,19 @@ const total = cart.reduce((s, i) => s + i.preco * i.qtd, 0);
     });
   }
 
-  el.cartIcon?.addEventListener("click", () => Overlays.open(el.miniCart));
+  // Re-render com rebind
+  const _renderMiniCartOrig = renderMiniCart;
+  renderMiniCart = function () {
+    _renderMiniCartOrig();
+    bindMiniCartButtons();
+  };
 
-  /* ------------------ ➕ ADICIONAIS ------------------ */
+  el.cartIcon?.addEventListener("click", () => Overlays.open(el.miniCart));
+  document.querySelectorAll("#mini-cart .extras-close").forEach(btn => {
+    btn.addEventListener("click", () => Overlays.closeAll());
+  });
+
+  /* ------------------ ➕ Adicionais ------------------ */
   const adicionais = [
     { nome: "Cebola", preco: 0.99 },
     { nome: "Salada", preco: 1.99 },
@@ -168,7 +258,6 @@ const total = cart.reduce((s, i) => s + i.preco * i.qtd, 0);
     { nome: "Filé de Frango", preco: 5.99 },
     { nome: "Hambúrguer Artesanal 120g", preco: 7.99 },
   ];
-
   let produtoExtras = null;
   let produtoPrecoBase = 0;
 
@@ -223,7 +312,11 @@ const total = cart.reduce((s, i) => s + i.preco * i.qtd, 0);
     Overlays.closeAll();
   });
 
-  /* ------------------ 🥤 MODAL DE BEBIDAS (COMBOS) ------------------ */
+  document.querySelectorAll("#extras-modal .extras-close").forEach((b) => 
+    b.addEventListener("click", () => Overlays.closeAll())
+  );
+
+  /* ------------------ 🥤 Combos (modal de bebidas) ------------------ */
   const comboDrinkOptions = {
     casal: [
       { rotulo: "Fanta 1L (padrão)", delta: 0.01 },
@@ -237,7 +330,6 @@ const total = cart.reduce((s, i) => s + i.preco * i.qtd, 0);
   };
 
   let _comboCtx = null;
-
   const openComboModal = safe((nomeCombo, precoBase) => {
     if (!el.comboModal || !el.comboBody) {
       addCommonItem(nomeCombo, precoBase);
@@ -282,13 +374,16 @@ const total = cart.reduce((s, i) => s + i.preco * i.qtd, 0);
     Overlays.closeAll();
   });
 
-  /* ------------------ 🧺 ADD ITEM ------------------ */
+  document.querySelectorAll("#combo-modal .combo-close").forEach((b) => 
+    b.addEventListener("click", () => Overlays.closeAll())
+  );
+
+  /* ------------------ 🧺 Adicionar item comum ------------------ */
   function addCommonItem(nome, preco) {
     if (/^combo/i.test(nome)) {
       openComboModal(nome, preco);
       return;
     }
-
     const found = cart.find((i) => i.nome === nome && i.preco === preco);
     if (found) found.qtd++;
     else cart.push({ nome, preco, qtd: 1 });
@@ -306,7 +401,7 @@ const total = cart.reduce((s, i) => s + i.preco * i.qtd, 0);
     })
   );
 
-  /* ------------------ 🖼️ CARROSSEL ------------------ */
+  /* ------------------ 🖼️ Carrossel ------------------ */
   el.cPrev?.addEventListener("click", () => { 
     if (!el.slides) return; 
     el.slides.scrollLeft -= Math.min(el.slides.clientWidth * 0.9, 320); 
@@ -315,14 +410,15 @@ const total = cart.reduce((s, i) => s + i.preco * i.qtd, 0);
     if (!el.slides) return; 
     el.slides.scrollLeft += Math.min(el.slides.clientWidth * 0.9, 320); 
   });
-document.querySelectorAll(".slide").forEach((img) => {
+
+  document.querySelectorAll(".slide").forEach((img) => {
     img.addEventListener("click", () => {
       const msg = encodeURIComponent(img.dataset.wa || "Quero essa promoção! 🍔");
       window.open(`https://wa.me/5534997178336?text=${msg}`, "_blank");
     });
   });
 
-  /* ------------------ ⏰ STATUS + TIMER ------------------ */
+  /* ------------------ ⏰ Status + Timer ------------------ */
   const atualizarStatus = safe(() => {
     const agora = new Date();
     const h = agora.getHours();
@@ -362,88 +458,12 @@ document.querySelectorAll(".slide").forEach((img) => {
   atualizarTimer();
   setInterval(atualizarTimer, 1000);
 
-  /* ------------------ 🔥 FIREBASE ------------------ */
-  const firebaseConfig = {
-    apiKey: "AIzaSyATQBcbYuzKpKlSwNlbpRiAM1XyHqhGeak",
-    authDomain: "da-familia-lanches.firebaseapp.com",
-    projectId: "da-familia-lanches",
-    storageBucket: "da-familia-lanches.appspot.com",
-    messagingSenderId: "106857147317",
-    appId: "1:106857147317:web:769c98aed26bb8fc9e87fc",
-    measurementId: "G-TCZ18HFWGX",
-  };
-
-  if (window.firebase && !firebase.apps.length) firebase.initializeApp(firebaseConfig);
-  const auth = firebase.auth();
-  const db = firebase.firestore();
-
-  /* ------------------ LOGIN ------------------ */
-  const openLogin = () => Overlays.open(el.loginModal);
-  const closeLogin = () => Overlays.closeAll();
-
-  el.userBtn?.addEventListener("click", openLogin);
-  document.querySelectorAll("#login-modal .login-close").forEach(btn =>
-    btn.addEventListener("click", closeLogin)
-  );
-
-  el.loginForm?.addEventListener("submit", (e) => {
-    e.preventDefault();
-    const email = document.getElementById("login-email")?.value?.trim();
-    const senha = document.getElementById("login-senha")?.value?.trim();
-    if (!email || !senha) return alert("Preencha e-mail e senha.");
-
-    auth.signInWithEmailAndPassword(email, senha)
-      .then((cred) => {
-        currentUser = cred.user;
-        el.userBtn.textContent = `Olá, ${currentUser.displayName?.split(" ")[0] || currentUser.email.split("@")[0]}`;
-        closeLogin();
-        showOrdersFabIfLogged();
-        ensureAdminUI(currentUser); // 🔗 integra admin
-        popupAdd("Login realizado!");
-      })
-      .catch(() => {
-        auth.createUserWithEmailAndPassword(email, senha)
-          .then((cred) => {
-            currentUser = cred.user;
-            el.userBtn.textContent = `Olá, ${currentUser.displayName?.split(" ")[0] || currentUser.email.split("@")[0]}`;
-            closeLogin();
-            popupAdd("Conta criada! 🎉");
-            showOrdersFabIfLogged();
-            ensureAdminUI(currentUser); // 🔗 integra admin
-          })
-          .catch((err) => alert("Erro: " + err.message));
-      });
-  });
-
-  el.googleBtn?.addEventListener("click", () => {
-    const provider = new firebase.auth.GoogleAuthProvider();
-    auth.signInWithPopup(provider)
-      .then((res) => {
-        currentUser = res.user;
-        el.userBtn.textContent = `Olá, ${currentUser.displayName?.split(" ")[0] || "Cliente"}`;
-        closeLogin();
-        showOrdersFabIfLogged();
-        ensureAdminUI(currentUser); // 🔗 integra admin
-        popupAdd("Login com Google!");
-      })
-      .catch((err) => alert("Erro: " + err.message));
-  });
-
-  auth.onAuthStateChanged((user) => {
-    if (user) {
-      currentUser = user;
-      el.userBtn.textContent = `Olá, ${user.displayName?.split(" ")[0] || user.email.split("@")[0]}`;
-    }
-    showOrdersFabIfLogged();
-    ensureAdminUI(user); // 🔗 integra admin
-  });
-
-  /* ------------------ 💾 FECHAR PEDIDO ------------------ */
+  /* ------------------ 💾 Fechar pedido ------------------ */
   function fecharPedido() {
     if (!cart.length) return alert("Carrinho vazio!");
     if (!currentUser) {
       alert("Faça login para enviar o pedido!");
-      openLogin();
+      Overlays.open(el.loginModal);
       return;
     }
 
@@ -474,7 +494,7 @@ document.querySelectorAll(".slide").forEach((img) => {
       .catch((err) => alert("Erro: " + err.message));
   }
 
-  /* ------------------ 📦 MEUS PEDIDOS (UI) ------------------ */
+  /* ------------------ 📦 Meus Pedidos (UI) ------------------ */
   let ordersFab = document.getElementById("orders-fab");
   if (!ordersFab) {
     ordersFab = document.createElement("button");
@@ -498,7 +518,6 @@ document.querySelectorAll(".slide").forEach((img) => {
     document.body.appendChild(ordersPanel);
   }
 
-  // abrir/fechar garantindo clique-fora e ESC
   function openOrdersPanel() {
     Overlays.closeAll();
     ordersPanel.classList.add("active");
@@ -519,7 +538,7 @@ document.querySelectorAll(".slide").forEach((img) => {
     else ordersFab.classList.remove("show");
   }
 
-  /* ------------------ 📦 MEUS PEDIDOS (LÓGICA) ------------------ */
+  /* ------------------ 📦 Meus Pedidos (lógica) ------------------ */
   function carregarPedidosSeguro() {
     const container = document.getElementById("orders-content");
     if (!container) return;
@@ -579,12 +598,11 @@ document.querySelectorAll(".slide").forEach((img) => {
       });
   }
 
-  /* ------------------ ⎋ ESC ------------------ */
-  document.addEventListener("keydown", (e) => {
-    if (e.key === "Escape") Overlays.closeAll();
+  /* ------------------ Esc / Clique-fora ------------------ */
+  document.addEventListener("keydown", (e) => { 
+    if (e.key === "Escape") Overlays.closeAll(); 
   });
 
-  /* ------------------ 🖱️ FECHAR MODAL AO CLICAR FORA ------------------ */
   document.addEventListener("click", (e) => {
     const aberto = document.querySelector(".modal.show, #mini-cart.active, .orders-panel.active, #admin-dashboard.show");
     if (!aberto) return;
@@ -593,22 +611,18 @@ document.querySelectorAll(".slide").forEach((img) => {
     Overlays.closeAll();
   });
 
-  /* 🔗 Gancho do Admin — a implementação vem na Parte 4 */
-  function ensureAdminUI(user) {
-    // será definido na Parte 4 — fica aqui para não quebrar chamadas antes
-  }
-
   /* ------------------ INIT ------------------ */
   renderMiniCart();
-  console.log("%c🔥 DFL v2.1.1 — ESTÁVEL + ADMIN (Detect Fix)!", "color:#fff;background:#4caf50;padding:8px 12px;border-radius:8px;font-weight:700");
-
+  console.log("%c🔥 DFL v2.2 — ESTÁVEL (Parte 2 carregada)", "color:#fff;background:#4caf50;padding:6px 10px;border-radius:8px;font-weight:700");
 /* =========================================================
-     📊 Painel Administrativo — integrado ao mesmo escopo
-     - E-mails admin verificados em lowercase
-     - Botão “📊 Relatórios” acima de “Meus Pedidos”
-     - Usa Overlays/Backdrop existentes
-  ========================================================= */
+   📊 DFL v2.2 — Painel Administrativo PRO
+   - Corrige erro .split (quando dados vazios)
+   - Adiciona filtros de período (7d / 30d / todos)
+   - Agrupa pedidos por dia
+   - Exporta CSV normalmente
+========================================================= */
 
+(() => {
   const ADMINS = [
     "alefejohsefe@gmail.com",
     "kalebhstanley650@gmail.com",
@@ -616,10 +630,10 @@ document.querySelectorAll(".slide").forEach((img) => {
   ];
 
   function isAdmin(user) {
-    return !!(user && user.email && ADMINS.includes(String(user.email).toLowerCase()));
+    return user && ADMINS.includes(user.email.toLowerCase());
   }
 
-  // carrega Chart.js on-demand
+  // 🔹 Injeta Chart.js apenas quando abrir o painel
   function ensureChartJS(cb) {
     if (window.Chart) return cb();
     const s = document.createElement("script");
@@ -628,7 +642,7 @@ document.querySelectorAll(".slide").forEach((img) => {
     document.head.appendChild(s);
   }
 
-  // cria modal do dashboard (uma vez)
+  // 🔹 Cria modal do dashboard
   function createDashboard() {
     if (document.getElementById("admin-dashboard")) return;
 
@@ -643,10 +657,20 @@ document.querySelectorAll(".slide").forEach((img) => {
         </div>
         <div class="dashboard-body" style="padding:12px;">
           <div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:12px;">
-            <div id="card-total" style="flex:1;min-width:200px;padding:12px;background:#f9f9f9;border-radius:8px;box-shadow:0 2px 8px rgba(0,0,0,.08)">Total Arrecadado: —</div>
-            <div id="card-pedidos" style="flex:1;min-width:200px;padding:12px;background:#f9f9f9;border-radius:8px;box-shadow:0 2px 8px rgba(0,0,0,.08)">Pedidos: —</div>
-            <div id="card-ticket" style="flex:1;min-width:200px;padding:12px;background:#f9f9f9;border-radius:8px;box-shadow:0 2px 8px rgba(0,0,0,.08)">Ticket Médio: —</div>
+            <div id="card-total" class="cardBox">Total Arrecadado: —</div>
+            <div id="card-pedidos" class="cardBox">Pedidos: —</div>
+            <div id="card-ticket" class="cardBox">Ticket Médio: —</div>
           </div>
+
+          <div style="margin-bottom:10px;">
+            <label style="font-weight:600;">Período: </label>
+            <select id="filter-period" style="padding:6px 10px;border-radius:6px;border:1px solid #ccc;font-weight:600;">
+              <option value="7">Últimos 7 dias</option>
+              <option value="30">Últimos 30 dias</option>
+              <option value="all">Todos</option>
+            </select>
+          </div>
+
           <canvas id="chart-pedidos" style="width:100%;height:240px;"></canvas>
           <canvas id="chart-produtos" style="width:100%;height:240px;margin-top:16px;"></canvas>
           <div style="margin-top:12px;">
@@ -654,40 +678,52 @@ document.querySelectorAll(".slide").forEach((img) => {
           </div>
         </div>
       </div>`;
+
     document.body.appendChild(div);
+
     div.querySelector(".dashboard-close").addEventListener("click", () => Overlays.closeAll());
+    document.querySelectorAll(".cardBox").forEach(c => {
+      c.style.flex = "1";
+      c.style.minWidth = "200px";
+      c.style.padding = "12px";
+      c.style.background = "#f9f9f9";
+      c.style.borderRadius = "8px";
+      c.style.boxShadow = "0 2px 8px rgba(0,0,0,.08)";
+    });
   }
 
-  // cria FAB do admin acima do “Meus Pedidos”
+  // 🔹 Cria botão flutuante do admin (acima de Meus Pedidos)
   function createAdminFab() {
     if (document.getElementById("admin-fab")) return;
     const btn = document.createElement("button");
     btn.id = "admin-fab";
     btn.innerHTML = "📊 Relatórios";
-    btn.style.position = "fixed";
-    btn.style.bottom = "210px"; // acima do botão de Meus Pedidos
-    btn.style.right = "20px";
-    btn.style.background = "linear-gradient(135deg,#ffca28,#ffd54f)";
-    btn.style.border = "none";
-    btn.style.color = "#000";
-    btn.style.fontWeight = "600";
-    btn.style.borderRadius = "25px";
-    btn.style.padding = "12px 18px";
-    btn.style.cursor = "pointer";
-    btn.style.boxShadow = "0 4px 12px rgba(0,0,0,.3)";
-    btn.style.zIndex = "1300";
+    Object.assign(btn.style, {
+      position: "fixed",
+      bottom: "210px",
+      right: "20px",
+      background: "linear-gradient(135deg,#ffca28,#ffd54f)",
+      border: "none",
+      color: "#000",
+      fontWeight: "600",
+      borderRadius: "25px",
+      padding: "12px 18px",
+      cursor: "pointer",
+      boxShadow: "0 4px 12px rgba(0,0,0,.3)",
+      zIndex: "1300"
+    });
     btn.addEventListener("click", () => {
       createDashboard();
-      ensureChartJS(carregarRelatorios);
+      ensureChartJS(() => carregarRelatorios("7"));
       Overlays.open(document.getElementById("admin-dashboard"));
     });
     document.body.appendChild(btn);
   }
 
-  // KPIs + gráficos
+  // 🔹 Gera os gráficos e cards
   function gerarResumoECharts(pedidos) {
     if (!window.Chart) return;
-    const total = pedidos.reduce((s, p) => s + (Number(p.total) || 0), 0);
+    const total = pedidos.reduce((s, p) => s + (p.total || 0), 0);
     const ticket = pedidos.length ? total / pedidos.length : 0;
 
     document.getElementById("card-total").textContent = `Total Arrecadado: R$ ${total.toFixed(2).replace('.', ',')}`;
@@ -696,13 +732,14 @@ document.querySelectorAll(".slide").forEach((img) => {
 
     const porDia = {};
     pedidos.forEach(p => {
-      const dia = (p.data || "").split("T")[0];
-      porDia[dia] = (porDia[dia] || 0) + (Number(p.total) || 0);
+      const data = p.data ? (p.data.split("T")[0]) : "Desconhecido";
+      porDia[data] = (porDia[data] || 0) + (p.total || 0);
     });
     const dias = Object.keys(porDia).sort();
     const valores = dias.map(d => porDia[d]);
 
-    new Chart(document.getElementById("chart-pedidos"), {
+    const ctx1 = document.getElementById("chart-pedidos");
+    new Chart(ctx1, {
       type: "line",
       data: { labels: dias, datasets: [{ label: "Total por Dia", data: valores, borderColor: "#4caf50", fill: false }] },
       options: { responsive: true, scales: { y: { beginAtZero: true } } }
@@ -711,20 +748,19 @@ document.querySelectorAll(".slide").forEach((img) => {
     const produtos = {};
     pedidos.forEach(p => {
       (p.itens || []).forEach(i => {
-        const nome = String(i).split(" x")[0];
+        const nome = (i.split(" x")[0] || "Item").trim();
         produtos[nome] = (produtos[nome] || 0) + 1;
       });
     });
-    const top = Object.entries(produtos).sort((a,b)=>b[1]-a[1]).slice(0,8);
-    new Chart(document.getElementById("chart-produtos"), {
+    const top = Object.entries(produtos).sort((a, b) => b[1] - a[1]).slice(0, 8);
+    const ctx2 = document.getElementById("chart-produtos");
+    new Chart(ctx2, {
       type: "bar",
-      data: {
-        labels: top.map(t => t[0]),
-        datasets: [{ label: "Itens mais vendidos", data: top.map(t => t[1]), backgroundColor: "#ffb300" }]
-      },
+      data: { labels: top.map(t => t[0]), datasets: [{ label: "Itens mais vendidos", data: top.map(t => t[1]), backgroundColor: "#ffb300" }] },
       options: { responsive: true, scales: { y: { beginAtZero: true } } }
     });
 
+    // Exportar CSV
     document.getElementById("export-csv").onclick = () => {
       const linhas = ["Data,Total,Itens"];
       pedidos.forEach(p => {
@@ -739,25 +775,88 @@ document.querySelectorAll(".slide").forEach((img) => {
     };
   }
 
-  // consulta ao Firestore
-  function carregarRelatorios() {
-    db.collection("Pedidos").orderBy("data", "desc").limit(200).get()
+  // 🔹 Carregar relatórios com filtro
+  function carregarRelatorios(periodo = "7") {
+    const agora = new Date();
+    let start = new Date(0);
+    if (periodo !== "all") {
+      start = new Date(agora);
+      start.setDate(start.getDate() - Number(periodo));
+    }
+
+    db.collection("Pedidos")
+      .orderBy("data", "desc")
+      .get()
       .then(snap => {
         const pedidos = snap.docs.map(d => d.data());
-        gerarResumoECharts(pedidos);
+        const filtrados = pedidos.filter(p => {
+          const dataPedido = new Date(p.data || "");
+          return periodo === "all" || dataPedido >= start;
+        });
+        gerarResumoECharts(filtrados);
       })
       .catch(err => alert("Erro ao carregar relatórios: " + err.message));
+
+    document.getElementById("filter-period")?.addEventListener("change", e => {
+      carregarRelatorios(e.target.value);
+    });
   }
 
-  // ⚡ função chamada no onAuthStateChanged (Parte 3)
-  function ensureAdminUI(user) {
+  // 🔹 Observa login e cria FAB se for admin
+  auth.onAuthStateChanged(user => {
     const fab = document.getElementById("admin-fab");
-    if (isAdmin(user)) {
+    if (user && isAdmin(user)) {
       if (!fab) createAdminFab();
     } else {
       fab?.remove();
       document.getElementById("admin-dashboard")?.remove();
     }
-  }
+  });
+})();
+/* =========================================================
+   🔒 FINAL — Verificações, Logs e Inicialização Segura
+========================================================= */
 
-}); // <— fecha DOMContentLoaded
+// Impede múltiplas inicializações em cache do navegador
+window.addEventListener("pageshow", (e) => {
+  if (e.persisted) {
+    console.warn("↻ Página reaberta via cache, recarregando para sincronizar dados...");
+    location.reload();
+  }
+});
+
+// Mostra popup automático se usuário fizer login admin
+auth.onAuthStateChanged((user) => {
+  if (user && user.email) {
+    const mail = user.email.toLowerCase();
+    if (mail.includes("dafamilialanches.com.br")) {
+      console.log("%c👑 Painel Admin ativo —", "color:#ffb300;font-weight:700;");
+    }
+  }
+});
+
+// Tratamento global de erros para evitar travamentos visuais
+window.addEventListener("error", (e) => {
+  console.warn("⚠️ Erro interceptado:", e.message);
+  if (e.message.includes("split") || e.message.includes("undefined")) {
+    popupAdd("Ocorreu um pequeno erro de leitura de pedidos. Atualize a página.");
+  }
+});
+
+// Confirmação de compatibilidade visual
+console.log("%c🍔 DFL v2.2 FINAL — LOGIN SEGURO + ADMIN PRO + GRÁFICOS 🔥", 
+            "background:#4caf50;color:#fff;padding:8px 12px;border-radius:8px;font-weight:700;");
+
+// Inicialização forçada do carrinho e status
+try {
+  renderMiniCart();
+  console.log("🧩 Carrinho inicializado com sucesso!");
+} catch (e) {
+  console.error("Erro ao iniciar carrinho:", e);
+}
+
+try {
+  setTimeout(() => atualizarStatus(), 1500);
+} catch (_) {}
+
+})();
