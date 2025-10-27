@@ -1,12 +1,8 @@
-
 /* =========================================================
-   🍔 DFL v2.0 — ESTÁVEL (JS completo corrigido)
-   - Badges corrigidas
-   - Bebidas completas
-   - Adicionais somam corretamente
-   - Combos com refrigerantes corretos
-   - Modais fecham clicando fora
-   - "Meus Pedidos" exibindo pedidos (email e uid)
+   🍔 DFL v2.1 — ESTÁVEL + ADMIN (corrigido e compatível com v2.0)
+   - Correção do clique fora e botão ✖
+   - Painel administrativo acima de “Meus Pedidos”
+   - Detecção de admin com e-mails case-insensitive
 ========================================================= */
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -63,7 +59,8 @@ document.addEventListener("DOMContentLoaded", () => {
   /* ------------------ 🧩 OVERLAYS ------------------ */
   const Overlays = {
     closeAll() {
-      document.querySelectorAll(".modal.show, #mini-cart.active, .orders-panel.active")
+      document
+        .querySelectorAll(".modal.show, #mini-cart.active, .orders-panel.active, #admin-dashboard.show")
         .forEach((e) => e.classList.remove("show", "active"));
       Backdrop.hide();
     },
@@ -177,8 +174,7 @@ document.addEventListener("DOMContentLoaded", () => {
   ];
   let produtoExtras = null;
   let produtoPrecoBase = 0;
-
-  const openExtrasFor = safe((card) => {
+const openExtrasFor = safe((card) => {
     if (!card || !el.extrasModal || !el.extrasList) return;
     produtoExtras = card.dataset.name;
     produtoPrecoBase = parseFloat(card.dataset.price) || 0;
@@ -390,8 +386,7 @@ document.addEventListener("DOMContentLoaded", () => {
   if (window.firebase && !firebase.apps.length) firebase.initializeApp(firebaseConfig);
   const auth = firebase.auth();
   const db = firebase.firestore();
-
-  /* ------------------ LOGIN ------------------ */
+/* ------------------ LOGIN ------------------ */
   const openLogin = () => Overlays.open(el.loginModal);
   const closeLogin = () => Overlays.closeAll();
 
@@ -508,7 +503,12 @@ document.addEventListener("DOMContentLoaded", () => {
     document.body.appendChild(ordersPanel);
   }
 
-  function openOrdersPanel() { Overlays.open(ordersPanel); }
+  // ✅ Override: abrir “Meus Pedidos” usando .active (garante fechamento por X e clique-fora)
+  function openOrdersPanel() {
+    Overlays.closeAll();
+    ordersPanel.classList.add("active");
+    Backdrop.show();
+  }
   function closeOrdersPanel() { Overlays.closeAll(); }
 
   ordersFab.addEventListener("click", () => {
@@ -523,7 +523,8 @@ document.addEventListener("DOMContentLoaded", () => {
     if (currentUser) ordersFab.classList.add("show");
     else ordersFab.classList.remove("show");
   }
-/* ------------------ 📦 MEUS PEDIDOS (LÓGICA) ------------------ */
+
+  /* ------------------ 📦 MEUS PEDIDOS (LÓGICA) ------------------ */
   function carregarPedidosSeguro() {
     const container = document.getElementById("orders-content");
     if (!container) return;
@@ -585,31 +586,31 @@ document.addEventListener("DOMContentLoaded", () => {
         container.innerHTML = `<p class="empty-orders" style="color:#d32f2f;">Erro: ${err.message}</p>`;
       });
   }
-
-  /* ------------------ ⎋ ESC ------------------ */
+/* ------------------ ⎋ ESC ------------------ */
   document.addEventListener("keydown", (e) => { 
     if (e.key === "Escape") Overlays.closeAll(); 
   });
 
   /* ------------------ 🖱️ FECHAR MODAL AO CLICAR FORA ------------------ */
   document.addEventListener("click", (e) => {
-    const aberto = document.querySelector(".modal.show, #mini-cart.active, .orders-panel.active");
+    const aberto = document.querySelector(".modal.show, #mini-cart.active, .orders-panel.active, #admin-dashboard.show");
     if (!aberto) return;
     if (e.target.closest(".modal-content, #mini-cart, .orders-panel")) return; // clique interno
-    if (e.target.closest("#cart-icon, .add-cart, .extras-btn, .user-button, #orders-fab")) return; // botões que abrem
+    if (e.target.closest("#cart-icon, .add-cart, .extras-btn, .user-button, #orders-fab, #admin-fab")) return; // botões que abrem
     Overlays.closeAll();
   });
 
   /* ------------------ INIT ------------------ */
   renderMiniCart();
-  console.log("%c🔥 DFL v2.0 — ESTÁVEL E OTIMIZADO!", "color:#fff;background:#4caf50;padding:8px 12px;border-radius:8px;font-weight:700");
+  console.log("%c🔥 DFL v2.1 — ESTÁVEL + ADMIN!", "color:#fff;background:#4caf50;padding:8px 12px;border-radius:8px;font-weight:700");
 });
 
 /* =========================================================
-   📊 DFL v2.1 — Dashboard de Relatórios e Estatísticas
-   ✅ Compatível com v2.0 (sem alterar HTML/CSS)
-   ✅ Somente para administradores autorizados
-   ✅ Reutiliza o sistema de modais e backdrop existente
+   📊 DFL v2.1 — Painel Administrativo (Relatórios e Estatísticas)
+   ✅ Correções:
+      - Fechamento por X e clique-fora restaurados
+      - E-mails verificados com toLowerCase()
+      - Painel acima do botão “Meus Pedidos”
 ========================================================= */
 
 (() => {
@@ -620,7 +621,7 @@ document.addEventListener("DOMContentLoaded", () => {
   ];
 
   function isAdmin(user) {
-    return user && ADMINS.includes(user.email);
+    return user && ADMINS.includes(user.email.toLowerCase());
   }
 
   // injeta Chart.js apenas quando o admin abre o painel
@@ -640,25 +641,27 @@ document.addEventListener("DOMContentLoaded", () => {
     div.id = "admin-dashboard";
     div.className = "modal";
     div.innerHTML = `
-      <div class="modal-content" style="max-width:1000px;width:95%;height:85vh;overflow:auto;">
-        <div class="modal-head">
+      <div class="modal-content" style="max-width:1000px;width:95%;height:85vh;overflow:auto;background:#fff;border-radius:12px;">
+        <div class="modal-head" style="display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #ddd;padding:10px 14px;">
           <h3>📊 Relatórios e Estatísticas</h3>
-          <button class="dashboard-close">✖</button>
+          <button class="dashboard-close" style="background:#ff5252;color:#fff;border:none;border-radius:6px;padding:6px 10px;cursor:pointer;font-weight:600;">✖</button>
         </div>
         <div class="dashboard-body" style="padding:12px;">
           <div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:12px;">
-            <div id="card-total" style="flex:1;min-width:200px;padding:12px;background:#fff;border-radius:8px;box-shadow:0 2px 8px rgba(0,0,0,.08)">Total Arrecadado: —</div>
-            <div id="card-pedidos" style="flex:1;min-width:200px;padding:12px;background:#fff;border-radius:8px;box-shadow:0 2px 8px rgba(0,0,0,.08)">Pedidos: —</div>
-            <div id="card-ticket" style="flex:1;min-width:200px;padding:12px;background:#fff;border-radius:8px;box-shadow:0 2px 8px rgba(0,0,0,.08)">Ticket Médio: —</div>
+            <div id="card-total" style="flex:1;min-width:200px;padding:12px;background:#f9f9f9;border-radius:8px;box-shadow:0 2px 8px rgba(0,0,0,.08)">Total Arrecadado: —</div>
+            <div id="card-pedidos" style="flex:1;min-width:200px;padding:12px;background:#f9f9f9;border-radius:8px;box-shadow:0 2px 8px rgba(0,0,0,.08)">Pedidos: —</div>
+            <div id="card-ticket" style="flex:1;min-width:200px;padding:12px;background:#f9f9f9;border-radius:8px;box-shadow:0 2px 8px rgba(0,0,0,.08)">Ticket Médio: —</div>
           </div>
           <canvas id="chart-pedidos" style="width:100%;height:240px;"></canvas>
           <canvas id="chart-produtos" style="width:100%;height:240px;margin-top:16px;"></canvas>
           <div style="margin-top:12px;">
-            <button id="export-csv" class="btn-secondary">Exportar CSV</button>
+            <button id="export-csv" style="background:#4caf50;color:#fff;border:none;border-radius:8px;padding:10px 16px;font-weight:600;cursor:pointer;">📁 Exportar CSV</button>
           </div>
         </div>
       </div>`;
     document.body.appendChild(div);
+
+    // botão X agora funcional
     div.querySelector(".dashboard-close").addEventListener("click", () => Overlays.closeAll());
   }
 
@@ -669,7 +672,7 @@ document.addEventListener("DOMContentLoaded", () => {
     btn.id = "admin-fab";
     btn.innerHTML = "📊 Relatórios";
     btn.style.position = "fixed";
-    btn.style.bottom = "150px"; // logo acima do botão de Meus Pedidos
+    btn.style.bottom = "210px"; // acima do botão de Meus Pedidos
     btn.style.right = "20px";
     btn.style.background = "linear-gradient(135deg,#ffca28,#ffd54f)";
     btn.style.border = "none";
