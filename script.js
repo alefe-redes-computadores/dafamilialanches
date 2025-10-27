@@ -1,8 +1,8 @@
 /* =========================================================
-   🍔 DFL v2.1 — ESTÁVEL + ADMIN (corrigido e compatível com v2.0)
-   - Correção do clique fora e botão ✖
-   - Painel administrativo acima de “Meus Pedidos”
-   - Detecção de admin com e-mails case-insensitive
+   🍔 DFL v2.1.1 — ESTÁVEL + ADMIN (Detect Fix)
+   - Painel administrativo integrado ao mesmo escopo do Firebase
+   - Correção completa de detecção de admin
+   - Nenhuma quebra visual ou funcional
 ========================================================= */
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -115,8 +115,7 @@ document.addEventListener("DOMContentLoaded", () => {
         </div>
       </div>
     `).join("");
-
-    const total = cart.reduce((s, i) => s + i.preco * i.qtd, 0);
+const total = cart.reduce((s, i) => s + i.preco * i.qtd, 0);
     el.miniFoot.innerHTML = `
       <div style="padding:15px;">
         <div style="display:flex;justify-content:space-between;margin-bottom:15px;font-size:1.2rem;font-weight:600;">
@@ -157,10 +156,8 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   el.cartIcon?.addEventListener("click", () => Overlays.open(el.miniCart));
-  document.querySelectorAll("#mini-cart .extras-close").forEach(btn => {
-    btn.addEventListener("click", () => Overlays.closeAll());
-  });
-/* ------------------ ➕ ADICIONAIS ------------------ */
+
+  /* ------------------ ➕ ADICIONAIS ------------------ */
   const adicionais = [
     { nome: "Cebola", preco: 0.99 },
     { nome: "Salada", preco: 1.99 },
@@ -171,6 +168,7 @@ document.addEventListener("DOMContentLoaded", () => {
     { nome: "Filé de Frango", preco: 5.99 },
     { nome: "Hambúrguer Artesanal 120g", preco: 7.99 },
   ];
+
   let produtoExtras = null;
   let produtoPrecoBase = 0;
 
@@ -225,10 +223,6 @@ document.addEventListener("DOMContentLoaded", () => {
     Overlays.closeAll();
   });
 
-  document.querySelectorAll("#extras-modal .extras-close").forEach((b) => 
-    b.addEventListener("click", () => Overlays.closeAll())
-  );
-
   /* ------------------ 🥤 MODAL DE BEBIDAS (COMBOS) ------------------ */
   const comboDrinkOptions = {
     casal: [
@@ -243,6 +237,7 @@ document.addEventListener("DOMContentLoaded", () => {
   };
 
   let _comboCtx = null;
+
   const openComboModal = safe((nomeCombo, precoBase) => {
     if (!el.comboModal || !el.comboBody) {
       addCommonItem(nomeCombo, precoBase);
@@ -287,10 +282,6 @@ document.addEventListener("DOMContentLoaded", () => {
     Overlays.closeAll();
   });
 
-  document.querySelectorAll("#combo-modal .combo-close").forEach((b) => 
-    b.addEventListener("click", () => Overlays.closeAll())
-  );
-
   /* ------------------ 🧺 ADD ITEM ------------------ */
   function addCommonItem(nome, preco) {
     if (/^combo/i.test(nome)) {
@@ -324,14 +315,14 @@ document.addEventListener("DOMContentLoaded", () => {
     if (!el.slides) return; 
     el.slides.scrollLeft += Math.min(el.slides.clientWidth * 0.9, 320); 
   });
-
-  document.querySelectorAll(".slide").forEach((img) => {
+document.querySelectorAll(".slide").forEach((img) => {
     img.addEventListener("click", () => {
       const msg = encodeURIComponent(img.dataset.wa || "Quero essa promoção! 🍔");
       window.open(`https://wa.me/5534997178336?text=${msg}`, "_blank");
     });
   });
-/* ------------------ ⏰ STATUS + TIMER ------------------ */
+
+  /* ------------------ ⏰ STATUS + TIMER ------------------ */
   const atualizarStatus = safe(() => {
     const agora = new Date();
     const h = agora.getHours();
@@ -391,7 +382,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const closeLogin = () => Overlays.closeAll();
 
   el.userBtn?.addEventListener("click", openLogin);
-  document.querySelectorAll("#login-modal .login-close").forEach(btn => 
+  document.querySelectorAll("#login-modal .login-close").forEach(btn =>
     btn.addEventListener("click", closeLogin)
   );
 
@@ -407,6 +398,7 @@ document.addEventListener("DOMContentLoaded", () => {
         el.userBtn.textContent = `Olá, ${currentUser.displayName?.split(" ")[0] || currentUser.email.split("@")[0]}`;
         closeLogin();
         showOrdersFabIfLogged();
+        ensureAdminUI(currentUser); // 🔗 integra admin
         popupAdd("Login realizado!");
       })
       .catch(() => {
@@ -417,6 +409,7 @@ document.addEventListener("DOMContentLoaded", () => {
             closeLogin();
             popupAdd("Conta criada! 🎉");
             showOrdersFabIfLogged();
+            ensureAdminUI(currentUser); // 🔗 integra admin
           })
           .catch((err) => alert("Erro: " + err.message));
       });
@@ -430,6 +423,7 @@ document.addEventListener("DOMContentLoaded", () => {
         el.userBtn.textContent = `Olá, ${currentUser.displayName?.split(" ")[0] || "Cliente"}`;
         closeLogin();
         showOrdersFabIfLogged();
+        ensureAdminUI(currentUser); // 🔗 integra admin
         popupAdd("Login com Google!");
       })
       .catch((err) => alert("Erro: " + err.message));
@@ -441,6 +435,7 @@ document.addEventListener("DOMContentLoaded", () => {
       el.userBtn.textContent = `Olá, ${user.displayName?.split(" ")[0] || user.email.split("@")[0]}`;
     }
     showOrdersFabIfLogged();
+    ensureAdminUI(user); // 🔗 integra admin
   });
 
   /* ------------------ 💾 FECHAR PEDIDO ------------------ */
@@ -503,7 +498,7 @@ document.addEventListener("DOMContentLoaded", () => {
     document.body.appendChild(ordersPanel);
   }
 
-  // ✅ Override: abrir “Meus Pedidos” usando .active (garante fechamento por X e clique-fora)
+  // abrir/fechar garantindo clique-fora e ESC
   function openOrdersPanel() {
     Overlays.closeAll();
     ordersPanel.classList.add("active");
@@ -523,20 +518,19 @@ document.addEventListener("DOMContentLoaded", () => {
     if (currentUser) ordersFab.classList.add("show");
     else ordersFab.classList.remove("show");
   }
-/* ------------------ 📦 MEUS PEDIDOS (LÓGICA) ------------------ */
+
+  /* ------------------ 📦 MEUS PEDIDOS (LÓGICA) ------------------ */
   function carregarPedidosSeguro() {
     const container = document.getElementById("orders-content");
     if (!container) return;
 
     container.innerHTML = `<p class="empty-orders">Carregando pedidos...</p>`;
 
-    // garante que currentUser/email já estejam disponíveis (especialmente logo após login Google)
     if (!currentUser || !currentUser.email) {
       setTimeout(carregarPedidosSeguro, 300);
       return;
     }
 
-    // helper de renderização
     const render = (snap) => {
       if (snap.empty) {
         container.innerHTML = `<p class="empty-orders">Nenhum pedido encontrado 😢</p>`;
@@ -570,7 +564,6 @@ document.addEventListener("DOMContentLoaded", () => {
       });
     };
 
-    // busca por e-mail; se vazio, tenta por UID
     db.collection("Pedidos")
       .where("usuario", "==", currentUser.email)
       .get()
@@ -587,47 +580,46 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   /* ------------------ ⎋ ESC ------------------ */
-  document.addEventListener("keydown", (e) => { 
-    if (e.key === "Escape") Overlays.closeAll(); 
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape") Overlays.closeAll();
   });
 
   /* ------------------ 🖱️ FECHAR MODAL AO CLICAR FORA ------------------ */
   document.addEventListener("click", (e) => {
     const aberto = document.querySelector(".modal.show, #mini-cart.active, .orders-panel.active, #admin-dashboard.show");
     if (!aberto) return;
-    if (e.target.closest(".modal-content, #mini-cart, .orders-panel")) return; // clique interno
-    if (e.target.closest("#cart-icon, .add-cart, .extras-btn, .user-button, #orders-fab, #admin-fab")) return; // botões que abrem
+    if (e.target.closest(".modal-content, #mini-cart, .orders-panel")) return;
+    if (e.target.closest("#cart-icon, .add-cart, .extras-btn, .user-button, #orders-fab, #admin-fab")) return;
     Overlays.closeAll();
   });
 
+  /* 🔗 Gancho do Admin — a implementação vem na Parte 4 */
+  function ensureAdminUI(user) {
+    // será definido na Parte 4 — fica aqui para não quebrar chamadas antes
+  }
+
   /* ------------------ INIT ------------------ */
   renderMiniCart();
-  console.log("%c🔥 DFL v2.1 — ESTÁVEL + ADMIN!", "color:#fff;background:#4caf50;padding:8px 12px;border-radius:8px;font-weight:700");
-});
+  console.log("%c🔥 DFL v2.1.1 — ESTÁVEL + ADMIN (Detect Fix)!", "color:#fff;background:#4caf50;padding:8px 12px;border-radius:8px;font-weight:700");
 
 /* =========================================================
-   📊 DFL v2.1 — Painel Administrativo (Relatórios e Estatísticas)
-   ✅ Correções:
-      - Fechamento por X e clique-fora restaurados
-      - E-mails verificados com toLowerCase() + trim()
-      - Painel acima do botão “Meus Pedidos”
-========================================================= */
+     📊 Painel Administrativo — integrado ao mesmo escopo
+     - E-mails admin verificados em lowercase
+     - Botão “📊 Relatórios” acima de “Meus Pedidos”
+     - Usa Overlays/Backdrop existentes
+  ========================================================= */
 
-(() => {
   const ADMINS = [
     "alefejohsefe@gmail.com",
     "kalebhstanley650@gmail.com",
     "contato@dafamilialanches.com.br"
   ];
 
-  // ✅ Função corrigida
   function isAdmin(user) {
-    if (!user || !user.email) return false;
-    const email = user.email.trim().toLowerCase();
-    return ADMINS.some(a => a.toLowerCase() === email);
+    return !!(user && user.email && ADMINS.includes(String(user.email).toLowerCase()));
   }
 
-  // injeta Chart.js apenas quando o admin abre o painel
+  // carrega Chart.js on-demand
   function ensureChartJS(cb) {
     if (window.Chart) return cb();
     const s = document.createElement("script");
@@ -636,7 +628,7 @@ document.addEventListener("DOMContentLoaded", () => {
     document.head.appendChild(s);
   }
 
-  // cria modal do dashboard se ainda não existir
+  // cria modal do dashboard (uma vez)
   function createDashboard() {
     if (document.getElementById("admin-dashboard")) return;
 
@@ -666,14 +658,14 @@ document.addEventListener("DOMContentLoaded", () => {
     div.querySelector(".dashboard-close").addEventListener("click", () => Overlays.closeAll());
   }
 
-  // cria botão flutuante do admin (acima de “Meus Pedidos”)
+  // cria FAB do admin acima do “Meus Pedidos”
   function createAdminFab() {
     if (document.getElementById("admin-fab")) return;
     const btn = document.createElement("button");
     btn.id = "admin-fab";
     btn.innerHTML = "📊 Relatórios";
     btn.style.position = "fixed";
-    btn.style.bottom = "210px";
+    btn.style.bottom = "210px"; // acima do botão de Meus Pedidos
     btn.style.right = "20px";
     btn.style.background = "linear-gradient(135deg,#ffca28,#ffd54f)";
     btn.style.border = "none";
@@ -692,10 +684,10 @@ document.addEventListener("DOMContentLoaded", () => {
     document.body.appendChild(btn);
   }
 
-  // gera os gráficos e cards
+  // KPIs + gráficos
   function gerarResumoECharts(pedidos) {
     if (!window.Chart) return;
-    const total = pedidos.reduce((s, p) => s + p.total, 0);
+    const total = pedidos.reduce((s, p) => s + (Number(p.total) || 0), 0);
     const ticket = pedidos.length ? total / pedidos.length : 0;
 
     document.getElementById("card-total").textContent = `Total Arrecadado: R$ ${total.toFixed(2).replace('.', ',')}`;
@@ -705,7 +697,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const porDia = {};
     pedidos.forEach(p => {
       const dia = (p.data || "").split("T")[0];
-      porDia[dia] = (porDia[dia] || 0) + p.total;
+      porDia[dia] = (porDia[dia] || 0) + (Number(p.total) || 0);
     });
     const dias = Object.keys(porDia).sort();
     const valores = dias.map(d => porDia[d]);
@@ -719,7 +711,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const produtos = {};
     pedidos.forEach(p => {
       (p.itens || []).forEach(i => {
-        const nome = i.split(" x")[0];
+        const nome = String(i).split(" x")[0];
         produtos[nome] = (produtos[nome] || 0) + 1;
       });
     });
@@ -747,6 +739,7 @@ document.addEventListener("DOMContentLoaded", () => {
     };
   }
 
+  // consulta ao Firestore
   function carregarRelatorios() {
     db.collection("Pedidos").orderBy("data", "desc").limit(200).get()
       .then(snap => {
@@ -756,13 +749,15 @@ document.addEventListener("DOMContentLoaded", () => {
       .catch(err => alert("Erro ao carregar relatórios: " + err.message));
   }
 
-  auth.onAuthStateChanged(user => {
+  // ⚡ função chamada no onAuthStateChanged (Parte 3)
+  function ensureAdminUI(user) {
     const fab = document.getElementById("admin-fab");
-    if (user && isAdmin(user)) {
+    if (isAdmin(user)) {
       if (!fab) createAdminFab();
     } else {
       fab?.remove();
       document.getElementById("admin-dashboard")?.remove();
     }
-  });
-})();
+  }
+
+}); // <— fecha DOMContentLoaded
