@@ -2,6 +2,7 @@
    🍔 DFL v2.2 — ESTÁVEL FINAL (Login Seguro + Admin Pro)
    - Corrige bug de login com senha incorreta
    - Corrige erro split() no painel admin
+   - Corrige erro total.toFixed() (tratamento numérico)
    - Adiciona agrupamento diário e filtros
    - Mantém compatibilidade total com v2.1
 ========================================================= */
@@ -12,7 +13,7 @@ document.addEventListener("DOMContentLoaded", () => {
   let cart = [];
   let currentUser = null;
 
-  const money = (n) => `R$ ${Number(n).toFixed(2).replace(".", ",")}`;
+  const money = (n) => `R$ ${Number(n || 0).toFixed(2).replace(".", ",")}`;
   const safe = (fn) => (...a) => { try { fn(...a); } catch (e) { console.error(e); } };
 
   document.addEventListener("click", () => {
@@ -128,7 +129,44 @@ document.addEventListener("DOMContentLoaded", () => {
       </div>`;
   }
 
-  /* ------------------ ⚙️ LOGIN ------------------ */
+  // 🔧 rebind de botões para evitar bugs após render
+  function bindMiniCartButtons() {
+    document.querySelectorAll(".cart-plus").forEach(b => b.addEventListener("click", e => {
+      const i = +e.currentTarget.dataset.idx;
+      cart[i].qtd++;
+      renderMiniCart();
+    }));
+
+    document.querySelectorAll(".cart-minus").forEach(b => b.addEventListener("click", e => {
+      const i = +e.currentTarget.dataset.idx;
+      if (cart[i].qtd > 1) cart[i].qtd--;
+      else cart.splice(i, 1);
+      renderMiniCart();
+    }));
+
+    document.querySelectorAll(".cart-remove").forEach(b => b.addEventListener("click", e => {
+      const i = +e.currentTarget.dataset.idx;
+      cart.splice(i, 1);
+      renderMiniCart();
+      popupAdd("Item removido!");
+    }));
+
+    document.getElementById("finish-order")?.addEventListener("click", fecharPedido);
+    document.getElementById("clear-cart")?.addEventListener("click", () => {
+      if (confirm("Limpar todo o carrinho?")) {
+        cart = [];
+        renderMiniCart();
+        popupAdd("Carrinho limpo!");
+      }
+    });
+  }
+
+  const _renderMiniCartOrig = renderMiniCart;
+  renderMiniCart = function () {
+    _renderMiniCartOrig();
+    bindMiniCartButtons();
+  };
+/* ------------------ ⚙️ LOGIN ------------------ */
   const firebaseConfig = {
     apiKey: "AIzaSyATQBcbYuzKpKlSwNlbpRiAM1XyHqhGeak",
     authDomain: "da-familia-lanches.firebaseapp.com",
@@ -146,7 +184,7 @@ document.addEventListener("DOMContentLoaded", () => {
     btn.addEventListener("click", () => Overlays.closeAll())
   );
 
-  // ✅ Login seguro
+  // ✅ Login seguro (sem criar conta automaticamente)
   el.loginForm?.addEventListener("submit", (e) => {
     e.preventDefault();
     const email = document.getElementById("login-email")?.value?.trim();
@@ -179,7 +217,8 @@ document.addEventListener("DOMContentLoaded", () => {
         }
       });
   });
-/* ------------------ Login com Google + Estado ------------------ */
+
+  /* ------------------ Login com Google + Estado ------------------ */
   el.googleBtn?.addEventListener("click", () => {
     const provider = new firebase.auth.GoogleAuthProvider();
     auth.signInWithPopup(provider)
@@ -201,50 +240,6 @@ document.addEventListener("DOMContentLoaded", () => {
       el.userBtn.textContent = "Entrar / Cadastrar";
       showOrdersFabIfLogged();
     }
-  });
-
-  /* ------------------ Mini-carrinho (bind de botões dinâmicos) ------------------ */
-  function bindMiniCartButtons() {
-    document.querySelectorAll(".cart-plus").forEach(b => b.addEventListener("click", e => {
-      const i = +e.currentTarget.dataset.idx;
-      cart[i].qtd++;
-      renderMiniCart();
-    }));
-
-    document.querySelectorAll(".cart-minus").forEach(b => b.addEventListener("click", e => {
-      const i = +e.currentTarget.dataset.idx;
-      if (cart[i].qtd > 1) cart[i].qtd--;
-      else cart.splice(i, 1);
-      renderMiniCart();
-    }));
-
-    document.querySelectorAll(".cart-remove").forEach(b => b.addEventListener("click", e => {
-      const i = +e.currentTarget.dataset.idx;
-      cart.splice(i, 1);
-      renderMiniCart();
-      popupAdd("Item removido!");
-    }));
-
-    document.getElementById("finish-order")?.addEventListener("click", fecharPedido);
-    document.getElementById("clear-cart")?.addEventListener("click", () => {
-      if (confirm("Limpar todo o carrinho?")) {
-        cart = [];
-        renderMiniCart();
-        popupAdd("Carrinho limpo!");
-      }
-    });
-  }
-
-  // Re-render com rebind
-  const _renderMiniCartOrig = renderMiniCart;
-  renderMiniCart = function () {
-    _renderMiniCartOrig();
-    bindMiniCartButtons();
-  };
-
-  el.cartIcon?.addEventListener("click", () => Overlays.open(el.miniCart));
-  document.querySelectorAll("#mini-cart .extras-close").forEach(btn => {
-    btn.addEventListener("click", () => Overlays.closeAll());
   });
 
   /* ------------------ ➕ Adicionais ------------------ */
@@ -356,8 +351,7 @@ document.addEventListener("DOMContentLoaded", () => {
     _comboCtx = { nomeCombo, precoBase, grupo };
     Overlays.open(el.comboModal);
   });
-
-  el.comboConfirm?.addEventListener("click", () => {
+el.comboConfirm?.addEventListener("click", () => {
     if (!_comboCtx) return Overlays.closeAll();
     const sel = el.comboBody?.querySelector('input[name="combo-drink"]:checked');
     if (!sel) return;
@@ -493,8 +487,7 @@ document.addEventListener("DOMContentLoaded", () => {
       })
       .catch((err) => alert("Erro: " + err.message));
   }
-
-  /* ------------------ 📦 Meus Pedidos (UI) ------------------ */
+/* ------------------ 📦 Meus Pedidos (UI) ------------------ */
   let ordersFab = document.getElementById("orders-fab");
   if (!ordersFab) {
     ordersFab = document.createElement("button");
@@ -562,14 +555,13 @@ document.addEventListener("DOMContentLoaded", () => {
 
       container.innerHTML = "";
       pedidos.forEach((p) => {
-        const itens = Array.isArray(p.itens) ? p.itens.join("<br>• ") : p.itens || "";
-        const dataFormatada = new Date(p.data).toLocaleString("pt-BR", {
-          day: "2-digit",
-          month: "2-digit",
-          year: "numeric",
-          hour: "2-digit",
-          minute: "2-digit",
-        });
+        const itens = Array.isArray(p.itens) ? p.itens.join("<br>• ") : (p.itens || "");
+        const dataFormatada = p.data
+          ? new Date(p.data).toLocaleString("pt-BR", {
+              day: "2-digit", month: "2-digit", year: "numeric",
+              hour: "2-digit", minute: "2-digit",
+            })
+          : "—";
 
         const box = document.createElement("div");
         box.className = "order-item";
@@ -577,7 +569,7 @@ document.addEventListener("DOMContentLoaded", () => {
           <h4>📅 ${dataFormatada}</h4>
           <p style="margin:8px 0;"><b>Itens:</b><br>• ${itens}</p>
           <p style="font-size:1.1rem;color:#4caf50;font-weight:600;margin-top:8px;">
-            <b>Total:</b> ${money(p.total)}
+            <b>Total:</b> ${money(p.total || 0)}
           </p>`;
         container.appendChild(box);
       });
@@ -598,31 +590,32 @@ document.addEventListener("DOMContentLoaded", () => {
       });
   }
 
-  /* ------------------ Esc / Clique-fora ------------------ */
-  document.addEventListener("keydown", (e) => { 
-    if (e.key === "Escape") Overlays.closeAll(); 
+  /* ------------------ ⎋ ESC + Clique-fora ------------------ */
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape") Overlays.closeAll();
   });
 
   document.addEventListener("click", (e) => {
     const aberto = document.querySelector(".modal.show, #mini-cart.active, .orders-panel.active, #admin-dashboard.show");
     if (!aberto) return;
-    if (e.target.closest(".modal-content, #mini-cart, .orders-panel")) return;
-    if (e.target.closest("#cart-icon, .add-cart, .extras-btn, .user-button, #orders-fab, #admin-fab")) return;
+    if (e.target.closest(".modal-content, #mini-cart, .orders-panel")) return; // clique interno
+    if (e.target.closest("#cart-icon, .add-cart, .extras-btn, .user-button, #orders-fab, #admin-fab")) return; // botões que abrem
     Overlays.closeAll();
   });
 
-  /* ------------------ INIT ------------------ */
+  /* ------------------ INIT (parte final do app) ------------------ */
   renderMiniCart();
-  console.log("%c🔥 DFL v2.2 — ESTÁVEL (Parte 2 carregada)", "color:#fff;background:#4caf50;padding:6px 10px;border-radius:8px;font-weight:700");
-/* =========================================================
-   📊 DFL v2.2 — Painel Administrativo PRO
-   - Corrige erro .split (quando dados vazios)
-   - Adiciona filtros de período (7d / 30d / todos)
-   - Agrupa pedidos por dia
-   - Exporta CSV normalmente
-========================================================= */
+  showOrdersFabIfLogged();
+  console.log("%c🔥 DFL v2.2 — ESTÁVEL (App pronto)", "color:#fff;background:#4caf50;padding:6px 10px;border-radius:8px;font-weight:700");
 
-(() => {
+
+  /* =========================================================
+     📊 DFL v2.2 — Painel Administrativo PRO
+     - Filtros 7/30/todos
+     - Agrupa por dia
+     - Corrige .split em dados vazios
+  ========================================================= */
+
   const ADMINS = [
     "alefejohsefe@gmail.com",
     "kalebhstanley650@gmail.com",
@@ -630,10 +623,9 @@ document.addEventListener("DOMContentLoaded", () => {
   ];
 
   function isAdmin(user) {
-    return user && ADMINS.includes(user.email.toLowerCase());
+    return user && user.email && ADMINS.includes(user.email.toLowerCase());
   }
 
-  // 🔹 Injeta Chart.js apenas quando abrir o painel
   function ensureChartJS(cb) {
     if (window.Chart) return cb();
     const s = document.createElement("script");
@@ -642,7 +634,6 @@ document.addEventListener("DOMContentLoaded", () => {
     document.head.appendChild(s);
   }
 
-  // 🔹 Cria modal do dashboard
   function createDashboard() {
     if (document.getElementById("admin-dashboard")) return;
 
@@ -678,21 +669,20 @@ document.addEventListener("DOMContentLoaded", () => {
           </div>
         </div>
       </div>`;
-
     document.body.appendChild(div);
 
-    div.querySelector(".dashboard-close").addEventListener("click", () => Overlays.closeAll());
+    // estiliza cards
     document.querySelectorAll(".cardBox").forEach(c => {
-      c.style.flex = "1";
-      c.style.minWidth = "200px";
-      c.style.padding = "12px";
-      c.style.background = "#f9f9f9";
-      c.style.borderRadius = "8px";
-      c.style.boxShadow = "0 2px 8px rgba(0,0,0,.08)";
+      Object.assign(c.style, {
+        flex: "1", minWidth: "200px", padding: "12px",
+        background: "#f9f9f9", borderRadius: "8px",
+        boxShadow: "0 2px 8px rgba(0,0,0,.08)"
+      });
     });
+
+    div.querySelector(".dashboard-close").addEventListener("click", () => Overlays.closeAll());
   }
 
-  // 🔹 Cria botão flutuante do admin (acima de Meus Pedidos)
   function createAdminFab() {
     if (document.getElementById("admin-fab")) return;
     const btn = document.createElement("button");
@@ -720,62 +710,77 @@ document.addEventListener("DOMContentLoaded", () => {
     document.body.appendChild(btn);
   }
 
-  // 🔹 Gera os gráficos e cards
   function gerarResumoECharts(pedidos) {
     if (!window.Chart) return;
-    const total = pedidos.reduce((s, p) => s + (p.total || 0), 0);
+
+    const total = pedidos.reduce((s, p) => s + (Number(p.total) || 0), 0);
     const ticket = pedidos.length ? total / pedidos.length : 0;
 
-    document.getElementById("card-total").textContent = `Total Arrecadado: R$ ${total.toFixed(2).replace('.', ',')}`;
-    document.getElementById("card-pedidos").textContent = `Pedidos: ${pedidos.length}`;
-    document.getElementById("card-ticket").textContent = `Ticket Médio: R$ ${ticket.toFixed(2).replace('.', ',')}`;
+    const elTotal = document.getElementById("card-total");
+    const elQtd   = document.getElementById("card-pedidos");
+    const elTick  = document.getElementById("card-ticket");
+    if (elTotal) elTotal.textContent = `Total Arrecadado: R$ ${total.toFixed(2).replace('.', ',')}`;
+    if (elQtd)   elQtd.textContent   = `Pedidos: ${pedidos.length}`;
+    if (elTick)  elTick.textContent  = `Ticket Médio: R$ ${ticket.toFixed(2).replace('.', ',')}`;
 
+    // grafico por dia
     const porDia = {};
     pedidos.forEach(p => {
-      const data = p.data ? (p.data.split("T")[0]) : "Desconhecido";
-      porDia[data] = (porDia[data] || 0) + (p.total || 0);
+      const iso = typeof p.data === "string" ? p.data : (p.data?.toDate?.() ? p.data.toDate().toISOString() : "");
+      const dia = iso ? iso.split("T")[0] : "—";
+      porDia[dia] = (porDia[dia] || 0) + (Number(p.total) || 0);
     });
     const dias = Object.keys(porDia).sort();
     const valores = dias.map(d => porDia[d]);
 
     const ctx1 = document.getElementById("chart-pedidos");
-    new Chart(ctx1, {
-      type: "line",
-      data: { labels: dias, datasets: [{ label: "Total por Dia", data: valores, borderColor: "#4caf50", fill: false }] },
-      options: { responsive: true, scales: { y: { beginAtZero: true } } }
-    });
+    if (ctx1) {
+      new Chart(ctx1, {
+        type: "line",
+        data: { labels: dias, datasets: [{ label: "Total por Dia", data: valores, borderColor: "#4caf50", fill: false }] },
+        options: { responsive: true, interaction: { mode: 'index' }, scales: { y: { beginAtZero: true } } }
+      });
+    }
 
+    // produtos mais vendidos (contagem)
     const produtos = {};
     pedidos.forEach(p => {
-      (p.itens || []).forEach(i => {
-        const nome = (i.split(" x")[0] || "Item").trim();
+      const itensArr = Array.isArray(p.itens) ? p.itens : (typeof p.itens === "string" ? p.itens.split("; ") : []);
+      itensArr.forEach(i => {
+        const nome = (i && i.split(" x")[0]) ? i.split(" x")[0].trim() : "Item";
         produtos[nome] = (produtos[nome] || 0) + 1;
       });
     });
     const top = Object.entries(produtos).sort((a, b) => b[1] - a[1]).slice(0, 8);
-    const ctx2 = document.getElementById("chart-produtos");
-    new Chart(ctx2, {
-      type: "bar",
-      data: { labels: top.map(t => t[0]), datasets: [{ label: "Itens mais vendidos", data: top.map(t => t[1]), backgroundColor: "#ffb300" }] },
-      options: { responsive: true, scales: { y: { beginAtZero: true } } }
-    });
 
-    // Exportar CSV
-    document.getElementById("export-csv").onclick = () => {
-      const linhas = ["Data,Total,Itens"];
-      pedidos.forEach(p => {
-        const itens = Array.isArray(p.itens) ? p.itens.join("; ") : p.itens;
-        linhas.push(`${p.data},${p.total},"${itens}"`);
+    const ctx2 = document.getElementById("chart-produtos");
+    if (ctx2) {
+      new Chart(ctx2, {
+        type: "bar",
+        data: { labels: top.map(t => t[0]), datasets: [{ label: "Itens mais vendidos", data: top.map(t => t[1]), backgroundColor: "#ffb300" }] },
+        options: { responsive: true, scales: { y: { beginAtZero: true } } }
       });
-      const blob = new Blob([linhas.join("\n")], { type: "text/csv" });
-      const link = document.createElement("a");
-      link.href = URL.createObjectURL(blob);
-      link.download = "pedidos_dfl.csv";
-      link.click();
-    };
+    }
+
+    // exportar CSV
+    const btnCSV = document.getElementById("export-csv");
+    if (btnCSV) {
+      btnCSV.onclick = () => {
+        const linhas = ["Data,Total,Itens"];
+        pedidos.forEach(p => {
+          const iso = typeof p.data === "string" ? p.data : (p.data?.toDate?.() ? p.data.toDate().toISOString() : "");
+          const itens = Array.isArray(p.itens) ? p.itens.join("; ") : (p.itens || "");
+          linhas.push(`${iso},${Number(p.total) || 0},"${itens.replaceAll('"', '""')}"`);
+        });
+        const blob = new Blob([linhas.join("\n")], { type: "text/csv" });
+        const link = document.createElement("a");
+        link.href = URL.createObjectURL(blob);
+        link.download = "pedidos_dfl.csv";
+        link.click();
+      };
+    }
   }
 
-  // 🔹 Carregar relatórios com filtro
   function carregarRelatorios(periodo = "7") {
     const agora = new Date();
     let start = new Date(0);
@@ -790,19 +795,23 @@ document.addEventListener("DOMContentLoaded", () => {
       .then(snap => {
         const pedidos = snap.docs.map(d => d.data());
         const filtrados = pedidos.filter(p => {
-          const dataPedido = new Date(p.data || "");
-          return periodo === "all" || dataPedido >= start;
+          const dt = typeof p.data === "string" ? new Date(p.data) :
+                     (p.data?.toDate?.() ? p.data.toDate() : new Date(0));
+          return periodo === "all" || (dt >= start);
         });
         gerarResumoECharts(filtrados);
       })
       .catch(err => alert("Erro ao carregar relatórios: " + err.message));
 
-    document.getElementById("filter-period")?.addEventListener("change", e => {
-      carregarRelatorios(e.target.value);
-    });
+    // rebind seguro do filtro
+    const sel = document.getElementById("filter-period");
+    if (sel && !sel._bound) {
+      sel.addEventListener("change", e => carregarRelatorios(e.target.value));
+      sel._bound = true;
+    }
   }
 
-  // 🔹 Observa login e cria FAB se for admin
+  // cria/remove botão admin conforme login
   auth.onAuthStateChanged(user => {
     const fab = document.getElementById("admin-fab");
     if (user && isAdmin(user)) {
@@ -812,51 +821,31 @@ document.addEventListener("DOMContentLoaded", () => {
       document.getElementById("admin-dashboard")?.remove();
     }
   });
-})();
-/* =========================================================
-   🔒 FINAL — Verificações, Logs e Inicialização Segura
-========================================================= */
 
-// Impede múltiplas inicializações em cache do navegador
-window.addEventListener("pageshow", (e) => {
-  if (e.persisted) {
-    console.warn("↻ Página reaberta via cache, recarregando para sincronizar dados...");
-    location.reload();
-  }
-});
-
-// Mostra popup automático se usuário fizer login admin
-auth.onAuthStateChanged((user) => {
-  if (user && user.email) {
-    const mail = user.email.toLowerCase();
-    if (mail.includes("dafamilialanches.com.br")) {
-      console.log("%c👑 Painel Admin ativo —", "color:#ffb300;font-weight:700;");
+  /* ------------------ Logs e segurança final ------------------ */
+  // Evita estado zombie ao voltar do cache
+  window.addEventListener("pageshow", (e) => {
+    if (e.persisted) {
+      console.warn("↻ Página reaberta via cache, recarregando...");
+      location.reload();
     }
-  }
-});
+  });
 
-// Tratamento global de erros para evitar travamentos visuais
-window.addEventListener("error", (e) => {
-  console.warn("⚠️ Erro interceptado:", e.message);
-  if (e.message.includes("split") || e.message.includes("undefined")) {
-    popupAdd("Ocorreu um pequeno erro de leitura de pedidos. Atualize a página.");
-  }
-});
+  // Sinalização para e-mails do domínio admin
+  auth.onAuthStateChanged((user) => {
+    if (user?.email?.toLowerCase()?.includes("dafamilialanches.com.br")) {
+      console.log("%c👑 Painel Admin ativo", "color:#ffb300;font-weight:700;");
+    }
+  });
 
-// Confirmação de compatibilidade visual
-console.log("%c🍔 DFL v2.2 FINAL — LOGIN SEGURO + ADMIN PRO + GRÁFICOS 🔥", 
-            "background:#4caf50;color:#fff;padding:8px 12px;border-radius:8px;font-weight:700;");
+  // Handler global de erros (evita travar UI)
+  window.addEventListener("error", (e) => {
+    if (String(e?.message || "").toLowerCase().includes("split")) {
+      popupAdd("Humm… houve um pequeno erro ao ler dados. Atualize a página.");
+    }
+    console.warn("⚠️ Erro interceptado:", e?.message);
+  });
 
-// Inicialização forçada do carrinho e status
-try {
-  renderMiniCart();
-  console.log("🧩 Carrinho inicializado com sucesso!");
-} catch (e) {
-  console.error("Erro ao iniciar carrinho:", e);
-}
-
-try {
-  setTimeout(() => atualizarStatus(), 1500);
-} catch (_) {}
-
-})();
+  console.log("%c🍔 DFL v2.2 FINAL — LOGIN SEGURO + ADMIN PRO + GRÁFICOS 🔥",
+              "background:#4caf50;color:#fff;padding:8px 12px;border-radius:8px;font-weight:700;");
+}); // <-- fim do DOMContentLoaded
