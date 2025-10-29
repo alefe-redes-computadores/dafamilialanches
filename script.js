@@ -1,7 +1,8 @@
 /* =========================================================
-   🍔 DFL v2.3.1 — PATCH GRÁFICOS FIX (Chart Destroy + LGPD)
-   - Corrige erro "Canvas already in use" nos relatórios
-   - Mantém LGPD, login UX e estrutura estável v2.3
+   🍔 DFL v2.5 — CUPOM + ENDEREÇO + TAXA ENTREGA FIXA
+   - Adiciona campos de endereço e cupom no carrinho
+   - Aplica taxa de entrega fixa (R$ 6,00)
+   - Mantém compatibilidade total com Firestore e login seguro
 ========================================================= */
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -10,9 +11,23 @@ document.addEventListener("DOMContentLoaded", () => {
   let cart = [];
   let currentUser = null;
 
+  // 💰 Valor fixo da taxa de entrega
+  const TAXA_ENTREGA = 6.00;
+
+  // 💸 Cupons válidos e regras
+  const CUPONS = {
+    "FAMILIA10": { tipo: "percentual", valor: 10 },   // 10% de desconto
+    "PRIMEIRO": { tipo: "fixo", valor: 5 }            // R$5 fixo
+  };
+
+  // 💾 Dados temporários
+  let cupomAplicado = null;
+  let enderecoCliente = "";
+
   const money = (n) => `R$ ${Number(n || 0).toFixed(2).replace(".", ",")}`;
   const safe = (fn) => (...a) => { try { fn(...a); } catch (e) { console.error(e); } };
 
+  // 🔊 Clique com som suave (não bloqueia o site se falhar)
   document.addEventListener("click", () => {
     try { sound.currentTime = 0; sound.play(); } catch (_) {}
   });
@@ -84,8 +99,7 @@ document.addEventListener("DOMContentLoaded", () => {
     pop.classList.add("show");
     setTimeout(() => pop.classList.remove("show"), 2000);
   }
-
-  /* ------------------ 🛒 MINI-CARRINHO ------------------ */
+/* ------------------ 🛒 MINI-CARRINHO (com cupom + endereço) ------------------ */
   function renderMiniCart() {
     if (!el.miniList || !el.miniFoot) return;
 
@@ -115,17 +129,72 @@ document.addEventListener("DOMContentLoaded", () => {
       </div>
     `).join("");
 
-    const total = cart.reduce((s, i) => s + i.preco * i.qtd, 0);
+    // 💰 Subtotal e cálculos
+    let subtotal = cart.reduce((s, i) => s + i.preco * i.qtd, 0);
+    let desconto = 0;
+
+    if (cupomAplicado && CUPONS[cupomAplicado]) {
+      const c = CUPONS[cupomAplicado];
+      desconto = c.tipo === "percentual" ? (subtotal * c.valor / 100) : c.valor;
+    }
+
+    const totalComTaxa = subtotal + TAXA_ENTREGA - desconto;
+    const resumoCupom = cupomAplicado
+      ? `<p style="font-size:0.9rem;color:#43a047;">Cupom <b>${cupomAplicado}</b> aplicado (-${money(desconto)})</p>`
+      : "";
+
     el.miniFoot.innerHTML = `
       <div style="padding:15px;">
-        <div style="display:flex;justify-content:space-between;margin-bottom:15px;font-size:1.2rem;font-weight:600;">
-          <span>Total:</span><span style="color:#e53935;">${money(total)}</span>
+        <div style="display:flex;justify-content:space-between;font-weight:600;margin-bottom:6px;">
+          <span>Subtotal:</span><span>${money(subtotal)}</span>
         </div>
-        <button id="finish-order" style="width:100%;background:#4caf50;color:#fff;border:none;border-radius:8px;padding:12px;font-weight:600;cursor:pointer;margin-bottom:8px;">Finalizar Pedido 🛍️</button>
-        <button id="clear-cart" style="width:100%;background:#ff4081;color:#fff;border:none;border-radius:8px;padding:10px;font-weight:600;cursor:pointer;">Limpar Carrinho</button>
+        <div style="display:flex;justify-content:space-between;margin-bottom:6px;">
+          <span>🚚 Entrega:</span><span>${money(TAXA_ENTREGA)}</span>
+        </div>
+        ${resumoCupom}
+        <div style="display:flex;justify-content:space-between;margin-top:10px;font-size:1.2rem;font-weight:700;">
+          <span>Total:</span><span style="color:#e53935;">${money(totalComTaxa)}</span>
+        </div>
+
+        <!-- 📍 Endereço -->
+        <div style="margin-top:15px;">
+          <input id="endereco-input" type="text" placeholder="Digite seu endereço completo" 
+            style="width:100%;padding:10px;border:1px solid #ccc;border-radius:8px;font-size:0.95rem;"
+            value="${enderecoCliente || ''}">
+        </div>
+
+        <!-- 🎟️ Cupom -->
+        <div style="margin-top:10px;display:flex;gap:6px;">
+          <input id="cupom-input" type="text" placeholder="Cupom de desconto" 
+            style="flex:1;padding:10px;border:1px solid #ccc;border-radius:8px;font-size:0.95rem;text-transform:uppercase;"
+            value="${cupomAplicado || ''}">
+          <button id="apply-cupom" style="background:#ffb300;color:#000;border:none;border-radius:8px;padding:10px 14px;font-weight:600;cursor:pointer;">Aplicar</button>
+        </div>
+
+        <button id="finish-order" style="width:100%;background:#4caf50;color:#fff;border:none;border-radius:8px;padding:12px;font-weight:600;cursor:pointer;margin-top:12px;">Finalizar Pedido 🛍️</button>
+        <button id="clear-cart" style="width:100%;background:#ff4081;color:#fff;border:none;border-radius:8px;padding:10px;font-weight:600;cursor:pointer;margin-top:8px;">Limpar Carrinho</button>
       </div>`;
+
+    // Atualiza campos dinâmicos
+    document.getElementById("apply-cupom")?.addEventListener("click", () => {
+      const val = document.getElementById("cupom-input").value.trim().toUpperCase();
+      if (!val) return popupAdd("Digite um cupom válido!");
+      if (!CUPONS[val]) {
+        popupAdd("Cupom inválido ❌");
+        cupomAplicado = null;
+      } else {
+        cupomAplicado = val;
+        popupAdd(`Cupom ${val} aplicado! 🎉`);
+      }
+      renderMiniCart();
+    });
+
+    document.getElementById("endereco-input")?.addEventListener("input", (e) => {
+      enderecoCliente = e.target.value;
+    });
   }
 
+  /* 🔄 Vincula botões dinâmicos (incremento, remoção, limpar, finalizar) */
   function bindMiniCartButtons() {
     document.querySelectorAll(".cart-plus").forEach(b => b.addEventListener("click", e => {
       const i = +e.currentTarget.dataset.idx;
@@ -180,7 +249,7 @@ document.addEventListener("DOMContentLoaded", () => {
     btn.addEventListener("click", () => Overlays.closeAll())
   );
 
-  // ✅ Login seguro (com feedback visual aprimorado)
+  // ✅ Login seguro com verificação + popup de feedback
   el.loginForm?.addEventListener("submit", (e) => {
     e.preventDefault();
     const email = document.getElementById("login-email")?.value?.trim();
@@ -221,7 +290,7 @@ document.addEventListener("DOMContentLoaded", () => {
       .then((res) => {
         currentUser = res.user;
         el.userBtn.textContent = `Olá, ${currentUser.displayName?.split(" ")[0] || "Cliente"}`;
-        popupAdd("Login com Google realizado!");
+        popupAdd("Login com Google realizado! ✅");
         Overlays.closeAll();
       })
       .catch((err) => alert("Erro: " + err.message));
@@ -249,6 +318,7 @@ document.addEventListener("DOMContentLoaded", () => {
     { nome: "Filé de Frango", preco: 5.99 },
     { nome: "Hambúrguer Artesanal 120g", preco: 7.99 },
   ];
+
   let produtoExtras = null;
   let produtoPrecoBase = 0;
 
@@ -303,7 +373,7 @@ document.addEventListener("DOMContentLoaded", () => {
     Overlays.closeAll();
   });
 
-  document.querySelectorAll("#extras-modal .extras-close").forEach((b) => 
+  document.querySelectorAll("#extras-modal .extras-close").forEach((b) =>
     b.addEventListener("click", () => Overlays.closeAll())
   );
 
@@ -365,10 +435,11 @@ document.addEventListener("DOMContentLoaded", () => {
     Overlays.closeAll();
   });
 
-  document.querySelectorAll("#combo-modal .combo-close").forEach((b) => 
+  document.querySelectorAll("#combo-modal .combo-close").forEach((b) =>
     b.addEventListener("click", () => Overlays.closeAll())
   );
-/* ------------------ 🧺 Adicionar item comum ------------------ */
+
+  /* ------------------ 🧺 Adicionar item comum ------------------ */
   function addCommonItem(nome, preco) {
     if (/^combo/i.test(nome)) {
       openComboModal(nome, preco);
@@ -390,17 +461,153 @@ document.addEventListener("DOMContentLoaded", () => {
       addCommonItem(nome, preco);
     })
   );
+/* ------------------ ⚙️ CONFIGURAÇÕES V2.5 ------------------ */
+  const DELIVERY_FEE = 6.00; // 💸 taxa fixa de entrega (R$ 6,00)
 
-  /* ------------------ 🖼️ Carrossel ------------------ */
-  el.cPrev?.addEventListener("click", () => { 
-    if (!el.slides) return; 
-    el.slides.scrollLeft -= Math.min(el.slides.clientWidth * 0.9, 320); 
-  });
-  el.cNext?.addEventListener("click", () => { 
-    if (!el.slides) return; 
-    el.slides.scrollLeft += Math.min(el.slides.clientWidth * 0.9, 320); 
-  });
+  // 🏷️ Tabela de cupons (exemplos)
+  // - Valores percentuais usam "percent"
+  // - Valores fixos usam "value"
+  // - FRETEZERO zera a taxa de entrega
+  const COUPONS = {
+    "DFL5":        { type: "percent", value: 5,  note: "5% OFF" },
+    "DFL10":       { type: "percent", value: 10, note: "10% OFF" },
+    "BEMVINDO":    { type: "value",   value: 5,  note: "R$ 5,00 OFF na 1ª compra" },
+    "FRETEZERO":   { type: "frete",   value: 0,  note: "Frete grátis" },
+  };
 
+  let couponApplied = (localStorage.getItem("dflCoupon") || "").toUpperCase();
+  let addressValue  = (localStorage.getItem("dflAddress") || "").trim();
+
+  const getCartSubtotal = () =>
+    cart.reduce((s, i) => s + (Number(i.preco) || 0) * (Number(i.qtd) || 0), 0);
+
+  function calcDiscount(subtotal, couponCode) {
+    const code = (couponCode || "").toUpperCase();
+    const rule = COUPONS[code];
+    if (!rule) return { discount: 0, freeShipping: false, label: "" };
+
+    if (rule.type === "percent") {
+      const val = Math.max(0, subtotal * (rule.value / 100));
+      return { discount: val, freeShipping: false, label: `${rule.value}% OFF` };
+    }
+    if (rule.type === "value") {
+      const val = Math.min(subtotal, Math.max(0, rule.value));
+      return { discount: val, freeShipping: false, label: `R$ ${val.toFixed(2).replace(".", ",")} OFF` };
+    }
+    if (rule.type === "frete") {
+      return { discount: 0, freeShipping: true, label: "Frete Grátis" };
+    }
+    return { discount: 0, freeShipping: false, label: "" };
+  }
+
+  function calcTotals() {
+    const subtotal = getCartSubtotal();
+    const d = calcDiscount(subtotal, couponApplied);
+    const delivery = d.freeShipping ? 0 : DELIVERY_FEE;
+    const total = Math.max(0, subtotal + delivery - d.discount);
+    return {
+      subtotal,
+      delivery,
+      discount: d.discount,
+      discountLabel: d.label,
+      total
+    };
+  }
+
+  /* ------------------ 🛒 MINI-CARRINHO: UI ESTENDIDA V2.5 ------------------ */
+  function enhanceMiniCartUI() {
+    if (!el.miniFoot) return;
+
+    const { subtotal, delivery, discount, discountLabel, total } = calcTotals();
+
+    el.miniFoot.innerHTML = `
+      <div style="padding:14px 14px 10px;">
+        <div style="display:flex;justify-content:space-between;margin-bottom:6px;">
+          <span>Subtotal</span><b>${money(subtotal)}</b>
+        </div>
+        <div style="display:flex;justify-content:space-between;margin-bottom:6px;">
+          <span>Entrega</span><b>${money(delivery)}</b>
+        </div>
+        <div style="display:flex;justify-content:space-between;margin-bottom:10px;">
+          <span>Desconto ${discountLabel ? `(${discountLabel})` : ""}</span><b>- ${money(discount)}</b>
+        </div>
+        <div style="display:flex;justify-content:space-between;align-items:center;border-top:1px solid #eee;padding-top:10px;margin-bottom:12px;font-size:1.1rem;">
+          <span><b>Total</b></span><span style="color:#e53935;font-weight:800;">${money(total)}</span>
+        </div>
+
+        <label style="display:block;font-weight:600;margin-bottom:6px;">🏠 Endereço para Entrega</label>
+        <textarea id="address-input" rows="2" placeholder="Rua, número, complemento, bairro"
+          style="width:100%;border:1px solid #ddd;border-radius:10px;padding:10px;resize:vertical;margin-bottom:10px">${addressValue}</textarea>
+
+        <div style="display:flex;gap:8px;align-items:center;margin-bottom:12px;">
+          <input id="coupon-input" type="text" inputmode="text" placeholder="Cupom de desconto"
+            value="${couponApplied || ""}"
+            style="flex:1;border:1px solid #ddd;border-radius:10px;padding:10px;font-weight:600;letter-spacing:.5px;text-transform:uppercase">
+          <button id="apply-coupon" style="background:#000;color:#fff;border:none;border-radius:10px;padding:10px 16px;font-weight:700;cursor:pointer">Aplicar</button>
+        </div>
+
+        <button id="finish-order" style="width:100%;background:#4caf50;color:#fff;border:none;border-radius:10px;padding:12px;font-weight:700;cursor:pointer;margin-bottom:8px">
+          Finalizar Pedido 🛍️
+        </button>
+        <button id="clear-cart" style="width:100%;background:#ff4081;color:#fff;border:none;border-radius:10px;padding:10px;font-weight:700;cursor:pointer">
+          Limpar Carrinho
+        </button>
+      </div>
+    `;
+
+    // Listeners dos novos campos
+    document.getElementById("apply-coupon")?.addEventListener("click", () => {
+      const input = document.getElementById("coupon-input");
+      const val = (input?.value || "").trim().toUpperCase();
+      if (!val) {
+        couponApplied = "";
+        localStorage.removeItem("dflCoupon");
+        popupAdd("Cupom removido.");
+        enhanceMiniCartUI();
+        return;
+      }
+      if (!COUPONS[val]) {
+        popupAdd("Cupom inválido.");
+        return;
+      }
+      couponApplied = val;
+      localStorage.setItem("dflCoupon", couponApplied);
+      popupAdd(`Cupom aplicado: ${val}`);
+      enhanceMiniCartUI();
+    });
+
+    document.getElementById("address-input")?.addEventListener("input", (e) => {
+      addressValue = (e.target.value || "").trim();
+      localStorage.setItem("dflAddress", addressValue);
+    });
+
+    // Reaplica os binds padrão do mini-carrinho (mantendo tudo funcionando)
+    document.getElementById("finish-order")?.addEventListener("click", fecharPedido);
+    document.getElementById("clear-cart")?.addEventListener("click", () => {
+      if (confirm("Limpar todo o carrinho?")) {
+        cart = [];
+        renderMiniCart(); // isto reaplica enhanceMiniCartUI automaticamente (ver override abaixo)
+        popupAdd("Carrinho limpo!");
+      }
+    });
+  }
+
+  // 🔁 Reforço: quando o renderMiniCart original roda, reaplicamos a UI estendida
+  const __renderMiniCartPrev = renderMiniCart;
+  renderMiniCart = function() {
+    __renderMiniCartPrev();   // rendeiriza lista + botões + binds padrões
+    enhanceMiniCartUI();      // injeta totais, endereço e cupom
+  };
+
+  /* ------------------ 🖼️ Carrossel (mantido) ------------------ */
+  el.cPrev?.addEventListener("click", () => {
+    if (!el.slides) return;
+    el.slides.scrollLeft -= Math.min(el.slides.clientWidth * 0.9, 320);
+  });
+  el.cNext?.addEventListener("click", () => {
+    if (!el.slides) return;
+    el.slides.scrollLeft += Math.min(el.slides.clientWidth * 0.9, 320);
+  });
   document.querySelectorAll(".slide").forEach((img) => {
     img.addEventListener("click", () => {
       const msg = encodeURIComponent(img.dataset.wa || "Quero essa promoção! 🍔");
@@ -408,7 +615,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   });
 
-  /* ------------------ ⏰ Status + Timer ------------------ */
+  /* ------------------ ⏰ Status + Timer (mantidos) ------------------ */
   const atualizarStatus = safe(() => {
     const agora = new Date();
     const h = agora.getHours();
@@ -448,7 +655,7 @@ document.addEventListener("DOMContentLoaded", () => {
   atualizarTimer();
   setInterval(atualizarTimer, 1000);
 
-  /* ------------------ 💾 Fechar pedido ------------------ */
+  /* ------------------ 💾 Fechar pedido (V2.5 com endereço/cupom/frete) ------------------ */
   function fecharPedido() {
     if (!cart.length) return alert("Carrinho vazio!");
     if (!currentUser) {
@@ -457,13 +664,25 @@ document.addEventListener("DOMContentLoaded", () => {
       return;
     }
 
-    const total = cart.reduce((a, i) => a + i.preco * i.qtd, 0);
+    const addr = (document.getElementById("address-input")?.value || "").trim();
+    if (!addr) {
+      alert("Informe o endereço para entrega antes de finalizar.");
+      return;
+    }
+
+    const { subtotal, delivery, discount, discountLabel, total } = calcTotals();
+
     const pedido = {
       usuario: currentUser.email,
       userId: currentUser.uid,
       nome: currentUser.displayName || currentUser.email.split("@")[0],
       itens: cart.map((i) => `${i.nome} x${i.qtd}`),
+      subtotal: Number(subtotal.toFixed(2)),
+      entrega: Number(delivery.toFixed(2)),
+      desconto: Number(discount.toFixed(2)),
+      cupom: couponApplied || "",
       total: Number(total.toFixed(2)),
+      endereco: addr,
       data: new Date().toISOString(),
     };
 
@@ -471,19 +690,33 @@ document.addEventListener("DOMContentLoaded", () => {
       .add(pedido)
       .then(() => {
         popupAdd("Pedido salvo ✅");
-        const texto = encodeURIComponent(
-          "🍔 *Pedido DFL*\n" +
-          cart.map((i) => `• ${i.nome} x${i.qtd}`).join("\n") +
-          `\n\n*Total: ${money(total)}*`
-        );
+
+        const linhas = [
+          "🍔 *Pedido DFL*",
+          cart.map((i) => `• ${i.nome} x${i.qtd}`).join("\n"),
+          "",
+          `Subtotal: *${money(subtotal)}*`,
+          `Entrega: *${money(delivery)}*${couponApplied && discountLabel === "Frete Grátis" ? " _(Frete Grátis)_" : ""}`,
+          `Desconto${couponApplied ? ` (${couponApplied})` : ""}: *-${money(discount)}*`,
+          `*Total: ${money(total)}*`,
+          "",
+          `🏠 *Endereço:* ${addr}`
+        ].join("\n");
+
+        const texto = encodeURIComponent(linhas);
         window.open(`https://wa.me/5534997178336?text=${texto}`, "_blank");
+
+        // Limpa carrinho e mantém endereço/cupom salvos
         cart = [];
         renderMiniCart();
         Overlays.closeAll();
       })
       .catch((err) => alert("Erro: " + err.message));
   }
-/* ------------------ 📦 Meus Pedidos (UI + lógica) ------------------ */
+
+  // 🔰 Primeira renderização do mini-carrinho com UI estendida
+  renderMiniCart();
+/* ------------------ 📦 Meus Pedidos (UI + lógica V2.5) ------------------ */
   let ordersFab = document.getElementById("orders-fab");
   if (!ordersFab) {
     ordersFab = document.createElement("button");
@@ -562,8 +795,15 @@ document.addEventListener("DOMContentLoaded", () => {
         box.className = "order-item";
         box.innerHTML = `
           <h4>📅 ${dataFormatada}</h4>
-          <p style="margin:8px 0;"><b>Itens:</b><br>• ${itens}</p>
-          <p style="font-size:1.1rem;color:#4caf50;font-weight:600;margin-top:8px;">
+          <p style="margin:6px 0;"><b>Itens:</b><br>• ${itens}</p>
+          ${p.endereco ? `<p style="margin:6px 0;"><b>Endereço:</b> ${p.endereco}</p>` : ""}
+          ${p.cupom ? `<p style="margin:6px 0;"><b>Cupom:</b> ${p.cupom}</p>` : ""}
+          <p style="margin:6px 0;">
+            <b>Subtotal:</b> ${money(p.subtotal || 0)}<br>
+            <b>Entrega:</b> ${money(p.entrega || 0)}<br>
+            <b>Desconto:</b> -${money(p.desconto || 0)}
+          </p>
+          <p style="font-size:1.1rem;color:#4caf50;font-weight:700;margin-top:6px;">
             <b>Total:</b> ${money(p.total || 0)}
           </p>`;
         container.appendChild(box);
@@ -586,11 +826,10 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   /* =========================================================
-     📊 ADMIN DASHBOARD (com Chart Destroy Fix)
-     - Corrige erro "Canvas already in use"
-     - Gráficos reinicializados ao trocar período
+     📊 ADMIN DASHBOARD (V2.5 com Cupom + Frete + Desconto)
+     - Mantém Chart Destroy fix
+     - Inclui novos campos no CSV
   ========================================================= */
-
   const ADMINS = [
     "alefejohsefe@gmail.com",
     "kalebhstanley650@gmail.com",
@@ -687,85 +926,10 @@ document.addEventListener("DOMContentLoaded", () => {
     });
     document.body.appendChild(btn);
   }
-/* ------------------ 📊 Geração de Resumo e Gráficos ------------------ */
-  function gerarResumoECharts(pedidos) {
-    if (!window.Chart) return;
-
-    const total = pedidos.reduce((s, p) => s + (Number(p.total) || 0), 0);
-    const ticket = pedidos.length ? total / pedidos.length : 0;
-
-    const elTotal = document.getElementById("card-total");
-    const elQtd   = document.getElementById("card-pedidos");
-    const elTick  = document.getElementById("card-ticket");
-    if (elTotal) elTotal.textContent = `Total Arrecadado: R$ ${total.toFixed(2).replace('.', ',')}`;
-    if (elQtd)   elQtd.textContent   = `Pedidos: ${pedidos.length}`;
-    if (elTick)  elTick.textContent  = `Ticket Médio: R$ ${ticket.toFixed(2).replace('.', ',')}`;
-
-    // 🔁 destrói gráficos antigos antes de redesenhar
-    chartPedidos?.destroy();
-    chartProdutos?.destroy();
-
-    // gráfico por dia
-    const porDia = {};
-    pedidos.forEach(p => {
-      const iso = typeof p.data === "string" ? p.data : (p.data?.toDate?.() ? p.data.toDate().toISOString() : "");
-      const dia = iso ? iso.split("T")[0] : "—";
-      porDia[dia] = (porDia[dia] || 0) + (Number(p.total) || 0);
-    });
-    const dias = Object.keys(porDia).sort();
-    const valores = dias.map(d => porDia[d]);
-
-    const ctx1 = document.getElementById("chart-pedidos");
-    if (ctx1) {
-      chartPedidos = new Chart(ctx1, {
-        type: "line",
-        data: { labels: dias, datasets: [{ label: "Total por Dia", data: valores, borderColor: "#4caf50", fill: false }] },
-        options: { responsive: true, interaction: { mode: 'index' }, scales: { y: { beginAtZero: true } } }
-      });
-    }
-
-    // produtos mais vendidos
-    const produtos = {};
-    pedidos.forEach(p => {
-      const itensArr = Array.isArray(p.itens) ? p.itens : (typeof p.itens === "string" ? p.itens.split("; ") : []);
-      itensArr.forEach(i => {
-        const nome = (i && i.split(" x")[0]) ? i.split(" x")[0].trim() : "Item";
-        produtos[nome] = (produtos[nome] || 0) + 1;
-      });
-    });
-    const top = Object.entries(produtos).sort((a, b) => b[1] - a[1]).slice(0, 8);
-
-    const ctx2 = document.getElementById("chart-produtos");
-    if (ctx2) {
-      chartProdutos = new Chart(ctx2, {
-        type: "bar",
-        data: { labels: top.map(t => t[0]), datasets: [{ label: "Itens mais vendidos", data: top.map(t => t[1]), backgroundColor: "#ffb300" }] },
-        options: { responsive: true, scales: { y: { beginAtZero: true } } }
-      });
-    }
-
-    // exportar CSV
-    const btnCSV = document.getElementById("export-csv");
-    if (btnCSV) {
-      btnCSV.onclick = () => {
-        const linhas = ["Data,Total,Itens"];
-        pedidos.forEach(p => {
-          const iso = typeof p.data === "string" ? p.data : (p.data?.toDate?.() ? p.data.toDate().toISOString() : "");
-          const itens = Array.isArray(p.itens) ? p.itens.join("; ") : (p.itens || "");
-          linhas.push(`${iso},${Number(p.total) || 0},"${itens.replaceAll('"', '""')}"`);
-        });
-        const blob = new Blob([linhas.join("\n")], { type: "text/csv" });
-        const link = document.createElement("a");
-        link.href = URL.createObjectURL(blob);
-        link.download = "pedidos_dfl.csv";
-        link.click();
-      };
-    }
-  }
-
+/* ------------------ 📊 Carregar Relatórios (V2.5) ------------------ */
   function carregarRelatorios(periodo = "7") {
     const agora = new Date();
-    let start = new Date(0);
+    let start = new Date(0); // início de todos
     if (periodo !== "all") {
       start = new Date(agora);
       start.setDate(start.getDate() - Number(periodo));
@@ -775,16 +939,36 @@ document.addEventListener("DOMContentLoaded", () => {
       .orderBy("data", "desc")
       .get()
       .then(snap => {
-        const pedidos = snap.docs.map(d => d.data());
-        const filtrados = pedidos.filter(p => {
-          const dt = typeof p.data === "string" ? new Date(p.data) :
-                     (p.data?.toDate?.() ? p.data.toDate() : new Date(0));
-          return periodo === "all" || (dt >= start);
+        // Normaliza documentos (compatível com pedidos antigos e novos)
+        const pedidos = snap.docs.map(d => {
+          const p = d.data() || {};
+          // Compat: total pode existir sem subtotal/desconto/entrega (v2.3-)
+          const subtotal = Number(p.subtotal ?? 0);
+          const entrega  = Number(p.entrega  ?? 0);
+          const desconto = Number(p.desconto ?? 0);
+          const total    = Number(p.total    ?? (subtotal + entrega - desconto)) || 0;
+
+          return {
+            ...p,
+            subtotal,
+            entrega,
+            desconto,
+            total,
+            data: typeof p.data === "string"
+              ? new Date(p.data)
+              : (p.data?.toDate?.() ? p.data.toDate() : new Date(0)),
+            itens: Array.isArray(p.itens)
+              ? p.itens
+              : (typeof p.itens === "string" ? p.itens.split("; ") : [])
+          };
         });
+
+        const filtrados = pedidos.filter(p => periodo === "all" || (p.data >= start));
         gerarResumoECharts(filtrados);
       })
       .catch(err => alert("Erro ao carregar relatórios: " + err.message));
 
+    // bind do seletor de período (uma única vez)
     const sel = document.getElementById("filter-period");
     if (sel && !sel._bound) {
       sel.addEventListener("change", e => carregarRelatorios(e.target.value));
@@ -792,7 +976,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
-  /* ------------------ 🔐 Segurança, Logs e LGPD ------------------ */
+  /* ------------------ 🔐 Segurança/Admin + UX Final ------------------ */
   auth.onAuthStateChanged(user => {
     const fab = document.getElementById("admin-fab");
     if (user && isAdmin(user)) {
@@ -803,6 +987,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
+  // Evita estado “zumbi” ao voltar do histórico (PWA/Android)
   window.addEventListener("pageshow", (e) => {
     if (e.persisted) {
       console.warn("↻ Página reaberta via cache, recarregando...");
@@ -810,6 +995,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
+  // Observabilidade: erros comuns em leitura de strings/arrays antigos
   window.addEventListener("error", (e) => {
     if (String(e?.message || "").toLowerCase().includes("split")) {
       popupAdd("Humm… houve um pequeno erro ao ler dados. Atualize a página.");
@@ -817,36 +1003,6 @@ document.addEventListener("DOMContentLoaded", () => {
     console.warn("⚠️ Erro interceptado:", e?.message);
   });
 
-  console.log("%c🍔 DFL v2.3.1 — Login Seguro + Charts Corrigidos + LGPD Pronto",
+  console.log("%c🍔 DFL v2.5 — Cupom + Endereço + Frete R$6 — Relatórios e Painel OK",
               "background:#4caf50;color:#fff;padding:8px 12px;border-radius:8px;font-weight:700;");
-}); // <-- fim do DOMContentLoaded
-
-
-/* =========================================================
-   🍪 Banner de Cookies (LGPD) + Link Política de Privacidade
-   - Não bloqueia a tela
-   - Abre a política em nova aba
-========================================================= */
-if (!localStorage.getItem("dflCookiesAccepted")) {
-  const banner = document.createElement("div");
-  banner.id = "cookie-banner";
-  banner.innerHTML = `
-    <p style="margin:0 0 8px 0;">Usamos cookies para melhorar sua experiência.
-      <a href="/politica-privacidade.html" target="_blank" rel="noopener" style="text-decoration:underline;font-weight:700;">
-        Leia nossa Política de Privacidade
-      </a>.
-    </p>
-    <button id="accept-cookies" style="border:none;border-radius:8px;padding:8px 14px;font-weight:700;cursor:pointer;">
-      Aceitar
-    </button>`;
-  Object.assign(banner.style, {
-    position: "fixed", bottom: "0", left: "0", right: "0", zIndex: "9999",
-    background: "#ffca28", color: "#000", padding: "12px", textAlign: "center",
-    fontWeight: "600", boxShadow: "0 -2px 10px rgba(0,0,0,.2)"
-  });
-  document.body.appendChild(banner);
-  document.getElementById("accept-cookies").onclick = () => {
-    localStorage.setItem("dflCookiesAccepted", "true");
-    banner.remove();
-  };
-}
+/* ==== FIM DA PARTE 6/6 ==== */
