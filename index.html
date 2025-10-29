@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>🍔 Da Família Lanches</title>
   <link rel="stylesheet" href="style.css" />
+  <!-- v2.5-ready: campos de entrega/cupom/resumo serão injetados via script.js -->
 
   <!-- Firebase v8 -->
   <script defer src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
@@ -105,11 +106,11 @@
       </div>
     </div>
   </section>
-<!-- ================= LANCHES TRADICIONAIS ================= -->
+
+  <!-- ================= LANCHES TRADICIONAIS ================= -->
   <section class="menu-section">
     <h2>🍔 Nossos Lanches Tradicionais</h2>
     <div class="grid">
-      <!-- BÃO -->
       <div class="card" data-name="Bão" data-price="11.00">
         <img src="imagens/bao.png" alt="Bão">
         <h3>Bão <span class="badge-small">Com Molho Verde</span></h3>
@@ -118,7 +119,6 @@
         <div class="actions"><button class="add-cart">Adicionar</button><button class="extras-btn">Adicionais</button></div>
       </div>
 
-      <!-- UAI -->
       <div class="card" data-name="Uai" data-price="13.00">
         <img src="imagens/uai.png" alt="Uai">
         <h3>Uai <span class="badge-small">Com Molho Verde</span></h3>
@@ -127,7 +127,6 @@
         <div class="actions"><button class="add-cart">Adicionar</button><button class="extras-btn">Adicionais</button></div>
       </div>
 
-      <!-- TREM -->
       <div class="card" data-name="Trem" data-price="14.00">
         <img src="imagens/trem.png" alt="Trem">
         <h3>Trem <span class="badge-small">Com Molho Verde</span></h3>
@@ -136,7 +135,6 @@
         <div class="actions"><button class="add-cart">Adicionar</button><button class="extras-btn">Adicionais</button></div>
       </div>
 
-      <!-- CADIM -->
       <div class="card" data-name="Cadim" data-price="17.00">
         <img src="imagens/cadim.png" alt="Cadim">
         <h3>Cadim <span class="badge-small">Com Molho Verde</span></h3>
@@ -145,7 +143,6 @@
         <div class="actions"><button class="add-cart">Adicionar</button><button class="extras-btn">Adicionais</button></div>
       </div>
 
-      <!-- ARMARIA -->
       <div class="card" data-name="Armaria" data-price="18.00">
         <img src="imagens/armaria.png" alt="Armaria">
         <h3>Armaria <span class="badge-small">Com Molho Verde</span></h3>
@@ -154,7 +151,6 @@
         <div class="actions"><button class="add-cart">Adicionar</button><button class="extras-btn">Adicionais</button></div>
       </div>
 
-      <!-- BITELA -->
       <div class="card" data-name="Bitela" data-price="22.00">
         <img src="imagens/bitela.png" alt="Bitela">
         <h3>Bitela <span class="badge-small">Com Molho Verde</span></h3>
@@ -163,7 +159,6 @@
         <div class="actions"><button class="add-cart">Adicionar</button><button class="extras-btn">Adicionais</button></div>
       </div>
 
-      <!-- APRUMA -->
       <div class="card" data-name="Apruma" data-price="25.00">
         <img src="imagens/apruma.png" alt="Apruma">
         <h3>Apruma <span class="badge-small">Com Molho Verde</span></h3>
@@ -172,7 +167,6 @@
         <div class="actions"><button class="add-cart">Adicionar</button><button class="extras-btn">Adicionais</button></div>
       </div>
 
-      <!-- GRADICIDO -->
       <div class="card" data-name="Gradicido" data-price="28.00">
         <img src="imagens/gradicido.png" alt="Gradicido">
         <h3>Gradicido <span class="badge-small">Com Molho Verde</span></h3>
@@ -181,7 +175,6 @@
         <div class="actions"><button class="add-cart">Adicionar</button><button class="extras-btn">Adicionais</button></div>
       </div>
 
-      <!-- VARADIFOME -->
       <div class="card" data-name="Varadifome" data-price="30.00">
         <img src="imagens/varadifome.png" alt="Varadifome">
         <h3>Varadifome <span class="badge-small">Com Molho Verde</span></h3>
@@ -316,7 +309,8 @@
       </div>
     </div>
   </section>
-<!-- ================= MODAL DE ADICIONAIS ================= -->
+
+  <!-- ================= MODAL DE ADICIONAIS ================= -->
   <div id="extras-modal" class="modal">
     <div class="modal-content">
       <div class="modal-head">
