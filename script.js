@@ -55,9 +55,13 @@ document.addEventListener("DOMContentLoaded", () => {
     userBtn: document.getElementById("user-btn"),
     statusBanner: document.getElementById("status-banner"),
     hoursBanner: document.querySelector(".hours-banner"),
+    // Adicionando os botões que eu incluí no HTML para garantir que o JS os veja
+    reportsBtn: document.getElementById("reports-btn"), // Botão de admin
+    myOrdersBtn: document.getElementById("orders-fab") // Botão Meus Pedidos
   };
 
   /* ------------------ 🌫️ BACKDROP ------------------ */
+  // (Garantindo que o backdrop exista, mesmo que o CSS falhe)
   if (!el.cartBackdrop) {
     const bd = document.createElement("div");
     bd.id = "cart-backdrop";
@@ -66,8 +70,8 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   const Backdrop = {
-    show() { el.cartBackdrop.classList.add("show"); document.body.classList.add("no-scroll"); },
-    hide() { el.cartBackdrop.classList.remove("show"); document.body.classList.remove("no-scroll"); },
+    show() { el.cartBackdrop.classList.add("active"); document.body.classList.add("no-scroll"); },
+    hide() { el.cartBackdrop.classList.remove("active"); document.body.classList.remove("no-scroll"); },
   };
 
   /* ------------------ 🧩 OVERLAYS ------------------ */
@@ -127,10 +131,10 @@ document.addEventListener("DOMContentLoaded", () => {
             <p style="color:#666;font-size:0.85rem;">${money(item.preco)} × ${item.qtd}</p>
           </div>
           <div style="display:flex;gap:8px;align-items:center;">
-            <button class="cart-minus" data-idx="${idx}" style="background:#ff4081;color:#fff;border:none;border-radius:5px;width:28px;height:28px;cursor:pointer;">−</button>
+            <button type="button" class="cart-minus" data-idx="${idx}" style="background:#ff4081;color:#fff;border:none;border-radius:5px;width:28px;height:28px;cursor:pointer;">−</button>
             <span style="font-weight:600;min-width:20px;text-align:center;">${item.qtd}</span>
-            <button class="cart-plus" data-idx="${idx}" style="background:#4caf50;color:#fff;border:none;border-radius:5px;width:28px;height:28px;cursor:pointer;">+</button>
-            <button class="cart-remove" data-idx="${idx}" style="background:#d32f2f;color:#fff;border:none;border-radius:5px;width:28px;height:28px;cursor:pointer;">🗑</button>
+            <button type="button" class="cart-plus" data-idx="${idx}" style="background:#4caf50;color:#fff;border:none;border-radius:5px;width:28px;height:28px;cursor:pointer;">+</button>
+            <button type="button" class="cart-remove" data-idx="${idx}" style="background:#d32f2f;color:#fff;border:none;border-radius:5px;width:28px;height:28px;cursor:pointer;">🗑</button>
           </div>
         </div>
       </div>
@@ -144,20 +148,25 @@ document.addEventListener("DOMContentLoaded", () => {
 
   /* 🔄 Vincula botões dinâmicos (incremento, remoção, limpar, finalizar) */
   function bindMiniCartButtons() {
-    document.querySelectorAll(".cart-plus").forEach(b => b.addEventListener("click", e => {
+    // CORREÇÃO: Adicionado 'el.miniList' para garantir que só pegamos botões DENTRO do carrinho
+    el.miniList.querySelectorAll(".cart-plus").forEach(b => b.addEventListener("click", e => {
       const i = +e.currentTarget.dataset.idx;
-      cart[i].qtd++;
-      renderMiniCart();
+      if (cart[i]) {
+        cart[i].qtd++;
+        renderMiniCart();
+      }
     }));
 
-    document.querySelectorAll(".cart-minus").forEach(b => b.addEventListener("click", e => {
+    el.miniList.querySelectorAll(".cart-minus").forEach(b => b.addEventListener("click", e => {
       const i = +e.currentTarget.dataset.idx;
-      if (cart[i].qtd > 1) cart[i].qtd--;
-      else cart.splice(i, 1);
-      renderMiniCart();
+      if (cart[i]) {
+        if (cart[i].qtd > 1) cart[i].qtd--;
+        else cart.splice(i, 1);
+        renderMiniCart();
+      }
     }));
 
-    document.querySelectorAll(".cart-remove").forEach(b => b.addEventListener("click", e => {
+    el.miniList.querySelectorAll(".cart-remove").forEach(b => b.addEventListener("click", e => {
       const i = +e.currentTarget.dataset.idx;
       cart.splice(i, 1);
       renderMiniCart();
@@ -173,7 +182,10 @@ document.addEventListener("DOMContentLoaded", () => {
     _renderMiniCartOrig();
     bindMiniCartButtons();
   };
-/* ------------------ ⚙️ LOGIN ------------------ */
+/* =========================================================
+   INÍCIO DA CORREÇÃO 
+   - Bloco de inicialização robusto do Firebase
+========================================================= */
   const firebaseConfig = {
     apiKey: "AIzaSyATQBcbYuzKpKlSwNlbpRiAM1XyHqhGeak",
     authDomain: "da-familia-lanches.firebaseapp.com",
@@ -182,10 +194,50 @@ document.addEventListener("DOMContentLoaded", () => {
     messagingSenderId: "106857147317",
     appId: "1:106857147317:web:769c98aed26bb8fc9e87fc",
   };
-  if (window.firebase && !firebase.apps.length) firebase.initializeApp(firebaseConfig);
-  const auth = firebase.auth();
-  const db = firebase.firestore();
+  
+  let auth, db; // Declarados aqui para estarem disponíveis para todo o script
 
+  try {
+    // 1. Verifica se o Firebase App (principal) carregou
+    if (!window.firebase) {
+      throw new Error("Biblioteca principal do Firebase (app) não carregou.");
+    }
+    // 2. Inicializa o App
+    if (!firebase.apps.length) {
+      firebase.initializeApp(firebaseConfig);
+    }
+    
+    // 3. Verifica se o Módulo de Autenticação carregou
+    if (!firebase.auth) {
+      throw new Error("Módulo de Autenticação (auth) não carregou.");
+    }
+    auth = firebase.auth();
+    
+    // 4. Verifica se o Módulo de Banco de Dados carregou
+    if (!firebase.firestore) {
+      throw new Error("Módulo de Banco de Dados (firestore) não carregou.");
+    }
+    db = firebase.firestore();
+
+  } catch (error) {
+    console.error("ERRO FATAL AO INICIAR FIREBASE:", error);
+    // Mostra um erro fatal para o usuário e PARA a execução do script
+    const elBody = document.querySelector("body");
+    if (elBody) {
+       elBody.innerHTML = `<div style="padding:20px;text-align:center;font-size:1.2rem;color:red;font-family:sans-serif;margin-top:50px;">
+        <b>Erro Crítico</b><br>Não foi possível conectar aos nossos serviços.
+        <br><small>Verifique sua conexão com a internet e tente recarregar a página.</small>
+        <br><br><small style="color:#666">Detalhe: ${error.message}</small></div>`;
+    }
+    return; // ABORTA O RESTO DO SCRIPT.JS
+  }
+/* =========================================================
+   FIM DA CORREÇÃO 
+   - O resto do script só executa se 'auth' e 'db'
+     forem carregados com sucesso.
+========================================================= */
+
+  /* ------------------ ⚙️ LOGIN ------------------ */
   el.userBtn?.addEventListener("click", () => Overlays.open(el.loginModal));
   document.querySelectorAll("#login-modal .login-close").forEach(btn =>
     btn.addEventListener("click", () => Overlays.closeAll())
@@ -201,7 +253,7 @@ document.addEventListener("DOMContentLoaded", () => {
     auth.signInWithEmailAndPassword(email, senha)
       .then((cred) => {
         currentUser = cred.user;
-        el.userBtn.textContent = `Olá, ${currentUser.displayName?.split(" ")[0] || currentUser.email.split("@")[0]}`;
+        // el.userBtn.textContent = `Olá, ${currentUser.displayName?.split(" ")[0] || currentUser.email.split("@")[0]}`; // Removido, pois o onAuthStateChanged já faz isso
         popupAdd("Login realizado com sucesso!");
         Overlays.closeAll();
       })
@@ -211,7 +263,7 @@ document.addEventListener("DOMContentLoaded", () => {
             auth.createUserWithEmailAndPassword(email, senha)
               .then((cred) => {
                 currentUser = cred.user;
-                el.userBtn.textContent = `Olá, ${currentUser.email.split("@")[0]}`;
+                // el.userBtn.textContent = `Olá, ${currentUser.email.split("@")[0]}`; // Removido
                 popupAdd("Conta criada com sucesso! 🎉");
                 Overlays.closeAll();
               })
@@ -231,23 +283,15 @@ document.addEventListener("DOMContentLoaded", () => {
     auth.signInWithPopup(provider)
       .then((res) => {
         currentUser = res.user;
-        el.userBtn.textContent = `Olá, ${currentUser.displayName?.split(" ")[0] || "Cliente"}`;
+        // el.userBtn.textContent = `Olá, ${currentUser.displayName?.split(" ")[0] || "Cliente"}`; // Removido
         popupAdd("Login com Google realizado! ✅");
         Overlays.closeAll();
       })
       .catch((err) => alert("Erro: " + err.message));
   });
 
-  auth.onAuthStateChanged((user) => {
-    currentUser = user || null;
-    if (user) {
-      el.userBtn.textContent = `Olá, ${user.displayName?.split(" ")[0] || user.email.split("@")[0]}`;
-      showOrdersFabIfLogged();
-    } else {
-      el.userBtn.textContent = "Entrar / Cadastrar";
-      showOrdersFabIfLogged();
-    }
-  });
+  // REMOVIDO o primeiro auth.onAuthStateChanged que estava aqui, 
+  // pois ele será sobrescrito pelo listener final (mais completo) no fim do arquivo.
 
   /* ------------------ ➕ Adicionais ------------------ */
   const adicionais = [
@@ -284,7 +328,8 @@ document.addEventListener("DOMContentLoaded", () => {
   el.extrasConfirm?.addEventListener("click", () => {
     if (!produtoExtras) return Overlays.closeAll();
     const checks = [...document.querySelectorAll("#extras-modal .extras-list input:checked")];
-    if (!checks.length) return alert("Selecione pelo menos um adicional!");
+    // Permitir adicionar sem extras, caso o usuário só queira o lanche (embora o botão "adicionar" já faça isso)
+    // if (!checks.length) return alert("Selecione pelo menos um adicional!"); 
 
     const extrasContagem = {};
     checks.forEach(c => {
@@ -304,7 +349,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const precoExtras = Object.values(extrasContagem).reduce((t, e) => t + (e.preco * e.qtd), 0);
     const precoTotal = produtoPrecoBase + precoExtras;
-    const nomeCompleto = `${produtoExtras} + ${extrasNomes}`;
+    const nomeCompleto = extrasNomes ? `${produtoExtras} + ${extrasNomes}` : produtoExtras; // Adiciona sem extras se nada for marcado
 
     const existente = cart.find(i => i.nome === nomeCompleto);
     if (existente) existente.qtd++;
@@ -403,6 +448,19 @@ document.addEventListener("DOMContentLoaded", () => {
       addCommonItem(nome, preco);
     })
   );
+
+  /* ------------------ 🛒 ABRIR CARRINHO ------------------ */
+  // Este é o listener que abre o carrinho. 
+  // Agora ele deve funcionar.
+  el.cartIcon?.addEventListener("click", () => {
+    renderMiniCart(); // Garante que o carrinho está atualizado antes de abrir
+    Overlays.open(el.miniCart);
+  });
+  document.querySelectorAll("#mini-cart .extras-close").forEach((b) =>
+    b.addEventListener("click", () => Overlays.closeAll())
+  );
+
+
 /* ------------------ ⚙️ CONFIGURAÇÕES V2.5 ------------------ */
   const DELIVERY_FEE = 6.00; // 💸 taxa fixa de entrega (R$ 6,00)
 
@@ -492,13 +550,13 @@ document.addEventListener("DOMContentLoaded", () => {
           <input id="coupon-input" type="text" inputmode="text" placeholder="Cupom de desconto"
             value="${couponApplied || ""}"
             style="flex:1;border:1px solid #ddd;border-radius:10px;padding:10px;font-weight:600;letter-spacing:.5px;text-transform:uppercase">
-          <button id="apply-coupon" style="background:#000;color:#fff;border:none;border-radius:10px;padding:10px 16px;font-weight:700;cursor:pointer">Aplicar</button>
+          <button id="apply-coupon" type="button" style="background:#000;color:#fff;border:none;border-radius:10px;padding:10px 16px;font-weight:700;cursor:pointer">Aplicar</button>
         </div>
 
-        <button id="finish-order" style="width:100%;background:#4caf50;color:#fff;border:none;border-radius:10px;padding:12px;font-weight:700;cursor:pointer;margin-bottom:8px">
+        <button id="finish-order" type="button" style="width:100%;background:#4caf50;color:#fff;border:none;border-radius:10px;padding:12px;font-weight:700;cursor:pointer;margin-bottom:8px">
           Finalizar Pedido 🛍️
         </button>
-        <button id="clear-cart" style="width:100%;background:#ff4081;color:#fff;border:none;border-radius:10px;padding:10px;font-weight:700;cursor:pointer">
+        <button id="clear-cart" type="button" style="width:100%;background:#ff4081;color:#fff;border:none;border-radius:10px;padding:10px;font-weight:700;cursor:pointer">
           Limpar Carrinho
         </button>
       </div>
@@ -569,21 +627,41 @@ document.addEventListener("DOMContentLoaded", () => {
     const agora = new Date();
     const h = agora.getHours();
     const m = agora.getMinutes();
-    const aberto = h >= 18 && h < 23;
+    const aberto = h >= 18 && h < 23; // Aberto das 18:00 até 22:59
     if (el.statusBanner) {
       el.statusBanner.textContent = aberto ? "🟢 Aberto — Faça seu pedido!" : "🔴 Fechado — Voltamos às 18h!";
       el.statusBanner.className = `status-banner ${aberto ? "open" : "closed"}`;
     }
     if (el.hoursBanner) {
+      const elTimer = el.hoursBanner.querySelector("#timer");
+      if (!elTimer) return;
+
       if (aberto) {
-        // CORREÇÃO: O seu timer estava 23h30 no HTML, mas 23h00 no JS.
-        // Ajustei para 23h00 (23) como estava no seu JS.
-        // Se quiser 23h30, mude (h < 23) para (h < 23 || (h === 23 && m < 30))
-        const rest = (23 - h) * 60 - m; 
-        el.hoursBanner.innerHTML = `⏰ Hoje atendemos até <b>23h00</b> — Faltam <b>${Math.floor(rest / 60)}h ${rest % 60}min</b>`;
+        // CORREÇÃO: O seu HTML dizia 23h30, mas seu JS antigo dizia 23h00.
+        // Vou usar 23h30 (23, 30) como referência.
+        const fim = new Date(agora);
+        fim.setHours(23, 30, 0); // 23h30
+        
+        let diff = (fim - agora) / 1000; // segundos
+        if (diff < 0) diff = 0;
+        
+        const restH = Math.floor(diff / 3600);
+        const restM = Math.floor((diff % 3600) / 60);
+        
+        elTimer.innerHTML = `<b>${restH}h ${restM}min</b>`;
+
       } else {
-        const faltam = h < 18 ? (18 - h) * 60 - m : (24 - h + 18) * 60 - m;
-        el.hoursBanner.innerHTML = `🔒 Fechado — Abrimos em <b>${Math.floor(faltam / 60)}h ${faltam % 60}min</b>`;
+        const inicio = new Date(agora);
+        if (h >= 23 || (h === 23 && m >= 30)) { // Se já passou das 23h30
+          inicio.setDate(inicio.getDate() + 1); // Pula para o dia seguinte
+        }
+        inicio.setHours(18, 0, 0); // Próxima abertura às 18h
+
+        let diff = (inicio - agora) / 1000; // segundos
+        const faltamH = Math.floor(diff / 3600);
+        const faltamM = Math.floor((diff % 3600) / 60);
+
+        el.hoursBanner.innerHTML = `🔒 Fechado — Abrimos em <b>${faltamH}h ${faltamM}min</b>`;
       }
     }
   });
@@ -670,12 +748,14 @@ document.addEventListener("DOMContentLoaded", () => {
   // 🔰 Primeira renderização do mini-carrinho com UI estendida
   renderMiniCart();
 /* ------------------ 📦 Meus Pedidos (UI + lógica V2.5) ------------------ */
-  let ordersFab = document.getElementById("orders-fab");
+  // CORREÇÃO: Usando a variável 'el.myOrdersBtn' que definimos no topo
+  let ordersFab = el.myOrdersBtn;
   if (!ordersFab) {
     ordersFab = document.createElement("button");
-    ordersFab.id = "orders-fab";
+    ordersFab.id = "orders-fab"; // ID que o seu CSS espera
     ordersFab.innerHTML = "📦 Meus Pedidos";
     document.body.appendChild(ordersFab);
+    el.myOrdersBtn = ordersFab; // Atualiza a referência
   }
 
   let ordersPanel = document.querySelector(".orders-panel");
@@ -685,7 +765,7 @@ document.addEventListener("DOMContentLoaded", () => {
     ordersPanel.innerHTML = `
       <div class="orders-head">
         <span>📦 Meus Pedidos</span>
-        <button class="orders-close">✖</button>
+        <button class="orders-close" type="button">✖</button>
       </div>
       <div class="orders-content" id="orders-content">
         <p class="empty-orders">Faça login para ver seus pedidos.</p>
@@ -709,8 +789,11 @@ document.addEventListener("DOMContentLoaded", () => {
   ordersPanel.querySelector(".orders-close")?.addEventListener("click", closeOrdersPanel);
 
   function showOrdersFabIfLogged() {
-    if (currentUser) ordersFab.classList.add("show");
-    else ordersFab.classList.remove("show");
+    // CORREÇÃO: Usando a referência correta
+    if (el.myOrdersBtn) {
+      if (currentUser) el.myOrdersBtn.classList.add("show");
+      else el.myOrdersBtn.classList.remove("show");
+    }
   }
 
   function carregarPedidosSeguro() {
@@ -720,7 +803,8 @@ document.addEventListener("DOMContentLoaded", () => {
     container.innerHTML = `<p class="empty-orders">Carregando pedidos...</p>`;
 
     if (!currentUser || !currentUser.email) {
-      setTimeout(carregarPedidosSeguro, 300);
+      // Espera um pouco caso o currentUser ainda não esteja pronto
+      setTimeout(carregarPedidosSeguro, 500);
       return;
     }
 
@@ -763,10 +847,12 @@ document.addEventListener("DOMContentLoaded", () => {
       });
     };
 
+    // Tenta buscar por email (compatibilidade com logins antigos)
     db.collection("Pedidos")
       .where("usuario", "==", currentUser.email)
       .get()
       .then((snap) => {
+        // Se não achar por email, busca por userId (método mais seguro)
         if (!snap.empty) return render(snap);
         return db.collection("Pedidos")
           .where("userId", "==", currentUser.uid)
@@ -814,7 +900,7 @@ document.addEventListener("DOMContentLoaded", () => {
       <div class="modal-content" style="max-width:1000px;width:95%;height:85vh;overflow:auto;background:#fff;border-radius:12px;">
         <div class="modal-head" style="display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #ddd;padding:10px 14px;">
           <h3>📊 Relatórios e Estatísticas</h3>
-          <button class="dashboard-close" style="background:#ff5252;color:#fff;border:none;border-radius:6px;padding:6px 10px;cursor:pointer;font-weight:600;">✖</button>
+          <button class="dashboard-close" type="button" style="background:#ff5252;color:#fff;border:none;border-radius:6px;padding:6px 10px;cursor:pointer;font-weight:600;">✖</button>
         </div>
         <div class="dashboard-body" style="padding:12px;">
           <div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:12px;">
@@ -835,7 +921,7 @@ document.addEventListener("DOMContentLoaded", () => {
           <canvas id="chart-pedidos" style="width:100%;height:240px;"></canvas>
           <canvas id="chart-produtos" style="width:100%;height:240px;margin-top:16px;"></canvas>
           <div style="margin-top:12px;">
-            <button id="export-csv" style="background:#4caf50;color:#fff;border:none;border-radius:8px;padding:10px 16px;font-weight:600;cursor:pointer;">📁 Exportar CSV</button>
+            <button id="export-csv" type="button" style="background:#4caf50;color:#fff;border:none;border-radius:8px;padding:10px 16px;font-weight:600;cursor:pointer;">📁 Exportar CSV</button>
           </div>
         </div>
       </div>`;
@@ -854,30 +940,15 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function createAdminFab() {
-    if (document.getElementById("admin-fab")) return;
-    const btn = document.createElement("button");
-    btn.id = "admin-fab";
-    btn.innerHTML = "📊 Relatórios";
-    Object.assign(btn.style, {
-      position: "fixed",
-      bottom: "210px", // Posição do FAB de Admin
-      right: "20px",
-      background: "linear-gradient(135deg,#ffca28,#ffd54f)",
-      border: "none",
-      color: "#000",
-      fontWeight: "600",
-      borderRadius: "25px",
-      padding: "12px 18px",
-      cursor: "pointer",
-      boxShadow: "0 4px 12px rgba(0,0,0,.3)",
-      zIndex: "1300"
-    });
-    btn.addEventListener("click", () => {
-      createDashboard();
-      ensureChartJS(() => carregarRelatorios("7"));
-      Overlays.open(document.getElementById("admin-dashboard"));
-    });
-    document.body.appendChild(btn);
+    // CORREÇÃO: Usando a referência 'el.reportsBtn' do HTML
+    if (el.reportsBtn) {
+      el.reportsBtn.style.display = "block"; // Apenas mostra o botão que já existe
+      el.reportsBtn.addEventListener("click", () => {
+        createDashboard();
+        ensureChartJS(() => carregarRelatorios("7"));
+        Overlays.open(document.getElementById("admin-dashboard"));
+      });
+    }
   }
 /* ------------------ 📊 Carregar Relatórios (V2.5) ------------------ */
   function carregarRelatorios(periodo = "7") {
@@ -903,6 +974,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
           return {
             ...p,
+            id: d.id, // Garante que o ID do documento está presente
             subtotal,
             entrega,
             desconto,
@@ -970,8 +1042,10 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   /* ------------------ 🔐 Segurança/Admin + UX Final ------------------ */
+  // Este é o ÚNICO 'onAuthStateChanged'. Ele controla tudo.
   auth.onAuthStateChanged(user => {
     currentUser = user; // Atualiza o currentUser global
+    
     if (user) {
       el.userBtn.textContent = `Olá, ${user.displayName?.split(" ")[0] || user.email.split("@")[0]}`;
       showOrdersFabIfLogged(); // Mostra "Meus Pedidos"
@@ -981,12 +1055,13 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     // Lógica do Painel Admin
-    const fab = document.getElementById("admin-fab");
     if (user && isAdmin(user)) {
-      if (!fab) createAdminFab(); // Cria o botão "Relatórios"
+      if (el.reportsBtn) {
+        createAdminFab(); // Liga o botão "Relatórios" que estava escondido
+      }
     } else {
-      fab?.remove();
-      document.getElementById("admin-dashboard")?.remove();
+      if (el.reportsBtn) el.reportsBtn.style.display = "none"; // Esconde o botão
+      document.getElementById("admin-dashboard")?.remove(); // Remove o painel se estiver aberto
       Overlays.closeAll(); // Fecha o dashboard se o usuário fizer logout
     }
   });
