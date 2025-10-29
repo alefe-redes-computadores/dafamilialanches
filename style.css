@@ -705,3 +705,55 @@ section h2{
     max-width:100%;
   }
 }
+/* =========================================================
+   🔧 HOTFIX CRÍTICO - BACKDROP E CLIQUES
+========================================================= */
+
+/* Remove backdrop da frente de tudo */
+#cart-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,.6);
+  z-index: 900;
+  display: none;
+  pointer-events: none !important;
+}
+
+#cart-backdrop.show {
+  display: block;
+  pointer-events: none !important;
+}
+
+/* Garante que modais fiquem na frente */
+.modal {
+  z-index: 1200 !important;
+  pointer-events: auto !important;
+}
+
+.modal-content {
+  z-index: 1201 !important;
+  pointer-events: auto !important;
+}
+
+#mini-cart {
+  z-index: 1100 !important;
+  pointer-events: auto !important;
+}
+
+.orders-panel {
+  z-index: 1100 !important;
+  pointer-events: auto !important;
+}
+
+/* Garante que botões sejam clicáveis */
+button, .card, .slide, a, input, textarea, select {
+  pointer-events: auto !important;
+  cursor: pointer !important;
+}
+
+.add-cart, .extras-btn, #cart-icon, .user-button {
+  pointer-events: auto !important;
+  cursor: pointer !important;
+  z-index: 10 !important;
+  position: relative !important;
+}
