@@ -5,8 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>🍔 Da Família Lanches</title>
   <link rel="stylesheet" href="style.css" />
-
-  <!-- Firebase v8 -->
   <script defer src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
   <script defer src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
   <script defer src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
@@ -14,7 +12,6 @@
 </head>
 
 <body>
-  <!-- ================= CABEÇALHO ================= -->
   <header class="header">
     <div class="header-content">
       <img src="logo.png" alt="Logo DFL" class="logo" />
@@ -30,13 +27,11 @@
     </div>
   </header>
 
-  <!-- ================= STATUS ================= -->
   <div id="status-banner" class="status-banner"></div>
   <div class="hours-banner">
     ⏰ Hoje atendemos até <b>23h30</b> — Faltam <span id="timer"></span>
   </div>
 
-  <!-- ================= PROMOÇÕES ================= -->
   <section class="promo-section">
     <h2>🔥 Promoções do Dia</h2>
     <p class="promo-sub">Aproveite antes que acabe!</p>
@@ -57,7 +52,6 @@
     </div>
   </section>
 
-  <!-- ================= MINI-CARRINHO ================= -->
   <div id="cart-backdrop"></div>
   <aside id="mini-cart" class="mini-cart">
     <div class="mini-head">
@@ -68,7 +62,6 @@
     <div class="mini-foot"></div>
   </aside>
 
-  <!-- ================= COMBOS ================= -->
   <section class="menu-section">
     <h2>🧡 Combos</h2>
     <div class="grid">
@@ -106,7 +99,6 @@
     </div>
   </section>
 
-  <!-- ================= LANCHES TRADICIONAIS ================= -->
   <section class="menu-section">
     <h2>🍔 Nossos Lanches Tradicionais</h2>
     <div class="grid">
@@ -183,7 +175,7 @@
       </div>
     </div>
   </section>
-<!-- ================= LANCHES ARTESANAIS ================= -->
+
   <section class="menu-section">
     <h2>🍔 Lanches Artesanais</h2>
     <div class="grid">
@@ -213,7 +205,6 @@
     </div>
   </section>
 
-  <!-- ================= HOT DOGS ================= -->
   <section class="menu-section">
     <h2>🌭 Hot Dogs</h2>
     <div class="grid">
@@ -251,7 +242,6 @@
     </div>
   </section>
 
-  <!-- ================= BEBIDAS ================= -->
   <section id="bebidas-section" class="menu-section">
     <h2>🥤 Bebidas</h2>
     <div class="grid">
@@ -308,7 +298,6 @@
     </div>
   </section>
 
-  <!-- ================= MODAL DE ADICIONAIS ================= -->
   <div id="extras-modal" class="modal">
     <div class="modal-content">
       <div class="modal-head">
@@ -323,7 +312,6 @@
     </div>
   </div>
 
-  <!-- ================= MODAL DE REFRIGERANTE ================= -->
   <div id="combo-modal" class="modal">
     <div class="modal-content">
       <div class="modal-head">
@@ -338,7 +326,6 @@
     </div>
   </div>
 
-  <!-- ================= MODAL DE LOGIN ================= -->
   <div id="login-modal" class="modal">
     <div class="modal-content login-box">
       <div class="modal-head">
@@ -362,7 +349,6 @@
     </div>
   </div>
 
-  <!-- ================= RODAPÉ ================= -->
   <footer class="footer">
     <p>📍 <a href="https://www.google.com/maps?q=Rua+dos+Caiçaras,+212,+Patos+de+Minas,+MG" target="_blank">
       Rua dos Caiçaras, 212 — Patos de Minas/MG
