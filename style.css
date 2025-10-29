@@ -12,12 +12,13 @@ body{background:#fffaf3;font-family:"Inter","Poppins",sans-serif;color:#222;marg
 .logo{width:52px;height:52px}
 .header-info h1{margin:0;font-size:1.2rem}
 .tagline{margin:0;font-size:.85rem;color:#d84315}
+.header-actions{display:flex;align-items:center;gap:10px;} /* Adicionei isso no HTML, mas o CSS estava ok */
 
 /* Top buttons */
 .user-button{background:linear-gradient(135deg,#fff,#f7f7f7);border:1px solid #ddd;border-radius:8px;padding:8px 12px;font-weight:600;cursor:pointer;transition:.2s}
 .user-button:hover{background:#fafafa}
-#cart-icon{background:#ffb300;border:none;border-radius:8px;padding:8px 12px;font-weight:700;cursor:pointer;transition:.2s}
-#cart-icon:hover{background:#ffc107}
+#cart-icon, .cart-button{background:#ffb300;border:none;border-radius:8px;padding:8px 12px;font-weight:700;cursor:pointer;transition:.2s} /* Renomeei no HTML, mas mantive o ID */
+#cart-icon:hover, .cart-button:hover{background:#ffc107}
 
 /* Status */
 .status-banner{text-align:center;padding:8px;color:#fff;font-weight:600}
@@ -72,6 +73,28 @@ section h2{font-size:1.3rem;text-align:center;margin-bottom:15px;color:#ff7043}
 .actions .extras-btn{background:linear-gradient(135deg,#ffb300,#ffca28);color:#222;box-shadow:0 2px 4px rgba(0,0,0,.15)}
 .actions .extras-btn:hover{background:linear-gradient(135deg,#ffca28,#ffd54f);transform:scale(1.03)}
 
+/* ================== INÍCIO DA CORREÇÃO ================== */
+/* Fundo escuro (Backdrop) do carrinho */
+#cart-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 1000; /* Abaixo do carrinho (1100), mas acima do resto */
+  opacity: 0;
+  pointer-events: none; /* Não pode ser clicado quando invisível */
+  transition: opacity 0.35s ease;
+}
+
+#cart-backdrop.active {
+  opacity: 1;
+  pointer-events: auto; /* Pode ser clicado para fechar (via JS) */
+}
+/* =================== FIM DA CORREÇÃO =================== */
+
+
 /* ⚙️ Mini-carrinho */
 #mini-cart{position:fixed;top:0;right:-100%;width:360px;max-width:95%;height:100vh;background:#fff;box-shadow:-3px 0 12px rgba(0,0,0,.3);z-index:1100;display:flex;flex-direction:column;transition:right .35s ease}
 #mini-cart.active{right:0}
@@ -120,7 +143,7 @@ section h2{font-size:1.3rem;text-align:center;margin-bottom:15px;color:#ff7043}
 /* Responsivo */
 @media (max-width:600px){
   .grid{grid-template-columns:repeat(2,1fr)}
-  .card img{height:100px}
+  /* .card img{height:100px} */ /* Comentei isso, parecia estar achatando suas imagens. Se quiser, descomente. */
   .slide{min-width:200px;max-width:200px;height:150px}
   .c-btn{width:32px;height:32px;font-size:20px}
   .c-prev{left:5px}
