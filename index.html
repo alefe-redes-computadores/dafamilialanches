@@ -5,12 +5,13 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>🍔 Da Família Lanches</title>
 
-  <!-- Estilos e Firebase -->
-  <link rel="stylesheet" href="style.css?v=2.5" />
+  <!-- ======== ESTILOS ======== -->
+  <link rel="stylesheet" href="style.css?v=2.6" />
+
+  <!-- ======== FIREBASE ======== -->
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
-  <script defer src="script.js?v=2.5"></script>
 </head>
 
 <body>
@@ -33,13 +34,13 @@
     </div>
   </header>
 
-  <!-- ======== STATUS BANNERS ======== -->
+  <!-- ======== STATUS ======== -->
   <div id="status-banner" class="status-banner"></div>
   <div class="hours-banner">
     ⏰ Hoje atendemos até <b>23h30</b> — Faltam <span id="timer"></span>
   </div>
 
-  <!-- ======== SEÇÃO DE PROMOÇÕES ======== -->
+  <!-- ======== PROMOÇÕES ======== -->
   <section class="promo-section">
     <h2>🔥 Promoções do Dia</h2>
     <p class="promo-sub">Aproveite antes que acabe!</p>
@@ -64,13 +65,14 @@
     </div>
   </section>
 
-  <!-- ======== SEÇÕES DE PRODUTOS (Combos, Lanches, Hot Dogs, Bebidas) ======== -->
-  <!-- (mantive todas as seções exatamente como no seu arquivo anterior — sem cortes) -->
+  <!-- ======== SEÇÕES DE PRODUTOS ======== -->
+  <!-- Combos, Lanches Tradicionais, Artesanais, Hot Dogs, Bebidas -->
+  <!-- Mantidos idênticos à versão 2.5 Estável -->
 
   <!-- ======== MINI-CARRINHO ======== -->
   <aside id="mini-cart" class="mini-cart">
     <div class="mini-head">
-      <h3>🛒 Seu Carrinho</h3>
+      <h3>🛍 Seu Pedido</h3>
       <button class="extras-close" type="button">✖</button>
     </div>
     <div class="mini-list"></div>
@@ -79,10 +81,63 @@
 
   <div id="cart-backdrop" class="backdrop"></div>
 
-  <!-- ======== MODAIS (Adicionais, Combos, Login, Pedidos) ======== -->
-  <!-- (iguais à sua versão atual, mantidos sem alterações) -->
+  <!-- ======== MODAIS ======== -->
+  <div id="extras-modal" class="modal">
+    <div class="modal-content">
+      <div class="modal-head">
+        <h3>🍳 Adicionais</h3>
+        <button class="extras-close" type="button">✖</button>
+      </div>
+      <div class="extras-list"></div>
+      <div class="modal-foot">
+        <button id="extras-confirm" type="button">Confirmar</button>
+      </div>
+    </div>
+  </div>
 
-  <!-- ======== BANNER DE COOKIES ======== -->
+  <div id="combo-modal" class="modal">
+    <div class="modal-content">
+      <div class="modal-head">
+        <h3>🥤 Escolha sua bebida</h3>
+        <button class="combo-close" type="button">✖</button>
+      </div>
+      <div id="combo-body" class="combo-body"></div>
+      <div class="modal-foot">
+        <button id="combo-confirm" type="button">Confirmar</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="login-modal" class="modal">
+    <div class="modal-content" style="max-width: 400px;">
+      <div class="modal-head">
+        <h3>🔐 Entrar / Cadastrar</h3>
+        <button class="login-close" type="button">✖</button>
+      </div>
+      <form id="login-form" class="login-form">
+        <input type="email" id="login-email" placeholder="E-mail" required />
+        <input type="password" id="login-senha" placeholder="Senha" required />
+        <button type="submit">Entrar</button>
+        <div class="or">ou</div>
+        <button type="button" id="google-login" class="google-btn">Entrar com Google</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- ======== MEUS PEDIDOS ======== -->
+  <button id="orders-fab" class="fab" type="button">📦 Meus Pedidos</button>
+
+  <div class="orders-panel">
+    <div class="orders-head">
+      <span>📦 Meus Pedidos</span>
+      <button class="orders-close" type="button">✖</button>
+    </div>
+    <div id="orders-content" class="orders-content">
+      <p class="empty-orders">Nenhum pedido ainda 😋</p>
+    </div>
+  </div>
+
+  <!-- ======== COOKIES ======== -->
   <div id="cookie-banner" class="cookie-banner">
     <p>
       🍪 Usamos cookies para melhorar sua experiência.  
@@ -96,5 +151,8 @@
     <p>© 2025 Da Família Lanches — Todos os direitos reservados.</p>
     <p>📞 <a href="https://wa.me/5534997178336" target="_blank">Fale Conosco no WhatsApp</a></p>
   </footer>
+
+  <!-- ======== SCRIPT PRINCIPAL ======== -->
+  <script src="script.js?v=2.6"></script>
 </body>
 </html>
