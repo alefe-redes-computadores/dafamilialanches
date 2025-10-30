@@ -283,3 +283,53 @@ img {
   border-radius: 12px;
 }
 /* ======================================================================= */
+/* =================== DFL v2.6 — HOTFIX HEADER + CARROSSEL =================== */
+
+/* HEADER: layout estável */
+.header{
+  display:flex; justify-content:space-between; align-items:center;
+  gap:12px; padding:10px 14px;
+}
+.header-content{ display:flex; align-items:center; gap:10px; }
+.header .logo{
+  height:56px !important; width:auto !important; object-fit:contain !important;
+}
+.header-info h1{ margin:0; line-height:1.15; }
+.header-actions{ display:flex; align-items:center; gap:8px; }
+.header .user-button, .header .cart-button, #reports-btn{
+  font-size:14px !important; padding:8px 12px; line-height:1; border-radius:8px;
+}
+
+/* CARROSSEL: horizontal, com snap e setas posicionadas */
+.carousel{
+  position:relative; margin-top:8px;
+}
+.slides{
+  display:flex; gap:12px; overflow-x:auto; padding:6px 4px;
+  scroll-snap-type:x mandatory; -webkit-overflow-scrolling:touch;
+}
+.slide{
+  flex:0 0 auto; width: 72vw; max-width:340px; height:220px;
+  object-fit:cover; border-radius:12px; scroll-snap-align:start;
+  box-shadow:0 4px 12px rgba(0,0,0,.08);
+}
+/* esconde barra no mobile */
+.slides::-webkit-scrollbar{ display:none; }
+
+.c-btn{
+  position:absolute; top:50%; transform:translateY(-50%);
+  border:none; background:#00000099; color:#fff; width:32px; height:32px;
+  border-radius:999px; display:grid; place-items:center; cursor:pointer;
+}
+.c-prev{ left:6px; }
+.c-next{ right:6px; }
+
+/* Ajuste fino do contador e timers para não “pular” */
+.countdown-ticker{ font-weight:600; margin:6px 0 2px; }
+
+/* Mantém “Meus Pedidos” fechado por padrão */
+.orders-panel{ transform:translateY(10px); opacity:0; pointer-events:none; }
+.orders-panel.active{ transform:translateY(0); opacity:1; pointer-events:auto; }
+
+/* Toast sempre por cima */
+.popup-add{ z-index:10000; }
