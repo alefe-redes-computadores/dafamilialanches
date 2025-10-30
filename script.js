@@ -1126,3 +1126,50 @@ document.addEventListener("DOMContentLoaded", () => {
               "background:#4caf50;color:#fff;padding:8px 12px;border-radius:8px;font-weight:700;");
 
 }); // Fim do DOMContentLoaded
+
+/* =========================================================
+   SCRIPT PARA FECHAR MODAIS AO CLICAR FORA
+========================================================= */
+
+document.addEventListener('DOMContentLoaded', () => {
+
+  // --- 1. Lógica para fechar os MODAIS (Login, Extras, Combo) ---
+  
+  // Seleciona todos os elementos que são modais
+  const allModals = document.querySelectorAll('.modal');
+
+  allModals.forEach(modal => {
+    modal.addEventListener('click', (event) => {
+      
+      // event.target é o elemento exato que foi clicado.
+      // Verificamos se o clique foi DIRETAMENTE no fundo do modal
+      // (que tem a classe '.modal') e não em um "filho" (como o .modal-content)
+      if (event.target.classList.contains('modal')) {
+        
+        // Se foi no fundo, remove a classe 'show' para fechar
+        modal.classList.remove('show');
+        
+        // Também remove a classe 'active' do backdrop do carrinho,
+        // caso ele esteja ativo por algum motivo.
+        const cartBackdrop = document.getElementById('cart-backdrop');
+        if (cartBackdrop) {
+            cartBackdrop.classList.remove('active');
+        }
+      }
+    });
+  });
+
+  // --- 2. Lógica para fechar o MINI-CARRINHO ---
+  
+  const cartBackdrop = document.getElementById('cart-backdrop');
+  const miniCart = document.getElementById('mini-cart');
+
+  if (cartBackdrop && miniCart) {
+    cartBackdrop.addEventListener('click', () => {
+      // Ao clicar no backdrop, fecha tanto ele quanto o carrinho
+      cartBackdrop.classList.remove('active');
+      miniCart.classList.remove('active');
+    });
+  }
+
+});
