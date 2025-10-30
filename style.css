@@ -203,3 +203,83 @@
   z-index: 9990;
 }
 #cart-backdrop.active { opacity: 1; visibility: visible; }
+/* ===================== DFL v2.6 — HOTFIX-IMG/HEADER ===================== */
+/* 1) NADA de forçar width:100% em TODAS as imagens */
+img {
+  height: auto !important;
+  max-width: 100%;
+  width: auto !important;        /* desfaz width:100% global */
+}
+
+/* 2) Logo do header: tamanho fixo e seguro */
+.header .logo {
+  height: 56px !important;       /* ajuste fino: 56–64px se preferir maior */
+  width: auto !important;
+  max-height: 56px !important;
+  object-fit: contain !important;
+  display: block;
+}
+
+/* 3) Ícones/botões do topo: não “crescem” com o font-size global */
+.header .user-button,
+.header .cart-button,
+#reports-btn {
+  font-size: 14px !important;
+  line-height: 1 !important;
+  padding: 8px 12px;
+}
+
+/* 4) Slides do carrossel: controlados, sem esticar */
+.carousel .slide {
+  height: 220px !important;      /* 200–240px ok */
+  width: auto !important;
+  object-fit: cover;
+  border-radius: 12px;
+}
+
+/* 5) Imagens das cards: seguras dentro do card */
+.card img {
+  width: 100% !important;
+  height: 220px !important;      /* mesma altura dos slides p/ consistência */
+  object-fit: cover !important;
+  border-radius: 12px;
+}
+
+/* 6) Painel “Meus Pedidos”: garante que começa fechado e não empurra layout */
+.orders-panel {
+  transform: translateY(10px);
+  opacity: 0;
+  pointer-events: none;
+}
+.orders-panel.active {
+  transform: translateY(0);
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* 7) Toast “adicionado ao carrinho”: sempre por cima */
+.popup-add {
+  position: fixed;
+  left: 50%;
+  bottom: 18px;
+  transform: translateX(-50%);
+  background: #111;
+  color: #fff;
+  padding: 10px 14px;
+  border-radius: 10px;
+  z-index: 10000;
+  opacity: 0;
+  transition: opacity .2s, transform .2s;
+}
+.popup-add.show {
+  opacity: 1;
+  transform: translate(-50%, -4px);
+}
+
+/* 8) Modais (login/extras/combos): visual consistente e sem “esticar” */
+.modal .modal-content {
+  max-width: min(95vw, 420px);
+  width: 100%;
+  border-radius: 12px;
+}
+/* ======================================================================= */
