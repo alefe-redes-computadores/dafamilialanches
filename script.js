@@ -1,10 +1,9 @@
 /* =========================================================
-   🍔 DFL v2.5 — CUPOM + ENDEREÇO + TAXA ENTREGA FIXA
-   - Adiciona campos de endereço e cupom no carrinho
-   - Aplica taxa de entrega fixa (R$ 6,00)
-   - Mantém compatibilidade total com Firestore e login seguro
-   - CORREÇÃO: Readiciona a função de gráficos (gerarResumoECharts)
-   - NOVO: Adiciona lógica do banner de cookies
+   🍔 DFL v2.6 — UPGRADE VISUAL/UX
+   - Esta versão mantém 100% da lógica funcional da v2.5.
+   - As mudanças são aplicadas via CSS (v2.6) e HTML (v2.6).
+   - Lógica de Firebase, carrinho, pedidos, admin, modais e
+     cookies permanecem idênticas à v2.5 Estável.
 ========================================================= */
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -1122,13 +1121,14 @@ document.addEventListener("DOMContentLoaded", () => {
     console.warn("⚠️ Erro interceptado:", e?.message);
   });
 
-  console.log("%c🍔 DFL v2.5 — Cupom + Endereço + Frete R$6 — Relatórios e Painel OK",
+  /* 🚨 ATUALIZADO V2.6: Mensagem de console */
+  console.log("%c🍔 DFL v2.6 — UX/UI Upgrade — Lógica v2.5 Estável",
               "background:#4caf50;color:#fff;padding:8px 12px;border-radius:8px;font-weight:700;");
 
 }); // Fim do DOMContentLoaded
 
 /* =========================================================
-   SCRIPT PARA FECHAR MODAIS AO CLICAR FORA
+   SCRIPT PARA FECHAR MODAIS AO CLICAR FORA (v2.5)
 ========================================================= */
 
 document.addEventListener('DOMContentLoaded', () => {
