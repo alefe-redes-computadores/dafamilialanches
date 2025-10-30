@@ -4,6 +4,7 @@
    - Aplica taxa de entrega fixa (R$ 6,00)
    - Mantém compatibilidade total com Firestore e login seguro
    - CORREÇÃO: Readiciona a função de gráficos (gerarResumoECharts)
+   - NOVO: Adiciona lógica do banner de cookies
 ========================================================= */
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -873,11 +874,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
-/* 🚨 =========================================================
-     INÍCIO DA CORREÇÃO (FUNÇÃO DO GRÁFICO)
-     Esta função estava faltando e foi recriada.
-   ========================================================= 🚨
-*/
+/* ------------------ 📊 Função dos Gráficos (Corrigida) ------------------ */
   function gerarResumoECharts(pedidos) {
     if (!window.Chart) {
       console.error("Chart.js não está carregado.");
@@ -899,7 +896,6 @@ document.addEventListener("DOMContentLoaded", () => {
       pedidosPorDia[dia] = (pedidosPorDia[dia] || 0) + 1;
     });
 
-    // Ordena os dados por data
     const labelsPedidos = Object.keys(pedidosPorDia).sort((a, b) => {
       const [diaA, mesA] = a.split('/');
       const [diaB, mesB] = b.split('/');
@@ -908,7 +904,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const dataPedidos = labelsPedidos.map(label => pedidosPorDia[label]);
 
     if (chartPedidos) {
-      chartPedidos.destroy(); // Destrói gráfico anterior para evitar bugs
+      chartPedidos.destroy();
     }
     chartPedidos = new Chart(ctxPedidos, {
       type: 'line',
@@ -936,7 +932,6 @@ document.addEventListener("DOMContentLoaded", () => {
     const produtosContagem = {};
     pedidos.forEach(p => {
       p.itens.forEach(itemStr => {
-        // Parseia o item, ex: "Bão + Bacon x2"
         const parts = itemStr.split(' x');
         const nome = parts[0];
         const qtd = parts.length > 1 ? parseInt(parts[1], 10) : 1;
@@ -947,16 +942,15 @@ document.addEventListener("DOMContentLoaded", () => {
       });
     });
 
-    // Pega o Top 10 produtos
     const produtosOrdenados = Object.entries(produtosContagem)
       .sort(([, a], [, b]) => b - a)
-      .slice(0, 10); // Pega os 10 mais vendidos
+      .slice(0, 10); 
 
     const labelsProdutos = produtosOrdenados.map(p => p[0]);
     const dataProdutos = produtosOrdenados.map(p => p[1]);
 
     if (chartProdutos) {
-      chartProdutos.destroy(); // Destrói gráfico anterior
+      chartProdutos.destroy();
     }
     chartProdutos = new Chart(ctxProdutos, {
       type: 'bar',
@@ -971,7 +965,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }]
       },
       options: {
-        indexAxis: 'y', // Deixa o gráfico na horizontal para ler os nomes
+        indexAxis: 'y',
         responsive: true,
         plugins: {
           title: { display: true, text: 'Top 10 Itens Mais Vendidos' }
@@ -979,15 +973,11 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     });
   }
-/* 🚨 =========================================================
-     FIM DA CORREÇÃO (FUNÇÃO DO GRÁFICO)
-   ========================================================= 🚨
-*/
 
 /* ------------------ 📊 Carregar Relatórios (V2.5) ------------------ */
   function carregarRelatorios(periodo = "7") {
     const agora = new Date();
-    let start = new Date(0); // início de todos
+    let start = new Date(0);
     if (periodo !== "all") {
       start = new Date(agora);
       start.setDate(start.getDate() - Number(periodo));
@@ -1022,11 +1012,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
         const filtrados = pedidos.filter(p => periodo === "all" || (p.data >= start));
         
-        // 🚨 CORREÇÃO APLICADA AQUI 🚨
-        // A linha abaixo estava comentada, agora ela vai chamar a função de gráfico
         gerarResumoECharts(filtrados); 
         
-        // Preenche os cards de resumo
         const totalVendido = filtrados.reduce((s, p) => s + p.total, 0);
         const numPedidos = filtrados.length;
         const ticketMedio = numPedidos > 0 ? totalVendido / numPedidos : 0;
@@ -1035,7 +1022,6 @@ document.addEventListener("DOMContentLoaded", () => {
         document.getElementById("card-pedidos").textContent = `Pedidos: ${numPedidos}`;
         document.getElementById("card-ticket").textContent = `Ticket Médio: ${money(ticketMedio)}`;
 
-        // Lógica de exportar CSV
         document.getElementById("export-csv").onclick = () => {
             let csv = "ID;Data;Usuario;Nome;Itens;Subtotal;Entrega;Desconto;Cupom;Total;Endereco\n";
             filtrados.forEach(p => {
@@ -1078,10 +1064,10 @@ document.addEventListener("DOMContentLoaded", () => {
     
     if (user) {
       el.userBtn.textContent = `Olá, ${user.displayName?.split(" ")[0] || user.email.split("@")[0]}`;
-      showOrdersFabIfLogged(); // Mostra "Meus Pedidos"
+      showOrdersFabIfLogged();
     } else {
       el.userBtn.textContent = "Entrar / Cadastrar";
-      showOrdersFabIfLogged(); // Esconde "Meus Pedidos"
+      showOrdersFabIfLogged();
     }
 
     if (user && isAdmin(user)) {
@@ -1095,6 +1081,33 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
+  /* ------------------ 🍪 LÓGICA DO BANNER DE COOKIES ------------------ */
+  // (Este é o novo bloco de código adicionado)
+  const cookieBanner = document.getElementById("cookie-banner");
+  const cookieAcceptBtn = document.getElementById("cookie-accept");
+
+  if (cookieBanner && cookieAcceptBtn) {
+    // Verifica se o cookie já foi aceito
+    if (localStorage.getItem("dfl-cookies-accepted") === "true") {
+      cookieBanner.style.display = "none";
+    } else {
+      // A classe .show (do CSS) vai ativar a animação
+      cookieBanner.classList.add("show");
+    }
+
+    // O que acontece ao clicar em "Aceitar"
+    cookieAcceptBtn.addEventListener("click", () => {
+      localStorage.setItem("dfl-cookies-accepted", "true");
+      cookieBanner.classList.remove("show");
+      
+      // Opcional: esconde o banner após a animação de saída
+      setTimeout(() => {
+        cookieBanner.style.display = "none";
+      }, 500); // 500ms (mesmo tempo da transição no CSS)
+    });
+  }
+  
+  /* ------------------ Outras Funções ------------------ */
   window.addEventListener("pageshow", (e) => {
     if (e.persisted) {
       console.warn("↻ Página reaberta via cache, recarregando...");
