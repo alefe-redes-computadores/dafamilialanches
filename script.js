@@ -1,29 +1,22 @@
 /* =========================================================
-   🍔 DFL v2.5 — ESTÁVEL (Cupom + Endereço + Taxa Fixa + Relatórios)
-   Arquivo: script.js (Parte 1/6)
-   Conteúdo desta parte:
-   - Base/estado global + utilitários
-   - Seletor de elementos
-   - Backdrop/Overlays (abre/fecha modais e carrinho)
-   - Popup “adicionado ao carrinho”
-   - Carrossel e timers (status + promo)
-   - Inicialização Firebase (com failsafe)
+   🍔 DFL v2.5 — CUPOM + ENDEREÇO + TAXA ENTREGA FIXA
+   - Adiciona campos de endereço e cupom no carrinho
+   - Aplica taxa de entrega fixa (R$ 6,00)
+   - Mantém compatibilidade total com Firestore e login seguro
+   - CORREÇÃO: Readiciona a função de gráficos (gerarResumoECharts)
+   - NOVO: Adiciona lógica do banner de cookies
 ========================================================= */
 
-(() => {
-  // Evita múltiplas importações acidentais
-  if (window.__DFL_SCRIPT_LOADED__) return;
-  window.__DFL_SCRIPT_LOADED__ = true;
-
+document.addEventListener("DOMContentLoaded", () => {
   /* ------------------ ⚙️ BASE ------------------ */
   const sound = new Audio("click.wav");
   let cart = [];
   let currentUser = null;
 
   const money = (n) => `R$ ${Number(n || 0).toFixed(2).replace(".", ",")}`;
-  const safe = (fn) => (...a) => { try { return fn(...a); } catch (e) { console.error(e); } };
+  const safe = (fn) => (...a) => { try { fn(...a); } catch (e) { console.error(e); } };
 
-  // 🔊 Clique suave (não quebra se falhar autoplay)
+  // 🔊 Clique com som suave (não bloqueia o site se falhar)
   document.addEventListener("click", () => {
     try { sound.currentTime = 0; sound.play(); } catch (_) {}
   });
@@ -45,15 +38,14 @@
     loginModal: document.getElementById("login-modal"),
     loginForm: document.getElementById("login-form"),
     googleBtn: document.getElementById("google-login"),
-    userBtn: document.getElementById("user-btn"),
-    reportsBtn: document.getElementById("reports-btn"),
     slides: document.querySelector(".slides"),
     cPrev: document.querySelector(".c-prev"),
     cNext: document.querySelector(".c-next"),
+    userBtn: document.getElementById("user-btn"),
     statusBanner: document.getElementById("status-banner"),
     hoursBanner: document.querySelector(".hours-banner"),
-    myOrdersBtn: document.getElementById("orders-fab"),
-    promoTimer: document.getElementById("promo-timer"),
+    reportsBtn: document.getElementById("reports-btn"), // Botão de admin
+    myOrdersBtn: document.getElementById("orders-fab") // Botão Meus Pedidos
   };
 
   /* ------------------ 🌫️ BACKDROP ------------------ */
@@ -64,14 +56,8 @@
     el.cartBackdrop = bd;
   }
   const Backdrop = {
-    show() {
-      el.cartBackdrop.classList.add("active");
-      document.body.classList.add("no-scroll");
-    },
-    hide() {
-      el.cartBackdrop.classList.remove("active");
-      document.body.classList.remove("no-scroll");
-    },
+    show() { el.cartBackdrop.classList.add("active"); document.body.classList.add("no-scroll"); },
+    hide() { el.cartBackdrop.classList.remove("active"); document.body.classList.remove("no-scroll"); },
   };
 
   /* ------------------ 🧩 OVERLAYS ------------------ */
@@ -91,7 +77,7 @@
   };
   el.cartBackdrop.addEventListener("click", () => Overlays.closeAll());
 
-  /* ------------------ 💬 POPUP (toast) ------------------ */
+  /* ------------------ 💬 POPUP ------------------ */
   function popupAdd(msg) {
     let pop = document.querySelector(".popup-add");
     if (!pop) {
@@ -103,10 +89,460 @@
     pop.classList.add("show");
     setTimeout(() => pop.classList.remove("show"), 2000);
   }
-  // Exponho para outras partes
-  window.__DFL_popupAdd = popupAdd;
 
-  /* ------------------ 🖼️ CARROSSEL ------------------ */
+/* ------------------ 🛒 MINI-CARRINHO (Limpo e Corrigido) ------------------ */
+  function renderMiniCart() {
+    
+    if (!el.miniList) return; 
+
+    const totalItens = cart.reduce((s, i) => s + i.qtd, 0);
+    if (el.cartCount) el.cartCount.textContent = totalItens;
+
+    if (!cart.length) {
+      el.miniList.innerHTML = '<p style="text-align:center;color:#999;padding:20px;">Carrinho vazio 🛒</p>';
+      if(el.miniFoot) el.miniFoot.innerHTML = ""; 
+      return;
+    }
+
+    el.miniList.innerHTML = cart.map((item, idx) => `
+      <div class="cart-item" style="border-bottom:1px solid #eee;padding:10px 0;">
+        <div style="display:flex;justify-content:space-between;align-items:center;">
+          <div style="flex:1;">
+            <p style="font-weight:600;margin-bottom:4px;">${item.nome}</p>
+            <p style="color:#666;font-size:0.85rem;">${money(item.preco)} × ${item.qtd}</p>
+          </div>
+          <div style="display:flex;gap:8px;align-items:center;">
+            <button type="button" class="cart-minus" data-idx="${idx}" style="background:#ff4081;color:#fff;border:none;border-radius:5px;width:28px;height:28px;cursor:pointer;">−</button>
+            <span style="font-weight:600;min-width:20px;text-align:center;">${item.qtd}</span>
+            <button type="button" class="cart-plus" data-idx="${idx}" style="background:#4caf50;color:#fff;border:none;border-radius:5px;width:28px;height:28px;cursor:pointer;">+</button>
+            <button type="button" class="cart-remove" data-idx="${idx}" style="background:#d32f2f;color:#fff;border:none;border-radius:5px;width:28px;height:28px;cursor:pointer;">🗑</button>
+          </div>
+        </div>
+      </div>
+    `).join("");
+  }
+
+
+  /* 🔄 Vincula botões dinâmicos (incremento, remoção, limpar, finalizar) */
+  function bindMiniCartButtons() {
+    el.miniList.querySelectorAll(".cart-plus").forEach(b => b.addEventListener("click", e => {
+      const i = +e.currentTarget.dataset.idx;
+      if (cart[i]) {
+        cart[i].qtd++;
+        renderMiniCart();
+      }
+    }));
+
+    el.miniList.querySelectorAll(".cart-minus").forEach(b => b.addEventListener("click", e => {
+      const i = +e.currentTarget.dataset.idx;
+      if (cart[i]) {
+        if (cart[i].qtd > 1) cart[i].qtd--;
+        else cart.splice(i, 1);
+        renderMiniCart();
+      }
+    }));
+
+    el.miniList.querySelectorAll(".cart-remove").forEach(b => b.addEventListener("click", e => {
+      const i = +e.currentTarget.dataset.idx;
+      cart.splice(i, 1);
+      renderMiniCart();
+      popupAdd("Item removido!");
+    }));
+  }
+
+  const _renderMiniCartOrig = renderMiniCart;
+  renderMiniCart = function () {
+    _renderMiniCartOrig();
+    bindMiniCartButtons();
+  };
+
+  /* ------------------ 🔥 FIREBASE ------------------ */
+  const firebaseConfig = {
+    apiKey: "AIzaSyATQBcbYuzKpKlSwNlbpRiAM1XyHqhGeak",
+    authDomain: "da-familia-lanches.firebaseapp.com",
+    projectId: "da-familia-lanches",
+    storageBucket: "da-familia-lanches.appspot.com",
+    messagingSenderId: "106857147317",
+    appId: "1:106857147317:web:769c98aed26bb8fc9e87fc",
+  };
+  
+  let auth, db; 
+
+  try {
+    if (!window.firebase) {
+      throw new Error("Biblioteca principal do Firebase (app) não carregou.");
+    }
+    if (!firebase.apps.length) {
+      firebase.initializeApp(firebaseConfig);
+    }
+    if (!firebase.auth) {
+      throw new Error("Módulo de Autenticação (auth) não carregou.");
+    }
+    auth = firebase.auth();
+    if (!firebase.firestore) {
+      throw new Error("Módulo de Banco de Dados (firestore) não carregou.");
+    }
+    db = firebase.firestore();
+
+  } catch (error) {
+    console.error("ERRO FATAL AO INICIAR FIREBASE:", error);
+    const elBody = document.querySelector("body");
+    if (elBody) {
+       elBody.innerHTML = `<div style="padding:20px;text-align:center;font-size:1.2rem;color:red;font-family:sans-serif;margin-top:50px;">
+        <b>Erro Crítico</b><br>Não foi possível conectar aos nossos serviços.
+        <br><small>Verifique sua conexão com a internet e tente recarregar a página.</small>
+        <br><br><small style="color:#666">Detalhe: ${error.message}</small></div>`;
+    }
+    return; // ABORTA O RESTO DO SCRIPT.JS
+  }
+
+  /* ------------------ ⚙️ LOGIN ------------------ */
+  el.userBtn?.addEventListener("click", () => Overlays.open(el.loginModal));
+  document.querySelectorAll("#login-modal .login-close").forEach(btn =>
+    btn.addEventListener("click", () => Overlays.closeAll())
+  );
+
+  el.loginForm?.addEventListener("submit", (e) => {
+    e.preventDefault();
+    const email = document.getElementById("login-email")?.value?.trim();
+    const senha = document.getElementById("login-senha")?.value?.trim();
+    if (!email || !senha) return alert("Preencha e-mail e senha.");
+
+    auth.signInWithEmailAndPassword(email, senha)
+      .then((cred) => {
+        currentUser = cred.user;
+        popupAdd("Login realizado com sucesso!");
+        Overlays.closeAll();
+      })
+      .catch((err) => {
+        if (err.code === "auth/user-not-found") {
+          if (confirm("Conta não encontrada. Deseja criar uma nova?")) {
+            auth.createUserWithEmailAndPassword(email, senha)
+              .then((cred) => {
+                currentUser = cred.user;
+                popupAdd("Conta criada com sucesso! 🎉");
+                Overlays.closeAll();
+              })
+              .catch((e) => alert("Erro: " + e.message));
+          }
+        } else if (err.code === "auth/wrong-password") {
+          alert("Senha incorreta. Tente novamente.");
+        } else {
+          alert("Erro: ".concat(err.message));
+        }
+      });
+  });
+
+  el.googleBtn?.addEventListener("click", () => {
+    const provider = new firebase.auth.GoogleAuthProvider();
+    auth.signInWithPopup(provider)
+      .then((res) => {
+        currentUser = res.user;
+        popupAdd("Login com Google realizado! ✅");
+        Overlays.closeAll();
+      })
+      .catch((err) => alert("Erro: ".concat(err.message)));
+  });
+
+  /* ------------------ ➕ Adicionais ------------------ */
+  const adicionais = [
+    { nome: "Cebola", preco: 0.99 },
+    { nome: "Salada", preco: 1.99 },
+    { nome: "Ovo", preco: 1.99 },
+    { nome: "Bacon", preco: 2.99 },
+    { nome: "Hambúrguer Tradicional 56g", preco: 2.99 },
+    { nome: "Cheddar Cremoso", preco: 3.99 },
+    { nome: "Filé de Frango", preco: 5.99 },
+    { nome: "Hambúrguer Artesanal 120g", preco: 7.99 },
+  ];
+
+  let produtoExtras = null;
+  let produtoPrecoBase = 0;
+
+  const openExtrasFor = safe((card) => {
+    if (!card || !el.extrasModal || !el.extrasList) return;
+    produtoExtras = card.dataset.name;
+    produtoPrecoBase = parseFloat(card.dataset.price) || 0;
+
+    el.extrasList.innerHTML = adicionais.map((a, i) => `
+      <label class="extra-line">
+        <span>${a.nome} — <b>${money(a.preco)}</b></span>
+        <input type="checkbox" value="${i}">
+      </label>`).join("");
+    Overlays.open(el.extrasModal);
+  });
+
+  document.querySelectorAll(".extras-btn").forEach((btn) =>
+    btn.addEventListener("click", (e) => openExtrasFor(e.currentTarget.closest(".card")))
+  );
+
+  el.extrasConfirm?.addEventListener("click", () => {
+    if (!produtoExtras) return Overlays.closeAll();
+    const checks = [...document.querySelectorAll("#extras-modal .extras-list input:checked")];
+
+    const extrasContagem = {};
+    checks.forEach(c => {
+      const idx = +c.value;
+      const adicional = adicionais[idx];
+      if (extrasContagem[adicional.nome]) {
+        extrasContagem[adicional.nome].qtd++;
+      } else {
+        extrasContagem[adicional.nome] = { preco: adicional.preco, qtd: 1 };
+      }
+    });
+
+    const extrasNomes = Object.keys(extrasContagem).map(nome => {
+      const qtd = extrasContagem[nome].qtd;
+      return qtd > 1 ? `${qtd}x ${nome}` : nome;
+    }).join(", ");
+
+    const precoExtras = Object.values(extrasContagem).reduce((t, e) => t + (e.preco * e.qtd), 0);
+    const precoTotal = produtoPrecoBase + precoExtras;
+    const nomeCompleto = extrasNomes ? `${produtoExtras} + ${extrasNomes}` : produtoExtras;
+
+    const existente = cart.find(i => i.nome === nomeCompleto);
+    if (existente) existente.qtd++;
+    else cart.push({ nome: nomeCompleto, preco: precoTotal, qtd: 1 });
+
+    renderMiniCart();
+    popupAdd("Adicionado ao carrinho!");
+    Overlays.closeAll();
+  });
+
+  document.querySelectorAll("#extras-modal .extras-close").forEach((b) =>
+    b.addEventListener("click", () => Overlays.closeAll())
+  );
+
+  /* ------------------ 🥤 Combos (modal de bebidas) ------------------ */
+  const comboDrinkOptions = {
+    casal: [
+      { rotulo: "Fanta 1L (padrão)", delta: 0.01 },
+      { rotulo: "Coca-Cola 1L", delta: 3.0 },
+      { rotulo: "Coca-Cola 1L Zero", delta: 3.0 },
+    ],
+    familia: [
+      { rotulo: "Kuat Guaraná 2L (padrão)", delta: 0.01 },
+      { rotulo: "Coca-Cola 2L", delta: 5.0 },
+    ],
+  };
+
+  let _comboCtx = null;
+  const openComboModal = safe((nomeCombo, precoBase) => {
+    if (!el.comboModal || !el.comboBody) {
+      addCommonItem(nomeCombo, precoBase);
+      return;
+    }
+
+    const low = (nomeCombo || "").toLowerCase();
+    const grupo = low.includes("casal") ? "casal" :
+                  (low.includes("família") || low.includes("familia")) ? "familia" : null;
+
+    if (!grupo) {
+      addCommonItem(nomeCombo, precoBase);
+      return;
+    }
+
+    const opts = comboDrinkOptions[grupo];
+    el.comboBody.innerHTML = opts.map((o, i) => `
+      <label class="extra-line">
+        <span>${o.rotulo} — + ${money(o.delta)}</span>
+        <input type="radio" name="combo-drink" value="${i}" ${i === 0 ? "checked" : ""}>
+      </label>
+    `).join("");
+
+    _comboCtx = { nomeCombo, precoBase, grupo };
+    Overlays.open(el.comboModal);
+  });
+
+  el.comboConfirm?.addEventListener("click", () => {
+    if (!_comboCtx) return Overlays.closeAll();
+    const sel = el.comboBody?.querySelector('input[name="combo-drink"]:checked');
+    if (!sel) return;
+    const opt = comboDrinkOptions[_comboCtx.grupo][+sel.value];
+    const finalName = `${_comboCtx.nomeCombo} + ${opt.rotulo}`;
+    const finalPrice = Number(_comboCtx.precoBase) + (opt.delta || 0);
+
+    const existente = cart.find(i => i.nome === finalName);
+    if (existente) existente.qtd++;
+    else cart.push({ nome: finalName, preco: finalPrice, qtd: 1 });
+
+    popupAdd("Combo adicionado!");
+    renderMiniCart();
+    Overlays.closeAll();
+  });
+
+  document.querySelectorAll("#combo-modal .combo-close").forEach((b) =>
+    b.addEventListener("click", () => Overlays.closeAll())
+  );
+
+  /* ------------------ 🧺 Adicionar item comum ------------------ */
+  function addCommonItem(nome, preco) {
+    if (/^combo/i.test(nome)) {
+      openComboModal(nome, preco);
+      return;
+    }
+    const found = cart.find((i) => i.nome === nome && i.preco === preco);
+    if (found) found.qtd++;
+    else cart.push({ nome, preco, qtd: 1 });
+    renderMiniCart();
+    popupAdd(`${nome} adicionado!`);
+  }
+
+  document.querySelectorAll(".add-cart").forEach((btn) =>
+    btn.addEventListener("click", (e) => {
+      const card = e.currentTarget.closest(".card");
+      if (!card) return;
+      const nome = card.dataset.name;
+      const preco = parseFloat(card.dataset.price);
+      addCommonItem(nome, preco);
+    })
+  );
+
+  /* ------------------ 🛒 ABRIR CARRINHO ------------------ */
+  el.cartIcon?.addEventListener("click", () => {
+    renderMiniCart();
+    Overlays.open(el.miniCart);
+  });
+  document.querySelectorAll("#mini-cart .extras-close").forEach((b) =>
+    b.addEventListener("click", () => Overlays.closeAll())
+  );
+
+
+/* ------------------ ⚙️ CONFIGURAÇÕES V2.5 ------------------ */
+  const DELIVERY_FEE = 6.00; 
+
+  const COUPONS = {
+    "DFL5":        { type: "percent", value: 5,  note: "5% OFF" },
+    "DFL10":       { type: "percent", value: 10, note: "10% OFF" },
+    "BEMVINDO":    { type: "value",   value: 5,  note: "R$ 5,00 OFF na 1ª compra" },
+    "FRETEZERO":   { type: "frete",   value: 0,  note: "Frete grátis" },
+    "FAMILIA10": { type: "percent", value: 10,  note: "10% OFF" },
+    "PRIMEIRO": { type: "value",   value: 5,  note: "R$ 5,00 OFF" } 
+  };
+
+  let couponApplied = (localStorage.getItem("dflCoupon") || "").toUpperCase();
+  let addressValue  = (localStorage.getItem("dflAddress") || "").trim();
+
+  const getCartSubtotal = () =>
+    cart.reduce((s, i) => s + (Number(i.preco) || 0) * (Number(i.qtd) || 0), 0);
+
+  function calcDiscount(subtotal, couponCode) {
+    const code = (couponCode || "").toUpperCase();
+    const rule = COUPONS[code];
+    if (!rule) return { discount: 0, freeShipping: false, label: "" };
+
+    if (rule.type === "percent") {
+      const val = Math.max(0, subtotal * (rule.value / 100));
+      return { discount: val, freeShipping: false, label: `${rule.value}% OFF` };
+    }
+    if (rule.type === "value") {
+      const val = Math.min(subtotal, Math.max(0, rule.value));
+      return { discount: val, freeShipping: false, label: `R$ ${val.toFixed(2).replace(".", ",")} OFF` };
+    }
+    if (rule.type === "frete") {
+      return { discount: 0, freeShipping: true, label: "Frete Grátis" };
+    }
+    return { discount: 0, freeShipping: false, label: "" };
+  }
+
+  function calcTotals() {
+    const subtotal = getCartSubtotal();
+    const d = calcDiscount(subtotal, couponApplied);
+    const delivery = d.freeShipping ? 0 : DELIVERY_FEE;
+    const total = Math.max(0, subtotal + delivery - d.discount);
+    return {
+      subtotal,
+      delivery,
+      discount: d.discount,
+      discountLabel: d.label,
+      total
+    };
+  }
+
+  /* ------------------ 🛒 MINI-CARRINHO: UI ESTENDIDA V2.5 ------------------ */
+  function enhanceMiniCartUI() {
+    if (!el.miniFoot) return;
+    if (cart.length === 0) return;
+
+    const { subtotal, delivery, discount, discountLabel, total } = calcTotals();
+
+    el.miniFoot.innerHTML = `
+      <div style="padding:14px 14px 10px;">
+        <div style="display:flex;justify-content:space-between;margin-bottom:6px;">
+          <span>Subtotal</span><b>${money(subtotal)}</b>
+        </div>
+        <div style="display:flex;justify-content:space-between;margin-bottom:6px;">
+          <span>Entrega</span><b>${money(delivery)}</b>
+        </div>
+        <div style="display:flex;justify-content:space-between;margin-bottom:10px;">
+          <span>Desconto ${discountLabel ? `(${discountLabel})` : ""}</span><b>- ${money(discount)}</b>
+        </div>
+        <div style="display:flex;justify-content:space-between;align-items:center;border-top:1px solid #eee;padding-top:10px;margin-bottom:12px;font-size:1.1rem;">
+          <span><b>Total</b></span><span style="color:#e53935;font-weight:800;">${money(total)}</span>
+        </div>
+
+        <label style="display:block;font-weight:600;margin-bottom:6px;">🏠 Endereço para Entrega</label>
+        <textarea id="address-input" rows="2" placeholder="Rua, número, complemento, bairro"
+          style="width:100%;border:1px solid #ddd;border-radius:10px;padding:10px;resize:vertical;margin-bottom:10px">${addressValue}</textarea>
+
+        <div style="display:flex;gap:8px;align-items:center;margin-bottom:12px;">
+          <input id="coupon-input" type="text" inputmode="text" placeholder="Cupom de desconto"
+            value="${couponApplied || ""}"
+            style="flex:1;border:1px solid #ddd;border-radius:10px;padding:10px;font-weight:600;letter-spacing:.5px;text-transform:uppercase">
+          <button id="apply-coupon" type="button" style="background:#000;color:#fff;border:none;border-radius:10px;padding:10px 16px;font-weight:700;cursor:pointer">Aplicar</button>
+        </div>
+
+        <button id="finish-order" type="button" style="width:100%;background:#4caf50;color:#fff;border:none;border-radius:10px;padding:12px;font-weight:700;cursor:pointer;margin-bottom:8px">
+          Finalizar Pedido 🛍️
+        </button>
+        <button id="clear-cart" type="button" style="width:100%;background:#ff4081;color:#fff;border:none;border-radius:10px;padding:10px;font-weight:700;cursor:pointer">
+          Limpar Carrinho
+        </button>
+      </div>
+    `;
+
+    document.getElementById("apply-coupon")?.addEventListener("click", () => {
+      const input = document.getElementById("coupon-input");
+      const val = (input?.value || "").trim().toUpperCase();
+      if (!val) {
+        couponApplied = "";
+        localStorage.removeItem("dflCoupon");
+        popupAdd("Cupom removido.");
+        enhanceMiniCartUI();
+        return;
+      }
+      if (!COUPONS[val]) {
+        popupAdd("Cupom inválido.");
+        return;
+      }
+      couponApplied = val;
+      localStorage.setItem("dflCoupon", couponApplied);
+      popupAdd(`Cupom aplicado: ${val}`);
+      enhanceMiniCartUI();
+    });
+
+    document.getElementById("address-input")?.addEventListener("input", (e) => {
+      addressValue = (e.target.value || "").trim();
+      localStorage.setItem("dflAddress", addressValue);
+    });
+
+    document.getElementById("finish-order")?.addEventListener("click", fecharPedido);
+    document.getElementById("clear-cart")?.addEventListener("click", () => {
+      if (confirm("Limpar todo o carrinho?")) {
+        cart = [];
+        renderMiniCart();
+        popupAdd("Carrinho limpo!");
+      }
+    });
+  }
+
+  const __renderMiniCartPrev = renderMiniCart;
+  renderMiniCart = function() {
+    __renderMiniCartPrev();
+    enhanceMiniCartUI();
+  };
+
+  /* ------------------ 🖼️ Carrossel (mantido) ------------------ */
   el.cPrev?.addEventListener("click", () => {
     if (!el.slides) return;
     el.slides.scrollLeft -= Math.min(el.slides.clientWidth * 0.9, 320);
@@ -122,636 +558,182 @@
     });
   });
 
-  /* ------------------ ⏰ STATUS + TIMER ------------------ */
+  /* ------------------ ⏰ Status + Timer (mantidos) ------------------ */
   const atualizarStatus = safe(() => {
     const agora = new Date();
     const h = agora.getHours();
     const m = agora.getMinutes();
-    const aberto = h >= 18 && h < 23; // 18:00 até 22:59
-
+    const aberto = h >= 18 && h < 23; // Aberto das 18:00 até 22:59
     if (el.statusBanner) {
-      el.statusBanner.textContent = aberto
-        ? "🟢 Aberto — Faça seu pedido!"
-        : "🔴 Fechado — Voltamos às 18h!";
+      el.statusBanner.textContent = aberto ? "🟢 Aberto — Faça seu pedido!" : "🔴 Fechado — Voltamos às 18h!";
       el.statusBanner.className = `status-banner ${aberto ? "open" : "closed"}`;
     }
-
     if (el.hoursBanner) {
       const elTimer = el.hoursBanner.querySelector("#timer");
+      if (!elTimer) return;
+
       if (aberto) {
         const fim = new Date(agora);
-        fim.setHours(23, 30, 0);
-        let diff = Math.max(0, (fim - agora) / 1000);
+        fim.setHours(23, 30, 0); // 23h30
+        
+        let diff = (fim - agora) / 1000;
+        if (diff < 0) diff = 0;
+        
         const restH = Math.floor(diff / 3600);
         const restM = Math.floor((diff % 3600) / 60);
-        if (elTimer) elTimer.innerHTML = `<b>${restH}h ${restM}min</b>`;
+        
+        elTimer.innerHTML = `<b>${restH}h ${restM}min</b>`;
+
       } else {
         const inicio = new Date(agora);
-        if (h >= 23 || (h === 23 && m >= 30)) inicio.setDate(inicio.getDate() + 1);
-        inicio.setHours(18, 0, 0);
-        let diff = Math.max(0, (inicio - agora) / 1000);
+        if (h >= 23 || (h === 23 && m >= 30)) { 
+          inicio.setDate(inicio.getDate() + 1);
+        }
+        inicio.setHours(18, 0, 0); 
+
+        let diff = (inicio - agora) / 1000;
         const faltamH = Math.floor(diff / 3600);
         const faltamM = Math.floor((diff % 3600) / 60);
+
         el.hoursBanner.innerHTML = `🔒 Fechado — Abrimos em <b>${faltamH}h ${faltamM}min</b>`;
       }
     }
   });
   atualizarStatus();
-  setInterval(atualizarStatus, 60_000);
+  setInterval(atualizarStatus, 60000);
 
   const atualizarTimer = safe(() => {
-    if (!el.promoTimer) return;
     const agora = new Date();
     const fim = new Date();
     fim.setHours(23, 59, 59, 999);
     const diff = fim - agora;
-    if (diff <= 0) {
-      el.promoTimer.textContent = "00:00:00";
-      return;
-    }
-    const h = String(Math.floor(diff / 3_600_000)).padStart(2, "0");
-    const m = String(Math.floor((diff % 3_600_000) / 60_000)).padStart(2, "0");
-    const s = String(Math.floor((diff % 60_000) / 1000)).padStart(2, "0");
-    el.promoTimer.textContent = `${h}:${m}:${s}`;
+    const elTimer = document.getElementById("promo-timer");
+    if (!elTimer) return;
+    if (diff <= 0) return (elTimer.textContent = "00:00:00");
+
+    const h = String(Math.floor(diff / 3600000)).padStart(2, "0");
+    const m = String(Math.floor((diff % 3600000) / 60000)).padStart(2, "0");
+    const s = String(Math.floor((diff % 60000) / 1000)).padStart(2, "0");
+    elTimer.textContent = `${h}:${m}:${s}`;
   });
   atualizarTimer();
-  setInterval(atualizarTimer, 1_000);
+  setInterval(atualizarTimer, 1000);
 
-  /* ------------------ 🔥 FIREBASE INIT (fail-safe) ------------------ */
-  const firebaseConfig = {
-    apiKey: "AIzaSyATQBcbYuzKpKlSwNlbpRiAM1XyHqhGeak",
-    authDomain: "da-familia-lanches.firebaseapp.com",
-    projectId: "da-familia-lanches",
-    storageBucket: "da-familia-lanches.appspot.com",
-    messagingSenderId: "106857147317",
-    appId: "1:106857147317:web:769c98aed26bb8fc9e87fc",
-  };
-
-  let auth = null;
-  let db = null;
-
-  try {
-    if (!window.firebase) {
-      throw new Error("Firebase base não carregou (app).");
-    }
-    if (!firebase.apps.length) {
-      firebase.initializeApp(firebaseConfig);
-    }
-    if (!firebase.auth || !firebase.firestore) {
-      throw new Error("Módulos auth ou firestore não carregaram.");
-    }
-    auth = firebase.auth();
-    db = firebase.firestore();
-  } catch (error) {
-    console.error("ERRO FATAL AO INICIAR FIREBASE:", error);
-    const elBody = document.querySelector("body");
-    if (elBody) {
-      elBody.innerHTML = `
-        <div style="padding:20px;text-align:center;font-size:1.2rem;color:red;font-family:sans-serif;margin-top:50px;">
-          <b>Erro Crítico</b><br>Não foi possível conectar aos nossos serviços.
-          <br><small>Verifique sua conexão com a internet e recarregue a página.</small>
-          <br><br><small style="color:#666">Detalhe: ${error.message}</small>
-        </div>`;
-    }
-    return; // aborta restante do script
-  }
-
-  // Exportar referências para as próximas partes
-  window.__DFL = {
-    el,
-    Backdrop,
-    Overlays,
-    money,
-    popupAdd,
-    safe,
-    state: { cart, currentUser },
-    setUser(u) { currentUser = u; this.state.currentUser = u; },
-    getUser() { return currentUser; },
-    getCart() { return cart; },
-    setCart(c) { cart = Array.isArray(c) ? c : []; this.state.cart = cart; },
-    auth,
-    db
-  };
-
-  // Logs de diagnóstico
-  console.log("%cDFL v2.5 — Parte 1/6 carregada",
-    "background:#4caf50;color:#fff;padding:4px 8px;border-radius:6px;font-weight:700;");
-})();
-/* =========================================================
-   🍔 DFL v2.5 — ESTÁVEL (Parte 2/6)
-   Conteúdo:
-   - Controle do Carrinho (add/remove/update)
-   - Toast “adicionado ao carrinho”
-   - Cálculo automático com taxa fixa (R$6,00)
-   - Sincronização localStorage
-========================================================= */
-
-(() => {
-  const { el, money, popupAdd, state, setCart, getCart } = window.__DFL;
-  const TAXA_ENTREGA_FIXA = 6.0; // 💰 taxa fixa definida por Álefe
-
-  /* ------------------ 🛒 FUNÇÕES DO CARRINHO ------------------ */
-  function salvarCarrinho() {
-    localStorage.setItem("dfl_cart", JSON.stringify(state.cart));
-  }
-
-  function carregarCarrinho() {
-    try {
-      const salvo = JSON.parse(localStorage.getItem("dfl_cart"));
-      if (Array.isArray(salvo)) {
-        setCart(salvo);
-      }
-    } catch (e) {
-      console.warn("Erro ao carregar carrinho:", e);
-    }
-    atualizarCarrinhoUI();
-  }
-
-  function adicionarAoCarrinho(nome, preco) {
-    const item = state.cart.find((p) => p.nome === nome);
-    if (item) {
-      item.qtd++;
-    } else {
-      state.cart.push({ nome, preco, qtd: 1 });
-    }
-    salvarCarrinho();
-    atualizarCarrinhoUI();
-    popupAdd(`${nome} adicionado ao carrinho 🛍️`);
-  }
-
-  function removerItem(nome) {
-    state.cart = state.cart.filter((i) => i.nome !== nome);
-    salvarCarrinho();
-    atualizarCarrinhoUI();
-  }
-
-  function atualizarQuantidade(nome, qtd) {
-    const item = state.cart.find((i) => i.nome === nome);
-    if (!item) return;
-    item.qtd = Math.max(1, qtd);
-    salvarCarrinho();
-    atualizarCarrinhoUI();
-  }
-
-  function calcularTotal() {
-    const subtotal = state.cart.reduce((acc, i) => acc + i.preco * i.qtd, 0);
-    return subtotal + TAXA_ENTREGA_FIXA;
-  }
-
-  function atualizarCarrinhoUI() {
-    const carrinho = getCart();
-    const lista = el.miniList;
-    const rodape = el.miniFoot;
-    const contador = el.cartCount;
-
-    if (!lista || !rodape || !contador) return;
-
-    contador.textContent = carrinho.length;
-    lista.innerHTML = "";
-
-    if (!carrinho.length) {
-      lista.innerHTML = `<p class="empty-orders">🛒 Carrinho vazio</p>`;
-      rodape.innerHTML = "";
+  /* ------------------ 💾 Fechar pedido (V2.5 com endereço/cupom/frete) ------------------ */
+  function fecharPedido() {
+    if (!cart.length) return alert("Carrinho vazio!");
+    if (!currentUser) {
+      alert("Faça login para enviar o pedido!");
+      Overlays.open(el.loginModal);
       return;
     }
 
-    carrinho.forEach((item) => {
-      const div = document.createElement("div");
-      div.className = "cart-item";
-      div.innerHTML = `
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
-          <b>${item.nome}</b>
-          <span>${money(item.preco)}</span>
-        </div>
-        <div style="display:flex;justify-content:space-between;align-items:center;">
-          <div>
-            <button class="menos" aria-label="Diminuir">➖</button>
-            <span>${item.qtd}</span>
-            <button class="mais" aria-label="Aumentar">➕</button>
-          </div>
-          <button class="remover" aria-label="Remover">🗑️</button>
-        </div>
-      `;
+    const addr = (document.getElementById("address-input")?.value || "").trim();
+    if (!addr) {
+      alert("Informe o endereço para entrega antes de finalizar.");
+      document.getElementById("address-input")?.focus();
+      return;
+    }
 
-      const menos = div.querySelector(".menos");
-      const mais = div.querySelector(".mais");
-      const remover = div.querySelector(".remover");
+    const { subtotal, delivery, discount, discountLabel, total } = calcTotals();
 
-      menos.addEventListener("click", () => {
-        if (item.qtd > 1) {
-          item.qtd--;
-          salvarCarrinho();
-          atualizarCarrinhoUI();
-        }
-      });
-      mais.addEventListener("click", () => {
-        item.qtd++;
-        salvarCarrinho();
-        atualizarCarrinhoUI();
-      });
-      remover.addEventListener("click", () => removerItem(item.nome));
+    const pedido = {
+      usuario: currentUser.email,
+      userId: currentUser.uid,
+      nome: currentUser.displayName || currentUser.email.split("@")[0],
+      itens: cart.map((i) => `${i.nome} x${i.qtd}`),
+      subtotal: Number(subtotal.toFixed(2)),
+      entrega: Number(delivery.toFixed(2)),
+      desconto: Number(discount.toFixed(2)),
+      cupom: couponApplied || "",
+      total: Number(total.toFixed(2)),
+      endereco: addr,
+      data: new Date().toISOString(),
+    };
 
-      lista.appendChild(div);
-    });
+    db.collection("Pedidos")
+      .add(pedido)
+      .then(() => {
+        popupAdd("Pedido salvo ✅");
 
-    const total = calcularTotal();
-    const subtotal = total - TAXA_ENTREGA_FIXA;
+        const linhas = [
+          "🍔 *Pedido DFL*",
+          cart.map((i) => `• ${i.nome} x${i.qtd}`).join("\n"),
+          "",
+          `Subtotal: *${money(subtotal)}*`,
+          `Entrega: *${money(delivery)}*${couponApplied && discountLabel === "Frete Grátis" ? " _(Frete Grátis)_" : ""}`,
+          `Desconto${couponApplied ? ` (${couponApplied})` : ""}: *-${money(discount)}*`,
+          `*Total: ${money(total)}*`,
+          "",
+          `🏠 *Endereço:* ${addr}`
+        ].join("\n");
 
-    rodape.innerHTML = `
-      <div style="padding:12px 16px;font-size:.95rem;">
-        <div style="display:flex;justify-content:space-between;margin-bottom:4px;">
-          <span>Subtotal:</span> <b>${money(subtotal)}</b>
-        </div>
-        <div style="display:flex;justify-content:space-between;margin-bottom:4px;">
-          <span>Entrega:</span> <b>${money(TAXA_ENTREGA_FIXA)}</b>
-        </div>
-        <div style="display:flex;justify-content:space-between;font-size:1.05rem;margin-top:6px;">
-          <span>Total:</span> <b>${money(total)}</b>
-        </div>
-        <button id="finalizar-pedido" class="btn-primario" style="width:100%;margin-top:12px;">Finalizar Pedido</button>
+        const texto = encodeURIComponent(linhas);
+        window.open(`https://wa.me/5534997178336?text=${texto}`, "_blank");
+
+        cart = [];
+        renderMiniCart();
+        Overlays.closeAll();
+      })
+      .catch((err) => alert("Erro: ".concat(err.message)));
+  }
+
+  renderMiniCart();
+  
+/* ------------------ 📦 Meus Pedidos (UI + lógica V2.5) ------------------ */
+  let ordersFab = el.myOrdersBtn;
+  if (!ordersFab) {
+    ordersFab = document.createElement("button");
+    ordersFab.id = "orders-fab"; 
+    ordersFab.innerHTML = "📦 Meus Pedidos";
+    document.body.appendChild(ordersFab);
+    el.myOrdersBtn = ordersFab; 
+  }
+
+  let ordersPanel = document.querySelector(".orders-panel");
+  if (!ordersPanel) {
+    ordersPanel = document.createElement("div");
+    ordersPanel.className = "orders-panel";
+    ordersPanel.innerHTML = `
+      <div class="orders-head">
+        <span>📦 Meus Pedidos</span>
+        <button class="orders-close" type="button">✖</button>
       </div>
-    `;
-
-    const finalizarBtn = rodape.querySelector("#finalizar-pedido");
-    finalizarBtn.addEventListener("click", finalizarPedido);
+      <div class="orders-content" id="orders-content">
+        <p class="empty-orders">Faça login para ver seus pedidos.</p>
+      </div>`;
+    document.body.appendChild(ordersPanel);
   }
-
-  /* ------------------ 📦 FINALIZAR PEDIDO ------------------ */
-  function finalizarPedido() {
-    const carrinho = getCart();
-    if (!carrinho.length) return alert("Adicione itens antes de finalizar.");
-
-    const total = calcularTotal();
-    const textoPedido = carrinho
-      .map((i) => `• ${i.qtd}x ${i.nome} — ${money(i.preco * i.qtd)}`)
-      .join("%0A");
-    const msg = `🛍️ *Pedido Da Família Lanches*%0A${textoPedido}%0A———————————%0A💰 *Total:* ${money(total)} (inclui entrega)%0A🚚 Endereço: `;
-    const url = `https://wa.me/5534997178336?text=${msg}`;
-    window.open(url, "_blank");
-
-    popupAdd("Pedido enviado para o WhatsApp 📦");
-  }
-
-  /* ------------------ 🔄 EVENTOS GERAIS ------------------ */
-  document.querySelectorAll(".add-cart").forEach((btn) => {
-    btn.addEventListener("click", () => {
-      const card = btn.closest(".card");
-      const nome = card.dataset.name;
-      const preco = parseFloat(card.dataset.price);
-      adicionarAoCarrinho(nome, preco);
-    });
-  });
-
-  el.cartIcon?.addEventListener("click", () => {
-    const { Overlays } = window.__DFL;
-    Overlays.open(el.miniCart);
-  });
-
-  document
-    .querySelector("#mini-cart .extras-close")
-    ?.addEventListener("click", () => {
-      el.miniCart.classList.remove("active");
-      window.__DFL.Backdrop.hide();
-    });
-
-  // Carregar carrinho salvo
-  carregarCarrinho();
-
-  console.log("%cDFL v2.5 — Parte 2/6 carregada (Carrinho ✅)",
-    "background:#ffb300;color:#000;padding:4px 8px;border-radius:6px;font-weight:700;");
-})();
-/* =========================================================
-   🍟 DFL v2.5 — Parte 3/6
-   Conteúdo:
-   - Modais de Adicionais e Combos
-   - Fechamento clicando fora
-   - Estilo visual aprimorado (transições suaves)
-========================================================= */
-
-(() => {
-  const { el, Overlays, popupAdd, money, state } = window.__DFL;
-
-  /* ------------------ 🧩 MODAL DE ADICIONAIS ------------------ */
-  const adicionais = [
-    { nome: "Cebola", preco: 0.99 },
-    { nome: "Salada", preco: 1.99 },
-    { nome: "Ovo", preco: 1.99 },
-    { nome: "Bacon", preco: 2.99 },
-    { nome: "Hambúrguer Tradicional 56g", preco: 2.99 },
-    { nome: "Cheddar Cremoso", preco: 3.99 },
-    { nome: "Filé de Frango", preco: 5.99 },
-    { nome: "Hambúrguer Artesanal 120g", preco: 7.99 },
-  ];
-
-  let produtoAtual = null;
-  let precoBase = 0;
-
-  function abrirExtras(card) {
-    if (!card || !el.extrasModal || !el.extrasList) return;
-    produtoAtual = card.dataset.name;
-    precoBase = parseFloat(card.dataset.price) || 0;
-
-    el.extrasList.innerHTML = adicionais.map((a, i) => `
-      <label class="extra-line" style="
-        display:flex;
-        justify-content:space-between;
-        align-items:center;
-        background:#fff;
-        border:1px solid #eee;
-        border-radius:8px;
-        padding:8px 12px;
-        margin-bottom:6px;
-        transition:background 0.2s;
-      ">
-        <span>${a.nome} — <b>${money(a.preco)}</b></span>
-        <input type="checkbox" value="${i}" style="transform:scale(1.3);cursor:pointer;">
-      </label>
-    `).join("");
-
-    Overlays.open(el.extrasModal);
-  }
-
-  document.querySelectorAll(".extras-btn").forEach((btn) => {
-    btn.addEventListener("click", (e) => abrirExtras(e.currentTarget.closest(".card")));
-  });
-
-  el.extrasConfirm?.addEventListener("click", () => {
-    if (!produtoAtual) return Overlays.closeAll();
-
-    const checks = [...el.extrasList.querySelectorAll("input:checked")];
-    const extras = checks.map((c) => adicionais[+c.value]);
-
-    const precoExtras = extras.reduce((t, e) => t + e.preco, 0);
-    const precoTotal = precoBase + precoExtras;
-    const extrasNomes = extras.map((a) => a.nome).join(", ");
-
-    const nomeFinal = extrasNomes
-      ? `${produtoAtual} + ${extrasNomes}`
-      : produtoAtual;
-
-    const existente = state.cart.find((i) => i.nome === nomeFinal);
-    if (existente) existente.qtd++;
-    else state.cart.push({ nome: nomeFinal, preco: precoTotal, qtd: 1 });
-
-    localStorage.setItem("dfl_cart", JSON.stringify(state.cart));
-    popupAdd(`${nomeFinal} adicionado! 🍔`);
-    Overlays.closeAll();
-  });
-
-  document.querySelectorAll("#extras-modal .extras-close").forEach((b) =>
-    b.addEventListener("click", () => Overlays.closeAll())
-  );
-
-  /* ------------------ 🥤 MODAL DE COMBOS ------------------ */
-  const opcoesBebidas = {
-    casal: [
-      { nome: "Fanta 1L (padrão)", preco: 0 },
-      { nome: "Coca-Cola 1L", preco: 3.0 },
-      { nome: "Coca-Cola 1L Zero", preco: 3.0 },
-    ],
-    familia: [
-      { nome: "Kuat 2L (padrão)", preco: 0 },
-      { nome: "Coca-Cola 2L", preco: 5.0 },
-    ],
-  };
-
-  let comboContexto = null;
-
-  function abrirCombo(nomeCombo, precoBase) {
-    if (!el.comboModal || !el.comboBody) return;
-    const nome = nomeCombo.toLowerCase();
-    const grupo = nome.includes("casal")
-      ? "casal"
-      : nome.includes("família") || nome.includes("familia")
-      ? "familia"
-      : null;
-
-    if (!grupo) {
-      adicionarItemSimples(nomeCombo, precoBase);
-      return;
-    }
-
-    el.comboBody.innerHTML = opcoesBebidas[grupo]
-      .map(
-        (o, i) => `
-      <label class="extra-line" style="
-        display:flex;
-        justify-content:space-between;
-        align-items:center;
-        border:1px solid #eee;
-        border-radius:8px;
-        padding:8px 12px;
-        background:#fff;
-        margin-bottom:6px;
-      ">
-        <span>${o.nome} ${o.preco ? `— + ${money(o.preco)}` : ""}</span>
-        <input type="radio" name="combo-drink" value="${i}" ${
-          i === 0 ? "checked" : ""
-        }>
-      </label>`
-      )
-      .join("");
-
-    comboContexto = { nomeCombo, precoBase, grupo };
-    Overlays.open(el.comboModal);
-  }
-
-  el.comboConfirm?.addEventListener("click", () => {
-    if (!comboContexto) return Overlays.closeAll();
-    const sel = el.comboBody.querySelector("input[name='combo-drink']:checked");
-    if (!sel) return;
-
-    const opt = opcoesBebidas[comboContexto.grupo][+sel.value];
-    const precoFinal = comboContexto.precoBase + (opt.preco || 0);
-    const nomeFinal = `${comboContexto.nomeCombo} + ${opt.nome}`;
-
-    const existente = state.cart.find((i) => i.nome === nomeFinal);
-    if (existente) existente.qtd++;
-    else state.cart.push({ nome: nomeFinal, preco: precoFinal, qtd: 1 });
-
-    localStorage.setItem("dfl_cart", JSON.stringify(state.cart));
-    popupAdd(`${nomeFinal} adicionado! 🧃`);
-    Overlays.closeAll();
-  });
-
-  document.querySelectorAll("#combo-modal .combo-close").forEach((b) =>
-    b.addEventListener("click", () => Overlays.closeAll())
-  );
-
-  /* ------------------ 🧺 ITEM SIMPLES ------------------ */
-  function adicionarItemSimples(nome, preco) {
-    const existente = state.cart.find((i) => i.nome === nome);
-    if (existente) existente.qtd++;
-    else state.cart.push({ nome, preco, qtd: 1 });
-    localStorage.setItem("dfl_cart", JSON.stringify(state.cart));
-    popupAdd(`${nome} adicionado!`);
-  }
-
-  /* ------------------ 🖱️ FECHAR MODAL AO CLICAR FORA ------------------ */
-  document.querySelectorAll(".modal").forEach((modal) => {
-    modal.addEventListener("click", (ev) => {
-      if (ev.target.classList.contains("modal")) {
-        modal.classList.remove("show");
-        window.__DFL.Backdrop.hide();
-      }
-    });
-  });
-
-  console.log("%cDFL v2.5 — Parte 3/6 carregada (Modais ✅)",
-    "background:#ff7043;color:#fff;padding:4px 8px;border-radius:6px;font-weight:700;");
-})();
-/* =========================================================
-   🔐 DFL v2.5 — Parte 4/6
-   Conteúdo:
-   - Login seguro (Google + e-mail/senha)
-   - Cadeado no botão do usuário
-   - Verificação de administrador (exibe botão Relatórios)
-   - Correções de "Meus Pedidos" (abre/fecha corretamente e carrega dados)
-========================================================= */
-
-(() => {
-  const { el, Overlays, Backdrop, popupAdd, money, state } = window.__DFL;
-
-  /* ------------------ 🔥 Firebase (usa instância já carregada) ------------------ */
-  const firebaseConfig = {
-    apiKey: "AIzaSyATQBcbYuzKpKlSwNlbpRiAM1XyHqhGeak",
-    authDomain: "da-familia-lanches.firebaseapp.com",
-    projectId: "da-familia-lanches",
-    storageBucket: "da-familia-lanches.appspot.com",
-    messagingSenderId: "106857147317",
-    appId: "1:106857147317:web:769c98aed26bb8fc9e87fc",
-  };
-
-  function ensureFirebase() {
-    if (!window.firebase) throw new Error("Firebase não carregado.");
-    if (!firebase.apps?.length) firebase.initializeApp(firebaseConfig);
-    if (!firebase.auth || !firebase.firestore) throw new Error("Módulos do Firebase ausentes.");
-    return { auth: firebase.auth(), db: firebase.firestore() };
-  }
-
-  let auth = null;
-  let db   = null;
-
-  try {
-    ({ auth, db } = ensureFirebase());
-  } catch (e) {
-    console.error("Erro ao iniciar Firebase:", e);
-    return;
-  }
-
-  /* ------------------ 👤 Login UI: abrir/fechar modal ------------------ */
-  el.userBtn?.addEventListener("click", () => Overlays.open(el.loginModal));
-  document.querySelectorAll("#login-modal .login-close").forEach(btn =>
-    btn.addEventListener("click", () => Overlays.closeAll())
-  );
-
-  /* ------------------ ✉️ Login e-mail/senha ------------------ */
-  el.loginForm?.addEventListener("submit", (e) => {
-    e.preventDefault();
-    const email = document.getElementById("login-email")?.value?.trim();
-    const senha = document.getElementById("login-senha")?.value?.trim();
-    if (!email || !senha) return alert("Preencha e-mail e senha.");
-
-    auth.signInWithEmailAndPassword(email, senha)
-      .then((cred) => {
-        state.currentUser = cred.user;
-        atualizarBotaoUsuario();
-        popupAdd("Login realizado com sucesso! ✅");
-        Overlays.closeAll();
-      })
-      .catch((err) => {
-        if (err.code === "auth/user-not-found") {
-          if (confirm("Conta não encontrada. Deseja criar uma nova?")) {
-            auth.createUserWithEmailAndPassword(email, senha)
-              .then((cred) => {
-                state.currentUser = cred.user;
-                atualizarBotaoUsuario();
-                popupAdd("Conta criada com sucesso! 🎉");
-                Overlays.closeAll();
-              })
-              .catch((e) => alert("Erro: " + e.message));
-          }
-        } else if (err.code === "auth/wrong-password") {
-          alert("Senha incorreta. Tente novamente.");
-        } else {
-          alert("Erro: " + err.message);
-        }
-      });
-  });
-
-  /* ------------------ 🟦 Login com Google ------------------ */
-  el.googleBtn?.addEventListener("click", () => {
-    const provider = new firebase.auth.GoogleAuthProvider();
-    auth.signInWithPopup(provider)
-      .then((res) => {
-        state.currentUser = res.user;
-        atualizarBotaoUsuario();
-        popupAdd("Login com Google realizado! ✅");
-        Overlays.closeAll();
-      })
-      .catch((err) => alert("Erro: " + err.message));
-  });
-
-  /* ------------------ 🛡️ Admins autorizados ------------------ */
-  const ADMINS = [
-    "alefejohsefe@gmail.com",
-    "kalebhstanley650@gmail.com",
-    "contato@dafamilialanches.com.br",
-  ];
-  const isAdmin = (user) => user?.email && ADMINS.includes(user.email.toLowerCase());
-
-  /* ------------------ 🔒 Botão do usuário (cadeado + nome) ------------------ */
-  function atualizarBotaoUsuario() {
-    const u = state.currentUser;
-    if (!el.userBtn) return;
-
-    if (u) {
-      const nome = u.displayName?.split(" ")[0] || u.email.split("@")[0];
-      // 🔒 Cadeado restaurado no rótulo do botão
-      el.userBtn.innerHTML = `🔒 Olá, ${nome}`;
-    } else {
-      el.userBtn.textContent = "Entrar / Cadastrar";
-    }
-  }
-
-  /* ------------------ 📦 Meus Pedidos (abre/fecha e carrega) ------------------ */
-  // Garante que comece fechado, evitando ocupar 30% da tela permanentemente
-  const ordersPanel = document.querySelector(".orders-panel");
-  if (ordersPanel) ordersPanel.classList.remove("active");
 
   function openOrdersPanel() {
-    if (!state.currentUser) {
-      alert("Faça login para ver seus pedidos.");
-      return Overlays.open(el.loginModal);
-    }
     Overlays.closeAll();
-    ordersPanel?.classList.add("active");
+    ordersPanel.classList.add("active");
     Backdrop.show();
-    carregarPedidosSeguro(); // carrega sempre que abrir
   }
 
-  function closeOrdersPanel() {
-    ordersPanel?.classList.remove("active");
-    Backdrop.hide();
-  }
+  ordersFab.addEventListener("click", () => {
+    if (!currentUser) return alert("Faça login para ver seus pedidos.");
+    openOrdersPanel();
+    carregarPedidosSeguro();
+  });
 
-  el.myOrdersBtn?.addEventListener("click", openOrdersPanel);
-  ordersPanel?.querySelector(".orders-close")?.addEventListener("click", closeOrdersPanel);
+  ordersPanel.querySelector(".orders-close")?.addEventListener("click", () => Overlays.closeAll());
 
   function showOrdersFabIfLogged() {
-    if (!el.myOrdersBtn) return;
-    if (state.currentUser) el.myOrdersBtn.classList.add("show");
-    else el.myOrdersBtn.classList.remove("show");
+    if (el.myOrdersBtn) {
+      if (currentUser) el.myOrdersBtn.classList.add("show");
+      else el.myOrdersBtn.classList.remove("show");
+    }
   }
 
   function carregarPedidosSeguro() {
     const container = document.getElementById("orders-content");
     if (!container) return;
+
     container.innerHTML = `<p class="empty-orders">Carregando pedidos...</p>`;
 
-    const u = state.currentUser;
-    if (!u?.email) {
-      setTimeout(carregarPedidosSeguro, 400);
+    if (!currentUser || !currentUser.email) {
+      setTimeout(carregarPedidosSeguro, 500);
       return;
     }
 
@@ -760,10 +742,9 @@
         container.innerHTML = `<p class="empty-orders">Nenhum pedido encontrado 😢</p>`;
         return;
       }
+
       const pedidos = [];
       snap.forEach((doc) => pedidos.push({ id: doc.id, ...doc.data() }));
-
-      // Ordena por data descendente
       pedidos.sort((a, b) => new Date(b.data) - new Date(a.data));
 
       container.innerHTML = "";
@@ -784,25 +765,24 @@
           ${p.endereco ? `<p style="margin:6px 0;"><b>Endereço:</b> ${p.endereco}</p>` : ""}
           ${p.cupom ? `<p style="margin:6px 0;"><b>Cupom:</b> ${p.cupom}</p>` : ""}
           <p style="margin:6px 0;">
-            <b>Subtotal:</b> ${money(+p.subtotal || 0)}<br>
-            <b>Entrega:</b> ${money(+p.entrega || 0)}<br>
-            <b>Desconto:</b> -${money(+p.desconto || 0)}
+            <b>Subtotal:</b> ${money(p.subtotal || 0)}<br>
+            <b>Entrega:</b> ${money(p.entrega || 0)}<br>
+            <b>Desconto:</b> -${money(p.desconto || 0)}
           </p>
           <p style="font-size:1.1rem;color:#4caf50;font-weight:700;margin-top:6px;">
-            <b>Total:</b> ${money(+p.total || 0)}
+            <b>Total:</b> ${money(p.total || 0)}
           </p>`;
         container.appendChild(box);
       });
     };
 
-    // Busca por email e, se vazio, tenta por userId
     db.collection("Pedidos")
-      .where("usuario", "==", u.email)
+      .where("usuario", "==", currentUser.email)
       .get()
       .then((snap) => {
         if (!snap.empty) return render(snap);
         return db.collection("Pedidos")
-          .where("userId", "==", u.uid)
+          .where("userId", "==", currentUser.uid)
           .get()
           .then(render);
       })
@@ -811,38 +791,19 @@
       });
   }
 
-  /* ------------------ 🧭 Estado de autenticação global ------------------ */
-  auth.onAuthStateChanged((user) => {
-    state.currentUser = user || null;
-    atualizarBotaoUsuario();
-    showOrdersFabIfLogged();
+  /* =========================================================
+     📊 ADMIN DASHBOARD (V2.5 com Cupom + Frete + Desconto)
+  ========================================================= */
+  const ADMINS = [
+    "alefejohsefe@gmail.com",
+    "kalebhstanley650@gmail.com",
+    "contato@dafamilialanches.com.br"
+  ];
 
-    // Botão de relatórios só para admins
-    if (el.reportsBtn) {
-      if (user && isAdmin(user)) {
-        el.reportsBtn.style.display = "block";
-      } else {
-        el.reportsBtn.style.display = "none";
-        document.getElementById("admin-dashboard")?.remove();
-        Overlays.closeAll();
-      }
-    }
-  });
+  function isAdmin(user) {
+    return user && user.email && ADMINS.includes(user.email.toLowerCase());
+  }
 
-  console.log("%cDFL v2.5 — Parte 4/6 carregada (Login + Admin + Pedidos ✅)",
-    "background:#4caf50;color:#fff;padding:4px 8px;border-radius:6px;font-weight:700;");
-})();
-/* =========================================================
-   📊 DFL v2.5 — Parte 5/6
-   Conteúdo:
-   - Painel de Relatórios (Admin)
-   - Chart.js com destruição segura
-   - Exportação CSV e filtros de período
-   - Melhorias visuais dos gráficos
-========================================================= */
-
-(() => {
-  const { popupAdd, money } = window.__DFL;
   let chartPedidos = null;
   let chartProdutos = null;
 
@@ -854,16 +815,16 @@
     document.head.appendChild(s);
   }
 
-  function criarPainelAdmin() {
+  function createDashboard() {
     if (document.getElementById("admin-dashboard")) return;
 
     const div = document.createElement("div");
     div.id = "admin-dashboard";
-    div.className = "modal show";
+    div.className = "modal";
     div.innerHTML = `
       <div class="modal-content" style="max-width:1000px;width:95%;height:85vh;overflow:auto;background:#fff;border-radius:12px;">
-        <div class="modal-head" style="display:flex;justify-content:space-between;align-items:center;padding:10px 14px;border-bottom:1px solid #eee;">
-          <h3>📈 Relatórios e Estatísticas</h3>
+        <div class="modal-head" style="display:flex;justify-content:space-between;align-items:center;padding:10px 14px;">
+          <h3>📊 Relatórios e Estatísticas</h3>
           <button class="dashboard-close" type="button" style="background:#ff5252;color:#fff;border:none;border-radius:6px;padding:6px 10px;cursor:pointer;font-weight:600;">✖</button>
         </div>
         <div class="dashboard-body" style="padding:12px;">
@@ -882,110 +843,138 @@
             </select>
           </div>
 
-          <canvas id="chart-pedidos" style="width:100%;height:260px;"></canvas>
-          <canvas id="chart-produtos" style="width:100%;height:260px;margin-top:16px;"></canvas>
-
-          <div style="margin-top:16px;text-align:right;">
+          <canvas id="chart-pedidos" style="width:100%;height:240px;"></canvas>
+          <canvas id="chart-produtos" style="width:100%;height:240px;margin-top:16px;"></canvas>
+          <div style="margin-top:12px;">
             <button id="export-csv" type="button" style="background:#4caf50;color:#fff;border:none;border-radius:8px;padding:10px 16px;font-weight:600;cursor:pointer;">📁 Exportar CSV</button>
           </div>
         </div>
-      </div>
-    `;
+      </div>`;
     document.body.appendChild(div);
 
-    // Estilo visual dos cards
-    document.querySelectorAll(".cardBox").forEach((c) => {
+    document.querySelectorAll(".cardBox").forEach(c => {
       Object.assign(c.style, {
-        flex: "1",
-        minWidth: "200px",
-        padding: "12px",
-        background: "linear-gradient(135deg, #fff7e6, #fff)",
-        border: "1px solid #ffe082",
-        borderRadius: "10px",
-        boxShadow: "0 3px 10px rgba(255,193,7,0.15)",
-        fontWeight: "600",
+        flex: "1", minWidth: "200px", padding: "12px",
+        background: "#f9f9f9", borderRadius: "8px",
+        boxShadow: "0 2px 8px rgba(0,0,0,.08)"
       });
     });
 
-    div.querySelector(".dashboard-close").addEventListener("click", () => {
-      div.classList.remove("show");
-    });
+    div.querySelector(".dashboard-close").addEventListener("click", () => Overlays.closeAll());
   }
 
-  function gerarGraficos(pedidos) {
-    if (!window.Chart) return;
+  function createAdminFab() {
+    if (el.reportsBtn) {
+      el.reportsBtn.style.display = "block";
+      el.reportsBtn.addEventListener("click", () => {
+        createDashboard();
+        ensureChartJS(() => carregarRelatorios("7"));
+        Overlays.open(document.getElementById("admin-dashboard"));
+      });
+    }
+  }
 
-    const ctxPedidos = document.getElementById("chart-pedidos")?.getContext("2d");
-    const ctxProdutos = document.getElementById("chart-produtos")?.getContext("2d");
-    if (!ctxPedidos || !ctxProdutos) return;
+/* ------------------ 📊 Função dos Gráficos (Corrigida) ------------------ */
+  function gerarResumoECharts(pedidos) {
+    if (!window.Chart) {
+      console.error("Chart.js não está carregado.");
+      return;
+    }
+    
+    const ctxPedidos = document.getElementById('chart-pedidos')?.getContext('2d');
+    const ctxProdutos = document.getElementById('chart-produtos')?.getContext('2d');
 
-    if (chartPedidos) chartPedidos.destroy();
-    if (chartProdutos) chartProdutos.destroy();
+    if (!ctxPedidos || !ctxProdutos) {
+      console.error("Elementos <canvas> dos gráficos não encontrados.");
+      return;
+    }
 
+    // --- Gráfico 1: Pedidos por Dia (Gráfico de Linha) ---
     const pedidosPorDia = {};
-    pedidos.forEach((p) => {
-      const dia = p.data.toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit" });
+    pedidos.forEach(p => {
+      const dia = p.data.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' });
       pedidosPorDia[dia] = (pedidosPorDia[dia] || 0) + 1;
     });
 
-    const labelsPedidos = Object.keys(pedidosPorDia);
-    const dataPedidos = Object.values(pedidosPorDia);
+    const labelsPedidos = Object.keys(pedidosPorDia).sort((a, b) => {
+      const [diaA, mesA] = a.split('/');
+      const [diaB, mesB] = b.split('/');
+      return new Date(`${mesA}/${diaA}/2025`) - new Date(`${mesB}/${diaB}/2025`);
+    });
+    const dataPedidos = labelsPedidos.map(label => pedidosPorDia[label]);
 
+    if (chartPedidos) {
+      chartPedidos.destroy();
+    }
     chartPedidos = new Chart(ctxPedidos, {
-      type: "line",
+      type: 'line',
       data: {
         labels: labelsPedidos,
         datasets: [{
-          label: "Pedidos por Dia",
+          label: 'Pedidos por Dia',
           data: dataPedidos,
-          backgroundColor: "rgba(255, 204, 0, 0.3)",
-          borderColor: "#ffb300",
+          backgroundColor: 'rgba(255, 179, 0, 0.2)',
+          borderColor: '#ffb300',
           borderWidth: 2,
           fill: true,
-          tension: 0.3,
-          pointRadius: 4,
-          pointBackgroundColor: "#ffb300",
-        }],
+          tension: 0.1
+        }]
       },
       options: {
         responsive: true,
-        plugins: { title: { display: true, text: "📅 Volume de Pedidos por Dia" } },
-        scales: { y: { beginAtZero: true } },
-      },
+        plugins: {
+          title: { display: true, text: 'Volume de Pedidos por Dia' }
+        }
+      }
     });
 
+    // --- Gráfico 2: Produtos Mais Vendidos (Gráfico de Barras) ---
     const produtosContagem = {};
-    pedidos.forEach((p) => {
-      (p.itens || []).forEach((i) => {
-        const nome = i.split(" x")[0];
-        produtosContagem[nome] = (produtosContagem[nome] || 0) + 1;
+    pedidos.forEach(p => {
+      p.itens.forEach(itemStr => {
+        const parts = itemStr.split(' x');
+        const nome = parts[0];
+        const qtd = parts.length > 1 ? parseInt(parts[1], 10) : 1;
+        
+        if (nome) {
+          produtosContagem[nome] = (produtosContagem[nome] || 0) + (isNaN(qtd) ? 1 : qtd);
+        }
       });
     });
 
     const produtosOrdenados = Object.entries(produtosContagem)
       .sort(([, a], [, b]) => b - a)
-      .slice(0, 8);
+      .slice(0, 10); 
 
+    const labelsProdutos = produtosOrdenados.map(p => p[0]);
+    const dataProdutos = produtosOrdenados.map(p => p[1]);
+
+    if (chartProdutos) {
+      chartProdutos.destroy();
+    }
     chartProdutos = new Chart(ctxProdutos, {
-      type: "bar",
+      type: 'bar',
       data: {
-        labels: produtosOrdenados.map((p) => p[0]),
+        labels: labelsProdutos,
         datasets: [{
-          label: "Itens Mais Vendidos",
-          data: produtosOrdenados.map((p) => p[1]),
-          backgroundColor: "rgba(255, 87, 34, 0.6)",
-          borderColor: "#d84315",
-          borderWidth: 1,
-        }],
+          label: 'Itens Mais Vendidos',
+          data: dataProdutos,
+          backgroundColor: '#ff7043',
+          borderColor: '#d84315',
+          borderWidth: 1
+        }]
       },
       options: {
-        indexAxis: "y",
+        indexAxis: 'y',
         responsive: true,
-        plugins: { title: { display: true, text: "🍔 Top 8 Itens Mais Vendidos" } },
-      },
+        plugins: {
+          title: { display: true, text: 'Top 10 Itens Mais Vendidos' }
+        }
+      }
     });
   }
 
+/* ------------------ 📊 Carregar Relatórios (V2.5) ------------------ */
   function carregarRelatorios(periodo = "7") {
     const agora = new Date();
     let start = new Date(0);
@@ -994,145 +983,193 @@
       start.setDate(start.getDate() - Number(periodo));
     }
 
-    const db = firebase.firestore();
     db.collection("Pedidos")
       .orderBy("data", "desc")
       .get()
-      .then((snap) => {
-        const pedidos = snap.docs.map((d) => {
+      .then(snap => {
+        const pedidos = snap.docs.map(d => {
           const p = d.data() || {};
-          const total = Number(p.total) || 0;
+          const subtotal = Number(p.subtotal ?? 0);
+          const entrega  = Number(p.entrega  ?? 0);
+          const desconto = Number(p.desconto ?? 0);
+          const total    = Number(p.total    ?? (subtotal + entrega - desconto)) || 0;
+
           return {
             ...p,
+            id: d.id,
+            subtotal,
+            entrega,
+            desconto,
+            total,
             data: typeof p.data === "string"
               ? new Date(p.data)
-              : p.data?.toDate?.() || new Date(0),
-            total,
+              : (p.data?.toDate?.() ? p.data.toDate() : new Date(0)),
             itens: Array.isArray(p.itens)
               ? p.itens
-              : typeof p.itens === "string"
-              ? p.itens.split(";")
-              : [],
+              : (typeof p.itens === "string" ? p.itens.split("; ") : [])
           };
         });
 
-        const filtrados = pedidos.filter(
-          (p) => periodo === "all" || (p.data >= start)
-        );
-
-        gerarGraficos(filtrados);
-
+        const filtrados = pedidos.filter(p => periodo === "all" || (p.data >= start));
+        
+        gerarResumoECharts(filtrados); 
+        
         const totalVendido = filtrados.reduce((s, p) => s + p.total, 0);
         const numPedidos = filtrados.length;
-        const ticketMedio = numPedidos ? totalVendido / numPedidos : 0;
-
+        const ticketMedio = numPedidos > 0 ? totalVendido / numPedidos : 0;
+        
         document.getElementById("card-total").textContent = `Total Arrecadado: ${money(totalVendido)}`;
         document.getElementById("card-pedidos").textContent = `Pedidos: ${numPedidos}`;
         document.getElementById("card-ticket").textContent = `Ticket Médio: ${money(ticketMedio)}`;
 
         document.getElementById("export-csv").onclick = () => {
-          let csv = "Data;Usuário;Itens;Total\n";
-          filtrados.forEach((p) => {
-            csv += `${p.data.toLocaleString("pt-BR")};${p.usuario || ""};"${p.itens.join(", ")}";${p.total}\n`;
-          });
-          const blob = new Blob([`\uFEFF${csv}`], { type: "text/csv;charset=utf-8;" });
-          const link = document.createElement("a");
-          link.href = URL.createObjectURL(blob);
-          link.download = `pedidos_dfl_${periodo}.csv`;
-          link.click();
-          popupAdd("📊 Exportando relatório...");
+            let csv = "ID;Data;Usuario;Nome;Itens;Subtotal;Entrega;Desconto;Cupom;Total;Endereco\n";
+            filtrados.forEach(p => {
+                const linha = [
+                    p.id || 'N/A',
+                    p.data.toLocaleString('pt-BR'),
+                    p.usuario || p.email || '',
+                    p.nome || '',
+                    `"${p.itens.join(', ')}"`,
+                    String(p.subtotal.toFixed(2)).replace('.',','),
+                    String(p.entrega.toFixed(2)).replace('.',','),
+                    String(p.desconto.toFixed(2)).replace('.',','),
+                    p.cupom || '',
+                    String(p.total.toFixed(2)).replace('.',','),
+                    `"${(p.endereco || '').replace(/"/g, '""')}"`
+                ].join(';');
+                csv += linha + '\n';
+            });
+            const blob = new Blob([`\uFEFF${csv}`], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = `pedidos_dfl_${periodo}.csv`;
+            link.click();
+            popupAdd('Exportando CSV...');
         };
+
       })
-      .catch((err) => alert("Erro ao carregar relatórios: " + err.message));
+      .catch(err => alert("Erro ao carregar relatórios: ".concat(err.message)));
 
     const sel = document.getElementById("filter-period");
     if (sel && !sel._bound) {
-      sel.addEventListener("change", (e) => carregarRelatorios(e.target.value));
+      sel.addEventListener("change", e => carregarRelatorios(e.target.value));
       sel._bound = true;
     }
   }
 
-  // Inicialização automática do painel (para admins)
-  window.__DFL.loadAdminDashboard = function () {
-    criarPainelAdmin();
-    ensureChartJS(() => carregarRelatorios("7"));
-  };
-
-  console.log("%cDFL v2.5 — Parte 5/6 carregada (Relatórios ✅)",
-    "background:#0288d1;color:#fff;padding:4px 8px;border-radius:6px;font-weight:700;");
-})();
-/* =========================================================
-   🍪 DFL v2.5 — Parte 6/6 (Final)
-   Conteúdo:
-   - Banner de Cookies (moderno e responsivo)
-   - Fechamento automático de modais e backdrop
-   - Tratamento de erros e recarregamento seguro
-========================================================= */
-
-(() => {
-  const { popupAdd } = window.__DFL || {};
-
-  /* ------------------ 🍪 Banner de Cookies ------------------ */
-  const banner = document.getElementById("cookie-banner");
-  const btnAceitar = document.getElementById("cookie-accept");
-
-  if (banner && btnAceitar) {
-    if (localStorage.getItem("dfl-cookies-accepted") === "true") {
-      banner.style.display = "none";
+  /* ------------------ 🔐 Segurança/Admin + UX Final ------------------ */
+  auth.onAuthStateChanged(user => {
+    currentUser = user; 
+    
+    if (user) {
+      el.userBtn.textContent = `Olá, ${user.displayName?.split(" ")[0] || user.email.split("@")[0]}`;
+      showOrdersFabIfLogged();
     } else {
-      banner.classList.add("show");
+      el.userBtn.textContent = "Entrar / Cadastrar";
+      showOrdersFabIfLogged();
     }
 
-    btnAceitar.addEventListener("click", () => {
-      localStorage.setItem("dfl-cookies-accepted", "true");
-      banner.classList.remove("show");
-      setTimeout(() => {
-        banner.style.display = "none";
-      }, 500);
-      popupAdd?.("Preferências de cookies salvas 🍪");
-    });
-  }
-
-  /* ------------------ 🎬 Fechar modais ao clicar fora ------------------ */
-  document.querySelectorAll(".modal").forEach((modal) => {
-    modal.addEventListener("click", (ev) => {
-      if (ev.target.classList.contains("modal")) {
-        modal.classList.remove("show");
-        const backdrop = document.getElementById("cart-backdrop");
-        backdrop?.classList.remove("active");
+    if (user && isAdmin(user)) {
+      if (el.reportsBtn) {
+        createAdminFab();
       }
-    });
+    } else {
+      if (el.reportsBtn) el.reportsBtn.style.display = "none";
+      document.getElementById("admin-dashboard")?.remove();
+      Overlays.closeAll();
+    }
   });
 
-  const cartBackdrop = document.getElementById("cart-backdrop");
-  const miniCart = document.getElementById("mini-cart");
-  if (cartBackdrop && miniCart) {
-    cartBackdrop.addEventListener("click", () => {
-      cartBackdrop.classList.remove("active");
-      miniCart.classList.remove("active");
+  /* ------------------ 🍪 LÓGICA DO BANNER DE COOKIES ------------------ */
+  // (Este é o novo bloco de código adicionado)
+  const cookieBanner = document.getElementById("cookie-banner");
+  const cookieAcceptBtn = document.getElementById("cookie-accept");
+
+  if (cookieBanner && cookieAcceptBtn) {
+    // Verifica se o cookie já foi aceito
+    if (localStorage.getItem("dfl-cookies-accepted") === "true") {
+      cookieBanner.style.display = "none";
+    } else {
+      // A classe .show (do CSS) vai ativar a animação
+      cookieBanner.classList.add("show");
+    }
+
+    // O que acontece ao clicar em "Aceitar"
+    cookieAcceptBtn.addEventListener("click", () => {
+      localStorage.setItem("dfl-cookies-accepted", "true");
+      cookieBanner.classList.remove("show");
+      
+      // Opcional: esconde o banner após a animação de saída
+      setTimeout(() => {
+        cookieBanner.style.display = "none";
+      }, 500); // 500ms (mesmo tempo da transição no CSS)
     });
   }
-
-  /* ------------------ 🧱 Tratamento global de erros ------------------ */
-  window.addEventListener("error", (e) => {
-    const msg = String(e?.message || "").toLowerCase();
-    if (msg.includes("split") || msg.includes("undefined")) {
-      popupAdd?.("⚠️ Ocorreu um pequeno erro. Atualize a página.");
-    }
-    console.warn("⚠️ Erro capturado:", e?.message);
-  });
-
-  /* ------------------ 🔁 Reload seguro (cache/persisted) ------------------ */
+  
+  /* ------------------ Outras Funções ------------------ */
   window.addEventListener("pageshow", (e) => {
     if (e.persisted) {
-      console.log("↻ Página restaurada via cache, forçando recarregar...");
+      console.warn("↻ Página reaberta via cache, recarregando...");
       location.reload();
     }
   });
 
-  /* ------------------ 💚 Mensagem final ------------------ */
-  console.log(
-    "%c🔥 DFL v2.5 Estável — Cupom + Endereço + Frete + Relatórios + Cookies ✅",
-    "background:#43a047;color:#fff;padding:8px 12px;border-radius:8px;font-weight:700;"
-  );
-})();
+  window.addEventListener("error", (e) => {
+    if (String(e?.message || "").toLowerCase().includes("split")) {
+      popupAdd("Humm… houve um pequeno erro ao ler dados. Atualize a página.");
+    }
+    console.warn("⚠️ Erro interceptado:", e?.message);
+  });
+
+  console.log("%c🍔 DFL v2.5 — Cupom + Endereço + Frete R$6 — Relatórios e Painel OK",
+              "background:#4caf50;color:#fff;padding:8px 12px;border-radius:8px;font-weight:700;");
+
+}); // Fim do DOMContentLoaded
+
+/* =========================================================
+   SCRIPT PARA FECHAR MODAIS AO CLICAR FORA
+========================================================= */
+
+document.addEventListener('DOMContentLoaded', () => {
+
+  // --- 1. Lógica para fechar os MODAIS (Login, Extras, Combo) ---
+  
+  // Seleciona todos os elementos que são modais
+  const allModals = document.querySelectorAll('.modal');
+
+  allModals.forEach(modal => {
+    modal.addEventListener('click', (event) => {
+      
+      // event.target é o elemento exato que foi clicado.
+      // Verificamos se o clique foi DIRETAMENTE no fundo do modal
+      // (que tem a classe '.modal') e não em um "filho" (como o .modal-content)
+      if (event.target.classList.contains('modal')) {
+        
+        // Se foi no fundo, remove a classe 'show' para fechar
+        modal.classList.remove('show');
+        
+        // Também remove a classe 'active' do backdrop do carrinho,
+        // caso ele esteja ativo por algum motivo.
+        const cartBackdrop = document.getElementById('cart-backdrop');
+        if (cartBackdrop) {
+            cartBackdrop.classList.remove('active');
+        }
+      }
+    });
+  });
+
+  // --- 2. Lógica para fechar o MINI-CARRINHO ---
+  
+  const cartBackdrop = document.getElementById('cart-backdrop');
+  const miniCart = document.getElementById('mini-cart');
+
+  if (cartBackdrop && miniCart) {
+    cartBackdrop.addEventListener('click', () => {
+      // Ao clicar no backdrop, fecha tanto ele quanto o carrinho
+      cartBackdrop.classList.remove('active');
+      miniCart.classList.remove('active');
+    });
+  }
+
+});
