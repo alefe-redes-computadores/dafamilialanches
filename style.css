@@ -133,7 +133,7 @@ section h2{font-size:1.3rem;text-align:center;margin-bottom:15px;color:#ff7043}
 .footer{background:#fff3e0;text-align:center;padding:20px;font-size:.9rem;color:#444}
 .footer a{color:#ff7043;text-decoration:none;transition:color .2s ease}
 .footer a:hover{color:#ff5722}
-.footer-links{display:flex;justify:content:center;gap:10px;flex-wrap:wrap;margin:8px 0}
+.footer-links{display:flex;justify-content:center;gap:10px;flex-wrap:wrap;margin:8px 0}
 .footer-btn{background:#ffb300;color:#222;padding:6px 14px;border-radius:6px;font-weight:700;text-decoration:none;transition:.25s}
 .footer-btn:hover{background:#ffca28;transform:scale(1.03)}
 .footer-copy{font-size:.8rem;color:#555;margin-top:10px}
@@ -151,9 +151,7 @@ section h2{font-size:1.3rem;text-align:center;margin-bottom:15px;color:#ff7043}
 }
 
 /* =========================================================
-   🎨 INÍCIO DA MODERNIZAÇÃO DOS MODAIS
-   - Estilos refeitos para um visual mais limpo e
-     integrado com as cores do site (Laranja/Branco).
+   🎨 MODERNIZAÇÃO DOS MODAIS
 ========================================================= */
 
 /* Base do Modal (pop-up) */
@@ -171,25 +169,20 @@ section h2{font-size:1.3rem;text-align:center;margin-bottom:15px;color:#ff7043}
   pointer-events: none;
   transition: opacity 0.3s ease;
 }
-
-/* Modal quando está visível */
 .modal.show {
   opacity: 1;
   pointer-events: auto;
 }
-
-/* O "card" branco do pop-up */
 .modal-content {
   background: #fff;
   border-radius: 12px;
   box-shadow: 0 4px 20px rgba(0,0,0,.2);
-  max-width: 400px; /* Mais limpo em desktop */
+  max-width: 400px;
   width: 90%;
   overflow: hidden;
   transform: scale(0.95);
   transition: transform 0.3s ease;
 }
-
 .modal.show .modal-content {
   transform: scale(1);
 }
@@ -200,20 +193,19 @@ section h2{font-size:1.3rem;text-align:center;margin-bottom:15px;color:#ff7043}
   justify-content: space-between;
   align-items: center;
   padding: 16px 20px;
-  border-bottom: none; /* Remove a borda cinza */
-  background: #ffca28; /* Cor do cabeçalho do site */
+  border-bottom: none;
+  background: #ffca28;
 }
-
 .modal-head h3 {
   margin: 0;
   font-size: 1.2rem;
   font-weight: 700;
-  color: #222; /* Texto escuro no fundo laranja */
+  color: #222;
 }
 
 /* Botões de fechar (X) - Estilo Laranja */
 .extras-close, .combo-close, .login-close {
-  background: #ffb300; /* Laranja mais escuro */
+  background: #ffb300;
   border: none;
   border-radius: 50%;
   width: 30px;
@@ -227,14 +219,14 @@ section h2{font-size:1.3rem;text-align:center;margin-bottom:15px;color:#ff7043}
   transition: all .2s;
 }
 .extras-close:hover, .combo-close:hover, .login-close:hover {
-  background: #ff7043; /* Laranja "quente" do site */
+  background: #ff7043;
   color: #fff;
   transform: scale(1.1);
 }
 
 /* Corpo do modal (lista de extras) */
 .extras-list, #combo-body {
-  padding: 10px 20px; /* Mais padding lateral */
+  padding: 10px 20px;
   max-height: 60vh;
   overflow-y: auto;
 }
@@ -242,13 +234,13 @@ section h2{font-size:1.3rem;text-align:center;margin-bottom:15px;color:#ff7043}
   display:flex;
   justify-content:space-between;
   align-items:center;
-  padding: 12px 4px; /* Mais espaçamento */
+  padding: 12px 4px;
   border-bottom:1px solid #eee;
   cursor:pointer;
   transition: background .2s;
 }
 .extra-line:hover {
-  background: #fffaf3; /* Fundo do site */
+  background: #fffaf3;
 }
 .extra-line span {
   font-size: 0.95rem;
@@ -310,11 +302,9 @@ section h2{font-size:1.3rem;text-align:center;margin-bottom:15px;color:#ff7043}
 
 /* --- ESTILOS DE LOGIN (MODERNIZADO) --- */
 .login-box {
-  padding: 20px; /* Padding interno da caixa */
+  padding: 20px;
   text-align: center;
 }
-
-/* Botão Google (Estilo "Clean") */
 .btn-google {
   display: flex;
   align-items: center;
@@ -337,8 +327,6 @@ section h2{font-size:1.3rem;text-align:center;margin-bottom:15px;color:#ff7043}
   transform: translateY(-2px);
   box-shadow: 0 2px 5px rgba(0,0,0,.05);
 }
-
-/* Ícone do Google (sem alteração) */
 .google-icon {
   width: 24px;
   height: 24px;
@@ -347,15 +335,12 @@ section h2{font-size:1.3rem;text-align:center;margin-bottom:15px;color:#ff7043}
   padding: 2px;
   object-fit: contain;
 }
-
 .login-safe {
   font-size: 0.8rem;
   color: #777;
   margin-top: 10px;
   display: block;
 }
-
-/* Divisor "ou" */
 .divider {
   display: flex;
   align-items: center;
@@ -371,8 +356,6 @@ section h2{font-size:1.3rem;text-align:center;margin-bottom:15px;color:#ff7043}
 }
 .divider:not(:empty)::before { margin-right: .5em; }
 .divider:not(:empty)::after { margin-left: .5em; }
-
-/* Formulário de e-mail */
 .login-form {
   display: flex;
   flex-direction: column;
@@ -380,7 +363,7 @@ section h2{font-size:1.3rem;text-align:center;margin-bottom:15px;color:#ff7043}
 }
 .login-form input {
   width: 100%;
-  padding: 14px; /* Mais confortável */
+  padding: 14px;
   border: 1px solid #ddd;
   border-radius: 10px;
   font-size: 1rem;
@@ -388,11 +371,75 @@ section h2{font-size:1.3rem;text-align:center;margin-bottom:15px;color:#ff7043}
   transition: all .2s;
 }
 .login-form input:focus {
-  border-color: #ff7043; /* Laranja quente no foco */
+  border-color: #ff7043;
   outline: none;
   box-shadow: 0 0 0 3px rgba(255, 112, 67, 0.2);
 }
 
 /* =========================================================
-   ✅ Final do CSS v2.5 — MODERNIZADO
+   🚨 NOVO CÓDIGO ADICIONADO AQUI:
+   Estilos para o banner de cookies.
 ========================================================= */
+#cookie-banner {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: rgba(34, 34, 34, 0.95); /* Fundo escuro */
+  color: #fff;
+  padding: 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  z-index: 2000;
+  transform: translateY(100%);
+  transition: transform 0.5s ease;
+}
+
+#cookie-banner.show {
+  transform: translateY(0);
+}
+
+#cookie-banner p {
+  margin: 0;
+  font-size: 0.9rem;
+  line-height: 1.4;
+  margin-right: 16px;
+}
+
+#cookie-banner a {
+  color: #ffca28; /* Amarelo/Laranja do site */
+  font-weight: 600;
+  text-decoration: underline;
+}
+
+#cookie-banner button {
+  background: #4caf50; /* Botão verde "Aceitar" */
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 10px 16px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background .2s;
+  flex-shrink: 0; /* Impede que o botão encolha */
+}
+#cookie-banner button:hover {
+  background: #43a047;
+}
+
+/* Ajuste responsivo para o banner de cookies */
+@media (max-width: 600px) {
+  #cookie-banner {
+    flex-direction: column;
+    text-align: center;
+    gap: 12px;
+  }
+  #cookie-banner p {
+    margin-right: 0;
+  }
+  #cookie-banner button {
+    width: 100%;
+    padding: 12px;
+  }
+}
