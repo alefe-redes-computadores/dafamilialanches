@@ -333,3 +333,40 @@ img {
 
 /* Toast sempre por cima */
 .popup-add{ z-index:10000; }
+/* ==================== DFL v2.6 - PATCH FINAL DE CAMADAS ==================== */
+
+/* Corrige cliques bloqueados (carrossel e overlays) */
+.carousel, .slides, .slide {
+  position: relative;
+  z-index: 1;
+  pointer-events: auto;
+}
+
+/* Garante que o conteúdo abaixo do header fique clicável */
+main, section, .menu-section, .grid, .card {
+  position: relative;
+  z-index: 2;
+}
+
+/* Header e botões fixos por cima, mas não bloqueiam o resto */
+.header {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background: #fff;
+}
+
+/* Backdrop do carrinho e modais só aparecem quando ativos */
+.backdrop, .modal, .orders-panel {
+  z-index: 100;
+}
+
+/* Toast “adicionado ao carrinho” acima de tudo */
+.popup-add {
+  z-index: 9999 !important;
+}
+
+/* Corrige espaçamento visual do topo */
+body {
+  padding-top: 5px;
+}
