@@ -3,6 +3,7 @@
    - Adiciona campos de endereço e cupom no carrinho
    - Aplica taxa de entrega fixa (R$ 6,00)
    - Mantém compatibilidade total com Firestore e login seguro
+   - CORREÇÃO: Readiciona a função de gráficos (gerarResumoECharts)
 ========================================================= */
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -10,19 +11,6 @@ document.addEventListener("DOMContentLoaded", () => {
   const sound = new Audio("click.wav");
   let cart = [];
   let currentUser = null;
-
-  // 💰 Valor fixo da taxa de entrega
-  //   (REMOVIDO DAQUI - AGORA ESTÁ NA LÓGICA V2.5 ABAIXO)
-  // const TAXA_ENTREGA = 6.00;
-
-  // 💸 Cupons válidos e regras
-  //   (REMOVIDO DAQUI - AGORA ESTÁ NA LÓGICA V2.5 ABAIXO)
-  // const CUPONS = { ... };
-
-  // 💾 Dados temporários
-  //   (REMOVIDO DAQUI - AGORA ESTÁ NA LÓGICA V2.5 ABAIXO)
-  // let cupomAplicado = null;
-  // let enderecoCliente = "";
 
   const money = (n) => `R$ ${Number(n || 0).toFixed(2).replace(".", ",")}`;
   const safe = (fn) => (...a) => { try { fn(...a); } catch (e) { console.error(e); } };
@@ -55,20 +43,17 @@ document.addEventListener("DOMContentLoaded", () => {
     userBtn: document.getElementById("user-btn"),
     statusBanner: document.getElementById("status-banner"),
     hoursBanner: document.querySelector(".hours-banner"),
-    // Adicionando os botões que eu incluí no HTML para garantir que o JS os veja
     reportsBtn: document.getElementById("reports-btn"), // Botão de admin
     myOrdersBtn: document.getElementById("orders-fab") // Botão Meus Pedidos
   };
 
   /* ------------------ 🌫️ BACKDROP ------------------ */
-  // (Garantindo que o backdrop exista, mesmo que o CSS falhe)
   if (!el.cartBackdrop) {
     const bd = document.createElement("div");
     bd.id = "cart-backdrop";
     document.body.appendChild(bd);
     el.cartBackdrop = bd;
   }
-
   const Backdrop = {
     show() { el.cartBackdrop.classList.add("active"); document.body.classList.add("no-scroll"); },
     hide() { el.cartBackdrop.classList.remove("active"); document.body.classList.remove("no-scroll"); },
@@ -105,20 +90,15 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
 /* ------------------ 🛒 MINI-CARRINHO (Limpo e Corrigido) ------------------ */
-  // ESTA É A FUNÇÃO QUE FOI CORRIGIDA.
-  // Ela agora SÓ renderiza a LISTA de itens.
-  // O rodapé (totais, cupom, endereço) é feito pela 'enhanceMiniCartUI'
   function renderMiniCart() {
     
-    if (!el.miniList) return; // Não precisamos mais do miniFoot aqui
+    if (!el.miniList) return; 
 
     const totalItens = cart.reduce((s, i) => s + i.qtd, 0);
     if (el.cartCount) el.cartCount.textContent = totalItens;
 
     if (!cart.length) {
       el.miniList.innerHTML = '<p style="text-align:center;color:#999;padding:20px;">Carrinho vazio 🛒</p>';
-      
-      // Limpamos o rodapé manualmente se o carrinho estiver vazio
       if(el.miniFoot) el.miniFoot.innerHTML = ""; 
       return;
     }
@@ -139,16 +119,11 @@ document.addEventListener("DOMContentLoaded", () => {
         </div>
       </div>
     `).join("");
-
-    // IMPORTANTE: Toda a lógica de criar o .mini-foot, os botões de cupom,
-    // endereço e os cálculos foram REMOVIDOS daqui, pois a
-    // função 'enhanceMiniCartUI' (linha 490) já faz isso.
   }
 
 
   /* 🔄 Vincula botões dinâmicos (incremento, remoção, limpar, finalizar) */
   function bindMiniCartButtons() {
-    // CORREÇÃO: Adicionado 'el.miniList' para garantir que só pegamos botões DENTRO do carrinho
     el.miniList.querySelectorAll(".cart-plus").forEach(b => b.addEventListener("click", e => {
       const i = +e.currentTarget.dataset.idx;
       if (cart[i]) {
@@ -172,9 +147,6 @@ document.addEventListener("DOMContentLoaded", () => {
       renderMiniCart();
       popupAdd("Item removido!");
     }));
-
-    // Os botões "finish-order" e "clear-cart" agora são vinculados
-    // pela função 'enhanceMiniCartUI'
   }
 
   const _renderMiniCartOrig = renderMiniCart;
@@ -182,10 +154,8 @@ document.addEventListener("DOMContentLoaded", () => {
     _renderMiniCartOrig();
     bindMiniCartButtons();
   };
-/* =========================================================
-   INÍCIO DA CORREÇÃO 
-   - Bloco de inicialização robusto do Firebase
-========================================================= */
+
+  /* ------------------ 🔥 FIREBASE ------------------ */
   const firebaseConfig = {
     apiKey: "AIzaSyATQBcbYuzKpKlSwNlbpRiAM1XyHqhGeak",
     authDomain: "da-familia-lanches.firebaseapp.com",
@@ -195,25 +165,19 @@ document.addEventListener("DOMContentLoaded", () => {
     appId: "1:106857147317:web:769c98aed26bb8fc9e87fc",
   };
   
-  let auth, db; // Declarados aqui para estarem disponíveis para todo o script
+  let auth, db; 
 
   try {
-    // 1. Verifica se o Firebase App (principal) carregou
     if (!window.firebase) {
       throw new Error("Biblioteca principal do Firebase (app) não carregou.");
     }
-    // 2. Inicializa o App
     if (!firebase.apps.length) {
       firebase.initializeApp(firebaseConfig);
     }
-    
-    // 3. Verifica se o Módulo de Autenticação carregou
     if (!firebase.auth) {
       throw new Error("Módulo de Autenticação (auth) não carregou.");
     }
     auth = firebase.auth();
-    
-    // 4. Verifica se o Módulo de Banco de Dados carregou
     if (!firebase.firestore) {
       throw new Error("Módulo de Banco de Dados (firestore) não carregou.");
     }
@@ -221,7 +185,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
   } catch (error) {
     console.error("ERRO FATAL AO INICIAR FIREBASE:", error);
-    // Mostra um erro fatal para o usuário e PARA a execução do script
     const elBody = document.querySelector("body");
     if (elBody) {
        elBody.innerHTML = `<div style="padding:20px;text-align:center;font-size:1.2rem;color:red;font-family:sans-serif;margin-top:50px;">
@@ -231,11 +194,6 @@ document.addEventListener("DOMContentLoaded", () => {
     }
     return; // ABORTA O RESTO DO SCRIPT.JS
   }
-/* =========================================================
-   FIM DA CORREÇÃO 
-   - O resto do script só executa se 'auth' e 'db'
-     forem carregados com sucesso.
-========================================================= */
 
   /* ------------------ ⚙️ LOGIN ------------------ */
   el.userBtn?.addEventListener("click", () => Overlays.open(el.loginModal));
@@ -243,7 +201,6 @@ document.addEventListener("DOMContentLoaded", () => {
     btn.addEventListener("click", () => Overlays.closeAll())
   );
 
-  // ✅ Login seguro com verificação + popup de feedback
   el.loginForm?.addEventListener("submit", (e) => {
     e.preventDefault();
     const email = document.getElementById("login-email")?.value?.trim();
@@ -253,7 +210,6 @@ document.addEventListener("DOMContentLoaded", () => {
     auth.signInWithEmailAndPassword(email, senha)
       .then((cred) => {
         currentUser = cred.user;
-        // el.userBtn.textContent = `Olá, ${currentUser.displayName?.split(" ")[0] || currentUser.email.split("@")[0]}`; // Removido, pois o onAuthStateChanged já faz isso
         popupAdd("Login realizado com sucesso!");
         Overlays.closeAll();
       })
@@ -263,7 +219,6 @@ document.addEventListener("DOMContentLoaded", () => {
             auth.createUserWithEmailAndPassword(email, senha)
               .then((cred) => {
                 currentUser = cred.user;
-                // el.userBtn.textContent = `Olá, ${currentUser.email.split("@")[0]}`; // Removido
                 popupAdd("Conta criada com sucesso! 🎉");
                 Overlays.closeAll();
               })
@@ -272,26 +227,21 @@ document.addEventListener("DOMContentLoaded", () => {
         } else if (err.code === "auth/wrong-password") {
           alert("Senha incorreta. Tente novamente.");
         } else {
-          alert("Erro: " + err.message);
+          alert("Erro: ".concat(err.message));
         }
       });
   });
 
-  /* ------------------ Login com Google + Estado ------------------ */
   el.googleBtn?.addEventListener("click", () => {
     const provider = new firebase.auth.GoogleAuthProvider();
     auth.signInWithPopup(provider)
       .then((res) => {
         currentUser = res.user;
-        // el.userBtn.textContent = `Olá, ${currentUser.displayName?.split(" ")[0] || "Cliente"}`; // Removido
         popupAdd("Login com Google realizado! ✅");
         Overlays.closeAll();
       })
-      .catch((err) => alert("Erro: " + err.message));
+      .catch((err) => alert("Erro: ".concat(err.message)));
   });
-
-  // REMOVIDO o primeiro auth.onAuthStateChanged que estava aqui, 
-  // pois ele será sobrescrito pelo listener final (mais completo) no fim do arquivo.
 
   /* ------------------ ➕ Adicionais ------------------ */
   const adicionais = [
@@ -314,9 +264,9 @@ document.addEventListener("DOMContentLoaded", () => {
     produtoPrecoBase = parseFloat(card.dataset.price) || 0;
 
     el.extrasList.innerHTML = adicionais.map((a, i) => `
-      <label class="extra-line" style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid #eee;cursor:pointer;">
+      <label class="extra-line">
         <span>${a.nome} — <b>${money(a.preco)}</b></span>
-        <input type="checkbox" value="${i}" style="width:20px;height:20px;cursor:pointer;">
+        <input type="checkbox" value="${i}">
       </label>`).join("");
     Overlays.open(el.extrasModal);
   });
@@ -328,8 +278,6 @@ document.addEventListener("DOMContentLoaded", () => {
   el.extrasConfirm?.addEventListener("click", () => {
     if (!produtoExtras) return Overlays.closeAll();
     const checks = [...document.querySelectorAll("#extras-modal .extras-list input:checked")];
-    // Permitir adicionar sem extras, caso o usuário só queira o lanche (embora o botão "adicionar" já faça isso)
-    // if (!checks.length) return alert("Selecione pelo menos um adicional!"); 
 
     const extrasContagem = {};
     checks.forEach(c => {
@@ -349,7 +297,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const precoExtras = Object.values(extrasContagem).reduce((t, e) => t + (e.preco * e.qtd), 0);
     const precoTotal = produtoPrecoBase + precoExtras;
-    const nomeCompleto = extrasNomes ? `${produtoExtras} + ${extrasNomes}` : produtoExtras; // Adiciona sem extras se nada for marcado
+    const nomeCompleto = extrasNomes ? `${produtoExtras} + ${extrasNomes}` : produtoExtras;
 
     const existente = cart.find(i => i.nome === nomeCompleto);
     if (existente) existente.qtd++;
@@ -395,9 +343,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const opts = comboDrinkOptions[grupo];
     el.comboBody.innerHTML = opts.map((o, i) => `
-      <label class="extra-line" style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid #eee;cursor:pointer;">
+      <label class="extra-line">
         <span>${o.rotulo} — + ${money(o.delta)}</span>
-        <input type="radio" name="combo-drink" value="${i}" ${i === 0 ? "checked" : ""} style="width:20px;height:20px;cursor:pointer;">
+        <input type="radio" name="combo-drink" value="${i}" ${i === 0 ? "checked" : ""}>
       </label>
     `).join("");
 
@@ -450,10 +398,8 @@ document.addEventListener("DOMContentLoaded", () => {
   );
 
   /* ------------------ 🛒 ABRIR CARRINHO ------------------ */
-  // Este é o listener que abre o carrinho. 
-  // Agora ele deve funcionar.
   el.cartIcon?.addEventListener("click", () => {
-    renderMiniCart(); // Garante que o carrinho está atualizado antes de abrir
+    renderMiniCart();
     Overlays.open(el.miniCart);
   });
   document.querySelectorAll("#mini-cart .extras-close").forEach((b) =>
@@ -462,18 +408,13 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
 /* ------------------ ⚙️ CONFIGURAÇÕES V2.5 ------------------ */
-  const DELIVERY_FEE = 6.00; // 💸 taxa fixa de entrega (R$ 6,00)
+  const DELIVERY_FEE = 6.00; 
 
-  // 🏷️ Tabela de cupons (exemplos)
-  // - Valores percentuais usam "percent"
-  // - Valores fixos usam "value"
-  // - FRETEZERO zera a taxa de entrega
   const COUPONS = {
     "DFL5":        { type: "percent", value: 5,  note: "5% OFF" },
     "DFL10":       { type: "percent", value: 10, note: "10% OFF" },
     "BEMVINDO":    { type: "value",   value: 5,  note: "R$ 5,00 OFF na 1ª compra" },
     "FRETEZERO":   { type: "frete",   value: 0,  note: "Frete grátis" },
-    // Adicionando os cupons da sua lógica antiga para garantir
     "FAMILIA10": { type: "percent", value: 10,  note: "10% OFF" },
     "PRIMEIRO": { type: "value",   value: 5,  note: "R$ 5,00 OFF" } 
   };
@@ -520,9 +461,6 @@ document.addEventListener("DOMContentLoaded", () => {
   /* ------------------ 🛒 MINI-CARRINHO: UI ESTENDIDA V2.5 ------------------ */
   function enhanceMiniCartUI() {
     if (!el.miniFoot) return;
-
-    // Se o carrinho estiver vazio, a função 'renderMiniCart' (limpa)
-    // já vai ter limpado o miniFoot. Então não fazemos nada.
     if (cart.length === 0) return;
 
     const { subtotal, delivery, discount, discountLabel, total } = calcTotals();
@@ -562,7 +500,6 @@ document.addEventListener("DOMContentLoaded", () => {
       </div>
     `;
 
-    // Listeners dos novos campos
     document.getElementById("apply-coupon")?.addEventListener("click", () => {
       const input = document.getElementById("coupon-input");
       const val = (input?.value || "").trim().toUpperCase();
@@ -588,22 +525,20 @@ document.addEventListener("DOMContentLoaded", () => {
       localStorage.setItem("dflAddress", addressValue);
     });
 
-    // Reaplica os binds padrão do mini-carrinho (mantendo tudo funcionando)
     document.getElementById("finish-order")?.addEventListener("click", fecharPedido);
     document.getElementById("clear-cart")?.addEventListener("click", () => {
       if (confirm("Limpar todo o carrinho?")) {
         cart = [];
-        renderMiniCart(); // isto reaplica enhanceMiniCartUI automaticamente (ver override abaixo)
+        renderMiniCart();
         popupAdd("Carrinho limpo!");
       }
     });
   }
 
-  // 🔁 Reforço: quando o renderMiniCart original roda, reaplicamos a UI estendida
   const __renderMiniCartPrev = renderMiniCart;
   renderMiniCart = function() {
-    __renderMiniCartPrev();   // rendeiriza lista + botões + binds padrões
-    enhanceMiniCartUI();      // injeta totais, endereço e cupom
+    __renderMiniCartPrev();
+    enhanceMiniCartUI();
   };
 
   /* ------------------ 🖼️ Carrossel (mantido) ------------------ */
@@ -637,12 +572,10 @@ document.addEventListener("DOMContentLoaded", () => {
       if (!elTimer) return;
 
       if (aberto) {
-        // CORREÇÃO: O seu HTML dizia 23h30, mas seu JS antigo dizia 23h00.
-        // Vou usar 23h30 (23, 30) como referência.
         const fim = new Date(agora);
         fim.setHours(23, 30, 0); // 23h30
         
-        let diff = (fim - agora) / 1000; // segundos
+        let diff = (fim - agora) / 1000;
         if (diff < 0) diff = 0;
         
         const restH = Math.floor(diff / 3600);
@@ -652,12 +585,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
       } else {
         const inicio = new Date(agora);
-        if (h >= 23 || (h === 23 && m >= 30)) { // Se já passou das 23h30
-          inicio.setDate(inicio.getDate() + 1); // Pula para o dia seguinte
+        if (h >= 23 || (h === 23 && m >= 30)) { 
+          inicio.setDate(inicio.getDate() + 1);
         }
-        inicio.setHours(18, 0, 0); // Próxima abertura às 18h
+        inicio.setHours(18, 0, 0); 
 
-        let diff = (inicio - agora) / 1000; // segundos
+        let diff = (inicio - agora) / 1000;
         const faltamH = Math.floor(diff / 3600);
         const faltamM = Math.floor((diff % 3600) / 60);
 
@@ -737,25 +670,23 @@ document.addEventListener("DOMContentLoaded", () => {
         const texto = encodeURIComponent(linhas);
         window.open(`https://wa.me/5534997178336?text=${texto}`, "_blank");
 
-        // Limpa carrinho e mantém endereço/cupom salvos
         cart = [];
         renderMiniCart();
         Overlays.closeAll();
       })
-      .catch((err) => alert("Erro: " + err.message));
+      .catch((err) => alert("Erro: ".concat(err.message)));
   }
 
-  // 🔰 Primeira renderização do mini-carrinho com UI estendida
   renderMiniCart();
+  
 /* ------------------ 📦 Meus Pedidos (UI + lógica V2.5) ------------------ */
-  // CORREÇÃO: Usando a variável 'el.myOrdersBtn' que definimos no topo
   let ordersFab = el.myOrdersBtn;
   if (!ordersFab) {
     ordersFab = document.createElement("button");
-    ordersFab.id = "orders-fab"; // ID que o seu CSS espera
+    ordersFab.id = "orders-fab"; 
     ordersFab.innerHTML = "📦 Meus Pedidos";
     document.body.appendChild(ordersFab);
-    el.myOrdersBtn = ordersFab; // Atualiza a referência
+    el.myOrdersBtn = ordersFab; 
   }
 
   let ordersPanel = document.querySelector(".orders-panel");
@@ -778,7 +709,6 @@ document.addEventListener("DOMContentLoaded", () => {
     ordersPanel.classList.add("active");
     Backdrop.show();
   }
-  function closeOrdersPanel() { Overlays.closeAll(); }
 
   ordersFab.addEventListener("click", () => {
     if (!currentUser) return alert("Faça login para ver seus pedidos.");
@@ -786,10 +716,9 @@ document.addEventListener("DOMContentLoaded", () => {
     carregarPedidosSeguro();
   });
 
-  ordersPanel.querySelector(".orders-close")?.addEventListener("click", closeOrdersPanel);
+  ordersPanel.querySelector(".orders-close")?.addEventListener("click", () => Overlays.closeAll());
 
   function showOrdersFabIfLogged() {
-    // CORREÇÃO: Usando a referência correta
     if (el.myOrdersBtn) {
       if (currentUser) el.myOrdersBtn.classList.add("show");
       else el.myOrdersBtn.classList.remove("show");
@@ -803,7 +732,6 @@ document.addEventListener("DOMContentLoaded", () => {
     container.innerHTML = `<p class="empty-orders">Carregando pedidos...</p>`;
 
     if (!currentUser || !currentUser.email) {
-      // Espera um pouco caso o currentUser ainda não esteja pronto
       setTimeout(carregarPedidosSeguro, 500);
       return;
     }
@@ -847,12 +775,10 @@ document.addEventListener("DOMContentLoaded", () => {
       });
     };
 
-    // Tenta buscar por email (compatibilidade com logins antigos)
     db.collection("Pedidos")
       .where("usuario", "==", currentUser.email)
       .get()
       .then((snap) => {
-        // Se não achar por email, busca por userId (método mais seguro)
         if (!snap.empty) return render(snap);
         return db.collection("Pedidos")
           .where("userId", "==", currentUser.uid)
@@ -866,8 +792,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
   /* =========================================================
      📊 ADMIN DASHBOARD (V2.5 com Cupom + Frete + Desconto)
-     - Mantém Chart Destroy fix
-     - Inclui novos campos no CSV
   ========================================================= */
   const ADMINS = [
     "alefejohsefe@gmail.com",
@@ -898,7 +822,7 @@ document.addEventListener("DOMContentLoaded", () => {
     div.className = "modal";
     div.innerHTML = `
       <div class="modal-content" style="max-width:1000px;width:95%;height:85vh;overflow:auto;background:#fff;border-radius:12px;">
-        <div class="modal-head" style="display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #ddd;padding:10px 14px;">
+        <div class="modal-head" style="display:flex;justify-content:space-between;align-items:center;padding:10px 14px;">
           <h3>📊 Relatórios e Estatísticas</h3>
           <button class="dashboard-close" type="button" style="background:#ff5252;color:#fff;border:none;border-radius:6px;padding:6px 10px;cursor:pointer;font-weight:600;">✖</button>
         </div>
@@ -927,7 +851,6 @@ document.addEventListener("DOMContentLoaded", () => {
       </div>`;
     document.body.appendChild(div);
 
-    // estiliza cards
     document.querySelectorAll(".cardBox").forEach(c => {
       Object.assign(c.style, {
         flex: "1", minWidth: "200px", padding: "12px",
@@ -940,9 +863,8 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function createAdminFab() {
-    // CORREÇÃO: Usando a referência 'el.reportsBtn' do HTML
     if (el.reportsBtn) {
-      el.reportsBtn.style.display = "block"; // Apenas mostra o botão que já existe
+      el.reportsBtn.style.display = "block";
       el.reportsBtn.addEventListener("click", () => {
         createDashboard();
         ensureChartJS(() => carregarRelatorios("7"));
@@ -950,6 +872,118 @@ document.addEventListener("DOMContentLoaded", () => {
       });
     }
   }
+
+/* 🚨 =========================================================
+     INÍCIO DA CORREÇÃO (FUNÇÃO DO GRÁFICO)
+     Esta função estava faltando e foi recriada.
+   ========================================================= 🚨
+*/
+  function gerarResumoECharts(pedidos) {
+    if (!window.Chart) {
+      console.error("Chart.js não está carregado.");
+      return;
+    }
+    
+    const ctxPedidos = document.getElementById('chart-pedidos')?.getContext('2d');
+    const ctxProdutos = document.getElementById('chart-produtos')?.getContext('2d');
+
+    if (!ctxPedidos || !ctxProdutos) {
+      console.error("Elementos <canvas> dos gráficos não encontrados.");
+      return;
+    }
+
+    // --- Gráfico 1: Pedidos por Dia (Gráfico de Linha) ---
+    const pedidosPorDia = {};
+    pedidos.forEach(p => {
+      const dia = p.data.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' });
+      pedidosPorDia[dia] = (pedidosPorDia[dia] || 0) + 1;
+    });
+
+    // Ordena os dados por data
+    const labelsPedidos = Object.keys(pedidosPorDia).sort((a, b) => {
+      const [diaA, mesA] = a.split('/');
+      const [diaB, mesB] = b.split('/');
+      return new Date(`${mesA}/${diaA}/2025`) - new Date(`${mesB}/${diaB}/2025`);
+    });
+    const dataPedidos = labelsPedidos.map(label => pedidosPorDia[label]);
+
+    if (chartPedidos) {
+      chartPedidos.destroy(); // Destrói gráfico anterior para evitar bugs
+    }
+    chartPedidos = new Chart(ctxPedidos, {
+      type: 'line',
+      data: {
+        labels: labelsPedidos,
+        datasets: [{
+          label: 'Pedidos por Dia',
+          data: dataPedidos,
+          backgroundColor: 'rgba(255, 179, 0, 0.2)',
+          borderColor: '#ffb300',
+          borderWidth: 2,
+          fill: true,
+          tension: 0.1
+        }]
+      },
+      options: {
+        responsive: true,
+        plugins: {
+          title: { display: true, text: 'Volume de Pedidos por Dia' }
+        }
+      }
+    });
+
+    // --- Gráfico 2: Produtos Mais Vendidos (Gráfico de Barras) ---
+    const produtosContagem = {};
+    pedidos.forEach(p => {
+      p.itens.forEach(itemStr => {
+        // Parseia o item, ex: "Bão + Bacon x2"
+        const parts = itemStr.split(' x');
+        const nome = parts[0];
+        const qtd = parts.length > 1 ? parseInt(parts[1], 10) : 1;
+        
+        if (nome) {
+          produtosContagem[nome] = (produtosContagem[nome] || 0) + (isNaN(qtd) ? 1 : qtd);
+        }
+      });
+    });
+
+    // Pega o Top 10 produtos
+    const produtosOrdenados = Object.entries(produtosContagem)
+      .sort(([, a], [, b]) => b - a)
+      .slice(0, 10); // Pega os 10 mais vendidos
+
+    const labelsProdutos = produtosOrdenados.map(p => p[0]);
+    const dataProdutos = produtosOrdenados.map(p => p[1]);
+
+    if (chartProdutos) {
+      chartProdutos.destroy(); // Destrói gráfico anterior
+    }
+    chartProdutos = new Chart(ctxProdutos, {
+      type: 'bar',
+      data: {
+        labels: labelsProdutos,
+        datasets: [{
+          label: 'Itens Mais Vendidos',
+          data: dataProdutos,
+          backgroundColor: '#ff7043',
+          borderColor: '#d84315',
+          borderWidth: 1
+        }]
+      },
+      options: {
+        indexAxis: 'y', // Deixa o gráfico na horizontal para ler os nomes
+        responsive: true,
+        plugins: {
+          title: { display: true, text: 'Top 10 Itens Mais Vendidos' }
+        }
+      }
+    });
+  }
+/* 🚨 =========================================================
+     FIM DA CORREÇÃO (FUNÇÃO DO GRÁFICO)
+   ========================================================= 🚨
+*/
+
 /* ------------------ 📊 Carregar Relatórios (V2.5) ------------------ */
   function carregarRelatorios(periodo = "7") {
     const agora = new Date();
@@ -963,10 +997,8 @@ document.addEventListener("DOMContentLoaded", () => {
       .orderBy("data", "desc")
       .get()
       .then(snap => {
-        // Normaliza documentos (compatível com pedidos antigos e novos)
         const pedidos = snap.docs.map(d => {
           const p = d.data() || {};
-          // Compat: total pode existir sem subtotal/desconto/entrega (v2.3-)
           const subtotal = Number(p.subtotal ?? 0);
           const entrega  = Number(p.entrega  ?? 0);
           const desconto = Number(p.desconto ?? 0);
@@ -974,7 +1006,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
           return {
             ...p,
-            id: d.id, // Garante que o ID do documento está presente
+            id: d.id,
             subtotal,
             entrega,
             desconto,
@@ -989,12 +1021,12 @@ document.addEventListener("DOMContentLoaded", () => {
         });
 
         const filtrados = pedidos.filter(p => periodo === "all" || (p.data >= start));
-        // A função 'gerarResumoECharts' não foi fornecida no seu código,
-        // então estou comentando para evitar erros.
-        // Se você tiver essa função, pode descomentar.
-        // gerarResumoECharts(filtrados); 
         
-        // Em vez disso, vamos apenas preencher os cards de resumo:
+        // 🚨 CORREÇÃO APLICADA AQUI 🚨
+        // A linha abaixo estava comentada, agora ela vai chamar a função de gráfico
+        gerarResumoECharts(filtrados); 
+        
+        // Preenche os cards de resumo
         const totalVendido = filtrados.reduce((s, p) => s + p.total, 0);
         const numPedidos = filtrados.length;
         const ticketMedio = numPedidos > 0 ? totalVendido / numPedidos : 0;
@@ -1003,7 +1035,7 @@ document.addEventListener("DOMContentLoaded", () => {
         document.getElementById("card-pedidos").textContent = `Pedidos: ${numPedidos}`;
         document.getElementById("card-ticket").textContent = `Ticket Médio: ${money(ticketMedio)}`;
 
-        // Lógica de exportar CSV (adaptada do seu código, mas não estava completa)
+        // Lógica de exportar CSV
         document.getElementById("export-csv").onclick = () => {
             let csv = "ID;Data;Usuario;Nome;Itens;Subtotal;Entrega;Desconto;Cupom;Total;Endereco\n";
             filtrados.forEach(p => {
@@ -1031,9 +1063,8 @@ document.addEventListener("DOMContentLoaded", () => {
         };
 
       })
-      .catch(err => alert("Erro ao carregar relatórios: " + err.message));
+      .catch(err => alert("Erro ao carregar relatórios: ".concat(err.message)));
 
-    // bind do seletor de período (uma única vez)
     const sel = document.getElementById("filter-period");
     if (sel && !sel._bound) {
       sel.addEventListener("change", e => carregarRelatorios(e.target.value));
@@ -1042,9 +1073,8 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   /* ------------------ 🔐 Segurança/Admin + UX Final ------------------ */
-  // Este é o ÚNICO 'onAuthStateChanged'. Ele controla tudo.
   auth.onAuthStateChanged(user => {
-    currentUser = user; // Atualiza o currentUser global
+    currentUser = user; 
     
     if (user) {
       el.userBtn.textContent = `Olá, ${user.displayName?.split(" ")[0] || user.email.split("@")[0]}`;
@@ -1054,19 +1084,17 @@ document.addEventListener("DOMContentLoaded", () => {
       showOrdersFabIfLogged(); // Esconde "Meus Pedidos"
     }
 
-    // Lógica do Painel Admin
     if (user && isAdmin(user)) {
       if (el.reportsBtn) {
-        createAdminFab(); // Liga o botão "Relatórios" que estava escondido
+        createAdminFab();
       }
     } else {
-      if (el.reportsBtn) el.reportsBtn.style.display = "none"; // Esconde o botão
-      document.getElementById("admin-dashboard")?.remove(); // Remove o painel se estiver aberto
-      Overlays.closeAll(); // Fecha o dashboard se o usuário fizer logout
+      if (el.reportsBtn) el.reportsBtn.style.display = "none";
+      document.getElementById("admin-dashboard")?.remove();
+      Overlays.closeAll();
     }
   });
 
-  // Evita estado “zumbi” ao voltar do histórico (PWA/Android)
   window.addEventListener("pageshow", (e) => {
     if (e.persisted) {
       console.warn("↻ Página reaberta via cache, recarregando...");
@@ -1074,7 +1102,6 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
-  // Observabilidade: erros comuns em leitura de strings/arrays antigos
   window.addEventListener("error", (e) => {
     if (String(e?.message || "").toLowerCase().includes("split")) {
       popupAdd("Humm… houve um pequeno erro ao ler dados. Atualize a página.");
