@@ -1,104 +1,207 @@
-/* ============ 2.6 VISUAL / UX SAFE PATCH ============ */
+/* =========================================================
+   🍔 DFL v2.6 — ESTÁVEL CONSOLIDADA (Base Gemini + Safe Patch)
+   Autor: ChatGPT x Álefe Jôhsefe
+   Objetivo: manter a base da v2.5 estável com correções visuais,
+   fundo amarelo DFL, carrossel suave (2½ cards), e cliques restaurados.
+========================================================= */
 
-/* 1) Painel "Meus Pedidos" — fechado por padrão, abre suave */
-.orders-panel {
-  position: fixed;
-  right: 12px;
-  bottom: 12px;
-  width: min(420px, 94vw);
-  max-height: 80vh;
-  background: #fff;
-  border: 1px solid #eee;
-  border-radius: 14px;
-  box-shadow: 0 12px 30px rgba(0,0,0,.14);
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
+/* ------------------ 🌈 BASE VISUAL ------------------ */
+:root {
+  --amarelo: #ffd54f;
+  --laranja: #ff9800;
+  --preto: #111;
+  --branco: #fff;
+  --sombra: rgba(0, 0, 0, 0.15);
+}
 
-  /* fechado inicialmente */
-  opacity: 0;
-  transform: translateY(16px);
-  visibility: hidden;
-  transition: opacity .25s ease, transform .25s ease, visibility .25s;
-  z-index: 9999; /* acima do resto */
+body {
+  font-family: "Poppins", sans-serif;
+  margin: 0;
+  background: var(--branco);
+  color: var(--preto);
+  padding-top: 60px;
 }
-.orders-panel.active {
-  opacity: 1;
-  transform: translateY(0);
-  visibility: visible;
-}
-.orders-head {
+
+/* ------------------ 🔝 HEADER ------------------ */
+.header {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background: var(--amarelo);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+  padding: 10px 16px;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 10px 12px;
-  background: #fffbe6;
-  border-bottom: 1px solid #ffe58f;
-  font-weight: 700;
+  gap: 10px;
 }
-.orders-head .orders-close {
-  border: 0;
-  background: #ff4d4f;
-  color: #fff;
-  border-radius: 8px;
-  padding: 6px 10px;
-  cursor: pointer;
-  font-weight: 700;
+.header-content {
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
-.orders-content {
-  padding: 12px;
-  overflow: auto;
-}
-.order-item {
-  border: 1px solid #f0f0f0;
-  border-radius: 10px;
-  padding: 10px;
-  margin-bottom: 10px;
-  background: #fff;
-}
-
-/* 2) Toast “adicionado ao carrinho” — sempre visível por cima */
-.popup-add {
-  position: fixed;
-  left: 50%;
-  bottom: 18px;
-  transform: translateX(-50%) translateY(12px);
-  background: #111;
-  color: #fff;
-  padding: 10px 16px;
-  border-radius: 999px;
-  font-weight: 700;
-  box-shadow: 0 8px 24px rgba(0,0,0,.2);
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity .25s ease, transform .25s ease;
-  z-index: 10000;
-}
-.popup-add.show {
-  opacity: 1;
-  transform: translateX(-50%) translateY(0);
-}
-
-/* 3) Imagens/ícones — impedir “gigantes” */
-.card img,
-.menu-section .card img,
-.carousel .slide {
-  max-width: 100%;
-  height: auto;
+.header .logo {
+  height: 56px;
+  width: auto;
+  object-fit: contain;
   display: block;
 }
-.menu-section .card img { 
-  max-height: 140px;     /* limite nos cards */
-  object-fit: contain;
-  margin-inline: auto;
+.header-info h1 {
+  margin: 0;
+  line-height: 1.1;
+  font-size: 1.4rem;
 }
-.carousel .slide { 
-  max-height: 360px;     /* limite no carrossel */
-  object-fit: cover;
-  border-radius: 10px;
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.user-button,
+.cart-button,
+#reports-btn {
+  background: var(--branco);
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 14px;
+  padding: 6px 10px;
+  cursor: pointer;
+  transition: 0.2s;
+}
+.user-button:hover,
+.cart-button:hover,
+#reports-btn:hover {
+  background: #f8f8f8;
 }
 
-/* 4) Mini-carrinho — tipografia e botões proporcionais */
+/* ------------------ 🕒 STATUS BANNERS ------------------ */
+.status-banner {
+  text-align: center;
+  font-weight: 600;
+  padding: 6px;
+}
+.status-banner.open {
+  background: #e8f5e9;
+  color: #388e3c;
+}
+.status-banner.closed {
+  background: #ffebee;
+  color: #c62828;
+}
+.hours-banner {
+  text-align: center;
+  background: #fffde7;
+  padding: 4px 0;
+  font-size: 0.95rem;
+}
+
+/* ------------------ 🧲 CARROSSEL ------------------ */
+.carousel {
+  position: relative;
+  margin: 10px 0 16px;
+}
+.slides {
+  display: flex;
+  gap: 14px;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+  padding: 6px;
+}
+.slides::-webkit-scrollbar {
+  display: none;
+}
+.slide {
+  flex: 0 0 auto;
+  width: 75vw; /* 2 e meio cards visíveis */
+  max-width: 340px;
+  height: 220px;
+  object-fit: cover;
+  border-radius: 12px;
+  scroll-snap-align: start;
+  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.12);
+  transition: transform 0.25s ease;
+}
+.slide:hover {
+  transform: scale(1.03);
+}
+.c-btn {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  border: none;
+  background: #00000088;
+  color: #fff;
+  width: 34px;
+  height: 34px;
+  border-radius: 999px;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  z-index: 2;
+}
+.c-prev {
+  left: 8px;
+}
+.c-next {
+  right: 8px;
+}
+
+/* ------------------ 🍔 MENU / CARDS ------------------ */
+.menu-section {
+  padding: 10px 16px;
+}
+.menu-section h2 {
+  font-size: 1.3rem;
+  margin: 10px 0;
+}
+.grid {
+  display: grid;
+  gap: 12px;
+}
+.card {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.06);
+  padding: 12px;
+  text-align: center;
+}
+.card img {
+  width: 100%;
+  height: 220px;
+  object-fit: cover;
+  border-radius: 12px;
+}
+.price {
+  font-weight: 600;
+  margin: 4px 0;
+}
+.actions {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+}
+.add-cart,
+.extras-btn {
+  border: none;
+  border-radius: 8px;
+  padding: 8px 10px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: 0.2s;
+}
+.add-cart {
+  background: var(--laranja);
+  color: #fff;
+}
+.extras-btn {
+  background: #f0f0f0;
+}
+.add-cart:hover {
+  background: #fb8c00;
+}
+
+/* ------------------ 🛒 MINI CARRINHO ------------------ */
 .mini-cart {
   width: min(420px, 94vw);
   position: fixed;
@@ -108,11 +211,11 @@
   background: #fff;
   border-radius: 14px;
   border: 1px solid #eee;
-  box-shadow: 0 12px 30px rgba(0,0,0,.14);
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.14);
   transform: translateX(24px);
   opacity: 0;
   visibility: hidden;
-  transition: opacity .25s ease, transform .25s ease, visibility .25s;
+  transition: opacity 0.25s ease, transform 0.25s ease, visibility 0.25s;
   z-index: 9998;
   display: flex;
   flex-direction: column;
@@ -123,250 +226,143 @@
   visibility: visible;
 }
 .mini-head {
-  display: flex; align-items: center; justify-content: space-between;
-  padding: 10px 12px; border-bottom: 1px solid #f0f0f0;
-  background: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 12px;
+  border-bottom: 1px solid #f0f0f0;
 }
-.mini-list { padding: 10px 12px; overflow: auto; }
-.mini-foot { border-top: 1px solid #f0f0f0; }
-
-/* Deixar botões +/- e lixeira em tamanho confortável, sem “exagero” */
-.cart-item button.menos,
-.cart-item button.mais,
+.cart-item button {
+  border: none;
+  cursor: pointer;
+  border-radius: 6px;
+  font-size: 16px;
+}
+.cart-item button.menos {
+  background: #ff6b81;
+  color: #fff;
+}
+.cart-item button.mais {
+  background: #4caf50;
+  color: #fff;
+}
 .cart-item button.remover {
-  width: 30px; height: 30px; border-radius: 8px;
-  border: 0; cursor: pointer; font-size: 16px;
-}
-.cart-item button.menos { background: #ff6b81; color: #fff; }
-.cart-item button.mais  { background: #4caf50; color: #fff; }
-.cart-item button.remover { background: #d32f2f; color: #fff; }
-
-/* 5) Modais (adicionais/combos/login) mais bonitos */
-.modal .modal-content {
-  border-radius: 14px;
-  box-shadow: 0 18px 40px rgba(0,0,0,.22);
-  border: 1px solid #eee;
-}
-.modal .modal-head {
-  padding: 10px 12px; border-bottom: 1px solid #f0f0f0; background: #fff;
-}
-.modal .modal-foot {
-  padding: 10px 12px; border-top: 1px solid #f0f0f0; background: #fff;
-}
-.extra-line {
-  border: 1px solid #eee; border-radius: 10px;
-  padding: 10px 12px; margin-bottom: 8px; background: #fff;
+  background: #d32f2f;
+  color: #fff;
 }
 
-/* 6) Google/lock no login/usuário */
-#user-btn { font-weight: 700; }
-#user-btn::before {
-  content: "🔒 ";
-}
-.google-btn {
-  display: inline-flex; align-items: center; justify-content: center;
-  gap: 8px; width: 100%;
-  border: 0; border-radius: 10px; padding: 10px 12px;
-  background: #fff; color: #111; font-weight: 700;
-  box-shadow: 0 2px 10px rgba(0,0,0,.08);
-}
-.google-btn::before {
-  content: ""; display: inline-block; width: 18px; height: 18px;
-  background: url('imagens/google-icon.png') center/contain no-repeat;
-}
-
-/* 7) Banner de cookies mais clean */
-.cookie-banner {
-  position: fixed; left: 12px; right: 12px; bottom: 12px;
-  padding: 12px; border-radius: 12px; background: #111; color: #fff;
-  display: flex; flex-wrap: wrap; align-items: center; gap: 10px;
-  box-shadow: 0 10px 26px rgba(0,0,0,.24);
-  opacity: 0; transform: translateY(10px); visibility: hidden;
-  transition: opacity .25s ease, transform .25s ease, visibility .25s;
-  z-index: 10000;
-}
-.cookie-banner.show {
-  opacity: 1; transform: translateY(0); visibility: visible;
-}
-.cookie-banner a { color: #ffd54f; text-decoration: underline; }
-#cookie-accept {
-  margin-left: auto; border: 0; border-radius: 10px;
-  padding: 10px 12px; background: #4caf50; color: #fff;
-  font-weight: 800; cursor: pointer;
-}
-
-/* 8) Backdrop padrão */
-#cart-backdrop.backdrop,
-#cart-backdrop {
-  position: fixed; inset: 0; background: rgba(0,0,0,.35);
-  opacity: 0; visibility: hidden; transition: opacity .2s ease, visibility .2s;
-  z-index: 9990;
-}
-#cart-backdrop.active { opacity: 1; visibility: visible; }
-/* ===================== DFL v2.6 — HOTFIX-IMG/HEADER ===================== */
-/* 1) NADA de forçar width:100% em TODAS as imagens */
-img {
-  height: auto !important;
-  max-width: 100%;
-  width: auto !important;        /* desfaz width:100% global */
-}
-
-/* 2) Logo do header: tamanho fixo e seguro */
-.header .logo {
-  height: 56px !important;       /* ajuste fino: 56–64px se preferir maior */
-  width: auto !important;
-  max-height: 56px !important;
-  object-fit: contain !important;
-  display: block;
-}
-
-/* 3) Ícones/botões do topo: não “crescem” com o font-size global */
-.header .user-button,
-.header .cart-button,
-#reports-btn {
-  font-size: 14px !important;
-  line-height: 1 !important;
-  padding: 8px 12px;
-}
-
-/* 4) Slides do carrossel: controlados, sem esticar */
-.carousel .slide {
-  height: 220px !important;      /* 200–240px ok */
-  width: auto !important;
-  object-fit: cover;
-  border-radius: 12px;
-}
-
-/* 5) Imagens das cards: seguras dentro do card */
-.card img {
-  width: 100% !important;
-  height: 220px !important;      /* mesma altura dos slides p/ consistência */
-  object-fit: cover !important;
-  border-radius: 12px;
-}
-
-/* 6) Painel “Meus Pedidos”: garante que começa fechado e não empurra layout */
-.orders-panel {
-  transform: translateY(10px);
-  opacity: 0;
-  pointer-events: none;
-}
-.orders-panel.active {
-  transform: translateY(0);
-  opacity: 1;
-  pointer-events: auto;
-}
-
-/* 7) Toast “adicionado ao carrinho”: sempre por cima */
+/* ------------------ 💬 TOAST ------------------ */
 .popup-add {
   position: fixed;
   left: 50%;
   bottom: 18px;
-  transform: translateX(-50%);
+  transform: translateX(-50%) translateY(12px);
   background: #111;
   color: #fff;
-  padding: 10px 14px;
-  border-radius: 10px;
-  z-index: 10000;
+  padding: 10px 16px;
+  border-radius: 999px;
+  font-weight: 700;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
   opacity: 0;
-  transition: opacity .2s, transform .2s;
+  pointer-events: none;
+  transition: opacity 0.25s ease, transform 0.25s ease;
+  z-index: 10000;
 }
 .popup-add.show {
   opacity: 1;
-  transform: translate(-50%, -4px);
+  transform: translateX(-50%) translateY(0);
 }
 
-/* 8) Modais (login/extras/combos): visual consistente e sem “esticar” */
+/* ------------------ 📦 MEUS PEDIDOS ------------------ */
+.orders-panel {
+  position: fixed;
+  right: 12px;
+  bottom: 12px;
+  width: min(420px, 94vw);
+  max-height: 80vh;
+  background: #fff;
+  border: 1px solid #eee;
+  border-radius: 14px;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.14);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  opacity: 0;
+  transform: translateY(16px);
+  visibility: hidden;
+  transition: opacity 0.25s ease, transform 0.25s ease, visibility 0.25s;
+  z-index: 9999;
+}
+.orders-panel.active {
+  opacity: 1;
+  transform: translateY(0);
+  visibility: visible;
+}
+
+/* ------------------ 🔒 MODAIS ------------------ */
 .modal .modal-content {
+  border-radius: 14px;
+  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.22);
+  border: 1px solid #eee;
+  background: #fff;
   max-width: min(95vw, 420px);
   width: 100%;
+}
+
+/* ------------------ 🍪 COOKIES ------------------ */
+.cookie-banner {
+  position: fixed;
+  left: 12px;
+  right: 12px;
+  bottom: 12px;
+  padding: 12px;
   border-radius: 12px;
+  background: #111;
+  color: #fff;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  box-shadow: 0 10px 26px rgba(0, 0, 0, 0.24);
+  opacity: 0;
+  transform: translateY(10px);
+  visibility: hidden;
+  transition: opacity 0.25s ease, transform 0.25s ease, visibility 0.25s;
+  z-index: 10000;
 }
-/* ======================================================================= */
-/* =================== DFL v2.6 — HOTFIX HEADER + CARROSSEL =================== */
-
-/* HEADER: layout estável */
-.header{
-  display:flex; justify-content:space-between; align-items:center;
-  gap:12px; padding:10px 14px;
+.cookie-banner.show {
+  opacity: 1;
+  transform: translateY(0);
+  visibility: visible;
 }
-.header-content{ display:flex; align-items:center; gap:10px; }
-.header .logo{
-  height:56px !important; width:auto !important; object-fit:contain !important;
-}
-.header-info h1{ margin:0; line-height:1.15; }
-.header-actions{ display:flex; align-items:center; gap:8px; }
-.header .user-button, .header .cart-button, #reports-btn{
-  font-size:14px !important; padding:8px 12px; line-height:1; border-radius:8px;
-}
-
-/* CARROSSEL: horizontal, com snap e setas posicionadas */
-.carousel{
-  position:relative; margin-top:8px;
-}
-.slides{
-  display:flex; gap:12px; overflow-x:auto; padding:6px 4px;
-  scroll-snap-type:x mandatory; -webkit-overflow-scrolling:touch;
-}
-.slide{
-  flex:0 0 auto; width: 72vw; max-width:340px; height:220px;
-  object-fit:cover; border-radius:12px; scroll-snap-align:start;
-  box-shadow:0 4px 12px rgba(0,0,0,.08);
-}
-/* esconde barra no mobile */
-.slides::-webkit-scrollbar{ display:none; }
-
-.c-btn{
-  position:absolute; top:50%; transform:translateY(-50%);
-  border:none; background:#00000099; color:#fff; width:32px; height:32px;
-  border-radius:999px; display:grid; place-items:center; cursor:pointer;
-}
-.c-prev{ left:6px; }
-.c-next{ right:6px; }
-
-/* Ajuste fino do contador e timers para não “pular” */
-.countdown-ticker{ font-weight:600; margin:6px 0 2px; }
-
-/* Mantém “Meus Pedidos” fechado por padrão */
-.orders-panel{ transform:translateY(10px); opacity:0; pointer-events:none; }
-.orders-panel.active{ transform:translateY(0); opacity:1; pointer-events:auto; }
-
-/* Toast sempre por cima */
-.popup-add{ z-index:10000; }
-/* ==================== DFL v2.6 - PATCH FINAL DE CAMADAS ==================== */
-
-/* Corrige cliques bloqueados (carrossel e overlays) */
-.carousel, .slides, .slide {
-  position: relative;
-  z-index: 1;
-  pointer-events: auto;
+#cookie-accept {
+  margin-left: auto;
+  border: 0;
+  border-radius: 10px;
+  padding: 10px 12px;
+  background: #4caf50;
+  color: #fff;
+  font-weight: 800;
+  cursor: pointer;
 }
 
-/* Garante que o conteúdo abaixo do header fique clicável */
+/* ------------------ 🌫️ BACKDROP ------------------ */
+.backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.35);
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.25s ease, visibility 0.25s ease;
+  z-index: 9990;
+}
+.backdrop.active {
+  opacity: 1;
+  visibility: visible;
+}
+
+/* ------------------ ⚙️ AJUSTES FINAIS ------------------ */
 main, section, .menu-section, .grid, .card {
   position: relative;
   z-index: 2;
-}
-
-/* Header e botões fixos por cima, mas não bloqueiam o resto */
-.header {
-  position: sticky;
-  top: 0;
-  z-index: 10;
-  background: #fff;
-}
-
-/* Backdrop do carrinho e modais só aparecem quando ativos */
-.backdrop, .modal, .orders-panel {
-  z-index: 100;
-}
-
-/* Toast “adicionado ao carrinho” acima de tudo */
-.popup-add {
-  z-index: 9999 !important;
-}
-
-/* Corrige espaçamento visual do topo */
-body {
-  padding-top: 5px;
 }
