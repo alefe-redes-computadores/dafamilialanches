@@ -73,7 +73,6 @@ section h2{font-size:1.3rem;text-align:center;margin-bottom:15px;color:#ff7043}
 .actions .extras-btn{background:linear-gradient(135deg,#ffb300,#ffca28);color:#222;box-shadow:0 2px 4px rgba(0,0,0,.15)}
 .actions .extras-btn:hover{background:linear-gradient(135deg,#ffca28,#ffd54f);transform:scale(1.03)}
 
-/* ================== INÍCIO DA CORREÇÃO ================== */
 /* Fundo escuro (Backdrop) do carrinho */
 #cart-backdrop {
   position: fixed;
@@ -87,12 +86,10 @@ section h2{font-size:1.3rem;text-align:center;margin-bottom:15px;color:#ff7043}
   pointer-events: none; /* Não pode ser clicado quando invisível */
   transition: opacity 0.35s ease;
 }
-
 #cart-backdrop.active {
   opacity: 1;
   pointer-events: auto; /* Pode ser clicado para fechar (via JS) */
 }
-/* =================== FIM DA CORREÇÃO =================== */
 
 
 /* ⚙️ Mini-carrinho */
@@ -114,15 +111,16 @@ section h2{font-size:1.3rem;text-align:center;margin-bottom:15px;color:#ff7043}
 .cart-summary p.total{font-size:1.1rem;font-weight:700;color:#2e7d32}
 
 /* FAB Pedidos */
-#orders-fab{position:fixed;bottom:85px;right:20px;background:linear-gradient(135deg,#ffb300,#ffca28);border:none;color:#000;font-weight:600;border-radius:25px;padding:12px 18px;cursor:pointer;display:none;box-shadow:0 4px 12px rgba(0,0,0,.3);z-index:1300;transition:all .2s ease}
+#orders-fab{position:fixed;bottom:20px;right:20px;background:linear-gradient(135deg,#ffb300,#ffca28);border:none;color:#000;font-weight:600;border-radius:25px;padding:12px 18px;cursor:pointer;display:none;box-shadow:0 4px 12px rgba(0,0,0,.3);z-index:900;transition:all .2s ease}
 #orders-fab.show{display:block}
 #orders-fab:hover{background:linear-gradient(135deg,#ffd54f,#ffe082);transform:scale(1.05)}
 
 /* Painel de Pedidos */
 .orders-panel{position:fixed;bottom:0;left:0;right:0;max-height:80vh;background:#fff;border-radius:20px 20px 0 0;box-shadow:0 -4px 20px rgba(0,0,0,.2);transform:translateY(100%);transition:transform .4s ease;overflow-y:auto;z-index:1100}
 .orders-panel.active,.orders-panel.show{transform:translateY(0)}
-.orders-head{padding:14px;font-weight:700;font-size:1.1rem;background:#ffb300;color:#222;border-radius:20px 20px 0 0;display:flex;justify-content:space-between;align-items:center}
-.orders-close{background:transparent;border:none;font-size:24px;cursor:pointer;color:#000}
+.orders-head{padding:16px 20px;font-weight:700;font-size:1.2rem;background:#ffca28;color:#222;border-radius:20px 20px 0 0;display:flex;justify-content:space-between;align-items:center}
+.orders-close{background:#ffb300;border:none;border-radius:50%;width:30px;height:30px;font-size:18px;cursor:pointer;color:#222;font-weight:700;transition:.2s}
+.orders-close:hover{background:#ff7043;color:#fff}
 .orders-content{padding:15px}
 .order-item{padding:12px 16px;border-bottom:1px solid #eee}
 .order-item h4{color:#ff7043;margin-bottom:6px}
@@ -135,7 +133,7 @@ section h2{font-size:1.3rem;text-align:center;margin-bottom:15px;color:#ff7043}
 .footer{background:#fff3e0;text-align:center;padding:20px;font-size:.9rem;color:#444}
 .footer a{color:#ff7043;text-decoration:none;transition:color .2s ease}
 .footer a:hover{color:#ff5722}
-.footer-links{display:flex;justify-content:center;gap:10px;flex-wrap:wrap;margin:8px 0}
+.footer-links{display:flex;justify:content:center;gap:10px;flex-wrap:wrap;margin:8px 0}
 .footer-btn{background:#ffb300;color:#222;padding:6px 14px;border-radius:6px;font-weight:700;text-decoration:none;transition:.25s}
 .footer-btn:hover{background:#ffca28;transform:scale(1.03)}
 .footer-copy{font-size:.8rem;color:#555;margin-top:10px}
@@ -143,7 +141,6 @@ section h2{font-size:1.3rem;text-align:center;margin-bottom:15px;color:#ff7043}
 /* Responsivo */
 @media (max-width:600px){
   .grid{grid-template-columns:repeat(2,1fr)}
-  /* .card img{height:100px} */ /* Comentei isso, parecia estar achatando suas imagens. Se quiser, descomente. */
   .slide{min-width:200px;max-width:200px;height:150px}
   .c-btn{width:32px;height:32px;font-size:20px}
   .c-prev{left:5px}
@@ -154,9 +151,9 @@ section h2{font-size:1.3rem;text-align:center;margin-bottom:15px;color:#ff7043}
 }
 
 /* =========================================================
-   🚨 INÍCIO DO CÓDIGO FALTANTE (CORREÇÃO)
-   Seu arquivo CSS estava incompleto. Estas são as regras
-   necessárias para os pop-ups (login, etc.) funcionarem.
+   🎨 INÍCIO DA MODERNIZAÇÃO DOS MODAIS
+   - Estilos refeitos para um visual mais limpo e
+     integrado com as cores do site (Laranja/Branco).
 ========================================================= */
 
 /* Base do Modal (pop-up) */
@@ -186,10 +183,9 @@ section h2{font-size:1.3rem;text-align:center;margin-bottom:15px;color:#ff7043}
   background: #fff;
   border-radius: 12px;
   box-shadow: 0 4px 20px rgba(0,0,0,.2);
-  max-width: 500px;
+  max-width: 400px; /* Mais limpo em desktop */
   width: 90%;
   overflow: hidden;
-  /* Animação de "zoom" */
   transform: scale(0.95);
   transition: transform 0.3s ease;
 }
@@ -198,129 +194,155 @@ section h2{font-size:1.3rem;text-align:center;margin-bottom:15px;color:#ff7043}
   transform: scale(1);
 }
 
-/* Cabeçalho (Título e 'X') */
+/* Cabeçalho (Título e 'X') - Estilo Laranja */
 .modal-head {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 12px 16px;
-  border-bottom: 1px solid #eee;
-  background: #f9f9f9;
+  padding: 16px 20px;
+  border-bottom: none; /* Remove a borda cinza */
+  background: #ffca28; /* Cor do cabeçalho do site */
 }
 
 .modal-head h3 {
   margin: 0;
-  font-size: 1.1rem;
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: #222; /* Texto escuro no fundo laranja */
 }
 
-/* Botões de fechar (X) */
+/* Botões de fechar (X) - Estilo Laranja */
 .extras-close, .combo-close, .login-close {
-  background: #eee;
+  background: #ffb300; /* Laranja mais escuro */
   border: none;
   border-radius: 50%;
-  width: 28px;
-  height: 28px;
-  font-size: 16px;
+  width: 30px;
+  height: 30px;
+  font-size: 18px;
   font-weight: 700;
   cursor: pointer;
-  line-height: 28px;
+  line-height: 30px;
   text-align: center;
-  transition: background .2s;
+  color: #222;
+  transition: all .2s;
 }
 .extras-close:hover, .combo-close:hover, .login-close:hover {
-  background: #ddd;
+  background: #ff7043; /* Laranja "quente" do site */
+  color: #fff;
+  transform: scale(1.1);
 }
 
 /* Corpo do modal (lista de extras) */
-.extras-list {
-  padding: 10px 16px;
+.extras-list, #combo-body {
+  padding: 10px 20px; /* Mais padding lateral */
   max-height: 60vh;
   overflow-y: auto;
 }
-.extra-line { /* (Estilo já estava no JS, mas é bom ter) */
+.extra-line {
   display:flex;
   justify-content:space-between;
   align-items:center;
-  padding:8px 0;
+  padding: 12px 4px; /* Mais espaçamento */
   border-bottom:1px solid #eee;
   cursor:pointer;
+  transition: background .2s;
+}
+.extra-line:hover {
+  background: #fffaf3; /* Fundo do site */
+}
+.extra-line span {
+  font-size: 0.95rem;
 }
 .extra-line input {
   width:20px;
   height:20px;
   cursor:pointer;
+  flex-shrink: 0;
+  margin-left: 10px;
+}
+.extra-line input[type="radio"] {
+  border-radius: 50%;
 }
 
 /* Rodapé (botões de confirmar/cancelar) */
 .modal-foot {
   display: flex;
   gap: 10px;
-  padding: 16px;
+  padding: 20px;
   background: #f9f9f9;
   border-top: 1px solid #eee;
 }
 
-/* Botões genéricos */
+/* Botões genéricos (Primário e Secundário) */
 .btn-primary, .btn-secondary, .btn-primario {
   flex: 1;
   border: none;
-  border-radius: 8px;
-  padding: 12px;
+  border-radius: 10px;
+  padding: 14px;
   font-weight: 700;
   font-size: 1rem;
   cursor: pointer;
-  transition: all .2s;
+  transition: all .2s ease;
 }
+
+/* Botão Verde (Confirmar) */
 .btn-primary, .btn-primario {
   background: #4caf50;
   color: #fff;
+  box-shadow: 0 2px 5px rgba(0,0,0,.1);
 }
 .btn-primary:hover, .btn-primario:hover {
   background: #43a047;
+  transform: translateY(-2px);
 }
+
+/* Botão Cinza (Cancelar) */
 .btn-secondary {
-  background: #f1f1f1;
-  color: #333;
+  background: transparent;
+  color: #555;
   border: 1px solid #ddd;
 }
 .btn-secondary:hover {
-  background: #e9e9e9;
+  background: #f1f1f1;
+  border-color: #ccc;
 }
 
 
-/* --- ESTILOS DE LOGIN (OS MAIS IMPORTANTES) --- */
+/* --- ESTILOS DE LOGIN (MODERNIZADO) --- */
 .login-box {
+  padding: 20px; /* Padding interno da caixa */
   text-align: center;
-  /* O modal-content já tem padding, mas o login-box pode ter um padding interno */
-  padding: 16px 24px 24px; 
 }
 
-/* Botão Google */
+/* Botão Google (Estilo "Clean") */
 .btn-google {
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 12px;
   width: 100%;
-  padding: 10px;
-  background: #4285F4;
-  color: #fff;
-  border: none;
-  border-radius: 8px;
+  padding: 12px;
+  background: #fff;
+  color: #444;
+  border: 1px solid #ddd;
+  border-radius: 10px;
   font-size: 1rem;
   font-weight: 600;
   cursor: pointer;
-  transition: background .2s;
+  transition: all .2s;
 }
 .btn-google:hover {
-  background: #357ae8;
+  background: #f9f9f9;
+  border-color: #ccc;
+  transform: translateY(-2px);
+  box-shadow: 0 2px 5px rgba(0,0,0,.05);
 }
 
-/* 🚨 CORREÇÃO DO BUG DO ÍCONE GIGANTE 🚨 */
+/* Ícone do Google (sem alteração) */
 .google-icon {
-  width: 24px;  /* Define um tamanho fixo */
-  height: 24px; /* Define um tamanho fixo */
-  background: #fff; /* Fundo branco para o 'G' */
+  width: 24px;
+  height: 24px;
+  background: #fff;
   border-radius: 50%;
   padding: 2px;
   object-fit: contain;
@@ -329,7 +351,7 @@ section h2{font-size:1.3rem;text-align:center;margin-bottom:15px;color:#ff7043}
 .login-safe {
   font-size: 0.8rem;
   color: #777;
-  margin-top: 8px;
+  margin-top: 10px;
   display: block;
 }
 
@@ -340,7 +362,7 @@ section h2{font-size:1.3rem;text-align:center;margin-bottom:15px;color:#ff7043}
   text-align: center;
   color: #999;
   font-size: 0.9rem;
-  margin: 20px 0;
+  margin: 24px 0;
 }
 .divider::before, .divider::after {
   content: '';
@@ -354,3 +376,23 @@ section h2{font-size:1.3rem;text-align:center;margin-bottom:15px;color:#ff7043}
 .login-form {
   display: flex;
   flex-direction: column;
+  gap: 12px;
+}
+.login-form input {
+  width: 100%;
+  padding: 14px; /* Mais confortável */
+  border: 1px solid #ddd;
+  border-radius: 10px;
+  font-size: 1rem;
+  box-sizing: border-box;
+  transition: all .2s;
+}
+.login-form input:focus {
+  border-color: #ff7043; /* Laranja quente no foco */
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(255, 112, 67, 0.2);
+}
+
+/* =========================================================
+   ✅ Final do CSS v2.5 — MODERNIZADO
+========================================================= */
