@@ -5,10 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>🍔 Da Família Lanches</title>
   
-  <!-- Mantido: versão visual/UX atual -->
-  <link rel="stylesheet" href="style.css?v=2.6" />
+  <link rel="stylesheet" href="style.css?v=2.7" />
   
-  <!-- Mantido: Firebase e script base -->
   <script defer src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
   <script defer src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
   <script defer src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
@@ -54,34 +52,15 @@
       <div class="carousel">
         <button class="c-btn c-prev" type="button" aria-label="Anterior">‹</button>
         <div class="slides">
-          <!-- Mantido data-wa (comportamento atual). Acrescentados data-nome, data-de, data-preco para a v2.7 -->
-          <img class="slide" src="promocoes/promo1.jpg"
-               data-wa="Quero essa Promoção 1 imperdível! 🍔"
-               data-nome="Promo 1" data-de="40.00" data-preco="34.99" />
-          <img class="slide" src="promocoes/promo2.jpg"
-               data-wa="Não vou perder! Quero a Promoção 2 exclusiva! 🌭"
-               data-nome="Promo 2" data-de="45.00" data-preco="37.99" />
-          <img class="slide" src="promocoes/promo3.jpg"
-               data-wa="Me vê a Promoção 3, só hoje! 🥤"
-               data-nome="Promo 3" data-de="52.00" data-preco="39.99" />
-          <img class="slide" src="promocoes/promo4.jpg"
-               data-wa="Quero a Promoção 4 da casa! 🍟"
-               data-nome="Promo 4" data-de="52.00" data-preco="44.99" />
-          <img class="slide" src="promocoes/promo5.jpg"
-               data-wa="Sensacional! Quero a Promoção 5! 🔥"
-               data-nome="Promo 5" data-de="65.00" data-preco="49.99" />
-          <img class="slide" src="promocoes/promo6.jpg"
-               data-wa="Opa! Quero a Promoção 6, antes que acabe! 🏃‍♂️"
-               data-nome="Promo 6" data-de="65.00" data-preco="44.99" />
-          <img class="slide" src="promocoes/promo7.jpg"
-               data-wa="Essa é minha! Quero a Promoção 7! 🤩"
-               data-nome="Promo 7" data-de="77.00" data-preco="59.99" />
-          <img class="slide" src="promocoes/promo8.jpg"
-               data-wa="Quero a Promoção 8, por favor! ✨"
-               data-nome="Promo 8" data-de="72.00" data-preco="59.99" />
-          <img class="slide" src="promocoes/promo9.jpg"
-               data-wa="Uau! Quero a Promoção 9 agora! 😋"
-               data-nome="Promo 9" data-de="79.99" data-preco="64.99" />
+          <img class="slide" src="promocoes/promo1.jpg" data-promo-id="1" />
+          <img class="slide" src="promocoes/promo2.jpg" data-promo-id="2" />
+          <img class="slide" src="promocoes/promo3.jpg" data-promo-id="3" />
+          <img class="slide" src="promocoes/promo4.jpg" data-promo-id="4" />
+          <img class="slide" src="promocoes/promo5.jpg" data-promo-id="5" />
+          <img class="slide" src="promocoes/promo6.jpg" data-promo-id="6" />
+          <img class="slide" src="promocoes/promo7.jpg" data-promo-id="7" />
+          <img class="slide" src="promocoes/promo8.jpg" data-promo-id="8" />
+          <img class="slide" src="promocoes/promo9.jpg" data-promo-id="9" />
         </div>
         <button class="c-btn c-next" type="button" aria-label="Próximo">›</button>
       </div>
@@ -103,7 +82,7 @@
       <div class="grid">
         <div class="card" data-name="Combo Casal Tradicional" data-price="34.99">
           <img src="imagens/combo1.png" alt="Combo Casal Tradicional">
-          <h3>Combo Casal Tradicional <span class="badge economia"><span class="badge-icon">💸</span> EconomIA de R$ 5,01</span></h3>
+          <h3>Combo Casal Tradicional <span class="badge economia"><span class="badge-icon">💸</span> Economia de R$ 5,01</span></h3>
           <p class="price">De R$ 39,99 por <b>R$ 34,99</b></p>
           <p>2 Burger <b>Trem</b> + 1 Fanta 1L.</p>
           <div class="actions"><button class="add-cart" type="button">Adicionar</button></div>
@@ -334,6 +313,21 @@
       </div>
     </section>
   
+    <div id="promo-modal" class="modal">
+      <div class="promo-content">
+        <button class="promo-close" type="button" aria-label="Fechar modal">✖</button>
+        <button class="promo-nav prev" type="button" aria-label="Anterior">‹</button>
+        <button class="promo-nav next" type="button" aria-label="Próximo">›</button>
+        
+        <img id="promo-modal-img" src="" alt="Promoção" />
+        
+        <div class="promo-info">
+          <h3 id="promo-modal-title"></h3>
+          <p id="promo-modal-price"></p>
+          <button id="promo-modal-add" class="btn-primary" type="button">Adicionar ao Pedido</button>
+        </div>
+      </div>
+    </div>
     <div id="extras-modal" class="modal">
       <div class="modal-content">
         <div class="modal-head">
@@ -361,32 +355,6 @@
         </div>
       </div>
     </div>
-
-    <!-- NOVO: Modal de Promoções (v2.7). Não interfere na v2.6 até trocarmos o JS -->
-    <div id="promo-modal" class="modal" aria-hidden="true">
-      <div class="modal-content" style="max-width:720px;width:95%;">
-        <div class="modal-head">
-          <h3 id="promo-title">Promo</h3>
-          <button class="promo-close login-close" type="button" aria-label="Fechar modal">✖</button>
-        </div>
-
-        <div class="extras-list" style="display:flex;flex-direction:column;gap:12px;align-items:center;">
-          <img id="promo-image" src="" alt="Promoção" style="width:100%;max-height:60vh;object-fit:contain;border-radius:12px;background:#fafafa" />
-          
-          <div style="display:flex;gap:10px;align-items:baseline;font-weight:700;">
-            <span id="promo-old" style="color:#999;text-decoration:line-through;">R$ 0,00</span>
-            <span id="promo-new" style="color:#e53935;font-size:1.3rem;">R$ 0,00</span>
-          </div>
-        </div>
-
-        <div class="modal-foot" style="align-items:center;">
-          <button id="promo-prev" class="btn-secondary" type="button" aria-label="Promoção anterior">‹</button>
-          <button id="promo-add" class="btn-primary" type="button">Adicionar ao Carrinho</button>
-          <button id="promo-next" class="btn-secondary" type="button" aria-label="Próxima promoção">›</button>
-        </div>
-      </div>
-    </div>
-    <!-- Fim Modal de Promoções -->
   
     <div id="login-modal" class="modal">
       <div class="modal-content login-box">
@@ -429,8 +397,7 @@
       </div>
     </footer>
 
-  </div> 
-  <button id="orders-fab" class="fab" type="button">
+  </div> <button id="orders-fab" class="fab" type="button">
     Meus Pedidos
   </button>
 
