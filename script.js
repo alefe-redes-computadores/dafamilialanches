@@ -1,11 +1,11 @@
 /* =========================================================
-   🍔 DFL v2.7 — Promoções Expansíveis + UX Refinada
-   PARTE 1 — Inicialização, Funções Base e Overlays
-   Base v2.6 Estável (mantida 100%)
+   🍔 DFL v2.7 — MODAL DE PROMOÇÕES
+   - Transforma o carrossel em um modal de venda interativo.
+   - Adiciona promoções como itens simples (vontade do usuário).
+   - Mantém 100% da lógica funcional e estabilidade da v2.6.
 ========================================================= */
 
 document.addEventListener("DOMContentLoaded", () => {
-
   /* ------------------ ⚙️ BASE ------------------ */
   const sound = new Audio("click.wav");
   let cart = [];
@@ -18,6 +18,22 @@ document.addEventListener("DOMContentLoaded", () => {
   document.addEventListener("click", () => {
     try { sound.currentTime = 0; sound.play(); } catch (_) {}
   });
+
+  /* 🚨 NOVO BANCO DE DADOS V2.7 
+    Dados das 9 promoções do carrossel.
+  */
+  const PROMO_DATA = [
+    null, // Para que o índice 1 corresponda à Promo 1
+    { id: 1, nome: "Combo 2 Purizin + Fanta 1L", preco: 34.99, precoAntigo: 40.00, img: "promocoes/promo1.jpg" },
+    { id: 2, nome: "Combo 3 Padaná", preco: 37.99, precoAntigo: 45.00, img: "promocoes/promo2.jpg" },
+    { id: 3, nome: "Combo 2 Peleja", preco: 39.99, precoAntigo: 52.00, img: "promocoes/promo3.jpg" },
+    { id: 4, nome: "Combo 3 Trem + Fanta 1L", preco: 44.99, precoAntigo: 52.00, img: "promocoes/promo4.jpg" },
+    { id: 5, nome: "Combo 4 Trem + Fanta 1L", preco: 49.99, precoAntigo: 65.00, img: "promocoes/promo5.jpg" },
+    { id: 6, nome: "Combo 5 Uai", preco: 54.99, precoAntigo: 65.00, img: "promocoes/promo6.jpg" }, // Preço corrigido
+    { id: 7, nome: "Combo 4 TremBão + Fanta 1L", preco: 59.99, precoAntigo: 77.00, img: "promocoes/promo7.jpg" },
+    { id: 8, nome: "Combo 4 Armaria", preco: 59.99, precoAntigo: 72.00, img: "promocoes/promo8.jpg" },
+    { id: 9, nome: "Combo 5 Uai + Kuat 2L", preco: 64.99, precoAntigo: 79.99, img: "promocoes/promo9.jpg" }
+  ];
 
   /* ------------------ 🎯 ELEMENTOS ------------------ */
   const el = {
@@ -42,16 +58,18 @@ document.addEventListener("DOMContentLoaded", () => {
     userBtn: document.getElementById("user-btn"),
     statusBanner: document.getElementById("status-banner"),
     hoursBanner: document.querySelector(".hours-banner"),
-    reportsBtn: document.getElementById("reports-btn"),
+    reportsBtn: document.getElementById("reports-btn"), 
     myOrdersBtn: document.getElementById("orders-fab"),
-
-    // 🆕 Novo Modal de Promoções (v2.7)
+    
+    // 🚨 NOVOS ELEMENTOS V2.7
     promoModal: document.getElementById("promo-modal"),
-    promoImg: document.getElementById("promo-image"),
-    promoOld: document.getElementById("promo-old"),
-    promoNew: document.getElementById("promo-new"),
-    promoAddBtn: document.getElementById("promo-add"),
-    promoClose: document.querySelector("#promo-modal .close-btn"),
+    promoImg: document.getElementById("promo-modal-img"),
+    promoTitle: document.getElementById("promo-modal-title"),
+    promoPrice: document.getElementById("promo-modal-price"),
+    promoAddBtn: document.getElementById("promo-modal-add"),
+    promoNavPrev: document.querySelector("#promo-modal .promo-nav.prev"),
+    promoNavNext: document.querySelector("#promo-modal .promo-nav.next"),
+    promoClose: document.querySelector("#promo-modal .promo-close")
   };
 
   /* ------------------ 🌫️ BACKDROP ------------------ */
@@ -61,16 +79,9 @@ document.addEventListener("DOMContentLoaded", () => {
     document.body.appendChild(bd);
     el.cartBackdrop = bd;
   }
-
   const Backdrop = {
-    show() {
-      el.cartBackdrop.classList.add("active");
-      document.body.classList.add("no-scroll");
-    },
-    hide() {
-      el.cartBackdrop.classList.remove("active");
-      document.body.classList.remove("no-scroll");
-    },
+    show() { el.cartBackdrop.classList.add("active"); document.body.classList.add("no-scroll"); },
+    hide() { el.cartBackdrop.classList.remove("active"); document.body.classList.remove("no-scroll"); },
   };
 
   /* ------------------ 🧩 OVERLAYS ------------------ */
@@ -103,18 +114,17 @@ document.addEventListener("DOMContentLoaded", () => {
     setTimeout(() => pop.classList.remove("show"), 2000);
   }
 
-  // 🧠 Mantém a função acessível globalmente
-  window.popupAdd = popupAdd;
-/* ------------------ 🛒 MINI-CARRINHO ------------------ */
+/* ------------------ 🛒 MINI-CARRINHO (Limpo e Corrigido) ------------------ */
   function renderMiniCart() {
-    if (!el.miniList) return;
+    
+    if (!el.miniList) return; 
 
     const totalItens = cart.reduce((s, i) => s + i.qtd, 0);
     if (el.cartCount) el.cartCount.textContent = totalItens;
 
     if (!cart.length) {
       el.miniList.innerHTML = '<p style="text-align:center;color:#999;padding:20px;">Carrinho vazio 🛒</p>';
-      if (el.miniFoot) el.miniFoot.innerHTML = "";
+      if(el.miniFoot) el.miniFoot.innerHTML = ""; 
       return;
     }
 
@@ -136,6 +146,8 @@ document.addEventListener("DOMContentLoaded", () => {
     `).join("");
   }
 
+
+  /* 🔄 Vincula botões dinâmicos (incremento, remoção, limpar, finalizar) */
   function bindMiniCartButtons() {
     el.miniList.querySelectorAll(".cart-plus").forEach(b => b.addEventListener("click", e => {
       const i = +e.currentTarget.dataset.idx;
@@ -177,22 +189,35 @@ document.addEventListener("DOMContentLoaded", () => {
     messagingSenderId: "106857147317",
     appId: "1:106857147317:web:769c98aed26bb8fc9e87fc",
   };
-
-  let auth, db;
+  
+  let auth, db; 
 
   try {
-    if (!window.firebase) throw new Error("Firebase não carregou corretamente.");
-    if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+    if (!window.firebase) {
+      throw new Error("Biblioteca principal do Firebase (app) não carregou.");
+    }
+    if (!firebase.apps.length) {
+      firebase.initializeApp(firebaseConfig);
+    }
+    if (!firebase.auth) {
+      throw new Error("Módulo de Autenticação (auth) não carregou.");
+    }
     auth = firebase.auth();
+    if (!firebase.firestore) {
+      throw new Error("Módulo de Banco de Dados (firestore) não carregou.");
+    }
     db = firebase.firestore();
+
   } catch (error) {
     console.error("ERRO FATAL AO INICIAR FIREBASE:", error);
-    document.body.innerHTML = `
-      <div style="padding:20px;text-align:center;font-size:1.1rem;color:red;">
-        <b>Erro Crítico</b><br>Não foi possível conectar aos nossos serviços.<br>
-        <small>Verifique sua internet e recarregue a página.</small>
-      </div>`;
-    return;
+    const elBody = document.querySelector("body");
+    if (elBody) {
+       elBody.innerHTML = `<div style="padding:20px;text-align:center;font-size:1.2rem;color:red;font-family:sans-serif;margin-top:50px;">
+        <b>Erro Crítico</b><br>Não foi possível conectar aos nossos serviços.
+        <br><small>Verifique sua conexão com a internet e tente recarregar a página.</small>
+        <br><br><small style="color:#666">Detalhe: ${error.message}</small></div>`;
+    }
+    return; // ABORTA O RESTO DO SCRIPT.JS
   }
 
   /* ------------------ ⚙️ LOGIN ------------------ */
@@ -242,366 +267,989 @@ document.addEventListener("DOMContentLoaded", () => {
       })
       .catch((err) => alert("Erro: ".concat(err.message)));
   });
-/* ------------------ 🍟 ADICIONAIS ------------------ */
-  function openExtrasFor(productName, basePrice) {
-    if (!el.extrasList) return;
-    el.extrasList.innerHTML = `
+
+  /* ------------------ ➕ Adicionais ------------------ */
+  const adicionais = [
+    { nome: "Cebola", preco: 0.99 },
+    { nome: "Salada", preco: 1.99 },
+    { nome: "Ovo", preco: 1.99 },
+    { nome: "Bacon", preco: 2.99 },
+    { nome: "Hambúrguer Tradicional 56g", preco: 2.99 },
+    { nome: "Cheddar Cremoso", preco: 3.99 },
+    { nome: "Filé de Frango", preco: 5.99 },
+    { nome: "Hambúrguer Artesanal 120g", preco: 7.99 },
+  ];
+
+  let produtoExtras = null;
+  let produtoPrecoBase = 0;
+
+  const openExtrasFor = safe((card) => {
+    if (!card || !el.extrasModal || !el.extrasList) return;
+    produtoExtras = card.dataset.name;
+    produtoPrecoBase = parseFloat(card.dataset.price) || 0;
+
+    el.extrasList.innerHTML = adicionais.map((a, i) => `
       <label class="extra-line">
-        <span>+ Bacon crocante (+ R$ 4,00)</span>
-        <input type="checkbox" value="4">
-      </label>
-      <label class="extra-line">
-        <span>+ Queijo cheddar (+ R$ 3,00)</span>
-        <input type="checkbox" value="3">
-      </label>
-      <label class="extra-line">
-        <span>+ Ovo (+ R$ 2,00)</span>
-        <input type="checkbox" value="2">
-      </label>
-    `;
-    el.extrasConfirm.onclick = () => {
-      const extras = Array.from(el.extrasList.querySelectorAll("input:checked"))
-        .map((i) => Number(i.value));
-      const totalExtras = extras.reduce((a, b) => a + b, 0);
-      const total = basePrice + totalExtras;
-      addToCart(productName + " + extras", total);
-      Overlays.closeAll();
-      popupAdd("Adicionado com extras!");
-    };
+        <span>${a.nome} — <b>${money(a.preco)}</b></span>
+        <input type="checkbox" value="${i}">
+      </label>`).join("");
     Overlays.open(el.extrasModal);
-  }
+  });
 
-  /* ------------------ 🍔 COMBOS ------------------ */
-  function openComboSelection() {
-    if (!el.comboBody) return;
-    el.comboBody.innerHTML = `
-      <label class="extra-line">
-        <span>Combo Família Tradicional (R$ 59,99)</span>
-        <input type="radio" name="combo" value="59.99">
-      </label>
-      <label class="extra-line">
-        <span>Combo Família Artesanal (R$ 79,99)</span>
-        <input type="radio" name="combo" value="79.99">
-      </label>
-      <label class="extra-line">
-        <span>Combo Casal Trem + Fanta 1L (R$ 34,99)</span>
-        <input type="radio" name="combo" value="34.99">
-      </label>
-      <label class="extra-line">
-        <span>Combo Casal Artesanal (R$ 54,99)</span>
-        <input type="radio" name="combo" value="54.99">
-      </label>
-    `;
-    el.comboConfirm.onclick = () => {
-      const opt = el.comboBody.querySelector("input:checked");
-      if (!opt) return alert("Selecione um combo.");
-      addToCart("Combo Especial", Number(opt.value));
-      Overlays.closeAll();
-      popupAdd("Combo adicionado!");
-    };
-    Overlays.open(el.comboModal);
-  }
+  document.querySelectorAll(".extras-btn").forEach((btn) =>
+    btn.addEventListener("click", (e) => openExtrasFor(e.currentTarget.closest(".card")))
+  );
 
-  /* ------------------ 🛍️ ADICIONAR AO CARRINHO ------------------ */
-  function addToCart(nome, preco) {
-    const existente = cart.find(i => i.nome === nome);
-    if (existente) {
-      existente.qtd++;
-    } else {
-      cart.push({ nome, preco, qtd: 1 });
-    }
+  el.extrasConfirm?.addEventListener("click", () => {
+    if (!produtoExtras) return Overlays.closeAll();
+    const checks = [...document.querySelectorAll("#extras-modal .extras-list input:checked")];
+
+    const extrasContagem = {};
+    checks.forEach(c => {
+      const idx = +c.value;
+      const adicional = adicionais[idx];
+      if (extrasContagem[adicional.nome]) {
+        extrasContagem[adicional.nome].qtd++;
+      } else {
+        extrasContagem[adicional.nome] = { preco: adicional.preco, qtd: 1 };
+      }
+    });
+
+    const extrasNomes = Object.keys(extrasContagem).map(nome => {
+      const qtd = extrasContagem[nome].qtd;
+      return qtd > 1 ? `${qtd}x ${nome}` : nome;
+    }).join(", ");
+
+    const precoExtras = Object.values(extrasContagem).reduce((t, e) => t + (e.preco * e.qtd), 0);
+    const precoTotal = produtoPrecoBase + precoExtras;
+    const nomeCompleto = extrasNomes ? `${produtoExtras} + ${extrasNomes}` : produtoExtras;
+
+    const existente = cart.find(i => i.nome === nomeCompleto);
+    if (existente) existente.qtd++;
+    else cart.push({ nome: nomeCompleto, preco: precoTotal, qtd: 1 });
+
     renderMiniCart();
-    popupAdd("Item adicionado!");
+    popupAdd("Adicionado ao carrinho!");
+    Overlays.closeAll();
+  });
+
+  document.querySelectorAll("#extras-modal .extras-close").forEach((b) =>
+    b.addEventListener("click", () => Overlays.closeAll())
+  );
+
+  /* ------------------ 🥤 Combos (modal de bebidas) ------------------ */
+  const comboDrinkOptions = {
+    casal: [
+      { rotulo: "Fanta 1L (padrão)", delta: 0.01 },
+      { rotulo: "Coca-Cola 1L", delta: 3.0 },
+      { rotulo: "Coca-Cola 1L Zero", delta: 3.0 },
+    ],
+    familia: [
+      { rotulo: "Kuat Guaraná 2L (padrão)", delta: 0.01 },
+      { rotulo: "Coca-Cola 2L", delta: 5.0 },
+    ],
+  };
+
+  let _comboCtx = null;
+  const openComboModal = safe((nomeCombo, precoBase) => {
+    if (!el.comboModal || !el.comboBody) {
+      addCommonItem(nomeCombo, precoBase);
+      return;
+    }
+
+    const low = (nomeCombo || "").toLowerCase();
+    const grupo = low.includes("casal") ? "casal" :
+                  (low.includes("família") || low.includes("familia")) ? "familia" : null;
+
+    if (!grupo) {
+      addCommonItem(nomeCombo, precoBase);
+      return;
+    }
+
+    const opts = comboDrinkOptions[grupo];
+    el.comboBody.innerHTML = opts.map((o, i) => `
+      <label class="extra-line">
+        <span>${o.rotulo} — + ${money(o.delta)}</span>
+        <input type="radio" name="combo-drink" value="${i}" ${i === 0 ? "checked" : ""}>
+      </label>
+    `).join("");
+
+    _comboCtx = { nomeCombo, precoBase, grupo };
+    Overlays.open(el.comboModal);
+  });
+
+  el.comboConfirm?.addEventListener("click", () => {
+    if (!_comboCtx) return Overlays.closeAll();
+    const sel = el.comboBody?.querySelector('input[name="combo-drink"]:checked');
+    if (!sel) return;
+    const opt = comboDrinkOptions[_comboCtx.grupo][+sel.value];
+    const finalName = `${_comboCtx.nomeCombo} + ${opt.rotulo}`;
+    const finalPrice = Number(_comboCtx.precoBase) + (opt.delta || 0);
+
+    const existente = cart.find(i => i.nome === finalName);
+    if (existente) existente.qtd++;
+    else cart.push({ nome: finalName, preco: finalPrice, qtd: 1 });
+
+    popupAdd("Combo adicionado!");
+    renderMiniCart();
+    Overlays.closeAll();
+  });
+
+  document.querySelectorAll("#combo-modal .combo-close").forEach((b) =>
+    b.addEventListener("click", () => Overlays.closeAll())
+  );
+
+  /* ------------------ 🧺 Adicionar item comum ------------------ */
+  function addCommonItem(nome, preco) {
+    // Se for um combo do *cardápio principal*, abre o modal de bebida
+    if (/^combo/i.test(nome) && !/^\s*Combo [0-9]/.test(nome)) {
+      openComboModal(nome, preco);
+      return;
+    }
+    // Se for uma *promoção* (ex: "Combo 2 Purizin..."), adiciona direto
+    const found = cart.find((i) => i.nome === nome && i.preco === preco);
+    if (found) found.qtd++;
+    else cart.push({ nome, preco, qtd: 1 });
+    renderMiniCart();
+    popupAdd(`${nome} adicionado!`);
   }
 
-  // Atribui função globalmente
-  window.addToCart = addToCart;
+  document.querySelectorAll(".add-cart").forEach((btn) =>
+    btn.addEventListener("click", (e) => {
+      const card = e.currentTarget.closest(".card");
+      if (!card) return;
+      const nome = card.dataset.name;
+      const preco = parseFloat(card.dataset.price);
+      addCommonItem(nome, preco);
+    })
+  );
 
-  /* ------------------ 🧾 FORM DE ENTREGA / RESUMO ------------------ */
+  /* ------------------ 🛒 ABRIR CARRINHO ------------------ */
+  el.cartIcon?.addEventListener("click", () => {
+    renderMiniCart();
+    Overlays.open(el.miniCart);
+  });
+  document.querySelectorAll("#mini-cart .extras-close").forEach((b) =>
+    b.addEventListener("click", () => Overlays.closeAll())
+  );
+
+
+/* ------------------ ⚙️ CONFIGURAÇÕES V2.5 ------------------ */
+  const DELIVERY_FEE = 6.00; 
+
+  const COUPONS = {
+    "DFL5":        { type: "percent", value: 5,  note: "5% OFF" },
+    "DFL10":       { type: "percent", value: 10, note: "10% OFF" },
+    "BEMVINDO":    { type: "value",   value: 5,  note: "R$ 5,00 OFF na 1ª compra" },
+    "FRETEZERO":   { type: "frete",   value: 0,  note: "Frete grátis" },
+    "FAMILIA10": { type: "percent", value: 10,  note: "10% OFF" },
+    "PRIMEIRO": { type: "value",   value: 5,  note: "R$ 5,00 OFF" } 
+  };
+
+  let couponApplied = (localStorage.getItem("dflCoupon") || "").toUpperCase();
+  let addressValue  = (localStorage.getItem("dflAddress") || "").trim();
+
+  const getCartSubtotal = () =>
+    cart.reduce((s, i) => s + (Number(i.preco) || 0) * (Number(i.qtd) || 0), 0);
+
+  function calcDiscount(subtotal, couponCode) {
+    const code = (couponCode || "").toUpperCase();
+    const rule = COUPONS[code];
+    if (!rule) return { discount: 0, freeShipping: false, label: "" };
+
+    if (rule.type === "percent") {
+      const val = Math.max(0, subtotal * (rule.value / 100));
+      return { discount: val, freeShipping: false, label: `${rule.value}% OFF` };
+    }
+    if (rule.type === "value") {
+      const val = Math.min(subtotal, Math.max(0, rule.value));
+      return { discount: val, freeShipping: false, label: `R$ ${val.toFixed(2).replace(".", ",")} OFF` };
+    }
+    if (rule.type === "frete") {
+      return { discount: 0, freeShipping: true, label: "Frete Grátis" };
+    }
+    return { discount: 0, freeShipping: false, label: "" };
+  }
+
+  function calcTotals() {
+    const subtotal = getCartSubtotal();
+    const d = calcDiscount(subtotal, couponApplied);
+    const delivery = d.freeShipping ? 0 : DELIVERY_FEE;
+    const total = Math.max(0, subtotal + delivery - d.discount);
+    return {
+      subtotal,
+      delivery,
+      discount: d.discount,
+      discountLabel: d.label,
+      total
+    };
+  }
+
+  /* ------------------ 🛒 MINI-CARRINHO: UI ESTENDIDA V2.5 ------------------ */
   function enhanceMiniCartUI() {
     if (!el.miniFoot) return;
-    const total = cart.reduce((s, i) => s + i.preco * i.qtd, 0);
+    if (cart.length === 0) return;
+
+    const { subtotal, delivery, discount, discountLabel, total } = calcTotals();
+
     el.miniFoot.innerHTML = `
-      <input type="text" class="cart-input" id="endereco" placeholder="Endereço para entrega">
-      <div class="cart-summary">
-        <p><span>Subtotal:</span><span>${money(total)}</span></p>
-        <p><span>Taxa de Entrega:</span><span>R$ 5,00</span></p>
-        <p class="total"><span>Total:</span><span>${money(total + 5)}</span></p>
+      <div style="padding:14px 14px 10px;">
+        <div style="display:flex;justify-content:space-between;margin-bottom:6px;">
+          <span>Subtotal</span><b>${money(subtotal)}</b>
+        </div>
+        <div style="display:flex;justify-content:space-between;margin-bottom:6px;">
+          <span>Entrega</span><b>${money(delivery)}</b>
+        </div>
+        <div style="display:flex;justify-content:space-between;margin-bottom:10px;">
+          <span>Desconto ${discountLabel ? `(${discountLabel})` : ""}</span><b>- ${money(discount)}</b>
+        </div>
+        <div style="display:flex;justify-content:space-between;align-items:center;border-top:1px solid #eee;padding-top:10px;margin-bottom:12px;font-size:1.1rem;">
+          <span><b>Total</b></span><span style="color:#e53935;font-weight:800;">${money(total)}</span>
+        </div>
+
+        <label style="display:block;font-weight:600;margin-bottom:6px;">🏠 Endereço para Entrega</label>
+        <textarea id="address-input" rows="2" placeholder="Rua, número, complemento, bairro"
+          style="width:100%;border:1px solid #ddd;border-radius:10px;padding:10px;resize:vertical;margin-bottom:10px">${addressValue}</textarea>
+
+        <div style="display:flex;gap:8px;align-items:center;margin-bottom:12px;">
+          <input id="coupon-input" type="text" inputmode="text" placeholder="Cupom de desconto"
+            value="${couponApplied || ""}"
+            style="flex:1;border:1px solid #ddd;border-radius:10px;padding:10px;font-weight:600;letter-spacing:.5px;text-transform:uppercase">
+          <button id="apply-coupon" type="button" style="background:#000;color:#fff;border:none;border-radius:10px;padding:10px 16px;font-weight:700;cursor:pointer">Aplicar</button>
+        </div>
+
+        <button id="finish-order" type="button" style="width:100%;background:#4caf50;color:#fff;border:none;border-radius:10px;padding:12px;font-weight:700;cursor:pointer;margin-bottom:8px">
+          Finalizar Pedido 🛍️
+        </button>
+        <button id="clear-cart" type="button" style="width:100%;background:#ff4081;color:#fff;border:none;border-radius:10px;padding:10px;font-weight:700;cursor:pointer">
+          Limpar Carrinho
+        </button>
       </div>
-      <button id="finalizar-btn" class="cart-row" style="background:#4caf50;color:#fff;font-weight:700;border:none;border-radius:10px;padding:14px 0;cursor:pointer;margin-top:10px;">Finalizar Pedido</button>
     `;
 
-    const btn = document.getElementById("finalizar-btn");
-    btn.addEventListener("click", () => {
-      const end = document.getElementById("endereco")?.value.trim();
-      if (!end) return alert("Informe seu endereço para entrega.");
+    document.getElementById("apply-coupon")?.addEventListener("click", () => {
+      const input = document.getElementById("coupon-input");
+      const val = (input?.value || "").trim().toUpperCase();
+      if (!val) {
+        couponApplied = "";
+        localStorage.removeItem("dflCoupon");
+        popupAdd("Cupom removido.");
+        enhanceMiniCartUI();
+        return;
+      }
+      if (!COUPONS[val]) {
+        popupAdd("Cupom inválido.");
+        return;
+      }
+      couponApplied = val;
+      localStorage.setItem("dflCoupon", couponApplied);
+      popupAdd(`Cupom aplicado: ${val}`);
+      enhanceMiniCartUI();
+    });
 
-      const resumo = cart.map(i => `${i.nome} (${i.qtd}x) - ${money(i.preco * i.qtd)}`).join("%0A");
-      const totalFinal = money(cart.reduce((s, i) => s + i.preco * i.qtd, 5));
+    document.getElementById("address-input")?.addEventListener("input", (e) => {
+      addressValue = (e.target.value || "").trim();
+      localStorage.setItem("dflAddress", addressValue);
+    });
 
-      const msg = `📦 *Novo Pedido - Da Família Lanches*%0A${resumo}%0A🚗 Endereço: ${end}%0A💰 Total: ${totalFinal}`;
-      const url = `https://wa.me/5561984261633?text=${msg}`;
-      window.open(url, "_blank");
+    document.getElementById("finish-order")?.addEventListener("click", fecharPedido);
+    document.getElementById("clear-cart")?.addEventListener("click", () => {
+      if (confirm("Limpar todo o carrinho?")) {
+        cart = [];
+        renderMiniCart();
+        popupAdd("Carrinho limpo!");
+      }
     });
   }
 
-  // Re-render automático do mini-cart
-  const _renderMiniCart = renderMiniCart;
+  const __renderMiniCartPrev = renderMiniCart;
   renderMiniCart = function() {
-    _renderMiniCart();
-    bindMiniCartButtons();
+    __renderMiniCartPrev();
     enhanceMiniCartUI();
   };
-/* ------------------ 🕐 STATUS DE FUNCIONAMENTO ------------------ */
-  function atualizarStatus() {
-    const agora = new Date();
-    const hora = agora.getHours();
-    const minuto = agora.getMinutes();
 
-    // Define o horário de funcionamento: 18h às 23h59
-    const aberto = (hora >= 18 && hora < 24);
 
-    if (el.statusBanner) {
-      el.statusBanner.textContent = aberto ? "Aberto 🍔" : "Fechado 😴";
-      el.statusBanner.className = "status-banner " + (aberto ? "open" : "closed");
+  /* ------------------ 🖼️ CARROSSEL V2.7 (NOVA LÓGICA) ------------------ */
+  let currentPromoId = 1;
+
+  // Função central que abre e popula o modal
+  function showPromoModal(promoId) {
+    if (!el.promoModal || !PROMO_DATA[promoId]) return;
+    
+    currentPromoId = Number(promoId);
+    const promo = PROMO_DATA[currentPromoId];
+
+    if (el.promoImg) el.promoImg.src = promo.img;
+    if (el.promoTitle) el.promoTitle.textContent = promo.nome;
+    if (el.promoPrice) {
+      el.promoPrice.innerHTML = 
+        `<span class="old-price">De ${money(promo.precoAntigo)}</span> por <b>${money(promo.preco)}</b>`;
     }
-
-    if (el.hoursBanner) {
-      el.hoursBanner.textContent = aberto
-        ? "Estamos atendendo agora! Faça seu pedido 🍟"
-        : "Atendimento de 18h às 23h59 ⏰";
-    }
-
-    // Atualiza a cada 60 segundos
-    setTimeout(atualizarStatus, 60000);
+    
+    Overlays.open(el.promoModal);
   }
 
-  safe(atualizarStatus)();
+  // 1. Abrir o modal ao clicar em um slide
+  document.querySelectorAll(".slide[data-promo-id]").forEach((img) => {
+    img.addEventListener("click", () => {
+      const id = parseInt(img.dataset.promoId, 10);
+      if (id) {
+        showPromoModal(id);
+      }
+    });
+  });
 
-  /* ------------------ ⏱️ TIMER PROMOCIONAL ------------------ */
-  function atualizarTimer() {
-    const tickers = document.querySelectorAll(".countdown-ticker");
-    tickers.forEach((el) => {
-      const agora = new Date();
-      const fim = new Date();
-      fim.setHours(23, 59, 59);
-      const diff = fim - agora;
+  // 2. Adicionar ao carrinho (como item simples, conforme pedido)
+  el.promoAddBtn?.addEventListener("click", () => {
+    const promo = PROMO_DATA[currentPromoId];
+    if (!promo) return;
+    
+    // Chama a função-base de adicionar, que não abre o modal de combos
+    addCommonItem(promo.nome, promo.preco); 
+    
+    Overlays.closeAll(); // Fecha o modal após adicionar
+  });
 
-      if (diff <= 0) {
-        el.textContent = "Encerrando promoções...";
+  // 3. Navegação (Próximo / Anterior)
+  el.promoNavPrev?.addEventListener("click", () => {
+    let newId = currentPromoId - 1;
+    if (newId < 1) newId = 9; // Loop para o final
+    showPromoModal(newId);
+  });
+
+  el.promoNavNext?.addEventListener("click", () => {
+    let newId = currentPromoId + 1;
+    if (newId > 9) newId = 1; // Loop para o início
+    showPromoModal(newId);
+  });
+  
+  // 4. Fechar o modal
+  el.promoClose?.addEventListener("click", () => Overlays.closeAll());
+
+  // 5. Navegação do carrossel principal (mantida)
+  el.cPrev?.addEventListener("click", () => {
+    if (!el.slides) return;
+    el.slides.scrollLeft -= Math.min(el.slides.clientWidth * 0.9, 320);
+  });
+  el.cNext?.addEventListener("click", () => {
+    if (!el.slides) return;
+    el.slides.scrollLeft += Math.min(el.slides.clientWidth * 0.9, 320);
+  });
+
+
+  /* ------------------ ⏰ Status + Timer (mantidos) ------------------ */
+  const atualizarStatus = safe(() => {
+    const agora = new Date();
+    const h = agora.getHours();
+    const m = agora.getMinutes();
+    const aberto = h >= 18 && h < 23; // Aberto das 18:00 até 22:59
+    if (el.statusBanner) {
+      el.statusBanner.textContent = aberto ? "🟢 Aberto — Faça seu pedido!" : "🔴 Fechado — Voltamos às 18h!";
+      el.statusBanner.className = `status-banner ${aberto ? "open" : "closed"}`;
+    }
+    if (el.hoursBanner) {
+      const elTimer = el.hoursBanner.querySelector("#timer");
+      if (!elTimer) return;
+
+      if (aberto) {
+        const fim = new Date(agora);
+        fim.setHours(23, 30, 0); // 23h30
+        
+        let diff = (fim - agora) / 1000;
+        if (diff < 0) diff = 0;
+        
+        const restH = Math.floor(diff / 3600);
+        const restM = Math.floor((diff % 3600) / 60);
+        
+        elTimer.innerHTML = `<b>${restH}h ${restM}min</b>`;
+
+      } else {
+        const inicio = new Date(agora);
+        if (h >= 23 || (h === 23 && m >= 30)) { 
+          inicio.setDate(inicio.getDate() + 1);
+        }
+        inicio.setHours(18, 0, 0); 
+
+        let diff = (inicio - agora) / 1000;
+        const faltamH = Math.floor(diff / 3600);
+        const faltamM = Math.floor((diff % 3600) / 60);
+
+        el.hoursBanner.innerHTML = `🔒 Fechado — Abrimos em <b>${faltamH}h ${faltamM}min</b>`;
+      }
+    }
+  });
+  atualizarStatus();
+  setInterval(atualizarStatus, 60000);
+
+  const atualizarTimer = safe(() => {
+    const agora = new Date();
+    const fim = new Date();
+    fim.setHours(23, 59, 59, 999);
+    const diff = fim - agora;
+    const elTimer = document.getElementById("promo-timer");
+    if (!elTimer) return;
+    if (diff <= 0) return (elTimer.textContent = "00:00:00");
+
+    const h = String(Math.floor(diff / 3600000)).padStart(2, "0");
+    const m = String(Math.floor((diff % 3600000) / 60000)).padStart(2, "0");
+    const s = String(Math.floor((diff % 60000) / 1000)).padStart(2, "0");
+    elTimer.textContent = `${h}:${m}:${s}`;
+  });
+  atualizarTimer();
+  setInterval(atualizarTimer, 1000);
+
+  /* ------------------ 💾 Fechar pedido (V2.5 com endereço/cupom/frete) ------------------ */
+  function fecharPedido() {
+    if (!cart.length) return alert("Carrinho vazio!");
+    if (!currentUser) {
+      alert("Faça login para enviar o pedido!");
+      Overlays.open(el.loginModal);
+      return;
+    }
+
+    const addr = (document.getElementById("address-input")?.value || "").trim();
+    if (!addr) {
+      alert("Informe o endereço para entrega antes de finalizar.");
+      document.getElementById("address-input")?.focus();
+      return;
+    }
+
+    const { subtotal, delivery, discount, discountLabel, total } = calcTotals();
+
+    const pedido = {
+      usuario: currentUser.email,
+      userId: currentUser.uid,
+      nome: currentUser.displayName || currentUser.email.split("@")[0],
+      itens: cart.map((i) => `${i.nome} x${i.qtd}`),
+      subtotal: Number(subtotal.toFixed(2)),
+      entrega: Number(delivery.toFixed(2)),
+      desconto: Number(discount.toFixed(2)),
+      cupom: couponApplied || "",
+      total: Number(total.toFixed(2)),
+      endereco: addr,
+      data: new Date().toISOString(),
+    };
+
+    db.collection("Pedidos")
+      .add(pedido)
+      .then(() => {
+        popupAdd("Pedido salvo ✅");
+
+        const linhas = [
+          "🍔 *Pedido DFL*",
+          cart.map((i) => `• ${i.nome} x${i.qtd}`).join("\n"),
+          "",
+          `Subtotal: *${money(subtotal)}*`,
+          `Entrega: *${money(delivery)}*${couponApplied && discountLabel === "Frete Grátis" ? " _(Frete Grátis)_" : ""}`,
+          `Desconto${couponApplied ? ` (${couponApplied})` : ""}: *-${money(discount)}*`,
+          `*Total: ${money(total)}*`,
+          "",
+          `🏠 *Endereço:* ${addr}`
+        ].join("\n");
+
+        const texto = encodeURIComponent(linhas);
+        window.open(`https://wa.me/5534997178336?text=${texto}`, "_blank");
+
+        cart = [];
+        renderMiniCart();
+        Overlays.closeAll();
+      })
+      .catch((err) => alert("Erro: ".concat(err.message)));
+  }
+
+  renderMiniCart();
+  
+/* ------------------ 📦 Meus Pedidos (UI + lógica V2.5) ------------------ */
+  let ordersFab = el.myOrdersBtn;
+  if (!ordersFab) {
+    ordersFab = document.createElement("button");
+    ordersFab.id = "orders-fab"; 
+    ordersFab.innerHTML = "📦 Meus Pedidos";
+    document.body.appendChild(ordersFab);
+    el.myOrdersBtn = ordersFab; 
+  }
+
+  let ordersPanel = document.querySelector(".orders-panel");
+  if (!ordersPanel) {
+    ordersPanel = document.createElement("div");
+    ordersPanel.className = "orders-panel";
+    ordersPanel.innerHTML = `
+      <div class="orders-head">
+        <span>📦 Meus Pedidos</span>
+        <button class="orders-close" type="button">✖</button>
+      </div>
+      <div class="orders-content" id="orders-content">
+        <p class="empty-orders">Faça login para ver seus pedidos.</p>
+      </div>`;
+    document.body.appendChild(ordersPanel);
+  }
+
+  function openOrdersPanel() {
+    Overlays.closeAll();
+    ordersPanel.classList.add("active");
+    Backdrop.show();
+  }
+
+  ordersFab.addEventListener("click", () => {
+    if (!currentUser) return alert("Faça login para ver seus pedidos.");
+    openOrdersPanel();
+    carregarPedidosSeguro();
+  });
+
+  ordersPanel.querySelector(".orders-close")?.addEventListener("click", () => Overlays.closeAll());
+
+  function showOrdersFabIfLogged() {
+    if (el.myOrdersBtn) {
+      if (currentUser) el.myOrdersBtn.classList.add("show");
+      else el.myOrdersBtn.classList.remove("show");
+    }
+  }
+
+  function carregarPedidosSeguro() {
+    const container = document.getElementById("orders-content");
+    if (!container) return;
+
+    container.innerHTML = `<p class="empty-orders">Carregando pedidos...</p>`;
+
+    if (!currentUser || !currentUser.email) {
+      setTimeout(carregarPedidosSeguro, 500);
+      return;
+    }
+
+    const render = (snap) => {
+      if (snap.empty) {
+        container.innerHTML = `<p class="empty-orders">Nenhum pedido encontrado 😢</p>`;
         return;
       }
 
-      const h = Math.floor(diff / 3600000);
-      const m = Math.floor((diff % 3600000) / 60000);
-      const s = Math.floor((diff % 60000) / 1000);
-      el.textContent = `${h.toString().padStart(2, "0")}:${m
-        .toString()
-        .padStart(2, "0")}:${s.toString().padStart(2, "0")}`;
-    });
-    setTimeout(atualizarTimer, 1000);
-  }
+      const pedidos = [];
+      snap.forEach((doc) => pedidos.push({ id: doc.id, ...doc.data() }));
+      pedidos.sort((a, b) => new Date(b.data) - new Date(a.data));
 
-  safe(atualizarTimer)();
+      container.innerHTML = "";
+      pedidos.forEach((p) => {
+        const itens = Array.isArray(p.itens) ? p.itens.join("<br>• ") : (p.itens || "");
+        const dataFormatada = p.data
+          ? new Date(p.data).toLocaleString("pt-BR", {
+              day: "2-digit", month: "2-digit", year: "numeric",
+              hour: "2-digit", minute: "2-digit",
+            })
+          : "—";
 
-  /* ------------------ 📦 MEUS PEDIDOS ------------------ */
-  const pedidosPainel = document.querySelector(".orders-panel");
-  const pedidosBtn = document.getElementById("orders-fab");
-  const pedidosClose = document.querySelector(".orders-close");
+        const box = document.createElement("div");
+        box.className = "order-item";
+        box.innerHTML = `
+          <h4>📅 ${dataFormatada}</h4>
+          <p style="margin:6px 0;"><b>Itens:</b><br>• ${itens}</p>
+          ${p.endereco ? `<p style="margin:6px 0;"><b>Endereço:</b> ${p.endereco}</p>` : ""}
+          ${p.cupom ? `<p style="margin:6px 0;"><b>Cupom:</b> ${p.cupom}</p>` : ""}
+          <p style="margin:6px 0;">
+            <b>Subtotal:</b> ${money(p.subtotal || 0)}<br>
+            <b>Entrega:</b> ${money(p.entrega || 0)}<br>
+            <b>Desconto:</b> -${money(p.desconto || 0)}
+          </p>
+          <p style="font-size:1.1rem;color:#4caf50;font-weight:700;margin-top:6px;">
+            <b>Total:</b> ${money(p.total || 0)}
+          </p>`;
+        container.appendChild(box);
+      });
+    };
 
-  function carregarMeusPedidos() {
-    if (!db || !currentUser) return;
-
-    const lista = document.querySelector(".orders-content");
-    lista.innerHTML = `<p style="text-align:center;color:#999;">Carregando pedidos...</p>`;
-
-    db.collection("pedidos")
-      .where("uid", "==", currentUser.uid)
-      .orderBy("data", "desc")
-      .limit(10)
+    db.collection("Pedidos")
+      .where("usuario", "==", currentUser.email)
       .get()
       .then((snap) => {
-        if (snap.empty) {
-          lista.innerHTML = `<p style="text-align:center;color:#999;">Nenhum pedido encontrado ainda.</p>`;
-          return;
-        }
-
-        lista.innerHTML = snap.docs
-          .map((doc) => {
-            const p = doc.data();
-            const total = money(p.total);
-            const dataFmt = p.dataPedido || p.data || "—";
-            const itens = (p.itens || [])
-              .map((i) => `<li>${i.nome} (${i.qtd}x)</li>`)
-              .join("");
-            return `
-              <div class="order-item">
-                <h4>Pedido #${doc.id.slice(-5)}</h4>
-                <p><b>Total:</b> ${total}</p>
-                <p><b>Data:</b> ${dataFmt}</p>
-                <ul>${itens}</ul>
-              </div>
-            `;
-          })
-          .join("");
+        if (!snap.empty) return render(snap);
+        return db.collection("Pedidos")
+          .where("userId", "==", currentUser.uid)
+          .get()
+          .then(render);
       })
       .catch((err) => {
-        console.error("Erro ao carregar pedidos:", err);
-        lista.innerHTML = `<p style="text-align:center;color:#d32f2f;">Erro ao carregar seus pedidos.</p>`;
+        container.innerHTML = `<p class="empty-orders" style="color:#d32f2f;">Erro: ${err.message}</p>`;
       });
   }
 
-  pedidosBtn?.addEventListener("click", () => {
-    if (!currentUser) {
-      popupAdd("Faça login para ver seus pedidos!");
-      return Overlays.open(el.loginModal);
-    }
-    carregarMeusPedidos();
-    Overlays.open(pedidosPainel);
-  });
-
-  pedidosClose?.addEventListener("click", () => Overlays.closeAll());
-/* ------------------ 🎯 PROMOÇÕES EXPANSÍVEIS ------------------ */
-  const promocoes = [
-    { nome: "Promo 1", precoAntigo: 40.00, precoNovo: 34.99, img: "promo1.jpg" },
-    { nome: "Promo 2", precoAntigo: 45.00, precoNovo: 37.99, img: "promo2.jpg" },
-    { nome: "Promo 3", precoAntigo: 52.00, precoNovo: 39.99, img: "promo3.jpg" },
-    { nome: "Promo 4", precoAntigo: 52.00, precoNovo: 44.99, img: "promo4.jpg" },
-    { nome: "Promo 5", precoAntigo: 65.00, precoNovo: 49.99, img: "promo5.jpg" },
-    { nome: "Promo 6", precoAntigo: 65.00, precoNovo: 44.99, img: "promo6.jpg" },
-    { nome: "Promo 7", precoAntigo: 77.00, precoNovo: 59.99, img: "promo7.jpg" },
-    { nome: "Promo 8", precoAntigo: 72.00, precoNovo: 59.99, img: "promo8.jpg" },
-    { nome: "Promo 9", precoAntigo: 79.99, precoNovo: 64.99, img: "promo9.jpg" }
+  /* =========================================================
+     📊 ADMIN DASHBOARD (V2.5 com Cupom + Frete + Desconto)
+  ========================================================= */
+  const ADMINS = [
+    "alefejohsefe@gmail.com",
+    "kalebhstanley650@gmail.com",
+    "contato@dafamilialanches.com.br"
   ];
 
-  let idxPromoAtual = 0;
-  let modalPromo = null;
+  function isAdmin(user) {
+    return user && user.email && ADMINS.includes(user.email.toLowerCase());
+  }
 
-  // Cria o modal das promoções se ainda não existir
-  function criarModalPromocao() {
-    if (document.getElementById("promo-modal")) return;
+  let chartPedidos = null;
+  let chartProdutos = null;
+
+  function ensureChartJS(cb) {
+    if (window.Chart) return cb();
+    const s = document.createElement("script");
+    s.src = "https://cdn.jsdelivr.net/npm/chart.js";
+    s.onload = cb;
+    document.head.appendChild(s);
+  }
+
+  function createDashboard() {
+    if (document.getElementById("admin-dashboard")) return;
+
     const div = document.createElement("div");
-    div.id = "promo-modal";
-    div.className = "modal promo-modal";
+    div.id = "admin-dashboard";
+    div.className = "modal";
     div.innerHTML = `
-      <div class="promo-content">
-        <button id="promo-close" class="promo-close">✖️</button>
-        <button id="promo-prev" class="promo-nav prev">⬅️</button>
-        <div class="promo-body">
-          <img id="promo-img" src="" alt="Promoção" class="promo-img">
-          <div class="promo-info">
-            <h2 id="promo-nome"></h2>
-            <p id="promo-preco">
-              <span class="old"></span>
-              <span class="new"></span>
-            </p>
-            <button id="promo-add" class="promo-add">Adicionar ao Carrinho 🛒</button>
+      <div class="modal-content" style="max-width:1000px;width:95%;height:85vh;overflow:auto;background:#fff;border-radius:12px;">
+        <div class="modal-head" style="display:flex;justify-content:space-between;align-items:center;padding:10px 14px;">
+          <h3>📊 Relatórios e Estatísticas</h3>
+          <button class="dashboard-close" type="button" style="background:#ff5252;color:#fff;border:none;border-radius:6px;padding:6px 10px;cursor:pointer;font-weight:600;">✖</button>
+        </div>
+        <div class="dashboard-body" style="padding:12px;">
+          <div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:12px;">
+            <div id="card-total" class="cardBox">Total Arrecadado: —</div>
+            <div id="card-pedidos" class="cardBox">Pedidos: —</div>
+            <div id="card-ticket" class="cardBox">Ticket Médio: —</div>
+          </div>
+
+          <div style="margin-bottom:10px;">
+            <label style="font-weight:600;">Período: </label>
+            <select id="filter-period" style="padding:6px 10px;border-radius:6px;border:1px solid #ccc;font-weight:600;">
+              <option value="7">Últimos 7 dias</option>
+              <option value="30">Últimos 30 dias</option>
+              <option value="all">Todos</option>
+            </select>
+          </div>
+
+          <canvas id="chart-pedidos" style="width:100%;height:240px;"></canvas>
+          <canvas id="chart-produtos" style="width:100%;height:240px;margin-top:16px;"></canvas>
+          <div style="margin-top:12px;">
+            <button id="export-csv" type="button" style="background:#4caf50;color:#fff;border:none;border-radius:8px;padding:10px 16px;font-weight:600;cursor:pointer;">📁 Exportar CSV</button>
           </div>
         </div>
-        <button id="promo-next" class="promo-nav next">➡️</button>
-      </div>
-    `;
+      </div>`;
     document.body.appendChild(div);
-  }
 
-  // Atualiza o conteúdo do modal conforme a promoção
-  function renderPromocao() {
-    const p = promocoes[idxPromoAtual];
-    if (!p) return;
-
-    const nome = document.getElementById("promo-nome");
-    const img = document.getElementById("promo-img");
-    const precoAntigo = document.querySelector("#promo-preco .old");
-    const precoNovo = document.querySelector("#promo-preco .new");
-
-    nome.textContent = p.nome;
-    img.src = `./img/promos/${p.img}`;
-    precoAntigo.textContent = `R$ ${p.precoAntigo.toFixed(2).replace('.', ',')}`;
-    precoNovo.textContent = `R$ ${p.precoNovo.toFixed(2).replace('.', ',')}`;
-  }
-
-  // Abre o modal com a promoção clicada
-  function abrirPromocao(idx) {
-    criarModalPromocao();
-    idxPromoAtual = idx;
-    renderPromocao();
-
-    const modal = document.getElementById("promo-modal");
-    modal.classList.add("show");
-    Overlays.closeAll();
-    Backdrop.show();
-
-    // Botões dentro do modal
-    document.getElementById("promo-close").onclick = () => {
-      modal.classList.remove("show");
-      Backdrop.hide();
-    };
-
-    document.getElementById("promo-prev").onclick = () => {
-      idxPromoAtual = (idxPromoAtual - 1 + promocoes.length) % promocoes.length;
-      renderPromocao();
-    };
-
-    document.getElementById("promo-next").onclick = () => {
-      idxPromoAtual = (idxPromoAtual + 1) % promocoes.length;
-      renderPromocao();
-    };
-
-    document.getElementById("promo-add").onclick = () => {
-      const promo = promocoes[idxPromoAtual];
-      addToCart(promo.nome, promo.precoNovo);
-      popupAdd(`${promo.nome} adicionado!`);
-      modal.classList.remove("show");
-      Backdrop.hide();
-    };
-  }
-
-  /* 🔗 Substitui a ação padrão do carrossel */
-  document.querySelectorAll(".slide").forEach((slide, i) => {
-    slide.addEventListener("click", (e) => {
-      e.preventDefault();
-      abrirPromocao(i);
+    document.querySelectorAll(".cardBox").forEach(c => {
+      Object.assign(c.style, {
+        flex: "1", minWidth: "200px", padding: "12px",
+        background: "#f9f9f9", borderRadius: "8px",
+        boxShadow: "0 2px 8px rgba(0,0,0,.08)"
+      });
     });
-  });
-/* ------------------ 🍪 BANNER DE COOKIES ------------------ */
-  const cookieBanner = document.getElementById("cookie-banner");
-  const cookieBtn = document.getElementById("cookie-accept");
 
-  if (cookieBanner && cookieBtn) {
-    if (localStorage.getItem("dfl-cookies-ok") === "true") {
+    div.querySelector(".dashboard-close").addEventListener("click", () => Overlays.closeAll());
+  }
+
+  function createAdminFab() {
+    if (el.reportsBtn) {
+      el.reportsBtn.style.display = "block";
+      el.reportsBtn.addEventListener("click", () => {
+        createDashboard();
+        ensureChartJS(() => carregarRelatorios("7"));
+        Overlays.open(document.getElementById("admin-dashboard"));
+      });
+    }
+  }
+
+/* ------------------ 📊 Função dos Gráficos (Corrigida) ------------------ */
+  function gerarResumoECharts(pedidos) {
+    if (!window.Chart) {
+      console.error("Chart.js não está carregado.");
+      return;
+    }
+    
+    const ctxPedidos = document.getElementById('chart-pedidos')?.getContext('2d');
+    const ctxProdutos = document.getElementById('chart-produtos')?.getContext('2d');
+
+    if (!ctxPedidos || !ctxProdutos) {
+      console.error("Elementos <canvas> dos gráficos não encontrados.");
+      return;
+    }
+
+    // --- Gráfico 1: Pedidos por Dia (Gráfico de Linha) ---
+    const pedidosPorDia = {};
+    pedidos.forEach(p => {
+      const dia = p.data.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' });
+      pedidosPorDia[dia] = (pedidosPorDia[dia] || 0) + 1;
+    });
+
+    const labelsPedidos = Object.keys(pedidosPorDia).sort((a, b) => {
+      const [diaA, mesA] = a.split('/');
+      const [diaB, mesB] = b.split('/');
+      return new Date(`${mesA}/${diaA}/2025`) - new Date(`${mesB}/${diaB}/2025`);
+    });
+    const dataPedidos = labelsPedidos.map(label => pedidosPorDia[label]);
+
+    if (chartPedidos) {
+      chartPedidos.destroy();
+    }
+    chartPedidos = new Chart(ctxPedidos, {
+      type: 'line',
+      data: {
+        labels: labelsPedidos,
+        datasets: [{
+          label: 'Pedidos por Dia',
+          data: dataPedidos,
+          backgroundColor: 'rgba(255, 179, 0, 0.2)',
+          borderColor: '#ffb300',
+          borderWidth: 2,
+          fill: true,
+          tension: 0.1
+        }]
+      },
+      options: {
+        responsive: true,
+        plugins: {
+          title: { display: true, text: 'Volume de Pedidos por Dia' }
+        }
+      }
+    });
+
+    // --- Gráfico 2: Produtos Mais Vendidos (Gráfico de Barras) ---
+    const produtosContagem = {};
+    pedidos.forEach(p => {
+      p.itens.forEach(itemStr => {
+        const parts = itemStr.split(' x');
+        const nome = parts[0];
+        const qtd = parts.length > 1 ? parseInt(parts[1], 10) : 1;
+        
+        if (nome) {
+          produtosContagem[nome] = (produtosContagem[nome] || 0) + (isNaN(qtd) ? 1 : qtd);
+        }
+      });
+    });
+
+    const produtosOrdenados = Object.entries(produtosContagem)
+      .sort(([, a], [, b]) => b - a)
+      .slice(0, 10); 
+
+    const labelsProdutos = produtosOrdenados.map(p => p[0]);
+    const dataProdutos = produtosOrdenados.map(p => p[1]);
+
+    if (chartProdutos) {
+      chartProdutos.destroy();
+    }
+    chartProdutos = new Chart(ctxProdutos, {
+      type: 'bar',
+      data: {
+        labels: labelsProdutos,
+        datasets: [{
+          label: 'Itens Mais Vendidos',
+          data: dataProdutos,
+          backgroundColor: '#ff7043',
+          borderColor: '#d84315',
+          borderWidth: 1
+        }]
+      },
+      options: {
+        indexAxis: 'y',
+        responsive: true,
+        plugins: {
+          title: { display: true, text: 'Top 10 Itens Mais Vendidos' }
+        }
+      }
+    });
+  }
+
+/* ------------------ 📊 Carregar Relatórios (V2.5) ------------------ */
+  function carregarRelatorios(periodo = "7") {
+    const agora = new Date();
+    let start = new Date(0);
+    if (periodo !== "all") {
+      start = new Date(agora);
+      start.setDate(start.getDate() - Number(periodo));
+    }
+
+    db.collection("Pedidos")
+      .orderBy("data", "desc")
+      .get()
+      .then(snap => {
+        const pedidos = snap.docs.map(d => {
+          const p = d.data() || {};
+          const subtotal = Number(p.subtotal ?? 0);
+          const entrega  = Number(p.entrega  ?? 0);
+          const desconto = Number(p.desconto ?? 0);
+          const total    = Number(p.total    ?? (subtotal + entrega - desconto)) || 0;
+
+          return {
+            ...p,
+            id: d.id,
+            subtotal,
+            entrega,
+            desconto,
+            total,
+            data: typeof p.data === "string"
+              ? new Date(p.data)
+              : (p.data?.toDate?.() ? p.data.toDate() : new Date(0)),
+            itens: Array.isArray(p.itens)
+              ? p.itens
+              : (typeof p.itens === "string" ? p.itens.split("; ") : [])
+          };
+        });
+
+        const filtrados = pedidos.filter(p => periodo === "all" || (p.data >= start));
+        
+        gerarResumoECharts(filtrados); 
+        
+        const totalVendido = filtrados.reduce((s, p) => s + p.total, 0);
+        const numPedidos = filtrados.length;
+        const ticketMedio = numPedidos > 0 ? totalVendido / numPedidos : 0;
+        
+        document.getElementById("card-total").textContent = `Total Arrecadado: ${money(totalVendido)}`;
+        document.getElementById("card-pedidos").textContent = `Pedidos: ${numPedidos}`;
+        document.getElementById("card-ticket").textContent = `Ticket Médio: ${money(ticketMedio)}`;
+
+        document.getElementById("export-csv").onclick = () => {
+            let csv = "ID;Data;Usuario;Nome;Itens;Subtotal;Entrega;Desconto;Cupom;Total;Endereco\n";
+            filtrados.forEach(p => {
+                const linha = [
+                    p.id || 'N/A',
+                    p.data.toLocaleString('pt-BR'),
+                    p.usuario || p.email || '',
+                    p.nome || '',
+                    `"${p.itens.join(', ')}"`,
+                    String(p.subtotal.toFixed(2)).replace('.',','),
+                    String(p.entrega.toFixed(2)).replace('.',','),
+                    String(p.desconto.toFixed(2)).replace('.',','),
+                    p.cupom || '',
+                    String(p.total.toFixed(2)).replace('.',','),
+                    `"${(p.endereco || '').replace(/"/g, '""')}"`
+                ].join(';');
+                csv += linha + '\n';
+            });
+            const blob = new Blob([`\uFEFF${csv}`], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = `pedidos_dfl_${periodo}.csv`;
+            link.click();
+            popupAdd('Exportando CSV...');
+        };
+
+      })
+      .catch(err => alert("Erro ao carregar relatórios: ".concat(err.message)));
+
+    const sel = document.getElementById("filter-period");
+    if (sel && !sel._bound) {
+      sel.addEventListener("change", e => carregarRelatorios(e.target.value));
+      sel._bound = true;
+    }
+  }
+
+  /* ------------------ 🔐 Segurança/Admin + UX Final ------------------ */
+  auth.onAuthStateChanged(user => {
+    currentUser = user; 
+    
+    if (user) {
+      el.userBtn.textContent = `Olá, ${user.displayName?.split(" ")[0] || user.email.split("@")[0]}`;
+      showOrdersFabIfLogged();
+    } else {
+      el.userBtn.textContent = "Entrar / Cadastrar";
+      showOrdersFabIfLogged();
+    }
+
+    if (user && isAdmin(user)) {
+      if (el.reportsBtn) {
+        createAdminFab();
+      }
+    } else {
+      if (el.reportsBtn) el.reportsBtn.style.display = "none";
+      document.getElementById("admin-dashboard")?.remove();
+      Overlays.closeAll();
+    }
+  });
+
+  /* ------------------ 🍪 LÓGICA DO BANNER DE COOKIES ------------------ */
+  // (Este é o novo bloco de código adicionado)
+  const cookieBanner = document.getElementById("cookie-banner");
+  const cookieAcceptBtn = document.getElementById("cookie-accept");
+
+  if (cookieBanner && cookieAcceptBtn) {
+    // Verifica se o cookie já foi aceito
+    if (localStorage.getItem("dfl-cookies-accepted") === "true") {
       cookieBanner.style.display = "none";
     } else {
+      // A classe .show (do CSS) vai ativar a animação
       cookieBanner.classList.add("show");
     }
 
-    cookieBtn.addEventListener("click", () => {
-      localStorage.setItem("dfl-cookies-ok", "true");
+    // O que acontece ao clicar em "Aceitar"
+    cookieAcceptBtn.addEventListener("click", () => {
+      localStorage.setItem("dfl-cookies-accepted", "true");
       cookieBanner.classList.remove("show");
-      setTimeout(() => (cookieBanner.style.display = "none"), 400);
+      
+      // Opcional: esconde o banner após a animação de saída
+      setTimeout(() => {
+        cookieBanner.style.display = "none";
+      }, 500); // 500ms (mesmo tempo da transição no CSS)
     });
   }
-
-  /* ------------------ ⚠️ MONITORAMENTO DE ERROS ------------------ */
-  window.addEventListener("error", (e) => {
-    const msg = String(e.message || "").toLowerCase();
-    if (msg.includes("firebase") || msg.includes("split")) {
-      popupAdd("⚠️ Erro leve detectado. Atualize a página se persistir.");
-    }
-    console.warn("⚠️ Erro capturado:", e.message);
-  });
-
-  /* ------------------ 🔁 RECUPERAÇÃO DE CACHE ------------------ */
-  window.addEventListener("pageshow", (ev) => {
-    if (ev.persisted) {
-      console.log("↻ Página reaberta do cache, recarregando...");
+  
+  /* ------------------ Outras Funções ------------------ */
+  window.addEventListener("pageshow", (e) => {
+    if (e.persisted) {
+      console.warn("↻ Página reaberta via cache, recarregando...");
       location.reload();
     }
   });
 
-  /* ------------------ 🧩 FINALIZAÇÃO SEGURA ------------------ */
-  console.log(
-    "%c🔥 DFL v2.7 — Promos Expansíveis + UX Refinado + Base Estável v2.6",
-    "background:#000;color:#ffeb3b;font-weight:700;padding:6px 10px;border-radius:6px;"
-  );
+  window.addEventListener("error", (e) => {
+    if (String(e?.message || "").toLowerCase().includes("split")) {
+      popupAdd("Humm… houve um pequeno erro ao ler dados. Atualize a página.");
+    }
+    console.warn("⚠️ Erro interceptado:", e?.message);
+  });
 
-}); // 🔚 Fim do DOMContentLoaded principal
+  /* 🚨 ATUALIZADO V2.7: Mensagem de console */
+  console.log("%c🍔 DFL v2.7 — Modal de Promoções OK — Lógica v2.6 Estável",
+              "background:#4caf50;color:#fff;padding:8px 12px;border-radius:8px;font-weight:700;");
+
+}); // Fim do DOMContentLoaded
+
+/* =========================================================
+   SCRIPT PARA FECHAR MODAIS AO CLICAR FORA (v2.5)
+========================================================= */
+
+document.addEventListener('DOMContentLoaded', () => {
+
+  // --- 1. Lógica para fechar os MODAIS (Login, Extras, Combo) ---
+  
+  // Seleciona todos os elementos que são modais
+  const allModals = document.querySelectorAll('.modal');
+
+  allModals.forEach(modal => {
+    modal.addEventListener('click', (event) => {
+      
+      // event.target é o elemento exato que foi clicado.
+      // Verificamos se o clique foi DIRETAMENTE no fundo do modal
+      // (que tem a classe '.modal') e não em um "filho" (como o .modal-content)
+      if (event.target.classList.contains('modal')) {
+        
+        // Se foi no fundo, remove a classe 'show' para fechar
+        modal.classList.remove('show');
+        
+        // Também remove a classe 'active' do backdrop do carrinho,
+        // caso ele esteja ativo por algum motivo.
+        const cartBackdrop = document.getElementById('cart-backdrop');
+        if (cartBackdrop) {
+            cartBackdrop.classList.remove('active');
+        }
+      }
+    });
+  });
+
+  // --- 2. Lógica para fechar o MINI-CARRINHO ---
+  
+  const cartBackdrop = document.getElementById('cart-backdrop');
+  const miniCart = document.getElementById('mini-cart');
+
+  if (cartBackdrop && miniCart) {
+    cartBackdrop.addEventListener('click', () => {
+      // Ao clicar no backdrop, fecha tanto ele quanto o carrinho
+      cartBackdrop.classList.remove('active');
+      miniCart.classList.remove('active');
+    });
+  }
+
+});
