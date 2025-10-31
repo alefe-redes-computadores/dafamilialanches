@@ -1,6 +1,6 @@
 /* =========================================================
-   🎨 DFL STYLE — v2.7 (Modal de Promoções)
-   - Adiciona estilos para o novo modal do carrossel (#promo-modal)
+   🎨 DFL STYLE — v2.8 (Ajuste Fino do Modal)
+   - Corrige o corte da imagem no modal de promoções (v2.7)
    - Mantém 100% do layout e estabilidade da v2.6
 ========================================================= */
 
@@ -56,7 +56,7 @@ body{background:#ffd54f;font-family:"Inter","Poppins",sans-serif;color:#222;marg
 .slides::-webkit-scrollbar-track{background:#f1f1f1;border-radius:10px}
 .slides::-webkit-scrollbar-thumb{background:#ffd54f;border-radius:10px}
 .slides::-webkit-scrollbar-thumb:hover{background:#ffca28}
-/* 🚨 ATUALIZADO V2.7: Cursor mudou para zoom-in */
+/* Cursor v2.7 */
 .slide{min-width:250px;max-width:250px;height:180px;object-fit:cover;border-radius:12px;box-shadow:0 3px 10px rgba(0,0,0,.2);cursor:zoom-in;transition:transform .2s ease;flex-shrink:0}
 .slide:hover{transform:scale(1.05);box-shadow:0 5px 15px rgba(0,0,0,.3)}
 .c-btn{background:rgba(0,0,0,.7);color:#fff;border:none;font-size:24px;width:40px;height:40px;border-radius:50%;cursor:pointer;position:absolute;top:50%;transform:translateY(-50%);z-index:10;transition:all .2s ease;display:flex;align-items:center;justify-content:center}
@@ -451,7 +451,7 @@ section h2{font-size:1.3rem;text-align:center;margin-bottom:15px;color:#ff7043}
 
 
 /* =========================================================
-   🚨 NOVO CSS V2.7: MODAL DE PROMOÇÕES
+   🚨 CSS V2.8: MODAL DE PROMOÇÕES (AJUSTE FINO)
 ========================================================= */
 #promo-modal {
   /* Usa a classe .modal, mas sobe o z-index para ficar acima dos outros */
@@ -480,12 +480,18 @@ section h2{font-size:1.3rem;text-align:center;margin-bottom:15px;color:#ff7043}
   transform: scale(1);
 }
 
+/* 🚨 ATUALIZAÇÃO V2.8: 
+  A imagem agora tem altura automática e 'contain' 
+  para mostrar a imagem inteira, sem cortes.
+*/
 #promo-modal-img {
   width: 100%;
-  height: 250px;
-  object-fit: cover;
+  height: auto; /* v2.8: Deixa a altura ser automática */
+  max-height: 60vh; /* v2.8: Limita a altura a 60% da tela */
+  object-fit: contain; /* v2.8: Garante que a imagem apareça inteira */
   display: block;
   border-bottom: 2px solid #ffca28;
+  background-color: #f0f0f0; /* v2.8: Fundo caso a imagem seja transparente */
 }
 
 .promo-info {
@@ -564,10 +570,14 @@ section h2{font-size:1.3rem;text-align:center;margin-bottom:15px;color:#ff7043}
   transform: scale(1.1);
 }
 
-/* Ajuste fino para mobile: botões de nav ficam sobre a imagem */
+/* 🚨 ATUALIZAÇÃO V2.8: 
+  Ajusta a posição das setas de navegação,
+  pois a altura da imagem agora é variável.
+*/
 @media (max-width: 480px) {
   .promo-nav {
-    top: 125px; /* Metade da altura da imagem (250px / 2) */
+    /* 30% para baixo, em vez de um valor fixo */
+    top: 30%; 
   }
 }
 
