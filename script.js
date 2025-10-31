@@ -4,7 +4,6 @@
    - JS: Mantido da v2.7 Estável
 ========================================================= */
 
-
 document.addEventListener("DOMContentLoaded", () => {
   /* ------------------ ⚙️ BASE ------------------ */
   const sound = new Audio("click.wav");
