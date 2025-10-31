@@ -1,9 +1,9 @@
 /* =========================================================
-   🍔 DFL v2.7 — MODAL DE PROMOÇÕES
-   - Transforma o carrossel em um modal de venda interativo.
-   - Adiciona promoções como itens simples (vontade do usuário).
-   - Mantém 100% da lógica funcional e estabilidade da v2.6.
+   🍔 DFL v2.8 — Promoções Expansíveis + Layout Redondinho
+   - HTML e CSS: Atualizados (Expansão de imagens)
+   - JS: Mantido da v2.7 Estável
 ========================================================= */
+
 
 document.addEventListener("DOMContentLoaded", () => {
   /* ------------------ ⚙️ BASE ------------------ */
