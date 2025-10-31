@@ -549,3 +549,6 @@ h1, h2, h3, h4, p {
   from { opacity: 0; transform: scale(.95); }
   to { opacity: 1; transform: scale(1); }
 }
+/* HOTFIX v2.7.1 — evita imagens esticadas dentro do modal de login */
+#login-modal .modal-content img { max-width: 100%; height: auto; }
+#login-modal .google-icon { width: 24px; height: 24px; display: inline-block; }
