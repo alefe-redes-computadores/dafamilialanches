@@ -648,10 +648,10 @@ section h2{font-size:1.3rem;text-align:center;margin-bottom:15px;color:#ff7043}
   }
 }
 /* =========================================================
-   🟢 Ajuste Milimétrico do Banner Superior (v2.8.3)
-   - Reduz ainda mais o espaçamento
-   - Mantém o texto 100% visível
+   🟢 Correção Forçada do Banner Superior (v2.8.3-fix)
+   - Garante prioridade sobre outros seletores
+   - Remove espaço visual extra acima do banner verde/vermelho
 ========================================================= */
 .status-banner {
-  margin-top: calc(50px + env(safe-area-inset-top, 0px));
+  margin-top: calc(50px + env(safe-area-inset-top, 0px)) !important;
 }
