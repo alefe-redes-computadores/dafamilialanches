@@ -648,10 +648,10 @@ section h2{font-size:1.3rem;text-align:center;margin-bottom:15px;color:#ff7043}
   }
 }
 /* =========================================================
-   🟢 Correção Fina do Banner Superior (v2.8.2)
-   - Mantém o aviso "Estamos abertos" visível
-   - Ajusta o espaço para não deixar margem excessiva
+   🟢 Ajuste Milimétrico do Banner Superior (v2.8.3)
+   - Reduz ainda mais o espaçamento
+   - Mantém o texto 100% visível
 ========================================================= */
 .status-banner {
-  margin-top: calc(58px + env(safe-area-inset-top, 0px));
+  margin-top: calc(50px + env(safe-area-inset-top, 0px));
 }
