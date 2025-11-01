@@ -680,3 +680,32 @@ section h2{font-size:1.3rem;text-align:center;margin-bottom:15px;color:#ff7043}
 .carousel {
   margin-top: 6px !important;
 }
+/* =========================================================
+   ⚡ v2.8.6 — Compactação Real do Bloco de Promoções
+   - Reduz altura visual do bloco e aproxima o carrossel
+========================================================= */
+.promo-section {
+  padding: 12px 10px !important; /* reduz padding geral */
+}
+
+.promo-section h2 {
+  margin-top: 0 !important;
+  margin-bottom: 2px !important;
+  font-size: 1.25rem !important;
+}
+
+.promo-sub {
+  margin-bottom: 4px !important;
+  font-size: 0.95rem !important;
+  color: #555;
+}
+
+.countdown-ticker {
+  margin: 4px 0 6px !important;
+  padding: 5px 10px !important;
+  font-size: 0.95rem !important;
+}
+
+.carousel {
+  margin-top: 4px !important;
+}
