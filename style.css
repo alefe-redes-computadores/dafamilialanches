@@ -659,3 +659,24 @@ section h2{font-size:1.3rem;text-align:center;margin-bottom:15px;color:#ff7043}
 .status-banner {
   margin-top: 0 !important; /* elimina o deslocamento vertical */
 }
+/* =========================================================
+   ✨ v2.8.5 — Harmonização visual do bloco de Promoções
+   - Reduz espaços verticais e valoriza o cronômetro
+========================================================= */
+.promo-section h2 {
+  margin-bottom: 4px !important;
+}
+
+.promo-sub {
+  margin-bottom: 6px !important;
+  font-size: 1rem; /* ligeiramente maior pra dar presença */
+}
+
+.countdown-ticker {
+  margin: 6px 0 8px !important;
+  transform: scale(1.05); /* leve destaque visual */
+}
+
+.carousel {
+  margin-top: 6px !important;
+}
