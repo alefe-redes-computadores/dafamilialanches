@@ -648,10 +648,10 @@ section h2{font-size:1.3rem;text-align:center;margin-bottom:15px;color:#ff7043}
   }
 }
 /* =========================================================
-   🟢 Correção do banner cortado (v2.8.1)
-   - Garante que o aviso "Estamos abertos" apareça totalmente
-   - Evita sobreposição com o header fixo
+   🟢 Correção Fina do Banner Superior (v2.8.2)
+   - Mantém o aviso "Estamos abertos" visível
+   - Ajusta o espaço para não deixar margem excessiva
 ========================================================= */
 .status-banner {
-  margin-top: calc(72px + env(safe-area-inset-top, 0px));
+  margin-top: calc(58px + env(safe-area-inset-top, 0px));
 }
