@@ -721,3 +721,253 @@ section h2 {
 /* =========================================================
    ✨ FIM DO ARQUIVO — DFL v2.9.1 ESTÁVEL
 ========================================================= */
+/* =========================================================
+   🪟 CORREÇÃO FINAL — MODAIS E BACKDROP
+   Corrige o posicionamento e visual de todos os modais (promo, extras, login)
+========================================================= */
+
+.modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.6);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 1200;
+  backdrop-filter: blur(3px);
+}
+.modal.show {
+  display: flex;
+}
+
+/* Conteúdo genérico do modal */
+.modal-content,
+.promo-content,
+.login-box {
+  background: #fff;
+  border-radius: 20px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
+  max-width: 95%;
+  width: 400px;
+  padding: 20px;
+  position: relative;
+  animation: popIn 0.25s ease;
+}
+@keyframes popIn {
+  from {
+    transform: scale(0.9);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+/* Cabeçalhos */
+.modal-head,
+.promo-content .modal-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 2px solid #ffca28;
+  padding-bottom: 8px;
+  margin-bottom: 12px;
+}
+.modal-head h3 {
+  font-size: 1.1rem;
+  margin: 0;
+}
+.modal-head button,
+.promo-close,
+.extras-close,
+.combo-close,
+.login-close {
+  background: #ffca28;
+  border: none;
+  border-radius: 50%;
+  width: 28px;
+  height: 28px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: .2s;
+}
+.modal-head button:hover,
+.promo-close:hover,
+.extras-close:hover,
+.combo-close:hover,
+.login-close:hover {
+  background: #ffb300;
+  color: #fff;
+}
+
+/* Corpo dos modais */
+.extras-list,
+#combo-body {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-height: 300px;
+  overflow-y: auto;
+  padding: 5px;
+}
+.extras-list label {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #fafafa;
+  padding: 8px 10px;
+  border-radius: 8px;
+  border: 1px solid #eee;
+  cursor: pointer;
+  transition: background .2s;
+}
+.extras-list label:hover {
+  background: #fff9e5;
+}
+.extras-list input {
+  transform: scale(1.2);
+}
+
+/* Rodapé */
+.modal-foot {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 15px;
+}
+.btn-primary,
+.btn-primario {
+  background: linear-gradient(135deg, #4caf50, #43a047);
+  border: none;
+  color: #fff;
+  font-weight: 700;
+  padding: 8px 14px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: .25s;
+}
+.btn-primary:hover,
+.btn-primario:hover {
+  background: linear-gradient(135deg, #43a047, #388e3c);
+}
+.btn-secondary {
+  background: #e0e0e0;
+  color: #000;
+  border: none;
+  padding: 8px 14px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: .25s;
+}
+.btn-secondary:hover {
+  background: #d5d5d5;
+}
+
+/* ======== Modal de Promoção ======== */
+.promo-content {
+  max-width: 500px;
+  width: 90%;
+  background: #fff;
+  border-radius: 20px;
+  padding: 16px;
+  position: relative;
+}
+.promo-content img {
+  width: 100%;
+  border-radius: 12px;
+  margin-bottom: 10px;
+}
+.promo-info {
+  text-align: center;
+}
+.promo-info h3 {
+  margin: 10px 0 4px;
+  font-size: 1.1rem;
+}
+.promo-info p {
+  color: #444;
+  margin: 0 0 10px;
+}
+
+/* ======== Login Modal ======== */
+.login-box {
+  text-align: center;
+}
+.btn-google {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #fff;
+  border: 2px solid #ddd;
+  border-radius: 10px;
+  padding: 10px;
+  gap: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: .25s;
+}
+.btn-google:hover {
+  background: #fafafa;
+}
+.google-icon {
+  width: 22px;
+  height: 22px;
+}
+.divider {
+  text-transform: uppercase;
+  font-size: .85rem;
+  color: #888;
+  margin: 12px 0;
+  position: relative;
+}
+.divider::before,
+.divider::after {
+  content: "";
+  position: absolute;
+  height: 1px;
+  width: 40%;
+  background: #ccc;
+  top: 50%;
+}
+.divider::before {
+  left: 0;
+}
+.divider::after {
+  right: 0;
+}
+.login-form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.login-form input {
+  padding: 10px;
+  border-radius: 8px;
+  border: 1px solid #ddd;
+  font-size: .95rem;
+}
+.login-safe {
+  color: #888;
+  font-size: .8rem;
+  margin-top: 5px;
+}
+
+/* ======== Correção de sobreposição ======== */
+.modal,
+#cart-backdrop {
+  backdrop-filter: blur(3px);
+}
+
+/* ======== Responsividade ======== */
+@media (max-width: 480px) {
+  .modal-content,
+  .promo-content,
+  .login-box {
+    width: 90%;
+    padding: 15px;
+  }
+}
