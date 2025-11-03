@@ -744,7 +744,13 @@ document.addEventListener("DOMContentLoaded", () => {
       cupom: couponApplied || "",
       total: Number(total.toFixed(2)),
       endereco: addr,
-      data: new Date().toISOString(),
+      
+      // ===============================================
+      // 🚨 CORREÇÃO APLICADA AQUI 🚨
+      // Salva como Timestamp do Firebase, não como texto.
+      // Isso corrige a ordenação e a leitura no painel admin.
+      data: new Date(),
+      // ===============================================
       
       // 🚨 PONTO DE ATENÇÃO V2.9: 
       // O campo 'thumb' não está sendo salvo.
@@ -826,8 +832,11 @@ document.addEventListener("DOMContentLoaded", () => {
     el.pedidosLista.innerHTML = pedidos.map(p => {
       // Tenta usar p.thumb, se não existir, usa o placeholder do briefing
       const thumbUrl = p.thumb || 'img/padrao.jpg';
-      const dataFormatada = p.data
-          ? new Date(p.data?.seconds * 1000 || p.data).toLocaleString("pt-BR", {
+      
+      // Lógica de data robusta (Timestamp ou String antiga)
+      const jsDate = p.data?.toDate ? p.data.toDate() : new Date(p.data?.seconds * 1000 || p.data || 0);
+      const dataFormatada = (jsDate && jsDate.getFullYear() > 2000)
+          ? jsDate.toLocaleString("pt-BR", {
               day: "2-digit", month: "2-digit", year: "numeric",
               hour: "2-digit", minute: "2-digit",
             })
@@ -970,7 +979,8 @@ document.addEventListener("DOMContentLoaded", () => {
     // --- Gráfico 1: Pedidos por Dia (Gráfico de Linha) ---
     const pedidosPorDia = {};
     pedidos.forEach(p => {
-      const dia = (p.data?.toDate?.() || new Date(p.data)).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' });
+      // Usa p.data (que já foi convertido para Date em carregarRelatorios)
+      const dia = p.data.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' });
       pedidosPorDia[dia] = (pedidosPorDia[dia] || 0) + 1;
     });
 
@@ -1072,6 +1082,10 @@ document.addEventListener("DOMContentLoaded", () => {
           const desconto = Number(p.desconto ?? 0);
           const total    = Number(p.total    ?? (subtotal + entrega - desconto)) || 0;
 
+          // Lógica de data robusta (Timestamp ou String)
+          // Essencial agora que `fecharPedido` salva Timestamps
+          const jsDate = p.data?.toDate ? p.data.toDate() : new Date(p.data?.seconds * 1000 || p.data || 0);
+
           return {
             ...p,
             id: d.id,
@@ -1079,9 +1093,7 @@ document.addEventListener("DOMContentLoaded", () => {
             entrega,
             desconto,
             total,
-            data: typeof p.data === "string"
-              ? new Date(p.data)
-              : (p.data?.toDate?.() ? p.data.toDate() : new Date(0)),
+            data: jsDate, // Armazena o objeto Date já convertido
             itens: Array.isArray(p.itens)
               ? p.itens
               : (typeof p.itens === "string" ? p.itens.split("; ") : [])
@@ -1105,7 +1117,7 @@ document.addEventListener("DOMContentLoaded", () => {
             filtrados.forEach(p => {
                 const linha = [
                     p.id || 'N/A',
-                    (p.data?.toLocaleString ? p.data.toLocaleString('pt-BR') : new Date(p.data).toLocaleString('pt-BR')),
+                    p.data.toLocaleString('pt-BR'), // Já é um objeto Date
                     p.usuario || p.email || '',
                     p.nome || '',
                     `"${(p.itens || []).join(', ')}"`,
