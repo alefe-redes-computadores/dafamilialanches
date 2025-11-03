@@ -1,9 +1,8 @@
 /* =========================================================
-   🍔 DFL v2.9.2 — Miniaturas Dinâmicas de Pedidos
-   - Corrige o bug da miniatura em branco no painel "Meus Pedidos".
-   - O carrinho agora salva a URL da imagem de cada item.
-   - O pedido salvo no Firebase agora usa a imagem do 1º item do carrinho.
-   - Mantém 100% da lógica funcional e estabilidade da v2.9.
+   🍔 DFL v2.10 — REPETIR PEDIDO (LÓGICA REAL)
+   - Altera 'fecharPedido' para salvar 'itensObj' com preços.
+   - Implementa 'repetirPedido' para ler 'itensObj' e recriar o carrinho.
+   - Mantém estabilidade da v2.9.
 ========================================================= */
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -35,11 +34,6 @@ document.addEventListener("DOMContentLoaded", () => {
     { id: 8, nome: "Combo 4 Armaria", preco: 59.99, precoAntigo: 72.00, img: "promocoes/promo8.jpg" },
     { id: 9, nome: "Combo 5 Uai + Kuat 2L", preco: 64.99, precoAntigo: 79.99, img: "promocoes/promo9.jpg" }
   ];
-
-  // 🚨 NOVO V2.9.2: Imagem Padrão (Fallback)
-  // Usa a primeira promo como reserva, que é mais seguro
-  const FALLBACK_IMG_URL = PROMO_DATA[1]?.img || 'img/padrao.jpg';
-
 
   /* ------------------ 🎯 ELEMENTOS ------------------ */
   const el = {
@@ -76,7 +70,7 @@ document.addEventListener("DOMContentLoaded", () => {
     promoNavNext: document.querySelector("#promo-modal .promo-nav.next"),
     promoClose: document.querySelector("#promo-modal .promo-close"),
 
-    // Elementos V2.9
+    // Elementos v2.9
     pedidosContainer: document.querySelector(".meus-pedidos"),
     pedidosBtn: document.querySelector(".meus-pedidos-btn"),
     pedidosPanel: document.getElementById("painelPedidos"),
@@ -146,16 +140,14 @@ document.addEventListener("DOMContentLoaded", () => {
       return;
     }
 
-    // 🚨 ATUALIZADO V2.9.2: Adiciona miniatura do item no carrinho
     el.miniList.innerHTML = cart.map((item, idx) => `
-      <div class="cart-item" style="display:flex; gap:10px; border-bottom:1px solid #eee; padding:10px 0;">
-        <img src="${item.img}" alt="${item.nome}" style="width:50px; height:50px; border-radius:8px; object-fit:cover;">
-        <div style="flex:1; display:flex; justify-content:space-between; align-items:center;">
+      <div class="cart-item" style="border-bottom:1px solid #eee;padding:10px 0;">
+        <div style="display:flex;justify-content:space-between;align-items:center;">
           <div style="flex:1;">
-            <p style="font-weight:600; margin-bottom:4px; font-size:0.9rem;">${item.nome}</p>
+            <p style="font-weight:600;margin-bottom:4px;">${item.nome}</p>
             <p style="color:#666;font-size:0.85rem;">${money(item.preco)} × ${item.qtd}</p>
           </div>
-          <div style="display:flex; gap:8px; align-items:center;">
+          <div style="display:flex;gap:8px;align-items:center;">
             <button type="button" class="cart-minus" data-idx="${idx}" style="background:#ff4081;color:#fff;border:none;border-radius:5px;width:28px;height:28px;cursor:pointer;">−</button>
             <span style="font-weight:600;min-width:20px;text-align:center;">${item.qtd}</span>
             <button type="button" class="cart-plus" data-idx="${idx}" style="background:#4caf50;color:#fff;border:none;border-radius:5px;width:28px;height:28px;cursor:pointer;">+</button>
@@ -302,17 +294,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
   let produtoExtras = null;
   let produtoPrecoBase = 0;
-  // 🚨 NOVO V2.9.2: Guarda a imagem do produto base
-  let produtoImgBase = FALLBACK_IMG_URL; 
 
   const openExtrasFor = safe((card) => {
     if (!card || !el.extrasModal || !el.extrasList) return;
     produtoExtras = card.dataset.name;
     produtoPrecoBase = parseFloat(card.dataset.price) || 0;
-
-    // 🚨 NOVO V2.9.2: Salva a imagem do card
-    const imgEl = card.querySelector('img'); 
-    produtoImgBase = imgEl ? imgEl.src : FALLBACK_IMG_URL;
 
     el.extrasList.innerHTML = adicionais.map((a, i) => `
       <label class="extra-line">
@@ -352,8 +338,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const existente = cart.find(i => i.nome === nomeCompleto);
     if (existente) existente.qtd++;
-    // 🚨 ATUALIZADO V2.9.2: Salva o item com a imagem base
-    else cart.push({ nome: nomeCompleto, preco: precoTotal, qtd: 1, img: produtoImgBase });
+    else cart.push({ nome: nomeCompleto, preco: precoTotal, qtd: 1 });
 
     renderMiniCart();
     popupAdd("Adicionado ao carrinho!");
@@ -378,10 +363,9 @@ document.addEventListener("DOMContentLoaded", () => {
   };
 
   let _comboCtx = null;
-  // 🚨 ATUALIZADO V2.9.2: Aceita a imagem como parâmetro
-  const openComboModal = safe((nomeCombo, precoBase, img) => {
+  const openComboModal = safe((nomeCombo, precoBase) => {
     if (!el.comboModal || !el.comboBody) {
-      addCommonItem(nomeCombo, precoBase, img); // Adiciona direto se o modal não existir
+      addCommonItem(nomeCombo, precoBase);
       return;
     }
 
@@ -390,7 +374,7 @@ document.addEventListener("DOMContentLoaded", () => {
                   (low.includes("família") || low.includes("familia")) ? "familia" : null;
 
     if (!grupo) {
-      addCommonItem(nomeCombo, precoBase, img); // Adiciona direto se não for um combo conhecido
+      addCommonItem(nomeCombo, precoBase);
       return;
     }
 
@@ -402,8 +386,7 @@ document.addEventListener("DOMContentLoaded", () => {
       </label>
     `).join("");
 
-    // 🚨 ATUALIZADO V2.9.2: Salva a imagem no contexto
-    _comboCtx = { nomeCombo, precoBase, grupo, img: img || FALLBACK_IMG_URL };
+    _comboCtx = { nomeCombo, precoBase, grupo };
     Overlays.open(el.comboModal);
   });
 
@@ -417,8 +400,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const existente = cart.find(i => i.nome === finalName);
     if (existente) existente.qtd++;
-    // 🚨 ATUALIZADO V2.9.2: Salva o item com a imagem base do combo
-    else cart.push({ nome: finalName, preco: finalPrice, qtd: 1, img: _comboCtx.img });
+    else cart.push({ nome: finalName, preco: finalPrice, qtd: 1 });
 
     popupAdd("Combo adicionado!");
     renderMiniCart();
@@ -430,24 +412,16 @@ document.addEventListener("DOMContentLoaded", () => {
   );
 
   /* ------------------ 🧺 Adicionar item comum ------------------ */
-  // 🚨 ATUALIZADO V2.9.2: Aceita a imagem como parâmetro
-  function addCommonItem(nome, preco, img) {
-    const fallbackImg = img || FALLBACK_IMG_URL; // Garante uma imagem
-
+  function addCommonItem(nome, preco) {
     // Se for um combo do *cardápio principal* (mas não uma "Promo"), abre o modal de bebida
     if (/^combo/i.test(nome) && !/^\s*Combo [0-9]/.test(nome)) {
-      openComboModal(nome, preco, fallbackImg); // Passa a imagem adiante
+      openComboModal(nome, preco);
       return;
     }
-
     // Se for uma *promoção* (ex: "Combo 2 Purizin...") ou item normal, adiciona direto
     const found = cart.find((i) => i.nome === nome && i.preco === preco);
-    if (found) {
-      found.qtd++;
-    } else {
-      // 🚨 ATUALIZADO V2.9.2: Salva o item com a imagem
-      cart.push({ nome, preco, qtd: 1, img: fallbackImg });
-    }
+    if (found) found.qtd++;
+    else cart.push({ nome, preco, qtd: 1 });
     renderMiniCart();
     popupAdd(`${nome} adicionado!`);
   }
@@ -456,15 +430,9 @@ document.addEventListener("DOMContentLoaded", () => {
     btn.addEventListener("click", (e) => {
       const card = e.currentTarget.closest(".card");
       if (!card) return;
-      
       const nome = card.dataset.name;
       const preco = parseFloat(card.dataset.price);
-      
-      // 🚨 NOVO V2.9.2: Pega a imagem do card
-      const imgEl = card.querySelector('img'); // Procura a imagem dentro do card
-      const img = imgEl ? imgEl.src : FALLBACK_IMG_URL;
-      
-      addCommonItem(nome, preco, img); // Passa a imagem para a função
+      addCommonItem(nome, preco);
     })
   );
 
@@ -648,8 +616,8 @@ document.addEventListener("DOMContentLoaded", () => {
     const promo = PROMO_DATA[currentPromoId];
     if (!promo) return;
     
-    // 🚨 ATUALIZADO V2.9.2: Passa a imagem da promoção para a função
-    addCommonItem(promo.nome, promo.preco, promo.img); 
+    // Chama a função-base de adicionar, que não abre o modal de combos
+    addCommonItem(promo.nome, promo.preco); 
     
     Overlays.closeAll(); // Fecha o modal após adicionar
   });
@@ -742,7 +710,7 @@ document.addEventListener("DOMContentLoaded", () => {
   atualizarTimer();
   setInterval(atualizarTimer, 1000);
 
-  /* ------------------ 💾 Fechar pedido (V2.9.2 com Thumb Dinâmica) ------------------ */
+  /* ------------------ 💾 Fechar pedido (V2.10 com itensObj) ------------------ */
   function fecharPedido() {
     if (!cart.length) return alert("Carrinho vazio!");
     if (!currentUser) {
@@ -760,25 +728,24 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const { subtotal, delivery, discount, discountLabel, total } = calcTotals();
 
-    // 🚨 ATUALIZADO V2.9.2: Pega a imagem do primeiro item do carrinho
-    // Se o carrinho tiver itens, pega a img do item [0], senão usa o fallback.
-    const firstItemImg = (cart[0] && cart[0].img) ? cart[0].img : FALLBACK_IMG_URL;
-
     const pedido = {
       usuario: currentUser.email,
       userId: currentUser.uid,
       nome: currentUser.displayName || currentUser.email.split("@")[0],
+      
+      // 🚨 ATUALIZADO V2.10: Adiciona 'itensObj' para a função "Repetir Pedido"
+      // Mantém 'itens' (string) para compatibilidade com relatórios (admin)
       itens: cart.map((i) => `${i.nome} x${i.qtd}`),
+      itensObj: cart.map(i => ({ nome: i.nome, preco: i.preco, qtd: i.qtd })),
+      
       subtotal: Number(subtotal.toFixed(2)),
       entrega: Number(delivery.toFixed(2)),
       desconto: Number(discount.toFixed(2)),
       cupom: couponApplied || "",
       total: Number(total.toFixed(2)),
       endereco: addr,
-      data: new Date(), // CORRIGIDO (v2.9.1) - Salva como Timestamp
-      
-      // 🚨 ATUALIZADO V2.9.2: Salva a imagem dinâmica
-      thumb: firstItemImg 
+      data: new Date().toISOString(),
+      thumb: 'img/padrao.jpg' // Placeholder (v2.9)
     };
 
     db.collection("Pedidos")
@@ -810,28 +777,27 @@ document.addEventListener("DOMContentLoaded", () => {
 
   renderMiniCart();
   
-/* ------------------ 🚨 NOVO BLOCO V2.9: MEUS PEDIDOS PREMIUM ------------------ */
+/* ------------------ 📦 MEUS PEDIDOS PREMIUM (V2.10) ------------------ */
 
   // 1. Lógica de abrir/fechar o novo painel
   el.pedidosBtn?.addEventListener("click", () => {
     if (!currentUser) {
       alert("Faça login para ver seus pedidos.");
-      Overlays.open(el.loginModal); // Abre o login se não estiver logado
+      Overlays.open(el.loginModal); 
       return;
     }
     Overlays.open(el.pedidosPanel);
-    carregarPedidos(currentUser.uid); // Carrega os pedidos ao abrir
+    carregarPedidos(currentUser.uid); 
   });
 
   el.pedidosFecharBtn?.addEventListener("click", () => Overlays.closeAll());
 
-  // 2. Lógica de carregar pedidos (traduzida para nossa arquitetura)
+  // 2. Lógica de carregar pedidos (v2.9)
   async function carregarPedidos(userId) {
     if (!el.pedidosLista) return;
     el.pedidosLista.innerHTML = `<p class="empty-orders">Carregando pedidos...</p>`;
 
     try {
-      // A consulta agora funciona graças ao Índice composto (userId ASC, data DESC)
       const q = db.collection("Pedidos").where("userId", "==", userId).orderBy("data", "desc");
       const snapshot = await q.get();
 
@@ -849,23 +815,22 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
-  // 3. Lógica de exibir os pedidos no painel
+  // 3. Lógica de exibir os pedidos no painel (v2.9)
   function exibirPedidos(pedidos) {
     if (!el.pedidosLista) return;
     
     el.pedidosLista.innerHTML = pedidos.map(p => {
-      // 🚨 ATUALIZADO V2.9.2: Usa o thumb do pedido ou o fallback global
-      const thumbUrl = p.thumb || FALLBACK_IMG_URL; 
-      
-      // Lógica de data robusta (Timestamp ou String antiga)
-      const jsDate = p.data?.toDate ? p.data.toDate() : new Date(p.data?.seconds * 1000 || p.data || 0);
-      const dataFormatada = (jsDate && jsDate.getFullYear() > 2000)
-          ? jsDate.toLocaleString("pt-BR", {
+      const thumbUrl = p.thumb || 'img/padrao.jpg';
+      const dataFormatada = p.data
+          ? new Date(p.data?.seconds * 1000 || p.data).toLocaleString("pt-BR", {
               day: "2-digit", month: "2-digit", year: "numeric",
               hour: "2-digit", minute: "2-digit",
             })
           : "—";
 
+      // Verifica se o pedido tem 'itensObj' para habilitar o botão
+      const podeRepetir = Array.isArray(p.itensObj) && p.itensObj.length > 0;
+      
       return `
         <div class="pedido-card">
           <div class="pedido-thumb" style="background-image:url('${thumbUrl}');"></div>
@@ -874,32 +839,78 @@ document.addEventListener("DOMContentLoaded", () => {
           <div class="pedido-itens">
             ${(p.itens || []).map(i => `• ${i}`).join('<br>')}
           </div>
-          <button class="repetir-btn" data-id="${p.id}">
+          <button 
+            class="repetir-btn" 
+            data-id="${p.id}" 
+            ${podeRepetir ? '' : 'disabled style="background:grey;cursor:not-allowed;"'}
+          >
             🔁 Repetir Pedido
           </button>
         </div>`;
     }).join('');
   }
   
-  // 4. Lógica de "Repetir Pedido" (placeholder)
-  // Usando delegação de evento para ser mais seguro
-  el.pedidosLista?.addEventListener('click', (e) => {
-    if (e.target.classList.contains('repetir-btn')) {
+  // 4. Lógica de "Repetir Pedido" (v2.10 - Lógica Real)
+  el.pedidosLista?.addEventListener('click', async (e) => {
+    if (e.target.classList.contains('repetir-btn') && !e.target.disabled) {
       const idPedido = e.target.dataset.id;
-      repetirPedido(idPedido);
+      
+      // Desativa o botão para evitar clique duplo
+      e.target.disabled = true;
+      e.target.textContent = "Carregando...";
+      
+      await repetirPedido(idPedido);
+      
+      // Reativa o botão (opcional, pois o painel fechará)
+      // e.target.disabled = false;
+      // e.target.textContent = "🔁 Repetir Pedido";
     }
   });
 
-  function repetirPedido(idPedido) {
-    // Esta é a função placeholder do seu briefing.
-    // A lógica real (v2.10) precisará buscar esse pedido no DB,
-    // extrair os itens, e readicioná-los ao 'cart'.
-    alert('Função de repetir pedido acionada para o pedido: ' + idPedido);
-    console.log("ID do Pedido para repetir:", idPedido);
-    // (Integração futura com carrinho)
+  async function repetirPedido(idPedido) {
+    try {
+      const docRef = db.collection("Pedidos").doc(idPedido);
+      const doc = await docRef.get();
+
+      if (!doc.exists) {
+        return alert("Erro: Pedido antigo não encontrado.");
+      }
+
+      const pedido = doc.data();
+      const itensParaRepetir = pedido.itensObj; // Lê o novo array de objetos
+
+      if (!Array.isArray(itensParaRepetir) || itensParaRepetir.length === 0) {
+        return alert("Não é possível repetir este pedido (formato antigo). Faça um novo pedido para poder repeti-lo no futuro.");
+      }
+
+      // Limpa o carrinho atual antes de adicionar os itens antigos
+      cart = [];
+      
+      // Adiciona os itens ao carrinho
+      itensParaRepetir.forEach(item => {
+        // Validação simples (garante que temos o mínimo)
+        if (item.nome && item.preco > 0 && item.qtd > 0) {
+          cart.push({
+            nome: item.nome,
+            preco: item.preco,
+            qtd: item.qtd
+          });
+        }
+      });
+
+      // Feedback ao usuário
+      popupAdd("Pedido anterior adicionado ao carrinho!");
+      renderMiniCart(); // Atualiza o carrinho (backend)
+      Overlays.closeAll(); // Fecha o painel de pedidos
+      Overlays.open(el.miniCart); // Abre o mini-carrinho
+
+    } catch (err) {
+      console.error("Erro ao repetir pedido: ", err);
+      alert("Erro ao processar seu pedido. Tente novamente.");
+    }
   }
 
-/* ------------------ 🚨 FIM DO BLOCO V2.9 ------------------ */
+/* ------------------ FIM DO BLOCO V2.10 ------------------ */
 
 
   /* =========================================================
@@ -1003,8 +1014,7 @@ document.addEventListener("DOMContentLoaded", () => {
     // --- Gráfico 1: Pedidos por Dia (Gráfico de Linha) ---
     const pedidosPorDia = {};
     pedidos.forEach(p => {
-      // Usa p.data (que já foi convertido para Date em carregarRelatorios)
-      const dia = p.data.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' });
+      const dia = (p.data?.toDate?.() || new Date(p.data)).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' });
       pedidosPorDia[dia] = (pedidosPorDia[dia] || 0) + 1;
     });
 
@@ -1106,9 +1116,6 @@ document.addEventListener("DOMContentLoaded", () => {
           const desconto = Number(p.desconto ?? 0);
           const total    = Number(p.total    ?? (subtotal + entrega - desconto)) || 0;
 
-          // Lógica de data robusta (Timestamp ou String)
-          const jsDate = p.data?.toDate ? p.data.toDate() : new Date(p.data?.seconds * 1000 || p.data || 0);
-
           return {
             ...p,
             id: d.id,
@@ -1116,7 +1123,9 @@ document.addEventListener("DOMContentLoaded", () => {
             entrega,
             desconto,
             total,
-            data: jsDate, // Armazena o objeto Date já convertido
+            data: typeof p.data === "string"
+              ? new Date(p.data)
+              : (p.data?.toDate?.() ? p.data.toDate() : new Date(0)),
             itens: Array.isArray(p.itens)
               ? p.itens
               : (typeof p.itens === "string" ? p.itens.split("; ") : [])
@@ -1140,7 +1149,7 @@ document.addEventListener("DOMContentLoaded", () => {
             filtrados.forEach(p => {
                 const linha = [
                     p.id || 'N/A',
-                    p.data.toLocaleString('pt-BR'), // Já é um objeto Date
+                    (p.data?.toLocaleString ? p.data.toLocaleString('pt-BR') : new Date(p.data).toLocaleString('pt-BR')),
                     p.usuario || p.email || '',
                     p.nome || '',
                     `"${(p.itens || []).join(', ')}"`,
@@ -1230,8 +1239,8 @@ document.addEventListener("DOMContentLoaded", () => {
     console.warn("⚠️ Erro interceptado:", e?.message);
   });
 
-  /* 🚨 ATUALIZADO V2.9.2: Mensagem de console */
-  console.log("%c🍔 DFL v2.9.2 — Miniaturas Dinâmicas OK — Lógica v2.9.1 Estável",
+  /* 🚨 ATUALIZADO V2.10: Mensagem de console */
+  console.log("%c🍔 DFL v2.10 — Repetir Pedido (Lógica Real) OK — Estável",
               "background:#4caf50;color:#fff;padding:8px 12px;border-radius:8px;font-weight:700;");
 
 }); // Fim do DOMContentLoaded
@@ -1271,6 +1280,7 @@ document.addEventListener('DOMContentLoaded', () => {
       cartBackdrop.classList.remove('active');
       miniCart.classList.remove('active');
       
+      // v2.9: Garante que o painel de pedidos também feche
       const pedidosPanel = document.getElementById('painelPedidos');
       if (pedidosPanel) {
         pedidosPanel.classList.remove('active');
