@@ -1,10 +1,13 @@
 /* =========================================================
-   🍔 DFL STYLE — v2.9.1 ESTÁVEL
-   - Hotfix visual completo + Painel Meus Pedidos corrigido
-   - Mantém fidelidade visual da v2.8
-   - Corrige sobreposição e desaparecimento de cards
+   🍔 DFL v2.9.2 — Estável (Cardápio Restaurado + Pedidos Premium)
+   Autor: Álefe & GPT-5
+   - Restaura grid de produtos (cards)
+   - Mantém layout amarelo redondinho
+   - Corrige espaçamentos e banners
+   - Base sólida para Firebase + Repetir Pedido
 ========================================================= */
 
+/* Base */
 body {
   background: #ffd54f;
   font-family: "Inter", "Poppins", sans-serif;
@@ -13,133 +16,132 @@ body {
   scroll-behavior: smooth;
 }
 
-/* Header Fixo */
+/* =========================================================
+   🧭 HEADER FIXO
+========================================================= */
 .header {
   display: flex;
   justify-content: space-between;
   align-items: center;
   background: #ffca28;
   padding: 10px 16px;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, .15);
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.15);
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
   z-index: 900;
 }
+
 .header-content {
   display: flex;
   align-items: center;
   gap: 12px;
 }
+
 .logo {
   width: 52px;
   height: 52px;
 }
+
 .header-info h1 {
   margin: 0;
   font-size: 1.2rem;
 }
+
 .tagline {
   margin: 0;
-  font-size: .85rem;
+  font-size: 0.85rem;
   color: #d84315;
 }
+
 .header-actions {
   display: flex;
   align-items: center;
   gap: 10px;
 }
 
-/* Conteúdo Principal */
+/* Espaço do topo */
 .main-content-wrapper {
   padding-top: 72px;
 }
 
-/* Botões superiores */
-.user-button {
-  background: linear-gradient(135deg, #fff, #f7f7f7);
-  border: 1px solid #ddd;
-  border-radius: 8px;
-  padding: 8px 12px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: .2s;
-}
-.user-button:hover {
-  background: #fafafa;
-}
-#cart-icon, .cart-button {
-  background: #ffb300;
-  border: none;
-  border-radius: 8px;
-  padding: 8px 12px;
-  font-weight: 700;
-  cursor: pointer;
-  transition: .2s;
-}
-#cart-icon:hover, .cart-button:hover {
-  background: #ffc107;
-}
-
-/* ======== STATUS ======== */
+/* =========================================================
+   🟢 STATUS ABERTO/FECHADO
+========================================================= */
 .status-banner {
   display: flex;
   justify-content: center;
   align-items: center;
-  min-height: 36px;
-  padding: 6px 8px;
+  min-height: 36px !important;
+  line-height: 1.4 !important;
+  padding: 6px 8px !important;
+  box-sizing: border-box;
   font-weight: 600;
-  color: #fff;
   text-align: center;
+  color: #fff;
 }
+
 .status-banner.open {
   background: #4caf50;
 }
+
 .status-banner.closed {
   background: #d32f2f;
 }
+
 .hours-banner {
   background: #000;
   color: #fff;
   text-align: center;
   padding: 6px;
-  font-size: .9rem;
+  font-size: 0.9rem;
 }
 
-/* ======== PROMOÇÕES ======== */
+/* =========================================================
+   🔥 PROMOÇÕES DO DIA
+========================================================= */
 .promo-section {
   text-align: center;
-  padding: 20px 10px;
+  padding: 12px 10px;
 }
+
 .promo-section h2 {
   color: #ff5722;
-  margin-bottom: 8px;
+  margin: 0 0 4px;
+  font-size: 1.25rem;
 }
+
 .promo-sub {
-  color: #666;
-  margin-bottom: 10px;
-  font-size: .95rem;
+  color: #555;
+  font-size: 0.95rem;
+  margin-bottom: 6px;
 }
+
 .countdown-ticker {
   background: #fff;
   display: inline-block;
-  padding: 6px 12px;
+  padding: 5px 10px;
   border-radius: 10px;
-  margin: 8px 0 15px;
+  margin: 4px 0 6px;
   font-weight: 600;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, .1);
+  font-size: 0.95rem;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
 }
 
-/* ======== CARROSSEL ======== */
+/* =========================================================
+   🎠 CARROSSEL DE PROMOÇÕES
+========================================================= */
 .carousel {
   position: relative;
   width: 100%;
-  margin: 20px auto;
+  max-width: 100%;
+  margin: 8px auto;
   display: flex;
   align-items: center;
   justify-content: center;
 }
+
 .slides {
   display: flex;
   gap: 10px;
@@ -149,6 +151,7 @@ body {
   width: 100%;
   max-width: calc(100% - 80px);
 }
+
 .slides::-webkit-scrollbar {
   height: 8px;
 }
@@ -156,22 +159,29 @@ body {
   background: #ffd54f;
   border-radius: 10px;
 }
+.slides::-webkit-scrollbar-thumb:hover {
+  background: #ffca28;
+}
+
 .slide {
   min-width: 250px;
   max-width: 250px;
   height: 180px;
   object-fit: cover;
   border-radius: 12px;
-  box-shadow: 0 3px 10px rgba(0, 0, 0, .2);
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
   cursor: zoom-in;
-  transition: transform .2s ease;
+  transition: transform 0.2s ease;
   flex-shrink: 0;
 }
+
 .slide:hover {
   transform: scale(1.05);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
 }
+
 .c-btn {
-  background: rgba(0, 0, 0, .7);
+  background: rgba(0, 0, 0, 0.7);
   color: #fff;
   border: none;
   font-size: 24px;
@@ -182,13 +192,15 @@ body {
   position: absolute;
   top: 50%;
   transform: translateY(-50%);
-  transition: all .2s ease;
+  z-index: 10;
+  transition: all 0.2s ease;
   display: flex;
   align-items: center;
   justify-content: center;
 }
 .c-btn:hover {
-  background: rgba(0, 0, 0, .9);
+  background: rgba(0, 0, 0, 0.9);
+  transform: translateY(-50%) scale(1.1);
 }
 .c-prev {
   left: 10px;
@@ -197,95 +209,69 @@ body {
   right: 10px;
 }
 
-/* ======== SEÇÕES, GRID, CARDS ======== */
+/* =========================================================
+   🍟 SEÇÕES / GRADE DE PRODUTOS (CARDÁPIO)
+========================================================= */
 section {
   margin: 25px auto;
   width: 95%;
   max-width: 1000px;
 }
+
 section h2 {
   font-size: 1.3rem;
   text-align: center;
   margin-bottom: 15px;
   color: #ff7043;
 }
+
 .grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
   gap: 14px;
 }
+
+/* Cards individuais */
 .card {
   background: #fff;
   border-radius: 16px;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, .08);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
   padding: 14px;
   text-align: center;
-  transition: .2s;
+  transition: 0.25s ease;
 }
 .card:hover {
   transform: translateY(-3px);
-  box-shadow: 0 4px 10px rgba(0, 0, 0, .12);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.12);
 }
+
 .card img {
   width: 100%;
-  border-radius: 12px;
-  margin-bottom: 8px;
   height: 220px;
   object-fit: cover;
+  border-radius: 12px;
+  margin-bottom: 8px;
 }
+
 .card h3 {
   margin: 0 0 6px;
   font-weight: 700;
   font-size: 1rem;
 }
+
 .card p {
-  font-size: .9rem;
+  font-size: 0.9rem;
   color: #555;
-}
-.price {
-  font-weight: 600;
-  color: #4caf50;
-  margin: 8px 0;
-}
-/* ======== BADGES ======== */
-.badge {
-  display: inline-block;
-  font-size: .72rem;
-  font-weight: 700;
-  line-height: 1;
-  padding: 3px 8px;
-  border-radius: 999px;
-  color: #000;
-  background: linear-gradient(135deg, #f8e08b, #eac13f);
-  border: 1px solid #d4af37;
-  box-shadow: inset 0 -1px 0 rgba(0, 0, 0, .08), 0 1px 2px rgba(0, 0, 0, .08);
-  white-space: nowrap;
-  vertical-align: middle;
-}
-.badge.economia {
-  background: linear-gradient(135deg, #ffd480, #ffb74d);
-  border-color: #e09000;
-}
-.badge-small {
-  display: inline-block;
-  font-size: .68rem;
-  font-weight: 600;
-  line-height: 1.2;
-  padding: 2px 7px;
-  border-radius: 6px;
-  color: #000;
-  background: linear-gradient(135deg, #ffd54f, #ffca28);
-  border: 1px solid #d4af37;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, .1);
-  margin-left: 4px;
-}
-.badge-small.pure {
-  background: linear-gradient(135deg, #a5d6a7, #81c784);
-  border-color: #66bb6a;
-  color: #1b5e20;
+  line-height: 1.3;
 }
 
-/* ======== BOTÕES ======== */
+.price {
+  font-weight: 700;
+  color: #2e7d32;
+  margin: 8px 0;
+}
+
+/* Botões */
 .actions {
   margin-top: 10px;
   display: flex;
@@ -299,8 +285,8 @@ section h2 {
   font-weight: 700;
   cursor: pointer;
   padding: 8px 14px;
-  font-size: .9rem;
-  transition: .25s;
+  font-size: 0.9rem;
+  transition: 0.25s;
 }
 .actions .add-cart {
   background: linear-gradient(135deg, #4caf50, #43a047);
@@ -319,7 +305,32 @@ section h2 {
   transform: scale(1.03);
 }
 
-/* ======== MINI-CARRINHO ======== */
+/* =========================================================
+   📱 RESPONSIVO (MOBILE)
+========================================================= */
+@media (max-width: 600px) {
+  .grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .card img {
+    height: 140px;
+  }
+  .slide {
+    min-width: 150px;
+    max-width: 150px;
+    height: 120px;
+  }
+  .c-btn {
+    width: 32px;
+    height: 32px;
+    font-size: 20px;
+  }
+}
+/* =========================================================
+   🧾 MODAIS, CARRINHO, LOGIN E BASE
+========================================================= */
+
+/* 🔸 Fundo escuro (Backdrop) */
 #cart-backdrop {
   position: fixed;
   top: 0;
@@ -336,6 +347,8 @@ section h2 {
   opacity: 1;
   pointer-events: auto;
 }
+
+/* 🛒 Mini-carrinho lateral */
 #mini-cart {
   position: fixed;
   top: 0;
@@ -344,11 +357,11 @@ section h2 {
   max-width: 95%;
   height: 100vh;
   background: #fff;
-  box-shadow: -3px 0 12px rgba(0, 0, 0, .3);
+  box-shadow: -3px 0 12px rgba(0, 0, 0, 0.3);
   z-index: 1100;
   display: flex;
   flex-direction: column;
-  transition: right .35s ease;
+  transition: right 0.35s ease;
 }
 #mini-cart.active {
   right: 0;
@@ -372,34 +385,19 @@ section h2 {
   padding: 15px;
 }
 
-/* ======== CAMPOS DO CARRINHO ======== */
+/* 🧮 Campos e resumo do carrinho */
 .cart-input {
   width: 100%;
   padding: 10px;
   border: 1px solid #ddd;
   border-radius: 8px;
-  font-size: .95rem;
+  font-size: 0.95rem;
   margin-bottom: 10px;
 }
-.cart-row {
-  display: flex;
-  gap: 8px;
-  align-items: center;
-  margin-bottom: 10px;
-}
-.cart-row button {
-  background: #ffb300;
-  color: #000;
-  font-weight: 700;
-  border: none;
-  border-radius: 8px;
-  padding: 10px 16px;
-  cursor: pointer;
-  transition: .25s;
-}
-.cart-row button:hover {
-  background: #ffca28;
-  transform: scale(1.03);
+.cart-input:focus {
+  border-color: #ffb300;
+  outline: none;
+  box-shadow: 0 0 4px rgba(255, 179, 0, 0.3);
 }
 .cart-summary {
   border-top: 1px solid #ddd;
@@ -410,7 +408,7 @@ section h2 {
   display: flex;
   justify-content: space-between;
   margin: 5px 0;
-  font-size: .9rem;
+  font-size: 0.9rem;
   color: #444;
 }
 .cart-summary p.total {
@@ -419,32 +417,7 @@ section h2 {
   color: #2e7d32;
 }
 
-/* ======== BOTÃO FLUTUANTE (Meus Pedidos) ======== */
-#orders-fab {
-  position: fixed;
-  bottom: 20px;
-  right: 20px;
-  background: linear-gradient(135deg, #ffb300, #ffca28);
-  border: none;
-  color: #000;
-  font-weight: 600;
-  border-radius: 25px;
-  padding: 12px 18px;
-  cursor: pointer;
-  display: none;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, .3);
-  z-index: 900;
-  transition: all .2s ease;
-}
-#orders-fab.show {
-  display: block;
-}
-#orders-fab:hover {
-  background: linear-gradient(135deg, #ffd54f, #ffe082);
-  transform: scale(1.05);
-}
-
-/* ======== POPUP "Adicionado" ======== */
+/* 🧾 Popup “Adicionado ao carrinho” */
 .popup-add {
   position: fixed;
   left: 50%;
@@ -455,10 +428,9 @@ section h2 {
   padding: 12px 24px;
   border-radius: 25px;
   opacity: 0;
-  transition: all .3s ease;
+  transition: all 0.3s ease;
   z-index: 2000;
   font-weight: 600;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, .3);
   pointer-events: none;
 }
 .popup-add.show {
@@ -466,21 +438,173 @@ section h2 {
   transform: translate(-50%, -50%) scale(1);
 }
 
-/* ======== FOOTER ======== */
+/* =========================================================
+   💬 MODAIS GERAIS
+========================================================= */
+.modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 1050;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+}
+.modal.show {
+  opacity: 1;
+  pointer-events: auto;
+}
+.modal-content {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+  max-width: 420px;
+  width: 90%;
+  overflow: hidden;
+  transform: scale(0.95);
+  transition: transform 0.3s ease;
+}
+.modal.show .modal-content {
+  transform: scale(1);
+}
+.modal-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 20px;
+  background: #ffca28;
+}
+.modal-head h3 {
+  margin: 0;
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: #222;
+}
+.modal-foot {
+  display: flex;
+  gap: 10px;
+  padding: 20px;
+  background: #f9f9f9;
+  border-top: 1px solid #eee;
+}
+.btn-primary {
+  flex: 1;
+  background: #4caf50;
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  padding: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+.btn-primary:hover {
+  background: #43a047;
+  transform: translateY(-2px);
+}
+.btn-secondary {
+  flex: 1;
+  background: transparent;
+  border: 1px solid #ddd;
+  color: #555;
+  border-radius: 10px;
+  padding: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+.btn-secondary:hover {
+  background: #f1f1f1;
+}
+
+/* =========================================================
+   🔑 LOGIN MODAL
+========================================================= */
+.login-box {
+  padding: 20px;
+  text-align: center;
+}
+.btn-google {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  width: 100%;
+  padding: 12px;
+  background: #fff;
+  border: 1px solid #ddd;
+  border-radius: 10px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.25s ease;
+}
+.btn-google:hover {
+  background: #f9f9f9;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  transform: translateY(-1px);
+}
+.google-icon {
+  width: 24px;
+  height: 24px;
+}
+.login-safe {
+  font-size: 0.8rem;
+  color: #777;
+  margin-top: 8px;
+}
+.divider {
+  display: flex;
+  align-items: center;
+  text-align: center;
+  color: #999;
+  font-size: 0.9rem;
+  margin: 24px 0;
+}
+.divider::before,
+.divider::after {
+  content: "";
+  flex: 1;
+  border-bottom: 1px solid #eee;
+}
+.divider:not(:empty)::before {
+  margin-right: 0.5em;
+}
+.divider:not(:empty)::after {
+  margin-left: 0.5em;
+}
+.login-form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.login-form input {
+  width: 100%;
+  padding: 14px;
+  border: 1px solid #ddd;
+  border-radius: 10px;
+  font-size: 1rem;
+  transition: 0.2s;
+}
+.login-form input:focus {
+  border-color: #ff7043;
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(255, 112, 67, 0.2);
+}
+
+/* =========================================================
+   🧁 FOOTER
+========================================================= */
 .footer {
   background: #ffca28;
   text-align: center;
   padding: 20px;
-  font-size: .9rem;
+  font-size: 0.9rem;
   color: #222;
-}
-.footer a {
-  color: #ff7043;
-  text-decoration: none;
-  transition: color .2s ease;
-}
-.footer a:hover {
-  color: #ff5722;
 }
 .footer-links {
   display: flex;
@@ -496,478 +620,192 @@ section h2 {
   border-radius: 6px;
   font-weight: 700;
   text-decoration: none;
-  transition: .25s;
+  transition: 0.25s;
 }
 .footer-btn:hover {
   background: #ffca28;
   transform: scale(1.03);
 }
 .footer-copy {
-  font-size: .8rem;
+  font-size: 0.8rem;
   color: #000;
   margin-top: 10px;
 }
 /* =========================================================
-   📦 Painel "Meus Pedidos" — v2.9.1 Estável
-   (corrige corte, sobreposição e visual do botão repetir)
+   📦 MEUS PEDIDOS PREMIUM (v2.9.2)
 ========================================================= */
 
-.orders-panel {
+.meus-pedidos {
   position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  max-height: 80vh;
-  background: #fff;
-  border-radius: 20px 20px 0 0;
-  box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.25);
-  transform: translateY(100%);
-  transition: transform 0.4s ease;
-  overflow-y: auto;
-  z-index: 1150;
+  bottom: 20px;
+  right: 20px;
+  z-index: 1500;
 }
-.orders-panel.active {
-  transform: translateY(0);
-}
-.orders-head {
-  padding: 16px 20px;
-  font-weight: 700;
-  font-size: 1.2rem;
-  background: #ffca28;
+
+.meus-pedidos-btn {
+  background: linear-gradient(135deg, #ffca28, #ffb300);
   color: #222;
-  border-radius: 20px 20px 0 0;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-.orders-head .orders-close {
-  background: #ffb300;
   border: none;
-  border-radius: 50%;
-  width: 30px;
-  height: 30px;
-  font-size: 18px;
-  cursor: pointer;
+  border-radius: 20px;
   font-weight: 700;
-  color: #222;
-  transition: 0.2s;
-}
-.orders-head .orders-close:hover {
-  background: #ff7043;
-  color: #fff;
-}
-
-.orders-content {
-  padding: 15px;
-}
-.empty-orders {
-  text-align: center;
-  color: #666;
   font-size: 0.95rem;
-  padding: 20px;
+  padding: 12px 22px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+  cursor: pointer;
+  transition: 0.25s ease;
+}
+.meus-pedidos-btn:hover {
+  transform: translateY(-2px);
+  background: linear-gradient(135deg, #ffd54f, #ffca28);
 }
 
-/* Itens individuais */
-.order-item {
-  border-bottom: 1px solid #eee;
-  padding: 12px 8px;
+/* === Painel === */
+.pedidos-panel {
+  position: fixed;
+  top: 0;
+  right: -100%;
+  width: 440px;
+  max-width: 95%;
+  height: 100vh;
+  background: #fff;
+  box-shadow: -4px 0 18px rgba(0, 0, 0, 0.3);
+  transition: right 0.4s ease;
+  z-index: 1600;
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  transition: background 0.2s ease;
 }
-.order-item:hover {
-  background: #fffef5;
+.pedidos-panel.active {
+  right: 0;
 }
 
 /* Cabeçalho */
-.order-item-head {
+.pedidos-header {
+  background: #ffca28;
+  color: #222;
+  font-weight: 700;
+  font-size: 1.2rem;
+  padding: 18px 20px;
   display: flex;
-  align-items: center;
   justify-content: space-between;
-  gap: 12px;
+  align-items: center;
+  border-bottom: 3px solid #fbc02d;
 }
-.order-thumb {
-  width: 56px;
-  height: 56px;
-  border-radius: 10px;
-  overflow: hidden;
-  flex-shrink: 0;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.15);
-}
-.order-thumb img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-.order-info {
-  flex: 1;
-}
-.order-info h4 {
-  margin: 0;
-  font-size: 0.95rem;
-  font-weight: 700;
-  color: #333;
-}
-.order-info p {
-  margin: 2px 0 0;
-  color: #555;
-  font-size: 0.85rem;
-  line-height: 1.3;
-}
-.order-info .order-total {
-  font-weight: 700;
-  color: #2e7d32;
-  font-size: 0.9rem;
+.pedidos-header i {
+  font-size: 1.3rem;
+  cursor: pointer;
 }
 
-/* Botão Repetir Pedido */
-.repeat-order {
+/* Corpo */
+.pedidos-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 18px;
+  background: #fff8e1;
+}
+.pedido-card {
+  background: #fff;
+  border-radius: 14px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  padding: 16px;
+  margin-bottom: 16px;
+  transition: transform 0.25s ease;
+}
+.pedido-card:hover {
+  transform: scale(1.02);
+}
+
+/* Miniatura do pedido */
+.pedido-thumb {
+  width: 100%;
+  height: 140px;
+  background: #f5f5f5 center/cover no-repeat;
+  border-radius: 10px;
+  margin-bottom: 10px;
+  position: relative;
+  overflow: hidden;
+}
+.pedido-thumb::after {
+  content: "📦 Pedido";
+  position: absolute;
+  bottom: 6px;
+  right: 8px;
+  background: rgba(255, 202, 40, 0.9);
+  color: #000;
+  padding: 2px 8px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  border-radius: 8px;
+}
+
+/* Texto e conteúdo */
+.pedido-card h4 {
+  margin: 6px 0;
+  font-size: 1rem;
+  color: #333;
+}
+.pedido-info {
+  font-size: 0.9rem;
+  color: #444;
+  line-height: 1.4;
+  margin-bottom: 6px;
+}
+.pedido-itens {
+  font-size: 0.85rem;
+  color: #555;
+  background: #fffde7;
+  border-radius: 10px;
+  padding: 8px 12px;
+  margin-top: 6px;
+  line-height: 1.3;
+}
+
+/* Botão “Repetir Pedido” */
+.repetir-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
   background: linear-gradient(135deg, #4caf50, #43a047);
   color: #fff;
   border: none;
   border-radius: 10px;
-  font-weight: 700;
+  padding: 10px 16px;
+  margin-top: 10px;
   font-size: 0.9rem;
+  font-weight: 700;
   cursor: pointer;
-  padding: 8px 14px;
-  flex-shrink: 0;
-  transition: 0.25s;
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.2);
+  transition: all 0.25s ease;
 }
-.repeat-order:hover {
+.repetir-btn:hover {
+  transform: translateY(-2px);
   background: linear-gradient(135deg, #43a047, #388e3c);
-  transform: scale(1.05);
+}
+
+/* Ícone dentro do botão */
+.repetir-btn i {
+  font-size: 1rem;
+}
+
+/* Scroll */
+.pedidos-body::-webkit-scrollbar {
+  width: 6px;
+}
+.pedidos-body::-webkit-scrollbar-thumb {
+  background: #ffca28;
+  border-radius: 8px;
 }
 
 /* Responsivo */
 @media (max-width: 600px) {
-  .grid {
-    grid-template-columns: repeat(2, 1fr);
+  .pedido-thumb {
+    height: 100px;
   }
-  .slide {
-    min-width: 150px;
-    max-width: 150px;
-    height: 120px;
-  }
-  .card img {
-    height: 140px;
-  }
-  .order-item-head {
-    flex-direction: column;
-    align-items: flex-start;
-  }
-  .repeat-order {
+  .repetir-btn {
     width: 100%;
-    margin-top: 6px;
+    justify-content: center;
   }
-}
-
-/* ======== BANNER DE COOKIES ======== */
-#cookie-banner {
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  background: rgba(34, 34, 34, 0.95);
-  color: #fff;
-  padding: 16px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  z-index: 2000;
-  transform: translateY(100%);
-  transition: transform 0.5s ease;
-}
-#cookie-banner.show {
-  transform: translateY(0);
-}
-#cookie-banner p {
-  margin: 0;
-  font-size: 0.9rem;
-  line-height: 1.4;
-  margin-right: 16px;
-}
-#cookie-banner a {
-  color: #ffca28;
-  font-weight: 600;
-  text-decoration: underline;
-}
-#cookie-banner button {
-  background: #4caf50;
-  color: #fff;
-  border: none;
-  border-radius: 8px;
-  padding: 10px 16px;
-  font-weight: 700;
-  cursor: pointer;
-  transition: background .2s;
-  flex-shrink: 0;
-}
-#cookie-banner button:hover {
-  background: #43a047;
-}
-@media (max-width: 600px) {
-  #cookie-banner {
-    flex-direction: column;
-    text-align: center;
-    gap: 12px;
-  }
-  #cookie-banner button {
-    width: 100%;
-    padding: 12px;
-  }
-}
-
-/* =========================================================
-   ✨ FIM DO ARQUIVO — DFL v2.9.1 ESTÁVEL
-========================================================= */
-/* =========================================================
-   🪟 CORREÇÃO FINAL — MODAIS E BACKDROP
-   Corrige o posicionamento e visual de todos os modais (promo, extras, login)
-========================================================= */
-
-.modal {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100vw;
-  height: 100vh;
-  background: rgba(0, 0, 0, 0.6);
-  display: none;
-  align-items: center;
-  justify-content: center;
-  z-index: 1200;
-  backdrop-filter: blur(3px);
-}
-.modal.show {
-  display: flex;
-}
-
-/* Conteúdo genérico do modal */
-.modal-content,
-.promo-content,
-.login-box {
-  background: #fff;
-  border-radius: 20px;
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
-  max-width: 95%;
-  width: 400px;
-  padding: 20px;
-  position: relative;
-  animation: popIn 0.25s ease;
-}
-@keyframes popIn {
-  from {
-    transform: scale(0.9);
-    opacity: 0;
-  }
-  to {
-    transform: scale(1);
-    opacity: 1;
-  }
-}
-
-/* Cabeçalhos */
-.modal-head,
-.promo-content .modal-head {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  border-bottom: 2px solid #ffca28;
-  padding-bottom: 8px;
-  margin-bottom: 12px;
-}
-.modal-head h3 {
-  font-size: 1.1rem;
-  margin: 0;
-}
-.modal-head button,
-.promo-close,
-.extras-close,
-.combo-close,
-.login-close {
-  background: #ffca28;
-  border: none;
-  border-radius: 50%;
-  width: 28px;
-  height: 28px;
-  font-weight: 700;
-  cursor: pointer;
-  transition: .2s;
-}
-.modal-head button:hover,
-.promo-close:hover,
-.extras-close:hover,
-.combo-close:hover,
-.login-close:hover {
-  background: #ffb300;
-  color: #fff;
-}
-
-/* Corpo dos modais */
-.extras-list,
-#combo-body {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  max-height: 300px;
-  overflow-y: auto;
-  padding: 5px;
-}
-.extras-list label {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  background: #fafafa;
-  padding: 8px 10px;
-  border-radius: 8px;
-  border: 1px solid #eee;
-  cursor: pointer;
-  transition: background .2s;
-}
-.extras-list label:hover {
-  background: #fff9e5;
-}
-.extras-list input {
-  transform: scale(1.2);
-}
-
-/* Rodapé */
-.modal-foot {
-  display: flex;
-  justify-content: flex-end;
-  gap: 10px;
-  margin-top: 15px;
-}
-.btn-primary,
-.btn-primario {
-  background: linear-gradient(135deg, #4caf50, #43a047);
-  border: none;
-  color: #fff;
-  font-weight: 700;
-  padding: 8px 14px;
-  border-radius: 8px;
-  cursor: pointer;
-  transition: .25s;
-}
-.btn-primary:hover,
-.btn-primario:hover {
-  background: linear-gradient(135deg, #43a047, #388e3c);
-}
-.btn-secondary {
-  background: #e0e0e0;
-  color: #000;
-  border: none;
-  padding: 8px 14px;
-  border-radius: 8px;
-  cursor: pointer;
-  transition: .25s;
-}
-.btn-secondary:hover {
-  background: #d5d5d5;
-}
-
-/* ======== Modal de Promoção ======== */
-.promo-content {
-  max-width: 500px;
-  width: 90%;
-  background: #fff;
-  border-radius: 20px;
-  padding: 16px;
-  position: relative;
-}
-.promo-content img {
-  width: 100%;
-  border-radius: 12px;
-  margin-bottom: 10px;
-}
-.promo-info {
-  text-align: center;
-}
-.promo-info h3 {
-  margin: 10px 0 4px;
-  font-size: 1.1rem;
-}
-.promo-info p {
-  color: #444;
-  margin: 0 0 10px;
-}
-
-/* ======== Login Modal ======== */
-.login-box {
-  text-align: center;
-}
-.btn-google {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: #fff;
-  border: 2px solid #ddd;
-  border-radius: 10px;
-  padding: 10px;
-  gap: 8px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: .25s;
-}
-.btn-google:hover {
-  background: #fafafa;
-}
-.google-icon {
-  width: 22px;
-  height: 22px;
-}
-.divider {
-  text-transform: uppercase;
-  font-size: .85rem;
-  color: #888;
-  margin: 12px 0;
-  position: relative;
-}
-.divider::before,
-.divider::after {
-  content: "";
-  position: absolute;
-  height: 1px;
-  width: 40%;
-  background: #ccc;
-  top: 50%;
-}
-.divider::before {
-  left: 0;
-}
-.divider::after {
-  right: 0;
-}
-.login-form {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-.login-form input {
-  padding: 10px;
-  border-radius: 8px;
-  border: 1px solid #ddd;
-  font-size: .95rem;
-}
-.login-safe {
-  color: #888;
-  font-size: .8rem;
-  margin-top: 5px;
-}
-
-/* ======== Correção de sobreposição ======== */
-.modal,
-#cart-backdrop {
-  backdrop-filter: blur(3px);
-}
-
-/* ======== Responsividade ======== */
-@media (max-width: 480px) {
-  .modal-content,
-  .promo-content,
-  .login-box {
-    width: 90%;
-    padding: 15px;
+  .pedidos-header {
+    font-size: 1rem;
+    padding: 14px 16px;
   }
 }
