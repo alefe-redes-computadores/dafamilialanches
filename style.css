@@ -745,3 +745,148 @@ section h2{font-size:1.3rem;text-align:center;margin-bottom:15px;color:#ff7043}
   padding: 6px;
   font-size: 0.9rem;
 }
+/* =========================================================
+   🆕 v2.9 — Painel "Meus Pedidos" + Repetir Pedido
+   - Integra visualmente ao layout v2.8
+   - Mantém bordas arredondadas e tema amarelo
+========================================================= */
+
+.orders-panel {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  max-height: 80vh;
+  background: #fff;
+  border-radius: 20px 20px 0 0;
+  box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.25);
+  transform: translateY(100%);
+  transition: transform 0.4s ease;
+  overflow-y: auto;
+  z-index: 1150;
+}
+.orders-panel.active {
+  transform: translateY(0);
+}
+
+.orders-head {
+  padding: 16px 20px;
+  font-weight: 700;
+  font-size: 1.2rem;
+  background: #ffca28;
+  color: #222;
+  border-radius: 20px 20px 0 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.orders-head .orders-close {
+  background: #ffb300;
+  border: none;
+  border-radius: 50%;
+  width: 30px;
+  height: 30px;
+  font-size: 18px;
+  cursor: pointer;
+  font-weight: 700;
+  color: #222;
+  transition: 0.2s;
+}
+.orders-head .orders-close:hover {
+  background: #ff7043;
+  color: #fff;
+}
+
+.orders-content {
+  padding: 15px;
+}
+.empty-orders {
+  text-align: center;
+  color: #666;
+  font-size: 0.95rem;
+  padding: 20px;
+}
+
+/* Itens individuais de pedido */
+.order-item {
+  border-bottom: 1px solid #eee;
+  padding: 12px 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  transition: background 0.2s ease;
+}
+.order-item:hover {
+  background: #fffef5;
+}
+
+/* Cabeçalho do pedido */
+.order-item-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.order-thumb {
+  width: 56px;
+  height: 56px;
+  border-radius: 10px;
+  overflow: hidden;
+  flex-shrink: 0;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.15);
+}
+.order-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.order-info {
+  flex: 1;
+}
+.order-info h4 {
+  margin: 0;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #333;
+}
+.order-info p {
+  margin: 2px 0 0;
+  color: #555;
+  font-size: 0.85rem;
+  line-height: 1.3;
+}
+.order-info .order-total {
+  font-weight: 700;
+  color: #2e7d32;
+  font-size: 0.9rem;
+}
+
+/* Botão "Repetir Pedido" */
+.repeat-order {
+  background: linear-gradient(135deg, #4caf50, #43a047);
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  font-weight: 700;
+  font-size: 0.9rem;
+  cursor: pointer;
+  padding: 8px 14px;
+  flex-shrink: 0;
+  transition: 0.25s;
+}
+.repeat-order:hover {
+  background: linear-gradient(135deg, #43a047, #388e3c);
+  transform: scale(1.05);
+}
+
+/* Responsivo */
+@media (max-width: 600px) {
+  .order-item-head {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .repeat-order {
+    width: 100%;
+    margin-top: 6px;
+  }
+}
