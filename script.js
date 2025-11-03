@@ -1,8 +1,9 @@
 /* =========================================================
-   🍔 DFL v2.9 — MEUS PEDIDOS PREMIUM
-   - Substitui o antigo painel de pedidos pelo "Premium".
-   - Adiciona lógica de repetição de pedido (placeholder).
-   - Mantém 100% da lógica funcional e estabilidade da v2.8.
+   🍔 DFL v2.9.2 — Miniaturas Dinâmicas de Pedidos
+   - Corrige o bug da miniatura em branco no painel "Meus Pedidos".
+   - O carrinho agora salva a URL da imagem de cada item.
+   - O pedido salvo no Firebase agora usa a imagem do 1º item do carrinho.
+   - Mantém 100% da lógica funcional e estabilidade da v2.9.
 ========================================================= */
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -35,6 +36,11 @@ document.addEventListener("DOMContentLoaded", () => {
     { id: 9, nome: "Combo 5 Uai + Kuat 2L", preco: 64.99, precoAntigo: 79.99, img: "promocoes/promo9.jpg" }
   ];
 
+  // 🚨 NOVO V2.9.2: Imagem Padrão (Fallback)
+  // Usa a primeira promo como reserva, que é mais seguro
+  const FALLBACK_IMG_URL = PROMO_DATA[1]?.img || 'img/padrao.jpg';
+
+
   /* ------------------ 🎯 ELEMENTOS ------------------ */
   const el = {
     cartIcon: document.getElementById("cart-icon"),
@@ -60,8 +66,6 @@ document.addEventListener("DOMContentLoaded", () => {
     hoursBanner: document.querySelector(".hours-banner"),
     reportsBtn: document.getElementById("reports-btn"), 
     
-    // 🚨 REMOVIDO V2.9: 'myOrdersBtn'
-    
     // Elementos v2.7
     promoModal: document.getElementById("promo-modal"),
     promoImg: document.getElementById("promo-modal-img"),
@@ -72,7 +76,7 @@ document.addEventListener("DOMContentLoaded", () => {
     promoNavNext: document.querySelector("#promo-modal .promo-nav.next"),
     promoClose: document.querySelector("#promo-modal .promo-close"),
 
-    // 🚨 NOVOS ELEMENTOS V2.9
+    // Elementos V2.9
     pedidosContainer: document.querySelector(".meus-pedidos"),
     pedidosBtn: document.querySelector(".meus-pedidos-btn"),
     pedidosPanel: document.getElementById("painelPedidos"),
@@ -88,13 +92,11 @@ document.addEventListener("DOMContentLoaded", () => {
     el.cartBackdrop = bd;
   }
   const Backdrop = {
-    // 🚨 ATUALIZADO V2.9:
-    // O backdrop agora fecha o novo painel de pedidos também.
     show() { el.cartBackdrop.classList.add("active"); document.body.classList.add("no-scroll"); },
     hide() { 
       el.cartBackdrop.classList.remove("active"); 
       document.body.classList.remove("no-scroll");
-      el.pedidosPanel?.classList.remove("active"); // Garante que feche o painel
+      el.pedidosPanel?.classList.remove("active"); 
     },
   };
 
@@ -102,14 +104,13 @@ document.addEventListener("DOMContentLoaded", () => {
   const Overlays = {
     closeAll() {
       document
-        .querySelectorAll(".modal.show, #mini-cart.active, .pedidos-panel.active, #admin-dashboard.show") // v2.9: .orders-panel -> .pedidos-panel
+        .querySelectorAll(".modal.show, #mini-cart.active, .pedidos-panel.active, #admin-dashboard.show") 
         .forEach((e) => e.classList.remove("show", "active"));
       Backdrop.hide();
     },
     open(modalLike) {
       Overlays.closeAll();
       if (!modalLike) return;
-      // v2.9: Adiciona .pedidos-panel à lógica de abertura
       modalLike.classList.add(
         (modalLike.id === "mini-cart" || modalLike.id === "painelPedidos") ? "active" : "show"
       );
@@ -145,14 +146,16 @@ document.addEventListener("DOMContentLoaded", () => {
       return;
     }
 
+    // 🚨 ATUALIZADO V2.9.2: Adiciona miniatura do item no carrinho
     el.miniList.innerHTML = cart.map((item, idx) => `
-      <div class="cart-item" style="border-bottom:1px solid #eee;padding:10px 0;">
-        <div style="display:flex;justify-content:space-between;align-items:center;">
+      <div class="cart-item" style="display:flex; gap:10px; border-bottom:1px solid #eee; padding:10px 0;">
+        <img src="${item.img}" alt="${item.nome}" style="width:50px; height:50px; border-radius:8px; object-fit:cover;">
+        <div style="flex:1; display:flex; justify-content:space-between; align-items:center;">
           <div style="flex:1;">
-            <p style="font-weight:600;margin-bottom:4px;">${item.nome}</p>
+            <p style="font-weight:600; margin-bottom:4px; font-size:0.9rem;">${item.nome}</p>
             <p style="color:#666;font-size:0.85rem;">${money(item.preco)} × ${item.qtd}</p>
           </div>
-          <div style="display:flex;gap:8px;align-items:center;">
+          <div style="display:flex; gap:8px; align-items:center;">
             <button type="button" class="cart-minus" data-idx="${idx}" style="background:#ff4081;color:#fff;border:none;border-radius:5px;width:28px;height:28px;cursor:pointer;">−</button>
             <span style="font-weight:600;min-width:20px;text-align:center;">${item.qtd}</span>
             <button type="button" class="cart-plus" data-idx="${idx}" style="background:#4caf50;color:#fff;border:none;border-radius:5px;width:28px;height:28px;cursor:pointer;">+</button>
@@ -299,11 +302,17 @@ document.addEventListener("DOMContentLoaded", () => {
 
   let produtoExtras = null;
   let produtoPrecoBase = 0;
+  // 🚨 NOVO V2.9.2: Guarda a imagem do produto base
+  let produtoImgBase = FALLBACK_IMG_URL; 
 
   const openExtrasFor = safe((card) => {
     if (!card || !el.extrasModal || !el.extrasList) return;
     produtoExtras = card.dataset.name;
     produtoPrecoBase = parseFloat(card.dataset.price) || 0;
+
+    // 🚨 NOVO V2.9.2: Salva a imagem do card
+    const imgEl = card.querySelector('img'); 
+    produtoImgBase = imgEl ? imgEl.src : FALLBACK_IMG_URL;
 
     el.extrasList.innerHTML = adicionais.map((a, i) => `
       <label class="extra-line">
@@ -343,7 +352,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const existente = cart.find(i => i.nome === nomeCompleto);
     if (existente) existente.qtd++;
-    else cart.push({ nome: nomeCompleto, preco: precoTotal, qtd: 1 });
+    // 🚨 ATUALIZADO V2.9.2: Salva o item com a imagem base
+    else cart.push({ nome: nomeCompleto, preco: precoTotal, qtd: 1, img: produtoImgBase });
 
     renderMiniCart();
     popupAdd("Adicionado ao carrinho!");
@@ -368,9 +378,10 @@ document.addEventListener("DOMContentLoaded", () => {
   };
 
   let _comboCtx = null;
-  const openComboModal = safe((nomeCombo, precoBase) => {
+  // 🚨 ATUALIZADO V2.9.2: Aceita a imagem como parâmetro
+  const openComboModal = safe((nomeCombo, precoBase, img) => {
     if (!el.comboModal || !el.comboBody) {
-      addCommonItem(nomeCombo, precoBase);
+      addCommonItem(nomeCombo, precoBase, img); // Adiciona direto se o modal não existir
       return;
     }
 
@@ -379,7 +390,7 @@ document.addEventListener("DOMContentLoaded", () => {
                   (low.includes("família") || low.includes("familia")) ? "familia" : null;
 
     if (!grupo) {
-      addCommonItem(nomeCombo, precoBase);
+      addCommonItem(nomeCombo, precoBase, img); // Adiciona direto se não for um combo conhecido
       return;
     }
 
@@ -391,7 +402,8 @@ document.addEventListener("DOMContentLoaded", () => {
       </label>
     `).join("");
 
-    _comboCtx = { nomeCombo, precoBase, grupo };
+    // 🚨 ATUALIZADO V2.9.2: Salva a imagem no contexto
+    _comboCtx = { nomeCombo, precoBase, grupo, img: img || FALLBACK_IMG_URL };
     Overlays.open(el.comboModal);
   });
 
@@ -405,7 +417,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const existente = cart.find(i => i.nome === finalName);
     if (existente) existente.qtd++;
-    else cart.push({ nome: finalName, preco: finalPrice, qtd: 1 });
+    // 🚨 ATUALIZADO V2.9.2: Salva o item com a imagem base do combo
+    else cart.push({ nome: finalName, preco: finalPrice, qtd: 1, img: _comboCtx.img });
 
     popupAdd("Combo adicionado!");
     renderMiniCart();
@@ -417,16 +430,24 @@ document.addEventListener("DOMContentLoaded", () => {
   );
 
   /* ------------------ 🧺 Adicionar item comum ------------------ */
-  function addCommonItem(nome, preco) {
+  // 🚨 ATUALIZADO V2.9.2: Aceita a imagem como parâmetro
+  function addCommonItem(nome, preco, img) {
+    const fallbackImg = img || FALLBACK_IMG_URL; // Garante uma imagem
+
     // Se for um combo do *cardápio principal* (mas não uma "Promo"), abre o modal de bebida
     if (/^combo/i.test(nome) && !/^\s*Combo [0-9]/.test(nome)) {
-      openComboModal(nome, preco);
+      openComboModal(nome, preco, fallbackImg); // Passa a imagem adiante
       return;
     }
+
     // Se for uma *promoção* (ex: "Combo 2 Purizin...") ou item normal, adiciona direto
     const found = cart.find((i) => i.nome === nome && i.preco === preco);
-    if (found) found.qtd++;
-    else cart.push({ nome, preco, qtd: 1 });
+    if (found) {
+      found.qtd++;
+    } else {
+      // 🚨 ATUALIZADO V2.9.2: Salva o item com a imagem
+      cart.push({ nome, preco, qtd: 1, img: fallbackImg });
+    }
     renderMiniCart();
     popupAdd(`${nome} adicionado!`);
   }
@@ -435,9 +456,15 @@ document.addEventListener("DOMContentLoaded", () => {
     btn.addEventListener("click", (e) => {
       const card = e.currentTarget.closest(".card");
       if (!card) return;
+      
       const nome = card.dataset.name;
       const preco = parseFloat(card.dataset.price);
-      addCommonItem(nome, preco);
+      
+      // 🚨 NOVO V2.9.2: Pega a imagem do card
+      const imgEl = card.querySelector('img'); // Procura a imagem dentro do card
+      const img = imgEl ? imgEl.src : FALLBACK_IMG_URL;
+      
+      addCommonItem(nome, preco, img); // Passa a imagem para a função
     })
   );
 
@@ -621,8 +648,8 @@ document.addEventListener("DOMContentLoaded", () => {
     const promo = PROMO_DATA[currentPromoId];
     if (!promo) return;
     
-    // Chama a função-base de adicionar, que não abre o modal de combos
-    addCommonItem(promo.nome, promo.preco); 
+    // 🚨 ATUALIZADO V2.9.2: Passa a imagem da promoção para a função
+    addCommonItem(promo.nome, promo.preco, promo.img); 
     
     Overlays.closeAll(); // Fecha o modal após adicionar
   });
@@ -715,7 +742,7 @@ document.addEventListener("DOMContentLoaded", () => {
   atualizarTimer();
   setInterval(atualizarTimer, 1000);
 
-  /* ------------------ 💾 Fechar pedido (V2.5 com endereço/cupom/frete) ------------------ */
+  /* ------------------ 💾 Fechar pedido (V2.9.2 com Thumb Dinâmica) ------------------ */
   function fecharPedido() {
     if (!cart.length) return alert("Carrinho vazio!");
     if (!currentUser) {
@@ -733,6 +760,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const { subtotal, delivery, discount, discountLabel, total } = calcTotals();
 
+    // 🚨 ATUALIZADO V2.9.2: Pega a imagem do primeiro item do carrinho
+    // Se o carrinho tiver itens, pega a img do item [0], senão usa o fallback.
+    const firstItemImg = (cart[0] && cart[0].img) ? cart[0].img : FALLBACK_IMG_URL;
+
     const pedido = {
       usuario: currentUser.email,
       userId: currentUser.uid,
@@ -744,18 +775,10 @@ document.addEventListener("DOMContentLoaded", () => {
       cupom: couponApplied || "",
       total: Number(total.toFixed(2)),
       endereco: addr,
+      data: new Date(), // CORRIGIDO (v2.9.1) - Salva como Timestamp
       
-      // ===============================================
-      // 🚨 CORREÇÃO APLICADA AQUI 🚨
-      // Salva como Timestamp do Firebase, não como texto.
-      // Isso corrige a ordenação e a leitura no painel admin.
-      data: new Date(),
-      // ===============================================
-      
-      // 🚨 PONTO DE ATENÇÃO V2.9: 
-      // O campo 'thumb' não está sendo salvo.
-      // A lógica para 'repetirPedido' precisará ser mais robusta no futuro.
-      thumb: 'img/padrao.jpg' // Adicionando o placeholder
+      // 🚨 ATUALIZADO V2.9.2: Salva a imagem dinâmica
+      thumb: firstItemImg 
     };
 
     db.collection("Pedidos")
@@ -808,6 +831,7 @@ document.addEventListener("DOMContentLoaded", () => {
     el.pedidosLista.innerHTML = `<p class="empty-orders">Carregando pedidos...</p>`;
 
     try {
+      // A consulta agora funciona graças ao Índice composto (userId ASC, data DESC)
       const q = db.collection("Pedidos").where("userId", "==", userId).orderBy("data", "desc");
       const snapshot = await q.get();
 
@@ -830,8 +854,8 @@ document.addEventListener("DOMContentLoaded", () => {
     if (!el.pedidosLista) return;
     
     el.pedidosLista.innerHTML = pedidos.map(p => {
-      // Tenta usar p.thumb, se não existir, usa o placeholder do briefing
-      const thumbUrl = p.thumb || 'img/padrao.jpg';
+      // 🚨 ATUALIZADO V2.9.2: Usa o thumb do pedido ou o fallback global
+      const thumbUrl = p.thumb || FALLBACK_IMG_URL; 
       
       // Lógica de data robusta (Timestamp ou String antiga)
       const jsDate = p.data?.toDate ? p.data.toDate() : new Date(p.data?.seconds * 1000 || p.data || 0);
@@ -1083,7 +1107,6 @@ document.addEventListener("DOMContentLoaded", () => {
           const total    = Number(p.total    ?? (subtotal + entrega - desconto)) || 0;
 
           // Lógica de data robusta (Timestamp ou String)
-          // Essencial agora que `fecharPedido` salva Timestamps
           const jsDate = p.data?.toDate ? p.data.toDate() : new Date(p.data?.seconds * 1000 || p.data || 0);
 
           return {
@@ -1154,12 +1177,10 @@ document.addEventListener("DOMContentLoaded", () => {
     
     if (user) {
       el.userBtn.textContent = `Olá, ${user.displayName?.split(" ")[0] || user.email.split("@")[0]}`;
-      // 🚨 ATUALIZADO V2.9:
       if (el.pedidosContainer) el.pedidosContainer.style.display = 'block';
       
     } else {
       el.userBtn.textContent = "Entrar / Cadastrar";
-      // 🚨 ATUALIZADO V2.9:
       if (el.pedidosContainer) el.pedidosContainer.style.display = 'none';
     }
 
@@ -1209,8 +1230,8 @@ document.addEventListener("DOMContentLoaded", () => {
     console.warn("⚠️ Erro interceptado:", e?.message);
   });
 
-  /* 🚨 ATUALIZADO V2.9: Mensagem de console */
-  console.log("%c🍔 DFL v2.9 — Meus Pedidos Premium OK — Lógica v2.8 Estável",
+  /* 🚨 ATUALIZADO V2.9.2: Mensagem de console */
+  console.log("%c🍔 DFL v2.9.2 — Miniaturas Dinâmicas OK — Lógica v2.9.1 Estável",
               "background:#4caf50;color:#fff;padding:8px 12px;border-radius:8px;font-weight:700;");
 
 }); // Fim do DOMContentLoaded
@@ -1250,9 +1271,6 @@ document.addEventListener('DOMContentLoaded', () => {
       cartBackdrop.classList.remove('active');
       miniCart.classList.remove('active');
       
-      // 🚨 ATUALIZADO V2.9: 
-      // Garante que o painel de pedidos também feche
-      // (embora o 'Overlays.closeAll' no backdrop principal já deva cuidar disso)
       const pedidosPanel = document.getElementById('painelPedidos');
       if (pedidosPanel) {
         pedidosPanel.classList.remove('active');
