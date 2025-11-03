@@ -1,104 +1,119 @@
 /* =========================================================
-   🎨 DFL STYLE — v2.8 (Ajuste Fino do Modal)
-   - Corrige o corte da imagem no modal de promoções (v2.7)
-   - Mantém 100% do layout e estabilidade da v2.6
+   🍔 DFL — STYLE SHEET (Consolidado v2.9)
+   - Base estável v2.6 + melhorias v2.7/2.8
+   - Correções de conflito (.orders-panel unificado em bottom-sheet)
+   - Placeholder para miniaturas em "Meus Pedidos"
 ========================================================= */
 
-body{background:#ffd54f;font-family:"Inter","Poppins",sans-serif;color:#222;margin:0;scroll-behavior:smooth}
+/* ---------- BASE ---------- */
+*{box-sizing:border-box}
+html,body{height:100%}
+body{
+  background:#ffd54f;
+  font-family:"Inter","Poppins",system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,"Helvetica Neue",Arial,sans-serif;
+  color:#222;margin:0;scroll-behavior:smooth
+}
 
-/* Header Fixo (v2.6) */
+/* ---------- HEADER ---------- */
 .header{
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  background:#ffca28;
-  padding:10px 16px;
+  display:flex;justify-content:space-between;align-items:center;
+  background:#ffca28;padding:10px 16px;
   box-shadow:0 2px 5px rgba(0,0,0,.15);
-  position:fixed;
-  top:0;
-  left:0;
-  right:0;
-  z-index:900;
+  position:fixed;top:0;left:0;right:0;z-index:900;
+  padding-bottom:4px /* v2.8.4: reduz folga inferior */
 }
 .header-content{display:flex;align-items:center;gap:12px}
 .logo{width:52px;height:52px}
 .header-info h1{margin:0;font-size:1.2rem}
 .tagline{margin:0;font-size:.85rem;color:#d84315}
-.header-actions{display:flex;align-items:center;gap:10px;}
+.header-actions{display:flex;align-items:center;gap:10px}
 
-/* Wrapper de Conteúdo (v2.6) */
-.main-content-wrapper {
-  padding-top: 72px;
+/* wrapper de conteúdo (reserva o header fixo) */
+.main-content-wrapper{padding-top:72px}
+
+/* ---------- TOPO: BOTÕES ---------- */
+.user-button{
+  background:linear-gradient(135deg,#fff,#f7f7f7);
+  border:1px solid #ddd;border-radius:8px;padding:8px 12px;
+  font-weight:600;cursor:pointer;transition:.2s
 }
-
-/* Top buttons */
-.user-button{background:linear-gradient(135deg,#fff,#f7f7f7);border:1px solid #ddd;border-radius:8px;padding:8px 12px;font-weight:600;cursor:pointer;transition:.2s}
 .user-button:hover{background:#fafafa}
-#cart-icon, .cart-button{background:#ffb300;border:none;border-radius:8px;padding:8px 12px;font-weight:700;cursor:pointer;transition:.2s}
-#cart-icon:hover, .cart-button:hover{background:#ffc107}
+#cart-icon,.cart-button{
+  background:#ffb300;border:none;border-radius:8px;padding:8px 12px;
+  font-weight:700;cursor:pointer;transition:.2s
+}
+#cart-icon:hover,.cart-button:hover{background:#ffc107}
 
-/* Status */
-.status-banner{text-align:center;padding:8px;color:#fff;font-weight:600}
+/* ---------- STATUS ---------- */
+.status-banner{
+  display:flex;justify-content:center;align-items:center;
+  min-height:36px;line-height:1.4;padding:6px 8px;box-sizing:border-box;
+  text-align:center;color:#fff;font-weight:600;margin-top:0
+}
 .status-banner.open{background:#4caf50}
 .status-banner.closed{background:#d32f2f}
 .hours-banner{background:#000;color:#fff;text-align:center;padding:6px;font-size:.9rem}
 
-/* Promoções */
-.promo-section{text-align:center;padding:20px 10px}
-.promo-section h2{color:#ff5722;margin-bottom:8px}
-.promo-sub{color:#666;margin-bottom:10px;font-size:.95rem}
-.countdown-ticker{background:#fff;display:inline-block;padding:6px 12px;border-radius:10px;margin:8px 0 15px;font-weight:600;box-shadow:0 2px 5px rgba(0,0,0,.1)}
+/* ---------- PROMOÇÕES ---------- */
+.promo-section{text-align:center;padding:12px 10px}
+.promo-section h2{color:#ff7043;margin:0 0 2px;font-size:1.25rem}
+.promo-sub{color:#555;margin-bottom:4px;font-size:.95rem}
+.countdown-ticker{
+  background:#fff;display:inline-block;padding:5px 10px;border-radius:10px;
+  margin:4px 0 6px;font-weight:600;box-shadow:0 2px 5px rgba(0,0,0,.1);
+  transform:scale(1.05)
+}
 
-/* Carrossel */
-.carousel{position:relative;width:100%;max-width:100%;margin:20px auto;display:flex;align-items:center;justify-content:center}
+/* ---------- CARROSSEL ---------- */
+.carousel{position:relative;width:100%;max-width:100%;margin:4px auto 20px;display:flex;align-items:center;justify-content:center}
 .slides{display:flex;gap:10px;overflow-x:auto;scroll-behavior:smooth;padding:10px 5px;width:100%;max-width:calc(100% - 80px)}
 .slides::-webkit-scrollbar{height:8px}
 .slides::-webkit-scrollbar-track{background:#f1f1f1;border-radius:10px}
 .slides::-webkit-scrollbar-thumb{background:#ffd54f;border-radius:10px}
 .slides::-webkit-scrollbar-thumb:hover{background:#ffca28}
-/* Cursor v2.7 */
-.slide{min-width:250px;max-width:250px;height:180px;object-fit:cover;border-radius:12px;box-shadow:0 3px 10px rgba(0,0,0,.2);cursor:zoom-in;transition:transform .2s ease;flex-shrink:0}
+.slide{
+  min-width:250px;max-width:250px;height:180px;object-fit:cover;border-radius:12px;
+  box-shadow:0 3px 10px rgba(0,0,0,.2);cursor:zoom-in;transition:transform .2s ease;flex-shrink:0
+}
 .slide:hover{transform:scale(1.05);box-shadow:0 5px 15px rgba(0,0,0,.3)}
-.c-btn{background:rgba(0,0,0,.7);color:#fff;border:none;font-size:24px;width:40px;height:40px;border-radius:50%;cursor:pointer;position:absolute;top:50%;transform:translateY(-50%);z-index:10;transition:all .2s ease;display:flex;align-items:center;justify-content:center}
+.c-btn{
+  background:rgba(0,0,0,.7);color:#fff;border:none;font-size:24px;width:40px;height:40px;border-radius:50%;
+  cursor:pointer;position:absolute;top:50%;transform:translateY(-50%);z-index:10;transition:all .2s;display:flex;align-items:center;justify-content:center
+}
 .c-btn:hover{background:rgba(0,0,0,.9);transform:translateY(-50%) scale(1.1)}
-.c-btn:active{transform:translateY(-50%) scale(0.95)}
-.c-prev{left:10px}
-.c-next{right:10px}
+.c-btn:active{transform:translateY(-50%) scale(.95)}
+.c-prev{left:10px}.c-next{right:10px}
 
-/* Seções/grades/cards */
+/* ---------- SEÇÕES / GRADE / CARDS ---------- */
 section{margin:25px auto;width:95%;max-width:1000px}
 section h2{font-size:1.3rem;text-align:center;margin-bottom:15px;color:#ff7043}
 .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:14px}
-.card{background:#fff;border-radius:16px;box-shadow:0 2px 6px rgba(0,0,0,.08);padding:14px;text-align:center;transition:.2s}
-.card:hover{transform:translateY(-3px);box-shadow:0 4px 10px rgba(0,0,0,.12)}
-/* Altura das Imagens (v2.6) */
-.card img{
-  width:100%;
-  border-radius:12px;
-  margin-bottom:8px;
-  height: 220px; 
-  object-fit: cover;
+.card{
+  background:#fff;border-radius:16px;box-shadow:0 2px 6px rgba(0,0,0,.08);
+  padding:14px;text-align:center;transition:.2s
 }
+.card:hover{transform:translateY(-3px);box-shadow:0 4px 10px rgba(0,0,0,.12)}
+.card img{width:100%;border-radius:12px;margin-bottom:8px;height:220px;object-fit:cover}
 .card h3{margin:0 0 6px;font-weight:700;font-size:1rem;display:flex;align-items:center;justify-content:center;gap:6px;flex-wrap:wrap}
 .card p{font-size:.9rem;color:#555}
 .price{font-weight:600;color:#4caf50;margin:8px 0}
 
-/* ===== BADGES ===== */
-.badge{display:inline-block;font-size:.72rem;font-weight:700;line-height:1;padding:3px 8px;border-radius:999px;color:#000;background:linear-gradient(135deg,#f8e08b,#eac13f);border:1px solid #d4af37;box-shadow:inset 0 -1px 0 rgba(0,0,0,.08),0 1px 2px rgba(0,0,0,.08);white-space:nowrap;vertical-align:middle}
-.badge.economia{background:linear-gradient(135deg,#ffd480,#ffb74d);border-color:#e09000;color:#000}
-
-.badge-icon {
-  display: inline-block;
-  vertical-align: middle; 
-  margin-right: 4px;     
-  font-size: 0.8rem;     
-  line-height: 1;        
+/* ---------- BADGES ---------- */
+.badge{
+  display:inline-block;font-size:.72rem;font-weight:700;line-height:1;padding:3px 8px;border-radius:999px;
+  color:#000;background:linear-gradient(135deg,#f8e08b,#eac13f);border:1px solid #d4af37;
+  box-shadow:inset 0 -1px 0 rgba(0,0,0,.08),0 1px 2px rgba(0,0,0,.08);white-space:nowrap;vertical-align:middle
 }
-
-.badge-small{display:inline-block;font-size:.68rem;font-weight:600;line-height:1.2;padding:2px 7px;border-radius:6px;color:#000;background:linear-gradient(135deg,#ffd54f,#ffca28);border:1px solid #d4af37;box-shadow:0 1px 3px rgba(0,0,0,.1);white-space:nowrap;vertical-align:middle;margin-left:4px}
+.badge.economia{background:linear-gradient(135deg,#ffd480,#ffb74d);border-color:#e09000;color:#000}
+.badge-icon{display:inline-block;vertical-align:middle;margin-right:4px;font-size:.8rem;line-height:1}
+.badge-small{
+  display:inline-block;font-size:.68rem;font-weight:600;line-height:1.2;padding:2px 7px;border-radius:6px;
+  color:#000;background:linear-gradient(135deg,#ffd54f,#ffca28);border:1px solid #d4af37;box-shadow:0 1px 3px rgba(0,0,0,.1);
+  white-space:nowrap;vertical-align:middle;margin-left:4px
+}
 .badge-small.pure{background:linear-gradient(135deg,#a5d6a7,#81c784);border-color:#66bb6a;color:#1b5e20}
 
-/* Botões */
+/* ---------- BOTÕES CARD ---------- */
 .actions{margin-top:10px;display:flex;justify-content:center;gap:8px;flex-wrap:wrap}
 .actions button{border:none;border-radius:10px;font-weight:700;cursor:pointer;padding:8px 14px;font-size:.9rem;transition:.25s}
 .actions .add-cart{background:linear-gradient(135deg,#4caf50,#43a047);color:#fff;box-shadow:0 2px 4px rgba(0,0,0,.2)}
@@ -106,33 +121,24 @@ section h2{font-size:1.3rem;text-align:center;margin-bottom:15px;color:#ff7043}
 .actions .extras-btn{background:linear-gradient(135deg,#ffb300,#ffca28);color:#222;box-shadow:0 2px 4px rgba(0,0,0,.15)}
 .actions .extras-btn:hover{background:linear-gradient(135deg,#ffca28,#ffd54f);transform:scale(1.03)}
 
-/* Fundo escuro (Backdrop) do carrinho */
-#cart-backdrop {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100vw;
-  height: 100vh;
-  background: rgba(0, 0, 0, 0.5);
-  z-index: 1000;
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 0.35s ease;
+/* ---------- BACKDROP ---------- */
+#cart-backdrop{
+  position:fixed;top:0;left:0;width:100vw;height:100vh;background:rgba(0,0,0,.5);
+  z-index:1000;opacity:0;pointer-events:none;transition:opacity .35s ease
 }
-#cart-backdrop.active {
-  opacity: 1;
-  pointer-events: auto;
+#cart-backdrop.active{opacity:1;pointer-events:auto}
+
+/* ---------- MINI-CARRINHO ---------- */
+#mini-cart{
+  position:fixed;top:0;right:-100%;width:360px;max-width:95%;height:100vh;background:#fff;
+  box-shadow:-3px 0 12px rgba(0,0,0,.3);z-index:1100;display:flex;flex-direction:column;transition:right .35s ease
 }
-
-
-/* ⚙️ Mini-carrinho */
-#mini-cart{position:fixed;top:0;right:-100%;width:360px;max-width:95%;height:100vh;background:#fff;box-shadow:-3px 0 12px rgba(0,0,0,.3);z-index:1100;display:flex;flex-direction:column;transition:right .35s ease}
 #mini-cart.active{right:0}
 .mini-head{padding:15px;background:#ffd54f;display:flex;justify-content:space-between;align-items:center;border-bottom:2px solid #000}
 .mini-list{flex:1;overflow-y:auto;padding:10px 15px}
 .mini-foot{border-top:1px solid #ddd;background:#fafafa;padding:15px}
 
-/* 🧾 Campos de entrada e resumo */
+/* ---------- CAMPOS / RESUMO ---------- */
 .cart-input{width:100%;padding:10px;border:1px solid #ddd;border-radius:8px;font-size:.95rem;margin-bottom:10px}
 .cart-input:focus{border-color:#ffb300;outline:none;box-shadow:0 0 4px rgba(255,179,0,.3)}
 .cart-row{display:flex;gap:8px;align-items:center;margin-bottom:10px}
@@ -143,908 +149,168 @@ section h2{font-size:1.3rem;text-align:center;margin-bottom:15px;color:#ff7043}
 .cart-summary p{display:flex;justify-content:space-between;margin:5px 0;font-size:.9rem;color:#444}
 .cart-summary p.total{font-size:1.1rem;font-weight:700;color:#2e7d32}
 
-/* FAB Pedidos */
-#orders-fab{position:fixed;bottom:20px;right:20px;background:linear-gradient(135deg,#ffb300,#ffca28);border:none;color:#000;font-weight:600;border-radius:25px;padding:12px 18px;cursor:pointer;display:none;box-shadow:0 4px 12px rgba(0,0,0,.3);z-index:900;transition:all .2s ease}
-#orders-fab.show{display:block}
-#orders-fab:hover{background:linear-gradient(135deg,#ffd54f,#ffe082);transform:scale(1.05)}
+/* ---------- FAB "MEUS PEDIDOS" ---------- */
+#orders-fab{
+  position:fixed;bottom:80px;right:22px;background:#ffb300;color:#fff;border:none;border-radius:30px;
+  padding:14px 20px;font-weight:700;box-shadow:0 3px 8px rgba(0,0,0,.25);cursor:pointer;
+  opacity:0;transform:translateY(20px);transition:all .3s ease;z-index:999
+}
+#orders-fab.show{opacity:1;transform:translateY(0)}
+#orders-fab:hover{background:#ffa000}
 
-/* Painel de Pedidos (v2.6: Transição OK) */
-.orders-panel{position:fixed;bottom:0;left:0;right:0;max-height:80vh;background:#fff;border-radius:20px 20px 0 0;box-shadow:0 -4px 20px rgba(0,0,0,.2);transform:translateY(100%);transition:transform .4s ease;overflow-y:auto;z-index:1100}
-.orders-panel.active,.orders-panel.show{transform:translateY(0)}
-.orders-head{padding:16px 20px;font-weight:700;font-size:1.2rem;background:#ffca28;color:#222;border-radius:20px 20px 0 0;display:flex;justify-content:space-between;align-items:center}
-.orders-close{background:#ffb300;border:none;border-radius:50%;width:30px;height:30px;font-size:18px;cursor:pointer;color:#222;font-weight:700;transition:.2s}
-.orders-close:hover{background:#ff7043;color:#fff}
-.orders-content{padding:15px}
-.order-item{padding:12px 16px;border-bottom:1px solid #eee}
-.order-item h4{color:#ff7043;margin-bottom:6px}
-
-/* Popup "Adicionado" (v2.6) */
+/* ---------- POPUP "ADICIONADO" ---------- */
 .popup-add{
-  position:fixed;
-  left:50%;
-  top:50%;
-  transform: translate(-50%, -50%) scale(0.9);
-  background: rgba(34, 34, 34, 0.9);
-  color:#fff;
-  padding:12px 24px;
-  border-radius:25px;
-  opacity:0;
-  transition:all .3s ease;
-  z-index:2000;
-  font-weight:600;
-  box-shadow:0 4px 12px rgba(0,0,0,.3);
-  pointer-events:none;
+  position:fixed;left:50%;top:50%;transform:translate(-50%,-50%) scale(.9);
+  background:rgba(34,34,34,.9);color:#fff;padding:12px 24px;border-radius:25px;opacity:0;
+  transition:all .3s ease;z-index:2000;font-weight:600;box-shadow:0 4px 12px rgba(0,0,0,.3);pointer-events:none
 }
-.popup-add.show{
-  opacity:1;
-  transform: translate(-50%, -50%) scale(1);
-}
+.popup-add.show{opacity:1;transform:translate(-50%,-50%) scale(1)}
 
-/* Footer (v2.6) */
-.footer{
-  background:#ffca28; 
-  text-align:center;
-  padding:20px;
-  font-size:.9rem;
-  color:#222;
-}
+/* ---------- FOOTER ---------- */
+.footer{background:#ffca28;text-align:center;padding:20px;font-size:.9rem;color:#222}
 .footer a{color:#ff7043;text-decoration:none;transition:color .2s ease}
 .footer a:hover{color:#ff5722}
 .footer-links{display:flex;justify-content:center;gap:10px;flex-wrap:wrap;margin:8px 0}
 .footer-btn{background:#ffb300;color:#222;padding:6px 14px;border-radius:6px;font-weight:700;text-decoration:none;transition:.25s}
 .footer-btn:hover{background:#ffca28;transform:scale(1.03)}
-.footer-copy{
-  font-size:.8rem;
-  color:#000;
-  margin-top:10px;
+.footer-copy{font-size:.8rem;color:#000;margin-top:10px}
+
+/* ---------- MODAIS (EXTRAS / COMBO / LOGIN / PROMO) ---------- */
+.modal{
+  position:fixed;inset:0;width:100vw;height:100vh;z-index:1050;display:flex;align-items:center;justify-content:center;
+  opacity:0;pointer-events:none;transition:opacity .3s ease
+}
+.modal.show{opacity:1;pointer-events:auto}
+.modal-content{
+  background:#fff;border-radius:12px;box-shadow:0 4px 20px rgba(0,0,0,.2);
+  max-width:420px;width:90%;overflow:hidden;transform:scale(.95);transition:transform .3s ease
+}
+.modal.show .modal-content{transform:scale(1)}
+.modal-head{display:flex;justify-content:space-between;align-items:center;padding:16px 20px;background:#ffca28}
+.modal-head h3{margin:0;font-size:1.2rem;font-weight:700;color:#222}
+.extras-close,.combo-close,.login-close{
+  background:#ffb300;border:none;border-radius:50%;width:30px;height:30px;font-size:18px;font-weight:700;cursor:pointer;line-height:30px;text-align:center;color:#222;transition:.2s
+}
+.extras-close:hover,.combo-close:hover,.login-close:hover{background:#ff7043;color:#fff;transform:scale(1.1)}
+.extras-list,#combo-body{padding:10px 20px;max-height:60vh;overflow-y:auto}
+.extra-line{display:flex;justify-content:space-between;align-items:center;padding:12px 4px;border-bottom:1px solid #eee;cursor:pointer;transition:background .2s}
+.extra-line:hover{background:#fffaf3}
+.extra-line span{font-size:.95rem}
+.extra-line input{width:20px;height:20px;cursor:pointer;flex-shrink:0;margin-left:10px}
+.extra-line input[type="radio"]{border-radius:50%}
+.modal-foot{display:flex;gap:10px;padding:20px;background:#f9f9f9;border-top:1px solid #eee}
+.btn-primary,.btn-secondary,.btn-primario{flex:1;border:none;border-radius:10px;padding:14px;font-weight:700;font-size:1rem;cursor:pointer;transition:.2s}
+.btn-primary,.btn-primario{background:#4caf50;color:#fff;box-shadow:0 2px 5px rgba(0,0,0,.1)}
+.btn-primary:hover,.btn-primario:hover{background:#43a047;transform:translateY(-2px)}
+.btn-secondary{background:transparent;color:#555;border:1px solid #ddd}
+.btn-secondary:hover{background:#f1f1f1;border-color:#ccc}
+
+/* --- LOGIN --- */
+.login-box{padding:20px;text-align:center}
+.btn-google{display:flex;align-items:center;justify-content:center;gap:12px;width:100%;padding:12px;background:#fff;color:#444;border:1px solid #ddd;border-radius:10px;font-size:1rem;font-weight:600;cursor:pointer;transition:.2s}
+.btn-google:hover{background:#f9f9f9;border-color:#ccc;transform:translateY(-2px);box-shadow:0 2px 5px rgba(0,0,0,.05)}
+.google-icon{width:24px;height:24px;background:#fff;border-radius:50%;padding:2px;object-fit:contain}
+.login-safe{font-size:.8rem;color:#777;margin-top:10px;display:block}
+.divider{display:flex;align-items:center;text-align:center;color:#999;font-size:.9rem;margin:24px 0}
+.divider::before,.divider::after{content:"";flex:1;border-bottom:1px solid #eee}
+.divider:not(:empty)::before{margin-right:.5em}.divider:not(:empty)::after{margin-left:.5em}
+.login-form{display:flex;flex-direction:column;gap:12px}
+.login-form input{width:100%;padding:14px;border:1px solid #ddd;border-radius:10px;font-size:1rem;box-sizing:border-box;transition:.2s}
+.login-form input:focus{border-color:#ff7043;outline:0;box-shadow:0 0 0 3px rgba(255,112,67,.2)}
+
+/* --- PROMO MODAL (imagem sem corte) --- */
+#promo-modal{z-index:1150;background:rgba(0,0,0,.85);backdrop-filter:blur(4px);padding:10px}
+.promo-content{
+  position:relative;background:#fff;border-radius:16px;box-shadow:0 5px 25px rgba(0,0,0,.3);
+  max-width:400px;width:100%;overflow:hidden;transform:scale(.95);transition:transform .3s ease
+}
+#promo-modal.show .promo-content{transform:scale(1)}
+#promo-modal-img{width:100%;height:auto;max-height:60vh;object-fit:contain;display:block;border-bottom:2px solid #ffca28;background:#f0f0f0}
+.promo-info{padding:20px;text-align:center}
+#promo-modal-title{font-size:1.25rem;font-weight:700;color:#333;margin:0 0 10px}
+#promo-modal-price{font-size:1.1rem;color:#555;margin-bottom:20px}
+#promo-modal-price .old-price{text-decoration:line-through;color:#999;font-size:.95rem;margin-right:8px}
+#promo-modal-price b{font-size:1.3rem;color:#4caf50}
+#promo-modal-add{width:100%;box-sizing:border-box}
+.promo-nav,.promo-close{
+  position:absolute;top:50%;transform:translateY(-50%);background:rgba(0,0,0,.6);color:#fff;border:none;border-radius:50%;
+  width:40px;height:40px;font-size:24px;font-weight:700;cursor:pointer;z-index:10;transition:.2s;display:flex;align-items:center;justify-content:center
+}
+.promo-nav:hover,.promo-close:hover{background:rgba(0,0,0,.9);transform:translateY(-50%) scale(1.1)}
+.promo-nav.prev{left:10px}.promo-nav.next{right:10px}
+.promo-close{top:10px;right:10px;width:30px;height:30px;font-size:18px;background:rgba(0,0,0,.5);transform:none}
+.promo-close:hover{background:#d32f2f;transform:scale(1.1)}
+@media (max-width:480px){.promo-nav{top:30%}}
+
+/* ---------- BANNER DE COOKIES ---------- */
+#cookie-banner{
+  position:fixed;left:0;right:0;bottom:0;background:rgba(34,34,34,.95);color:#fff;padding:16px;
+  display:flex;justify-content:space-between;align-items:center;z-index:2000;transform:translateY(100%);transition:transform .5s ease
+}
+#cookie-banner.show{transform:translateY(0)}
+#cookie-banner p{margin:0;font-size:.9rem;line-height:1.4;margin-right:16px}
+#cookie-banner a{color:#ffca28;font-weight:600;text-decoration:underline}
+#cookie-banner button{
+  background:#4caf50;color:#fff;border:none;border-radius:8px;padding:10px 16px;font-weight:700;cursor:pointer;transition:background .2s;flex-shrink:0
+}
+#cookie-banner button:hover{background:#43a047}
+@media (max-width:600px){
+  #cookie-banner{flex-direction:column;text-align:center;gap:12px}
+  #cookie-banner p{margin-right:0}
+  #cookie-banner button{width:100%;padding:12px}
 }
 
-/* Responsivo */
+/* ---------- "MEUS PEDIDOS" (UNIFICADO: bottom-sheet) ---------- */
+.orders-panel{
+  position:fixed;left:0;right:0;bottom:0;max-height:80vh;background:#fff;border-radius:20px 20px 0 0;
+  box-shadow:0 -4px 20px rgba(0,0,0,.25);transform:translateY(100%);transition:transform .4s ease;overflow-y:auto;z-index:1150
+}
+.orders-panel.active{transform:translateY(0)}
+.orders-head{
+  padding:16px 20px;font-weight:700;font-size:1.2rem;background:#ffca28;color:#222;border-radius:20px 20px 0 0;
+  display:flex;justify-content:space-between;align-items:center
+}
+.orders-close{
+  background:#ffb300;border:none;border-radius:50%;width:30px;height:30px;font-size:18px;cursor:pointer;color:#222;font-weight:700;transition:.2s
+}
+.orders-close:hover{background:#ff7043;color:#fff}
+.orders-content{padding:15px}
+.empty-orders{text-align:center;color:#666;font-size:.95rem;padding:20px}
+
+.order-item{
+  border-bottom:1px solid #eee;padding:12px 8px;display:flex;flex-direction:column;gap:8px;transition:background .2s ease
+}
+.order-item:hover{background:#fffef5}
+
+/* Cabeçalho do pedido + miniatura */
+.order-item-head{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.order-thumb{
+  width:56px;height:56px;border-radius:10px;overflow:hidden;flex-shrink:0;
+  box-shadow:0 2px 5px rgba(0,0,0,.15);background:#fff3cd;position:relative
+}
+.order-thumb img{width:100%;height:100%;object-fit:cover;display:block}
+.order-thumb:empty::before{
+  content:"📦";position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:24px;opacity:.75
+}
+.order-info{flex:1}
+.order-info h4{margin:0;font-size:.95rem;font-weight:700;color:#333}
+.order-info p{margin:2px 0 0;color:#555;font-size:.85rem;line-height:1.3}
+.order-info .order-total{font-weight:700;color:#2e7d32;font-size:.9rem}
+
+/* Botão "Repetir Pedido" */
+.repeat-order{
+  background:linear-gradient(135deg,#4caf50,#43a047);color:#fff;border:none;border-radius:10px;font-weight:700;font-size:.9rem;
+  cursor:pointer;padding:8px 14px;flex-shrink:0;transition:.25s
+}
+.repeat-order:hover{background:linear-gradient(135deg,#43a047,#388e3c);transform:scale(1.05)}
+
+/* ---------- RESPONSIVO ---------- */
 @media (max-width:600px){
   .grid{grid-template-columns:repeat(2,1fr)}
-  
-  /* Carrossel 2.5 (v2.6) */
-  .slide{
-    min-width: 150px;
-    max-width: 150px;
-    height: 120px;
-  }
-  
-  /* Imagens Cards (v2.6) */
-  .card img {
-    height: 140px;
-  }
-  
-  .c-btn{width:32px;height:32px;font-size:20px}
-  .c-prev{left:5px}
-  .c-next{right:5px}
+  .slide{min-width:150px;max-width:150px;height:120px}
+  .card img{height:140px}
+  .c-btn{width:32px;height:32px;font-size:20px}.c-prev{left:5px}.c-next{right:5px}
   #mini-cart,.orders-panel{width:100%;max-width:100%}
   .cart-row{flex-direction:column;gap:6px}
   .cart-row button{width:100%}
 }
-
-/* =========================================================
-   🎨 MODERNIZAÇÃO DOS MODAIS
-========================================================= */
-
-/* Base do Modal (pop-up) */
-.modal {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100vw;
-  height: 100vh;
-  z-index: 1050; 
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 0.3s ease;
-}
-.modal.show {
-  opacity: 1;
-  pointer-events: auto;
-}
-.modal-content {
-  background: #fff;
-  border-radius: 12px;
-  box-shadow: 0 4px 20px rgba(0,0,0,.2);
-  max-width: 420px; /* v2.6 */
-  width: 90%;
-  overflow: hidden;
-  transform: scale(0.95);
-  transition: transform 0.3s ease;
-}
-.modal.show .modal-content {
-  transform: scale(1);
-}
-
-/* Cabeçalho (Título e 'X') - Estilo Laranja */
-.modal-head {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 16px 20px;
-  border-bottom: none;
-  background: #ffca28;
-}
-.modal-head h3 {
-  margin: 0;
-  font-size: 1.2rem;
-  font-weight: 700;
-  color: #222;
-}
-
-/* Botões de fechar (X) - Estilo Laranja */
-.extras-close, .combo-close, .login-close {
-  background: #ffb300;
-  border: none;
-  border-radius: 50%;
-  width: 30px;
-  height: 30px;
-  font-size: 18px;
-  font-weight: 700;
-  cursor: pointer;
-  line-height: 30px;
-  text-align: center;
-  color: #222;
-  transition: all .2s;
-}
-.extras-close:hover, .combo-close:hover, .login-close:hover {
-  background: #ff7043;
-  color: #fff;
-  transform: scale(1.1);
-}
-
-/* Corpo do modal (lista de extras) */
-.extras-list, #combo-body {
-  padding: 10px 20px;
-  max-height: 60vh;
-  overflow-y: auto;
-}
-.extra-line {
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  padding: 12px 4px;
-  border-bottom:1px solid #eee;
-  cursor:pointer;
-  transition: background .2s;
-}
-.extra-line:hover {
-  background: #fffaf3;
-}
-.extra-line span {
-  font-size: 0.95rem;
-}
-.extra-line input {
-  width:20px;
-  height:20px;
-  cursor:pointer;
-  flex-shrink: 0;
-  margin-left: 10px;
-}
-.extra-line input[type="radio"] {
-  border-radius: 50%;
-}
-
-/* Rodapé (botões de confirmar/cancelar) */
-.modal-foot {
-  display: flex;
-  gap: 10px;
-  padding: 20px;
-  background: #f9f9f9;
-  border-top: 1px solid #eee;
-}
-
-/* Botões genéricos (Primário e Secundário) */
-.btn-primary, .btn-secondary, .btn-primario {
-  flex: 1;
-  border: none;
-  border-radius: 10px;
-  padding: 14px;
-  font-weight: 700;
-  font-size: 1rem;
-  cursor: pointer;
-  transition: all .2s ease;
-}
-
-/* Botão Verde (Confirmar) */
-.btn-primary, .btn-primario {
-  background: #4caf50;
-  color: #fff;
-  box-shadow: 0 2px 5px rgba(0,0,0,.1);
-}
-.btn-primary:hover, .btn-primario:hover {
-  background: #43a047;
-  transform: translateY(-2px);
-}
-
-/* Botão Cinza (Cancelar) */
-.btn-secondary {
-  background: transparent;
-  color: #555;
-  border: 1px solid #ddd;
-}
-.btn-secondary:hover {
-  background: #f1f1f1;
-  border-color: #ccc;
-}
-
-
-/* --- ESTILOS DE LOGIN (MODERNIZADO) --- */
-.login-box {
-  padding: 20px;
-  text-align: center;
-}
-.btn-google {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 12px;
-  width: 100%;
-  padding: 12px;
-  background: #fff;
-  color: #444;
-  border: 1px solid #ddd;
-  border-radius: 10px;
-  font-size: 1rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all .2s;
-}
-.btn-google:hover {
-  background: #f9f9f9;
-  border-color: #ccc;
-  transform: translateY(-2px);
-  box-shadow: 0 2px 5px rgba(0,0,0,.05);
-}
-.google-icon {
-  width: 24px;
-  height: 24px;
-  background: #fff;
-  border-radius: 50%;
-  padding: 2px;
-  object-fit: contain;
-}
-.login-safe {
-  font-size: 0.8rem;
-  color: #777;
-  margin-top: 10px;
-  display: block;
-}
-.divider {
-  display: flex;
-  align-items: center;
-  text-align: center;
-  color: #999;
-  font-size: 0.9rem;
-  margin: 24px 0;
-}
-.divider::before, .divider::after {
-  content: '';
-  flex: 1;
-  border-bottom: 1px solid #eee;
-}
-.divider:not(:empty)::before { margin-right: .5em; }
-.divider:not(:empty)::after { margin-left: .5em; }
-.login-form {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-.login-form input {
-  width: 100%;
-  padding: 14px;
-  border: 1px solid #ddd;
-  border-radius: 10px;
-  font-size: 1rem;
-  box-sizing: border-box;
-  transition: all .2s;
-}
-.login-form input:focus {
-  border-color: #ff7043;
-  outline: none;
-  box-shadow: 0 0 0 3px rgba(255, 112, 67, 0.2);
-}
-
-
-/* =========================================================
-   🚨 CSS V2.8: MODAL DE PROMOÇÕES (AJUSTE FINO)
-========================================================= */
-#promo-modal {
-  /* Usa a classe .modal, mas sobe o z-index para ficar acima dos outros */
-  z-index: 1150; 
-  background: rgba(0,0,0,0.85); /* Mais escuro */
-  backdrop-filter: blur(4px);
-  padding: 10px;
-  box-sizing: border-box;
-}
-
-.promo-content {
-  position: relative;
-  background: #fff;
-  border-radius: 16px;
-  box-shadow: 0 5px 25px rgba(0,0,0,0.3);
-  max-width: 400px; /* Otimizado para mobile */
-  width: 100%;
-  overflow: hidden;
-  
-  /* Animação de entrada (igual aos outros) */
-  transform: scale(0.95);
-  transition: transform 0.3s ease;
-}
-/* A classe .show é controlada pelo JS */
-#promo-modal.show .promo-content {
-  transform: scale(1);
-}
-
-/* 🚨 ATUALIZAÇÃO V2.8: 
-  A imagem agora tem altura automática e 'contain' 
-  para mostrar a imagem inteira, sem cortes.
-*/
-#promo-modal-img {
-  width: 100%;
-  height: auto; /* v2.8: Deixa a altura ser automática */
-  max-height: 60vh; /* v2.8: Limita a altura a 60% da tela */
-  object-fit: contain; /* v2.8: Garante que a imagem apareça inteira */
-  display: block;
-  border-bottom: 2px solid #ffca28;
-  background-color: #f0f0f0; /* v2.8: Fundo caso a imagem seja transparente */
-}
-
-.promo-info {
-  padding: 20px;
-  text-align: center;
-}
-#promo-modal-title {
-  font-size: 1.25rem;
-  font-weight: 700;
-  color: #333;
-  margin: 0 0 10px;
-}
-#promo-modal-price {
-  font-size: 1.1rem;
-  color: #555;
-  margin-bottom: 20px;
-}
-#promo-modal-price .old-price {
-  text-decoration: line-through;
-  color: #999;
-  font-size: 0.95rem;
-  margin-right: 8px;
-}
-#promo-modal-price b {
-  font-size: 1.3rem;
-  color: #4caf50;
-}
-/* Botão "Adicionar" usa o estilo .btn-primary que já existe */
-#promo-modal-add {
-  width: 100%;
-  box-sizing: border-box;
-}
-
-/* Botões de Navegação (‹ ›) e Fechar (X) */
-.promo-nav, .promo-close {
-  position: absolute;
-  top: 50%;
-  transform: translateY(-50%);
-  background: rgba(0,0,0,0.6);
-  color: #fff;
-  border: none;
-  border-radius: 50%;
-  width: 40px;
-  height: 40px;
-  font-size: 24px;
-  font-weight: 700;
-  cursor: pointer;
-  z-index: 10;
-  transition: all 0.2s ease;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-.promo-nav:hover, .promo-close:hover {
-  background: rgba(0,0,0,0.9);
-  transform: translateY(-50%) scale(1.1);
-}
-.promo-nav.prev {
-  left: 10px;
-}
-.promo-nav.next {
-  right: 10px;
-}
-/* Posição do 'X' (canto superior) */
-.promo-close {
-  top: 10px;
-  right: 10px;
-  width: 30px;
-  height: 30px;
-  font-size: 18px;
-  background: rgba(0,0,0,0.5);
-  transform: none; /* Reseta o transform */
-}
-.promo-close:hover {
-  background: #d32f2f;
-  transform: scale(1.1);
-}
-
-/* 🚨 ATUALIZAÇÃO V2.8: 
-  Ajusta a posição das setas de navegação,
-  pois a altura da imagem agora é variável.
-*/
-@media (max-width: 480px) {
-  .promo-nav {
-    /* 30% para baixo, em vez de um valor fixo */
-    top: 30%; 
-  }
-}
-
-/* =========================================================
-   BANNER DE COOKIES (Estilos v2.5 OK)
-========================================================= */
-#cookie-banner {
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  background: rgba(34, 34, 34, 0.95); 
-  color: #fff;
-  padding: 16px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  z-index: 2000;
-  transform: translateY(100%);
-  transition: transform 0.5s ease;
-}
-
-#cookie-banner.show {
-  transform: translateY(0);
-}
-
-#cookie-banner p {
-  margin: 0;
-  font-size: 0.9rem;
-  line-height: 1.4;
-  margin-right: 16px;
-}
-
-#cookie-banner a {
-  color: #ffca28; 
-  font-weight: 600;
-  text-decoration: underline;
-}
-
-#cookie-banner button {
-  background: #4caf50; 
-  color: #fff;
-  border: none;
-  border-radius: 8px;
-  padding: 10px 16px;
-  font-weight: 700;
-  cursor: pointer;
-  transition: background .2s;
-  flex-shrink: 0;
-}
-#cookie-banner button:hover {
-  background: #43a047;
-}
-
-/* Ajuste responsivo para o banner de cookies */
-@media (max-width: 600px) {
-  #cookie-banner {
-    flex-direction: column;
-    text-align: center;
-    gap: 12px;
-  }
-  #cookie-banner p {
-    margin-right: 0;
-  }
-  #cookie-banner button {
-    width: 100%;
-    padding: 12px;
-  }
-}
-/* =========================================================
-   ✅ Correção Definitiva do Espaço Fantasma (v2.8.4)
-   - Remove o espaço visual extra entre header e status-banner
-   - Mantém o banner 100% legível, sem sobreposição
-========================================================= */
-.header {
-  padding-bottom: 4px !important; /* reduz a folga inferior */
-}
-
-.status-banner {
-  margin-top: 0 !important; /* elimina o deslocamento vertical */
-}
-/* =========================================================
-   ✨ v2.8.5 — Harmonização visual do bloco de Promoções
-   - Reduz espaços verticais e valoriza o cronômetro
-========================================================= */
-.promo-section h2 {
-  margin-bottom: 4px !important;
-}
-
-.promo-sub {
-  margin-bottom: 6px !important;
-  font-size: 1rem; /* ligeiramente maior pra dar presença */
-}
-
-.countdown-ticker {
-  margin: 6px 0 8px !important;
-  transform: scale(1.05); /* leve destaque visual */
-}
-
-.carousel {
-  margin-top: 6px !important;
-}
-/* =========================================================
-   ⚡ v2.8.6 — Compactação Real do Bloco de Promoções
-   - Reduz altura visual do bloco e aproxima o carrossel
-========================================================= */
-.promo-section {
-  padding: 12px 10px !important; /* reduz padding geral */
-}
-
-.promo-section h2 {
-  margin-top: 0 !important;
-  margin-bottom: 2px !important;
-  font-size: 1.25rem !important;
-}
-
-.promo-sub {
-  margin-bottom: 4px !important;
-  font-size: 0.95rem !important;
-  color: #555;
-}
-
-.countdown-ticker {
-  margin: 4px 0 6px !important;
-  padding: 5px 10px !important;
-  font-size: 0.95rem !important;
-}
-
-.carousel {
-  margin-top: 4px !important;
-}
-/* =========================================================
-   ✅ Correção Definitiva do Corte do Banner de Status (v2.8.7)
-   - Padroniza altura dos banners "Aberto" e "Fechado"
-   - Centraliza verticalmente o texto (incluindo emojis 🟢🔴)
-   - Elimina qualquer corte superior/inferior
-========================================================= */
-
-.status-banner {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  min-height: 36px !important; /* força altura mínima padrão */
-  line-height: 1.4 !important; /* garante altura ideal pro emoji */
-  padding: 6px 8px !important; /* folga uniforme em todos os lados */
-  box-sizing: border-box;
-  font-weight: 600;
-  text-align: center;
-  color: #fff;
-}
-
-.status-banner.open {
-  background: #4caf50;
-}
-
-.status-banner.closed {
-  background: #d32f2f;
-}
-
-/* Mantém coerência com o banner preto de horário */
-.hours-banner {
-  background: #000;
-  color: #fff;
-  text-align: center;
-  padding: 6px;
-  font-size: 0.9rem;
-}
-/* =========================================================
-   🆕 v2.9 — Painel "Meus Pedidos" + Repetir Pedido
-   - Integra visualmente ao layout v2.8
-   - Mantém bordas arredondadas e tema amarelo
-========================================================= */
-
-.orders-panel {
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  max-height: 80vh;
-  background: #fff;
-  border-radius: 20px 20px 0 0;
-  box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.25);
-  transform: translateY(100%);
-  transition: transform 0.4s ease;
-  overflow-y: auto;
-  z-index: 1150;
-}
-.orders-panel.active {
-  transform: translateY(0);
-}
-
-.orders-head {
-  padding: 16px 20px;
-  font-weight: 700;
-  font-size: 1.2rem;
-  background: #ffca28;
-  color: #222;
-  border-radius: 20px 20px 0 0;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-.orders-head .orders-close {
-  background: #ffb300;
-  border: none;
-  border-radius: 50%;
-  width: 30px;
-  height: 30px;
-  font-size: 18px;
-  cursor: pointer;
-  font-weight: 700;
-  color: #222;
-  transition: 0.2s;
-}
-.orders-head .orders-close:hover {
-  background: #ff7043;
-  color: #fff;
-}
-
-.orders-content {
-  padding: 15px;
-}
-.empty-orders {
-  text-align: center;
-  color: #666;
-  font-size: 0.95rem;
-  padding: 20px;
-}
-
-/* Itens individuais de pedido */
-.order-item {
-  border-bottom: 1px solid #eee;
-  padding: 12px 8px;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  transition: background 0.2s ease;
-}
-.order-item:hover {
-  background: #fffef5;
-}
-
-/* Cabeçalho do pedido */
-.order-item-head {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-}
-.order-thumb {
-  width: 56px;
-  height: 56px;
-  border-radius: 10px;
-  overflow: hidden;
-  flex-shrink: 0;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.15);
-}
-.order-thumb img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-.order-info {
-  flex: 1;
-}
-.order-info h4 {
-  margin: 0;
-  font-size: 0.95rem;
-  font-weight: 700;
-  color: #333;
-}
-.order-info p {
-  margin: 2px 0 0;
-  color: #555;
-  font-size: 0.85rem;
-  line-height: 1.3;
-}
-.order-info .order-total {
-  font-weight: 700;
-  color: #2e7d32;
-  font-size: 0.9rem;
-}
-
-/* Botão "Repetir Pedido" */
-.repeat-order {
-  background: linear-gradient(135deg, #4caf50, #43a047);
-  color: #fff;
-  border: none;
-  border-radius: 10px;
-  font-weight: 700;
-  font-size: 0.9rem;
-  cursor: pointer;
-  padding: 8px 14px;
-  flex-shrink: 0;
-  transition: 0.25s;
-}
-.repeat-order:hover {
-  background: linear-gradient(135deg, #43a047, #388e3c);
-  transform: scale(1.05);
-}
-
-/* Responsivo */
-@media (max-width: 600px) {
-  .order-item-head {
-    flex-direction: column;
-    align-items: flex-start;
-  }
-  .repeat-order {
-    width: 100%;
-    margin-top: 6px;
-  }
-}
-/* =========================================================
-   📦 DFL v2.9 — Repetir Pedido + Histórico Visual
-   Complemento CSS (adicionar ao final do arquivo)
-========================================================= */
-
-.orders-panel {
-  position: fixed;
-  top: 0; right: 0;
-  width: 420px;
-  height: 100vh;
-  background: #fff;
-  box-shadow: -2px 0 10px rgba(0,0,0,0.15);
-  transform: translateX(100%);
-  transition: transform 0.3s ease;
-  z-index: 9999;
-  display: flex;
-  flex-direction: column;
-}
-
-.orders-panel.active {
-  transform: translateX(0);
-}
-
-.orders-head {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 14px;
-  background: #ffb300;
-  color: #fff;
-  font-weight: 600;
-  font-size: 1.1rem;
-}
-
-.orders-head button {
-  background: transparent;
-  color: #fff;
-  border: none;
-  font-size: 1.2rem;
-  cursor: pointer;
-}
-
-.orders-content {
-  flex: 1;
-  overflow-y: auto;
-  padding: 12px 16px;
-  background: #fafafa;
-}
-
-.order-item {
-  background: #fff;
-  border-radius: 10px;
-  box-shadow: 0 2px 5px rgba(0,0,0,0.08);
-  padding: 10px 12px;
-  margin-bottom: 12px;
-  transition: all 0.2s ease;
-}
-
-.order-item:hover {
-  transform: scale(1.01);
-  box-shadow: 0 3px 8px rgba(0,0,0,0.12);
-}
-
-.order-header {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.order-thumb {
-  width: 70px;
-  height: 70px;
-  border-radius: 8px;
-  object-fit: cover;
-}
-
-.order-info h4 {
-  margin: 0;
-  font-size: 0.95rem;
-}
-
-.order-body {
-  font-size: 0.88rem;
-  color: #444;
-  margin-top: 6px;
-}
-
-.order-actions {
-  display: flex;
-  justify-content: flex-end;
-  margin-top: 10px;
-}
-
-.btn-repeat {
-  background: #4caf50;
-  color: #fff;
-  border: none;
-  border-radius: 6px;
-  padding: 8px 12px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: background 0.2s;
-}
-
-.btn-repeat:hover {
-  background: #43a047;
-}
-
-.empty-orders {
-  text-align: center;
-  color: #777;
-  font-style: italic;
-  margin-top: 20px;
-}
-
-/* 🧩 Scrollbar personalizada */
-.orders-content::-webkit-scrollbar {
-  width: 8px;
-}
-.orders-content::-webkit-scrollbar-thumb {
-  background: rgba(0,0,0,0.2);
-  border-radius: 10px;
-}
-.orders-content::-webkit-scrollbar-thumb:hover {
-  background: rgba(0,0,0,0.3);
-}
-
-/* 🪶 Botão flutuante “Meus Pedidos” */
-#orders-fab {
-  position: fixed;
-  bottom: 80px;
-  right: 22px;
-  background: #ffb300;
-  color: #fff;
-  border: none;
-  border-radius: 30px;
-  padding: 14px 20px;
-  font-weight: 700;
-  box-shadow: 0 3px 8px rgba(0,0,0,0.25);
-  cursor: pointer;
-  opacity: 0;
-  transform: translateY(20px);
-  transition: all 0.3s ease;
-  z-index: 9998;
-}
-
-#orders-fab.show {
-  opacity: 1;
-  transform: translateY(0);
-}
-
-#orders-fab:hover {
-  background: #ffa000;
-}
-
-/* =========================================================
-   Fim do bloco CSS v2.9
-========================================================= */
