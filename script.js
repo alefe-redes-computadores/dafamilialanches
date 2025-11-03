@@ -1,8 +1,8 @@
 /* =========================================================
-   🍔 DFL v2.10 — REPETIR PEDIDO (LÓGICA REAL)
-   - Altera 'fecharPedido' para salvar 'itensObj' com preços.
-   - Implementa 'repetirPedido' para ler 'itensObj' e recriar o carrinho.
-   - Mantém estabilidade da v2.9.
+   🍔 DFL v2.11 — HOTFIX CAMINHO DA IMAGEM
+   - Corrige o caminho do placeholder da miniatura do pedido
+   - (img/padrao.jpg -> imagens/padrao.jpg)
+   - Mantém 100% da lógica funcional da v2.10.
 ========================================================= */
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -733,8 +733,6 @@ document.addEventListener("DOMContentLoaded", () => {
       userId: currentUser.uid,
       nome: currentUser.displayName || currentUser.email.split("@")[0],
       
-      // 🚨 ATUALIZADO V2.10: Adiciona 'itensObj' para a função "Repetir Pedido"
-      // Mantém 'itens' (string) para compatibilidade com relatórios (admin)
       itens: cart.map((i) => `${i.nome} x${i.qtd}`),
       itensObj: cart.map(i => ({ nome: i.nome, preco: i.preco, qtd: i.qtd })),
       
@@ -745,7 +743,9 @@ document.addEventListener("DOMContentLoaded", () => {
       total: Number(total.toFixed(2)),
       endereco: addr,
       data: new Date().toISOString(),
-      thumb: 'img/padrao.jpg' // Placeholder (v2.9)
+      
+      // 🚨 HOTFIX V2.11: Corrigido o caminho da imagem
+      thumb: 'imagens/padrao.jpg' 
     };
 
     db.collection("Pedidos")
@@ -820,7 +820,8 @@ document.addEventListener("DOMContentLoaded", () => {
     if (!el.pedidosLista) return;
     
     el.pedidosLista.innerHTML = pedidos.map(p => {
-      const thumbUrl = p.thumb || 'img/padrao.jpg';
+      // 🚨 HOTFIX V2.11: Corrigido o caminho da imagem
+      const thumbUrl = p.thumb || 'imagens/padrao.jpg';
       const dataFormatada = p.data
           ? new Date(p.data?.seconds * 1000 || p.data).toLocaleString("pt-BR", {
               day: "2-digit", month: "2-digit", year: "numeric",
@@ -861,9 +862,8 @@ document.addEventListener("DOMContentLoaded", () => {
       
       await repetirPedido(idPedido);
       
-      // Reativa o botão (opcional, pois o painel fechará)
-      // e.target.disabled = false;
-      // e.target.textContent = "🔁 Repetir Pedido";
+      // O botão será reativado da próxima vez que o painel for aberto
+      // (a menos que prefira reativá-lo manualmente aqui)
     }
   });
 
@@ -1239,8 +1239,8 @@ document.addEventListener("DOMContentLoaded", () => {
     console.warn("⚠️ Erro interceptado:", e?.message);
   });
 
-  /* 🚨 ATUALIZADO V2.10: Mensagem de console */
-  console.log("%c🍔 DFL v2.10 — Repetir Pedido (Lógica Real) OK — Estável",
+  /* 🚨 ATUALIZADO V2.11: Mensagem de console */
+  console.log("%c🍔 DFL v2.11 — Hotfix Caminho Imagem OK — Lógica v2.10 Estável",
               "background:#4caf50;color:#fff;padding:8px 12px;border-radius:8px;font-weight:700;");
 
 }); // Fim do DOMContentLoaded
