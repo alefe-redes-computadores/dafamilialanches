@@ -709,3 +709,39 @@ section h2{font-size:1.3rem;text-align:center;margin-bottom:15px;color:#ff7043}
 .carousel {
   margin-top: 4px !important;
 }
+/* =========================================================
+   ✅ Correção Definitiva do Corte do Banner de Status (v2.8.7)
+   - Padroniza altura dos banners "Aberto" e "Fechado"
+   - Centraliza verticalmente o texto (incluindo emojis 🟢🔴)
+   - Elimina qualquer corte superior/inferior
+========================================================= */
+
+.status-banner {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 36px !important; /* força altura mínima padrão */
+  line-height: 1.4 !important; /* garante altura ideal pro emoji */
+  padding: 6px 8px !important; /* folga uniforme em todos os lados */
+  box-sizing: border-box;
+  font-weight: 600;
+  text-align: center;
+  color: #fff;
+}
+
+.status-banner.open {
+  background: #4caf50;
+}
+
+.status-banner.closed {
+  background: #d32f2f;
+}
+
+/* Mantém coerência com o banner preto de horário */
+.hours-banner {
+  background: #000;
+  color: #fff;
+  text-align: center;
+  padding: 6px;
+  font-size: 0.9rem;
+}
