@@ -1023,3 +1023,142 @@ section h2{font-size:1.3rem;text-align:center;margin-bottom:15px;color:#ff7043}
     border-bottom: 1px solid #ddd;
 }
 
+/* =========================================================
+   🎁 DFL v3.3.0 - ESTILIZAÇÃO DO PAINEL DE RECOMPENSAS
+   - Estilo para barra de progresso, cards e popup de conquista.
+========================================================= */
+
+/* 1. ESTILO DO BOTÃO FLUTUANTE (reforço) */
+.recompensas-btn {
+    /* Base do botão flutuante já existe, adicionamos transição */
+    transition: background 0.3s ease-in-out, transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    background: #ff7043; /* Laranja DFL */
+    border: none;
+    color: white;
+    padding: 10px 15px;
+    border-radius: 8px 8px 0 0;
+    font-weight: 700;
+    box-shadow: 0 -2px 6px rgba(0, 0, 0, 0.15);
+    /* Garante que ele fique acima do "Meus Pedidos" */
+    z-index: 1000; 
+}
+
+.recompensas-btn:hover {
+    background: #e53935; /* Vermelho DFL no hover */
+    transform: translateY(-2px);
+}
+
+/* 2. ESTILO DO PAINEL LATERAL (Overlay) */
+.recompensas-panel {
+    /* Garante o z-index alto para a UX */
+    z-index: 9999; 
+    transition: right 0.3s ease-in-out;
+    background-color: #fcfcfc;
+    box-shadow: -4px 0 15px rgba(0, 0, 0, 0.15);
+}
+
+/* 3. ESTILIZAÇÃO DA BARRA DE PROGRESSO */
+.progress-container {
+    /* Contêiner da barra (bloco de progresso) */
+    background: #fff;
+    border: 1px solid #ffb300; /* Borda amarela/laranja */
+    border-radius: 12px;
+    padding: 15px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+}
+
+.progresso-bar-bg {
+    /* Fundo estático da barra */
+    background: #eee;
+    border-radius: 8px;
+    height: 15px;
+}
+
+#progresso-bar {
+    /* Barra de progresso (dinâmica) */
+    transition: width 0.5s ease-out; 
+    /* Gradient Padrão (Amarelo para Laranja) - para progresso normal */
+    background: linear-gradient(90deg, #ffb300, #ff7043); 
+    border-radius: 8px;
+    height: 100%;
+}
+
+/* Estilo para quando a meta for atingida (Verde) */
+.progress-container[data-status="complete"] #progresso-bar {
+    background: linear-gradient(90deg, #4caf50, #43a047); /* Verde Sucesso */
+}
+
+#contador-valor {
+    color: #e53935; /* Destaque em vermelho DFL */
+    font-size: 1.2rem;
+}
+
+#progresso-mensagem {
+    font-style: italic;
+    color: #777;
+}
+
+
+/* 4. ESTILIZAÇÃO DOS CARDS DE RECOMPENSA */
+.recompensas-body h4 {
+    margin-top: 20px;
+    margin-bottom: 15px;
+    color: #333;
+    border-bottom: 2px solid #ff7043; /* Sublinhado DFL */
+    padding-bottom: 5px;
+}
+
+.recompensa-card {
+    transition: transform 0.2s, box-shadow 0.2s, opacity 0.3s;
+    background: #ffffff;
+    border: 1px solid #f0f0f0;
+    padding: 15px;
+    border-radius: 10px;
+}
+
+.recompensa-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
+}
+
+.recompensa-card img {
+    border: 3px solid #ff7043; /* Borda da imagem */
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+}
+
+/* Botão de Aplicar Cupom */
+.recompensa-aplicar-btn {
+    background: #4caf50 !important; /* Verde de Sucesso */
+    color: white !important;
+    font-weight: 700 !important;
+    transition: background 0.2s;
+}
+
+.recompensa-aplicar-btn:hover {
+    background: #43a047 !important; /* Verde mais escuro no hover */
+}
+
+/* Estilo para cupom JÁ UTILIZADO */
+.recompensa-card button[disabled] {
+    background: #ccc !important;
+    cursor: not-allowed !important;
+    opacity: 0.8;
+}
+
+/* 5. ESTILO DO POPUP DE CONQUISTA (para o #conquista-popup criado no JS) */
+#conquista-popup {
+    /* O estilo principal está no JS, mas forçamos a fonte e sombra aqui */
+    font-family: 'Arial', sans-serif; 
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+    font-size: 1.1rem;
+}
+
+/* 6. RESPONSIVIDADE (se necessário, para painéis laterais menores) */
+@media (max-width: 600px) {
+    .recompensas-panel {
+        width: 100%; 
+        right: -100%;
+        max-width: none;
+    }
+}
+
