@@ -143,6 +143,82 @@ section h2{font-size:1.3rem;text-align:center;margin-bottom:15px;color:#ff7043}
 .cart-summary p{display:flex;justify-content:space-between;margin:5px 0;font-size:.9rem;color:#444}
 .cart-summary p.total{font-size:1.1rem;font-weight:700;color:#2e7d32}
 
+/* =================================
+   ✨ v3.0: ESTILOS DO CUPOM 
+   ================================= */
+.coupon-form {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+#coupon-input {
+  flex: 1; /* Ocupa o espaço disponível */
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: .95rem;
+  box-sizing: border-box; /* Garante que o padding não quebre o layout */
+}
+
+#coupon-input:focus {
+  border-color: #ffb300;
+  outline: none;
+  box-shadow: 0 0 4px rgba(255,179,0,.3);
+}
+
+/* Sobrescrevendo o .btn-primary que foi colocado no HTML.
+  Este botão deve ser laranja (como o .cart-row button), 
+  e não deve esticar (flex: none).
+*/
+#coupon-apply-btn {
+  flex: 0 0 auto; /* Impede que o botão estique */
+  background: #ffb300;
+  color: #000;
+  font-weight: 700;
+  box-shadow: none;
+}
+#coupon-apply-btn:hover {
+  background: #ffca28;
+  transform: scale(1.03); /* Mantém o hover do .cart-row button */
+}
+
+.coupon-message {
+  font-size: 0.9rem;
+  text-align: center;
+  margin: -4px 0 10px; /* Margem negativa para ficar mais perto */
+  font-weight: 600;
+}
+
+.coupon-message.success {
+  color: #4caf50; /* Verde sucesso */
+}
+
+.coupon-message.error {
+  color: #d32f2f; /* Vermelho erro */
+}
+
+/* Estilo para as linhas de resumo (Subtotal, Entrega, Desconto)
+  que são injetadas pelo script.js
+*/
+.summary-row {
+  display: flex;
+  justify-content: space-between;
+  margin: 5px 0;
+  font-size: .9rem;
+  color: #444;
+}
+
+/* Estilo específico para a linha de desconto */
+#coupon-discount-row {
+  font-weight: 700;
+  color: #4caf50; /* Verde, para destacar o desconto */
+}
+/* =================================
+   FIM DOS ESTILOS V3.0
+   ================================= */
+
+
 /* 🚨 REMOVIDO V2.9: 
   - Regras #orders-fab e .orders-panel antigas
 */
