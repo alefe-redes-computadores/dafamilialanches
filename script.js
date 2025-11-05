@@ -1,8 +1,7 @@
 /* =========================================================
-   🚀 DFL v3.5.3 — ESTABILIDADE CRÍTICA DO SISTEMA
-   - CORRIGE 1: Bug de Login/onAuthStateChanged (Garante que a sessão do usuário seja lida corretamente).
-   - CORRIGE 2: Contador de promoções ausente.
-   - CORRIGE 3: Bugs visuais do Painel de Recompensas ("1 de 1" e "Aguardando o carregamento").
+   🚀 DFL v3.6.0 — OTIMIZAÇÃO DE PERFORMANCE (LAZY LOAD DO FIREBASE)
+   - Fase 2 do Plano de Performance: Implementa a inicialização tardia do Firebase SDK.
+   - Garante que a aplicação se torne interativa mais rapidamente.
 ========================================================= */
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -10,6 +9,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const sound = new Audio("click.wav");
   let cart = [];
   let currentUser = null;
+  let isFirebaseInitialized = false; // NOVO: Flag de inicialização do Firebase
 
   const money = (n) => `R$ ${Number(n || 0).toFixed(2).replace(".", ",")}`;
   const safe = (fn) => (...a) => { try { fn(...a); } catch (e) { console.error(e); } };
@@ -292,7 +292,7 @@ document.addEventListener("DOMContentLoaded", () => {
     enhanceMiniCartUI();
   };
 
-  /* ------------------ 🔥 FIREBASE (MANTIDO) ------------------ */
+  /* ------------------ 🔥 FIREBASE (LAZY LOAD - V3.6.0) ------------------ */
   const firebaseConfig = {
     apiKey: "AIzaSyATQBcbYuzKpKlSwNlbpRiAM1XyHqhGeak",
     authDomain: "da-familia-lanches.firebaseapp.com",
@@ -302,48 +302,81 @@ document.addEventListener("DOMContentLoaded", () => {
     appId: "1:106857147317:web:769c98aed26bb8fc9e87fc",
   };
   
+  // Variáveis globais para os módulos do Firebase
   let auth, db; 
+  
+  function inicializarFirebase() {
+      if (isFirebaseInitialized) return;
 
-  try {
-    if (!window.firebase) {
-      throw new Error("Biblioteca principal do Firebase (app) não carregou.");
-    }
-    if (!firebase.apps.length) {
-      firebase.initializeApp(firebaseConfig);
-    }
-    if (!firebase.auth) {
-      throw new Error("Módulo de Autenticação (auth) não carregou.");
-    }
-    auth = firebase.auth();
-    if (!firebase.firestore) {
-      throw new Error("Módulo de Banco de Dados (firestore) não carregou.");
-    }
-    db = firebase.firestore();
+      try {
+          if (!window.firebase) {
+              throw new Error("Biblioteca principal do Firebase (app) não carregou.");
+          }
+          if (!firebase.apps.length) {
+              firebase.initializeApp(firebaseConfig);
+          }
+          
+          // Inicializa os serviços
+          auth = firebase.auth();
+          db = firebase.firestore();
 
-  } catch (error) {
-    console.error("ERRO FATAL AO INICIAR FIREBASE:", error);
-    const elBody = document.querySelector("body");
-    if (elBody) {
-       elBody.innerHTML = `<div style="padding:20px;text-align:center;font-size:1.2rem;color:red;font-family:sans-serif;margin-top:50px;">
-        <b>Erro Crítico</b><br>Não foi possível conectar aos nossos serviços.
-        <br><small>Verifique sua conexão com a internet e tente recarregar a página.</small>
-        <br><br><small style="color:#666">Detalhe: ${error.message}</small></div>`;
-    }
-    return; // ABORTA O RESTO DO SCRIPT.JS
+          isFirebaseInitialized = true;
+          
+          // NOVO: Chama o listener de autenticação APÓS a inicialização
+          setupAuthListener(); 
+
+      } catch (error) {
+          console.error("ERRO FATAL AO INICIAR FIREBASE:", error);
+          const elBody = document.querySelector("body");
+          if (elBody) {
+             elBody.innerHTML = `<div style="padding:20px;text-align:center;font-size:1.2rem;color:red;font-family:sans-serif;margin-top:50px;">
+              <b>Erro Crítico</b><br>Não foi possível conectar aos nossos serviços.
+              <br><small>Verifique sua conexão com a internet e tente recarregar a página.</small>
+              <br><br><small style="color:#666">Detalhe: ${error.message}</small></div>`;
+          }
+          // Não aborta o resto do script, mas as funcionalidades dependentes falharão.
+      }
   }
 
-  /* ------------------ ⚙️ LOGIN (CORRIGIDO V3.5.3) ------------------ */
-  el.userBtn?.addEventListener("click", () => Overlays.open(el.loginModal));
-  document.querySelectorAll("#login-modal .login-close").forEach(btn =>
-    btn.addEventListener("click", () => Overlays.closeAll())
-  );
+  /* ------------------ SETUP LISTENERS E AUTH (V3.6.0) ------------------ */
+  function setupAuthListener() {
+    auth.onAuthStateChanged(user => {
+      currentUser = user; 
+      
+      if (user) {
+        el.userBtn.textContent = `Olá, ${user.displayName?.split(" ")[0] || user.email.split("@")[0]}`;
+        if (el.pedidosContainer) el.pedidosContainer.style.display = 'block';
+        if (el.recompensasContainer) el.recompensasContainer.style.display = 'block';
+        
+      } else {
+        el.userBtn.textContent = "Entrar / Cadastrar";
+        if (el.pedidosContainer) el.pedidosContainer.style.display = 'none';
+        if (el.recompensasContainer) el.recompensasContainer.style.display = 'none';
+      }
 
+      if (user && isAdmin(user)) {
+        if (el.reportsBtn) {
+          createAdminFab();
+        }
+      } else {
+        if (el.reportsBtn) el.reportsBtn.style.display = "none";
+        document.getElementById("admin-dashboard")?.remove();
+        // Overlays.closeAll(); // Removido para evitar fechar modais no carregamento
+      }
+    });
+  }
+
+  // A função setupAuthListener() é chamada APÓS a inicialização do Firebase.
+  // Isso impede que o script trave na linha auth.onAuthStateChanged(user => {...}) antes do Firebase estar carregado.
+
+
+  /* ------------------ ⚙️ LOGIN (CORRIGIDO V3.5.3) ------------------ */
   const handleLoginSuccess = (user) => {
     // Garante que currentUser seja definido e a UI atualizada imediatamente
     currentUser = user;
     popupAdd("Login realizado com sucesso!");
     Overlays.closeAll();
-    // A chamada a onAuthStateChanged logo abaixo garantirá a atualização final da UI
+    // O setupAuthListener (chamado em inicializarFirebase) garante a atualização final
   };
 
   const handleLoginError = (err) => {
@@ -365,6 +398,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
   el.loginForm?.addEventListener("submit", (e) => {
     e.preventDefault();
+    inicializarFirebase(); // Garante que o Firebase esteja pronto
+    if (!isFirebaseInitialized) return alert("Erro ao conectar ao serviço de login.");
+    
     const email = document.getElementById("login-email")?.value?.trim();
     const senha = document.getElementById("login-senha")?.value?.trim();
     if (!email || !senha) return alert("Preencha e-mail e senha.");
@@ -375,11 +411,30 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   el.googleBtn?.addEventListener("click", () => {
+    inicializarFirebase(); // Garante que o Firebase esteja pronto
+    if (!isFirebaseInitialized) return alert("Erro ao conectar ao serviço de login.");
+    
     const provider = new firebase.auth.GoogleAuthProvider();
     auth.signInWithPopup(provider)
       .then((res) => handleLoginSuccess(res.user))
       .catch((err) => alert("Erro: ".concat(err.message)));
   });
+  
+  // 🚨 OTIMIZAÇÃO: Adiciona listener para inicializar o Firebase no primeiro clique.
+  // Isto substitui o bloco 'el.userBtn?.addEventListener("click", () => Overlays.open(el.loginModal));'
+  el.userBtn?.addEventListener("click", () => {
+      inicializarFirebase();
+      Overlays.open(el.loginModal);
+  });
+  
+  // Inicializa o Firebase no primeiro clique do carrinho, se o usuário não estiver logado
+  el.cartIcon?.addEventListener("click", () => {
+      if (!currentUser) inicializarFirebase();
+      renderMiniCart();
+      Overlays.open(el.miniCart);
+  });
+
+  // ------------------ (CONTINUAÇÃO DO CÓDIGO DFL) ------------------
 
   /* ------------------ ➕ Adicionais (MANTIDO) ------------------ */
   const adicionais = [
@@ -538,13 +593,7 @@ document.addEventListener("DOMContentLoaded", () => {
   );
 
   /* ------------------ 🛒 ABRIR CARRINHO (MANTIDO) ------------------ */
-  el.cartIcon?.addEventListener("click", () => {
-    renderMiniCart();
-    Overlays.open(el.miniCart);
-  });
-  document.querySelectorAll("#mini-cart .extras-close").forEach((b) =>
-    b.addEventListener("click", () => Overlays.closeAll())
-  );
+  // Já está acima, unificado com a inicialização do Firebase
 
 
 /* ------------------ ⚙️ CONFIGURAÇÕES V3.0 (MANTIDO) ------------------ */
@@ -563,6 +612,7 @@ document.addEventListener("DOMContentLoaded", () => {
   let configuracoesRecompensa = null; // Cache global
   
   async function carregarConfiguracoesDeRecompensas() {
+      if (!isFirebaseInitialized) return []; // Aborta se Firebase não estiver pronto
       if (configuracoesRecompensa) return configuracoesRecompensa; // Usa o cache
       
       try {
@@ -608,6 +658,8 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   async function validarCupomFirestore(codigo, subtotal) {
+    if (!isFirebaseInitialized) return { valido:false, discount:0, freeShipping:false, label:"", mensagem:"Erro de conexão. Tente recarregar." };
+    
     const code = (codigo || "").toUpperCase();
     const invalido = { valido:false, discount:0, freeShipping:false, label:"", mensagem:"" };
     if (!code) return invalido;
@@ -1024,7 +1076,7 @@ document.addEventListener("DOMContentLoaded", () => {
       // 2. Marca cupom personalizado como USADO, se houver
       if (cupomInfo.isPersonalizado && couponApplied) {
           const cupomUserRef = db.collection("CuponsUsuarios").doc(userId);
-          batch.update(cupomUserRef, {
+          batch.update(cupumUserRef, {
               usado: true,
               dataUso: firebase.firestore.FieldValue.serverTimestamp(),
               pedidoId: 'PENDENTE' 
@@ -1154,6 +1206,7 @@ document.addEventListener("DOMContentLoaded", () => {
       Overlays.open(el.loginModal); 
       return;
     }
+    inicializarFirebase(); // Garante o Firebase se for o primeiro acesso
     Overlays.open(el.pedidosPanel);
     carregarPedidos(currentUser.uid); 
   });
@@ -1291,6 +1344,10 @@ document.addEventListener("DOMContentLoaded", () => {
 ========================================================= */
 async function carregarRecompensas(userId) {
     
+    // 🚨 NOVO: Garante que o Firebase esteja inicializado antes de tudo
+    inicializarFirebase();
+    if (!isFirebaseInitialized) return;
+
     const contadorValor = document.getElementById('contador-valor');
     const progressoBar = document.getElementById('progresso-bar');
     const progressoMsg = document.getElementById('progresso-mensagem');
@@ -1302,7 +1359,7 @@ async function carregarRecompensas(userId) {
     progressoBar.style.width = '0%';
     progressoMsg.textContent = 'Carregando metas...';
     // 🚨 CORREÇÃO FINAL: Limpa a lista de recompensas (seções) aqui para remover "Aguardando o carregamento"
-    el.recompensasLista.innerHTML = '<p style="text-align:center;color:#999;padding:20px;">Aguardando configurações...</p>';
+    el.recompensasLista.innerHTML = ''; 
     if(el.historicoLista) el.historicoLista.innerHTML = '';
     
     // 2. Carrega as metas primeiro.
@@ -1333,7 +1390,7 @@ async function carregarRecompensas(userId) {
         
         if (recompensaAtual && recompensaAtual.tipo === 'cupom') {
             const cupomSnap = await db.collection('CuponsUsuarios').doc(userId).get();
-            cupomStatus = cupomSnap.exists ? cupumSnap.data() : null;
+            cupomStatus = cupumSnap.exists ? cupumSnap.data() : null;
         }
 
         // Encontra a próxima meta que o cliente AINDA NÃO ATINGIU
@@ -1547,6 +1604,8 @@ async function carregarHistoricoRecompensas(userId) {
       Overlays.open(el.loginModal); 
       return;
     }
+    // 🚨 OTIMIZAÇÃO: Garante o Firebase se for o primeiro acesso
+    inicializarFirebase(); 
     Overlays.open(el.recompensasPanel);
     
     // 🚨 NOVO: Chama a função para carregar e monitorar o contador
@@ -1850,7 +1909,7 @@ async function carregarHistoricoRecompensas(userId) {
     } else {
       if (el.reportsBtn) el.reportsBtn.style.display = "none";
       document.getElementById("admin-dashboard")?.remove();
-      Overlays.closeAll();
+      // Overlays.closeAll(); // Removido para evitar fechar modais no carregamento
     }
   });
 
