@@ -969,3 +969,57 @@ section h2{font-size:1.3rem;text-align:center;margin-bottom:15px;color:#ff7043}
     padding: 12px;
   }
 }
+/* --- ESTILOS V3.2: CONTADOR E PROGRESSO --- */
+
+.progresso-card {
+  background: #fff;
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 20px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+}
+
+.progresso-card h4 {
+  color: #ff7043; 
+  margin-top: 0;
+  margin-bottom: 10px;
+  font-size: 1.1rem;
+}
+
+.contador-pedidos {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #4caf50;
+  margin: 5px 0 10px;
+}
+
+.progresso-bar-container {
+  background: #e0e0e0;
+  border-radius: 8px;
+  height: 16px;
+  overflow: hidden;
+  margin-bottom: 10px;
+}
+
+.progresso-bar {
+  height: 100%;
+  background: linear-gradient(90deg, #ffb300, #ff7043);
+  transition: width 0.8s ease-out; /* Animação suave */
+}
+
+.progresso-mensagem {
+  font-size: 0.9rem;
+  color: #555;
+  margin-top: 15px;
+}
+
+.recompensas-header-secundario {
+    margin-top: 25px;
+    margin-bottom: 15px;
+    color: #222;
+    font-size: 1.1rem;
+    font-weight: 700;
+    padding-bottom: 5px;
+    border-bottom: 1px solid #ddd;
+}
+
