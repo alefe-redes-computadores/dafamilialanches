@@ -431,10 +431,18 @@
       </div>
       <div class="recompensas-body" id="listaRecompensas">
         
-        <p class="empty-rewards">Você ainda não tem recompensas disponíveis.</p>
-        <p class="coming-soon">✨ Em breve, você poderá acompanhar suas recompensas e trocas aqui.</p>
+        <div class="progresso-card">
+            <h4>Seu Status de Fidelidade:</h4>
+            <p class="contador-pedidos">Pedidos Feitos: <span id="contador-valor">...</span></p>
+            <div class="progresso-bar-container">
+              <div id="progresso-bar" class="progresso-bar" style="width: 0%;"></div>
+            </div>
+            <p id="progresso-mensagem" class="progresso-mensagem">Carregando progresso...</p>
+        </div>
         
-      </div>
+        <h4 class="recompensas-header-secundario">🎁 Recompensas Disponíveis</h4>
+        <p class="empty-rewards">Nenhuma recompensa ativa no momento.</p>
+        </div>
     </div>
     
   </div>
