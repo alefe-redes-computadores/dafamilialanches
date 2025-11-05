@@ -1887,4 +1887,40 @@ document.addEventListener('DOMContentLoaded', () => {
   allModals.forEach(modal => {
     modal.addEventListener('click', (event) => {
       
-      if (event.
+      if (event.target.classList.contains('modal')) {
+        
+        modal.classList.remove('show');
+        
+        const cartBackdrop = document.getElementById('cart-backdrop');
+        if (cartBackdrop) {
+            cartBackdrop.classList.remove('active');
+        }
+      }
+    });
+  });
+
+  // --- 2. Lógica para fechar o MINI-CARRINHO ---
+  
+  const cartBackdrop = document.getElementById('cart-backdrop');
+  const miniCart = document.getElementById('mini-cart');
+
+  if (cartBackdrop && miniCart) {
+    cartBackdrop.addEventListener('click', () => {
+      cartBackdrop.classList.remove('active');
+      miniCart.classList.remove('active');
+      
+      // v2.9: Garante que o painel de pedidos também feche
+      const pedidosPanel = document.getElementById('painelPedidos');
+      if (pedidosPanel) {
+        pedidosPanel.classList.remove('active');
+      }
+      
+      // v3.1: Garante que o painel de recompensas também feche
+      const recompensasPanel = document.getElementById('recompensas-panel');
+      if (recompensasPanel) {
+        recompensasPanel.classList.remove('active');
+      }
+    });
+  }
+
+});
