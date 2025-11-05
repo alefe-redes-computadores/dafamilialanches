@@ -1,12 +1,8 @@
 /* =========================================================
-   🍔 DFL v3.0.2 — MÓDULO DE CUPONS FIREBASE (FASE 1)
-   - Substitui o objeto 'COUPONS' local por uma coleção no Firestore.
-   - Modifica 'calcTotals' e 'enhanceMiniCartUI' para serem assíncronas.
-   - Conecta aos novos elementos de cupom do index.html.
-   - Baseado na lógica estável da v2.11.
-   - v3.0.1: Adiciona cache leve (30s) na validação de cupons.
-   - v3.0.2: Corrige bug do 'renderMiniCart' duplicado que
-     desenhava o rodapé do carrinho duas vezes.
+   🎁 DFL v3.1.0 — PAINEL DE RECOMPENSAS (VISUAL)
+   - Adiciona a lógica visual (Fases 3, 4, 5 Parcial) para
+     o novo painel "Minhas Recompensas", espelhando "Meus Pedidos".
+   - Baseado na v3.0.2 (Cupons Firebase).
 ========================================================= */
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -79,7 +75,14 @@ document.addEventListener("DOMContentLoaded", () => {
     pedidosBtn: document.querySelector(".meus-pedidos-btn"),
     pedidosPanel: document.getElementById("painelPedidos"),
     pedidosFecharBtn: document.querySelector(".fechar-pedidos"),
-    pedidosLista: document.getElementById("listaPedidos")
+    pedidosLista: document.getElementById("listaPedidos"),
+
+    // Elementos v3.1 (Minhas Recompensas)
+    recompensasContainer: document.querySelector(".minhas-recompensas"),
+    recompensasBtn: document.querySelector(".recompensas-btn"),
+    recompensasPanel: document.getElementById("recompensas-panel"),
+    recompensasFecharBtn: document.querySelector(".fechar-recompensas"),
+    recompensasLista: document.getElementById("listaRecompensas")
   };
 
   /* ------------------ 🌫️ BACKDROP ------------------ */
@@ -94,7 +97,7 @@ document.addEventListener("DOMContentLoaded", () => {
     hide() { 
       el.cartBackdrop.classList.remove("active"); 
       document.body.classList.remove("no-scroll");
-      el.pedidosPanel?.classList.remove("active"); 
+      // v3.1: A lógica de fechar painéis foi movida para Overlays.closeAll
     },
   };
 
@@ -102,7 +105,8 @@ document.addEventListener("DOMContentLoaded", () => {
   const Overlays = {
     closeAll() {
       document
-        .querySelectorAll(".modal.show, #mini-cart.active, .pedidos-panel.active, #admin-dashboard.show") 
+        // v3.1: Adicionado .recompensas-panel.active
+        .querySelectorAll(".modal.show, #mini-cart.active, .pedidos-panel.active, .recompensas-panel.active, #admin-dashboard.show") 
         .forEach((e) => e.classList.remove("show", "active"));
       Backdrop.hide();
     },
@@ -110,7 +114,8 @@ document.addEventListener("DOMContentLoaded", () => {
       Overlays.closeAll();
       if (!modalLike) return;
       modalLike.classList.add(
-        (modalLike.id === "mini-cart" || modalLike.id === "painelPedidos") ? "active" : "show"
+        // v3.1: Adicionado #recompensas-panel
+        (modalLike.id === "mini-cart" || modalLike.id === "painelPedidos" || modalLike.id === "recompensas-panel") ? "active" : "show"
       );
       Backdrop.show();
     },
@@ -1093,6 +1098,27 @@ document.addEventListener("DOMContentLoaded", () => {
 /* ------------------ FIM DO BLOCO V2.10 ------------------ */
 
 
+/* ------------------ 🎁 MINHAS RECOMPENSAS (V3.1 - FASE 5 PARCIAL) ------------------ */
+
+  // 1. Lógica de abrir/fechar o novo painel
+  el.recompensasBtn?.addEventListener("click", () => {
+    // Requer login, assim como "Meus Pedidos"
+    if (!currentUser) {
+      alert("Faça login para ver suas recompensas.");
+      Overlays.open(el.loginModal); 
+      return;
+    }
+    Overlays.open(el.recompensasPanel);
+    // Futuramente, chamaremos a função de carregar recompensas aqui.
+    // carregarRecompensas(currentUser.uid); 
+  });
+
+  // 2. Lógica de fechar o painel
+  el.recompensasFecharBtn?.addEventListener("click", () => Overlays.closeAll());
+
+/* ------------------ FIM DO BLOCO V3.1 ------------------ */
+
+
   /* =========================================================
      📊 ADMIN DASHBOARD (V2.5 com Cupom + Frete + Desconto)
   ========================================================= */
@@ -1367,10 +1393,12 @@ document.addEventListener("DOMContentLoaded", () => {
     if (user) {
       el.userBtn.textContent = `Olá, ${user.displayName?.split(" ")[0] || user.email.split("@")[0]}`;
       if (el.pedidosContainer) el.pedidosContainer.style.display = 'block';
+      if (el.recompensasContainer) el.recompensasContainer.style.display = 'block'; // v3.1
       
     } else {
       el.userBtn.textContent = "Entrar / Cadastrar";
       if (el.pedidosContainer) el.pedidosContainer.style.display = 'none';
+      if (el.recompensasContainer) el.recompensasContainer.style.display = 'none'; // v3.1
     }
 
     if (user && isAdmin(user)) {
@@ -1419,9 +1447,9 @@ document.addEventListener("DOMContentLoaded", () => {
     console.warn("⚠️ Erro interceptado:", e?.message);
   });
 
-  /* 🚨 ATUALIZADO V3.0.2: Mensagem de console */
-  console.log("%c🍔 DFL v3.0.2 — Bugfix Duplicação Rodapé OK",
-              "background:#4caf50;color:#fff;padding:8px 12px;border-radius:8px;font-weight:700;");
+  /* 🚨 ATUALIZADO V3.1: Mensagem de console */
+  console.log("%c🎁 DFL v3.1 — Painel Recompensas (Visual) OK",
+              "background:#ff7043;color:#fff;padding:8px 12px;border-radius:8px;font-weight:700;");
 
 }); // Fim do DOMContentLoaded
 
@@ -1464,6 +1492,12 @@ document.addEventListener('DOMContentLoaded', () => {
       const pedidosPanel = document.getElementById('painelPedidos');
       if (pedidosPanel) {
         pedidosPanel.classList.remove('active');
+      }
+      
+      // v3.1: Garante que o painel de recompensas também feche
+      const recompensasPanel = document.getElementById('recompensas-panel');
+      if (recompensasPanel) {
+        recompensasPanel.classList.remove('active');
       }
     });
   }
