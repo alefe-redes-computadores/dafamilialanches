@@ -1,13 +1,11 @@
 /* =========================================================
-   🔥 DFL v3.5.0 — CONFIGURAÇÃO GLOBAL DE RECOMPENSAS VIA FIRESTORE
-   - Remove array estático RECOMPENSAS_DATA.
-   - Implementa carregarConfiguracoesDeRecompensas() para ler metas do Firestore.
-   - Atualiza carregarRecompensas() para usar as metas dinâmicas.
-   - Conclui o sistema de recompensas escalável.
+   🛠️ DFL v3.5.1 — CORREÇÃO DE INICIALIZAÇÃO DE RECOMPENSAS
+   - Garante que as configurações (RecompensasConfig) sejam carregadas antes de tentar ler o progresso do usuário.
+   - Adiciona tratamento de erro na UI caso as configurações globais não estejam disponíveis.
 ========================================================= */
 
 document.addEventListener("DOMContentLoaded", () => {
-  /* ------------------ ⚙️ BASE ------------------ */
+  /* ------------------ ⚙️ BASE (MANTIDO) ------------------ */
   const sound = new Audio("click.wav");
   let cart = [];
   let currentUser = null;
@@ -38,7 +36,7 @@ document.addEventListener("DOMContentLoaded", () => {
   
   // O array estático RECOMPENSAS_DATA FOI REMOVIDO E SERÁ CARREGADO DINAMICAMENTE
 
-  /* ------------------ 🎯 ELEMENTOS ------------------ */
+  /* ------------------ 🎯 ELEMENTOS (MANTIDO) ------------------ */
   const el = {
     cartIcon: document.getElementById("cart-icon"),
     cartCount: document.getElementById("cart-count"),
@@ -89,7 +87,7 @@ document.addEventListener("DOMContentLoaded", () => {
     historicoLista: document.getElementById("historicoRecompensas") 
   };
   
-  // Garantia do elemento do histórico (necessário para a leitura do el.)
+  // Garantia do elemento do histórico (MANTIDO)
   if (!el.historicoLista) {
      const painelBody = document.querySelector("#recompensas-panel .recompensas-body");
      if (painelBody) {
@@ -102,7 +100,7 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
 
-  /* ------------------ 🌫️ BACKDROP ------------------ */
+  /* ------------------ 🌫️ BACKDROP (MANTIDO) ------------------ */
   if (!el.cartBackdrop) {
     const bd = document.createElement("div");
     bd.id = "cart-backdrop";
@@ -114,15 +112,13 @@ document.addEventListener("DOMContentLoaded", () => {
     hide() { 
       el.cartBackdrop.classList.remove("active"); 
       document.body.classList.remove("no-scroll");
-      // v3.1: A lógica de fechar painéis foi movida para Overlays.closeAll
     },
   };
 
-  /* ------------------ 🧩 OVERLAYS ------------------ */
+  /* ------------------ 🧩 OVERLAYS (MANTIDO) ------------------ */
   const Overlays = {
     closeAll() {
       document
-        // v3.1: Adicionado .recompensas-panel.active
         .querySelectorAll(".modal.show, #mini-cart.active, .pedidos-panel.active, .recompensas-panel.active, #admin-dashboard.show") 
         .forEach((e) => e.classList.remove("show", "active"));
       Backdrop.hide();
@@ -131,7 +127,6 @@ document.addEventListener("DOMContentLoaded", () => {
       Overlays.closeAll();
       if (!modalLike) return;
       modalLike.classList.add(
-        // v3.1: Adicionado #recompensas-panel
         (modalLike.id === "mini-cart" || modalLike.id === "painelPedidos" || modalLike.id === "recompensas-panel") ? "active" : "show"
       );
       Backdrop.show();
@@ -140,7 +135,7 @@ document.addEventListener("DOMContentLoaded", () => {
   el.cartBackdrop.addEventListener("click", () => Overlays.closeAll());
 
   /* =========================================================
-    ✨ v3.0: LISTENER DO FORMULÁRIO DE CUPOM (ESTÁTICO)
+    ✨ v3.0: LISTENER DO FORMULÁRIO DE CUPOM (MANTIDO)
     =========================================================
   */
   const couponForm = document.getElementById("coupon-form");
@@ -166,7 +161,7 @@ document.addEventListener("DOMContentLoaded", () => {
   /* ========================================================= */
 
 
-  /* ------------------ 💬 POPUP ------------------ */
+  /* ------------------ 💬 POPUP (MANTIDO) ------------------ */
   function popupAdd(msg) {
     let pop = document.querySelector(".popup-add");
     if (!pop) {
@@ -179,7 +174,7 @@ document.addEventListener("DOMContentLoaded", () => {
     setTimeout(() => pop.classList.remove("show"), 2000);
   }
 
-  /* ------------------ 🎉 POPUP DE CONQUISTA (V3.3.0) ------------------ */
+  /* ------------------ 🎉 POPUP DE CONQUISTA (MANTIDO) ------------------ */
   function mostrarPopupRecompensa(msg) {
     let pop = document.getElementById("conquista-popup");
     if (!pop) {
@@ -218,7 +213,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 /* ------------------ 🛒 MINI-CARRINHO (MANTIDO) ------------------ */
   function renderMiniCart() {
-    
+    // ... (MANTIDO)
     if (!el.miniList) return; 
 
     const totalItens = cart.reduce((s, i) => s + i.qtd, 0);
@@ -284,7 +279,7 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   /* =========================================================
-     ✨ v3.0: HOOK ÚNICO DO RENDERMINICART
+     ✨ v3.0: HOOK ÚNICO DO RENDERMINICART (MANTIDO)
     =========================================================
   */
   const _renderMiniCartOrig = renderMiniCart;
@@ -296,7 +291,7 @@ document.addEventListener("DOMContentLoaded", () => {
     enhanceMiniCartUI();
   };
 
-  /* ------------------ 🔥 FIREBASE ------------------ */
+  /* ------------------ 🔥 FIREBASE (MANTIDO) ------------------ */
   const firebaseConfig = {
     apiKey: "AIzaSyATQBcbYuzKpKlSwNlbpRiAM1XyHqhGeak",
     authDomain: "da-familia-lanches.firebaseapp.com",
@@ -560,7 +555,7 @@ document.addEventListener("DOMContentLoaded", () => {
     cart.reduce((s, i) => s + (Number(i.preco) || 0) * (Number(i.qtd) || 0), 0);
 
   /* =========================================================
-    ✨ v3.5.0: FUNÇÃO PARA CARREGAR METAS (AGORA DINÂMICA)
+    ✨ v3.5.1: FUNÇÃO PARA CARREGAR METAS (CACHÊ REVISADO)
     =========================================================
   */
   let configuracoesRecompensa = null; // Cache global
@@ -710,7 +705,7 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   /* =========================================================
-    ✨ v3.0: FUNÇÃO 'calcTotals' AGORA É ASYNC
+    ✨ v3.0: FUNÇÃO 'calcTotals' AGORA É ASYNC (MANTIDO)
     =========================================================
   */
   async function calcTotals() {
@@ -1053,13 +1048,14 @@ document.addEventListener("DOMContentLoaded", () => {
       
       // Encontra a próxima recompensa com limite igual aos pedidos feitos
       const recompensaAtingida = RECOMPENSAS_DATA.find(r => 
-          r.limite === feitos && (r.limite / RECOMPENSAS_DATA[0].limite) > nivelAtual
+          r.limite === feitos && (r.limite / (RECOMPENSAS_DATA[0]?.limite || 1)) > nivelAtual
       );
       
       if (recompensaAtingida) {
           // Meta atingida!
           
-          const novoNivel = recompensaAtingida.limite / RECOMPENSAS_DATA[0].limite; 
+          const primeiroLimite = RECOMPENSAS_DATA[0]?.limite || 1;
+          const novoNivel = recompensaAtingida.limite / primeiroLimite; 
           
           // A. Dados do cupom/brinde a ser liberado
           const itemLiberado = {
@@ -1279,14 +1275,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
 /* =========================================================
-   🎁 V3.5.0: FUNÇÃO DE CARREGAMENTO DO PAINEL DE RECOMPENSAS (DINÂMICA)
+   🎁 V3.5.1: FUNÇÃO DE CARREGAMENTO DO PAINEL DE RECOMPENSAS (CORRIGIDA)
 ========================================================= */
 async function carregarRecompensas(userId) {
-    
-    // 🚨 NOVO: Carrega as metas dinamicamente
-    const RECOMPENSAS_DATA = await carregarConfiguracoesDeRecompensas();
-    if (RECOMPENSAS_DATA.length === 0) return; // Aborta se não houver metas
-    const metaPrimeiroNivel = RECOMPENSAS_DATA[0].limite; 
     
     const contadorValor = document.getElementById('contador-valor');
     const progressoBar = document.getElementById('progresso-bar');
@@ -1294,7 +1285,25 @@ async function carregarRecompensas(userId) {
     
     if (!contadorValor || !progressoBar || !progressoMsg || !el.recompensasLista) return; 
 
-    // --- 1. Lógica de Progresso (onSnapshot para real-time) ---
+    // 🚨 1. CORREÇÃO: Inicializa o contador e lista vazios até a leitura.
+    contadorValor.textContent = '0';
+    progressoBar.style.width = '0%';
+    progressoMsg.textContent = 'Carregando configurações...';
+    el.recompensasLista.innerHTML = '<p style="text-align:center;color:#999;padding:20px;">Aguardando configurações...</p>';
+    if(el.historicoLista) el.historicoLista.innerHTML = '';
+    
+    // 🚨 2. CORREÇÃO: Carrega as metas primeiro.
+    const RECOMPENSAS_DATA = await carregarConfiguracoesDeRecompensas();
+
+    if (RECOMPENSAS_DATA.length === 0) {
+        progressoMsg.textContent = 'Erro ao carregar metas de recompensa. (Coleção Configuração vazia).';
+        el.recompensasLista.innerHTML = '<p style="text-align:center;color:red;padding:20px;">O sistema de fidelidade está desativado no momento.</p>';
+        return; 
+    }
+    
+    const metaPrimeiroNivel = RECOMPENSAS_DATA[0]?.limite || 1; 
+
+    // --- 3. Lógica de Progresso (onSnapshot para real-time) ---
     db.collection('Usuarios').doc(userId).onSnapshot(async doc => {
         
         // --- LIMPEZA DE UI ---
@@ -1316,7 +1325,7 @@ async function carregarRecompensas(userId) {
 
         // Calcula a próxima meta: a primeira recompensa com limite > pedidos feitos
         const proximaRecompensa = RECOMPENSAS_DATA.find(r => r.limite > feitos);
-        const metaParaExibir = proximaRecompensa ? proximaRecompensa.limite : feitos; // Se atingiu a última, exibe a última meta
+        const metaParaExibir = proximaRecompensa ? proximaRecompensa.limite : feitos; 
         const metaBase = proximaRecompensa ? proximaRecompensa.limite : metaPrimeiroNivel;
 
         const porcentagem = Math.min(100, (feitos / metaBase) * 100);
@@ -1340,7 +1349,7 @@ async function carregarRecompensas(userId) {
             
             // Exibe as recompensas já obtidas (as que têm limite <= pedidos feitos)
             const recompensasObtidas = RECOMPENSAS_DATA.filter(r => r.limite <= feitos);
-            exibirRecompensas(feitos, recompensasObtidas, cupomStatus);
+            exibirRecompensas(feitos, recompensasObtidas, cupomStatus, RECOMPENSAS_DATA); // Passa RECOMPENSAS_DATA
 
             if (recompensasObtidas.length === 0) {
                  el.recompensasLista.innerHTML = `
@@ -1357,7 +1366,7 @@ async function carregarRecompensas(userId) {
             progressoBar.parentElement.parentElement.setAttribute('data-status', 'complete');
             
             // Exibe todas as recompensas como obtidas
-            exibirRecompensas(feitos, RECOMPENSAS_DATA, cupomStatus); 
+            exibirRecompensas(feitos, RECOMPENSAS_DATA, cupomStatus, RECOMPENSAS_DATA);
         }
         
         // --- 2. Lógica de Histórico (Chamada) ---
@@ -1372,7 +1381,7 @@ async function carregarRecompensas(userId) {
 /**
  * Desenha as recompensas atuais disponíveis (as que o limite foi atingido).
  */
-function exibirRecompensas(pedidosFeitos, recompensasDisponiveis, cupomStatus) {
+function exibirRecompensas(pedidosFeitos, recompensasDisponiveis, cupomStatus, RECOMPENSAS_DATA) {
     if (!el.recompensasLista) return;
     
     // Filtra apenas as recompensas que o usuário atingiu (ou seja, todas as do array)
@@ -1508,7 +1517,7 @@ async function carregarHistoricoRecompensas(userId) {
 }
 
 
-/* ------------------ 🎁 MINHAS RECOMPENSAS (V3.5.0) ------------------ */
+/* ------------------ 🎁 MINHAS RECOMPENSAS (V3.5.1) ------------------ */
 
   // 1. Lógica de abrir/fechar o novo painel
   el.recompensasBtn?.addEventListener("click", () => {
@@ -1527,7 +1536,7 @@ async function carregarHistoricoRecompensas(userId) {
   // 2. Lógica de fechar o painel
   el.recompensasFecharBtn?.addEventListener("click", () => Overlays.closeAll());
 
-/* ------------------ FIM DO BLOCO V3.5.0 ------------------ */
+/* ------------------ FIM DO BLOCO V3.5.1 ------------------ */
 
 
   /* =========================================================
@@ -1859,8 +1868,8 @@ async function carregarHistoricoRecompensas(userId) {
     console.warn("⚠️ Erro interceptado:", e?.message);
   });
 
-  /* 🚨 ATUALIZADO V3.5.0: Mensagem de console */
-  console.log("%c🔥 DFL v3.5.0 — Recompensas dinâmicas via Firestore carregadas com sucesso!",
+  /* 🚨 ATUALIZADO V3.5.1: Mensagem de console */
+  console.log("%c🔥 DFL v3.5.1 — Correção de Inicialização OK",
               "background:#1976D2;color:#fff;padding:8px 12px;border-radius:8px;font-weight:700;");
 
 }); // Fim do DOMContentLoaded
@@ -1878,40 +1887,4 @@ document.addEventListener('DOMContentLoaded', () => {
   allModals.forEach(modal => {
     modal.addEventListener('click', (event) => {
       
-      if (event.target.classList.contains('modal')) {
-        
-        modal.classList.remove('show');
-        
-        const cartBackdrop = document.getElementById('cart-backdrop');
-        if (cartBackdrop) {
-            cartBackdrop.classList.remove('active');
-        }
-      }
-    });
-  });
-
-  // --- 2. Lógica para fechar o MINI-CARRINHO ---
-  
-  const cartBackdrop = document.getElementById('cart-backdrop');
-  const miniCart = document.getElementById('mini-cart');
-
-  if (cartBackdrop && miniCart) {
-    cartBackdrop.addEventListener('click', () => {
-      cartBackdrop.classList.remove('active');
-      miniCart.classList.remove('active');
-      
-      // v2.9: Garante que o painel de pedidos também feche
-      const pedidosPanel = document.getElementById('painelPedidos');
-      if (pedidosPanel) {
-        pedidosPanel.classList.remove('active');
-      }
-      
-      // v3.1: Garante que o painel de recompensas também feche
-      const recompensasPanel = document.getElementById('recompensas-panel');
-      if (recompensasPanel) {
-        recompensasPanel.classList.remove('active');
-      }
-    });
-  }
-
-});
+      if (event.
