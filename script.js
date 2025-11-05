@@ -1,6 +1,6 @@
 /* =========================================================
-   🛠️ DFL v3.5.2 — CORREÇÃO FINAL DE EXIBIÇÃO DA BARRA
-   - Corrige o bug de exibição "1 de 1" para clientes novos, garantindo que use a meta do primeiro nível (limite: 5) como base visual até que a meta seja atingida.
+   🛠️ DFL v3.5.3 — CORREÇÃO FINAL DE EXIBIÇÃO VAZIA (Aguardando carregamento)
+   - Garante que a lista de recompensas (el.recompensasLista) seja limpa ao iniciar o carregamento.
 ========================================================= */
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -681,8 +681,8 @@ document.addEventListener("DOMContentLoaded", () => {
       let label = "";
 
       if (data.tipo === "percent") {
-        discount = Math.max(0, subtotal * (Number(data.valor) / 100));
-        label = `${Number(data.valor)}% OFF`;
+        discount = Math.max(0, subtotal * (Number(data.percent || data.valor) / 100)); // Usa 'percent' ou 'valor'
+        label = `${Number(data.percent || data.valor)}% OFF`;
       } else if (data.tipo === "value") {
         const val = Math.max(0, Number(data.valor) || 0);
         discount = Math.min(subtotal, val);
@@ -951,7 +951,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
   atualizarStatus();
-  setInterval(atualizarStatus, 60000);
+  setInterval(atualizarTimer, 1000);
 
   const atualizarTimer = safe(() => {
     const agora = new Date();
@@ -1315,6 +1315,7 @@ async function carregarRecompensas(userId) {
     db.collection('Usuarios').doc(userId).onSnapshot(async doc => {
         
         // --- LIMPEZA DE UI ---
+        // 🚨 CORREÇÃO FINAL: Limpa a lista de recompensas (seções) aqui para remover "Aguardando o carregamento"
         el.recompensasLista.innerHTML = ''; 
         if(el.historicoLista) el.historicoLista.innerHTML = ''; 
 
@@ -1334,13 +1335,10 @@ async function carregarRecompensas(userId) {
         // Encontra a próxima meta que o cliente AINDA NÃO ATINGIU
         const proximaRecompensa = RECOMPENSAS_DATA.find(r => r.limite > feitos);
         
-        // 🚨 CORREÇÃO: Define a meta base para exibição. Se não atingiu a primeira (0 pedidos), usa a primeira meta. Se atingiu, usa a próxima.
+        // Define a meta base para exibição. 
         const metaParaExibir = proximaRecompensa ? proximaRecompensa.limite : feitos; 
         const metaBaseCalculo = proximaRecompensa ? proximaRecompensa.limite : metaPrimeiroNivel;
 
-        // Se o cliente tem 1 pedido e a meta é 5, a base é 5.
-        // Se o cliente tem 6 pedidos e a meta é 10, a base é 10.
-        
         // Se ele completou o último nível e não tem mais metas, a barra deve ser 100%
         const porcentagem = proximaRecompensa === undefined ? 100 : Math.min(100, (feitos / metaBaseCalculo) * 100);
             
@@ -1363,7 +1361,7 @@ async function carregarRecompensas(userId) {
             
             // Exibe as recompensas já obtidas (as que têm limite <= pedidos feitos)
             const recompensasObtidas = RECOMPENSAS_DATA.filter(r => r.limite <= feitos);
-            exibirRecompensas(feitos, recompensasObtidas, cupomStatus, RECOMPENSAS_DATA);
+            exibirRecompensas(feitos, recompensasObtidas, cupomStatus, RECOMPENSAS_DATA); // Passa RECOMPENSAS_DATA
 
             if (recompensasObtidas.length === 0) {
                  el.recompensasLista.innerHTML = `
