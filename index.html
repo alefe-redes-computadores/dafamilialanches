@@ -74,8 +74,23 @@
         <button class="extras-close" type="button" aria-label="Fechar carrinho">✖</button>
       </div>
       <div class="mini-list"></div>
-      <div class="mini-foot"></div>
-    </aside>
+      
+      <div class="mini-foot">
+        
+        <form id="coupon-form" class="coupon-form">
+          <input type="text" id="coupon-input" placeholder="Cupom de desconto" aria-label="Cupom de desconto" />
+          <button type="submit" id="coupon-apply-btn" class="btn-primary">Aplicar</button>
+        </form>
+        
+        <div id="coupon-message" class="coupon-message"></div>
+        
+        <div class="summary-row" id="coupon-discount-row" style="display: none;">
+          <span>Desconto</span>
+          <span id="cart-discount">R$ 0,00</span>
+        </div>
+        
+        </div>
+      </aside>
   
     <section class="menu-section">
       <h2>🧡 Combos</h2>
