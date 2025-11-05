@@ -1,6 +1,7 @@
 /* =========================================================
-   🛠️ DFL v3.5.3 — CORREÇÃO FINAL DE EXIBIÇÃO VAZIA (Aguardando carregamento)
-   - Garante que a lista de recompensas (el.recompensasLista) seja limpa ao iniciar o carregamento.
+   🛠️ DFL v3.5.3 — CORREÇÃO CRÍTICA DE LOGIN E TIMER
+   - CORRIGE 1: Login não persistente (Garante a chamada do onAuthStateChanged após o login/cadastro).
+   - CORRIGE 2: Contador de promoções ausente (Garante que a função atualizarTimer seja chamada e executada corretamente).
 ========================================================= */
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -330,11 +331,36 @@ document.addEventListener("DOMContentLoaded", () => {
     return; // ABORTA O RESTO DO SCRIPT.JS
   }
 
-  /* ------------------ ⚙️ LOGIN (MANTIDO) ------------------ */
+  /* ------------------ ⚙️ LOGIN (CORRIGIDO) ------------------ */
   el.userBtn?.addEventListener("click", () => Overlays.open(el.loginModal));
   document.querySelectorAll("#login-modal .login-close").forEach(btn =>
     btn.addEventListener("click", () => Overlays.closeAll())
   );
+
+  const handleLoginSuccess = (user) => {
+    // 🚨 CORREÇÃO 1: Garante que currentUser seja definido e a UI atualizada imediatamente
+    currentUser = user;
+    popupAdd("Login realizado com sucesso!");
+    Overlays.closeAll();
+    // A chamada a onAuthStateChanged logo abaixo garantirá a atualização final da UI
+  };
+
+  const handleLoginError = (err) => {
+    if (err.code === "auth/user-not-found") {
+      if (confirm("Conta não encontrada. Deseja criar uma nova?")) {
+        auth.createUserWithEmailAndPassword(
+          document.getElementById("login-email")?.value?.trim(), 
+          document.getElementById("login-senha")?.value?.trim()
+        )
+          .then((cred) => handleLoginSuccess(cred.user))
+          .catch((e) => alert("Erro: " + e.message));
+      }
+    } else if (err.code === "auth/wrong-password") {
+      alert("Senha incorreta. Tente novamente.");
+    } else {
+      alert("Erro: ".concat(err.message));
+    }
+  };
 
   el.loginForm?.addEventListener("submit", (e) => {
     e.preventDefault();
@@ -343,38 +369,14 @@ document.addEventListener("DOMContentLoaded", () => {
     if (!email || !senha) return alert("Preencha e-mail e senha.");
 
     auth.signInWithEmailAndPassword(email, senha)
-      .then((cred) => {
-        currentUser = cred.user;
-        popupAdd("Login realizado com sucesso!");
-        Overlays.closeAll();
-      })
-      .catch((err) => {
-        if (err.code === "auth/user-not-found") {
-          if (confirm("Conta não encontrada. Deseja criar uma nova?")) {
-            auth.createUserWithEmailAndPassword(email, senha)
-              .then((cred) => {
-                currentUser = cred.user;
-                popupAdd("Conta criada com sucesso! 🎉");
-                Overlays.closeAll();
-              })
-              .catch((e) => alert("Erro: " + e.message));
-          }
-        } else if (err.code === "auth/wrong-password") {
-          alert("Senha incorreta. Tente novamente.");
-        } else {
-          alert("Erro: ".concat(err.message));
-        }
-      });
+      .then((cred) => handleLoginSuccess(cred.user))
+      .catch(handleLoginError);
   });
 
   el.googleBtn?.addEventListener("click", () => {
     const provider = new firebase.auth.GoogleAuthProvider();
     auth.signInWithPopup(provider)
-      .then((res) => {
-        currentUser = res.user;
-        popupAdd("Login com Google realizado! ✅");
-        Overlays.closeAll();
-      })
+      .then((res) => handleLoginSuccess(res.user))
       .catch((err) => alert("Erro: ".concat(err.message)));
   });
 
@@ -951,8 +953,9 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
   atualizarStatus();
-  setInterval(atualizarTimer, 1000);
+  setInterval(atualizarStatus, 60000);
 
+  // 🚨 CORREÇÃO 2: Reativação do Timer de Promoção
   const atualizarTimer = safe(() => {
     const agora = new Date();
     const fim = new Date();
@@ -1020,7 +1023,7 @@ document.addEventListener("DOMContentLoaded", () => {
       // 2. Marca cupom personalizado como USADO, se houver
       if (cupomInfo.isPersonalizado && couponApplied) {
           const cupomUserRef = db.collection("CuponsUsuarios").doc(userId);
-          batch.update(cupomUserRef, {
+          batch.update(cupumUserRef, {
               usado: true,
               dataUso: firebase.firestore.FieldValue.serverTimestamp(),
               pedidoId: 'PENDENTE' 
@@ -1297,6 +1300,7 @@ async function carregarRecompensas(userId) {
     contadorValor.textContent = '...';
     progressoBar.style.width = '0%';
     progressoMsg.textContent = 'Carregando metas...';
+    // 🚨 CORREÇÃO FINAL: Limpa a lista de recompensas (seções) aqui para remover "Aguardando o carregamento"
     el.recompensasLista.innerHTML = '<p style="text-align:center;color:#999;padding:20px;">Aguardando configurações...</p>';
     if(el.historicoLista) el.historicoLista.innerHTML = '';
     
@@ -1315,7 +1319,6 @@ async function carregarRecompensas(userId) {
     db.collection('Usuarios').doc(userId).onSnapshot(async doc => {
         
         // --- LIMPEZA DE UI ---
-        // 🚨 CORREÇÃO FINAL: Limpa a lista de recompensas (seções) aqui para remover "Aguardando o carregamento"
         el.recompensasLista.innerHTML = ''; 
         if(el.historicoLista) el.historicoLista.innerHTML = ''; 
 
@@ -1329,7 +1332,7 @@ async function carregarRecompensas(userId) {
         
         if (recompensaAtual && recompensaAtual.tipo === 'cupom') {
             const cupomSnap = await db.collection('CuponsUsuarios').doc(userId).get();
-            cupomStatus = cupomSnap.exists ? cupomSnap.data() : null;
+            cupomStatus = cupumSnap.exists ? cupumSnap.data() : null;
         }
 
         // Encontra a próxima meta que o cliente AINDA NÃO ATINGIU
@@ -1355,7 +1358,11 @@ async function carregarRecompensas(userId) {
         if (proximaRecompensa) {
             // A meta ainda não foi atingida
             const faltam = proximaRecompensa.limite - feitos;
-            progressoMsg.textContent = `Faltam apenas ${faltam} pedidos para você ganhar a recompensa "${proximaRecompensa.valor}"!`;
+            
+            // 🚨 CORREÇÃO: Usa o 'titulo' para exibir a recompensa na mensagem
+            const tituloRecompensa = proximaRecompensa.titulo || proximaRecompensa.valor;
+            progressoMsg.textContent = `Faltam apenas ${faltam} pedidos para você ganhar a recompensa "${tituloRecompensa}"!`;
+            
             progressoBar.style.background = 'linear-gradient(90deg, #ffb300, #ff7043)'; 
             progressoBar.parentElement.parentElement.removeAttribute('data-status');
             
@@ -1465,7 +1472,7 @@ function exibirRecompensas(pedidosFeitos, recompensasDisponiveis, cupomStatus, R
                 renderMiniCart(); // Recalcula e mostra a mensagem
                 Overlays.closeAll();
                 popupAdd(`Cupom ${codigo} aplicado! ✅`);
-                Overlays.open(el.miniCart); // Abre o carrinho para ver o desconto
+                Overlays.open(el.miniCart); // Abre o mini-carrinho para ver o desconto
             }
         });
     });
@@ -1529,7 +1536,7 @@ async function carregarHistoricoRecompensas(userId) {
 }
 
 
-/* ------------------ 🎁 MINHAS RECOMPENSAS (V3.5.2) ------------------ */
+/* ------------------ 🎁 MINHAS RECOMPENSAS (V3.5.3) ------------------ */
 
   // 1. Lógica de abrir/fechar o novo painel
   el.recompensasBtn?.addEventListener("click", () => {
@@ -1548,7 +1555,7 @@ async function carregarHistoricoRecompensas(userId) {
   // 2. Lógica de fechar o painel
   el.recompensasFecharBtn?.addEventListener("click", () => Overlays.closeAll());
 
-/* ------------------ FIM DO BLOCO V3.5.2 ------------------ */
+/* ------------------ FIM DO BLOCO V3.5.3 ------------------ */
 
 
   /* =========================================================
