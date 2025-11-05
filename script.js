@@ -1,8 +1,9 @@
 /* =========================================================
-   🍔 DFL v2.11 — HOTFIX CAMINHO DA IMAGEM
-   - Corrige o caminho do placeholder da miniatura do pedido
-   - (img/padrao.jpg -> imagens/padrao.jpg)
-   - Mantém 100% da lógica funcional da v2.10.
+   🍔 DFL v3.0 — MÓDULO DE CUPONS FIREBASE (FASE 1)
+   - Substitui o objeto 'COUPONS' local por uma coleção no Firestore.
+   - Modifica 'calcTotals' e 'enhanceMiniCartUI' para serem assíncronas.
+   - Conecta aos novos elementos de cupom do index.html.
+   - Baseado na lógica estável da v2.11.
 ========================================================= */
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -113,6 +114,37 @@ document.addEventListener("DOMContentLoaded", () => {
   };
   el.cartBackdrop.addEventListener("click", () => Overlays.closeAll());
 
+  /* =========================================================
+    ✨ v3.0: LISTENER DO FORMULÁRIO DE CUPOM (ESTÁTICO)
+    Conecta o formulário do index.html ao script.
+    =========================================================
+  */
+  const couponForm = document.getElementById("coupon-form");
+  couponForm?.addEventListener("submit", (e) => {
+    e.preventDefault();
+    const input = document.getElementById("coupon-input");
+    const val = (input?.value || "").trim().toUpperCase();
+
+    if (!val) {
+      couponApplied = "";
+      localStorage.removeItem("dflCoupon");
+      popupAdd("Cupom removido.");
+      renderMiniCart(); // Recalcula os totais
+      return;
+    }
+    
+    // Salva a *tentativa* de cupom.
+    // A validação real ocorrerá em 'calcTotals'
+    couponApplied = val;
+    localStorage.setItem("dflCoupon", couponApplied);
+    
+    // Apenas redesenha o carrinho. 
+    // A 'enhanceMiniCartUI' mostrará a mensagem de sucesso/erro.
+    renderMiniCart(); 
+  });
+  /* ========================================================= */
+
+
   /* ------------------ 💬 POPUP ------------------ */
   function popupAdd(msg) {
     let pop = document.querySelector(".popup-add");
@@ -136,7 +168,14 @@ document.addEventListener("DOMContentLoaded", () => {
 
     if (!cart.length) {
       el.miniList.innerHTML = '<p style="text-align:center;color:#999;padding:20px;">Carrinho vazio 🛒</p>';
-      if(el.miniFoot) el.miniFoot.innerHTML = ""; 
+      
+      // v3.0: Limpa também o rodapé dinâmico e estático
+      if(el.miniFoot) el.miniFoot.querySelectorAll(".cart-summary-generated").forEach(e => e.remove());
+      const couponMsg = document.getElementById("coupon-message");
+      const couponDiscountRow = document.getElementById("coupon-discount-row");
+      if (couponMsg) couponMsg.innerHTML = "";
+      if (couponDiscountRow) couponDiscountRow.style.display = "none";
+      
       return;
     }
 
@@ -190,6 +229,9 @@ document.addEventListener("DOMContentLoaded", () => {
   renderMiniCart = function () {
     _renderMiniCartOrig();
     bindMiniCartButtons();
+    // v3.0: Chama a função async que atualiza os totais,
+    // sem precisar de 'await' aqui.
+    enhanceMiniCartUI();
   };
 
   /* ------------------ 🔥 FIREBASE ------------------ */
@@ -446,17 +488,15 @@ document.addEventListener("DOMContentLoaded", () => {
   );
 
 
-/* ------------------ ⚙️ CONFIGURAÇÕES V2.5 ------------------ */
+/* ------------------ ⚙️ CONFIGURAÇÕES V3.0 ------------------ */
   const DELIVERY_FEE = 6.00; 
 
-  const COUPONS = {
-    "DFL5":        { type: "percent", value: 5,  note: "5% OFF" },
-    "DFL10":       { type: "percent", value: 10, note: "10% OFF" },
-    "BEMVINDO":    { type: "value",   value: 5,  note: "R$ 5,00 OFF na 1ª compra" },
-    "FRETEZERO":   { type: "frete",   value: 0,  note: "Frete grátis" },
-    "FAMILIA10": { type: "percent", value: 10,  note: "10% OFF" },
-    "PRIMEIRO": { type: "value",   value: 5,  note: "R$ 5,00 OFF" } 
-  };
+  /* =========================================================
+    ✨ v3.0: CUPONS REMOVIDOS
+    O objeto local 'COUPONS' foi removido.
+    A lógica agora vive em 'validarCupomFirestore'.
+    =========================================================
+  */
 
   let couponApplied = (localStorage.getItem("dflCoupon") || "").toUpperCase();
   let addressValue  = (localStorage.getItem("dflAddress") || "").trim();
@@ -464,120 +504,237 @@ document.addEventListener("DOMContentLoaded", () => {
   const getCartSubtotal = () =>
     cart.reduce((s, i) => s + (Number(i.preco) || 0) * (Number(i.qtd) || 0), 0);
 
-  function calcDiscount(subtotal, couponCode) {
-    const code = (couponCode || "").toUpperCase();
-    const rule = COUPONS[code];
-    if (!rule) return { discount: 0, freeShipping: false, label: "" };
+  /* =========================================================
+    ✨ v3.0: FUNÇÃO REMOVIDA
+    'calcDiscount' foi removida e substituída por 
+    'validarCupomFirestore'.
+    =========================================================
+  */
 
-    if (rule.type === "percent") {
-      const val = Math.max(0, subtotal * (rule.value / 100));
-      return { discount: val, freeShipping: false, label: `${rule.value}% OFF` };
+  /* =========================================================
+    ✨ v3.0: NOVA FUNÇÃO DE VALIDAÇÃO (ASYNC)
+    Valida um cupom no Firestore e calcula o desconto.
+    Substitui a antiga 'calcDiscount'.
+    =========================================================
+  */
+  /**
+   * @param {string} codigo - O código do cupom (ex: "BEMVINDO10").
+   * @param {number} subtotal - O subtotal do carrinho para calcular descontos.
+   * @returns {object} - Objeto com o resultado do desconto.
+   */
+  async function validarCupomFirestore(codigo, subtotal) {
+    const code = (codigo || "").toUpperCase();
+    
+    // O objeto de retorno padrão, caso o cupom seja "" ou inválido
+    const resultadoInvalido = { 
+      valido: false, 
+      discount: 0, 
+      freeShipping: false, 
+      label: "", 
+      mensagem: "" // Mensagem de erro será tratada por quem chama
+    };
+
+    if (!code) {
+      return resultadoInvalido;
     }
-    if (rule.type === "value") {
-      const val = Math.min(subtotal, Math.max(0, rule.value));
-      return { discount: val, freeShipping: false, label: `R$ ${val.toFixed(2).replace(".", ",")} OFF` };
+    
+    // Assumindo que 'db' está global
+    const cupomRef = db.collection("Cupons").doc(code);
+
+    try {
+      const doc = await cupomRef.get();
+
+      // 1. Verifica se existe
+      if (!doc.exists) {
+        console.warn(`Cupom "${code}" não encontrado.`);
+        return { ...resultadoInvalido, mensagem: "Cupom inválido." };
+      }
+
+      const data = doc.data();
+
+      // 2. Verifica se está ativo
+      if (!data.ativo) {
+        console.warn(`Cupom "${code}" está inativo.`);
+        return { ...resultadoInvalido, mensagem: "Este cupom não está mais ativo." };
+      }
+
+      // 3. Verifica expiração
+      if (data.expiraEm) {
+        const expira = data.expiraEm.toDate();
+        if (expira < new Date()) {
+          console.warn(`Cupom "${code}" expirou.`);
+          return { ...resultadoInvalido, mensagem: "Este cupom expirou." };
+        }
+      }
+
+      // 4. Cupom VÁLIDO. Vamos calcular o desconto.
+      let discount = 0;
+      let freeShipping = false;
+      let label = "";
+
+      if (data.tipo === "percent") {
+        discount = Math.max(0, subtotal * (data.valor / 100));
+        label = `${data.valor}% OFF`;
+      } else if (data.tipo === "value") {
+        discount = Math.min(subtotal, Math.max(0, data.valor));
+        label = `${money(data.valor)} OFF`;
+      } else if (data.tipo === "frete") {
+        freeShipping = true;
+        label = "Frete Grátis";
+      }
+      
+      // Sucesso
+      return {
+        valido: true,
+        discount,
+        freeShipping,
+        label,
+        mensagem: "Cupom aplicado com sucesso!"
+      };
+
+    } catch (error) {
+      console.error("Erro ao validar cupom no Firestore: ", error);
+      return { ...resultadoInvalido, mensagem: "Erro ao processar o cupom." };
     }
-    if (rule.type === "frete") {
-      return { discount: 0, freeShipping: true, label: "Frete Grátis" };
-    }
-    return { discount: 0, freeShipping: false, label: "" };
   }
 
-  function calcTotals() {
+  /* =========================================================
+    ✨ v3.0: FUNÇÃO 'calcTotals' AGORA É ASYNC
+    =========================================================
+  */
+  async function calcTotals() {
     const subtotal = getCartSubtotal();
-    const d = calcDiscount(subtotal, couponApplied);
+    
+    // 'd' (discountInfo) agora vem do Firestore e precisa de 'await'
+    const d = await validarCupomFirestore(couponApplied, subtotal); 
+    
     const delivery = d.freeShipping ? 0 : DELIVERY_FEE;
     const total = Math.max(0, subtotal + delivery - d.discount);
+    
     return {
       subtotal,
       delivery,
       discount: d.discount,
       discountLabel: d.label,
-      total
+      total,
+      cupomInfo: d // Passa a info completa (valido, mensagem)
     };
   }
 
-  /* ------------------ 🛒 MINI-CARRINHO: UI ESTENDIDA V2.5 ------------------ */
-  function enhanceMiniCartUI() {
+  /* =========================================================
+    ✨ v3.0: UI DO CARRINHO (ASYNC E CONECTADA)
+    Substitui a 'enhanceMiniCartUI' antiga.
+    =========================================================
+  */
+  async function enhanceMiniCartUI() {
     if (!el.miniFoot) return;
-    if (cart.length === 0) return;
+    
+    // Pega os elementos do cupom que JÁ EXISTEM no HTML
+    const couponMsg = document.getElementById("coupon-message");
+    const couponDiscountRow = document.getElementById("coupon-discount-row");
+    const cartDiscount = document.getElementById("cart-discount");
 
-    const { subtotal, delivery, discount, discountLabel, total } = calcTotals();
+    // Remove o resumo antigo (Subtotal, Total, Botões) antes de recalcular
+    el.miniFoot.querySelectorAll(".cart-summary-generated").forEach(e => e.remove());
+    
+    if (cart.length === 0) {
+      // Se o carrinho está vazio, já limpamos a lista.
+      // Agora limpamos a UI de cupom.
+      if (couponMsg) couponMsg.innerHTML = "";
+      if (couponDiscountRow) couponDiscountRow.style.display = "none";
+      return; 
+    }
 
-    el.miniFoot.innerHTML = `
-      <div style="padding:14px 14px 10px;">
-        <div style="display:flex;justify-content:space-between;margin-bottom:6px;">
-          <span>Subtotal</span><b>${money(subtotal)}</b>
-        </div>
-        <div style="display:flex;justify-content:space-between;margin-bottom:6px;">
-          <span>Entrega</span><b>${money(delivery)}</b>
-        </div>
-        <div style="display:flex;justify-content:space-between;margin-bottom:10px;">
-          <span>Desconto ${discountLabel ? `(${discountLabel})` : ""}</span><b>- ${money(discount)}</b>
-        </div>
-        <div style="display:flex;justify-content:space-between;align-items:center;border-top:1px solid #eee;padding-top:10px;margin-bottom:12px;font-size:1.1rem;">
-          <span><b>Total</b></span><span style="color:#e53935;font-weight:800;">${money(total)}</span>
-        </div>
+    // 1. CALCULA TOTAIS (AGORA É ASYNC)
+    const { subtotal, delivery, discount, discountLabel, total, cupomInfo } = await calcTotals();
 
-        <label style="display:block;font-weight:600;margin-bottom:6px;">🏠 Endereço para Entrega</label>
-        <textarea id="address-input" rows="2" placeholder="Rua, número, complemento, bairro"
-          style="width:100%;border:1px solid #ddd;border-radius:10px;padding:10px;resize:vertical;margin-bottom:10px">${addressValue}</textarea>
+    // 2. ATUALIZA MENSAGEM DO CUPOM (UI ESTÁTICA)
+    if (couponMsg) {
+      couponMsg.textContent = cupomInfo.mensagem;
+      couponMsg.className = `coupon-message ${cupomInfo.valido ? 'success' : 'error'}`;
+      
+      // Se o cupom era inválido, mas não estava vazio, limpa ele
+      if (!cupomInfo.valido && couponApplied) {
+         couponApplied = "";
+         localStorage.removeItem("dflCoupon");
+         // Atualiza o valor do input se ele não estiver focado
+         const couponInput = document.getElementById("coupon-input");
+         if (couponInput && document.activeElement !== couponInput) {
+           couponInput.value = "";
+         }
+      }
+    }
 
-        <div style="display:flex;gap:8px;align-items:center;margin-bottom:12px;">
-          <input id="coupon-input" type="text" inputmode="text" placeholder="Cupom de desconto"
-            value="${couponApplied || ""}"
-            style="flex:1;border:1px solid #ddd;border-radius:10px;padding:10px;font-weight:600;letter-spacing:.5px;text-transform:uppercase">
-          <button id="apply-coupon" type="button" style="background:#000;color:#fff;border:none;border-radius:10px;padding:10px 16px;font-weight:700;cursor:pointer">Aplicar</button>
-        </div>
-
-        <button id="finish-order" type="button" style="width:100%;background:#4caf50;color:#fff;border:none;border-radius:10px;padding:12px;font-weight:700;cursor:pointer;margin-bottom:8px">
-          Finalizar Pedido 🛍️
-        </button>
-        <button id="clear-cart" type="button" style="width:100%;background:#ff4081;color:#fff;border:none;border-radius:10px;padding:10px;font-weight:700;cursor:pointer">
-          Limpar Carrinho
-        </button>
+    // 3. ATUALIZA LINHA DE DESCONTO (UI ESTÁTICA)
+    if (couponDiscountRow && cartDiscount) {
+      if (discount > 0 || discountLabel) {
+        cartDiscount.textContent = `- ${money(discount)} ${discountLabel ? `(${discountLabel})` : ""}`;
+        couponDiscountRow.style.display = "flex";
+      } else {
+        couponDiscountRow.style.display = "none";
+      }
+    }
+    
+    // 4. GERA O RESTO DO HTML (SUBTOTAL, TOTAL, BOTÕES)
+    const summaryDiv = document.createElement('div');
+    summaryDiv.className = 'cart-summary-generated'; // Classe para fácil remoção
+    summaryDiv.innerHTML = `
+      <div class="summary-row" style="margin-top: 10px; border-top: 1px solid #eee; padding-top: 10px;">
+        <span>Subtotal</span><b>${money(subtotal)}</b>
       </div>
+      <div class="summary-row">
+        <span>Entrega</span><b>${money(delivery)}</b>
+      </div>
+      
+      <div class="summary-row" style="display:flex;justify-content:space-between;align-items:center;border-top:1px solid #eee;padding-top:10px;margin: 10px 0;font-size:1.1rem;">
+        <span><b>Total</b></span><span style="color:#e53935;font-weight:800;">${money(total)}</span>
+      </div>
+
+      <label style="display:block;font-weight:600;margin-bottom:6px;">🏠 Endereço para Entrega</label>
+      <textarea id="address-input" rows="2" placeholder="Rua, número, complemento, bairro"
+        style="width:100%;border:1px solid #ddd;border-radius:10px;padding:10px;resize:vertical;margin-bottom:10px">${addressValue}</textarea>
+
+      <button id="finish-order" type="button" style="width:100%;background:#4caf50;color:#fff;border:none;border-radius:10px;padding:12px;font-weight:700;cursor:pointer;margin-bottom:8px">
+        Finalizar Pedido 🛍️
+      </button>
+      <button id="clear-cart" type="button" style="width:100%;background:#ff4081;color:#fff;border:none;border-radius:10px;padding:10px;font-weight:700;cursor:pointer">
+        Limpar Carrinho
+      </button>
     `;
-
-    document.getElementById("apply-coupon")?.addEventListener("click", () => {
-      const input = document.getElementById("coupon-input");
-      const val = (input?.value || "").trim().toUpperCase();
-      if (!val) {
-        couponApplied = "";
-        localStorage.removeItem("dflCoupon");
-        popupAdd("Cupom removido.");
-        enhanceMiniCartUI();
-        return;
-      }
-      if (!COUPONS[val]) {
-        popupAdd("Cupom inválido.");
-        return;
-      }
-      couponApplied = val;
-      localStorage.setItem("dflCoupon", couponApplied);
-      popupAdd(`Cupom aplicado: ${val}`);
-      enhanceMiniCartUI();
-    });
-
-    document.getElementById("address-input")?.addEventListener("input", (e) => {
+    
+    // Adiciona os novos elementos ao rodapé
+    el.miniFoot.appendChild(summaryDiv);
+    
+    // 5. BIND EVENTOS (para os botões que acabamos de criar)
+    summaryDiv.querySelector("#address-input")?.addEventListener("input", (e) => {
       addressValue = (e.target.value || "").trim();
       localStorage.setItem("dflAddress", addressValue);
     });
 
-    document.getElementById("finish-order")?.addEventListener("click", fecharPedido);
-    document.getElementById("clear-cart")?.addEventListener("click", () => {
+    summaryDiv.querySelector("#finish-order")?.addEventListener("click", fecharPedido);
+    summaryDiv.querySelector("#clear-cart")?.addEventListener("click", () => {
       if (confirm("Limpar todo o carrinho?")) {
         cart = [];
+        couponApplied = ""; // Limpa o cupom também
+        localStorage.removeItem("dflCoupon");
+        const couponInput = document.getElementById("coupon-input");
+        if(couponInput) couponInput.value = "";
+        
         renderMiniCart();
         popupAdd("Carrinho limpo!");
       }
     });
   }
 
+  /* =========================================================
+    ✨ v3.0: HOOK DO RENDERMINICART
+    O wrapper é síncrono, mas chama a função 'enhance' que é assíncrona.
+    =========================================================
+  */
   const __renderMiniCartPrev = renderMiniCart;
   renderMiniCart = function() {
-    __renderMiniCartPrev();
-    enhanceMiniCartUI();
+    __renderMiniCartPrev(); // Roda a parte síncrona (lista de itens)
+    enhanceMiniCartUI(); // Dispara a atualização assíncrona do rodapé.
   };
 
 
@@ -710,8 +867,12 @@ document.addEventListener("DOMContentLoaded", () => {
   atualizarTimer();
   setInterval(atualizarTimer, 1000);
 
-  /* ------------------ 💾 Fechar pedido (V2.10 com itensObj) ------------------ */
-  function fecharPedido() {
+  /* =========================================================
+    ✨ v3.0: 'FECHAR PEDIDO' AGORA É ASYNC
+    Para aguardar o 'calcTotals' antes de salvar.
+    =========================================================
+  */
+  async function fecharPedido() {
     if (!cart.length) return alert("Carrinho vazio!");
     if (!currentUser) {
       alert("Faça login para enviar o pedido!");
@@ -726,7 +887,8 @@ document.addEventListener("DOMContentLoaded", () => {
       return;
     }
 
-    const { subtotal, delivery, discount, discountLabel, total } = calcTotals();
+    // Espera o cálculo (que agora busca no Firebase)
+    const { subtotal, delivery, discount, discountLabel, total } = await calcTotals();
 
     const pedido = {
       usuario: currentUser.email,
@@ -744,35 +906,42 @@ document.addEventListener("DOMContentLoaded", () => {
       endereco: addr,
       data: new Date().toISOString(),
       
-      // 🚨 HOTFIX V2.11: Corrigido o caminho da imagem
       thumb: 'imagens/padrao.jpg' 
     };
 
-    db.collection("Pedidos")
-      .add(pedido)
-      .then(() => {
-        popupAdd("Pedido salvo ✅");
+    // Convertido de .then() para try/catch
+    try {
+      await db.collection("Pedidos").add(pedido);
+      
+      popupAdd("Pedido salvo ✅");
 
-        const linhas = [
-          "🍔 *Pedido DFL*",
-          cart.map((i) => `• ${i.nome} x${i.qtd}`).join("\n"),
-          "",
-          `Subtotal: *${money(subtotal)}*`,
-          `Entrega: *${money(delivery)}*${couponApplied && discountLabel === "Frete Grátis" ? " _(Frete Grátis)_" : ""}`,
-          `Desconto${couponApplied ? ` (${couponApplied})` : ""}: *-${money(discount)}*`,
-          `*Total: ${money(total)}*`,
-          "",
-          `🏠 *Endereço:* ${addr}`
-        ].join("\n");
+      const linhas = [
+        "🍔 *Pedido DFL*",
+        cart.map((i) => `• ${i.nome} x${i.qtd}`).join("\n"),
+        "",
+        `Subtotal: *${money(subtotal)}*`,
+        `Entrega: *${money(delivery)}*${couponApplied && discountLabel === "Frete Grátis" ? " _(Frete Grátis)_" : ""}`,
+        `Desconto${couponApplied ? ` (${couponApplied})` : ""}: *-${money(discount)}*`,
+        `*Total: ${money(total)}*`,
+        "",
+        `🏠 *Endereço:* ${addr}`
+      ].join("\n");
 
-        const texto = encodeURIComponent(linhas);
-        window.open(`https://wa.me/5534997178336?text=${texto}`, "_blank");
+      const texto = encodeURIComponent(linhas);
+      window.open(`https://wa.me/5534997178336?text=${texto}`, "_blank");
 
-        cart = [];
-        renderMiniCart();
-        Overlays.closeAll();
-      })
-      .catch((err) => alert("Erro: ".concat(err.message)));
+      cart = [];
+      couponApplied = ""; // Limpa o cupom ao finalizar
+      localStorage.removeItem("dflCoupon");
+      const couponInput = document.getElementById("coupon-input");
+      if(couponInput) couponInput.value = "";
+      
+      renderMiniCart();
+      Overlays.closeAll();
+
+    } catch (err) {
+      alert("Erro: ".concat(err.message));
+    }
   }
 
   renderMiniCart();
@@ -820,7 +989,6 @@ document.addEventListener("DOMContentLoaded", () => {
     if (!el.pedidosLista) return;
     
     el.pedidosLista.innerHTML = pedidos.map(p => {
-      // 🚨 HOTFIX V2.11: Corrigido o caminho da imagem
       const thumbUrl = p.thumb || 'imagens/padrao.jpg';
       const dataFormatada = p.data
           ? new Date(p.data?.seconds * 1000 || p.data).toLocaleString("pt-BR", {
@@ -897,6 +1065,12 @@ document.addEventListener("DOMContentLoaded", () => {
           });
         }
       });
+      
+      // v3.0: Limpa o cupom ao repetir um pedido
+      couponApplied = "";
+      localStorage.removeItem("dflCoupon");
+      const couponInput = document.getElementById("coupon-input");
+      if(couponInput) couponInput.value = "";
 
       // Feedback ao usuário
       popupAdd("Pedido anterior adicionado ao carrinho!");
@@ -1239,8 +1413,8 @@ document.addEventListener("DOMContentLoaded", () => {
     console.warn("⚠️ Erro interceptado:", e?.message);
   });
 
-  /* 🚨 ATUALIZADO V2.11: Mensagem de console */
-  console.log("%c🍔 DFL v2.11 — Hotfix Caminho Imagem OK — Lógica v2.10 Estável",
+  /* 🚨 ATUALIZADO V3.0: Mensagem de console */
+  console.log("%c🍔 DFL v3.0 — Módulo de Cupons (Fase 1) OK — Base v2.11 Estável",
               "background:#4caf50;color:#fff;padding:8px 12px;border-radius:8px;font-weight:700;");
 
 }); // Fim do DOMContentLoaded
