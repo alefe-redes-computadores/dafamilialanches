@@ -1,7 +1,6 @@
 /* =========================================================
-   🎁 DFL v3.2.2 — IMPLEMENTAÇÃO DO CONTADOR E EXIBIÇÃO ESTÁVEL
-   - Corrige erro de travamento no fecharPedido (v3.2.1).
-   - Adiciona e conecta a função carregarRecompensas() para exibir o contador.
+   🎁 DFL v3.2.3 — EXIBIÇÃO DA PRIMEIRA RECOMPENSA DE FIDELIDADE
+   - Atualiza carregarRecompensas() para exibir a lista de cupons/recompensas.
 ========================================================= */
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -33,6 +32,22 @@ document.addEventListener("DOMContentLoaded", () => {
     { id: 8, nome: "Combo 4 Armaria", preco: 59.99, precoAntigo: 72.00, img: "promocoes/promo8.jpg" },
     { id: 9, nome: "Combo 5 Uai + Kuat 2L", preco: 64.99, precoAntigo: 79.99, img: "promocoes/promo9.jpg" }
   ];
+
+  /* ------------------ 🎁 RECOMPENSAS V3.2.3 ------------------ */
+  const RECOMPENSAS_DATA = [
+      // A primeira recompensa é liberada após 'metaPedidos'
+      { 
+          id: 'fid_5pedidos', 
+          meta: 5, 
+          titulo: 'Seu Primeiro Cupom de Fidelidade!', 
+          descricao: 'Ganhe R$ 10 OFF em seu próximo pedido!',
+          cupom: 'FIDELIDADE10', // Cupom deve existir no Firestore
+          tipo: 'cupom', // Ou 'item_gratis' no futuro
+          img: 'imagens/recompensa-cupom.png'
+      },
+      // Adicionar outras recompensas futuras aqui...
+  ];
+  const metaPedidos = RECOMPENSAS_DATA[0].meta; // Meta para a primeira recompensa
 
   /* ------------------ 🎯 ELEMENTOS ------------------ */
   const el = {
@@ -506,23 +521,11 @@ document.addEventListener("DOMContentLoaded", () => {
 /* ------------------ ⚙️ CONFIGURAÇÕES V3.0 ------------------ */
   const DELIVERY_FEE = 6.00; 
 
-  /* =========================================================
-    ✨ v3.0: CUPONS REMOVIDOS
-    O objeto local 'COUPONS' foi removido.
-    =========================================================
-  */
-
   let couponApplied = (localStorage.getItem("dflCoupon") || "").toUpperCase();
   let addressValue  = (localStorage.getItem("dflAddress") || "").trim();
 
   const getCartSubtotal = () =>
     cart.reduce((s, i) => s + (Number(i.preco) || 0) * (Number(i.qtd) || 0), 0);
-
-  /* =========================================================
-    ✨ v3.0: FUNÇÃO REMOVIDA
-    'calcDiscount' foi removida.
-    =========================================================
-  */
 
   /* =========================================================
     ✨ v3.0.1: NOVA FUNÇÃO DE VALIDAÇÃO (CACHE + TOLERÂNCIA)
@@ -738,12 +741,6 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     });
   }
-
-  /* =========================================================
-     v3.0.2: BLOCO HOOK REDUNDANTE REMOVIDO DAQUI
-     O hook correto já está definido perto da linha 228.
-    =========================================================
-  */
 
   /* ------------------ 🖼️ CARROSSEL V2.7 (NOVA LÓGICA) ------------------ */
   let currentPromoId = 1;
@@ -1118,55 +1115,128 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
 /* =========================================================
-   🎁 V3.2: FUNÇÃO DE CARREGAMENTO DO PAINEL DE RECOMPENSAS
+   🎁 V3.2.3: FUNÇÃO DE CARREGAMENTO DO PAINEL DE RECOMPENSAS (ATUALIZADA)
 ========================================================= */
 function carregarRecompensas(userId) {
-    const metaPedidos = 5; // Nossa meta inicial é de 5 pedidos para o primeiro cupom
     
     // Elementos de UI (para o novo HTML)
     const contadorValor = document.getElementById('contador-valor');
     const progressoBar = document.getElementById('progresso-bar');
     const progressoMsg = document.getElementById('progresso-mensagem');
     
-    if (!contadorValor || !progressoBar || !progressoMsg) return; // Segurança
+    if (!contadorValor || !progressoBar || !progressoMsg || !el.recompensasLista) return; // Segurança
 
     // Usa onSnapshot para ler em tempo real (o usuário não precisa recarregar)
     db.collection('Usuarios').doc(userId).onSnapshot(doc => {
-        if (doc.exists) {
-            const data = doc.data();
-            const feitos = data.pedidosFeitos || 0;
-            const porcentagem = Math.min(100, (feitos / metaPedidos) * 100);
+        
+        el.recompensasLista.innerHTML = ''; // Limpa a lista antes de desenhar
+        
+        const feitos = doc.exists ? (doc.data().pedidosFeitos || 0) : 0;
+        const porcentagem = Math.min(100, (feitos / metaPedidos) * 100);
             
-            // 1. Atualiza o valor do contador
-            contadorValor.textContent = feitos;
+        // 1. Atualiza o valor do contador
+        contadorValor.textContent = feitos;
             
-            // 2. Atualiza a barra de progresso
-            progressoBar.style.width = `${porcentagem}%`;
+        // 2. Atualiza a barra de progresso
+        progressoBar.style.width = `${porcentagem}%`;
 
-            // 3. Atualiza a mensagem de progresso
-            if (feitos >= metaPedidos) {
-                progressoMsg.textContent = '🎉 Parabéns! Você atingiu a meta! Sua recompensa está disponível abaixo.';
-                progressoBar.style.background = 'linear-gradient(90deg, #4caf50, #43a047)'; // Cor de sucesso
-            } else {
-                const faltam = metaPedidos - feitos;
-                progressoMsg.textContent = `Faltam apenas ${faltam} pedidos para você ganhar sua primeira recompensa de fidelidade!`;
-                progressoBar.style.background = 'linear-gradient(90deg, #ffb300, #ff7043)'; // Cor padrão
-            }
+        // 3. Atualiza a mensagem de progresso
+        if (feitos >= metaPedidos) {
+            progressoMsg.textContent = '🎉 Parabéns! Você atingiu a meta! Sua recompensa está disponível abaixo.';
+            progressoBar.style.background = 'linear-gradient(90deg, #4caf50, #43a047)'; // Cor de sucesso
+            
+            // 🚨 NOVO: Exibe as recompensas!
+            exibirRecompensas(feitos); 
 
         } else {
-            // Documento ainda não existe, então é 0 pedidos
-            contadorValor.textContent = '0';
-            progressoBar.style.width = '0%';
-            progressoMsg.textContent = `Faltam ${metaPedidos} pedidos para você ganhar sua primeira recompensa de fidelidade!`;
+            const faltam = metaPedidos - feitos;
+            progressoMsg.textContent = `Faltam apenas ${faltam} pedidos para você ganhar sua primeira recompensa de fidelidade!`;
+            progressoBar.style.background = 'linear-gradient(90deg, #ffb300, #ff7043)'; // Cor padrão
+            el.recompensasLista.innerHTML = `
+                <p style="text-align:center;color:#666;padding:20px;margin-top:20px;">
+                    Faça ${faltam} pedidos para desbloquear a primeira recompensa.
+                </p>`;
         }
+        
     }, error => {
         console.error("Erro ao ler contador de fidelidade:", error);
         progressoMsg.textContent = 'Erro ao carregar seu progresso. Tente recarregar a página.';
     });
 }
 
+/**
+ * Desenha as recompensas na lista.
+ * @param {number} pedidosFeitos 
+ */
+function exibirRecompensas(pedidosFeitos) {
+    if (!el.recompensasLista) return;
+    
+    const recompensasHtml = RECOMPENSAS_DATA.map(r => {
+        const liberada = pedidosFeitos >= r.meta;
+        
+        let acaoBtn = '';
+        if (liberada && r.tipo === 'cupom') {
+            acaoBtn = `
+                <button 
+                    class="recompensa-aplicar-btn" 
+                    data-cupom="${r.cupom}"
+                    style="background:#4caf50;color:#fff;border:none;border-radius:6px;padding:8px 12px;cursor:pointer;font-weight:600;margin-top:10px;"
+                >
+                    Aplicar Cupom 🏷️
+                </button>
+            `;
+        } else if (!liberada) {
+             acaoBtn = `
+                <button 
+                    disabled 
+                    style="background:#ccc;color:#666;border:none;border-radius:6px;padding:8px 12px;cursor:not-allowed;margin-top:10px;"
+                >
+                    Faltam ${r.meta - pedidosFeitos} pedidos
+                </button>
+            `;
+        }
 
-/* ------------------ 🎁 MINHAS RECOMPENSAS (V3.2 - AGORA LÊ DADOS) ------------------ */
+        return `
+            <div class="recompensa-card" style="display:flex;align-items:center;padding:15px;border-radius:10px;margin-bottom:15px;background:#f9f9f9;box-shadow:0 2px 5px rgba(0,0,0,0.1);">
+                <img src="${r.img}" alt="Ícone de Recompensa" style="width:50px;height:50px;object-fit:cover;border-radius:50%;margin-right:15px;">
+                <div style="flex:1;">
+                    <h4 style="margin:0 0 5px 0;color:#333;">${r.titulo}</h4>
+                    <p style="margin:0;font-size:0.9rem;color:#666;">${r.descricao}</p>
+                    ${liberada ? `<p style="margin:5px 0 0 0;font-size:1.1rem;font-weight:bold;color:#ff7043;">CÓDIGO: ${r.cupom}</p>` : ''}
+                </div>
+                <div>
+                    ${acaoBtn}
+                </div>
+            </div>
+        `;
+    }).join('');
+    
+    el.recompensasLista.innerHTML = recompensasHtml;
+    
+    // 4. BIND o evento de aplicar cupom (após o desenho)
+    el.recompensasLista.querySelectorAll('.recompensa-aplicar-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            const codigo = e.currentTarget.dataset.cupom;
+            if (codigo) {
+                // Aplica a lógica do cupom (similar ao formulário)
+                couponApplied = codigo;
+                localStorage.setItem("dflCoupon", couponApplied);
+                
+                // Atualiza o input de cupom (se estiver visível)
+                const couponInput = document.getElementById("coupon-input");
+                if(couponInput) couponInput.value = codigo;
+
+                renderMiniCart(); // Recalcula e mostra a mensagem
+                Overlays.closeAll();
+                popupAdd(`Cupom ${codigo} aplicado! ✅`);
+                Overlays.open(el.miniCart); // Abre o carrinho para ver o desconto
+            }
+        });
+    });
+}
+
+
+/* ------------------ 🎁 MINHAS RECOMPENSAS (V3.2.3) ------------------ */
 
   // 1. Lógica de abrir/fechar o novo painel
   el.recompensasBtn?.addEventListener("click", () => {
@@ -1185,7 +1255,7 @@ function carregarRecompensas(userId) {
   // 2. Lógica de fechar o painel
   el.recompensasFecharBtn?.addEventListener("click", () => Overlays.closeAll());
 
-/* ------------------ FIM DO BLOCO V3.2 ------------------ */
+/* ------------------ FIM DO BLOCO V3.2.3 ------------------ */
 
 
   /* =========================================================
@@ -1196,6 +1266,7 @@ function carregarRecompensas(userId) {
     "kalebhstanley650@gmail.com",
     "contato@dafamilialanches.com.br"
   ];
+  // ... (RESTANTE DO CÓDIGO DO ADMIN DASHBOARD MANTIDO)
 
   function isAdmin(user) {
     return user && user.email && ADMINS.includes(user.email.toLowerCase());
@@ -1516,14 +1587,15 @@ function carregarRecompensas(userId) {
     console.warn("⚠️ Erro interceptado:", e?.message);
   });
 
-  /* 🚨 ATUALIZADO V3.1: Mensagem de console */
-  console.log("%c🎁 DFL v3.1 — Painel Recompensas (Visual) OK",
-              "background:#ff7043;color:#fff;padding:8px 12px;border-radius:8px;font-weight:700;");
+  /* 🚨 ATUALIZADO V3.2.3: Mensagem de console */
+  console.log("%c🎁 DFL v3.2.3 — Recompensas OK",
+              "background:#4caf50;color:#fff;padding:8px 12px;border-radius:8px;font-weight:700;");
 
 }); // Fim do DOMContentLoaded
 
 /* =========================================================
    SCRIPT PARA FECHAR MODAIS AO CLICAR FORA (v2.5)
+   *MANTIDO SEM ALTERAÇÕES*
 ========================================================= */
 
 document.addEventListener('DOMContentLoaded', () => {
