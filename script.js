@@ -1,7 +1,9 @@
 /* =========================================================
-   🎁 DFL v3.4.0 — IMPLEMENTAÇÃO DO LOG DE RECOMPENSAS (FASE 2)
-   - Adiciona gravação do histórico em Usuarios/{userId}/RecompensasRecebidas.
-   - Adiciona leitura e exibição do histórico no painel.
+   🔥 DFL v3.5.0 — CONFIGURAÇÃO GLOBAL DE RECOMPENSAS VIA FIRESTORE
+   - Remove array estático RECOMPENSAS_DATA.
+   - Implementa carregarConfiguracoesDeRecompensas() para ler metas do Firestore.
+   - Atualiza carregarRecompensas() para usar as metas dinâmicas.
+   - Conclui o sistema de recompensas escalável.
 ========================================================= */
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -33,22 +35,8 @@ document.addEventListener("DOMContentLoaded", () => {
     { id: 8, nome: "Combo 4 Armaria", preco: 59.99, precoAntigo: 72.00, img: "promocoes/promo8.jpg" },
     { id: 9, nome: "Combo 5 Uai + Kuat 2L", preco: 64.99, precoAntigo: 79.99, img: "promocoes/promo9.jpg" }
   ];
-
-  /* ------------------ 🎁 RECOMPENSAS V3.4.0 (Metas configuráveis localmente) ------------------ */
-  const RECOMPENSAS_DATA = [
-      { 
-          id: 'fid_5pedidos', 
-          meta: 5, 
-          titulo: 'Seu Primeiro Cupom de Fidelidade!', 
-          descricao: 'Ganhe R$ 10 OFF em seu próximo pedido!',
-          cupom: 'FIDELIDADE10', 
-          tipo: 'value', 
-          valor: 10.00, 
-          img: 'imagens/recompensa-cupom.png'
-      },
-      // FUTUROS NÍVEIS ENTRARÃO AQUI...
-  ];
-  const metaPedidos = RECOMPENSAS_DATA[0].meta; 
+  
+  // O array estático RECOMPENSAS_DATA FOI REMOVIDO E SERÁ CARREGADO DINAMICAMENTE
 
   /* ------------------ 🎯 ELEMENTOS ------------------ */
   const el = {
@@ -98,11 +86,10 @@ document.addEventListener("DOMContentLoaded", () => {
     recompensasPanel: document.getElementById("recompensas-panel"),
     recompensasFecharBtn: document.querySelector(".fechar-recompensas"),
     recompensasLista: document.getElementById("listaRecompensas"),
-    // NOVO: Elemento para o Histórico de Recompensas
     historicoLista: document.getElementById("historicoRecompensas") 
   };
   
-  // Garantia do elemento do histórico
+  // Garantia do elemento do histórico (necessário para a leitura do el.)
   if (!el.historicoLista) {
      const painelBody = document.querySelector("#recompensas-panel .recompensas-body");
      if (painelBody) {
@@ -229,7 +216,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }, 4000);
   }
 
-/* ------------------ 🛒 MINI-CARRINHO (Limpo e Corrigido) ------------------ */
+/* ------------------ 🛒 MINI-CARRINHO (MANTIDO) ------------------ */
   function renderMiniCart() {
     
     if (!el.miniList) return; 
@@ -269,7 +256,7 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
 
-  /* 🔄 Vincula botões dinâmicos (incremento, remoção, limpar, finalizar) */
+  /* 🔄 Vincula botões dinâmicos (MANTIDO) */
   function bindMiniCartButtons() {
     el.miniList.querySelectorAll(".cart-plus").forEach(b => b.addEventListener("click", e => {
       const i = +e.currentTarget.dataset.idx;
@@ -349,7 +336,7 @@ document.addEventListener("DOMContentLoaded", () => {
     return; // ABORTA O RESTO DO SCRIPT.JS
   }
 
-  /* ------------------ ⚙️ LOGIN ------------------ */
+  /* ------------------ ⚙️ LOGIN (MANTIDO) ------------------ */
   el.userBtn?.addEventListener("click", () => Overlays.open(el.loginModal));
   document.querySelectorAll("#login-modal .login-close").forEach(btn =>
     btn.addEventListener("click", () => Overlays.closeAll())
@@ -397,7 +384,7 @@ document.addEventListener("DOMContentLoaded", () => {
       .catch((err) => alert("Erro: ".concat(err.message)));
   });
 
-  /* ------------------ ➕ Adicionais ------------------ */
+  /* ------------------ ➕ Adicionais (MANTIDO) ------------------ */
   const adicionais = [
     { nome: "Cebola", preco: 0.99 },
     { nome: "Salada", preco: 1.99 },
@@ -466,7 +453,7 @@ document.addEventListener("DOMContentLoaded", () => {
     b.addEventListener("click", () => Overlays.closeAll())
   );
 
-  /* ------------------ 🥤 Combos (modal de bebidas) ------------------ */
+  /* ------------------ 🥤 Combos (MANTIDO) ------------------ */
   const comboDrinkOptions = {
     casal: [
       { rotulo: "Fanta 1L (padrão)", delta: 0.01 },
@@ -528,7 +515,7 @@ document.addEventListener("DOMContentLoaded", () => {
     b.addEventListener("click", () => Overlays.closeAll())
   );
 
-  /* ------------------ 🧺 Adicionar item comum ------------------ */
+  /* ------------------ 🧺 Adicionar item comum (MANTIDO) ------------------ */
   function addCommonItem(nome, preco) {
     // Se for um combo do *cardápio principal* (mas não uma "Promo"), abre o modal de combos
     if (/^combo/i.test(nome) && !/^\s*Combo [0-9]/.test(nome)) {
@@ -553,7 +540,7 @@ document.addEventListener("DOMContentLoaded", () => {
     })
   );
 
-  /* ------------------ 🛒 ABRIR CARRINHO ------------------ */
+  /* ------------------ 🛒 ABRIR CARRINHO (MANTIDO) ------------------ */
   el.cartIcon?.addEventListener("click", () => {
     renderMiniCart();
     Overlays.open(el.miniCart);
@@ -563,7 +550,7 @@ document.addEventListener("DOMContentLoaded", () => {
   );
 
 
-/* ------------------ ⚙️ CONFIGURAÇÕES V3.0 ------------------ */
+/* ------------------ ⚙️ CONFIGURAÇÕES V3.0 (MANTIDO) ------------------ */
   const DELIVERY_FEE = 6.00; 
 
   let couponApplied = (localStorage.getItem("dflCoupon") || "").toUpperCase();
@@ -573,7 +560,38 @@ document.addEventListener("DOMContentLoaded", () => {
     cart.reduce((s, i) => s + (Number(i.preco) || 0) * (Number(i.qtd) || 0), 0);
 
   /* =========================================================
-    ✨ v3.3.0: Nova lógica de validação de cupons (Centralizada)
+    ✨ v3.5.0: FUNÇÃO PARA CARREGAR METAS (AGORA DINÂMICA)
+    =========================================================
+  */
+  let configuracoesRecompensa = null; // Cache global
+  
+  async function carregarConfiguracoesDeRecompensas() {
+      if (configuracoesRecompensa) return configuracoesRecompensa; // Usa o cache
+      
+      try {
+          const snapshot = await db.collection("RecompensasConfig").get();
+          const configs = [];
+          snapshot.forEach(doc => {
+              configs.push({ id: doc.id, ...doc.data() });
+          });
+          // Ordena pelo campo 'limite' (pedidos) e salva no cache
+          configuracoesRecompensa = configs.sort((a, b) => (a.limite || 0) - (b.limite || 0));
+          
+          if(configuracoesRecompensa.length === 0) {
+              console.warn("Firestore: Coleção RecompensasConfig vazia. Recompensas desativadas.");
+          }
+          
+          return configuracoesRecompensa;
+          
+      } catch (e) {
+          console.error("Erro ao carregar configurações de recompensas do Firestore:", e);
+          return [];
+      }
+  }
+
+
+  /* =========================================================
+    ✨ v3.5.0: Validação de cupons (Lê o cupom personalizado do Firestore)
     =========================================================
   */
   const _cupomCache = { /* key -> { ate: ms, res: {...} } */ };
@@ -587,6 +605,9 @@ document.addEventListener("DOMContentLoaded", () => {
     const invalido = { valido:false, discount:0, freeShipping:false, label:"", mensagem:"" };
     if (!code) return invalido;
     const userId = currentUser?.uid;
+    
+    // Carrega as configurações (garante que temos as metas para checar o cupom)
+    const RECOMPENSAS_DATA = await carregarConfiguracoesDeRecompensas();
 
     const key = _cacheKey(code, subtotal);
     const now = Date.now();
@@ -601,30 +622,35 @@ document.addEventListener("DOMContentLoaded", () => {
       const snapGeral = await db.collection("Cupons").doc(code).get();
       if (snapGeral.exists) {
         data = snapGeral.data();
-      } else if (userId && code === RECOMPENSAS_DATA[0].cupom) {
-        // Tenta em 'CuponsUsuarios' (personalizados) - Exemplo: FIDELIDADE10
-        const snapPessoal = await db.collection("CuponsUsuarios").doc(userId).get();
-        const pessoalData = snapPessoal.data();
-        
-        if (snapPessoal.exists && pessoalData?.cupom === code && !pessoalData?.usado) {
-          data = {
-            tipo: pessoalData.tipo, 
-            valor: pessoalData.valor, 
-            ativo: true, 
-            expiraEm: pessoalData.expiraEm 
-          };
-          isPersonalizado = true;
-        } else if (snapPessoal.exists && pessoalData?.usado) {
-           return { ...invalido, mensagem: "Este cupom já foi utilizado." };
-        } else {
-           // Cupom pessoal não encontrado/liberado
-           return { ...invalido, mensagem: "Cupom inválido ou não liberado." };
-        }
       } else {
-        // Não achou em Cupons nem é o cupom personalizado conhecido
-        const res = { ...invalido, mensagem: "Cupom inválido." };
-        _cupomCache[key] = { ate: now + 30000, res }; // 30s de cache
-        return res;
+          // Checa se o cupom é um dos códigos de recompensa configurados
+          const recompensaEncontrada = RECOMPENSAS_DATA.find(r => r.valor === code && r.tipo === 'cupom');
+          
+          if (userId && recompensaEncontrada) {
+              // Tenta em 'CuponsUsuarios' (personalizados)
+              const snapPessoal = await db.collection("CuponsUsuarios").doc(userId).get();
+              const pessoalData = snapPessoal.data();
+              
+              if (snapPessoal.exists && pessoalData?.cupom === code && !pessoalData?.usado) {
+                  data = {
+                    tipo: pessoalData.tipo, 
+                    valor: pessoalData.valor, // O valor é o R$ 10 OFF (ou 15, etc.)
+                    ativo: true, 
+                    expiraEm: pessoalData.expiraEm 
+                  };
+                  isPersonalizado = true;
+              } else if (snapPessoal.exists && pessoalData?.usado) {
+                  return { ...invalido, mensagem: "Este cupom já foi utilizado." };
+              } else {
+                  // Cupom pessoal não encontrado/liberado
+                  return { ...invalido, mensagem: "Cupom inválido ou não liberado." };
+              }
+          } else {
+              // Não achou em Cupons nem é um cupom personalizado configurado
+              const res = { ...invalido, mensagem: "Cupom inválido." };
+              _cupomCache[key] = { ate: now + 30000, res }; // 30s de cache
+              return res;
+          }
       }
       
       // Validação do Cupom (Geral ou Pessoal)
@@ -707,7 +733,7 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   /* =========================================================
-    ✨ v3.0: UI DO CARRINHO (ASYNC E CONECTADA)
+    ✨ v3.0: UI DO CARRINHO (MANTIDO)
     =========================================================
   */
   async function enhanceMiniCartUI() {
@@ -790,7 +816,7 @@ document.addEventListener("DOMContentLoaded", () => {
     // Adiciona os novos elementos ao rodapé
     el.miniFoot.appendChild(summaryDiv);
     
-    // 5. BIND EVENTOS (para os botões que acabamos de criar)
+    // 5. BIND EVENTOS (MANTIDO)
     summaryDiv.querySelector("#address-input")?.addEventListener("input", (e) => {
       addressValue = (e.target.value || "").trim();
       localStorage.setItem("dflAddress", addressValue);
@@ -811,7 +837,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  /* ------------------ 🖼️ CARROSSEL V2.7 (NOVA LÓGICA) ------------------ */
+  /* ------------------ 🖼️ CARROSSEL V2.7 (MANTIDO) ------------------ */
   let currentPromoId = 1;
 
   // Função central que abre e popula o modal
@@ -879,7 +905,7 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
 
-  /* ------------------ ⏰ Status + Timer (mantidos) ------------------ */
+  /* ------------------ ⏰ Status + Timer (MANTIDO) ------------------ */
   const atualizarStatus = safe(() => {
     const agora = new Date();
     const h = agora.getHours();
@@ -941,7 +967,7 @@ document.addEventListener("DOMContentLoaded", () => {
   setInterval(atualizarTimer, 1000);
 
   /* =========================================================
-    ✨ v3.4.0: FUNÇÃO 'FECHAR PEDIDO' (Com Log de Recompensa)
+    ✨ v3.5.0: FUNÇÃO 'FECHAR PEDIDO' (Configuração Dinâmica)
     =========================================================
   */
   async function fecharPedido() {
@@ -1017,59 +1043,63 @@ document.addEventListener("DOMContentLoaded", () => {
           });
       }
 
-      // 6. LÓGICA PÓS-PEDIDO (RECOMPENSAS - FASE V3.4)
+      // 6. LÓGICA PÓS-PEDIDO (RECOMPENSAS DINÂMICAS - V3.5.0)
+      const RECOMPENSAS_DATA = await carregarConfiguracoesDeRecompensas();
+      
       const doc = await usuarioRef.get();
       const data = doc.data() || { pedidosFeitos: 0, recompensaNivel: 0 };
       const feitos = data.pedidosFeitos;
       const nivelAtual = data.recompensaNivel;
       
-      // Verifica se a meta foi atingida (ex: 5 pedidos para o nível 1)
-      const proximaRecompensa = RECOMPENSAS_DATA.find(r => r.meta > nivelAtual * metaPedidos);
+      // Encontra a próxima recompensa com limite igual aos pedidos feitos
+      const recompensaAtingida = RECOMPENSAS_DATA.find(r => 
+          r.limite === feitos && (r.limite / RECOMPENSAS_DATA[0].limite) > nivelAtual
+      );
       
-      if (proximaRecompensa && feitos === proximaRecompensa.meta) {
+      if (recompensaAtingida) {
           // Meta atingida!
           
-          const novoNivel = proximaRecompensa.meta / metaPedidos; // Nível 1, 2, 3...
-          const cupomPersonalizado = {
-              cupom: proximaRecompensa.cupom,
-              tipo: proximaRecompensa.tipo,
-              valor: proximaRecompensa.valor,
+          const novoNivel = recompensaAtingida.limite / RECOMPENSAS_DATA[0].limite; 
+          
+          // A. Dados do cupom/brinde a ser liberado
+          const itemLiberado = {
+              cupom: recompensaAtingida.valor,
+              tipo: recompensaAtingida.tipo,
+              valor: recompensaAtingida.valor, // Se tipo 'brinde', valor é o nome
               liberadoEm: firebase.firestore.FieldValue.serverTimestamp(),
               usado: false,
-              pedidoLiberacao: pedidoRef.id
+              pedidoLiberacao: pedidoRef.id,
+              titulo: `Recompensa Nível ${novoNivel}`
           };
           
-          // A. Atualiza o progresso do usuário no Firestore (Nível e Última Recompensa)
+          // B. Atualiza o progresso do usuário no Firestore (Nível e Última Recompensa)
           await usuarioRef.update({
               recompensaNivel: novoNivel,
-              ultimaRecompensa: proximaRecompensa.id
+              ultimaRecompensa: recompensaAtingida.id
           });
           
-          // B. Cria o cupom personalizado para o usuário (em CuponsUsuarios)
-          await db.collection("CuponsUsuarios").doc(userId).set(cupomPersonalizado, { merge: true });
+          // C. Cria o cupom personalizado para o usuário (em CuponsUsuarios)
+          if (recompensaAtingida.tipo === 'cupom') {
+               await db.collection("CuponsUsuarios").doc(userId).set(itemLiberado, { merge: true });
+          }
+          // Nota: Se for 'brinde', o registro de liberação é apenas no Log.
 
-          // C. Registra a recompensa no histórico (NOVO na V3.4)
-          const logRecompensa = {
-              recompensaId: proximaRecompensa.id,
-              titulo: proximaRecompensa.titulo,
-              valor: proximaRecompensa.valor,
-              tipo: proximaRecompensa.tipo,
-              dataRecebimento: firebase.firestore.FieldValue.serverTimestamp(),
-              pedidoId: pedidoRef.id
-          };
+          // D. Registra a recompensa no histórico
           await db.collection("Usuarios").doc(userId)
-                  .collection("RecompensasRecebidas").add(logRecompensa);
+                  .collection("RecompensasRecebidas").add(itemLiberado);
 
 
-          // D. Exibe o Popup de Conquista
-          const msg = `🎉 Parabéns! Você completou ${feitos} pedidos e ganhou R$ ${proximaRecompensa.valor.toFixed(2).replace('.', ',')} OFF!`;
+          // E. Exibe o Popup de Conquista
+          const valorFormatado = (recompensaAtingida.tipo === 'cupom') ? `${recompensaAtingida.valor} OFF` : recompensaAtingida.valor;
+          const msg = `🎉 Parabéns! Você completou ${feitos} pedidos e ganhou: ${valorFormatado}!`;
           mostrarPopupRecompensa(msg);
           
           // Invalida o cache para forçar a leitura do novo cupom
+          configuracoesRecompensa = null; 
           _cupomCache = {}; 
       }
       
-      // 7. Feedback e Limpeza (o mesmo de antes)
+      // 7. Feedback e Limpeza (MANTIDO)
       popupAdd("Pedido salvo ✅");
 
       const linhas = [
@@ -1104,11 +1134,10 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   // Chama o renderMiniCart uma vez no início para carregar o rodapé
-  // caso haja itens no localStorage (a lógica de carregar o 'cart' do localStorage
-  // não está aqui, mas se estivesse, esta chamada inicializaria a UI)
+  // caso haja itens no localStorage (MANTIDO)
   renderMiniCart();
   
-/* ------------------ 📦 MEUS PEDIDOS PREMIUM (V2.10) ------------------ */
+/* ------------------ 📦 MEUS PEDIDOS PREMIUM (MANTIDO) ------------------ */
 
   // 1. Lógica de abrir/fechar o novo painel
   el.pedidosBtn?.addEventListener("click", () => {
@@ -1123,7 +1152,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   el.pedidosFecharBtn?.addEventListener("click", () => Overlays.closeAll());
 
-  // 2. Lógica de carregar pedidos (v2.9)
+  // 2. Lógica de carregar pedidos (MANTIDO)
   async function carregarPedidos(userId) {
     if (!el.pedidosLista) return;
     el.pedidosLista.innerHTML = `<p class="empty-orders">Carregando pedidos...</p>`;
@@ -1146,7 +1175,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
-  // 3. Lógica de exibir os pedidos no painel (v2.9)
+  // 3. Lógica de exibir os pedidos no painel (MANTIDO)
   function exibirPedidos(pedidos) {
     if (!el.pedidosLista) return;
     
@@ -1181,7 +1210,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }).join('');
   }
   
-  // 4. Lógica de "Repetir Pedido" (v2.10 - Lógica Real)
+  // 4. Lógica de "Repetir Pedido" (MANTIDO)
   el.pedidosLista?.addEventListener('click', async (e) => {
     if (e.target.classList.contains('repetir-btn') && !e.target.disabled) {
       const idPedido = e.target.dataset.id;
@@ -1250,10 +1279,14 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
 /* =========================================================
-   🎁 V3.4.0: FUNÇÃO DE CARREGAMENTO DO PAINEL DE RECOMPENSAS 
-   (Agora lê e exibe o Histórico)
+   🎁 V3.5.0: FUNÇÃO DE CARREGAMENTO DO PAINEL DE RECOMPENSAS (DINÂMICA)
 ========================================================= */
 async function carregarRecompensas(userId) {
+    
+    // 🚨 NOVO: Carrega as metas dinamicamente
+    const RECOMPENSAS_DATA = await carregarConfiguracoesDeRecompensas();
+    if (RECOMPENSAS_DATA.length === 0) return; // Aborta se não houver metas
+    const metaPrimeiroNivel = RECOMPENSAS_DATA[0].limite; 
     
     const contadorValor = document.getElementById('contador-valor');
     const progressoBar = document.getElementById('progresso-bar');
@@ -1266,7 +1299,7 @@ async function carregarRecompensas(userId) {
         
         // --- LIMPEZA DE UI ---
         el.recompensasLista.innerHTML = ''; 
-        if(el.historicoLista) el.historicoLista.innerHTML = ''; // Limpa o histórico também
+        if(el.historicoLista) el.historicoLista.innerHTML = ''; 
 
         const data = doc.data() || { pedidosFeitos: 0, recompensaNivel: 0 };
         const feitos = data.pedidosFeitos;
@@ -1274,34 +1307,57 @@ async function carregarRecompensas(userId) {
         
         // Status do Cupom Personalizado
         let cupomStatus = null;
-        if (nivelAtual > 0) {
+        const recompensaAtual = RECOMPENSAS_DATA.find(r => r.limite === nivelAtual * metaPrimeiroNivel);
+        
+        if (recompensaAtual && recompensaAtual.tipo === 'cupom') {
             const cupomSnap = await db.collection('CuponsUsuarios').doc(userId).get();
             cupomStatus = cupomSnap.exists ? cupomSnap.data() : null;
         }
 
-        const porcentagem = Math.min(100, (feitos / metaPedidos) * 100);
+        // Calcula a próxima meta: a primeira recompensa com limite > pedidos feitos
+        const proximaRecompensa = RECOMPENSAS_DATA.find(r => r.limite > feitos);
+        const metaParaExibir = proximaRecompensa ? proximaRecompensa.limite : feitos; // Se atingiu a última, exibe a última meta
+        const metaBase = proximaRecompensa ? proximaRecompensa.limite : metaPrimeiroNivel;
+
+        const porcentagem = Math.min(100, (feitos / metaBase) * 100);
             
         // Atualiza a barra
         contadorValor.textContent = feitos;
+        
+        // Ajusta a exibição da meta no HTML (sempre referente à próxima ou à última atingida)
+        const elMeta = document.querySelector('.progress-container span:last-child');
+        if(elMeta) elMeta.textContent = metaParaExibir;
+
         progressoBar.style.width = `${porcentagem}%`;
 
         // Verifica o Status da Meta
-        if (feitos >= metaPedidos) {
-            progressoMsg.textContent = '🎉 Parabéns! Você atingiu a meta! Sua recompensa está disponível abaixo.';
-            progressoBar.style.background = 'linear-gradient(90deg, #4caf50, #43a047)'; 
-            progressoBar.parentElement.parentElement.setAttribute('data-status', 'complete'); // Para o CSS
-            
-            exibirRecompensas(feitos, cupomStatus); 
-
-        } else {
-            const faltam = metaPedidos - feitos;
-            progressoMsg.textContent = `Faltam apenas ${faltam} pedidos para você ganhar sua primeira recompensa de fidelidade!`;
+        if (proximaRecompensa) {
+            // A meta ainda não foi atingida
+            const faltam = proximaRecompensa.limite - feitos;
+            progressoMsg.textContent = `Faltam apenas ${faltam} pedidos para você ganhar a recompensa "${proximaRecompensa.valor}"!`;
             progressoBar.style.background = 'linear-gradient(90deg, #ffb300, #ff7043)'; 
             progressoBar.parentElement.parentElement.removeAttribute('data-status');
-            el.recompensasLista.innerHTML = `
-                <p style="text-align:center;color:#666;padding:20px;margin-top:20px;">
-                    Faça ${faltam} pedidos para desbloquear a primeira recompensa.
-                </p>`;
+            
+            // Exibe as recompensas já obtidas (as que têm limite <= pedidos feitos)
+            const recompensasObtidas = RECOMPENSAS_DATA.filter(r => r.limite <= feitos);
+            exibirRecompensas(feitos, recompensasObtidas, cupomStatus);
+
+            if (recompensasObtidas.length === 0) {
+                 el.recompensasLista.innerHTML = `
+                    <p style="text-align:center;color:#666;padding:20px;margin-top:20px;">
+                        Faça ${faltam} pedidos para desbloquear a primeira recompensa.
+                    </p>`;
+            }
+
+
+        } else {
+             // Todas as metas foram atingidas
+            progressoMsg.textContent = '🎉 Parabéns! Você completou todas as metas de fidelidade!';
+            progressoBar.style.background = 'linear-gradient(90deg, #4caf50, #43a047)'; 
+            progressoBar.parentElement.parentElement.setAttribute('data-status', 'complete');
+            
+            // Exibe todas as recompensas como obtidas
+            exibirRecompensas(feitos, RECOMPENSAS_DATA, cupomStatus); 
         }
         
         // --- 2. Lógica de Histórico (Chamada) ---
@@ -1314,54 +1370,54 @@ async function carregarRecompensas(userId) {
 }
 
 /**
- * Desenha as recompensas atuais disponíveis.
+ * Desenha as recompensas atuais disponíveis (as que o limite foi atingido).
  */
-function exibirRecompensas(pedidosFeitos, cupomStatus) {
+function exibirRecompensas(pedidosFeitos, recompensasDisponiveis, cupomStatus) {
     if (!el.recompensasLista) return;
     
-    const recompensasHtml = RECOMPENSAS_DATA.map(r => {
-        const liberada = pedidosFeitos >= r.meta;
-        const cupomJaUsado = cupomStatus?.usado === true && cupomStatus?.cupom === r.cupom;
+    // Filtra apenas as recompensas que o usuário atingiu (ou seja, todas as do array)
+    const recompensasHtml = recompensasDisponiveis.map(r => {
+        const liberada = pedidosFeitos >= r.limite;
+        const cupomJaUsado = cupomStatus?.usado === true && cupomStatus?.cupom === r.valor;
+        
+        // Define o título de forma mais descritiva
+        const titulo = `Recompensa: ${r.valor} (${r.limite} Pedidos)`;
         
         let acaoBtn = '';
         let statusTag = '';
         let cardStyle = '';
+        let codigoCupom = r.tipo === 'cupom' ? r.valor : 'BRINDE';
         
         if (cupomJaUsado) {
              statusTag = '<span style="color:#d32f2f;font-weight:bold;">(JÁ UTILIZADO)</span>';
              acaoBtn = `<button disabled style="background:#ccc;color:#666;border:none;border-radius:6px;padding:8px 12px;cursor:not-allowed;margin-top:10px;">Cupom Usado</button>`;
              cardStyle = 'opacity: 0.7;';
         }
-        else if (liberada && r.tipo === 'value') {
+        else if (liberada && r.tipo === 'cupom') {
             statusTag = '<span style="color:#4caf50;font-weight:bold;">(DISPONÍVEL)</span>';
             acaoBtn = `
                 <button 
                     class="recompensa-aplicar-btn" 
-                    data-cupom="${r.cupom}"
+                    data-cupom="${codigoCupom}"
                     style="background:#4caf50;color:#fff;border:none;border-radius:6px;padding:8px 12px;cursor:pointer;font-weight:600;margin-top:10px;"
                 >
                     Aplicar Cupom 🏷️
                 </button>
             `;
-        } else if (!liberada) {
-             statusTag = '';
-             acaoBtn = `
-                <button 
-                    disabled 
-                    style="background:#ccc;color:#666;border:none;border-radius:6px;padding:8px 12px;cursor:not-allowed;margin-top:10px;"
-                >
-                    Faltam ${r.meta - pedidosFeitos} pedidos
-                </button>
-            `;
+        } else if (liberada && r.tipo === 'brinde') {
+             statusTag = '<span style="color:#1976D2;font-weight:bold;">(LIBERADO)</span>';
+             acaoBtn = `<button disabled style="background:#1976D2;color:#fff;border:none;border-radius:6px;padding:8px 12px;cursor:default;margin-top:10px;">Brinde na Próxima Compra</button>`;
         }
+        
+        // Se ainda não liberada, o filtro já removeu. Aqui só temos as liberadas.
 
         return `
             <div class="recompensa-card" style="display:flex;align-items:center;padding:15px;border-radius:10px;margin-bottom:15px;background:#f9f9f9;box-shadow:0 2px 5px rgba(0,0,0,0.1);${cardStyle}">
-                <img src="${r.img}" alt="Ícone de Recompensa" style="width:50px;height:50px;object-fit:cover;border-radius:50%;margin-right:15px;">
+                <img src="imagens/recompensa-${r.tipo}.png" alt="Ícone de Recompensa" style="width:50px;height:50px;object-fit:cover;border-radius:50%;margin-right:15px;">
                 <div style="flex:1;">
-                    <h4 style="margin:0 0 5px 0;color:#333;">${r.titulo} ${statusTag}</h4>
-                    <p style="margin:0;font-size:0.9rem;color:#666;">${r.descricao}</p>
-                    ${liberada ? `<p style="margin:5px 0 0 0;font-size:1.1rem;font-weight:bold;color:#ff7043;">CÓDIGO: ${r.cupom}</p>` : ''}
+                    <h4 style="margin:0 0 5px 0;color:#333;">${titulo} ${statusTag}</h4>
+                    <p style="margin:0;font-size:0.9rem;color:#666;">Ganho por ${r.limite} pedidos.</p>
+                    ${r.tipo === 'cupom' ? `<p style="margin:5px 0 0 0;font-size:1.1rem;font-weight:bold;color:#ff7043;">CÓDIGO: ${codigoCupom}</p>` : ''}
                 </div>
                 <div>
                     ${acaoBtn}
@@ -1422,13 +1478,15 @@ async function carregarHistoricoRecompensas(userId) {
                 ? (log.dataRecebimento.toDate().toLocaleDateString('pt-BR'))
                 : "—";
 
-            let valorStr = (log.tipo === 'value') ? money(log.valor) : (log.tipo === 'percent' ? `${log.valor}% OFF` : 'Item Grátis');
+            let valorStr = (log.tipo === 'cupom') ? `${log.valor} OFF` : log.valor;
+            if (log.tipo === 'value') valorStr = money(log.valor);
+
             
             return `
                 <div class="historico-card" style="display:flex; padding: 10px 0; border-bottom: 1px dashed #eee; align-items: center; justify-content: space-between;">
                     <div style="flex:1;">
                         <p style="font-weight:600; margin:0; color:#333;">
-                            🎁 ${log.titulo}
+                            🎁 ${log.titulo || log.valor}
                         </p>
                         <small style="color:#999;">Recebido em: ${dataRecebimento}</small>
                     </div>
@@ -1450,7 +1508,7 @@ async function carregarHistoricoRecompensas(userId) {
 }
 
 
-/* ------------------ 🎁 MINHAS RECOMPENSAS (V3.4.0) ------------------ */
+/* ------------------ 🎁 MINHAS RECOMPENSAS (V3.5.0) ------------------ */
 
   // 1. Lógica de abrir/fechar o novo painel
   el.recompensasBtn?.addEventListener("click", () => {
@@ -1469,7 +1527,7 @@ async function carregarHistoricoRecompensas(userId) {
   // 2. Lógica de fechar o painel
   el.recompensasFecharBtn?.addEventListener("click", () => Overlays.closeAll());
 
-/* ------------------ FIM DO BLOCO V3.4.0 ------------------ */
+/* ------------------ FIM DO BLOCO V3.5.0 ------------------ */
 
 
   /* =========================================================
@@ -1801,9 +1859,9 @@ async function carregarHistoricoRecompensas(userId) {
     console.warn("⚠️ Erro interceptado:", e?.message);
   });
 
-  /* 🚨 ATUALIZADO V3.4.0: Mensagem de console */
-  console.log("%c🎁 DFL v3.4.0 — Log de Recompensas OK",
-              "background:#FF7043;color:#fff;padding:8px 12px;border-radius:8px;font-weight:700;");
+  /* 🚨 ATUALIZADO V3.5.0: Mensagem de console */
+  console.log("%c🔥 DFL v3.5.0 — Recompensas dinâmicas via Firestore carregadas com sucesso!",
+              "background:#1976D2;color:#fff;padding:8px 12px;border-radius:8px;font-weight:700;");
 
 }); // Fim do DOMContentLoaded
 
