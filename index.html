@@ -10,7 +10,7 @@
   <script defer src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
   <script defer src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
   <script defer src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
-  <script defer src="script.js?v=3.2.1"></script> 
+  <script defer src="script.js?v=3.2.3"></script> 
 </head>
 
 <body>
@@ -429,23 +429,29 @@
         <span>🎁 Minhas Recompensas</span>
         <button class="fechar-recompensas" type="button">✖</button> 
       </div>
-      <div class="recompensas-body" id="listaRecompensas">
+      <div class="recompensas-body"> 
         
-        <div class="progresso-card">
-            <h4>Seu Status de Fidelidade:</h4>
-            <p class="contador-pedidos">Pedidos Feitos: <span id="contador-valor">...</span></p>
-            <div class="progresso-bar-container">
-              <div id="progresso-bar" class="progresso-bar" style="width: 0%;"></div>
+        <h4 style="margin-top: 0;">🏆 Contador de Fidelidade</h4>
+        
+        <div class="progress-container" style="margin-bottom: 20px; border: 1px solid #ccc; padding: 15px; border-radius: 8px;">
+            <p style="margin: 0 0 8px 0; font-size: 1.1rem;">
+                Pedidos Feitos: <span id="contador-valor" style="font-weight: bold; color: #ff7043;">...</span> de <span style="font-weight: bold;">5</span>
+            </p>
+            <div class="progresso-bar-bg" style="background:#eee; height: 15px; border-radius: 8px; overflow: hidden;">
+              <div id="progresso-bar" style="height: 100%; width: 0%; transition: width 0.5s;"></div>
             </div>
-            <p id="progresso-mensagem" class="progresso-mensagem">Carregando progresso...</p>
+            <p id="progresso-mensagem" style="margin-top: 8px; font-size: 0.9rem; color: #666;">Carregando progresso...</p>
         </div>
         
-        <h4 class="recompensas-header-secundario">🎁 Recompensas Disponíveis</h4>
-        <p class="empty-rewards">Nenhuma recompensa ativa no momento.</p>
+        <h4 class="recompensas-header-secundario">🏷️ Recompensas Desbloqueadas</h4>
+        <div id="listaRecompensas">
+            <p class="empty-rewards">Aguardando o carregamento...</p>
         </div>
+        
+      </div>
     </div>
-    
   </div>
+  
   <div class="meus-pedidos"> 
     <button class="meus-pedidos-btn" type="button">📦 Meus Pedidos</button>
     <div class="pedidos-panel" id="painelPedidos">
