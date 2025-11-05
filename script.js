@@ -1,7 +1,6 @@
 /* =========================================================
-   🛠️ DFL v3.5.1 — CORREÇÃO DE INICIALIZAÇÃO DE RECOMPENSAS
-   - Garante que as configurações (RecompensasConfig) sejam carregadas antes de tentar ler o progresso do usuário.
-   - Adiciona tratamento de erro na UI caso as configurações globais não estejam disponíveis.
+   🛠️ DFL v3.5.2 — CORREÇÃO FINAL DE EXIBIÇÃO DA BARRA
+   - Corrige o bug de exibição "1 de 1" para clientes novos, garantindo que use a meta do primeiro nível (limite: 5) como base visual até que a meta seja atingida.
 ========================================================= */
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -567,7 +566,17 @@ document.addEventListener("DOMContentLoaded", () => {
           const snapshot = await db.collection("RecompensasConfig").get();
           const configs = [];
           snapshot.forEach(doc => {
-              configs.push({ id: doc.id, ...doc.data() });
+              // 🚨 CORREÇÃO DE ESTRUTURA: Adicionamos mapeamento de campos
+              // O código espera: id, limite, tipo, valor, titulo
+              const data = doc.data();
+              configs.push({ 
+                  id: doc.id,
+                  limite: data.meta || data.limite, // Usa 'meta' ou 'limite'
+                  tipo: data.tipo,
+                  valor: data.valor || data.titulo, // Usa 'valor' ou 'titulo'
+                  titulo: data.titulo || data.valor,
+                  ...data // Mantém todos os outros campos (percent, ativo, etc.)
+              });
           });
           // Ordena pelo campo 'limite' (pedidos) e salva no cache
           configuracoesRecompensa = configs.sort((a, b) => (a.limite || 0) - (b.limite || 0));
@@ -889,7 +898,7 @@ document.addEventListener("DOMContentLoaded", () => {
   // 4. Fechar o modal
   el.promoClose?.addEventListener("click", () => Overlays.closeAll());
 
-  // 5. Navegação do carrossel principal (mantida)
+  // 5. Navegação do carrossel principal (mantido)
   el.cPrev?.addEventListener("click", () => {
     if (!el.slides) return;
     el.slides.scrollLeft -= Math.min(el.slides.clientWidth * 0.9, 320);
@@ -1061,11 +1070,11 @@ document.addEventListener("DOMContentLoaded", () => {
           const itemLiberado = {
               cupom: recompensaAtingida.valor,
               tipo: recompensaAtingida.tipo,
-              valor: recompensaAtingida.valor, // Se tipo 'brinde', valor é o nome
+              valor: recompensaAtingida.valor, // O campo valor armazena o código/descrição
               liberadoEm: firebase.firestore.FieldValue.serverTimestamp(),
               usado: false,
               pedidoLiberacao: pedidoRef.id,
-              titulo: `Recompensa Nível ${novoNivel}`
+              titulo: recompensaAtingida.titulo || `Recompensa Nível ${novoNivel}`
           };
           
           // B. Atualiza o progresso do usuário no Firestore (Nível e Última Recompensa)
@@ -1078,7 +1087,6 @@ document.addEventListener("DOMContentLoaded", () => {
           if (recompensaAtingida.tipo === 'cupom') {
                await db.collection("CuponsUsuarios").doc(userId).set(itemLiberado, { merge: true });
           }
-          // Nota: Se for 'brinde', o registro de liberação é apenas no Log.
 
           // D. Registra a recompensa no histórico
           await db.collection("Usuarios").doc(userId)
@@ -1275,7 +1283,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
 /* =========================================================
-   🎁 V3.5.1: FUNÇÃO DE CARREGAMENTO DO PAINEL DE RECOMPENSAS (CORRIGIDA)
+   🎁 V3.5.2: FUNÇÃO DE CARREGAMENTO DO PAINEL DE RECOMPENSAS (CORREÇÃO UI)
 ========================================================= */
 async function carregarRecompensas(userId) {
     
@@ -1285,14 +1293,14 @@ async function carregarRecompensas(userId) {
     
     if (!contadorValor || !progressoBar || !progressoMsg || !el.recompensasLista) return; 
 
-    // 🚨 1. CORREÇÃO: Inicializa o contador e lista vazios até a leitura.
-    contadorValor.textContent = '0';
+    // 1. Inicializa a UI
+    contadorValor.textContent = '...';
     progressoBar.style.width = '0%';
-    progressoMsg.textContent = 'Carregando configurações...';
+    progressoMsg.textContent = 'Carregando metas...';
     el.recompensasLista.innerHTML = '<p style="text-align:center;color:#999;padding:20px;">Aguardando configurações...</p>';
     if(el.historicoLista) el.historicoLista.innerHTML = '';
     
-    // 🚨 2. CORREÇÃO: Carrega as metas primeiro.
+    // 2. Carrega as metas primeiro.
     const RECOMPENSAS_DATA = await carregarConfiguracoesDeRecompensas();
 
     if (RECOMPENSAS_DATA.length === 0) {
@@ -1323,17 +1331,23 @@ async function carregarRecompensas(userId) {
             cupomStatus = cupomSnap.exists ? cupomSnap.data() : null;
         }
 
-        // Calcula a próxima meta: a primeira recompensa com limite > pedidos feitos
+        // Encontra a próxima meta que o cliente AINDA NÃO ATINGIU
         const proximaRecompensa = RECOMPENSAS_DATA.find(r => r.limite > feitos);
+        
+        // 🚨 CORREÇÃO: Define a meta base para exibição. Se não atingiu a primeira (0 pedidos), usa a primeira meta. Se atingiu, usa a próxima.
         const metaParaExibir = proximaRecompensa ? proximaRecompensa.limite : feitos; 
-        const metaBase = proximaRecompensa ? proximaRecompensa.limite : metaPrimeiroNivel;
+        const metaBaseCalculo = proximaRecompensa ? proximaRecompensa.limite : metaPrimeiroNivel;
 
-        const porcentagem = Math.min(100, (feitos / metaBase) * 100);
+        // Se o cliente tem 1 pedido e a meta é 5, a base é 5.
+        // Se o cliente tem 6 pedidos e a meta é 10, a base é 10.
+        
+        // Se ele completou o último nível e não tem mais metas, a barra deve ser 100%
+        const porcentagem = proximaRecompensa === undefined ? 100 : Math.min(100, (feitos / metaBaseCalculo) * 100);
             
         // Atualiza a barra
         contadorValor.textContent = feitos;
         
-        // Ajusta a exibição da meta no HTML (sempre referente à próxima ou à última atingida)
+        // Ajusta a exibição da meta no HTML 
         const elMeta = document.querySelector('.progress-container span:last-child');
         if(elMeta) elMeta.textContent = metaParaExibir;
 
@@ -1349,7 +1363,7 @@ async function carregarRecompensas(userId) {
             
             // Exibe as recompensas já obtidas (as que têm limite <= pedidos feitos)
             const recompensasObtidas = RECOMPENSAS_DATA.filter(r => r.limite <= feitos);
-            exibirRecompensas(feitos, recompensasObtidas, cupomStatus, RECOMPENSAS_DATA); // Passa RECOMPENSAS_DATA
+            exibirRecompensas(feitos, recompensasObtidas, cupomStatus, RECOMPENSAS_DATA);
 
             if (recompensasObtidas.length === 0) {
                  el.recompensasLista.innerHTML = `
@@ -1369,17 +1383,17 @@ async function carregarRecompensas(userId) {
             exibirRecompensas(feitos, RECOMPENSAS_DATA, cupomStatus, RECOMPENSAS_DATA);
         }
         
-        // --- 2. Lógica de Histórico (Chamada) ---
+        // --- 4. Lógica de Histórico (Chamada) ---
         await carregarHistoricoRecompensas(userId);
         
     }, error => {
         console.error("Erro ao ler contador de fidelidade:", error);
-        progressoMsg.textContent = 'Erro ao carregar seu progresso. Tente recarregar a página.';
+        progressoMsg.textContent = 'Erro ao ler seu progresso. Tente recarregar a página.';
     });
 }
 
 /**
- * Desenha as recompensas atuais disponíveis (as que o limite foi atingido).
+ * Desenha as recompensas atuais disponíveis.
  */
 function exibirRecompensas(pedidosFeitos, recompensasDisponiveis, cupomStatus, RECOMPENSAS_DATA) {
     if (!el.recompensasLista) return;
@@ -1390,7 +1404,7 @@ function exibirRecompensas(pedidosFeitos, recompensasDisponiveis, cupomStatus, R
         const cupomJaUsado = cupomStatus?.usado === true && cupomStatus?.cupom === r.valor;
         
         // Define o título de forma mais descritiva
-        const titulo = `Recompensa: ${r.valor} (${r.limite} Pedidos)`;
+        const titulo = r.titulo || `Recompensa: ${r.valor} (${r.limite} Pedidos)`;
         
         let acaoBtn = '';
         let statusTag = '';
@@ -1517,7 +1531,7 @@ async function carregarHistoricoRecompensas(userId) {
 }
 
 
-/* ------------------ 🎁 MINHAS RECOMPENSAS (V3.5.1) ------------------ */
+/* ------------------ 🎁 MINHAS RECOMPENSAS (V3.5.2) ------------------ */
 
   // 1. Lógica de abrir/fechar o novo painel
   el.recompensasBtn?.addEventListener("click", () => {
@@ -1536,7 +1550,7 @@ async function carregarHistoricoRecompensas(userId) {
   // 2. Lógica de fechar o painel
   el.recompensasFecharBtn?.addEventListener("click", () => Overlays.closeAll());
 
-/* ------------------ FIM DO BLOCO V3.5.1 ------------------ */
+/* ------------------ FIM DO BLOCO V3.5.2 ------------------ */
 
 
   /* =========================================================
@@ -1868,9 +1882,9 @@ async function carregarHistoricoRecompensas(userId) {
     console.warn("⚠️ Erro interceptado:", e?.message);
   });
 
-  /* 🚨 ATUALIZADO V3.5.1: Mensagem de console */
-  console.log("%c🔥 DFL v3.5.1 — Correção de Inicialização OK",
-              "background:#1976D2;color:#fff;padding:8px 12px;border-radius:8px;font-weight:700;");
+  /* 🚨 ATUALIZADO V3.5.2: Mensagem de console */
+  console.log("%c🔥 DFL v3.5.2 — Correção de Exibição OK",
+              "background:#4CAF50;color:#fff;padding:8px 12px;border-radius:8px;font-weight:700;");
 
 }); // Fim do DOMContentLoaded
 
