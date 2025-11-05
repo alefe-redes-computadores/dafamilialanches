@@ -5,12 +5,12 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>🍔 Da Família Lanches</title>
   
-  <link rel="stylesheet" href="style.css?v=3.0.1" />
+  <link rel="stylesheet" href="style.css?v=2.11" />
   
   <script defer src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
   <script defer src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
   <script defer src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
-  <script defer src="script.js?v=3.0.1"></script>
+  <script defer src="script.js?v=3.0.2"></script>
 </head>
 
 <body>
@@ -78,11 +78,16 @@
       <div class="mini-foot">
         
         <form id="coupon-form" class="coupon-form">
-          <input type="text" id="coupon-input" placeholder="Cupom de desconto" aria-label="Cupom de desconto" />
+          <input 
+            type="text" 
+            id="coupon-input" 
+            placeholder="Digite o cupom e clique em Aplicar" 
+            aria-label="Cupom de desconto" 
+          />
           <button type="submit" id="coupon-apply-btn" class="btn-primary">Aplicar</button>
         </form>
         
-        <div id="coupon-message" class="coupon-message">Digite seu cupom e clique em Aplicar.</div>
+        <div id="coupon-message" class="coupon-message"></div>
         
         <div class="summary-row" id="coupon-discount-row" style="display: none;">
           <span>Desconto</span>
