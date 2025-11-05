@@ -294,6 +294,12 @@ section h2{font-size:1.3rem;text-align:center;margin-bottom:15px;color:#ff7043}
     width: 100%;
     max-width: 100%;
   }
+
+  /* v3.1: Ajuste responsivo do painel de recompensas (herdado) */
+  .recompensas-panel {
+    width: 100%;
+    max-width: 100%;
+  }
 }
 
 /* =========================================================
@@ -635,6 +641,113 @@ section h2{font-size:1.3rem;text-align:center;margin-bottom:15px;color:#ff7043}
     top: 30%; 
   }
 }
+
+/* =========================================================
+   ✨ NOVO CSS V3.1: MINHAS RECOMPENSAS (FASE 4)
+   (Baseado nos estilos V2.9: Pedidos Premium)
+========================================================= */
+
+/* Botão flutuante */
+.minhas-recompensas {
+  position: fixed;
+  /* Posição: 65px acima do bottom (20px do .meus-pedidos + ~45px altura do botão) */
+  bottom: 85px; 
+  right: 20px;
+  z-index: 1510; /* Acima do Z-Index 1500 de .meus-pedidos */
+}
+.recompensas-btn {
+  /* Estilo idêntico ao .meus-pedidos-btn */
+  background: linear-gradient(135deg, #ffca28, #ffb300);
+  color: #222;
+  border: none;
+  border-radius: 20px;
+  font-weight: 700;
+  font-size: 0.95rem;
+  padding: 12px 22px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+.recompensas-btn:hover {
+  transform: scale(1.05);
+  box-shadow: 0 6px 15px rgba(0,0,0,0.3);
+}
+
+/* Painel lateral */
+.recompensas-panel {
+  position: fixed;
+  top: 0;
+  right: -100%;
+  width: 440px;
+  max-width: 95%; /* Responsivo */
+  height: 100vh;
+  background: #f4f4f4; /* Fundo levemente cinza */
+  box-shadow: -4px 0 18px rgba(0,0,0,0.3);
+  transition: right 0.4s ease;
+  z-index: 1610; /* Acima do painel de pedidos (1600) */
+  display: flex;
+  flex-direction: column;
+}
+.recompensas-panel.active {
+  right: 0;
+}
+
+/* Cabeçalho do Painel */
+.recompensas-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 20px;
+  background: #ffca28;
+  font-weight: 700;
+  font-size: 1.2rem;
+  color: #222;
+  flex-shrink: 0; /* Impede que encolha */
+}
+.fechar-recompensas {
+  background: #ffb300;
+  border: none;
+  border-radius: 50%;
+  width: 30px;
+  height: 30px;
+  font-size: 18px;
+  font-weight: 700;
+  cursor: pointer;
+  line-height: 30px;
+  text-align: center;
+  color: #222;
+  transition: all .2s;
+}
+.fechar-recompensas:hover {
+  background: #ff7043;
+  color: #fff;
+  transform: scale(1.1);
+}
+
+/* Corpo e Lista de Recompensas */
+.recompensas-body {
+  flex: 1; /* Ocupa todo o espaço restante */
+  overflow-y: auto;
+  padding: 16px;
+}
+/* Estilos do "Plano B" (Em breve) */
+.empty-rewards, .coming-soon {
+  text-align: center;
+  color: #888;
+  font-size: 0.95rem;
+}
+.empty-rewards {
+   padding-top: 40px; /* Igual ao .empty-orders */
+   font-weight: 600;
+   color: #666;
+   margin: 0;
+}
+.coming-soon {
+  font-size: 0.9rem;
+  color: #777;
+  margin-top: 8px;
+}
+
 
 /* =========================================================
    🚨 NOVO CSS V2.9: MEUS PEDIDOS PREMIUM
