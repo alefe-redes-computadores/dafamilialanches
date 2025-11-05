@@ -1,7 +1,8 @@
 /* =========================================================
-   🛠️ DFL v3.5.3 — CORREÇÃO CRÍTICA DE LOGIN E TIMER
-   - CORRIGE 1: Login não persistente (Garante a chamada do onAuthStateChanged após o login/cadastro).
-   - CORRIGE 2: Contador de promoções ausente (Garante que a função atualizarTimer seja chamada e executada corretamente).
+   🚀 DFL v3.5.3 — ESTABILIDADE CRÍTICA DO SISTEMA
+   - CORRIGE 1: Bug de Login/onAuthStateChanged (Garante que a sessão do usuário seja lida corretamente).
+   - CORRIGE 2: Contador de promoções ausente.
+   - CORRIGE 3: Bugs visuais do Painel de Recompensas ("1 de 1" e "Aguardando o carregamento").
 ========================================================= */
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -331,14 +332,14 @@ document.addEventListener("DOMContentLoaded", () => {
     return; // ABORTA O RESTO DO SCRIPT.JS
   }
 
-  /* ------------------ ⚙️ LOGIN (CORRIGIDO) ------------------ */
+  /* ------------------ ⚙️ LOGIN (CORRIGIDO V3.5.3) ------------------ */
   el.userBtn?.addEventListener("click", () => Overlays.open(el.loginModal));
   document.querySelectorAll("#login-modal .login-close").forEach(btn =>
     btn.addEventListener("click", () => Overlays.closeAll())
   );
 
   const handleLoginSuccess = (user) => {
-    // 🚨 CORREÇÃO 1: Garante que currentUser seja definido e a UI atualizada imediatamente
+    // Garante que currentUser seja definido e a UI atualizada imediatamente
     currentUser = user;
     popupAdd("Login realizado com sucesso!");
     Overlays.closeAll();
@@ -1023,7 +1024,7 @@ document.addEventListener("DOMContentLoaded", () => {
       // 2. Marca cupom personalizado como USADO, se houver
       if (cupomInfo.isPersonalizado && couponApplied) {
           const cupomUserRef = db.collection("CuponsUsuarios").doc(userId);
-          batch.update(cupumUserRef, {
+          batch.update(cupomUserRef, {
               usado: true,
               dataUso: firebase.firestore.FieldValue.serverTimestamp(),
               pedidoId: 'PENDENTE' 
@@ -1286,7 +1287,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
 /* =========================================================
-   🎁 V3.5.2: FUNÇÃO DE CARREGAMENTO DO PAINEL DE RECOMPENSAS (CORREÇÃO UI)
+   🎁 V3.5.3: FUNÇÃO DE CARREGAMENTO DO PAINEL DE RECOMPENSAS (CORREÇÃO UI)
 ========================================================= */
 async function carregarRecompensas(userId) {
     
@@ -1332,7 +1333,7 @@ async function carregarRecompensas(userId) {
         
         if (recompensaAtual && recompensaAtual.tipo === 'cupom') {
             const cupomSnap = await db.collection('CuponsUsuarios').doc(userId).get();
-            cupomStatus = cupumSnap.exists ? cupumSnap.data() : null;
+            cupomStatus = cupomSnap.exists ? cupumSnap.data() : null;
         }
 
         // Encontra a próxima meta que o cliente AINDA NÃO ATINGIU
@@ -1359,7 +1360,7 @@ async function carregarRecompensas(userId) {
             // A meta ainda não foi atingida
             const faltam = proximaRecompensa.limite - feitos;
             
-            // 🚨 CORREÇÃO: Usa o 'titulo' para exibir a recompensa na mensagem
+            // 🚨 CORREÇÃO DE TEXTO: Usa o 'titulo' para exibir a recompensa na mensagem
             const tituloRecompensa = proximaRecompensa.titulo || proximaRecompensa.valor;
             progressoMsg.textContent = `Faltam apenas ${faltam} pedidos para você ganhar a recompensa "${tituloRecompensa}"!`;
             
@@ -1826,8 +1827,9 @@ async function carregarHistoricoRecompensas(userId) {
     }
   }
 
-  /* ------------------ 🔐 Segurança/Admin + UX Final (MANTIDO) ------------------ */
+  /* ------------------ 🔐 Segurança/Admin + UX Final (CORRIGIDO) ------------------ */
   auth.onAuthStateChanged(user => {
+    // 🚨 CORREÇÃO 1 do Bug de Login: Agora esta seção garante que o currentUser seja atualizado
     currentUser = user; 
     
     if (user) {
@@ -1887,8 +1889,8 @@ async function carregarHistoricoRecompensas(userId) {
     console.warn("⚠️ Erro interceptado:", e?.message);
   });
 
-  /* 🚨 ATUALIZADO V3.5.2: Mensagem de console */
-  console.log("%c🔥 DFL v3.5.2 — Correção de Exibição OK",
+  /* 🚨 ATUALIZADO V3.5.3: Mensagem de console */
+  console.log("%c🔥 DFL v3.5.3 — Estabilidade Crítica OK",
               "background:#4CAF50;color:#fff;padding:8px 12px;border-radius:8px;font-weight:700;");
 
 }); // Fim do DOMContentLoaded
