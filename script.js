@@ -1,11 +1,12 @@
 /* =========================================================
-   🍔 DFL v3.0.1 — MÓDULO DE CUPONS FIREBASE (FASE 1)
+   🍔 DFL v3.0.2 — MÓDULO DE CUPONS FIREBASE (FASE 1)
    - Substitui o objeto 'COUPONS' local por uma coleção no Firestore.
    - Modifica 'calcTotals' e 'enhanceMiniCartUI' para serem assíncronas.
    - Conecta aos novos elementos de cupom do index.html.
    - Baseado na lógica estável da v2.11.
-   - v3.0.1: Adiciona cache leve (30s) na validação de cupons
-     para reduzir leituras do Firestore.
+   - v3.0.1: Adiciona cache leve (30s) na validação de cupons.
+   - v3.0.2: Corrige bug do 'renderMiniCart' duplicado que
+     desenhava o rodapé do carrinho duas vezes.
 ========================================================= */
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -227,12 +228,20 @@ document.addEventListener("DOMContentLoaded", () => {
     }));
   }
 
+  /* =========================================================
+     ✨ v3.0: HOOK ÚNICO DO RENDERMINICART
+     Este é o "hook" (wrapper) que garante que a UI do rodapé
+     (enhanceMiniCartUI) seja chamada APÓS a lista de itens
+     ser desenhada (pela _renderMiniCartOrig).
+     v3.0.2: Removido hook duplicado que estava no fim do arquivo.
+    =========================================================
+  */
   const _renderMiniCartOrig = renderMiniCart;
   renderMiniCart = function () {
-    _renderMiniCartOrig();
-    bindMiniCartButtons();
-    // v3.0: Chama a função async que atualiza os totais,
-    // sem precisar de 'await' aqui.
+    _renderMiniCartOrig(); // 1. Desenha a lista de itens (síncrono)
+    bindMiniCartButtons(); // 2. Vincula botões da lista (síncrono)
+    
+    // 3. Dispara a atualização do rodapé (assíncrono)
     enhanceMiniCartUI();
   };
 
@@ -634,6 +643,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const cartDiscount = document.getElementById("cart-discount");
 
     // Remove o resumo antigo (Subtotal, Total, Botões) antes de recalcular
+    // v3.0.2: Esta é a linha que impede a duplicação.
     el.miniFoot.querySelectorAll(".cart-summary-generated").forEach(e => e.remove());
     
     if (cart.length === 0) {
@@ -726,16 +736,10 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   /* =========================================================
-    ✨ v3.0: HOOK DO RENDERMINICART
-    O wrapper é síncrono, mas chama a função 'enhance' que é assíncrona.
+     v3.0.2: BLOCO HOOK REDUNDANTE REMOVIDO DAQUI
+     O hook correto já está definido perto da linha 228.
     =========================================================
   */
-  const __renderMiniCartPrev = renderMiniCart;
-  renderMiniCart = function() {
-    __renderMiniCartPrev(); // Roda a parte síncrona (lista de itens)
-    enhanceMiniCartUI(); // Dispara a atualização assíncrona do rodapé.
-  };
-
 
   /* ------------------ 🖼️ CARROSSEL V2.7 (NOVA LÓGICA) ------------------ */
   let currentPromoId = 1;
@@ -943,6 +947,9 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
+  // Chama o renderMiniCart uma vez no início para carregar o rodapé
+  // caso haja itens no localStorage (a lógica de carregar o 'cart' do localStorage
+  // não está aqui, mas se estivesse, esta chamada inicializaria a UI)
   renderMiniCart();
   
 /* ------------------ 📦 MEUS PEDIDOS PREMIUM (V2.10) ------------------ */
@@ -1412,8 +1419,8 @@ document.addEventListener("DOMContentLoaded", () => {
     console.warn("⚠️ Erro interceptado:", e?.message);
   });
 
-  /* 🚨 ATUALIZADO V3.0.1: Mensagem de console */
-  console.log("%c🍔 DFL v3.0.1 — Módulo de Cupons Otimizado (Cache 30s) OK",
+  /* 🚨 ATUALIZADO V3.0.2: Mensagem de console */
+  console.log("%c🍔 DFL v3.0.2 — Bugfix Duplicação Rodapé OK",
               "background:#4caf50;color:#fff;padding:8px 12px;border-radius:8px;font-weight:700;");
 
 }); // Fim do DOMContentLoaded
