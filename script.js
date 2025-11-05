@@ -1,9 +1,11 @@
 /* =========================================================
-   🍔 DFL v3.0 — MÓDULO DE CUPONS FIREBASE (FASE 1)
+   🍔 DFL v3.0.1 — MÓDULO DE CUPONS FIREBASE (FASE 1)
    - Substitui o objeto 'COUPONS' local por uma coleção no Firestore.
    - Modifica 'calcTotals' e 'enhanceMiniCartUI' para serem assíncronas.
    - Conecta aos novos elementos de cupom do index.html.
    - Baseado na lógica estável da v2.11.
+   - v3.0.1: Adiciona cache leve (30s) na validação de cupons
+     para reduzir leituras do Firestore.
 ========================================================= */
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -494,7 +496,6 @@ document.addEventListener("DOMContentLoaded", () => {
   /* =========================================================
     ✨ v3.0: CUPONS REMOVIDOS
     O objeto local 'COUPONS' foi removido.
-    A lógica agora vive em 'validarCupomFirestore'.
     =========================================================
   */
 
@@ -506,95 +507,93 @@ document.addEventListener("DOMContentLoaded", () => {
 
   /* =========================================================
     ✨ v3.0: FUNÇÃO REMOVIDA
-    'calcDiscount' foi removida e substituída por 
-    'validarCupomFirestore'.
+    'calcDiscount' foi removida.
     =========================================================
   */
 
   /* =========================================================
-    ✨ v3.0: NOVA FUNÇÃO DE VALIDAÇÃO (ASYNC)
-    Valida um cupom no Firestore e calcula o desconto.
-    Substitui a antiga 'calcDiscount'.
+    ✨ v3.0.1: NOVA FUNÇÃO DE VALIDAÇÃO (CACHE + TOLERÂNCIA)
+    Substitui a 'validarCupomFirestore' original da v3.0.
     =========================================================
   */
-  /**
-   * @param {string} codigo - O código do cupom (ex: "BEMVINDO10").
-   * @param {number} subtotal - O subtotal do carrinho para calcular descontos.
-   * @returns {object} - Objeto com o resultado do desconto.
-   */
+  // --- Substitua sua validarCupomFirestore por esta versão com cache e tolerâncias ---
+  const _cupomCache = { /* key -> { ate: ms, res: {...} } */ };
+  function _cacheKey(codigo, subtotal){
+    // agrupa subtotal em faixas de R$ 5 para melhorar reaproveitamento sem “errar” o valor
+    const faixa = Math.floor((subtotal || 0) / 5);
+    return `${(codigo||"").toUpperCase()}::${faixa}`;
+  }
+
   async function validarCupomFirestore(codigo, subtotal) {
     const code = (codigo || "").toUpperCase();
-    
-    // O objeto de retorno padrão, caso o cupom seja "" ou inválido
-    const resultadoInvalido = { 
-      valido: false, 
-      discount: 0, 
-      freeShipping: false, 
-      label: "", 
-      mensagem: "" // Mensagem de erro será tratada por quem chama
-    };
+    const invalido = { valido:false, discount:0, freeShipping:false, label:"", mensagem:"" };
+    if (!code) return invalido;
 
-    if (!code) {
-      return resultadoInvalido;
-    }
-    
-    // Assumindo que 'db' está global
-    const cupomRef = db.collection("Cupons").doc(code);
+    // 1) Cache leve por 30s
+    const key = _cacheKey(code, subtotal);
+    const now = Date.now();
+    const hit = _cupomCache[key];
+    if (hit && hit.ate > now) return hit.res;
 
     try {
-      const doc = await cupomRef.get();
-
-      // 1. Verifica se existe
-      if (!doc.exists) {
-        console.warn(`Cupom "${code}" não encontrado.`);
-        return { ...resultadoInvalido, mensagem: "Cupom inválido." };
+      const cupomSnap = await db.collection("Cupons").doc(code).get();
+      if (!cupomSnap.exists) {
+        const res = { ...invalido, mensagem: "Cupom inválido." };
+        _cupomCache[key] = { ate: now + 30000, res }; // 30s de cache
+        return res;
       }
 
-      const data = doc.data();
+      const data = cupomSnap.data();
 
-      // 2. Verifica se está ativo
+      // 2) Ativo
       if (!data.ativo) {
-        console.warn(`Cupom "${code}" está inativo.`);
-        return { ...resultadoInvalido, mensagem: "Este cupom não está mais ativo." };
+        const res = { ...invalido, mensagem: "Este cupom não está mais ativo." };
+        _cupomCache[key] = { ate: now + 30000, res };
+        return res;
       }
 
-      // 3. Verifica expiração
+      // 3) Expiração (aceita Timestamp ou string ISO)
       if (data.expiraEm) {
-        const expira = data.expiraEm.toDate();
-        if (expira < new Date()) {
-          console.warn(`Cupom "${code}" expirou.`);
-          return { ...resultadoInvalido, mensagem: "Este cupom expirou." };
+        let expiraDate = null;
+        if (typeof data.expiraEm?.toDate === "function") expiraDate = data.expiraEm.toDate();
+        else if (typeof data.expiraEm === "string") expiraDate = new Date(data.expiraEm);
+        if (expiraDate && expiraDate < new Date()) {
+          const res = { ...invalido, mensagem: "Este cupom expirou." };
+          _cupomCache[key] = { ate: now + 30000, res };
+          return res;
         }
       }
 
-      // 4. Cupom VÁLIDO. Vamos calcular o desconto.
+      // 4) Cálculo
       let discount = 0;
       let freeShipping = false;
       let label = "";
 
       if (data.tipo === "percent") {
-        discount = Math.max(0, subtotal * (data.valor / 100));
-        label = `${data.valor}% OFF`;
+        discount = Math.max(0, subtotal * (Number(data.valor) / 100));
+        label = `${Number(data.valor)}% OFF`;
       } else if (data.tipo === "value") {
-        discount = Math.min(subtotal, Math.max(0, data.valor));
-        label = `${money(data.valor)} OFF`;
+        const val = Math.max(0, Number(data.valor) || 0);
+        discount = Math.min(subtotal, val);
+        label = `R$ ${val.toFixed(2).replace(".", ",")} OFF`;
       } else if (data.tipo === "frete") {
         freeShipping = true;
         label = "Frete Grátis";
+      } else {
+        // Fallback caso o 'tipo' seja inválido no DB
+        const res = { ...invalido, mensagem: "Tipo de cupom desconhecido." };
+        _cupomCache[key] = { ate: now + 30000, res };
+        return res;
       }
-      
-      // Sucesso
-      return {
-        valido: true,
-        discount,
-        freeShipping,
-        label,
-        mensagem: "Cupom aplicado com sucesso!"
-      };
 
-    } catch (error) {
-      console.error("Erro ao validar cupom no Firestore: ", error);
-      return { ...resultadoInvalido, mensagem: "Erro ao processar o cupom." };
+      const res = { valido:true, discount, freeShipping, label, mensagem:"Cupom aplicado com sucesso!" };
+      _cupomCache[key] = { ate: now + 30000, res };
+      return res;
+
+    } catch (err) {
+      console.error("Erro ao validar cupom no Firestore:", err);
+      // Erro de permissão ou rede cai aqui
+      return { ...invalido, mensagem: "Erro ao processar o cupom." };
     }
   }
 
@@ -1413,8 +1412,8 @@ document.addEventListener("DOMContentLoaded", () => {
     console.warn("⚠️ Erro interceptado:", e?.message);
   });
 
-  /* 🚨 ATUALIZADO V3.0: Mensagem de console */
-  console.log("%c🍔 DFL v3.0 — Módulo de Cupons (Fase 1) OK — Base v2.11 Estável",
+  /* 🚨 ATUALIZADO V3.0.1: Mensagem de console */
+  console.log("%c🍔 DFL v3.0.1 — Módulo de Cupons Otimizado (Cache 30s) OK",
               "background:#4caf50;color:#fff;padding:8px 12px;border-radius:8px;font-weight:700;");
 
 }); // Fim do DOMContentLoaded
