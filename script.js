@@ -1,7 +1,7 @@
 /* =========================================================
-   🎁 DFL v3.2.1 — CORREÇÃO CRÍTICA DO CONTADOR (ESTÁVEL)
-   - Corrige o erro que travava o JavaScript (Variável Firebase mal usada em fecharPedido).
-   - A lógica de contagem de pedidos na coleção 'Usuarios' agora é segura.
+   🎁 DFL v3.2.2 — IMPLEMENTAÇÃO DO CONTADOR E EXIBIÇÃO ESTÁVEL
+   - Corrige erro de travamento no fecharPedido (v3.2.1).
+   - Adiciona e conecta a função carregarRecompensas() para exibir o contador.
 ========================================================= */
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -470,7 +470,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   /* ------------------ 🧺 Adicionar item comum ------------------ */
   function addCommonItem(nome, preco) {
-    // Se for um combo do *cardápio principal* (mas não uma "Promo"), abre o modal de bebida
+    // Se for um combo do *cardápio principal* (mas não uma "Promo"), abre o modal de combos
     if (/^combo/i.test(nome) && !/^\s*Combo [0-9]/.test(nome)) {
       openComboModal(nome, preco);
       return;
@@ -879,7 +879,7 @@ document.addEventListener("DOMContentLoaded", () => {
     Para aguardar o 'calcTotals' antes de salvar.
     =========================================================
   */
-  // 🚨 FUNÇÃO ATUALIZADA V3.2.1: Corrigida para usar 'db' e 'firebase' corretamente no batch.
+  // 🚨 FUNÇÃO ATUALIZADA V3.2.1: Corrigida e com contador de pedidos
   async function fecharPedido() {
     if (!cart.length) return alert("Carrinho vazio!");
     if (!currentUser) {
@@ -1117,7 +1117,56 @@ document.addEventListener("DOMContentLoaded", () => {
 /* ------------------ FIM DO BLOCO V2.10 ------------------ */
 
 
-/* ------------------ 🎁 MINHAS RECOMPENSAS (V3.1 - FASE 5 PARCIAL) ------------------ */
+/* =========================================================
+   🎁 V3.2: FUNÇÃO DE CARREGAMENTO DO PAINEL DE RECOMPENSAS
+========================================================= */
+function carregarRecompensas(userId) {
+    const metaPedidos = 5; // Nossa meta inicial é de 5 pedidos para o primeiro cupom
+    
+    // Elementos de UI (para o novo HTML)
+    const contadorValor = document.getElementById('contador-valor');
+    const progressoBar = document.getElementById('progresso-bar');
+    const progressoMsg = document.getElementById('progresso-mensagem');
+    
+    if (!contadorValor || !progressoBar || !progressoMsg) return; // Segurança
+
+    // Usa onSnapshot para ler em tempo real (o usuário não precisa recarregar)
+    db.collection('Usuarios').doc(userId).onSnapshot(doc => {
+        if (doc.exists) {
+            const data = doc.data();
+            const feitos = data.pedidosFeitos || 0;
+            const porcentagem = Math.min(100, (feitos / metaPedidos) * 100);
+            
+            // 1. Atualiza o valor do contador
+            contadorValor.textContent = feitos;
+            
+            // 2. Atualiza a barra de progresso
+            progressoBar.style.width = `${porcentagem}%`;
+
+            // 3. Atualiza a mensagem de progresso
+            if (feitos >= metaPedidos) {
+                progressoMsg.textContent = '🎉 Parabéns! Você atingiu a meta! Sua recompensa está disponível abaixo.';
+                progressoBar.style.background = 'linear-gradient(90deg, #4caf50, #43a047)'; // Cor de sucesso
+            } else {
+                const faltam = metaPedidos - feitos;
+                progressoMsg.textContent = `Faltam apenas ${faltam} pedidos para você ganhar sua primeira recompensa de fidelidade!`;
+                progressoBar.style.background = 'linear-gradient(90deg, #ffb300, #ff7043)'; // Cor padrão
+            }
+
+        } else {
+            // Documento ainda não existe, então é 0 pedidos
+            contadorValor.textContent = '0';
+            progressoBar.style.width = '0%';
+            progressoMsg.textContent = `Faltam ${metaPedidos} pedidos para você ganhar sua primeira recompensa de fidelidade!`;
+        }
+    }, error => {
+        console.error("Erro ao ler contador de fidelidade:", error);
+        progressoMsg.textContent = 'Erro ao carregar seu progresso. Tente recarregar a página.';
+    });
+}
+
+
+/* ------------------ 🎁 MINHAS RECOMPENSAS (V3.2 - AGORA LÊ DADOS) ------------------ */
 
   // 1. Lógica de abrir/fechar o novo painel
   el.recompensasBtn?.addEventListener("click", () => {
@@ -1128,14 +1177,15 @@ document.addEventListener("DOMContentLoaded", () => {
       return;
     }
     Overlays.open(el.recompensasPanel);
-    // Futuramente, chamaremos a função de carregar recompensas aqui.
-    // carregarRecompensas(currentUser.uid); 
+    
+    // 🚨 NOVO: Chama a função para carregar e monitorar o contador
+    carregarRecompensas(currentUser.uid); 
   });
 
   // 2. Lógica de fechar o painel
   el.recompensasFecharBtn?.addEventListener("click", () => Overlays.closeAll());
 
-/* ------------------ FIM DO BLOCO V3.1 ------------------ */
+/* ------------------ FIM DO BLOCO V3.2 ------------------ */
 
 
   /* =========================================================
