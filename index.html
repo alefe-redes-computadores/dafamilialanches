@@ -5,11 +5,13 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>🍔 Da Família Lanches</title>
 
-  <!-- CSS crítico leve para evitar layout "quebrando" antes do CSS principal -->
+  <!-- CSS crítico leve -->
   <style>
-    /* CSS CRÍTICO DFL v3.6.7 */
-    body{background:#ffd54f;font-family:"Inter","Poppins",sans-serif;color:#222;margin:0;scroll-behavior:smooth}
-    .header{display:flex;justify-content:space-between;align-items:center;background:#ffca28;padding:10px 16px;box-shadow:0 2px 5px rgba(0,0,0,.15);position:fixed;top:0;left:0;right:0;z-index:900}
+    /* CSS CRÍTICO DFL v3.6.8 */
+    :root { --preto:#000; --bg:#ffd54f; --acento:#ffca28; --botao:#ffb300; }
+    html,body{height:100%}
+    body{background:var(--bg);font-family:"Inter","Poppins",system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;color:#222;margin:0;scroll-behavior:smooth}
+    .header{display:flex;justify-content:space-between;align-items:center;background:var(--acento);padding:10px 16px;box-shadow:0 2px 5px rgba(0,0,0,.15);position:fixed;top:0;left:0;right:0;z-index:900}
     .header-content{display:flex;align-items:center;gap:12px}
     .logo{width:52px;height:52px}
     .header-info h1{margin:0;font-size:1.2rem}
@@ -17,25 +19,57 @@
     .header-actions{display:flex;align-items:center;gap:10px}
     .main-content-wrapper{padding-top:72px}
     .user-button{background:linear-gradient(135deg,#fff,#f7f7f7);border:1px solid #ddd;border-radius:8px;padding:8px 12px;font-weight:600;cursor:pointer;transition:.2s}
-    #cart-icon,.cart-button{background:#ffb300;border:none;border-radius:8px;padding:8px 12px;font-weight:700;cursor:pointer;transition:.2s}
+    #cart-icon,.cart-button{background:var(--botao);border:none;border-radius:8px;padding:8px 12px;font-weight:700;cursor:pointer;transition:.2s}
     .status-banner{text-align:center;padding:8px;color:#fff;font-weight:600}
     .status-banner.open{background:#4caf50}
     .status-banner.closed{background:#d32f2f}
     .hours-banner{display:flex;justify-content:space-between;align-items:center;padding:10px 20px;background:#000;color:#fff;font-size:.9rem;overflow:hidden;white-space:nowrap}
     .promo-section{text-align:center;padding:20px 10px}
     .promo-section h2{color:#ff5722;margin-bottom:8px}
-    .promo-sub{color:#666;margin-bottom:10px;font-size:.95rem}
+    .promo-sub{color:#444;margin-bottom:10px;font-size:.95rem}
     .countdown-ticker{background:#fff;display:inline-block;padding:6px 12px;border-radius:10px;margin:8px 0 15px;font-weight:600;box-shadow:0 2px 5px rgba(0,0,0,.1)}
+    .carousel{position:relative;max-width:900px;margin:0 auto}
+    .slides{display:flex;gap:8px;overflow-x:auto;scroll-behavior:smooth;padding:4px}
+    .slide{display:block;border-radius:10px;flex:0 0 auto}
+    .c-btn{position:absolute;top:50%;transform:translateY(-50%);background:#000;color:#fff;border:none;border-radius:10px;width:32px;height:32px;font-size:20px;opacity:.8}
+    .c-prev{left:4px}.c-next{right:4px}
+    /* mínimo para cards aparecerem mesmo se style.css falhar */
+    .menu-section{padding:18px 12px}
+    .menu-section h2{margin:0 0 12px}
+    .grid{display:grid;grid-template-columns:repeat( auto-fill, minmax(220px,1fr) );gap:12px}
+    .card{background:#fff;border-radius:12px;padding:12px;box-shadow:0 2px 8px rgba(0,0,0,.08)}
+    .card .actions{display:flex;gap:8px;margin-top:8px}
+    .add-cart,.extras-btn,.btn-primary,.btn-primario{cursor:pointer}
+    /* Overlays base */
+    #cart-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.45);opacity:0;pointer-events:none;transition:opacity .2s;z-index:980}
+    #cart-backdrop.active{opacity:1;pointer-events:auto}
+    .mini-cart,.modal,.pedidos-panel,.recompensas-panel{position:fixed;z-index:990;display:none}
+    .mini-cart.active,.modal.show,.pedidos-panel.active,.recompensas-panel.active{display:block}
+    .mini-cart{right:0;top:0;width:min(92vw,380px);height:100dvh;background:#fff;box-shadow:-4px 0 20px rgba(0,0,0,.25);transform:translateX(100%);transition:transform .25s}
+    .mini-cart.active{transform:translateX(0)}
+    .mini-head{display:flex;justify-content:space-between;align-items:center;padding:10px 14px;border-bottom:1px solid #eee}
+    .mini-list{max-height:60vh;overflow:auto;padding:10px 14px}
+    .mini-foot{padding:10px 14px;border-top:1px solid #eee}
+    .modal{inset:0;display:none;align-items:center;justify-content:center}
+    .modal.show{display:flex}
+    .modal-content{background:#fff;width:min(92vw,520px);border-radius:14px;box-shadow:0 8px 40px rgba(0,0,0,.25);max-height:86vh;overflow:auto}
+    .modal-head,.recompensas-header,.pedidos-header{display:flex;justify-content:space-between;align-items:center;padding:12px 16px;border-bottom:1px solid #eee}
+    .recompensas-panel,.pedidos-panel{right:0;top:0;width:min(92vw,520px);height:100dvh;background:#fff;box-shadow:-4px 0 20px rgba(0,0,0,.25);transform:translateX(100%);transition:transform .25s}
+    .recompensas-panel.active,.pedidos-panel.active{transform:translateX(0)}
+    .recompensas-body,.pedidos-body{padding:14px}
+    .footer{padding:24px 12px;text-align:center}
+    .footer-links{display:flex;justify-content:center;gap:10px;margin:10px 0}
+    .footer-btn{background:#fff;border:1px solid #ddd;border-radius:10px;padding:8px 12px;text-decoration:none;color:#111}
     @media (max-width:600px){.hours-banner{padding:8px 10px;font-size:.85rem}}
   </style>
 
-  <!-- CSS principal (carregado de forma não-bloqueante) -->
-  <link rel="stylesheet" href="style.css?v=2.11" media="print" onload="this.media='all'"/>
+  <!-- CSS principal (agora modo padrão para evitar erro no Android) -->
+  <link rel="stylesheet" href="style.css?v=2.11" />
 
-  <!-- Preloads (perf) -->
+  <!-- Preloads úteis -->
   <link rel="preload" as="image" href="imagens/bitela.png">
 
-  <!-- Firebase -->
+  <!-- Firebase (precisa estar antes do core.js) -->
   <script defer src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
   <script defer src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
   <script defer src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
@@ -78,33 +112,340 @@
       <div class="carousel">
         <button class="c-btn c-prev" type="button" aria-label="Anterior">‹</button>
         <div class="slides">
-          <img class="slide" src="promocoes/promo1.jpg" width="300" height="200"/>
-          <img class="slide" src="promocoes/promo2.jpg" width="300" height="200"/>
-          <img class="slide" src="promocoes/promo3.jpg" width="300" height="200"/>
+          <img class="slide" src="promocoes/promo1.jpg" data-promo-id="1" width="300" height="200"/>
+          <img class="slide" src="promocoes/promo2.jpg" data-promo-id="2" width="300" height="200"/>
+          <img class="slide" src="promocoes/promo3.jpg" data-promo-id="3" width="300" height="200"/>
+          <img class="slide" src="promocoes/promo4.jpg" data-promo-id="4" width="300" height="200"/>
+          <img class="slide" src="promocoes/promo5.jpg" data-promo-id="5" width="300" height="200"/>
+          <img class="slide" src="promocoes/promo6.jpg" data-promo-id="6" width="300" height="200"/>
+          <img class="slide" src="promocoes/promo7.jpg" data-promo-id="7" width="300" height="200"/>
+          <img class="slide" src="promocoes/promo8.jpg" data-promo-id="8" width="300" height="200"/>
+          <img class="slide" src="promocoes/promo9.jpg" data-promo-id="9" width="300" height="200"/>
         </div>
         <button class="c-btn c-next" type="button" aria-label="Próximo">›</button>
       </div>
     </section>
 
     <div id="cart-backdrop"></div>
+
     <aside id="mini-cart" class="mini-cart">
       <div class="mini-head">
         <h3>🛍 Seu Pedido</h3>
-        <button class="extras-close" type="button">✖</button>
+        <button class="extras-close" type="button" aria-label="Fechar carrinho">✖</button>
       </div>
       <div class="mini-list"></div>
+      <div class="mini-foot">
+        <form id="coupon-form" class="coupon-form">
+          <input type="text" id="coupon-input" placeholder="Digite o cupom e clique em Aplicar" aria-label="Cupom de desconto"/>
+          <button type="submit" id="coupon-apply-btn" class="btn-primary">Aplicar</button>
+        </form>
+        <div id="coupon-message" class="coupon-message"></div>
+        <div class="summary-row" id="coupon-discount-row" style="display:none;">
+          <span>Desconto</span>
+          <span id="cart-discount">R$ 0,00</span>
+        </div>
+      </div>
     </aside>
 
+    <section class="menu-section">
+      <h2>🧡 Combos</h2>
+      <div class="grid">
+        <div class="card" data-name="Combo Casal Tradicional" data-price="34.99">
+          <img src="imagens/combo1.png" alt="Combo Casal Tradicional" width="120" height="120">
+          <h3>Combo Casal Tradicional <span class="badge economia"><span class="badge-icon">💸</span> Economia de R$ 5,01</span></h3>
+          <p class="price">De R$ 39,99 por <b>R$ 34,99</b></p>
+          <p>2 Burger <b>Trem</b> + 1 Fanta 1L.</p>
+          <div class="actions"><button class="add-cart" type="button">Adicionar</button></div>
+        </div>
+
+        <div class="card" data-name="Combo Casal Artesanal" data-price="49.99">
+          <img src="imagens/combo2.png" alt="Combo Casal Artesanal" width="120" height="120">
+          <h3>Combo Casal Artesanal <span class="badge economia"><span class="badge-icon">💸</span> Economia de R$ 11,01</span></h3>
+          <p class="price">De R$ 61,00 por <b>R$ 49,99</b></p>
+          <p>2 Burger <b>Peleja</b> + 1 Fanta 1L.</p>
+          <div class="actions"><button class="add-cart" type="button">Adicionar</button></div>
+        </div>
+
+        <div class="card" data-name="Combo Família Tradicional" data-price="59.99">
+          <img src="imagens/combo3.png" alt="Combo Família Tradicional" width="120" height="120">
+          <h3>Combo Família Tradicional <span class="badge economia"><span class="badge-icon">💸</span> Economia de R$ 10,01</span></h3>
+          <p class="price">De R$ 70,00 por <b>R$ 59,99</b></p>
+          <p>4 Burger <b>Trem</b> + 1 Kuat 2L.</p>
+          <div class="actions"><button class="add-cart" type="button">Adicionar</button></div>
+        </div>
+
+        <div class="card" data-name="Combo Família Artesanal" data-price="84.99">
+          <img src="imagens/combo4.png" alt="Combo Família Artesanal" width="120" height="120">
+          <h3>Combo Família Artesanal <span class="badge economia"><span class="badge-icon">💸</span> Economia de R$ 29,01</span></h3>
+          <p class="price">De R$ 114,00 por <b>R$ 84,99</b></p>
+          <p>4 Burger <b>Peleja</b> + 1 Kuat 2L.</p>
+          <div class="actions"><button class="add-cart" type="button">Adicionar</button></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="menu-section">
+      <h2>🍔 Nossos Lanches Tradicionais</h2>
+      <div class="grid">
+        <div class="card" data-name="Bão" data-price="11.00">
+          <img src="imagens/bao.png" alt="Bão" width="120" height="120">
+          <h3>Bão <span class="badge-small">Com Molho Verde</span></h3>
+          <p class="price">R$ 11,00</p>
+          <p>Pão, hambúrguer, alface, tomate, presunto e mussarela. Acompanha ketchup sachê.</p>
+          <div class="actions"><button class="add-cart" type="button">Adicionar</button><button class="extras-btn" type="button">Adicionais</button></div>
+        </div>
+
+        <div class="card" data-name="Uai" data-price="13.00">
+          <img src="imagens/uai.png" alt="Uai" width="120" height="120">
+          <h3>Uai <span class="badge-small">Com Molho Verde</span></h3>
+          <p class="price">R$ 13,00</p>
+          <p>Pão, hambúrguer, milho, bacon, alface, tomate, presunto e mussarela. Acompanha ketchup sachê.</p>
+          <div class="actions"><button class="add-cart" type="button">Adicionar</button><button class="extras-btn" type="button">Adicionais</button></div>
+        </div>
+
+        <div class="card" data-name="Trem" data-price="14.00">
+          <img src="imagens/trem.png" alt="Trem" width="120" height="120">
+          <h3>Trem <span class="badge-small">Com Molho Verde</span></h3>
+          <p class="price">R$ 14,00</p>
+          <p>Pão, hambúrguer, salsicha, bacon, milho, alface, tomate, presunto e mussarela. Acompanha ketchup sachê.</p>
+          <div class="actions"><button class="add-cart" type="button">Adicionar</button><button class="extras-btn" type="button">Adicionais</button></div>
+        </div>
+
+        <div class="card" data-name="Cadim" data-price="17.00">
+          <img src="imagens/cadim.png" alt="Cadim" width="120" height="120">
+          <h3>Cadim <span class="badge-small">Com Molho Verde</span></h3>
+          <p class="price">R$ 17,00</p>
+          <p>Pão, hambúrguer, 1 filé frango, bacon, milho, salsicha, alface, tomate, presunto e mussarela. Acompanha ketchup sachê.</p>
+          <div class="actions"><button class="add-cart" type="button">Adicionar</button><button class="extras-btn" type="button">Adicionais</button></div>
+        </div>
+
+        <div class="card" data-name="Armaria" data-price="18.00">
+          <img src="imagens/armaria.png" alt="Armaria" width="120" height="120">
+          <h3>Armaria <span class="badge-small">Com Molho Verde</span></h3>
+          <p class="price">R$ 18,00</p>
+          <p>Pão, 1 hambúrguer, 1 filé frango, bacon, milho, batata palha, alface, tomate, salsicha, presunto e mussarela. Acompanha ketchup sachê.</p>
+          <div class="actions"><button class="add-cart" type="button">Adicionar</button><button class="extras-btn" type="button">Adicionais</button></div>
+        </div>
+
+        <div class="card" data-name="Bitela" data-price="22.00">
+          <img src="imagens/bitela.png" alt="Bitela" width="120" height="120">
+          <h3>Bitela <span class="badge-small">Com Molho Verde</span></h3>
+          <p class="price">R$ 22,00</p>
+          <p>Pão, 2 hambúrgueres, filé frango, bacon, milho, batata palha, alface, salsicha, tomate, presunto e mussarela. Acompanha ketchup sachê.</p>
+          <div class="actions"><button class="add-cart" type="button">Adicionar</button><button class="extras-btn" type="button">Adicionais</button></div>
+        </div>
+
+        <div class="card" data-name="Apruma" data-price="25.00">
+          <img src="imagens/apruma.png" alt="Apruma" width="120" height="120">
+          <h3>Apruma <span class="badge-small">Com Molho Verde</span></h3>
+          <p class="price">R$ 25,00</p>
+          <p>Pão, 3 hambúrgueres, filé frango, bacon, salsicha, milho, batata palha, alface, tomate, 2 presuntos e 2 mussarelas. Acompanha ketchup sachê.</p>
+          <div class="actions"><button class="add-cart" type="button">Adicionar</button><button class="extras-btn" type="button">Adicionais</button></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="menu-section">
+      <h2>🍔 Lanches Artesanais</h2>
+      <div class="grid">
+        <div class="card" data-name="Peleja" data-price="26.00">
+          <img src="imagens/peleja.png" alt="Peleja" width="120" height="120">
+          <h3>Peleja <span class="badge-small">Com Molho Verde</span></h3>
+          <p class="price">R$ 26,00</p>
+          <p>Pão, hambúrguer artesanal, filé de frango, bacon, milho, batata palha.</p>
+          <div class="actions"><button class="add-cart" type="button">Adicionar</button><button class="extras-btn" type="button">Adicionais</button></div>
+        </div>
+
+        <div class="card" data-name="Tudibom" data-price="28.50">
+          <img src="imagens/tudibom.png" alt="Tudibom" width="120" height="120">
+          <h3>Tudibom <span class="badge-small">Com Molho Verde</span></h3>
+          <p class="price">R$ 28,50</p>
+          <p>Pão, 2 hambúrgueres artesanais, 2 filés de frango, bacon, milho.</p>
+          <div class="actions"><button class="add-cart" type="button">Adicionar</button><button class="extras-btn" type="button">Adicionais</button></div>
+        </div>
+
+        <div class="card" data-name="Custoso" data-price="31.00">
+          <img src="imagens/custoso.png" alt="Custoso" width="120" height="120">
+          <h3>Custoso <span class="badge-small">Com Molho Verde</span></h3>
+          <p class="price">R$ 31,00</p>
+          <p>Pão, 2 hambúrgueres artesanais, 2 filés de frango, bacon, milho.</p>
+          <div class="actions"><button class="add-cart" type="button">Adicionar</button><button class="extras-btn" type="button">Adicionais</button></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="menu-section">
+      <h2>🌭 Hot Dogs</h2>
+      <div class="grid">
+        <div class="card" data-name="Nigucim" data-price="10.00">
+          <h3>Nigucim <span class="badge-small">Com Molho Verde</span></h3>
+          <p class="price">R$ 10,00</p>
+          <p>Pão, molho, salsicha, milho, batata palha.</p>
+          <div class="actions"><button class="add-cart" type="button">Adicionar</button><button class="extras-btn" type="button">Adicionais</button></div>
+        </div>
+
+        <div class="card" data-name="Simprão" data-price="12.00">
+          <img src="imagens/simprao.png" alt="Simprão" width="120" height="120">
+          <h3>Simprão <span class="badge-small">Com Molho Verde</span></h3>
+          <p class="price">R$ 12,00</p>
+          <p>Pão, molho, salsicha, milho, batata palha, bacon.</p>
+          <div class="actions"><button class="add-cart" type="button">Adicionar</button><button class="extras-btn" type="button">Adicionais</button></div>
+        </div>
+
+        <div class="card" data-name="Purizin" data-price="14.00">
+          <img src="imagens/purizin.png" alt="Purizin" width="120" height="120">
+          <h3>Purizin <span class="badge-small">Com Molho Verde</span> <span class="badge-small pure">Com Purê</span></h3>
+          <p class="price">R$ 14,00</p>
+          <p>Pão, molho, purê de batata cremoso, salsicha, milho.</p>
+          <div class="actions"><button class="add-cart" type="button">Adicionar</button><button class="extras-btn" type="button">Adicionais</button></div>
+        </div>
+
+        <div class="card" data-name="Trembão" data-price="17.00">
+          <img src="imagens/trembao.png" alt="Trembão" width="120" height="120">
+          <h3>Trembão <span class="badge-small">Com Molho Verde</span> <span class="badge-small pure">Com Purê</span></h3>
+          <p class="price">R$ 17,00</p>
+          <p>Pão, molho, purê de batata cremoso, 2 salsichas, bacon.</p>
+          <div class="actions"><button class="add-cart" type="button">Adicionar</button><button class="extras-btn" type="button">Adicionais</button></div>
+        </div>
+      </div>
+    </section>
+
+    <div id="promo-modal" class="modal">
+      <div class="promo-content modal-content">
+        <div class="modal-head">
+          <button class="promo-close" type="button" aria-label="Fechar modal">✖</button>
+          <div style="display:flex;gap:8px;margin-left:auto">
+            <button class="promo-nav prev" type="button" aria-label="Anterior">‹</button>
+            <button class="promo-nav next" type="button" aria-label="Próximo">›</button>
+          </div>
+        </div>
+        <img id="promo-modal-img" src="" alt="Promoção" style="width:100%;height:auto"/>
+        <div class="promo-info" style="padding:12px 16px;">
+          <h3 id="promo-modal-title" style="margin:6px 0;"></h3>
+          <p id="promo-modal-price" style="margin:6px 0 14px;"></p>
+          <button id="promo-modal-add" class="btn-primary" type="button">Adicionar ao Pedido</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="extras-modal" class="modal">
+      <div class="modal-content">
+        <div class="modal-head">
+          <h3>Adicionais</h3>
+          <button class="extras-close" type="button" aria-label="Fechar modal">✖</button>
+        </div>
+        <div class="extras-list" style="padding:12px 16px;"></div>
+        <div class="modal-foot" style="display:flex;gap:8px;justify-content:flex-end;padding:12px 16px;">
+          <button id="extras-confirm" class="btn-primary" type="button">Adicionar ao Pedido</button>
+          <button class="btn-secondary extras-close" type="button">Cancelar</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="combo-modal" class="modal">
+      <div class="modal-content">
+        <div class="modal-head">
+          <h3>Escolher Refrigerante</h3>
+          <button class="combo-close" type="button" aria-label="Fechar modal">✖</button>
+        </div>
+        <div id="combo-body" style="padding:12px 16px;"></div>
+        <div class="modal-foot" style="display:flex;gap:8px;justify-content:flex-end;padding:12px 16px;">
+          <button id="combo-confirm" class="btn-primary" type="button">Confirmar</button>
+          <button class="btn-secondary combo-close" type="button">Cancelar</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="login-modal" class="modal">
+      <div class="modal-content login-box">
+        <div class="modal-head">
+          <h3>Entrar / Cadastrar</h3>
+          <button class="login-close" type="button" aria-label="Fechar modal">✖</button>
+        </div>
+        <div style="padding:12px 16px;">
+          <button id="google-login" class="btn-google" type="button" style="display:flex;align-items:center;gap:8px;padding:10px 12px;border:1px solid #ddd;border-radius:10px;background:#fff;width:100%;">
+            <img src="imagens/google-icon.png" alt="Google" class="google-icon" width="20" height="20"/>
+            Entrar com Google
+          </button>
+          <small class="login-safe">🔒 Login seguro e criptografado</small>
+          <div class="divider" style="text-align:center;margin:12px 0;color:#888;">ou</div>
+          <form id="login-form" class="login-form" style="display:grid;gap:8px;">
+            <input id="login-email" type="email" placeholder="E-mail" required />
+            <input id="login-senha" type="password" placeholder="Senha" required />
+            <button type="submit" class="btn-primario" style="padding:10px 12px;border:none;border-radius:10px;background:#111;color:#fff">Entrar</button>
+          </form>
+        </div>
+      </div>
+    </div>
+
     <footer class="footer">
-      <p>📍 Rua dos Caiçaras, 212 — Patos de Minas/MG</p>
+      <p>📍 
+        <a href="https://www.google.com/maps/search/?api=1&query=Rua+dos+Caiçaras,+212,+Patos+de+Minas,+MG" target="_blank">
+          Rua dos Caiçaras, 212 — Patos de Minas/MG
+        </a>
+      </p>
+      <div class="footer-links">
+        <a href="https://wa.me/5534997178336" target="_blank" class="footer-btn">💬 WhatsApp</a>
+        <a href="https://www.instagram.com/dafamilialanches" target="_blank" class="footer-btn">📸 Instagram</a>
+        <a href="https://www.ifood.com.br/delivery/patos-de-minas/dafamilialanches" target="_blank" class="footer-btn">🍔 iFood</a>
+      </div>
+      <div class="footer-copy">© 2025 Da Família Lanches — Todos os direitos reservados 🍔</div>
     </footer>
 
   </div>
 
-  <!-- 🔧 Scripts principais (versão compatível com celular) -->
-  <script defer src="js/cart.js?v=3.6.7"></script>
-  <script defer src="js/rewards.js?v=3.6.7"></script>
-  <script defer src="js/admin.js?v=3.6.7"></script>
-  <script defer src="js/core.js?v=3.6.7"></script>
+  <!-- Painéis flutuantes -->
+  <div class="minhas-recompensas">
+    <button class="recompensas-btn" type="button">🎁 Minhas Recompensas</button>
+    <div class="recompensas-panel" id="recompensas-panel">
+      <div class="recompensas-header">
+        <span>🎁 Minhas Recompensas</span>
+        <button class="fechar-recompensas" type="button">✖</button>
+      </div>
+      <div class="recompensas-body">
+        <h4 style="margin-top:0;">🏆 Contador de Fidelidade</h4>
+        <div class="progress-container" style="margin-bottom:20px;border:1px solid #ccc;padding:15px;border-radius:8px;">
+          <p style="margin:0 0 8px 0;font-size:1.1rem;">
+            Pedidos Feitos: <span id="contador-valor" style="font-weight:bold;color:#ff7043;">...</span> de <span style="font-weight:bold;">5</span>
+          </p>
+          <div class="progresso-bar-bg" style="background:#eee;height:15px;border-radius:8px;overflow:hidden;">
+            <div id="progresso-bar" style="height:100%;width:0%;transition:width .5s;"></div>
+          </div>
+          <p id="progresso-mensagem" style="margin-top:8px;font-size:.9rem;color:#666;">Carregando progresso...</p>
+        </div>
+
+        <h4 class="recompensas-header-secundario">🏷️ Recompensas Desbloqueadas</h4>
+        <div id="listaRecompensas"></div>
+
+        <h4 class="recompensas-header-secundario">📜 Histórico de Recompensas</h4>
+        <div id="historicoRecompensas">
+          <p class="empty-rewards">Você ainda não recebeu recompensas.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="meus-pedidos">
+    <button class="meus-pedidos-btn" type="button">📦 Meus Pedidos</button>
+    <div class="pedidos-panel" id="painelPedidos">
+      <div class="pedidos-header">
+        <span>📦 Meus Pedidos</span>
+        <button class="fechar-pedidos" type="button">✖</button>
+      </div>
+      <div class="pedidos-body" id="listaPedidos">
+        <p class="empty-orders">Faça login para ver seus pedidos.</p>
+      </div>
+    </div>
+  </div>
+
+  <div id="cookie-banner">
+    <p>Usamos cookies para garantir que você tenha a melhor experiência em nosso site.
+      <a href="politica-privacidade.html" target="_blank">Saiba mais</a>.
+    </p>
+    <button id="cookie-accept" type="button">Aceitar</button>
+  </div>
+
+  <!-- ÚNICO ponto de entrada JS -->
+  <script type="module" src="js/core.js?v=3.6.8"></script>
 </body>
 </html>
