@@ -5,18 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>🍔 Da Família Lanches</title>
 
-  <!-- =========================================================
-       DFL v3.6.5 – Estável (Layout Amarelo Suave + Perf. Refinada)
-       CSS CRÍTICO (AGRESSIVO): Header, Banners, Botões, Grid/Card,
-       Overlays, Carrossel e Rodapé. Pensado para LCP/TTI melhores.
-       Mantém IDs/classes do v3.6.0 para compatibilidade total.
-       ========================================================= -->
-
-  <!-- Preconnects úteis -->
   <link rel="preconnect" href="https://www.gstatic.com" crossorigin>
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 
-  <!-- Preloads de elementos críticos (logo e 2 promos iniciais) -->
   <link rel="preload" as="image" href="logo.png">
   <link rel="preload" as="image" href="promocoes/promo1.jpg">
   <link rel="preload" as="image" href="promocoes/promo2.jpg">
@@ -280,18 +271,15 @@
     }
   </style>
 
-  <!-- CSS principal (não-bloqueante) -->
   <link rel="stylesheet" href="style.css?v=2.11" media="print" onload="this.media='all'"/>
   <noscript><link rel="stylesheet" href="style.css?v=2.11"/></noscript>
 
-  <!-- Firebase (mantido antes do script monolítico para Lazy Load controlado) -->
   <script defer src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
   <script defer src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
   <script defer src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
 </head>
 
 <body>
-  <!-- ================= HEADER ================= -->
   <header class="header">
     <div class="header-content">
       <img src="logo.png" alt="Logo DFL" class="logo" width="52" height="52" />
@@ -311,13 +299,11 @@
   </header>
 
   <div class="main-content-wrapper">
-    <!-- ================= STATUS + HORAS ================= -->
     <div id="status-banner" class="status-banner"></div>
     <div class="hours-banner">
       ⏰ Hoje atendemos até <b>23h30</b> — Faltam <span id="timer"></span>
     </div>
 
-    <!-- ================= PROMOÇÕES / CARROSSEL ================= -->
     <section class="promo-section">
       <h2>🔥 Promoções do Dia</h2>
       <p class="promo-sub">Aproveite antes que acabe!</p>
@@ -340,10 +326,8 @@
       </div>
     </section>
 
-    <!-- ================= BACKDROP DO CARRINHO ================= -->
     <div id="cart-backdrop"></div>
 
-    <!-- ================= MINI-CART ================= -->
     <aside id="mini-cart" class="mini-cart" aria-hidden="true">
       <div class="mini-head">
         <h3>🛍 Seu Pedido</h3>
@@ -362,8 +346,6 @@
         </div>
       </div>
     </aside>
-
-    <!-- =================== MENUS =================== -->
 
     <section class="menu-section">
       <h2>🧡 Combos</h2>
@@ -548,8 +530,6 @@
       </div>
     </section>
 
-    <!-- =================== MODAIS =================== -->
-
     <div id="promo-modal" class="modal" aria-hidden="true">
       <div class="promo-content modal-content" role="dialog" aria-modal="true">
         <div class="modal-head">
@@ -618,7 +598,6 @@
       </div>
     </div>
 
-    <!-- =================== RODAPÉ =================== -->
     <footer class="footer">
       <p>📍
         <a href="https://www.google.com/maps/search/?api=1&query=Rua+dos+Caiçaras,+212,+Patos+de+Minas,+MG" target="_blank" rel="noopener">
@@ -630,11 +609,10 @@
         <a href="https://www.instagram.com/dafamilialanches" target="_blank" class="footer-btn" rel="noopener">📸 Instagram</a>
         <a href="https://www.ifood.com.br/delivery/patos-de-minas/dafamilialanches" target="_blank" class="footer-btn" rel="noopener">🍔 iFood</a>
       </div>
-      <div class="footer-copy">© 2025 Da Família Lanches — Todos os direitos reservados 🍔 • <b>v3.6.5 Estável</b></div>
+      <div class="footer-copy">© 2025 Da Família Lanches — Todos os direitos reservados 🍔 • <b>v3.6.6 Estável</b></div>
     </footer>
   </div>
 
-  <!-- =================== PAINÉIS FLUTUANTES =================== -->
   <div class="minhas-recompensas">
     <button class="recompensas-btn" type="button">🎁 Minhas Recompensas</button>
     <div class="recompensas-panel" id="recompensas-panel" aria-hidden="true">
@@ -644,9 +622,9 @@
       </div>
       <div class="recompensas-body">
         <h4 style="margin-top:0;">🏆 Contador de Fidelidade</h4>
-        <div class="progress-container" style="margin-bottom:20px;border:1px solid #ffb300;padding:15px;border-radius:8px;background:#fff;">
+        <div class="progress-container" style="margin-bottom:20px;border:1px solid var(--botao);padding:15px;border-radius:8px;background:#fff;box-shadow:var(--shadow-1);">
           <p style="margin:0 0 8px 0;font-size:1.1rem;">
-            Pedidos Feitos: <span id="contador-valor" style="font-weight:bold;color:#ff7043;">...</span> de <span style="font-weight:bold;">5</span>
+            Pedidos Feitos: <span id="contador-valor" style="font-weight:bold;color:var(--danger);">...</span> de <span style="font-weight:bold;">5</span>
           </p>
           <div class="progresso-bar-bg" style="background:#eee;height:15px;border-radius:8px;overflow:hidden;">
             <div id="progresso-bar" style="height:100%;width:0%;transition:width .5s;"></div>
@@ -678,7 +656,6 @@
     </div>
   </div>
 
-  <!-- =================== COOKIE BANNER =================== -->
   <div id="cookie-banner" role="region" aria-label="Aviso de Cookies">
     <p>Usamos cookies para garantir que você tenha a melhor experiência em nosso site.
       <a href="politica-privacidade.html" target="_blank" rel="noopener">Saiba mais</a>.
@@ -686,7 +663,6 @@
     <button id="cookie-accept" type="button">Aceitar</button>
   </div>
 
-  <!-- =================== ÚLTIMA LINHA: JS MONOLÍTICO =================== -->
-  <script defer src="script.js?v=3.6.0"></script>
+  <script defer src="script.js?v=3.6.2"></script>
 </body>
 </html>
