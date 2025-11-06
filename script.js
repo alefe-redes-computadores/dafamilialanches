@@ -1,12 +1,12 @@
 /* =========================================================
-   🚀 DFL v3.6.10 — ESTÁVEL (CORREÇÃO DE DESIGN FINAL)
-   - Contém TODAS as funcionalidades originais da V3.6.9.
-   - CORRIGE VISUAL: Banner de Horário (Alinhamento/Espaçamento).
+   🚀 DFL v3.7.0 — REMOÇÃO DE SOM GLOBAL DE CLIQUE (MELHORIA UX)
+   - Remove o som de clique constante e o mantém APENAS na finalização do pedido.
+   - Baseado na DFL v3.6.10 Estável e Corrigida.
 ========================================================= */
 
 document.addEventListener("DOMContentLoaded", () => {
   /* ------------------ ⚙️ BASE (MANTIDO) ------------------ */
-  const sound = new Audio("click.wav");
+  const sound = new Audio("click.wav"); // Mantemos a inicialização do áudio
   let cart = [];
   let currentUser = null;
   let isFirebaseInitialized = false; // NOVO: Flag de inicialização do Firebase
@@ -14,10 +14,8 @@ document.addEventListener("DOMContentLoaded", () => {
   const money = (n) => `R$ ${Number(n || 0).toFixed(2).replace(".", ",")}`;
   const safe = (fn) => (...a) => { try { fn(...a); } catch (e) { console.error(e); } };
 
-  // 🔊 Clique com som suave (não bloqueia o site se falhar)
-  document.addEventListener("click", () => {
-    try { sound.currentTime = 0; sound.play(); } catch (_) {}
-  });
+  // 🔊 REMOVIDO: O listener de clique global foi removido daqui para melhorar a UX.
+  // O som será ativado apenas na função fecharPedido().
 
   /* Banco de Dados v2.7:
     Dados das 9 promoções do carrossel.
@@ -1193,6 +1191,10 @@ document.addEventListener("DOMContentLoaded", () => {
       
       // 7. Feedback e Limpeza (MANTIDO)
       popupAdd("Pedido salvo ✅");
+      
+      // 🚨 ADIÇÃO V3.7.0: Somente na finalização do pedido!
+      try { sound.currentTime = 0; sound.play(); } catch (_) {}
+
 
       const linhas = [
         "🍔 *Pedido DFL*",
@@ -1464,7 +1466,7 @@ async function carregarRecompensas(userId) {
             if (recompensasObtidas.length === 0) {
                  el.recompensasLista.innerHTML = `
                     <p style="text-align:center;color:#666;padding:20px;margin-top:20px;">
-                         Faça ${faltam} pedidos para desbloquear a primeira recompensa.
+                        Faça ${faltam} pedidos para desbloquear a primeira recompensa.
                     </p>`;
             }
 
