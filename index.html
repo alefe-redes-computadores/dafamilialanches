@@ -5,71 +5,59 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>🍔 Da Família Lanches</title>
 
-  <!-- CSS crítico leve -->
+  <!-- CSS crítico mínimo para não piscar layout antes do style.css -->
   <style>
-    /* CSS CRÍTICO DFL v3.6.8 */
-    :root { --preto:#000; --bg:#ffd54f; --acento:#ffca28; --botao:#ffb300; }
     html,body{height:100%}
-    body{background:var(--bg);font-family:"Inter","Poppins",system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;color:#222;margin:0;scroll-behavior:smooth}
-    .header{display:flex;justify-content:space-between;align-items:center;background:var(--acento);padding:10px 16px;box-shadow:0 2px 5px rgba(0,0,0,.15);position:fixed;top:0;left:0;right:0;z-index:900}
-    .header-content{display:flex;align-items:center;gap:12px}
+    body{
+      margin:0; background:#ffd54f; color:#222;
+      font-family:"Inter","Poppins",system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+      -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale;
+      scroll-behavior:smooth;
+    }
+    .header{position:fixed; inset:0 auto auto 0; right:0; height:auto; z-index:900;
+      display:flex; align-items:center; justify-content:space-between; gap:12px;
+      padding:10px 16px; background:#ffca28; box-shadow:0 2px 5px rgba(0,0,0,.15)}
+    .header-content{display:flex; align-items:center; gap:12px}
     .logo{width:52px;height:52px}
-    .header-info h1{margin:0;font-size:1.2rem}
-    .tagline{margin:0;font-size:.85rem;color:#d84315}
-    .header-actions{display:flex;align-items:center;gap:10px}
+    .header-info h1{margin:0; font-size:1.2rem}
+    .tagline{margin:0; font-size:.85rem; color:#d84315}
+    .header-actions{display:flex; align-items:center; gap:10px}
+    .user-button{background:linear-gradient(135deg,#fff,#f7f7f7); border:1px solid #ddd; border-radius:8px; padding:8px 12px; font-weight:600; cursor:pointer}
+    #cart-icon{background:#ffb300; border:none; border-radius:8px; padding:8px 12px; font-weight:700; cursor:pointer}
     .main-content-wrapper{padding-top:72px}
-    .user-button{background:linear-gradient(135deg,#fff,#f7f7f7);border:1px solid #ddd;border-radius:8px;padding:8px 12px;font-weight:600;cursor:pointer;transition:.2s}
-    #cart-icon,.cart-button{background:var(--botao);border:none;border-radius:8px;padding:8px 12px;font-weight:700;cursor:pointer;transition:.2s}
-    .status-banner{text-align:center;padding:8px;color:#fff;font-weight:600}
-    .status-banner.open{background:#4caf50}
-    .status-banner.closed{background:#d32f2f}
-    .hours-banner{display:flex;justify-content:space-between;align-items:center;padding:10px 20px;background:#000;color:#fff;font-size:.9rem;overflow:hidden;white-space:nowrap}
-    .promo-section{text-align:center;padding:20px 10px}
-    .promo-section h2{color:#ff5722;margin-bottom:8px}
-    .promo-sub{color:#444;margin-bottom:10px;font-size:.95rem}
-    .countdown-ticker{background:#fff;display:inline-block;padding:6px 12px;border-radius:10px;margin:8px 0 15px;font-weight:600;box-shadow:0 2px 5px rgba(0,0,0,.1)}
-    .carousel{position:relative;max-width:900px;margin:0 auto}
-    .slides{display:flex;gap:8px;overflow-x:auto;scroll-behavior:smooth;padding:4px}
-    .slide{display:block;border-radius:10px;flex:0 0 auto}
-    .c-btn{position:absolute;top:50%;transform:translateY(-50%);background:#000;color:#fff;border:none;border-radius:10px;width:32px;height:32px;font-size:20px;opacity:.8}
-    .c-prev{left:4px}.c-next{right:4px}
-    /* mínimo para cards aparecerem mesmo se style.css falhar */
+    .status-banner{text-align:center; padding:8px; color:#fff; font-weight:600}
+    .status-banner.open{background:#4caf50} .status-banner.closed{background:#d32f2f}
+    .hours-banner{display:flex; justify-content:space-between; align-items:center; gap:8px; padding:10px 20px; background:#000; color:#fff; font-size:.9rem; overflow:hidden; white-space:nowrap}
+    .promo-section{text-align:center; padding:20px 10px}
+    .promo-section h2{color:#ff5722; margin:0 0 8px}
+    .promo-sub{color:#666; margin:0 0 10px; font-size:.95rem}
+    .countdown-ticker{background:#fff; display:inline-block; padding:6px 12px; border-radius:10px; margin:8px 0 15px; font-weight:600; box-shadow:0 2px 5px rgba(0,0,0,.1)}
+    .carousel{position:relative; max-width:900px; margin:0 auto}
+    .slides{display:flex; gap:8px; overflow-x:auto; scroll-behavior:smooth; padding:4px}
+    .slide{display:block; border-radius:10px; flex:0 0 auto}
+    .c-btn{position:absolute; top:50%; transform:translateY(-50%); background:#000; color:#fff; border:none; border-radius:10px; width:32px; height:32px; font-size:20px; opacity:.85}
+    .c-prev{left:4px} .c-next{right:4px}
+    /* skeleton mínimo dos cards caso style.css demore */
     .menu-section{padding:18px 12px}
     .menu-section h2{margin:0 0 12px}
-    .grid{display:grid;grid-template-columns:repeat( auto-fill, minmax(220px,1fr) );gap:12px}
-    .card{background:#fff;border-radius:12px;padding:12px;box-shadow:0 2px 8px rgba(0,0,0,.08)}
-    .card .actions{display:flex;gap:8px;margin-top:8px}
+    .grid{display:grid; grid-template-columns:repeat(auto-fill,minmax(220px,1fr)); gap:12px}
+    .card{background:#fff; border-radius:12px; padding:12px; box-shadow:0 2px 8px rgba(0,0,0,.08)}
+    .card .actions{display:flex; gap:8px; margin-top:8px}
     .add-cart,.extras-btn,.btn-primary,.btn-primario{cursor:pointer}
-    /* Overlays base */
-    #cart-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.45);opacity:0;pointer-events:none;transition:opacity .2s;z-index:980}
-    #cart-backdrop.active{opacity:1;pointer-events:auto}
-    .mini-cart,.modal,.pedidos-panel,.recompensas-panel{position:fixed;z-index:990;display:none}
+    /* overlays base */
+    #cart-backdrop{position:fixed; inset:0; background:rgba(0,0,0,.45); opacity:0; pointer-events:none; transition:opacity .2s; z-index:980}
+    #cart-backdrop.active{opacity:1; pointer-events:auto}
+    .mini-cart,.modal,.pedidos-panel,.recompensas-panel{position:fixed; z-index:990; display:none}
     .mini-cart.active,.modal.show,.pedidos-panel.active,.recompensas-panel.active{display:block}
-    .mini-cart{right:0;top:0;width:min(92vw,380px);height:100dvh;background:#fff;box-shadow:-4px 0 20px rgba(0,0,0,.25);transform:translateX(100%);transition:transform .25s}
-    .mini-cart.active{transform:translateX(0)}
-    .mini-head{display:flex;justify-content:space-between;align-items:center;padding:10px 14px;border-bottom:1px solid #eee}
-    .mini-list{max-height:60vh;overflow:auto;padding:10px 14px}
-    .mini-foot{padding:10px 14px;border-top:1px solid #eee}
-    .modal{inset:0;display:none;align-items:center;justify-content:center}
-    .modal.show{display:flex}
-    .modal-content{background:#fff;width:min(92vw,520px);border-radius:14px;box-shadow:0 8px 40px rgba(0,0,0,.25);max-height:86vh;overflow:auto}
-    .modal-head,.recompensas-header,.pedidos-header{display:flex;justify-content:space-between;align-items:center;padding:12px 16px;border-bottom:1px solid #eee}
-    .recompensas-panel,.pedidos-panel{right:0;top:0;width:min(92vw,520px);height:100dvh;background:#fff;box-shadow:-4px 0 20px rgba(0,0,0,.25);transform:translateX(100%);transition:transform .25s}
-    .recompensas-panel.active,.pedidos-panel.active{transform:translateX(0)}
-    .recompensas-body,.pedidos-body{padding:14px}
-    .footer{padding:24px 12px;text-align:center}
-    .footer-links{display:flex;justify-content:center;gap:10px;margin:10px 0}
-    .footer-btn{background:#fff;border:1px solid #ddd;border-radius:10px;padding:8px 12px;text-decoration:none;color:#111}
-    @media (max-width:600px){.hours-banner{padding:8px 10px;font-size:.85rem}}
   </style>
 
-  <!-- CSS principal (agora modo padrão para evitar erro no Android) -->
+  <!-- CSS principal -->
   <link rel="stylesheet" href="style.css?v=2.11" />
 
   <!-- Preloads úteis -->
   <link rel="preload" as="image" href="imagens/bitela.png">
 
-  <!-- Firebase (precisa estar antes do core.js) -->
+  <!-- Firebase v8 (compatível com script.js legado) -->
   <script defer src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
   <script defer src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
   <script defer src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
@@ -147,6 +135,7 @@
       </div>
     </aside>
 
+    <!-- 🧡 Combos -->
     <section class="menu-section">
       <h2>🧡 Combos</h2>
       <div class="grid">
@@ -184,6 +173,7 @@
       </div>
     </section>
 
+    <!-- 🍔 Tradicionais -->
     <section class="menu-section">
       <h2>🍔 Nossos Lanches Tradicionais</h2>
       <div class="grid">
@@ -245,6 +235,7 @@
       </div>
     </section>
 
+    <!-- 🍔 Artesanais -->
     <section class="menu-section">
       <h2>🍔 Lanches Artesanais</h2>
       <div class="grid">
@@ -274,6 +265,7 @@
       </div>
     </section>
 
+    <!-- 🌭 Hot Dogs -->
     <section class="menu-section">
       <h2>🌭 Hot Dogs</h2>
       <div class="grid">
@@ -310,6 +302,7 @@
       </div>
     </section>
 
+    <!-- Modal Promo -->
     <div id="promo-modal" class="modal">
       <div class="promo-content modal-content">
         <div class="modal-head">
@@ -328,6 +321,7 @@
       </div>
     </div>
 
+    <!-- Modal Adicionais -->
     <div id="extras-modal" class="modal">
       <div class="modal-content">
         <div class="modal-head">
@@ -342,6 +336,7 @@
       </div>
     </div>
 
+    <!-- Modal Combo -->
     <div id="combo-modal" class="modal">
       <div class="modal-content">
         <div class="modal-head">
@@ -356,6 +351,7 @@
       </div>
     </div>
 
+    <!-- Modal Login -->
     <div id="login-modal" class="modal">
       <div class="modal-content login-box">
         <div class="modal-head">
@@ -378,6 +374,7 @@
       </div>
     </div>
 
+    <!-- Footer -->
     <footer class="footer">
       <p>📍 
         <a href="https://www.google.com/maps/search/?api=1&query=Rua+dos+Caiçaras,+212,+Patos+de+Minas,+MG" target="_blank">
@@ -445,7 +442,7 @@
     <button id="cookie-accept" type="button">Aceitar</button>
   </div>
 
-  <!-- ÚNICO ponto de entrada JS -->
-  <script type="module" src="js/core.js?v=3.6.8"></script>
+  <!-- ✅ Único ponto de entrada: script.js legado (v3.6.0) -->
+  <script defer src="script.js?v=3.6.0"></script>
 </body>
 </html>
