@@ -403,41 +403,7 @@ button, input, select {
   overflow: hidden;
   text-overflow: ellipsis;
 }
-/* ===========================================================
-   🎯 DFL v3.6.7 - ModalArrowFix
-   Corrige e aprimora o estilo das setas no modal expandido
-   =========================================================== */
 
-/* Contêiner do modal ajustado para permitir sobreposição das setas */
-.modal-content {
-  position: relative;
-  overflow: hidden;
-}
-
-/* Setas dentro do modal (navegação de imagens ampliadas) */
-.modal-content .c-btn {
-  position: absolute;
-  top: 50%;
-  transform: translateY(-50%);
-  width: 42px;
-  height: 42px;
-  border-radius: 50%;
-  background: rgba(0, 0, 0, 0.45);
-  color: #fff;
-  border: none;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  transition: background 0.25s, transform 0.2s;
-  z-index: 2001;
-}
-
-/* Efeito hover para desktop */
-.modal-content .c-btn:hover {
-  background: rgba(0, 0, 0, 0.6);
-  transform: translateY(-50%) scale(1.08);
-}
 
 /* Seta esquerda e direita — posição */
 .modal-content .c-prev {
@@ -460,4 +426,81 @@ button, input, select {
     height: 48px;
     background: rgba(0, 0, 0, 0.55);
   }
+}
+/* ===========================================================
+   🍔 DFL v3.6.8 - Modal Restore
+   Corrige visual das setas e restaura o estilo do preço no modal
+   =========================================================== */
+
+/* ========== SETAS DO MODAL DE IMAGEM EXPANDIDA ========== */
+.modal-content .c-btn {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.45);
+  color: #fff;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  z-index: 2001;
+  box-shadow: 0 2px 8px rgba(0,0,0,.3);
+}
+
+.modal-content .c-btn:hover {
+  background: rgba(0, 0, 0, 0.6);
+  transform: translateY(-50%) scale(1.08);
+}
+
+.modal-content .c-prev {
+  left: 14px;
+}
+.modal-content .c-next {
+  right: 14px;
+}
+
+/* Ícones internos */
+.modal-content .c-btn::before {
+  font-size: 24px;
+  line-height: 1;
+}
+
+/* Mobile */
+@media (max-width: 600px) {
+  .modal-content .c-btn {
+    width: 52px;
+    height: 52px;
+    background: rgba(0, 0, 0, 0.55);
+  }
+}
+
+/* ========== ESTILO DO PREÇO DENTRO DO MODAL ========== */
+.modal-content .price-block {
+  text-align: center;
+  margin-top: 6px;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #333;
+}
+
+.modal-content .price-block .old-price {
+  color: #777;
+  text-decoration: line-through;
+  margin-right: 6px;
+}
+
+.modal-content .price-block .new-price {
+  color: #2e7d32;
+  font-weight: 800;
+  font-size: 1.05rem;
+}
+
+/* Para garantir espaçamento harmonioso no botão abaixo */
+.modal-content .btn-primario {
+  margin-top: 8px;
 }
