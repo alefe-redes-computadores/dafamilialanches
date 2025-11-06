@@ -293,6 +293,33 @@
         margin-left: 10px;
     }
 
+    /* Estilo para Histórico de Entregas */
+    .historico-frete-card {
+        background: #fff;
+        border-radius: 10px;
+        padding: 15px;
+        margin-bottom: 12px;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.08);
+        border-left: 4px solid var(--botao);
+    }
+    .historico-frete-card h4 {
+        margin: 0 0 8px 0;
+        font-size: 1.1rem;
+        color: #ff7043;
+    }
+    .historico-frete-card p {
+        margin: 5px 0;
+        font-size: 0.95rem;
+        color: #555;
+    }
+    .historico-frete-card .total {
+        font-weight: 700;
+        color: var(--danger);
+        margin-top: 10px;
+        border-top: 1px dashed #eee;
+        padding-top: 5px;
+    }
+
     /* ================= FOOTER ================= */
     .footer{background:#ffca28; text-align:center; padding:20px; font-size:.9rem; color:#222}
     .footer a{color:#ff7043; text-decoration:none; transition:color .2s}
@@ -328,8 +355,8 @@
     }
   </style>
 
-  <link rel="stylesheet" href="style.css?v=3.7.1" media="print" onload="this.media='all'"/>
-  <noscript><link rel="stylesheet" href="style.css?v=3.7.1"/></noscript>
+  <link rel="stylesheet" href="style.css?v=3.7.2" media="print" onload="this.media='all'"/>
+  <noscript><link rel="stylesheet" href="style.css?v=3.7.2"/></noscript>
 
   <script defer src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
   <script defer src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
@@ -433,6 +460,17 @@
             <span>TOTAL:</span>
             <span id="total-display">R$ 0,00</span>
         </div>
+        
+        <label style="display:block;font-weight:600;margin-bottom:6px;margin-top:10px;">🏠 Endereço para Entrega</label>
+        <textarea id="address-input" rows="2" placeholder="Rua, número, complemento, bairro"
+            style="width:100%;border:1px solid #ddd;border-radius:10px;padding:10px;resize:vertical;margin-bottom:10px"></textarea>
+    
+        <button id="finish-order" type="button" style="width:100%;background:#4caf50;color:#fff;border:none;border-radius:10px;padding:12px;font-weight:700;cursor:pointer;margin-bottom:8px">
+            Finalizar Pedido 🛍️
+        </button>
+        <button id="clear-cart" type="button" style="width:100%;background:#ff4081;color:#fff;border:none;border-radius:10px;padding:10px;font-weight:700;cursor:pointer">
+            Limpar Carrinho
+        </button>
         
       </div>
     </aside>
@@ -704,7 +742,7 @@
         <a href="https://www.instagram.com/dafamilialanches" target="_blank" class="footer-btn" rel="noopener">📸 Instagram</a>
         <a href="https://www.ifood.com.br/delivery/patos-de-minas/dafamilialanches" target="_blank" class="footer-btn" rel="noopener">🍔 iFood</a>
       </div>
-      <div class="footer-copy">© 2025 Da Família Lanches — Todos os direitos reservados 🍔 • <b>v3.7.1 Design</b></div>
+      <div class="footer-copy">© 2025 Da Família Lanches — Todos os direitos reservados 🍔 • <b>v3.7.2 Design</b></div>
     </footer>
   </div>
 
@@ -745,8 +783,17 @@
         <span>📦 Meus Pedidos</span>
         <button class="fechar-pedidos" type="button" aria-label="Fechar painel">✖</button>
       </div>
-      <div class="pedidos-body" id="listaPedidos">
-        <p class="empty-orders">Faça login para ver seus pedidos.</p>
+      <div class="pedidos-body" id="pedidos-body">
+        <h4 style="margin-top:0;">🔁 Repetir Pedido Recente</h4>
+        <div id="listaPedidos">
+          <p class="empty-orders">Faça login para ver seus pedidos.</p>
+        </div>
+        
+        <h4 style="margin-top:20px;">🚚 Histórico de Entregas</h4>
+        <div id="historicoEntregas">
+            <p class="empty-history" style="text-align:center;color:#999;">Carregando histórico de entregas...</p>
+        </div>
+        
       </div>
     </div>
   </div>
@@ -758,6 +805,6 @@
     <button id="cookie-accept" type="button">Aceitar</button>
   </div>
 
-  <script defer src="script.js?v=3.7.1"></script>
+  <script defer src="script.js?v=3.7.2"></script>
 </body>
 </html>
