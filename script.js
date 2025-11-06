@@ -2004,3 +2004,26 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
 });
+/* ===== v3.6.8r3 — Formatter de preço do modal de promoções ===== */
+(function () {
+  const priceEl = document.getElementById('promo-modal-price');
+  if (!priceEl) return;
+
+  // Transforma "De R$ 65,00 por R$ 49,99" em spans estilizados.
+  const format = (txt) => {
+    const m = txt && txt.match(/De\s*(R\$\s*[\d\.,]+)\s*por\s*(R\$\s*[\d\.,]+)/i);
+    if (!m) return txt;
+    return `<span class="old-price">${m[1]}</span> por <span class="new-price">${m[2]}</span>`;
+    // Obs.: CSS das classes está no style.css (acima).
+  };
+
+  // 1) Primeira aplicação (caso o texto já esteja no DOM)
+  priceEl.innerHTML = format(priceEl.textContent);
+
+  // 2) Se o seu código trocar o texto depois de abrir o modal,
+  //    este observer re-formata automaticamente.
+  const mo = new MutationObserver(() => {
+    priceEl.innerHTML = format(priceEl.textContent);
+  });
+  mo.observe(priceEl, { childList: true, characterData: true, subtree: true });
+})();
