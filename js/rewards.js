@@ -1,24 +1,46 @@
 // Local: /js/rewards.js
 
-import { el, Overlays, inicializarFirebase } from './core.js';
+import { el, money, safe, Overlays, db, currentUser, isFirebaseInitialized, configuracoesRecompensa, renderMiniCart, couponApplied } from './core.js';
 
-// NOVO: Funções de Recompensas (carregarRecompensas, exibirRecompensas, etc.)
-export function setupRewards() {
-    
-    // 1. Lógica de abrir/fechar o novo painel
-    el.recompensasBtn?.addEventListener("click", () => {
-        // Requer login, assim como "Meus Pedidos"
-        // ... (Lógica de checagem de login) ...
-        
-        inicializarFirebase(); // Garante o Firebase se for o primeiro acesso
-        Overlays.open(el.recompensasPanel);
-        
-        // carregarRecompensas(currentUser.uid); // Dependente do Firebase
-    });
 
-    // 2. Lógica de fechar o painel
-    el.recompensasFecharBtn?.addEventListener("click", () => Overlays.closeAll());
+// ------------------ Funções do Módulo Recompensas ------------------
 
+// [Carregamento de Metas]
+export async function carregarConfiguracoesDeRecompensas() {
+    // ... (Lógica completa do carregarConfiguracoesDeRecompensas)
 }
 
-// ... (Outras Funções de Recompensa, como carregarRecompensas, exibirRecompensas, carregarHistoricoRecompensas)
+// [Exibição]
+export async function carregarRecompensas(userId) {
+    // ... (Lógica completa do carregarRecompensas)
+}
+
+function exibirRecompensas(pedidosFeitos, recompensasDisponiveis, cupomStatus, RECOMPENSAS_DATA) {
+    // ... (Lógica completa do exibirRecompensas)
+}
+
+async function carregarHistoricoRecompensas(userId) {
+    // ... (Lógica completa do carregarHistoricoRecompensas)
+}
+
+export function mostrarPopupRecompensa(msg) {
+    // ... (Lógica completa do mostrarPopupRecompensa)
+}
+
+// ------------------ Setup do Módulo ------------------
+export function setupRewards() {
+    // Bindings de Abertura/Fechamento
+    el.recompensasBtn?.addEventListener("click", () => {
+        if (!currentUser) {
+            alert("Faça login para ver suas recompensas.");
+            Overlays.open(el.loginModal); 
+            return;
+        }
+        // Garante o Firebase se for o primeiro acesso
+        inicializarFirebase(); 
+        Overlays.open(el.recompensasPanel);
+        carregarRecompensas(currentUser.uid); 
+    });
+    
+    el.recompensasFecharBtn?.addEventListener("click", () => Overlays.closeAll());
+}
