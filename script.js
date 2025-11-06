@@ -1,8 +1,7 @@
 /* =========================================================
-   🚀 DFL v3.6.2 — ESTÁVEL (CORREÇÃO DE BUGS CRÍTICOS NO FIREBASE)
-   - Contém TODAS as funcionalidades originais da V3.6.0.
-   - Corrige o erro de digitação 'cupumUserRef' que quebrava transações Batch no fecharPedido.
-   - Corrige o erro 'cupumSnap' que impedia a leitura do status da recompensa.
+   🚀 DFL v3.6.9 — ESTÁVEL (DESIGN FINAL)
+   - Contém TODAS as funcionalidades originais da V3.6.2.
+   - CORRIGE VISUAL: Modal de Escolha de Refrigerante (Layout de Card Vertical).
 ========================================================= */
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -536,10 +535,23 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     const opts = comboDrinkOptions[grupo];
+    // 🚨 CORREÇÃO VISUAL V3.6.9: Aplica o estilo de CARD VERTICAL no HTML injetado
     el.comboBody.innerHTML = opts.map((o, i) => `
-      <label class="extra-line">
-        <span>${o.rotulo} — + ${money(o.delta)}</span>
-        <input type="radio" name="combo-drink" value="${i}" ${i === 0 ? "checked" : ""}>
+      <label class="combo-option-line" style="
+        display: flex; 
+        justify-content: space-between; 
+        align-items: center; 
+        padding: 12px; 
+        border: 1px solid #ffb300; /* Borda amarela var(--botao) */
+        border-radius: 8px; 
+        background: #fff; 
+        box-shadow: 0 1px 3px rgba(0,0,0,.08); /* Sombra suave */
+        cursor: pointer; 
+        transition: all 0.2s;
+      ">
+        <span style="font-weight: 600; color: #222;">${o.rotulo}</span>
+        <span style="font-weight: 700; color: #d32f2f;">+ ${money(o.delta)}</span>
+        <input type="radio" name="combo-drink" value="${i}" ${i === 0 ? "checked" : ""} style="margin-left: 10px;">
       </label>
     `).join("");
 
