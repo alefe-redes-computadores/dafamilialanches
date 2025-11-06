@@ -1,6 +1,6 @@
 /* ===========================================================
-   🎨 Da Família Lanches – CSS Principal (v3.7.0)
-   Hotfix Interatividade & Modal Premium (Carrossel)
+   🎨 Da Família Lanches – CSS Principal (v3.7.1)
+   Hotfix Estético de Modais e Carrossel (Preço e Navegação)
    =========================================================== */
 
 /* ======== ELEMENTOS BÁSICOS ======== */
@@ -171,20 +171,18 @@ button, input, select {
   font-size: 1.1rem;
   color: #555;
   margin-bottom: 20px;
+  line-height: 1.5; /* Ajuste para evitar que o texto seja cortado */
 }
 #promo-modal-price .old-price {
   text-decoration: line-through;
   color: #999;
   margin-right: 8px;
+  font-size: 0.95rem; /* Explicitamente menor para ser visível ao lado do negrito */
 }
 #promo-modal-price b {
   font-size: 1.3rem;
   color: #4caf50;
   font-weight: 700;
-}
-#promo-modal-add {
-  width: 100%;
-  box-sizing: border-box;
 }
 .promo-nav, .promo-close {
   position: absolute;
@@ -201,6 +199,7 @@ button, input, select {
   display: flex;
   align-items: center;
   justify-content: center;
+  z-index: 10; /* Garante que fique acima do conteúdo do modal */
 }
 .promo-nav:hover, .promo-close:hover {
   background: rgba(0,0,0,.9);
@@ -214,6 +213,7 @@ button, input, select {
   font-size: 18px;
   background: rgba(0,0,0,.5);
   transform: none;
+  z-index: 20; /* Prioridade para o botão de fechar */
 }
 .promo-close:hover {
   background: #d32f2f;
