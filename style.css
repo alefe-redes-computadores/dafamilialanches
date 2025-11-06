@@ -452,3 +452,34 @@ button, input, select {
   color: #2e7d32;
   font-weight: 800;
 }
+/* ======== PATCH DE CLICKS BLOQUEADOS (v3.6.8r4) ======== */
+/* Garante que o backdrop não trave toda a interface */
+
+#cart-backdrop {
+  opacity: 0 !important;
+  pointer-events: none !important;
+  transition: opacity 0.3s ease !important;
+  z-index: 900 !important;
+}
+
+/* Ativo apenas quando o carrinho ou modal estiverem realmente abertos */
+#mini-cart.active + #cart-backdrop,
+.modal.show + #cart-backdrop {
+  opacity: 1 !important;
+  pointer-events: auto !important;
+}
+
+/* Correção extra: impede sobreposição indevida dos painéis laterais */
+.pedidos-panel,
+.recompensas-panel,
+.modal,
+#mini-cart {
+  z-index: 1000 !important;
+}
+
+/* Garante que o header e botões flutuantes fiquem acima de tudo */
+.header,
+.meus-pedidos,
+.minhas-recompensas {
+  z-index: 1500 !important;
+}
