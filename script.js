@@ -1,7 +1,7 @@
 /* =========================================================
-   🚀 DFL v3.6.9 — ESTÁVEL (DESIGN FINAL)
-   - Contém TODAS as funcionalidades originais da V3.6.2.
-   - CORRIGE VISUAL: Modal de Escolha de Refrigerante (Layout de Card Vertical).
+   🚀 DFL v3.6.10 — ESTÁVEL (CORREÇÃO DE DESIGN FINAL)
+   - Contém TODAS as funcionalidades originais da V3.6.9.
+   - CORRIGE VISUAL: Banner de Horário (Alinhamento/Espaçamento).
 ========================================================= */
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -1001,8 +1001,9 @@ document.addEventListener("DOMContentLoaded", () => {
       el.statusBanner.className = `status-banner ${aberto ? "open" : "closed"}`;
     }
     if (el.hoursBanner) {
+      const elMsg = el.hoursBanner.querySelector("#hours-message");
       const elTimer = el.hoursBanner.querySelector("#timer");
-      if (!elTimer) return;
+      if (!elMsg || !elTimer) return;
 
       if (aberto) {
         const fim = new Date(agora);
@@ -1014,8 +1015,8 @@ document.addEventListener("DOMContentLoaded", () => {
         const restH = Math.floor(diff / 3600);
         const restM = Math.floor((diff % 3600) / 60);
         
-        // 🚨 CORREÇÃO VISUAL V3.6.9: Atualização para injetar apenas o tempo no #timer
-        el.hoursBanner.querySelector("#hours-message").innerHTML = `⏰ Hoje atendemos até <b>23h30</b> — Faltam`;
+        // 🚨 CORREÇÃO FINAL V3.6.10: Injeta o HTML na mensagem e o tempo no timer
+        elMsg.innerHTML = `⏰ Hoje atendemos até <b>23h30</b> — Faltam`;
         elTimer.textContent = `${restH}h ${restM}min`;
 
       } else {
@@ -1029,8 +1030,8 @@ document.addEventListener("DOMContentLoaded", () => {
         const faltamH = Math.floor(diff / 3600);
         const faltamM = Math.floor((diff % 3600) / 60);
 
-        // 🚨 CORREÇÃO VISUAL V3.6.9: Atualização para injetar apenas o tempo no #timer
-        el.hoursBanner.querySelector("#hours-message").innerHTML = `🔒 Fechado — Abrimos em`;
+        // 🚨 CORREÇÃO FINAL V3.6.10: Injeta o HTML na mensagem e o tempo no timer
+        elMsg.innerHTML = `🔒 Fechado — Abrimos em`;
         elTimer.textContent = `${faltamH}h ${faltamM}min`;
       }
     }
@@ -1463,7 +1464,7 @@ async function carregarRecompensas(userId) {
             if (recompensasObtidas.length === 0) {
                  el.recompensasLista.innerHTML = `
                     <p style="text-align:center;color:#666;padding:20px;margin-top:20px;">
-                        Faça ${faltam} pedidos para desbloquear a primeira recompensa.
+                         Faça ${faltam} pedidos para desbloquear a primeira recompensa.
                     </p>`;
             }
 
