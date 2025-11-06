@@ -1,24 +1,39 @@
 /* =========================================================
-   🚀 DFL v3.7.1 — MÓDULO DE FRETE FUNCIONAL (FASE 2)
-   - Continuação direta da v3.7.0 (fase inócuo validada)
-   - Ativa o cálculo de frete dinâmico por CEP/Bairro via Firestore
-   - Integrado de forma segura ao carrinho lateral
-========================================================= */
+   🚀 DFL v3.7.2 — HISTÓRICO DE ENTREGAS + PERSISTÊNCIA DE FRETE
+   - Adiciona gravação automática do destino e valor do frete no Firestore
+   - Amplia o painel "📦 Meus Pedidos" com o Histórico de Entregas
+
+   🧩 Estrutura Base:
+   1️⃣ Persistência: grava freteDestino e freteValor em cada pedido
+   2️⃣ Histórico: exibe os dados no painel de pedidos
+   3️⃣ Logs: [DFL/FRETE/HIST] em cada operação
+   4️⃣ Segurança: somente para usuários autenticados
+
+   ⚙️ Compatibilidade:
+   - Mantém integração total com Firebase Lazy Load
+   - Nenhum impacto nas funções de cupons, som ou recompensas
+
+   📅 Planejamento:
+   - v3.7.0 → módulo inócuo validado
+   - v3.7.1 → frete funcional ativo
+   - v3.7.2 → persistência e histórico de entregas
+   ========================================================= */
 
 // 🔧 Feature Flags (habilitar quando pronto)
 window.DFL_FLAGS = Object.assign({},
   window.DFL_FLAGS || {},
   {
-    freightEnabled: true,     // ATIVADO: Ativa módulo de frete no UI (Ação 1)
+    freightEnabled: true,     // ATIVADO: Módulo de frete ativo (v3.7.1)
     freightDebug:   true,      // logs detalhados no console
   }
 );
 
-// 📝 Namespace de Logs
+// 📝 Namespace de Logs (DFL v3.7.2: Adição do TAG /HIST)
 const LOG = {
   info:  (...a) => (window.DFL_FLAGS?.freightDebug ? console.log("[DFL/FRETE]", ...a) : void 0),
   warn:  (...a) => console.warn("[DFL/FRETE]", ...a),
   error: (...a) => console.error("[DFL/FRETE]", ...a),
+  hist:  (...a) => (window.DFL_FLAGS?.freightDebug ? console.log("[DFL/FRETE/HIST]", ...a) : void 0),
 };
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -52,7 +67,7 @@ document.addEventListener("DOMContentLoaded", () => {
   
   // O array estático RECOMPENSAS_DATA FOI REMOVIDO E SERÁ CARREGADO DINAMICAMENTE
 
-  /* ------------------ 🎯 ELEMENTOS (INJEÇÃO DE FRETE) ------------------ */
+  /* ------------------ 🎯 ELEMENTOS (INJEÇÃO DE FRETE + HISTÓRICO) ------------------ */
   const el = {
     cartIcon: document.getElementById("cart-icon"),
     cartCount: document.getElementById("cart-count"),
@@ -93,7 +108,7 @@ document.addEventListener("DOMContentLoaded", () => {
     pedidosPanel: document.getElementById("painelPedidos"),
     pedidosFecharBtn: document.querySelector(".fechar-pedidos"),
     pedidosLista: document.getElementById("listaPedidos"),
-
+    
     // Elementos v3.1 (Minhas Recompensas)
     recompensasContainer: document.querySelector(".minhas-recompensas"),
     recompensasBtn: document.querySelector(".recompensas-btn"),
@@ -102,12 +117,15 @@ document.addEventListener("DOMContentLoaded", () => {
     recompensasLista: document.getElementById("listaRecompensas"),
     historicoLista: document.getElementById("historicoRecompensas"),
     
-    // NOVO DFL v3.7.1: Elementos do Frete
+    // DFL v3.7.1: Elementos do Frete
     freteInput: document.getElementById("frete-input"),
     calcularFreteBtn: document.getElementById("calcular-frete-btn"),
     freteStatusMsg: document.getElementById("frete-status-msg"),
     freteDisplayLine: document.getElementById("frete-display-line"),
     freteValorDisplay: document.getElementById("frete-valor-display"),
+
+    // DFL v3.7.2: Novo elemento para Histórico de Entregas (Ação 2)
+    historicoEntregas: document.getElementById("historicoEntregas"),
   };
   
   // Garantia do elemento do histórico (MANTIDO)
@@ -245,7 +263,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if (!cart.length) {
       el.miniList.innerHTML = '<p style="text-align:center;color:#999;padding:20px;">Carrinho vazio 🛒</p>';
       
-      // v3.0: Limpa também o rodapé dinâmico e estático
+      // Limpeza do frete e UI de cupom
       if(el.miniFoot) el.miniFoot.querySelectorAll(".cart-summary-generated").forEach(e => e.remove());
       const couponMsg = document.getElementById("coupon-message");
       const couponDiscountRow = document.getElementById("coupon-discount-row");
@@ -876,9 +894,6 @@ document.addEventListener("DOMContentLoaded", () => {
     const freteDisplayLine = document.getElementById("frete-display-line");
     const freteValorDisplay = document.getElementById("frete-valor-display");
 
-    // Remove o resumo antigo (Subtotal, Total, Botões)
-    // OBS: O HTML v3.7.1 não tem mais o resumo gerado dinamicamente, apenas o subtotal, total e frete são atualizados.
-    
     if (cart.length === 0) {
       // Zera o frete e esconde a linha se o carrinho estiver vazio
       window.DFL_Frete.resetFrete();
@@ -971,7 +986,9 @@ document.addEventListener("DOMContentLoaded", () => {
 ========================================================= */
 window.DFL_Frete = (function() {
     const TAG = '[DFL/FRETE]';
-    let freteAtual = 0.00; // Valor do frete calculado
+    // DFL v3.7.2: Variável para armazenar o termo de busca do frete para persistência
+    let freteDestino = ""; 
+    let freteValor = 0.00; 
     
     const config = {
         freightEnabled: window.DFL_FLAGS.freightEnabled,
@@ -1056,18 +1073,20 @@ window.DFL_Frete = (function() {
             
             // 4️⃣ Atualização Dinâmica (Sucesso/Erro de Busca)
             if (valorEncontrado >= 0) {
-                freteAtual = valorEncontrado;
+                freteValor = valorEncontrado; // Armazena o valor
+                freteDestino = bairroEncontrado; // Armazena o destino para persistência
                 
                 // Atualiza a linha do frete no mini-cart (via updateCartTotals)
                 window.updateCartTotals(); 
                 
-                msgDisplay.textContent = `Frete para ${bairroEncontrado}: ${money(freteAtual)}.`;
+                msgDisplay.textContent = `Frete para ${bairroEncontrado}: ${money(freteValor)}.`;
                 msgDisplay.style.color = '#28a745'; // Verde de sucesso
                 msgDisplay.style.display = 'block';
                 
             } else {
                 // 3️⃣ Bairro não encontrado
-                freteAtual = 0.00;
+                freteValor = 0.00;
+                freteDestino = termoBusca; // Mantém o termo digitado para possível rastreio
                 window.updateCartTotals(); // Recalcula o total sem frete
                 
                 // Exibir mensagem amigável de erro
@@ -1079,7 +1098,8 @@ window.DFL_Frete = (function() {
 
         } catch (error) {
             LOG.error("Erro crítico ao calcular frete:", error);
-            freteAtual = 0.00;
+            freteValor = 0.00;
+            freteDestino = termoBusca;
             window.updateCartTotals();
             
             msgDisplay.textContent = "Erro de sistema. Tente novamente mais tarde.";
@@ -1092,26 +1112,34 @@ window.DFL_Frete = (function() {
     }
 
     /** Retorna o valor do frete atual. */
-    function getFreteAtual() {
-        return config.freightEnabled ? freteAtual : 0.00;
+    function getFreteValor() {
+        return config.freightEnabled ? freteValor : 0.00;
+    }
+    
+    /** Retorna o destino do frete atual. */
+    function getFreteDestino() {
+        return config.freightEnabled ? freteDestino : null;
     }
     
     /** Zera o valor do frete e atualiza a UI. */
     function resetFrete() {
-        freteAtual = 0.00;
+        freteValor = 0.00;
+        freteDestino = "";
         if (el.freteStatusMsg) el.freteStatusMsg.style.display = 'none';
         if (el.freteInput) el.freteInput.value = '';
         if (el.freteDisplayLine) el.freteDisplayLine.style.display = "none";
         
         // Se o carrinho estava vazio, updateCartTotals() não foi chamado. Chama agora para zerar o Total.
-        window.updateCartTotals();
+        // window.updateCartTotals() será chamado logo após renderMiniCart, evitando chamadas duplas aqui.
     }
 
     // Retorna a interface pública do módulo
     return {
         init: init,
-        getFrete: getFreteAtual,
-        resetFrete: resetFrete // Exposto para ser usado no renderMiniCart quando vazio
+        getFrete: getFreteValor, // Mantendo a assinatura getFrete para compatibilidade
+        getFreteValor: getFreteValor,
+        getFreteDestino: getFreteDestino,
+        resetFrete: resetFrete 
     };
 })();
 
@@ -1252,13 +1280,13 @@ window.DFL_Frete = (function() {
   setInterval(atualizarTimer, 1000);
 
   /* =========================================================
-    ✨ v3.5.0: FUNÇÃO 'FECHAR PEDIDO' (Configuração Dinâmica)
+    ✨ v3.7.2: FUNÇÃO 'FECHAR PEDIDO' (Persistência de Frete)
     =========================================================
   */
   async function fecharPedido() {
     if (!cart.length) return alert("Carrinho vazio!");
     if (!currentUser) {
-      alert("Faça login para enviar o pedido!");
+      alert("⚠️ Faça login para registrar o histórico de entregas."); // Ação 4
       Overlays.open(el.loginModal);
       return;
     }
@@ -1270,8 +1298,8 @@ window.DFL_Frete = (function() {
       return;
     }
     
-    // 🚨 DFL v3.7.1: Checagem do Frete
-    if (window.DFL_FLAGS.freightEnabled && window.DFL_Frete?.getFrete() === 0.00 && cart.length > 0) {
+    // 🚨 DFL v3.7.1: Checagem do Frete (Recomendação de UX)
+    if (window.DFL_FLAGS.freightEnabled && window.DFL_Frete?.getFreteValor() === 0.00 && cart.length > 0) {
         alert("Calcule o frete para o seu bairro/CEP antes de finalizar o pedido.");
         document.getElementById("frete-input")?.focus();
         return;
@@ -1280,6 +1308,18 @@ window.DFL_Frete = (function() {
 
     // 1. CÁLCULO FINAL E INFORMAÇÕES DO CUPOM
     const { subtotal, delivery, discount, total, cupomInfo } = await calcTotals();
+    
+    // DFL v3.7.2: Captura os dados do Frete para Persistência (Ação 1)
+    let freteDestino = window.DFL_Frete?.getFreteDestino() || null;
+    let freteValor = window.DFL_Frete?.getFreteValor() || 0;
+    
+    // Fallback: Se o Frete estiver 0, mas o endereço foi preenchido, salva o endereço como destino
+    if (freteValor === 0 && freteDestino === "") {
+        // Assume que a primeira palavra do endereço é o destino, se o frete não foi calculado
+        freteDestino = addr.split(/[ ,]+/)[0] || addr; 
+    }
+    if (freteDestino === "") freteDestino = null;
+
 
     const pedido = {
       usuario: currentUser.email,
@@ -1297,11 +1337,19 @@ window.DFL_Frete = (function() {
       endereco: addr,
       data: new Date().toISOString(),
       
-      thumb: 'imagens/padrao.jpg' 
+      thumb: 'imagens/padrao.jpg',
+      
+      // DFL v3.7.2: PERSISTÊNCIA DE FRETE (Ação 1)
+      freteDestino: freteDestino, 
+      freteValor: Number(freteValor.toFixed(2)),
     };
+    
+    LOG.hist("Dados de frete para persistência:", { destino: pedido.freteDestino, valor: pedido.freteValor });
+
 
     try {
       // Cria a transação Batch
+      // 🔒 Segurança: Se o Firebase falhar, a execução vai para o 'catch' (Fallback)
       const batch = db.batch();
       const userId = currentUser.uid;
       const usuarioRef = db.collection("Usuarios").doc(userId);
@@ -1309,7 +1357,6 @@ window.DFL_Frete = (function() {
       // 2. Marca cupom personalizado como USADO, se houver
       if (cupomInfo.isPersonalizado && couponApplied) {
           const cupomUserRef = db.collection("CuponsUsuarios").doc(userId);
-          // 🚨 CORREÇÃO CRÍTICA V3.6.2: Corrigindo o erro de digitação 'cupumUserRef' para 'cupomUserRef'
           batch.update(cupomUserRef, {
               usado: true,
               dataUso: firebase.firestore.FieldValue.serverTimestamp(),
@@ -1329,6 +1376,9 @@ window.DFL_Frete = (function() {
       
       // 5. Commit da transação (cria o pedido e atualiza o contador/cupom)
       await batch.commit();
+      
+      LOG.hist("Pedido salvo com frete no Firestore:", pedidoRef.id);
+
 
       // Atualiza o ID do pedido no CupomUsuarios (se usado)
       if (cupomInfo.isPersonalizado && couponApplied) {
@@ -1351,44 +1401,32 @@ window.DFL_Frete = (function() {
       );
       
       if (recompensaAtingida) {
-          // Meta atingida!
-          
           const primeiroLimite = RECOMPENSAS_DATA[0]?.limite || 1;
           const novoNivel = recompensaAtingida.limite / primeiroLimite; 
           
-          // A. Dados do cupom/brinde a ser liberado
           const itemLiberado = {
               cupom: recompensaAtingida.valor,
               tipo: recompensaAtingida.tipo,
-              valor: recompensaAtingida.valor, // O campo valor armazena o código/descrição
+              valor: recompensaAtingida.valor, 
               liberadoEm: firebase.firestore.FieldValue.serverTimestamp(),
               usado: false,
               pedidoLiberacao: pedidoRef.id,
               titulo: recompensaAtingida.titulo || `Recompensa Nível ${novoNivel}`
           };
           
-          // B. Atualiza o progresso do usuário no Firestore (Nível e Última Recompensa)
-          await usuarioRef.update({
-              recompensaNivel: novoNivel,
-              ultimaRecompensa: recompensaAtingida.id
-          });
+          await usuarioRef.update({ recompensaNivel: novoNivel, ultimaRecompensa: recompensaAtingida.id });
           
-          // C. Cria o cupom personalizado para o usuário (em CuponsUsuarios)
           if (recompensaAtingida.tipo === 'cupom') {
                await db.collection("CuponsUsuarios").doc(userId).set(itemLiberado, { merge: true });
           }
 
-          // D. Registra a recompensa no histórico
           await db.collection("Usuarios").doc(userId)
                   .collection("RecompensasRecebidas").add(itemLiberado);
 
-
-          // E. Exibe o Popup de Conquista
           const valorFormatado = (recompensaAtingida.tipo === 'cupom') ? `${recompensaAtingida.valor} OFF` : recompensaAtingida.valor;
           const msg = `🎉 Parabéns! Você completou ${feitos} pedidos e ganhou: ${valorFormatado}!`;
           mostrarPopupRecompensa(msg);
           
-          // Invalida o cache para forçar a leitura do novo cupom
           configuracoesRecompensa = null; 
           _cupomCache = {}; 
       }
@@ -1412,17 +1450,20 @@ window.DFL_Frete = (function() {
       window.open(`https://wa.me/5534997178336?text=${texto}`, "_blank");
 
       cart = [];
-      couponApplied = ""; // Limpa o cupom ao finalizar
+      couponApplied = ""; 
       localStorage.removeItem("dflCoupon");
       const couponInput = document.getElementById("coupon-input");
       if(couponInput) couponInput.value = "";
+      
+      // Limpa os dados do frete atual
+      window.DFL_Frete.resetFrete();
       
       renderMiniCart();
       Overlays.closeAll();
 
     } catch (err) {
       console.error("Erro ao fechar pedido ou atualizar contador/recompensa:", err);
-      // Aqui, o erro pode ser tanto do pedido quanto do contador.
+      // Fallback de Segurança
       alert(`Ocorreu um erro ao finalizar seu pedido. Por favor, tente novamente. Detalhe: ${err.message}`);
     }
   }
@@ -1443,6 +1484,8 @@ window.DFL_Frete = (function() {
     inicializarFirebase(); // Garante o Firebase se for o primeiro acesso
     Overlays.open(el.pedidosPanel);
     carregarPedidos(currentUser.uid); 
+    // DFL v3.7.2: Chama a função para carregar o histórico de entregas
+    carregarHistoricoEntregas(currentUser.uid);
   });
 
   el.pedidosFecharBtn?.addEventListener("click", () => Overlays.closeAll());
@@ -1569,6 +1612,81 @@ window.DFL_Frete = (function() {
       alert("Erro ao processar seu pedido. Tente novamente.");
     }
   }
+
+/* =========================================================
+    DFL v3.7.2: FUNÇÃO DE CARREGAMENTO DO HISTÓRICO DE ENTREGAS (Ação 2)
+========================================================= */
+async function carregarHistoricoEntregas(userId) {
+    if (!el.historicoEntregas) return;
+    
+    // Ação 3: Log
+    LOG.hist("Carregando histórico de entregas...");
+
+    el.historicoEntregas.innerHTML = `<p class="empty-history" style="text-align:center;color:#999;">Buscando entregas...</p>`;
+
+    try {
+        // Busca todos os pedidos do usuário, ordenados por data
+        const q = db.collection("Pedidos").where("userId", "==", userId).orderBy("data", "desc");
+        const snapshot = await q.get();
+
+        if (snapshot.empty) {
+            el.historicoEntregas.innerHTML = `<p class="empty-history" style="text-align:center;color:#999;">Nenhuma entrega registrada ainda.</p>`;
+            return;
+        }
+
+        const entregas = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        exibirHistoricoEntregas(entregas);
+        
+        // Ação 3: Log
+        LOG.hist(`Histórico de entregas carregado. Total de ${entregas.length} registros.`);
+
+    } catch (err) {
+        LOG.error("Erro ao carregar histórico de entregas:", err);
+        el.historicoEntregas.innerHTML = `<p class="empty-history" style="text-align:center;color:red;">Erro ao buscar histórico de entregas.</p>`;
+    }
+}
+
+/**
+ * DFL v3.7.2: Desenha o histórico de entregas.
+ */
+function exibirHistoricoEntregas(pedidos) {
+    if (!el.historicoEntregas) return;
+    
+    const historicoHtml = pedidos.map(p => {
+        // DFL v3.7.2: Captura os novos campos
+        const destino = p.freteDestino || 'Endereço Completo (Verificar)';
+        const valorFrete = p.freteValor || 0.00;
+        
+        const dataFormatada = p.data
+            ? new Date(p.data?.seconds * 1000 || p.data).toLocaleString("pt-BR", {
+                day: "2-digit", month: "2-digit", year: "numeric",
+                hour: "2-digit", minute: "2-digit",
+              })
+            : "—";
+            
+        // Exemplo visual solicitado:
+        // 📦 Pedido #12345
+        // 🗓️ 06/11/2025 - 20:37
+        // 🚚 Entrega: Centro — R$ 5,00
+        // 💰 Total: R$ 74,99
+
+        return `
+            <div class="historico-frete-card">
+                <h4>📦 Pedido #${p.id.substring(0, 8)}</h4>
+                <p>🗓️ ${dataFormatada}</p>
+                <p>
+                    🚚 Entrega: <b>${destino}</b> — ${money(valorFrete)}
+                </p>
+                <p class="total">
+                    💰 Total: ${money(p.total)}
+                </p>
+            </div>
+        `;
+    }).join('');
+    
+    el.historicoEntregas.innerHTML = historicoHtml;
+}
+
 
 /* ------------------ FIM DO BLOCO V2.10 ------------------ */
 
@@ -2122,9 +2240,6 @@ async function carregarHistoricoRecompensas(userId) {
   }
 
   /* ------------------ 🔐 Segurança/Admin + UX Final (CORRIGIDO) ------------------ */
-  // O listener auth.onAuthStateChanged foi movido para a função setupAuthListener e é chamado APÓS a inicialização do Firebase.
-  // O bloco abaixo é o remanescente da v3.5.3 e será removido para evitar duplicação de listeners.
-  // Apenas a mensagem de console será mantida no final do DOMContentLoaded.
   
   /* ------------------ 🍪 LÓGICA DO BANNER DE COOKIES (MANTIDO) ------------------ */
   const cookieBanner = document.getElementById("cookie-banner");
@@ -2161,9 +2276,9 @@ async function carregarHistoricoRecompensas(userId) {
     console.warn("⚠️ Erro interceptado:", e?.message);
   });
 
-  /* 🚨 ATUALIZADO V3.7.1: Mensagem de console */
-  console.log("%c🚀 DFL v3.7.1 — Módulo de Frete Funcional Ativo",
-              "background:#ffb300;color:#222;padding:8px 12px;border-radius:8px;font-weight:700;");
+  /* 🚨 ATUALIZADO V3.7.2: Mensagem de console */
+  console.log("%c🚀 DFL v3.7.2 — Persistência e Histórico de Entregas Ativo",
+              "background:#1976D2;color:#fff;padding:8px 12px;border-radius:8px;font-weight:700;");
 
 }); // Fim do DOMContentLoaded
 
