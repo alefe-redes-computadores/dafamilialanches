@@ -85,12 +85,13 @@
     .status-banner.closed{background:var(--danger)}
     /* CORREÇÃO VISUAL: Alinhamento e Espaçamento */
     .hours-banner{
-      display:flex; justify-content:space-between; align-items:center;
-      padding:8px 16px; /* Diminuído de 10px 20px */
+      /* Removido o space-between para agrupar o texto, que estava causando o "espaço vago" */
+      display:flex; align-items:center; 
+      padding:8px 16px; 
       background:#000; color:#fff;
       font-size:.9rem; overflow:hidden; white-space:nowrap; text-overflow:ellipsis
     }
-    .hours-banner b{min-width:40px; display:inline-block; text-align:right} /* Reduzido min-width para menos espaçamento */
+    .hours-banner b{min-width:40px; display:inline-block; text-align:right}
 
     /* ================= PROMOÇÕES + CARROSSEL ================= */
     .promo-section{text-align:center; padding:20px 10px}
@@ -199,7 +200,9 @@
     .modal.show{opacity:1; pointer-events:auto}
     .modal-content{
       background:#fff; width:min(92vw,520px); border-radius:14px;
-      box-shadow:0 8px 40px rgba(0,0,0,.25); max-height:86vh; overflow:auto
+      box-shadow:0 8px 40px rgba(0,0,0,.25); max-height:86vh; overflow:auto;
+      /* CORREÇÃO ESTÉTICA GERAL PARA MODAIS */
+      position: relative; /* Garante que os filhos fiquem dentro */
     }
     .modal-head{
       display:flex; justify-content:space-between; align-items:center; padding:12px 16px;
@@ -208,8 +211,13 @@
     .btn-primary,.btn-secondary,.btn-primario{
       flex:1; border:none; border-radius:10px; padding:14px; font-weight:700; font-size:1rem; cursor:pointer; transition:.2s
     }
-    .btn-primary,.btn-primario{background:#4caf50; color:#fff}
-    .btn-primary:hover,.btn-primario:hover{background:#43a047; transform:translateY(-2px)}
+    /* CORREÇÃO ESTÉTICA: Botões Primários com Sombra e Gradiente */
+    .btn-primary,.btn-primario{
+      background:linear-gradient(135deg,var(--success), #388e3c); 
+      color:#fff;
+      box-shadow: 0 4px 6px rgba(0,0,0,.15);
+    }
+    .btn-primary:hover,.btn-primario:hover{background:linear-gradient(135deg, #388e3c, #2e7d32); transform:translateY(-2px); box-shadow: 0 6px 10px rgba(0,0,0,.25)}
     .btn-secondary{background:transparent; color:#555; border:1px solid #ddd}
     .btn-secondary:hover{background:#f1f1f1; border-color:#ccc}
 
@@ -236,6 +244,30 @@
     }
     .fechar-pedidos:hover,.fechar-recompensas:hover,.extras-close:hover,.combo-close:hover,.login-close:hover{
       background:#ff7043; color:#fff; transform:scale(1.1)
+    }
+    /* CORREÇÃO MODAL ADICIONAIS: Para o layout vertical e card */
+    .extras-list label.extra-line {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 10px;
+        margin-bottom: 8px;
+        border: 1px solid #ffb300;
+        border-radius: 8px;
+        background: #fff;
+        box-shadow: 0 1px 3px rgba(0,0,0,.08);
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+    .extras-list label.extra-line:hover {
+        background: #fff7e6;
+    }
+    .extras-list label.extra-line span b {
+        color: var(--danger); /* Preço em vermelho/destaque */
+        margin-left: 5px;
+    }
+    .extras-list input[type="checkbox"] {
+        margin-left: 10px;
     }
 
     /* ================= FOOTER ================= */
@@ -273,8 +305,8 @@
     }
   </style>
 
-  <link rel="stylesheet" href="style.css?v=3.7.0" media="print" onload="this.media='all'"/>
-  <noscript><link rel="stylesheet" href="style.css?v=3.7.0"/></noscript>
+  <link rel="stylesheet" href="style.css?v=3.7.1" media="print" onload="this.media='all'"/>
+  <noscript><link rel="stylesheet" href="style.css?v=3.7.1"/></noscript>
 
   <script defer src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
   <script defer src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
@@ -302,8 +334,9 @@
 
   <div class="main-content-wrapper">
     <div id="status-banner" class="status-banner"></div>
-    <div class="hours-banner" style="display:flex; justify-content:space-between; align-items:center; padding:8px 16px; background:#000; color:#fff; font-size:.9rem;">
-      Fechado — Voltamos às 18h! <span id="timer" style="font-weight:700; margin-left: 10px;"></span>
+    <div class="hours-banner">
+      <span id="hours-message"></span> 
+      <span id="timer" style="font-weight:700; margin-left: auto;"></span>
     </div>
 
     <section class="promo-section">
@@ -533,22 +566,22 @@
     </section>
 
     <div id="promo-modal" class="modal" aria-hidden="true">
-      <div class="promo-content modal-content" role="dialog" aria-modal="true">
-        <div class="modal-head">
-          <button class="promo-close" type="button" aria-label="Fechar modal">✖</button>
-          <div style="display:flex;gap:8px;margin-left:auto">
-            <button class="promo-nav prev" type="button" aria-label="Anterior">‹</button>
-            <button class="promo-nav next" type="button" aria-label="Próximo">›</button>
+        <div class="promo-content modal-content" role="dialog" aria-modal="true">
+          <div class="modal-head">
+            <button class="promo-close" type="button" aria-label="Fechar modal">✖</button>
+            <div style="display:flex;gap:8px;margin-left:auto">
+              <button class="promo-nav prev" type="button" aria-label="Anterior">‹</button>
+              <button class="promo-nav next" type="button" aria-label="Próximo">›</button>
+            </div>
+          </div>
+          <img id="promo-modal-img" src="" alt="Promoção" style="width:100%;height:auto" loading="lazy"/>
+          <div class="promo-info" style="padding:12px 16px;">
+            <h3 id="promo-modal-title" style="margin:6px 0;"></h3>
+            <p id="promo-modal-price" style="margin:6px 0 14px;"></p>
+            <button id="promo-modal-add" class="btn-primary" type="button">Adicionar ao Pedido</button>
           </div>
         </div>
-        <img id="promo-modal-img" src="" alt="Promoção" style="width:100%;height:auto" loading="lazy"/>
-        <div class="promo-info" style="padding:12px 16px;">
-          <h3 id="promo-modal-title" style="margin:6px 0;"></h3>
-          <p id="promo-modal-price" style="margin:6px 0 14px;"></p>
-          <button id="promo-modal-add" class="btn-primary" type="button">Adicionar ao Pedido</button>
-        </div>
       </div>
-    </div>
 
     <div id="extras-modal" class="modal" aria-hidden="true">
       <div class="modal-content" role="dialog" aria-modal="true">
@@ -556,8 +589,8 @@
           <h3>Adicionais</h3>
           <button class="extras-close" type="button" aria-label="Fechar modal">✖</button>
         </div>
-        <div class="extras-list" style="padding:12px 16px;"></div>
-        <div class="modal-foot" style="display:flex;gap:8px;justify-content:flex-end;padding:12px 16px;">
+        <div class="extras-list" style="padding:16px 20px; display:grid; gap:10px;"></div>
+        <div class="modal-foot" style="display:flex;gap:10px;justify-content:flex-end;padding:16px 20px;border-top:1px solid #eee;">
           <button id="extras-confirm" class="btn-primary" type="button">Adicionar ao Pedido</button>
           <button class="btn-secondary extras-close" type="button">Cancelar</button>
         </div>
@@ -616,7 +649,7 @@
         <a href="https://www.instagram.com/dafamilialanches" target="_blank" class="footer-btn" rel="noopener">📸 Instagram</a>
         <a href="https://www.ifood.com.br/delivery/patos-de-minas/dafamilialanches" target="_blank" class="footer-btn" rel="noopener">🍔 iFood</a>
       </div>
-      <div class="footer-copy">© 2025 Da Família Lanches — Todos os direitos reservados 🍔 • <b>v3.6.8 Design</b></div>
+      <div class="footer-copy">© 2025 Da Família Lanches — Todos os direitos reservados 🍔 • <b>v3.6.9 Design</b></div>
     </footer>
   </div>
 
