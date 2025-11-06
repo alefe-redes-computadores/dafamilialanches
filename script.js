@@ -1,9 +1,8 @@
 /* =========================================================
-   🚀 DFL v3.7.0 — FASE LÓGICA DE FRETE (Esqueleto Técnico)
-   - Objetivo: Calcular frete por Bairros/CEP e exibir antes do checkout
-   - Estado: Somente estrutura + pontos de integração (não altera fluxo atual)
-   - Compatibilidade: Mantém Lazy Load do Firebase e script monolítico
-   - Autor: GPT-5 (com Álefe) — Gemini em apoio pontual para JS
+   🚀 DFL v3.7.0 — FASE LÓGICA DE FRETE (Esqueleto Integrado)
+   - Objetivo: Base estável para calcular frete por Bairros/CEP (v3.7.1+)
+   - Contém: Módulo DFL_Frete em modo inócuo.
+   - Design: Modais e Banner de Horário corrigidos.
 ========================================================= */
 
 // 🔧 Feature Flags (habilitar quando pronto)
@@ -1031,7 +1030,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const restH = Math.floor(diff / 3600);
         const restM = Math.floor((diff % 3600) / 60);
         
-        // 🚨 CORREÇÃO FINAL V3.6.10: Injeta o HTML na mensagem e o tempo no timer
+        // 🚨 CORREÇÃO FINAL V3.6.10: Injeta o HTML na mensagem e o tempo no #timer
         elMsg.innerHTML = `⏰ Hoje atendemos até <b>23h30</b> — Faltam`;
         elTimer.textContent = `${restH}h ${restM}min`;
 
@@ -1046,7 +1045,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const faltamH = Math.floor(diff / 3600);
         const faltamM = Math.floor((diff % 3600) / 60);
 
-        // 🚨 CORREÇÃO FINAL V3.6.10: Injeta o HTML na mensagem e o tempo no timer
+        // 🚨 CORREÇÃO FINAL V3.6.10: Injeta o HTML na mensagem e o tempo no #timer
         elMsg.innerHTML = `🔒 Fechado — Abrimos em`;
         elTimer.textContent = `${faltamH}h ${faltamM}min`;
       }
