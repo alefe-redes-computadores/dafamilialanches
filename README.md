@@ -53,7 +53,7 @@ Nosso lema é simples:
 
 Desenvolvido por **Álefe Jôhsefe de Brito Gomes**  
 📍 Projeto pessoal e institucional  
-📅 Publicado via **Vercel **
+📅 Publicado via **Vercel e GitHub Pages**
 
 ---
 
