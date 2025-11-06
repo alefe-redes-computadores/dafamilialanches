@@ -1,12 +1,30 @@
 /* =========================================================
-   🚀 DFL v3.7.0 — REMOÇÃO DE SOM GLOBAL DE CLIQUE (MELHORIA UX)
-   - Remove o som de clique constante e o mantém APENAS na finalização do pedido.
-   - Baseado na DFL v3.6.10 Estável e Corrigida.
+   🚀 DFL v3.7.0 — FASE LÓGICA DE FRETE (Esqueleto Técnico)
+   - Objetivo: Calcular frete por Bairros/CEP e exibir antes do checkout
+   - Estado: Somente estrutura + pontos de integração (não altera fluxo atual)
+   - Compatibilidade: Mantém Lazy Load do Firebase e script monolítico
+   - Autor: GPT-5 (com Álefe) — Gemini em apoio pontual para JS
 ========================================================= */
+
+// 🔧 Feature Flags (habilitar quando pronto)
+window.DFL_FLAGS = Object.assign({},
+  window.DFL_FLAGS || {},
+  {
+    freightEnabled: false,     // ativa módulo de frete no UI
+    freightDebug:   true,      // logs detalhados no console
+  }
+);
+
+// 📝 Namespace de Logs
+const LOG = {
+  info:  (...a) => (window.DFL_FLAGS?.freightDebug ? console.log("[DFL/FRETE]", ...a) : void 0),
+  warn:  (...a) => console.warn("[DFL/FRETE]", ...a),
+  error: (...a) => console.error("[DFL/FRETE]", ...a),
+};
 
 document.addEventListener("DOMContentLoaded", () => {
   /* ------------------ ⚙️ BASE (MANTIDO) ------------------ */
-  const sound = new Audio("click.wav"); // Mantemos a inicialização do áudio
+  const sound = new Audio("click.wav");
   let cart = [];
   let currentUser = null;
   let isFirebaseInitialized = false; // NOVO: Flag de inicialização do Firebase
@@ -1191,10 +1209,6 @@ document.addEventListener("DOMContentLoaded", () => {
       
       // 7. Feedback e Limpeza (MANTIDO)
       popupAdd("Pedido salvo ✅");
-      
-      // 🚨 ADIÇÃO V3.7.0: Somente na finalização do pedido!
-      try { sound.currentTime = 0; sound.play(); } catch (_) {}
-
 
       const linhas = [
         "🍔 *Pedido DFL*",
