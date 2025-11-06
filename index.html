@@ -164,7 +164,7 @@
 
     .actions{margin-top:10px; display:flex; justify-content:center; gap:8px; flex-wrap:wrap}
     .actions button{
-      border:none; border-radius:10px; font-weight:700; cursor:pointer; padding:8px 14px; font-size:.9rem; transition:.25s
+      border:none; border-radius:10px; padding:14px; font-weight:700; font-size:1rem; cursor:pointer; transition:.2s
     }
     .actions .add-cart{background:linear-gradient(135deg,#4caf50,#43a047); color:#fff; box-shadow:0 2px 4px rgba(0,0,0,.2)}
     .actions .add-cart:hover{background:linear-gradient(135deg,#43a047,#388e3c); transform:scale(1.03)}
@@ -566,22 +566,22 @@
     </section>
 
     <div id="promo-modal" class="modal" aria-hidden="true">
-        <div class="promo-content modal-content" role="dialog" aria-modal="true">
-          <div class="modal-head">
-            <button class="promo-close" type="button" aria-label="Fechar modal">✖</button>
-            <div style="display:flex;gap:8px;margin-left:auto">
-              <button class="promo-nav prev" type="button" aria-label="Anterior">‹</button>
-              <button class="promo-nav next" type="button" aria-label="Próximo">›</button>
-            </div>
-          </div>
-          <img id="promo-modal-img" src="" alt="Promoção" style="width:100%;height:auto" loading="lazy"/>
-          <div class="promo-info" style="padding:12px 16px;">
-            <h3 id="promo-modal-title" style="margin:6px 0;"></h3>
-            <p id="promo-modal-price" style="margin:6px 0 14px;"></p>
-            <button id="promo-modal-add" class="btn-primary" type="button">Adicionar ao Pedido</button>
+      <div class="promo-content modal-content" role="dialog" aria-modal="true">
+        <div class="modal-head">
+          <button class="promo-close" type="button" aria-label="Fechar modal">✖</button>
+          <div style="display:flex;gap:8px;margin-left:auto">
+            <button class="promo-nav prev" type="button" aria-label="Anterior">‹</button>
+            <button class="promo-nav next" type="button" aria-label="Próximo">›</button>
           </div>
         </div>
+        <img id="promo-modal-img" src="" alt="Promoção" style="width:100%;height:auto" loading="lazy"/>
+        <div class="promo-info" style="padding:12px 16px;">
+          <h3 id="promo-modal-title" style="margin:6px 0;"></h3>
+          <p id="promo-modal-price" style="margin:6px 0 14px;"></p>
+          <button id="promo-modal-add" class="btn-primary" type="button">Adicionar ao Pedido</button>
+        </div>
       </div>
+    </div>
 
     <div id="extras-modal" class="modal" aria-hidden="true">
       <div class="modal-content" role="dialog" aria-modal="true">
@@ -649,7 +649,7 @@
         <a href="https://www.instagram.com/dafamilialanches" target="_blank" class="footer-btn" rel="noopener">📸 Instagram</a>
         <a href="https://www.ifood.com.br/delivery/patos-de-minas/dafamilialanches" target="_blank" class="footer-btn" rel="noopener">🍔 iFood</a>
       </div>
-      <div class="footer-copy">© 2025 Da Família Lanches — Todos os direitos reservados 🍔 • <b>v3.6.9 Design</b></div>
+      <div class="footer-copy">© 2025 Da Família Lanches — Todos os direitos reservados 🍔 • <b>v3.6.10 Design</b></div>
     </footer>
   </div>
 
@@ -703,6 +703,6 @@
     <button id="cookie-accept" type="button">Aceitar</button>
   </div>
 
-  <script defer src="script.js?v=3.6.2"></script>
+  <script defer src="script.js?v=3.6.10"></script>
 </body>
 </html>
