@@ -456,10 +456,23 @@ document.addEventListener("DOMContentLoaded", () => {
     produtoExtras = card.dataset.name;
     produtoPrecoBase = parseFloat(card.dataset.price) || 0;
 
+    // 🚨 CORREÇÃO VISUAL V3.6.9: Aplica o estilo de CARD VERTICAL em Adicionais
     el.extrasList.innerHTML = adicionais.map((a, i) => `
-      <label class="extra-line">
-        <span>${a.nome} — <b>${money(a.preco)}</b></span>
-        <input type="checkbox" value="${i}">
+      <label class="extra-line" style="
+        display: flex; 
+        justify-content: space-between; 
+        align-items: center; 
+        padding: 12px; 
+        border: 1px solid #ffb300; /* Borda amarela var(--botao) */
+        border-radius: 8px; 
+        background: #fff; 
+        box-shadow: 0 1px 3px rgba(0,0,0,.08); /* Sombra suave */
+        cursor: pointer; 
+        transition: all 0.2s;
+        font-size: 1rem;
+      ">
+        <span style="font-weight: 600; color: #222;">${a.nome} — <b style="color: #d32f2f;">${money(a.preco)}</b></span>
+        <input type="checkbox" value="${i}" style="margin-left: 10px;">
       </label>`).join("");
     Overlays.open(el.extrasModal);
   });
@@ -1001,7 +1014,9 @@ document.addEventListener("DOMContentLoaded", () => {
         const restH = Math.floor(diff / 3600);
         const restM = Math.floor((diff % 3600) / 60);
         
-        elTimer.innerHTML = `<b>${restH}h ${restM}min</b>`;
+        // 🚨 CORREÇÃO VISUAL V3.6.9: Atualização para injetar apenas o tempo no #timer
+        el.hoursBanner.querySelector("#hours-message").innerHTML = `⏰ Hoje atendemos até <b>23h30</b> — Faltam`;
+        elTimer.textContent = `${restH}h ${restM}min`;
 
       } else {
         const inicio = new Date(agora);
@@ -1014,7 +1029,9 @@ document.addEventListener("DOMContentLoaded", () => {
         const faltamH = Math.floor(diff / 3600);
         const faltamM = Math.floor((diff % 3600) / 60);
 
-        el.hoursBanner.innerHTML = `🔒 Fechado — Abrimos em <b>${faltamH}h ${faltamM}min</b>`;
+        // 🚨 CORREÇÃO VISUAL V3.6.9: Atualização para injetar apenas o tempo no #timer
+        el.hoursBanner.querySelector("#hours-message").innerHTML = `🔒 Fechado — Abrimos em`;
+        elTimer.textContent = `${faltamH}h ${faltamM}min`;
       }
     }
   });
