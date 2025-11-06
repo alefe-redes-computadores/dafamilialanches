@@ -83,12 +83,14 @@
     .status-banner{text-align:center; padding:8px; color:#fff; font-weight:600}
     .status-banner.open{background:var(--success)}
     .status-banner.closed{background:var(--danger)}
+    /* CORREÇÃO VISUAL: Alinhamento e Espaçamento */
     .hours-banner{
       display:flex; justify-content:space-between; align-items:center;
-      padding:10px 20px; background:#000; color:#fff;
+      padding:8px 16px; /* Diminuído de 10px 20px */
+      background:#000; color:#fff;
       font-size:.9rem; overflow:hidden; white-space:nowrap; text-overflow:ellipsis
     }
-    .hours-banner b{min-width:60px; display:inline-block; text-align:right}
+    .hours-banner b{min-width:40px; display:inline-block; text-align:right} /* Reduzido min-width para menos espaçamento */
 
     /* ================= PROMOÇÕES + CARROSSEL ================= */
     .promo-section{text-align:center; padding:20px 10px}
@@ -300,8 +302,8 @@
 
   <div class="main-content-wrapper">
     <div id="status-banner" class="status-banner"></div>
-    <div class="hours-banner">
-      ⏰ Hoje atendemos até <b>23h30</b> — Faltam <span id="timer"></span>
+    <div class="hours-banner" style="display:flex; justify-content:space-between; align-items:center; padding:8px 16px; background:#000; color:#fff; font-size:.9rem;">
+      Fechado — Voltamos às 18h! <span id="timer" style="font-weight:700; margin-left: 10px;"></span>
     </div>
 
     <section class="promo-section">
@@ -568,8 +570,8 @@
           <h3>Escolher Refrigerante</h3>
           <button class="combo-close" type="button" aria-label="Fechar modal">✖</button>
         </div>
-        <div id="combo-body" style="padding:12px 16px;"></div>
-        <div class="modal-foot" style="display:flex;gap:8px;justify-content:flex-end;padding:12px 16px;">
+        <div id="combo-body" style="padding:16px 20px; display:grid; gap:10px;"></div>
+        <div class="modal-foot" style="display:flex;gap:10px;justify-content:flex-end;padding:16px 20px;border-top:1px solid #eee;">
           <button id="combo-confirm" class="btn-primary" type="button">Confirmar</button>
           <button class="btn-secondary combo-close" type="button">Cancelar</button>
         </div>
@@ -582,17 +584,22 @@
           <h3>Entrar / Cadastrar</h3>
           <button class="login-close" type="button" aria-label="Fechar modal">✖</button>
         </div>
-        <div style="padding:12px 16px;">
-          <button id="google-login" class="btn-google" type="button" style="display:flex;align-items:center;gap:8px;padding:10px 12px;border:1px solid #ddd;border-radius:10px;background:#fff;width:100%;">
+        <div style="padding:20px 24px;">
+          <button id="google-login" class="btn-google" type="button" style="display:flex;align-items:center;justify-content:center;gap:12px;padding:12px;border:1px solid #ccc;border-radius:10px;background:#fff;width:100%;font-size:1rem;font-weight:600;box-shadow:0 3px 6px rgba(0,0,0,.1);">
             <img src="imagens/google-icon.png" alt="Google" class="google-icon" width="20" height="20" loading="lazy"/>
             Entrar com Google
           </button>
-          <small class="login-safe">🔒 Login seguro e criptografado</small>
-          <div class="divider" style="text-align:center;margin:12px 0;color:#888;">ou</div>
-          <form id="login-form" class="login-form" style="display:grid;gap:8px;" novalidate>
-            <input id="login-email" type="email" placeholder="E-mail" required />
-            <input id="login-senha" type="password" placeholder="Senha" required />
-            <button type="submit" class="btn-primario" style="padding:10px 12px;border:none;border-radius:10px;background:#111;color:#fff">Entrar</button>
+          <small class="login-safe" style="display:block;text-align:center;color:#777;margin-top:10px;">🔒 Login seguro e criptografado</small>
+          
+          <div class="divider" style="text-align:center;margin:20px 0 16px;font-weight:600;color:#999;font-size:.95rem;">— OU E-MAIL —</div>
+          
+          <form id="login-form" class="login-form" style="display:grid;gap:15px;" novalidate>
+            <input id="login-email" type="email" placeholder="Seu E-mail" required 
+                   style="padding:14px;border:1px solid #ccc;border-radius:10px;font-size:1rem;"/>
+            <input id="login-senha" type="password" placeholder="Sua Senha" required 
+                   style="padding:14px;border:1px solid #ccc;border-radius:10px;font-size:1rem;"/>
+            
+            <button type="submit" class="btn-primario" style="background:linear-gradient(135deg,var(--success), #388e3c); color:white; border:none; border-radius:10px; padding:14px; font-weight:700; font-size:1rem; cursor:pointer; transition:.2s; box-shadow: 0 4px 6px rgba(0,0,0,.15); margin-top:5px;">Entrar</button>
           </form>
         </div>
       </div>
@@ -609,7 +616,7 @@
         <a href="https://www.instagram.com/dafamilialanches" target="_blank" class="footer-btn" rel="noopener">📸 Instagram</a>
         <a href="https://www.ifood.com.br/delivery/patos-de-minas/dafamilialanches" target="_blank" class="footer-btn" rel="noopener">🍔 iFood</a>
       </div>
-      <div class="footer-copy">© 2025 Da Família Lanches — Todos os direitos reservados 🍔 • <b>v3.6.7 Estável</b></div>
+      <div class="footer-copy">© 2025 Da Família Lanches — Todos os direitos reservados 🍔 • <b>v3.6.8 Design</b></div>
     </footer>
   </div>
 
