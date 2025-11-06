@@ -1,10 +1,10 @@
 /* ===========================================================
-   🎨 Da Família Lanches – CSS Principal (v3.6.4-Lite)
-   Mantém toda interatividade, painéis, modais e animações.
-   Versão otimizada para carregamento não-bloqueante.
+   🎨 Da Família Lanches – CSS Principal (v3.6.6-PremiumFix rev2)
+   Mantém leveza da versão Lite, restaura layout completo
+   e corrige a sobreposição dos botões flutuantes.
    =========================================================== */
 
-/* ======== ELEMENTOS BÁSICOS (complementares) ======== */
+/* ======== ELEMENTOS BÁSICOS ======== */
 html, body {
   height: 100%;
   scroll-behavior: smooth;
@@ -132,6 +132,69 @@ button, input, select {
   gap: 10px;
 }
 
+/* === Suavização leve === */
+.modal, .modal-content, .slide, .c-btn {
+  transition: all .25s ease-out;
+  will-change: transform, opacity;
+}
+
+/* ======== LINHAS DE EXTRAS/REFRIGERANTES ======== */
+.extra-line {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 8px;
+  border-bottom: 1px solid #eee;
+  cursor: pointer;
+  transition: background .2s;
+}
+.extra-line:hover {
+  background: #fffaf3;
+}
+.extra-line span {
+  font-size: 0.95rem;
+}
+.extra-line input {
+  width: 20px;
+  height: 20px;
+  cursor: pointer;
+  flex-shrink: 0;
+  margin-left: 10px;
+}
+
+/* ======== CARROSSEL ======== */
+.carousel {
+  position: relative;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.c-btn {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background: rgba(0,0,0,.7);
+  color: #fff;
+  border: none;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  font-size: 22px;
+  cursor: pointer;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all .25s ease;
+}
+.c-btn:hover {
+  background: rgba(0,0,0,.9);
+  transform: translateY(-50%) scale(1.1);
+}
+.c-prev { left: 10px; }
+.c-next { right: 10px; }
+
 /* ======== BOTÕES PADRÃO ======== */
 .btn-primary, .btn-primario {
   background: #4caf50;
@@ -191,9 +254,15 @@ button, input, select {
 /* ======== PEDIDOS & RECOMPENSAS ======== */
 .meus-pedidos, .minhas-recompensas {
   position: fixed;
-  bottom: 20px;
   right: 20px;
   z-index: 1500;
+}
+.meus-pedidos {
+  bottom: 20px;
+}
+.minhas-recompensas {
+  bottom: 85px;  /* sobe 65px acima do Meus Pedidos */
+  z-index: 1510; /* garante sobreposição correta */
 }
 .meus-pedidos-btn, .recompensas-btn {
   background: linear-gradient(135deg,#ffca28,#ffb300);
@@ -289,9 +358,7 @@ button, input, select {
   transform: translateY(100%);
   transition: transform .5s;
 }
-#cookie-banner.show {
-  transform: translateY(0);
-}
+#cookie-banner.show { transform: translateY(0); }
 #cookie-banner p {
   margin: 0;
   font-size: .9rem;
@@ -313,18 +380,12 @@ button, input, select {
   cursor: pointer;
   transition: background .2s;
 }
-#cookie-banner button:hover {
-  background: #43a047;
-}
+#cookie-banner button:hover { background: #43a047; }
 
 /* ======== RESPONSIVO ======== */
 @media (max-width:600px){
-  .mini-cart {
-    width: 100%;
-  }
-  .pedidos-panel, .recompensas-panel {
-    width: 100%;
-  }
+  .mini-cart { width: 100%; }
+  .pedidos-panel, .recompensas-panel { width: 100%; }
   #cookie-banner {
     flex-direction: column;
     text-align: center;
@@ -335,14 +396,10 @@ button, input, select {
     padding: 12px;
   }
 }
-/* =========================================
-   DFL v3.6.5 - CORREÇÃO DE TEXTO DO HOURS-BANNER
-   (Garante que o texto completo do horário não seja cortado no celular)
-========================================= */
 
-/* Nota: A maioria dessas regras já está inline, mas o CSS externo precisa delas */
+/* === Correção do banner de horas === */
 .hours-banner {
-    white-space: nowrap; 
-    overflow: hidden; 
-    text-overflow: ellipsis; 
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
