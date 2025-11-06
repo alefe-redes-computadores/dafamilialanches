@@ -4,67 +4,75 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>🍔 Da Família Lanches</title>
-  
+
+  <!-- CSS CRÍTICO DFL v3.6.4.1 -->
   <style>
-/* CSS CRÍTICO DFL v3.6.4 */
-body{background:#ffd54f;font-family:"Inter","Poppins",sans-serif;color:#222;margin:0;scroll-behavior:smooth}
-.header{
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  background:#ffca28;
-  padding:10px 16px;
-  box-shadow:0 2px 5px rgba(0,0,0,.15);
-  position:fixed;
-  top:0;
-  left:0;
-  right:0;
-  z-index:900;
-}
-.header-content{display:flex;align-items:center;gap:12px}
-.logo{width:52px;height:52px}
-.header-info h1{margin:0;font-size:1.2rem}
-.tagline{margin:0;font-size:.85rem;color:#d84315}
-.header-actions{display:flex;align-items:center;gap:10px;}
-.main-content-wrapper{padding-top:72px}
-.user-button{background:linear-gradient(135deg,#fff,#f7f7f7);border:1px solid #ddd;border-radius:8px;padding:8px 12px;font-weight:600;cursor:pointer;transition:.2s}
-#cart-icon,.cart-button{background:#ffb300;border:none;border-radius:8px;padding:8px 12px;font-weight:700;cursor:pointer;transition:.2s}
-.status-banner{text-align:center;padding:8px;color:#fff;font-weight:600}
-.status-banner.open{background:#4caf50}
-.status-banner.closed{background:#d32f2f}
-.hours-banner{
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 10px 20px; 
-    background:#000;
-    color:#fff;
-    font-size:.9rem;
-    overflow: hidden; 
-    white-space: nowrap;
-}
-.promo-section{text-align:center;padding:20px 10px}
-.promo-section h2{color:#ff5722;margin-bottom:8px}
-.promo-sub{color:#666;margin-bottom:10px;font-size:.95rem}
-.countdown-ticker{background:#fff;display:inline-block;padding:6px 12px;border-radius:10px;margin:8px 0 15px;font-weight:600;box-shadow:0 2px 5px rgba(0,0,0,.1)}
+  /* CSS CRÍTICO DFL v3.6.4.1 */
+  body{background:#ffd54f;font-family:"Inter","Poppins",sans-serif;color:#222;margin:0;scroll-behavior:smooth}
+  .header{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    background:#ffca28;
+    padding:10px 16px;
+    box-shadow:0 2px 5px rgba(0,0,0,.15);
+    position:fixed;
+    top:0;
+    left:0;
+    right:0;
+    z-index:900;
+  }
+  .header-content{display:flex;align-items:center;gap:12px}
+  .logo{width:52px;height:52px}
+  .header-info h1{margin:0;font-size:1.2rem}
+  .tagline{margin:0;font-size:.85rem;color:#d84315}
+  .header-actions{display:flex;align-items:center;gap:10px;}
+  .main-content-wrapper{padding-top:72px}
+  .user-button{background:linear-gradient(135deg,#fff,#f7f7f7);border:1px solid #ddd;border-radius:8px;padding:8px 12px;font-weight:600;cursor:pointer;transition:.2s}
+  #cart-icon,.cart-button{background:#ffb300;border:none;border-radius:8px;padding:8px 12px;font-weight:700;cursor:pointer;transition:.2s}
+  .status-banner{text-align:center;padding:8px;color:#fff;font-weight:600}
+  .status-banner.open{background:#4caf50}
+  .status-banner.closed{background:#d32f2f}
+  .hours-banner{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      padding:10px 20px;
+      background:#000;
+      color:#fff;
+      font-size:.9rem;
+      overflow:hidden;
+      white-space:nowrap;
+  }
+  .promo-section{text-align:center;padding:20px 10px}
+  .promo-section h2{color:#ff5722;margin-bottom:8px}
+  .promo-sub{color:#666;margin-bottom:10px;font-size:.95rem}
+  .countdown-ticker{background:#fff;display:inline-block;padding:6px 12px;border-radius:10px;margin:8px 0 15px;font-weight:600;box-shadow:0 2px 5px rgba(0,0,0,.1)}
 
-@media (max-width:600px){
+  @media (max-width:600px){
     .hours-banner{padding:8px 10px;font-size:.85rem;}
-}
-</style>
+  }
+  </style>
 
-<link rel="stylesheet" href="style.css?v=2.11" media="print" onload="this.media='all'"/>
-  
-<link rel="preload" as="image" href="imagens/bitela.png"> 
+  <!-- CSS secundário com lazy-load -->
+  <link rel="stylesheet" href="style.css?v=2.11" media="print" onload="this.media='all'"/>
 
-<script defer src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-<script defer src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
-<script defer src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+  <!-- Pré-carregamento de imagem mais usada nos cards -->
+  <link rel="preload" as="image" href="imagens/bitela.png">
 
+  <!-- Firebase (defer) -->
+  <script defer src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+  <script defer src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+  <script defer src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+
+  <!-- (Opcional) modulepreload melhora first-interaction -->
+  <link rel="modulepreload" href="js/core.js?v=3.6.4.1">
+  <link rel="modulepreload" href="js/cart.js?v=3.6.4.1">
+  <link rel="modulepreload" href="js/rewards.js?v=3.6.4.1">
+  <link rel="modulepreload" href="js/admin.js?v=3.6.4.1">
 </head>
 
 <body>
-  
   <header class="header">
     <div class="header-content">
       <img src="logo.png" alt="Logo DFL" class="logo" width="48" height="48"/>
@@ -89,14 +97,14 @@ body{background:#ffd54f;font-family:"Inter","Poppins",sans-serif;color:#222;marg
     <div class="hours-banner">
       ⏰ Hoje atendemos até <b>23h30</b> — Faltam <span id="timer"></span>
     </div>
-  
+
     <section class="promo-section">
       <h2>🔥 Promoções do Dia</h2>
       <p class="promo-sub">Aproveite antes que acabe!</p>
       <div class="countdown-ticker">
         ⏳ Tempo restante: <span id="promo-timer"></span>
       </div>
-  
+
       <div class="carousel">
         <button class="c-btn c-prev" type="button" aria-label="Anterior">‹</button>
         <div class="slides">
@@ -113,9 +121,9 @@ body{background:#ffd54f;font-family:"Inter","Poppins",sans-serif;color:#222;marg
         <button class="c-btn c-next" type="button" aria-label="Próximo">›</button>
       </div>
     </section>
-  
+
     <div id="cart-backdrop"></div>
-  
+
     <aside id="mini-cart" class="mini-cart">
       <div class="mini-head">
         <h3>🛍 Seu Pedido</h3>
@@ -124,11 +132,11 @@ body{background:#ffd54f;font-family:"Inter","Poppins",sans-serif;color:#222;marg
       <div class="mini-list"></div>
       <div class="mini-foot">
         <form id="coupon-form" class="coupon-form">
-          <input 
-            type="text" 
-            id="coupon-input" 
-            placeholder="Digite o cupom e clique em Aplicar" 
-            aria-label="Cupom de desconto" 
+          <input
+            type="text"
+            id="coupon-input"
+            placeholder="Digite o cupom e clique em Aplicar"
+            aria-label="Cupom de desconto"
           />
           <button type="submit" id="coupon-apply-btn" class="btn-primary">Aplicar</button>
         </form>
@@ -139,7 +147,7 @@ body{background:#ffd54f;font-family:"Inter","Poppins",sans-serif;color:#222;marg
         </div>
       </div>
     </aside>
-  
+
     <section class="menu-section">
       <h2>🧡 Combos</h2>
       <div class="grid">
@@ -150,7 +158,7 @@ body{background:#ffd54f;font-family:"Inter","Poppins",sans-serif;color:#222;marg
           <p>2 Burger <b>Trem</b> + 1 Fanta 1L.</p>
           <div class="actions"><button class="add-cart" type="button">Adicionar</button></div>
         </div>
-        
+
         <div class="card" data-name="Combo Casal Artesanal" data-price="49.99">
           <img src="imagens/combo2.png" alt="Combo Casal Artesanal" width="120" height="120">
           <h3>Combo Casal Artesanal <span class="badge economia"><span class="badge-icon">💸</span> Economia de R$ 11,01</span></h3>
@@ -158,7 +166,7 @@ body{background:#ffd54f;font-family:"Inter","Poppins",sans-serif;color:#222;marg
           <p>2 Burger <b>Peleja</b> + 1 Fanta 1L.</p>
           <div class="actions"><button class="add-cart" type="button">Adicionar</button></div>
         </div>
-        
+
         <div class="card" data-name="Combo Família Tradicional" data-price="59.99">
           <img src="imagens/combo3.png" alt="Combo Família Tradicional" width="120" height="120">
           <h3>Combo Família Tradicional <span class="badge economia"><span class="badge-icon">💸</span> Economia de R$ 10,01</span></h3>
@@ -166,7 +174,7 @@ body{background:#ffd54f;font-family:"Inter","Poppins",sans-serif;color:#222;marg
           <p>4 Burger <b>Trem</b> + 1 Kuat 2L.</p>
           <div class="actions"><button class="add-cart" type="button">Adicionar</button></div>
         </div>
-  
+
         <div class="card" data-name="Combo Família Artesanal" data-price="84.99">
           <img src="imagens/combo4.png" alt="Combo Família Artesanal" width="120" height="120">
           <h3>Combo Família Artesanal <span class="badge economia"><span class="badge-icon">💸</span> Economia de R$ 29,01</span></h3>
@@ -176,7 +184,7 @@ body{background:#ffd54f;font-family:"Inter","Poppins",sans-serif;color:#222;marg
         </div>
       </div>
     </section>
-  
+
     <section class="menu-section">
       <h2>🍔 Nossos Lanches Tradicionais</h2>
       <div class="grid">
@@ -187,7 +195,7 @@ body{background:#ffd54f;font-family:"Inter","Poppins",sans-serif;color:#222;marg
           <p>Pão, hambúrguer, alface, tomate, presunto e mussarela. Acompanha ketchup sachê.</p>
           <div class="actions"><button class="add-cart" type="button">Adicionar</button><button class="extras-btn" type="button">Adicionais</button></div>
         </div>
-        
+
         <div class="card" data-name="Uai" data-price="13.00">
           <img src="imagens/uai.png" alt="Uai" width="120" height="120">
           <h3>Uai <span class="badge-small">Com Molho Verde</span></h3>
@@ -195,7 +203,7 @@ body{background:#ffd54f;font-family:"Inter","Poppins",sans-serif;color:#222;marg
           <p>Pão, hambúrguer, milho, bacon, alface, tomate, presunto e mussarela. Acompanha ketchup sachê.</p>
           <div class="actions"><button class="add-cart" type="button">Adicionar</button><button class="extras-btn" type="button">Adicionais</button></div>
         </div>
-        
+
         <div class="card" data-name="Trem" data-price="14.00">
           <img src="imagens/trem.png" alt="Trem" width="120" height="120">
           <h3>Trem <span class="badge-small">Com Molho Verde</span></h3>
@@ -203,7 +211,7 @@ body{background:#ffd54f;font-family:"Inter","Poppins",sans-serif;color:#222;marg
           <p>Pão, hambúrguer, salsicha, bacon, milho, alface, tomate, presunto e mussarela. Acompanha ketchup sachê.</p>
           <div class="actions"><button class="add-cart" type="button">Adicionar</button><button class="extras-btn" type="button">Adicionais</button></div>
         </div>
-        
+
         <div class="card" data-name="Cadim" data-price="17.00">
           <img src="imagens/cadim.png" alt="Cadim" width="120" height="120">
           <h3>Cadim <span class="badge-small">Com Molho Verde</span></h3>
@@ -211,7 +219,7 @@ body{background:#ffd54f;font-family:"Inter","Poppins",sans-serif;color:#222;marg
           <p>Pão, hambúrguer, 1 filé frango, bacon, milho, salsicha, alface, tomate, presunto e mussarela. Acompanha ketchup sachê.</p>
           <div class="actions"><button class="add-cart" type="button">Adicionar</button><button class="extras-btn" type="button">Adicionais</button></div>
         </div>
-        
+
         <div class="card" data-name="Armaria" data-price="18.00">
           <img src="imagens/armaria.png" alt="Armaria" width="120" height="120">
           <h3>Armaria <span class="badge-small">Com Molho Verde</span></h3>
@@ -219,7 +227,7 @@ body{background:#ffd54f;font-family:"Inter","Poppins",sans-serif;color:#222;marg
           <p>Pão, 1 hambúrguer, 1 filé frango, bacon, milho, batata palha, alface, tomate, salsicha, presunto e mussarela. Acompanha ketchup sachê.</p>
           <div class="actions"><button class="add-cart" type="button">Adicionar</button><button class="extras-btn" type="button">Adicionais</button></div>
         </div>
-        
+
         <div class="card" data-name="Bitela" data-price="22.00">
           <img src="imagens/bitela.png" alt="Bitela" width="120" height="120">
           <h3>Bitela <span class="badge-small">Com Molho Verde</span></h3>
@@ -227,7 +235,7 @@ body{background:#ffd54f;font-family:"Inter","Poppins",sans-serif;color:#222;marg
           <p>Pão, 2 hambúrgueres, filé frango, bacon, milho, batata palha, alface, salsicha, tomate, presunto e mussarela. Acompanha ketchup sachê.</p>
           <div class="actions"><button class="add-cart" type="button">Adicionar</button><button class="extras-btn" type="button">Adicionais</button></div>
         </div>
-        
+
         <div class="card" data-name="Apruma" data-price="25.00">
           <img src="imagens/apruma.png" alt="Apruma" width="120" height="120">
           <h3>Apruma <span class="badge-small">Com Molho Verde</span></h3>
@@ -235,7 +243,7 @@ body{background:#ffd54f;font-family:"Inter","Poppins",sans-serif;color:#222;marg
           <p>Pão, 3 hambúrgueres, filé frango, bacon, salsicha, milho, batata palha, alface, tomate, 2 presuntos e 2 mussarelas. Acompanha ketchup sachê.</p>
           <div class="actions"><button class="add-cart" type="button">Adicionar</button><button class="extras-btn" type="button">Adicionais</button></div>
         </div>
-        
+
         <div class="card" data-name="Gradicido" data-price="28.00">
           <img src="imagens/gradicido.png" alt="Gradicido" width="120" height="120">
           <h3>Gradicido <span class="badge-small">Com Molho Verde</span></h3>
@@ -243,7 +251,7 @@ body{background:#ffd54f;font-family:"Inter","Poppins",sans-serif;color:#222;marg
           <p>Pão, 3 hambúrgueres, filé frango, bacon, ovo, 1 salsicha, milho, batata palha, alface, tomate, 2 presuntos e 2 mussarelas. Acompanha ketchup sachê.</p>
           <div class="actions"><button class="add-cart" type="button">Adicionar</button><button class="extras-btn" type="button">Adicionais</button></div>
         </div>
-  
+
         <div class="card" data-name="Varadifome" data-price="30.00">
           <img src="imagens/varadifome.png" alt="Varadifome" width="120" height="120">
           <h3>Varadifome <span class="badge-small">Com Molho Verde</span></h3>
@@ -253,7 +261,7 @@ body{background:#ffd54f;font-family:"Inter","Poppins",sans-serif;color:#222;marg
         </div>
       </div>
     </section>
-  
+
     <section class="menu-section">
       <h2>🍔 Lanches Artesanais</h2>
       <div class="grid">
@@ -264,7 +272,7 @@ body{background:#ffd54f;font-family:"Inter","Poppins",sans-serif;color:#222;marg
           <p>Pão, hambúrguer artesanal, filé de frango, bacon, milho, batata palha.</p>
           <div class="actions"><button class="add-cart" type="button">Adicionar</button><button class="extras-btn" type="button">Adicionais</button></div>
         </div>
-  
+
         <div class="card" data-name="Tudibom" data-price="28.50">
           <img src="imagens/tudibom.png" alt="Tudibom" width="120" height="120">
           <h3>Tudibom <span class="badge-small">Com Molho Verde</span></h3>
@@ -272,7 +280,7 @@ body{background:#ffd54f;font-family:"Inter","Poppins",sans-serif;color:#222;marg
           <p>Pão, 2 hambúrgueres artesanais, 2 filés de frango, bacon, milho.</p>
           <div class="actions"><button class="add-cart" type="button">Adicionar</button><button class="extras-btn" type="button">Adicionais</button></div>
         </div>
-        
+
         <div class="card" data-name="Custoso" data-price="31.00">
           <img src="imagens/custoso.png" alt="Custoso" width="120" height="120">
           <h3>Custoso <span class="badge-small">Com Molho Verde</span></h3>
@@ -282,43 +290,7 @@ body{background:#ffd54f;font-family:"Inter","Poppins",sans-serif;color:#222;marg
         </div>
       </div>
     </section>
-  
-    <section class="menu-section">
-      <h2>🌭 Hot Dogs</h2>
-      <div class="grid">
-        <div class="card" data-name="Nigucim" data-price="10.00">
-          <h3>Nigucim <span class="badge-small">Com Molho Verde</span></h3>
-          <p class="price">R$ 10,00</p>
-          <p>Pão, molho, salsicha, milho, batata palha.</p>
-          <div class="actions"><button class="add-cart" type="button">Adicionar</button><button class="extras-btn" type="button">Adicionais</button></div>
-        </div>
-        
-        <div class="card" data-name="Simprão" data-price="12.00">
-          <img src="imagens/simprao.png" alt="Simprão" width="120" height="120">
-          <h3>Simprão <span class="badge-small">Com Molho Verde</span></h3>
-          <p class="price">R$ 12,00</p>
-          <p>Pão, molho, salsicha, milho, batata palha, bacon.</p>
-          <div class="actions"><button class="add-cart" type="button">Adicionar</button><button class="extras-btn" type="button">Adicionais</button></div>
-        </div>
-        
-        <div class="card" data-name="Purizin" data-price="14.00">
-          <img src="imagens/purizin.png" alt="Purizin" width="120" height="120">
-          <h3>Purizin <span class="badge-small">Com Molho Verde</span> <span class="badge-small pure">Com Purê</span></h3>
-          <p class="price">R$ 14,00</p>
-          <p>Pão, molho, purê de batata cremoso, salsicha, milho.</p>
-          <div class="actions"><button class="add-cart" type="button">Adicionar</button><button class="extras-btn" type="button">Adicionais</button></div>
-        </div>
-        
-        <div class="card" data-name="Trembão" data-price="17.00">
-          <img src="imagens/trembao.png" alt="Trembão" width="120" height="120">
-          <h3>Trembão <span class="badge-small">Com Molho Verde</span> <span class="badge-small pure">Com Purê</span></h3>
-          <p class="price">R$ 17,00</p>
-          <p>Pão, molho, purê de batata cremoso, 2 salsichas, bacon.</p>
-          <div class="actions"><button class="add-cart" type="button">Adicionar</button><button class="extras-btn" type="button">Adicionais</button></div>
-        </div>
-      </div>
-    </section>
-  
+
     <section id="bebidas-section" class="menu-section">
       <h2>🥤 Bebidas</h2>
       <div class="grid">
@@ -374,15 +346,13 @@ body{background:#ffd54f;font-family:"Inter","Poppins",sans-serif;color:#222;marg
         </div>
       </div>
     </section>
-  
+
     <div id="promo-modal" class="modal">
       <div class="promo-content">
         <button class="promo-close" type="button" aria-label="Fechar modal">✖</button>
         <button class="promo-nav prev" type="button" aria-label="Anterior">‹</button>
         <button class="promo-nav next" type="button" aria-label="Próximo">›</button>
-        
         <img id="promo-modal-img" src="" alt="Promoção" />
-        
         <div class="promo-info">
           <h3 id="promo-modal-title"></h3>
           <p id="promo-modal-price"></p>
@@ -390,7 +360,6 @@ body{background:#ffd54f;font-family:"Inter","Poppins",sans-serif;color:#222;marg
         </div>
       </div>
     </div>
-
 
     <div id="extras-modal" class="modal">
       <div class="modal-content">
@@ -405,7 +374,7 @@ body{background:#ffd54f;font-family:"Inter","Poppins",sans-serif;color:#222;marg
         </div>
       </div>
     </div>
-  
+
     <div id="combo-modal" class="modal">
       <div class="modal-content">
         <div class="modal-head">
@@ -419,22 +388,22 @@ body{background:#ffd54f;font-family:"Inter","Poppins",sans-serif;color:#222;marg
         </div>
       </div>
     </div>
-  
+
     <div id="login-modal" class="modal">
       <div class="modal-content login-box">
         <div class="modal-head">
           <h3>Entrar / Cadastrar</h3>
           <button class="login-close" type="button" aria-label="Fechar modal">✖</button>
         </div>
-  
+
         <button id="google-login" class="btn-google" type="button">
           <img src="imagens/google-icon.png" alt="Google" class="google-icon" width="20" height="20"/>
           Entrar com Google
         </button>
         <small class="login-safe">🔒 Login seguro e criptografado</small>
-  
+
         <div class="divider">ou</div>
-  
+
         <form id="login-form" class="login-form">
           <input id="login-email" type="email" placeholder="E-mail" required />
           <input id="login-senha" type="password" placeholder="Senha" required />
@@ -442,14 +411,14 @@ body{background:#ffd54f;font-family:"Inter","Poppins",sans-serif;color:#222;marg
         </form>
       </div>
     </div>
-  
+
     <footer class="footer">
-      <p>📍 
+      <p>📍
         <a href="https://www.google.com/maps/search/?api=1&query=Rua+dos+Caiçaras,+212,+Patos+de+Minas,+MG" target="_blank">
           Rua dos Caiçaras, 212 — Patos de Minas/MG
         </a>
       </p>
-  
+
       <div class="footer-links">
         <a href="https://wa.me/5534997178336" target="_blank" class="footer-btn">💬 WhatsApp</a>
         <a href="https://www.instagram.com/dafamilialanches" target="_blank" class="footer-btn">📸 Instagram</a>
@@ -460,49 +429,50 @@ body{background:#ffd54f;font-family:"Inter","Poppins",sans-serif;color:#222;marg
       </div>
     </footer>
 
-  </div> 
+  </div> <!-- /main-content-wrapper -->
 
-  <div class="minhas-recompensas"> 
+  <!-- Painel de Recompensas -->
+  <div class="minhas-recompensas">
     <button class="recompensas-btn" type="button">🎁 Minhas Recompensas</button>
-    
+
     <div class="recompensas-panel" id="recompensas-panel">
       <div class="recompensas-header">
         <span>🎁 Minhas Recompensas</span>
-        <button class="fechar-recompensas" type="button">✖</button> 
+        <button class="fechar-recompensas" type="button">✖</button>
       </div>
-      <div class="recompensas-body"> 
-        
-        <h4 style="margin-top: 0;">🏆 Contador de Fidelidade</h4>
-        
-        <div class="progress-container" style="margin-bottom: 20px; border: 1px solid #ccc; padding: 15px; border-radius: 8px;">
-            <p style="margin: 0 0 8px 0; font-size: 1.1rem;">
-                Pedidos Feitos: <span id="contador-valor" style="font-weight: bold; color: #ff7043;">...</span> de <span style="font-weight: bold;">5</span>
-            </p>
-            <div class="progresso-bar-bg" style="background:#eee; height: 15px; border-radius: 8px; overflow: hidden;">
-              <div id="progresso-bar" style="height: 100%; width: 0%; transition: width 0.5s;"></div>
-            </div>
-            <p id="progresso-mensagem" style="margin-top: 8px; font-size: 0.9rem; color: #666;">Carregando progresso...</p>
+      <div class="recompensas-body">
+
+        <h4 style="margin-top:0;">🏆 Contador de Fidelidade</h4>
+
+        <div class="progress-container" style="margin-bottom:20px;border:1px solid #ccc;padding:15px;border-radius:8px;">
+          <p style="margin:0 0 8px 0;font-size:1.1rem;">
+            Pedidos Feitos: <span id="contador-valor" style="font-weight:bold;color:#ff7043;">...</span> de <span style="font-weight:bold;">5</span>
+          </p>
+          <div class="progresso-bar-bg" style="background:#eee;height:15px;border-radius:8px;overflow:hidden;">
+            <div id="progresso-bar" style="height:100%;width:0%;transition:width .5s;"></div>
+          </div>
+          <p id="progresso-mensagem" style="margin-top:8px;font-size:.9rem;color:#666;">Carregando progresso...</p>
         </div>
-        
+
         <h4 class="recompensas-header-secundario">🏷️ Recompensas Desbloqueadas</h4>
-        <div id="listaRecompensas">
-        </div>
-        
+        <div id="listaRecompensas"></div>
+
         <h4 class="recompensas-header-secundario">📜 Histórico de Recompensas</h4>
         <div id="historicoRecompensas">
-            <p class="empty-rewards">Você ainda não recebeu recompensas.</p>
+          <p class="empty-rewards">Você ainda não recebeu recompensas.</p>
         </div>
-        
+
       </div>
     </div>
   </div>
-  
-  <div class="meus-pedidos"> 
+
+  <!-- Painel de Pedidos -->
+  <div class="meus-pedidos">
     <button class="meus-pedidos-btn" type="button">📦 Meus Pedidos</button>
     <div class="pedidos-panel" id="painelPedidos">
       <div class="pedidos-header">
         <span>📦 Meus Pedidos</span>
-        <button class="fechar-pedidos" type="button">✖</button> 
+        <button class="fechar-pedidos" type="button">✖</button>
       </div>
       <div class="pedidos-body" id="listaPedidos">
         <p class="empty-orders">Faça login para ver seus pedidos.</p>
@@ -510,7 +480,7 @@ body{background:#ffd54f;font-family:"Inter","Poppins",sans-serif;color:#222;marg
     </div>
   </div>
 
-
+  <!-- Cookies -->
   <div id="cookie-banner">
     <p>
       Usamos cookies para garantir que você tenha a melhor experiência em nosso site.
@@ -518,10 +488,11 @@ body{background:#ffd54f;font-family:"Inter","Poppins",sans-serif;color:#222;marg
     </p>
     <button id="cookie-accept" type="button">Aceitar</button>
   </div>
-  
-  <script type="module" src="js/cart.js?v=3.6.4"></script>
-  <script type="module" src="js/rewards.js?v=3.6.4"></script>
-  <script type="module" src="js/admin.js?v=3.6.4"></script>
 
+  <!-- ORDEM CORRETA: core -> cart -> rewards -> admin -->
+  <script type="module" src="js/core.js?v=3.6.4.1"></script>
+  <script type="module" src="js/cart.js?v=3.6.4.1"></script>
+  <script type="module" src="js/rewards.js?v=3.6.4.1"></script>
+  <script type="module" src="js/admin.js?v=3.6.4.1"></script>
 </body>
 </html>
