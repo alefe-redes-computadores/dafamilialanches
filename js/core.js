@@ -1,14 +1,14 @@
 // Local: /js/core.js
 
-import { setupCart } from './cart.js';
-import { setupRewards } from './rewards.js';
-import { setupAdmin } from './admin.js';
+import { renderMiniCart, enhanceMiniCartUI, fecharPedido, addCommonItem, openExtrasFor, openComboModal } from './cart.js';
+import { setupRewards, carregarConfiguracoesDeRecompensas, validarCupomFirestore, carregarHistoricoRecompensas } from './rewards.js';
+import { setupAdmin, isAdmin, createAdminFab } from './admin.js';
 
 // Variáveis globais para os módulos do Firebase
 export let auth, db; 
 export let isFirebaseInitialized = false; 
 
-const firebaseConfig = { /* ... (seus dados de configuração) */
+const firebaseConfig = { 
     apiKey: "AIzaSyATQBcbYuzKpKlSwNlbpRiAM1XyHqhGeak",
     authDomain: "da-familia-lanches.firebaseapp.com",
     projectId: "da-familia-lanches",
@@ -25,6 +25,7 @@ export let cart = [];
 export let currentUser = null;
 export let couponApplied = (localStorage.getItem("dflCoupon") || "").toUpperCase();
 export let addressValue  = (localStorage.getItem("dflAddress") || "").trim();
+export let configuracoesRecompensa = null; // Cache das configs globais
 
 /* ------------------ 🎯 ELEMENTOS ------------------ */
 export const el = {
@@ -51,7 +52,6 @@ export const el = {
     hoursBanner: document.querySelector(".hours-banner"),
     reportsBtn: document.getElementById("reports-btn"), 
     
-    // ... (restante dos elementos)
     pedidosContainer: document.querySelector(".meus-pedidos"),
     pedidosBtn: document.querySelector(".meus-pedidos-btn"),
     pedidosPanel: document.getElementById("painelPedidos"),
@@ -65,7 +65,7 @@ export const el = {
     historicoLista: document.getElementById("historicoRecompensas") 
 };
 
-/* ------------------ 🧩 OVERLAYS (MANTIDO) ------------------ */
+/* ------------------ 🧩 OVERLAYS ------------------ */
 export const Overlays = {
     closeAll() {
         document
@@ -98,13 +98,12 @@ export function inicializarFirebase() {
             firebase.initializeApp(firebaseConfig);
         }
         
-        // Inicializa os serviços
         auth = firebase.auth();
         db = firebase.firestore();
 
         isFirebaseInitialized = true;
         
-        setupAuthListener(); // Chama o listener de autenticação APÓS a inicialização
+        setupAuthListener(); 
 
     } catch (error) {
         console.error("ERRO FATAL AO INICIAR FIREBASE:", error);
@@ -112,7 +111,7 @@ export function inicializarFirebase() {
     }
 }
 
-/* ------------------ SETUP LISTENERS E AUTH (V3.6.0) ------------------ */
+/* ------------------ SETUP LISTENERS E AUTH ------------------ */
 function setupAuthListener() {
     auth.onAuthStateChanged(user => {
         currentUser = user; 
@@ -129,48 +128,96 @@ function setupAuthListener() {
         }
 
         if (user && isAdmin(user)) {
-            if (el.reportsBtn) {
-                // A lógica do admin será chamada em setupAdmin
-            }
+            setupAdmin(); // Reativa a interface admin
         } else {
             if (el.reportsBtn) el.reportsBtn.style.display = "none";
             document.getElementById("admin-dashboard")?.remove();
         }
     });
 }
-// Funções que o setupAuthListener precisa (extraídas)
-const ADMINS = ["alefejohsefe@gmail.com", "kalebhstanley650@gmail.com", "contato@dafamilialanches.com.br"];
-const isAdmin = (user) => user && user.email && ADMINS.includes(user.email.toLowerCase());
-const createAdminFab = () => { el.reportsBtn.style.display = "block"; el.reportsBtn.addEventListener("click", () => { /* Logic in admin.js */ }); };
+
+// Funções de login (movidas para core)
+const handleLoginSuccess = (user) => {
+    currentUser = user;
+    popupAdd("Login realizado com sucesso!");
+    Overlays.closeAll();
+};
+
+const handleLoginError = (err) => {
+    if (err.code === "auth/user-not-found") {
+        if (confirm("Conta não encontrada. Deseja criar uma nova?")) {
+            auth.createUserWithEmailAndPassword(
+              document.getElementById("login-email")?.value?.trim(), 
+              document.getElementById("login-senha")?.value?.trim()
+            )
+              .then((cred) => handleLoginSuccess(cred.user))
+              .catch((e) => alert("Erro: " + e.message));
+        }
+    } else if (err.code === "auth/wrong-password") {
+        alert("Senha incorreta. Tente novamente.");
+    } else {
+        alert("Erro: ".concat(err.message));
+    }
+};
 
 
 /* ------------------ INICIALIZAÇÃO GERAL ------------------ */
 document.addEventListener("DOMContentLoaded", () => {
     
-    // 🔊 Clique com som suave (não bloqueia o site se falhar)
-    const sound = new Audio("click.wav");
-    document.addEventListener("click", () => {
-      try { sound.currentTime = 0; sound.play(); } catch (_) {}
-    });
-
-    // Setup de Modais e Carrinho (Função principal importada)
+    // Garantia do elemento do histórico (MANTIDO)
+    if (!el.historicoLista) {
+       const painelBody = document.querySelector("#recompensas-panel .recompensas-body");
+       if (painelBody) {
+          painelBody.innerHTML += `
+              <h4 class="recompensas-header-secundario">📜 Histórico de Recompensas</h4>
+              <div id="historicoRecompensas" style="margin-top: 15px;"></div>
+          `;
+          el.historicoLista = document.getElementById("historicoRecompensas");
+       }
+    }
+    
+    // Setup de Módulos
     setupCart();
     setupRewards();
     setupAdmin();
     
-    // Bindings de Login (mantidos no core)
+    // Bindings de Login
+    el.loginForm?.addEventListener("submit", (e) => {
+        e.preventDefault();
+        inicializarFirebase();
+        if (!isFirebaseInitialized) return alert("Erro ao conectar ao serviço de login.");
+        
+        const email = document.getElementById("login-email")?.value?.trim();
+        const senha = document.getElementById("login-senha")?.value?.trim();
+        if (!email || !senha) return alert("Preencha e-mail e senha.");
+
+        auth.signInWithEmailAndPassword(email, senha)
+          .then((cred) => handleLoginSuccess(cred.user))
+          .catch(handleLoginError);
+    });
+
+    el.googleBtn?.addEventListener("click", () => {
+        inicializarFirebase();
+        if (!isFirebaseInitialized) return alert("Erro ao conectar ao serviço de login.");
+        
+        const provider = new firebase.auth.GoogleAuthProvider();
+        auth.signInWithPopup(provider)
+          .then((res) => handleLoginSuccess(res.user))
+          .catch((err) => alert("Erro: ".concat(err.message)));
+    });
+
+    // Binding de Botões de Acesso (Inicialização Lazy)
     el.userBtn?.addEventListener("click", () => {
         inicializarFirebase();
         Overlays.open(el.loginModal);
     });
     
-    // Inicializa Firebase no primeiro clique do carrinho
     el.cartIcon?.addEventListener("click", () => {
-        if (!currentUser) inicializarFirebase();
-        setupCart(); // Renderiza/rebinda
+        if (!currentUser) inicializarFirebase(); // Tenta autenticar/logar se for primeiro acesso
+        renderMiniCart(); // Renderiza o carrinho
         Overlays.open(el.miniCart);
     });
-
+    
     // Carrossel (mantido no core)
     el.cPrev?.addEventListener("click", () => {
       if (!el.slides) return;
@@ -180,34 +227,18 @@ document.addEventListener("DOMContentLoaded", () => {
       if (!el.slides) return;
       el.slides.scrollLeft += Math.min(el.slides.clientWidth * 0.9, 320);
     });
-    
-    // Promo Modal (manter no core por enquanto)
-    document.querySelectorAll(".slide[data-promo-id]").forEach((img) => {
-        img.addEventListener("click", () => {
-            const id = parseInt(img.dataset.promoId, 10);
-            if (id) {
-                // Lógica de showPromoModal
-            }
-        });
-    });
 
     // Chamadas de Banner/Timer (mantidas no core)
     // As funções atualizarStatus e atualizarTimer serão reescritas no core.js na próxima etapa (Sprint 2)
     
-    // Outras Funções (MANTIDO)
-    window.addEventListener("pageshow", (e) => {
-      if (e.persisted) {
-        console.warn("↻ Página reaberta via cache, recarregando...");
-        location.reload();
-      }
-    });
+    // Funções de inicialização remanescentes (mantidas no core)
+    document.querySelectorAll(".add-cart").forEach((btn) =>
+        btn.addEventListener("click", (e) => {
+            if (!currentUser) inicializarFirebase();
+            addCommonItem(e); 
+        })
+    );
 
-    window.addEventListener("error", (e) => {
-      if (String(e?.message || "").toLowerCase().includes("split")) {
-        popupAdd("Humm… houve um pequeno erro ao ler dados. Atualize a página.");
-      }
-      console.warn("⚠️ Erro interceptado:", e?.message);
-    });
 
     console.log("%c🚀 DFL v3.6.0 — Core Modularizado OK",
                 "background:#1976D2;color:#fff;padding:8px 12px;border-radius:8px;font-weight:700;");
