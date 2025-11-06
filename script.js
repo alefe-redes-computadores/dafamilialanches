@@ -67,6 +67,7 @@ document.addEventListener("DOMContentLoaded", () => {
         hoursBanner: document.querySelector(".hours-banner"),
         reportsBtn: document.getElementById("reports-btn"), 
         
+        // Elementos do Modal de Promoção (CRÍTICOS)
         promoModal: document.getElementById("promo-modal"),
         promoImg: document.getElementById("promo-modal-img"),
         promoTitle: document.getElementById("promo-modal-title"),
@@ -276,7 +277,7 @@ document.addEventListener("DOMContentLoaded", () => {
         elTimer.textContent = `${h}:${m}:${s}`;
     }
     
-    /* ------------------ 🍔 Dados e Lógica do Modal de Promoção (CORRIGIDO) ------------------ */
+    /* ------------------ 🍔 Dados e Lógica do Modal de Promoção (CORRIGIDO E REALOCADO) ------------------ */
 
     // **ATENÇÃO:** Substitua estes dados fictícios pelas suas promoções reais.
     const PROMOCOES = [
@@ -315,7 +316,11 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     function showPromoModal(id) {
-        if (!el.promoModal) return;
+        // VERIFICAÇÃO CRÍTICA DO DOM
+        if (!el.promoModal) {
+            console.error("Erro Crítico: Elemento #promo-modal não encontrado no DOM.");
+            return;
+        }
         
         updatePromoModal(id);
         Overlays.open(el.promoModal);
@@ -1107,7 +1112,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
           popupAdd("Pedido anterior adicionado ao carrinho!");
           renderMiniCart(); // Atualiza o carrinho (backend)
-          Overlays.closeAll(); // Fecha o painel de pedidos
+          Overlays.closeAll(); // Fechá o painel de pedidos
           Overlays.open(el.miniCart); // Abre o mini-carrinho
 
         } catch (err) {
@@ -1190,10 +1195,6 @@ document.addEventListener("DOMContentLoaded", () => {
     
     // Backdrop para fechar
     el.cartBackdrop?.addEventListener("click", () => Overlays.closeAll());
-
-    // Botão de Checkout (Finalizar Pedido)
-    // OBS: O binding original estava em enhanceMiniCartUI, este é um fallback.
-    // document.getElementById("finish-order")?.addEventListener("click", safe(fecharPedido)); 
 
     // 4. Bindings de Pedidos e Recompensas
     el.pedidosBtn?.addEventListener("click", () => {
@@ -1282,6 +1283,7 @@ document.addEventListener("DOMContentLoaded", () => {
         img.addEventListener("click", () => {
           const id = parseInt(img.dataset.promoId, 10);
           if (id) {
+            // Chama a função showPromoModal, que agora está em um escopo seguro.
             showPromoModal(id);
           }
         });
@@ -1317,5 +1319,3 @@ document.addEventListener("DOMContentLoaded", () => {
     console.log("%c🏆 DFL v3.7.1 — Estabilidade Monolítica Restaurada",
                 "background:#000;color:#fff;padding:8px 12px;border-radius:8px;font-weight:700;");
 });
-
-// REMOVIDO: O segundo e idêntico bloco 'document.addEventListener("DOMContentLoaded", ...)' foi removido para evitar duplicidade.
