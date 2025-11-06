@@ -524,3 +524,131 @@ body {
 .modal, #mini-cart { z-index: 1000 !important; }
 .pedidos-panel, .recompensas-panel { z-index: 1100 !important; }
 .header, .meus-pedidos, .minhas-recompensas { z-index: 1500 !important; }
+/* =========================================================
+   🧩 PATCH RESTAURADOR — MODAL DE CARROSSEL (v3.6.8r7)
+   ========================================================= */
+
+/* Container geral do modal */
+#promo-modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.85);
+  backdrop-filter: blur(4px);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 1150 !important;
+  transition: opacity 0.3s ease;
+  opacity: 0;
+}
+#promo-modal.show {
+  display: flex;
+  opacity: 1;
+}
+
+/* Conteúdo central */
+.promo-content {
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 5px 25px rgba(0,0,0,0.3);
+  max-width: 400px;
+  width: 90%;
+  overflow: hidden;
+  transform: scale(0.95);
+  transition: transform 0.3s ease;
+}
+#promo-modal.show .promo-content {
+  transform: scale(1);
+}
+
+/* Imagem do combo */
+#promo-modal-img {
+  width: 100%;
+  max-height: 60vh;
+  object-fit: contain;
+  display: block;
+  border-bottom: 2px solid #ffca28;
+  background-color: #f0f0f0;
+}
+
+/* Info e preço */
+.promo-info {
+  padding: 20px;
+  text-align: center;
+}
+#promo-modal-title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #333;
+  margin: 0 0 10px;
+}
+#promo-modal-price {
+  font-size: 1.1rem;
+  color: #555;
+  margin-bottom: 20px;
+}
+#promo-modal-price .old-price {
+  text-decoration: line-through;
+  color: #999;
+  font-size: 0.95rem;
+  margin-right: 8px;
+}
+#promo-modal-price b {
+  font-size: 1.3rem;
+  color: #4caf50;
+  font-weight: 700;
+}
+
+/* Botão principal */
+#promo-modal-add {
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* Botões de navegação e fechar */
+.promo-nav, .promo-close {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background: rgba(0,0,0,0.6);
+  color: #fff;
+  border: none;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  font-size: 24px;
+  font-weight: 700;
+  cursor: pointer;
+  z-index: 10;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.promo-nav:hover, .promo-close:hover {
+  background: rgba(0,0,0,0.9);
+  transform: translateY(-50%) scale(1.1);
+}
+.promo-nav.prev { left: 10px; }
+.promo-nav.next { right: 10px; }
+
+/* Botão de fechar no canto */
+.promo-close {
+  top: 10px;
+  right: 10px;
+  width: 30px;
+  height: 30px;
+  font-size: 18px;
+  background: rgba(0,0,0,0.5);
+  transform: none;
+}
+.promo-close:hover {
+  background: #d32f2f;
+  transform: scale(1.1);
+}
+
+/* Responsivo */
+@media (max-width: 480px) {
+  .promo-content { max-width: 90%; }
+  .promo-nav { top: 30%; }
+}
