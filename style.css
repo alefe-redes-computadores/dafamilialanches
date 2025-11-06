@@ -1,7 +1,6 @@
 /* ===========================================================
-   🎨 Da Família Lanches – CSS Principal (v3.6.8 – Modal Restore)
-   Mantém toda interatividade, painéis, modais e animações.
-   Versão otimizada e visualmente refinada.
+   🎨 Da Família Lanches – CSS Principal (v3.6.9 Estável)
+   Modal Restaurado + Interatividade Corrigida
    =========================================================== */
 
 /* ======== ELEMENTOS BÁSICOS ======== */
@@ -363,17 +362,6 @@ button, input, select {
 }
 .modal-content .c-prev { left: 14px; }
 .modal-content .c-next { right: 14px; }
-.modal-content .c-btn::before {
-  font-size: 24px;
-  line-height: 1;
-}
-@media (max-width: 600px) {
-  .modal-content .c-btn {
-    width: 52px;
-    height: 52px;
-    background: rgba(0, 0, 0, 0.55);
-  }
-}
 .modal-content .price-block {
   text-align: center;
   margin-top: 6px;
@@ -409,126 +397,11 @@ button, input, select {
     padding: 12px;
   }
 }
-/* ===== v3.6.8r3 — Ajuste do modal de promoções ===== */
-#promo-modal .promo-nav,
-#promo-modal .promo-close {
-  position: absolute;
-  z-index: 2001;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 44px;
-  height: 44px;
-  border: none;
-  border-radius: 999px;
-  background: rgba(0,0,0,.55);
-  color: #fff;
-  box-shadow: 0 2px 10px rgba(0,0,0,.28);
-  transition: transform .2s, background .2s;
-}
-#promo-modal .promo-nav:hover,
-#promo-modal .promo-close:hover {
-  background: rgba(0,0,0,.75);
-  transform: scale(1.06);
-}
 
-/* posicionamento */
-#promo-modal .promo-nav.prev { left: 12px; top: 50%; transform: translateY(-50%); }
-#promo-modal .promo-nav.next { right: 12px; top: 50%; transform: translateY(-50%); }
-#promo-modal .promo-close    { top: 12px; right: 12px; } /* fica no topo, fora do fluxo das setas */
-
-/* responsivo: setas um pouco maiores no mobile */
-@media (max-width: 600px) {
-  #promo-modal .promo-nav, #promo-modal .promo-close { width: 52px; height: 52px; }
-}
-
-/* estilo de preços dentro do modal */
-#promo-modal-price .old-price {
-  color: #777;
-  text-decoration: line-through;
-  margin-right: 6px;
-}
-#promo-modal-price .new-price {
-  color: #2e7d32;
-  font-weight: 800;
-}
-/* ======== PATCH DE CLICKS BLOQUEADOS (v3.6.8r4) ======== */
-/* Garante que o backdrop não trave toda a interface */
-
-#cart-backdrop {
-  opacity: 0 !important;
-  pointer-events: none !important;
-  transition: opacity 0.3s ease !important;
-  z-index: 900 !important;
-}
-
-/* Ativo apenas quando o carrinho ou modal estiverem realmente abertos */
-#mini-cart.active + #cart-backdrop,
-.modal.show + #cart-backdrop {
-  opacity: 1 !important;
-  pointer-events: auto !important;
-}
-
-/* Correção extra: impede sobreposição indevida dos painéis laterais */
-.pedidos-panel,
-.recompensas-panel,
-.modal,
-#mini-cart {
-  z-index: 1000 !important;
-}
-
-/* Garante que o header e botões flutuantes fiquem acima de tudo */
-.header,
-.meus-pedidos,
-.minhas-recompensas {
-  z-index: 1500 !important;
-}
-/* ======== PATCH ULTRA DE INTERATIVIDADE (v3.6.8r6) ======== */
-
-/* Força todos os modais, painéis e backdrops a só aceitarem clique quando ativos */
-#cart-backdrop,
-.modal,
-.pedidos-panel,
-.recompensas-panel,
-#mini-cart {
-  pointer-events: none !important;
-  opacity: 0 !important;
-  transition: opacity .3s ease !important;
-}
-
-/* Quando ativos, liberam pointer-events */
-#cart-backdrop.active,
-.modal.show,
-.pedidos-panel.active,
-.recompensas-panel.active,
-#mini-cart.active {
-  pointer-events: auto !important;
-  opacity: 1 !important;
-}
-
-/* Garante que o header e botões fiquem sempre clicáveis acima de tudo */
-.header,
-.meus-pedidos,
-.minhas-recompensas,
-button,
-.card,
-.grid,
-.carousel,
-body {
-  pointer-events: auto !important;
-  z-index: auto !important;
-}
-
-/* Corrige z-index global */
-#cart-backdrop { z-index: 900 !important; }
-.modal, #mini-cart { z-index: 1000 !important; }
-.pedidos-panel, .recompensas-panel { z-index: 1100 !important; }
-.header, .meus-pedidos, .minhas-recompensas { z-index: 1500 !important; }
 /* =========================================================
-   🧩 PATCH RESTAURADOR — MODAL DE CARROSSEL (v3.6.8r7)
+   🧩 PATCH RESTAURADOR — MODAL DE CARROSSEL (v3.6.9)
    ========================================================= */
 
-/* Container geral do modal */
 #promo-modal {
   position: fixed;
   inset: 0;
@@ -545,8 +418,6 @@ body {
   display: flex;
   opacity: 1;
 }
-
-/* Conteúdo central */
 .promo-content {
   background: #fff;
   border-radius: 16px;
@@ -560,8 +431,6 @@ body {
 #promo-modal.show .promo-content {
   transform: scale(1);
 }
-
-/* Imagem do combo */
 #promo-modal-img {
   width: 100%;
   max-height: 60vh;
@@ -570,8 +439,6 @@ body {
   border-bottom: 2px solid #ffca28;
   background-color: #f0f0f0;
 }
-
-/* Info e preço */
 .promo-info {
   padding: 20px;
   text-align: center;
@@ -598,14 +465,10 @@ body {
   color: #4caf50;
   font-weight: 700;
 }
-
-/* Botão principal */
 #promo-modal-add {
   width: 100%;
   box-sizing: border-box;
 }
-
-/* Botões de navegação e fechar */
 .promo-nav, .promo-close {
   position: absolute;
   top: 50%;
@@ -631,8 +494,6 @@ body {
 }
 .promo-nav.prev { left: 10px; }
 .promo-nav.next { right: 10px; }
-
-/* Botão de fechar no canto */
 .promo-close {
   top: 10px;
   right: 10px;
@@ -646,9 +507,38 @@ body {
   background: #d32f2f;
   transform: scale(1.1);
 }
-
-/* Responsivo */
 @media (max-width: 480px) {
   .promo-content { max-width: 90%; }
   .promo-nav { top: 30%; }
+}
+
+/* =========================================================
+   ⚙️ PATCH FINAL DE INTERATIVIDADE (v3.6.9 Estável)
+   ========================================================= */
+
+#cart-backdrop,
+.modal,
+#promo-modal,
+.pedidos-panel,
+.recompensas-panel,
+#mini-cart {
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+#cart-backdrop.active,
+.modal.show,
+#promo-modal.show,
+.pedidos-panel.active,
+.recompensas-panel.active,
+#mini-cart.active {
+  pointer-events: auto;
+  opacity: 1;
+}
+#cart-backdrop { z-index: 900; }
+.modal, #mini-cart, #promo-modal { z-index: 1000; }
+.pedidos-panel, .recompensas-panel { z-index: 1100; }
+.header, .meus-pedidos, .minhas-recompensas { z-index: 1500; }
+button, .card, .carousel, .grid {
+  pointer-events: auto;
 }
