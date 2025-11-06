@@ -1162,3 +1162,25 @@ section h2{font-size:1.3rem;text-align:center;margin-bottom:15px;color:#ff7043}
     }
 }
 
+/* =========================================
+   DFL v3.6.3 - CORREÇÃO DE ESTILO E BANNER
+========================================= */
+
+/* Garante que a área do banner de horário tenha espaço e formatação correta */
+.hours-banner {
+    /* Garante que o texto se alinhe e não esconda o timer */
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 20px; /* Garante padding suficiente */
+    overflow: hidden; 
+    white-space: nowrap; /* Evita que o texto quebre e force o corte */
+    text-overflow: ellipsis; 
+}
+
+/* Garante que o timer tenha espaço no banner */
+.hours-banner b {
+    min-width: 60px;
+    display: inline-block;
+    text-align: right;
+}
