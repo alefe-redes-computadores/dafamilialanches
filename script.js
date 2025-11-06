@@ -1,7 +1,8 @@
 /* =========================================================
-   🚀 DFL v3.6.0 — OTIMIZAÇÃO DE PERFORMANCE (LAZY LOAD DO FIREBASE)
-   - Fase 2 do Plano de Performance: Implementa a inicialização tardia do Firebase SDK.
-   - Garante que a aplicação se torne interativa mais rapidamente.
+   🚀 DFL v3.6.2 — ESTÁVEL (CORREÇÃO DE BUGS CRÍTICOS NO FIREBASE)
+   - Contém TODAS as funcionalidades originais da V3.6.0.
+   - Corrige o erro de digitação 'cupumUserRef' que quebrava transações Batch no fecharPedido.
+   - Corrige o erro 'cupumSnap' que impedia a leitura do status da recompensa.
 ========================================================= */
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -1076,7 +1077,8 @@ document.addEventListener("DOMContentLoaded", () => {
       // 2. Marca cupom personalizado como USADO, se houver
       if (cupomInfo.isPersonalizado && couponApplied) {
           const cupomUserRef = db.collection("CuponsUsuarios").doc(userId);
-          batch.update(cupumUserRef, {
+          // 🚨 CORREÇÃO CRÍTICA V3.6.2: Corrigindo o erro de digitação 'cupumUserRef' para 'cupomUserRef'
+          batch.update(cupomUserRef, {
               usado: true,
               dataUso: firebase.firestore.FieldValue.serverTimestamp(),
               pedidoId: 'PENDENTE' 
@@ -1390,7 +1392,8 @@ async function carregarRecompensas(userId) {
         
         if (recompensaAtual && recompensaAtual.tipo === 'cupom') {
             const cupomSnap = await db.collection('CuponsUsuarios').doc(userId).get();
-            cupomStatus = cupumSnap.exists ? cupumSnap.data() : null;
+            // 🚨 CORREÇÃO CRÍTICA V3.6.2: Corrigindo o erro de digitação 'cupumSnap' para 'cupomSnap'
+            cupomStatus = cupomSnap.exists ? cupomSnap.data() : null;
         }
 
         // Encontra a próxima meta que o cliente AINDA NÃO ATINGIU
@@ -2003,19 +2006,4 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-});
-
-// ==========================================================
-// 🔧 DFL v3.6.7 — Correção Final do Carrossel (fallback dinâmico)
-// Garante funcionamento dos botões ‹ / › mesmo após Lazy Load
-// ==========================================================
-window.addEventListener("load", () => {
-  const slides = document.querySelector(".slides");
-  const prev = document.querySelector(".c-prev");
-  const next = document.querySelector(".c-next");
-  if (!slides || !prev || !next) return;
-  const step = Math.min(slides.clientWidth * 0.9, 320);
-  prev.addEventListener("click", () => slides.scrollBy({ left: -step, behavior: "smooth" }));
-  next.addEventListener("click", () => slides.scrollBy({ left: step, behavior: "smooth" }));
-  console.log("✅ Carrossel (v3.6.7) inicializado com fallback dinâmico.");
 });
