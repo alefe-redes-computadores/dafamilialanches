@@ -1,7 +1,7 @@
 // Local: /js/core.js
 
 import { renderMiniCart, enhanceMiniCartUI, fecharPedido, addCommonItem, openExtrasFor, openComboModal } from './cart.js';
-import { setupRewards, carregarConfiguracoesDeRecompensas, validarCupomFirestore, carregarHistoricoRecompensas } from './rewards.js';
+import { setupRewards, carregarConfiguracoesDeRecompensas, validarCupomFirestore, carregarHistoricoRecompensas, mostrarPopupRecompensa, carregarRecompensas } from './rewards.js';
 import { setupAdmin, isAdmin, createAdminFab } from './admin.js';
 
 // Variáveis globais para os módulos do Firebase
@@ -19,7 +19,8 @@ const firebaseConfig = {
 
 // Variáveis essenciais (carrinho, user, etc.)
 export const money = (n) => `R$ ${Number(n || 0).toFixed(2).replace(".", ",")}`;
-export const safe = (fn) => (...a) => { try { fn(...a); } catch (e) { console.error(e); } };
+export const safe = (fn) => (...a) => { try { fn(...a); } catch (e) { console.error(e); } }
+export const DELIVERY_FEE = 6.00; // Constante essencial
 
 export let cart = [];
 export let currentUser = null;
@@ -65,7 +66,7 @@ export const el = {
     historicoLista: document.getElementById("historicoRecompensas") 
 };
 
-/* ------------------ 🧩 OVERLAYS ------------------ */
+/* ------------------ 🧩 OVERLAYS (MANTIDO) ------------------ */
 export const Overlays = {
     closeAll() {
         document
@@ -136,6 +137,7 @@ function setupAuthListener() {
     });
 }
 
+
 // Funções de login (movidas para core)
 const handleLoginSuccess = (user) => {
     currentUser = user;
@@ -160,28 +162,76 @@ const handleLoginError = (err) => {
     }
 };
 
+/* ------------------ CRONÔMETROS E STATUS (CORRIGIDO) ------------------ */
+function atualizarStatus() {
+    const agora = new Date();
+    const h = agora.getHours();
+    const m = agora.getMinutes();
+    const aberto = h >= 18 && h < 23; // Aberto das 18:00 até 22:59
+    if (el.statusBanner) {
+      el.statusBanner.textContent = aberto ? "🟢 Aberto — Faça seu pedido!" : "🔴 Fechado — Voltamos às 18h!";
+      el.statusBanner.className = `status-banner ${aberto ? "open" : "closed"}`;
+    }
+    if (el.hoursBanner) {
+      const elTimer = el.hoursBanner.querySelector("#timer");
+      if (!elTimer) return;
+
+      if (aberto) {
+        const fim = new Date(agora);
+        fim.setHours(23, 30, 0); // 23h30
+        
+        let diff = (fim - agora) / 1000;
+        if (diff < 0) diff = 0;
+        
+        const restH = Math.floor(diff / 3600);
+        const restM = Math.floor((diff % 3600) / 60);
+        
+        elTimer.innerHTML = `<b>${restH}h ${restM}min</b>`;
+
+      } else {
+        const inicio = new Date(agora);
+        if (h >= 23 || (h === 23 && m >= 30)) { 
+          inicio.setDate(inicio.getDate() + 1);
+        }
+        inicio.setHours(18, 0, 0); 
+
+        let diff = (inicio - agora) / 1000;
+        const faltamH = Math.floor(diff / 3600);
+        const faltamM = Math.floor((diff % 3600) / 60);
+
+        el.hoursBanner.innerHTML = `⏰ Hoje atendemos até <b>23h30</b> — Faltam <b>${faltamH}h ${faltamM}min</b>`;
+      }
+    }
+}
+
+function atualizarTimer() {
+    const agora = new Date();
+    const fim = new Date();
+    fim.setHours(23, 59, 59, 999);
+    const diff = fim - agora;
+    const elTimer = document.getElementById("promo-timer");
+    if (!elTimer) return;
+    if (diff <= 0) return (elTimer.textContent = "00:00:00");
+
+    const h = String(Math.floor(diff / 3600000)).padStart(2, "0");
+    const m = String(Math.floor((diff % 3600000) / 60000)).padStart(2, "0");
+    const s = String(Math.floor((diff % 60000) / 1000)).padStart(2, "0");
+    elTimer.textContent = `${h}:${m}:${s}`;
+}
+
 
 /* ------------------ INICIALIZAÇÃO GERAL ------------------ */
 document.addEventListener("DOMContentLoaded", () => {
     
-    // Garantia do elemento do histórico (MANTIDO)
-    if (!el.historicoLista) {
-       const painelBody = document.querySelector("#recompensas-panel .recompensas-body");
-       if (painelBody) {
-          painelBody.innerHTML += `
-              <h4 class="recompensas-header-secundario">📜 Histórico de Recompensas</h4>
-              <div id="historicoRecompensas" style="margin-top: 15px;"></div>
-          `;
-          el.historicoLista = document.getElementById("historicoRecompensas");
-       }
-    }
+    // 🔊 Setup de som de clique (MANTIDO)
+    const sound = new Audio("click.wav");
+    document.addEventListener("click", () => {
+      try { sound.currentTime = 0; sound.play(); } catch (_) {}
+    });
+
+    // Setup de Módulos (Funções de Setup de Módulos Auxiliares são chamadas no final do HTML)
     
-    // Setup de Módulos
-    setupCart();
-    setupRewards();
-    setupAdmin();
-    
-    // Bindings de Login
+    // 🚨 CORREÇÃO DE BINDINGS: Garante que os botões de Ação do HEADER funcionem
     el.loginForm?.addEventListener("submit", (e) => {
         e.preventDefault();
         inicializarFirebase();
@@ -206,7 +256,6 @@ document.addEventListener("DOMContentLoaded", () => {
           .catch((err) => alert("Erro: ".concat(err.message)));
     });
 
-    // Binding de Botões de Acesso (Inicialização Lazy)
     el.userBtn?.addEventListener("click", () => {
         inicializarFirebase();
         Overlays.open(el.loginModal);
@@ -227,10 +276,13 @@ document.addEventListener("DOMContentLoaded", () => {
       if (!el.slides) return;
       el.slides.scrollLeft += Math.min(el.slides.clientWidth * 0.9, 320);
     });
-
-    // Chamadas de Banner/Timer (mantidas no core)
-    // As funções atualizarStatus e atualizarTimer serão reescritas no core.js na próxima etapa (Sprint 2)
     
+    // Inicia os cronômetros e o status do restaurante
+    atualizarStatus();
+    setInterval(atualizarStatus, 60000);
+    atualizarTimer();
+    setInterval(atualizarTimer, 1000);
+
     // Funções de inicialização remanescentes (mantidas no core)
     document.querySelectorAll(".add-cart").forEach((btn) =>
         btn.addEventListener("click", (e) => {
@@ -240,6 +292,6 @@ document.addEventListener("DOMContentLoaded", () => {
     );
 
 
-    console.log("%c🚀 DFL v3.6.0 — Core Modularizado OK",
+    console.log("%c🚀 DFL v3.6.1 — Core Estável (Bindings OK)",
                 "background:#1976D2;color:#fff;padding:8px 12px;border-radius:8px;font-weight:700;");
 });
