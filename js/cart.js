@@ -1,89 +1,179 @@
-// Local: /js/cart.js
+// DFL v3.6.7 — Cart.js (compatível com mobile)
 
-import { el, money, safe, Overlays, cart, couponApplied, addressValue, db, auth, isFirebaseInitialized, currentUser, inicializarFirebase, configuracoesRecompensa } from './core.js';
-import { mostrarPopupRecompensa, carregarConfiguracoesDeRecompensas } from './rewards.js';
+let carrinho = [];
+let contadorCarrinho = document.getElementById("cart-count");
+let miniCart = document.getElementById("mini-cart");
+let miniList = document.querySelector(".mini-list");
+let backdrop = document.getElementById("cart-backdrop");
 
-
-// ------------------ Funções do Módulo Carrinho ------------------
-
-// [Adicionar item comum e Extras]
-const adicionais = [
-    { nome: "Cebola", preco: 0.99 },
-    { nome: "Salada", preco: 1.99 },
-    { nome: "Ovo", preco: 1.99 },
-    { nome: "Bacon", preco: 2.99 },
-    { nome: "Hambúrguer Tradicional 56g", preco: 2.99 },
-    { nome: "Cheddar Cremoso", preco: 3.99 },
-    { nome: "Filé de Frango", preco: 5.99 },
-    { nome: "Hambúrguer Artesanal 120g", preco: 7.99 },
-];
-let produtoExtras = null;
-let produtoPrecoBase = 0;
-
-export function openExtrasFor(card) {
-    // ... (Lógica do openExtrasFor)
-}
-// ... (Lógica do ExtrasConfirm) ...
-
-// [Combos]
-const comboDrinkOptions = {
-    casal: [
-        { rotulo: "Fanta 1L (padrão)", delta: 0.01 },
-        { rotulo: "Coca-Cola 1L", delta: 3.0 },
-        { rotulo: "Coca-Cola 1L Zero", delta: 3.0 },
-    ],
-    familia: [
-        { rotulo: "Kuat Guaraná 2L (padrão)", delta: 0.01 },
-        { rotulo: "Coca-Cola 2L", delta: 5.0 },
-    ],
-};
-let _comboCtx = null;
-export function openComboModal(nomeCombo, precoBase) {
-    // ... (Lógica do openComboModal)
-}
-// ... (Lógica do ComboConfirm) ...
-
-export function addCommonItem(nome, preco) {
-    // ... (Lógica do addCommonItem)
+// Função utilitária de formatação de moeda
+function money(valor) {
+  return `R$ ${Number(valor || 0).toFixed(2).replace(".", ",")}`;
 }
 
+// Renderiza o conteúdo do mini carrinho
+function renderMiniCart() {
+  if (!miniList) return;
 
-// [Renderização e Botões do Carrinho]
-export function renderMiniCart() {
-    // ... (Lógica do renderMiniCart e bindMiniCartButtons)
+  miniList.innerHTML = "";
+
+  if (carrinho.length === 0) {
+    miniList.innerHTML = `<p style="text-align:center;margin:15px 0;">🛒 Seu carrinho está vazio.</p>`;
+  } else {
+    carrinho.forEach((item, index) => {
+      const div = document.createElement("div");
+      div.className = "mini-item";
+      div.innerHTML = `
+        <div class="mini-info">
+          <b>${item.nome}</b><br>
+          <small>${money(item.preco)} — ${item.quantidade}x</small>
+        </div>
+        <button class="remover-item" data-index="${index}">✖</button>
+      `;
+      miniList.appendChild(div);
+    });
+  }
+
+  // Atualiza contador
+  atualizarContador();
+
+  // Atualiza total
+  const total = carrinho.reduce((acc, item) => acc + item.preco * item.quantidade, 0);
+  const totalDiv = document.createElement("div");
+  totalDiv.className = "mini-total";
+  totalDiv.innerHTML = `<b>Total:</b> ${money(total)}`;
+  miniList.appendChild(totalDiv);
+
+  // Botão finalizar
+  const btnFinalizar = document.createElement("button");
+  btnFinalizar.className = "btn-finalizar";
+  btnFinalizar.textContent = "✅ Finalizar Pedido";
+  btnFinalizar.addEventListener("click", () => fecharPedido());
+  miniList.appendChild(btnFinalizar);
+
+  // Evento para remover item
+  document.querySelectorAll(".remover-item").forEach((btn) => {
+    btn.addEventListener("click", (e) => {
+      const i = e.target.getAttribute("data-index");
+      removerItem(i);
+    });
+  });
 }
 
-
-// [Lógica de Cupons e Totais]
-const DELIVERY_FEE = 6.00;
-const _cupomCache = {};
-
-export async function validarCupomFirestore(codigo, subtotal) {
-    // ... (Lógica completa do validarCupomFirestore, checando se isFirebaseInitialized é true)
+// Atualiza o número no ícone do carrinho
+function atualizarContador() {
+  const totalItens = carrinho.reduce((acc, item) => acc + item.quantidade, 0);
+  contadorCarrinho.textContent = totalItens;
 }
 
-export async function calcTotals() {
-    // ... (Lógica completa do calcTotals)
+// Adiciona item ao carrinho
+function adicionarItem(nome, preco) {
+  const existente = carrinho.find((p) => p.nome === nome);
+  if (existente) {
+    existente.quantidade++;
+  } else {
+    carrinho.push({ nome, preco, quantidade: 1 });
+  }
+
+  salvarCarrinho();
+  renderMiniCart();
+  abrirMiniCart();
+  somClick();
 }
 
-export async function enhanceMiniCartUI() {
-    // ... (Lógica completa do enhanceMiniCartUI)
+// Remove item
+function removerItem(index) {
+  carrinho.splice(index, 1);
+  salvarCarrinho();
+  renderMiniCart();
+  somClick();
 }
 
-
-// [Checkout]
-export async function fecharPedido() {
-    // ... (Lógica completa do fecharPedido, incluindo lógica de recompensa)
+// Salva carrinho no localStorage
+function salvarCarrinho() {
+  localStorage.setItem("dflCarrinho", JSON.stringify(carrinho));
 }
 
-// ------------------ Setup do Módulo ------------------
-export function setupCart() {
-    // Bindings de Adicionais e Combos
-    document.querySelectorAll(".extras-btn").forEach((btn) =>
-        btn.addEventListener("click", (e) => openExtrasFor(e.currentTarget.closest(".card")))
-    );
-    // ... (Adicionar outros bindings do carrinho e modais)
-
-    // Chama o renderMiniCart uma vez no início (para carregar o rodapé inicial)
-    renderMiniCart();
+// Carrega carrinho salvo
+function carregarCarrinho() {
+  const salvo = localStorage.getItem("dflCarrinho");
+  if (salvo) {
+    try {
+      carrinho = JSON.parse(salvo);
+    } catch {
+      carrinho = [];
+    }
+  }
+  atualizarContador();
 }
+
+// Função de clique sonoro
+function somClick() {
+  const sound = new Audio("click.wav");
+  try { sound.currentTime = 0; sound.play(); } catch (_) {}
+}
+
+// Abre mini carrinho
+function abrirMiniCart() {
+  miniCart.classList.add("active");
+  backdrop.classList.add("active");
+  document.body.classList.add("no-scroll");
+}
+
+// Fecha mini carrinho
+function fecharMiniCart() {
+  miniCart.classList.remove("active");
+  backdrop.classList.remove("active");
+  document.body.classList.remove("no-scroll");
+}
+
+// Finaliza pedido (simples)
+function fecharPedido() {
+  if (carrinho.length === 0) {
+    alert("Seu carrinho está vazio.");
+    return;
+  }
+
+  const total = carrinho.reduce((acc, item) => acc + item.preco * item.quantidade, 0);
+  let resumo = "🧾 *Resumo do Pedido:*\n\n";
+  carrinho.forEach((p) => {
+    resumo += `🍔 ${p.quantidade}x ${p.nome} — ${money(p.preco * p.quantidade)}\n`;
+  });
+  resumo += `\n💰 *Total:* ${money(total)}`;
+
+  const msg = encodeURIComponent(resumo);
+  const url = `https://wa.me/5534997178336?text=${msg}`;
+  window.open(url, "_blank");
+
+  carrinho = [];
+  salvarCarrinho();
+  renderMiniCart();
+  fecharMiniCart();
+}
+
+// Configurações iniciais do carrinho
+function setupCart() {
+  carregarCarrinho();
+
+  // Fecha mini cart ao clicar no fundo
+  backdrop?.addEventListener("click", fecharMiniCart);
+
+  // Fecha mini cart ao clicar no botão de fechar
+  document.querySelectorAll(".extras-close").forEach((btn) =>
+    btn.addEventListener("click", fecharMiniCart)
+  );
+
+  // Adiciona evento a todos os botões "Adicionar"
+  document.querySelectorAll(".add-cart").forEach((btn) => {
+    btn.addEventListener("click", (e) => {
+      const card = e.target.closest(".card");
+      if (!card) return;
+      const nome = card.getAttribute("data-name");
+      const preco = parseFloat(card.getAttribute("data-price"));
+      adicionarItem(nome, preco);
+    });
+  });
+}
+
+// Inicialização automática se o core já carregou
+document.addEventListener("DOMContentLoaded", setupCart);
