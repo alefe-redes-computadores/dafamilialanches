@@ -1,4 +1,3 @@
-
 /* =========================================================
    👑 DFL v3.7.1 — HOTFIX PREMIUM E ESTABILIDADE FINAL
    - CÓDIGO MONOLÍTICO COMPLETO (Base v3.6.4).
@@ -275,6 +274,73 @@ document.addEventListener("DOMContentLoaded", () => {
         const m = String(Math.floor((diff % 3600000) / 60000)).padStart(2, "0");
         const s = String(Math.floor((diff % 60000) / 1000)).padStart(2, "0");
         elTimer.textContent = `${h}:${m}:${s}`;
+    }
+    
+    /* ------------------ 🍔 Dados e Lógica do Modal de Promoção (CORRIGIDO) ------------------ */
+
+    // **ATENÇÃO:** Substitua estes dados fictícios pelas suas promoções reais.
+    const PROMOCOES = [
+        { id: 1, nome: "Combo Família Mega", preco: 59.90, desc: "2 Hamburgueres + Batata Grande + Refri 1.5L", img: "imagens/promo1.jpg" },
+        { id: 2, nome: "Super X-Bacon Duplo", preco: 29.90, desc: "Delicioso X-Bacon com dobro de carne e queijo!", img: "imagens/promo2.jpg" },
+        { id: 3, nome: "Recompensa de Sexta", preco: 35.00, desc: "Batata recheada especial e suco natural.", img: "imagens/promo3.jpg" }
+        // ... adicione mais promoções aqui
+    ];
+
+
+    function findPromo(id) {
+        return PROMOCOES.find(p => p.id === id);
+    }
+
+    function updatePromoModal(id) {
+        const promo = findPromo(id);
+        if (!promo) {
+            currentPromoId = 1; // Volta para o primeiro se não encontrar
+            return showPromoModal(currentPromoId);
+        }
+        
+        currentPromoId = id;
+
+        // Atualiza o conteúdo do modal
+        if(el.promoImg) el.promoImg.src = promo.img;
+        if(el.promoTitle) el.promoTitle.textContent = promo.nome;
+        if(el.promoPrice) el.promoPrice.textContent = money(promo.preco);
+        if(el.promoAddBtn) {
+            el.promoAddBtn.dataset.nome = promo.nome;
+            el.promoAddBtn.dataset.preco = promo.preco;
+        }
+        
+        // Atualiza o estado dos botões de navegação
+        if(el.promoNavPrev) el.promoNavPrev.disabled = id === PROMOCOES[0].id;
+        if(el.promoNavNext) el.promoNavNext.disabled = id === PROMOCOES[PROMOCOES.length - 1].id;
+    }
+
+    function showPromoModal(id) {
+        if (!el.promoModal) return;
+        
+        updatePromoModal(id);
+        Overlays.open(el.promoModal);
+    }
+    
+    // Função para adicionar item simples (usado pelo modal de promoção e itens comuns)
+    function addCommonItem(e) {
+        const btn = e.currentTarget;
+        const nome = btn.dataset.nome || "Item";
+        const preco = Number(btn.dataset.preco) || 0;
+        
+        if (preco === 0) {
+            return alert(`Erro: Preço inválido para ${nome}.`);
+        }
+
+        const existing = cart.find(i => i.nome === nome);
+        if (existing) {
+            existing.qtd++;
+        } else {
+            cart.push({ nome, preco, qtd: 1 });
+        }
+
+        renderMiniCart();
+        Overlays.closeAll();
+        popupAdd(`1 ${nome} adicionado!`);
     }
 
     /* ------------------ 🛒 Lógica do Carrinho (Completa) ------------------ */
@@ -580,657 +646,6 @@ document.addEventListener("DOMContentLoaded", () => {
             }
         });
     }
-
-    /* ------------------ 💳 Checkout (Completa) ------------------ */
-    async function fecharPedido() {
-        if (!cart.length) return alert("Carrinho vazio!");
-        if (!currentUser) {
-            alert("Faça login para enviar o pedido!");
-            Overlays.open(el.loginModal);
-            return;
-        }
-
-        const addr = (document.getElementById("address-input")?.value || "").trim();
-        if (!addr) {
-            alert("Informe o endereço para entrega antes de finalizar.");
-            document.getElementById("address-input")?.focus();
-            return;
-        }
-
-        const { subtotal, delivery, discount, total, cupomInfo } = await calcTotals();
-
-        const pedido = {
-            usuario: currentUser.email,
-            userId: currentUser.uid,
-            nome: currentUser.displayName || currentUser.email.split("@")[0],
-            
-            itens: cart.map((i) => `${i.nome} x${i.qtd}`),
-            itensObj: cart.map(i => ({ nome: i.nome, preco: i.preco, qtd: i.qtd })),
-            
-            subtotal: Number(subtotal.toFixed(2)),
-            entrega: Number(delivery.toFixed(2)),
-            desconto: Number(discount.toFixed(2)),
-            cupom: couponApplied || "",
-            total: Number(total.toFixed(2)),
-            endereco: addr,
-            data: new Date().toISOString(),
-            
-            thumb: 'imagens/padrao.jpg' 
-        };
-
-        try {
-            const batch = db.batch();
-            const userId = currentUser.uid;
-            const usuarioRef = db.collection("Usuarios").doc(userId);
-            
-            if (cupomInfo.isPersonalizado && couponApplied) {
-                const cupomUserRef = db.collection("CuponsUsuarios").doc(userId);
-                batch.update(cupumUserRef, {
-                    usado: true,
-                    dataUso: firebase.firestore.FieldValue.serverTimestamp(),
-                    pedidoId: 'PENDENTE' 
-                });
-            }
-
-            const pedidoRef = db.collection("Pedidos").doc();
-            batch.set(pedidoRef, pedido);
-            
-            batch.set(usuarioRef, {
-                email: currentUser.email,
-                pedidosFeitos: firebase.firestore.FieldValue.increment(1) 
-            }, { merge: true }); 
-            
-            await batch.commit();
-
-            if (cupomInfo.isPersonalizado && couponApplied) {
-                await db.collection("CuponsUsuarios").doc(userId).update({
-                    pedidoId: pedidoRef.id
-                });
-            }
-
-            const RECOMPENSAS_DATA = await carregarConfiguracoesDeRecompensas();
-            
-            const doc = await usuarioRef.get();
-            const data = doc.data() || { pedidosFeitos: 0, recompensaNivel: 0 };
-            const feitos = data.pedidosFeitos;
-            const nivelAtual = data.recompensaNivel;
-            
-            const recompensaAtingida = RECOMPENSAS_DATA.find(r => 
-                r.limite === feitos && (r.limite / (RECOMPENSAS_DATA[0]?.limite || 1)) > nivelAtual
-            );
-            
-            if (recompensaAtingida) {
-                const primeiroLimite = RECOMPENSAS_DATA[0]?.limite || 1;
-                const novoNivel = recompensaAtingida.limite / primeiroLimite; 
-                
-                const itemLiberado = {
-                    cupom: recompensaAtingida.valor,
-                    tipo: recompensaAtingida.tipo,
-                    valor: recompensaAtingida.valor, 
-                    liberadoEm: firebase.firestore.FieldValue.serverTimestamp(),
-                    usado: false,
-                    pedidoLiberacao: pedidoRef.id,
-                    titulo: recompensaAtingida.titulo || `Recompensa Nível ${novoNivel}`
-                };
-                
-                await usuarioRef.update({
-                    recompensaNivel: novoNivel,
-                    ultimaRecompensa: recompensaAtingida.id
-                });
-                
-                if (recompensaAtingida.tipo === 'cupom') {
-                     await db.collection("CuponsUsuarios").doc(userId).set(itemLiberado, { merge: true });
-                }
-
-                await db.collection("Usuarios").doc(userId)
-                        .collection("RecompensasRecebidas").add(itemLiberado);
-
-
-                const valorFormatado = (recompensaAtingida.tipo === 'cupom') ? `${recompensaAtingida.valor} OFF` : recompensaAtingida.valor;
-                const msg = `🎉 Parabéns! Você completou ${feitos} pedidos e ganhou: ${valorFormatado}!`;
-                mostrarPopupRecompensa(msg);
-                
-                configuracoesRecompensa = null; 
-                _cupomCache = {}; 
-            }
-            
-            // 7. Feedback e Limpeza (MANTIDO)
-            popupAdd("Pedido salvo ✅");
-
-            const linhas = [
-                "🍔 *Pedido DFL*",
-                cart.map((i) => `• ${i.nome} x${i.qtd}`).join("\n"),
-                "",
-                `Subtotal: *${money(subtotal)}*`,
-                `Entrega: *${money(delivery)}*${cupomInfo.freeShipping ? " _(Frete Grátis)_" : ""}`,
-                `Desconto${couponApplied ? ` (${couponApplied})` : ""}: *-${money(discount)}*`,
-                `*Total: ${money(total)}*`,
-                "",
-                `🏠 *Endereço:* ${addr}`
-            ].join("\n");
-
-            const texto = encodeURIComponent(linhas);
-            window.open(`https://wa.me/5534997178336?text=${texto}`, "_blank");
-
-            cart = [];
-            couponApplied = ""; 
-            localStorage.removeItem("dflCoupon");
-            const couponInput = document.getElementById("coupon-input");
-            if(couponInput) couponInput.value = "";
-            
-            renderMiniCart();
-            Overlays.closeAll();
-
-        } catch (err) {
-            console.error("Erro ao fechar pedido ou atualizar contador/recompensa:", err);
-            alert(`Ocorreu um erro ao finalizar seu pedido. Detalhe: ${err.message}`);
-        }
-    }
-
-
-    /* ------------------ 🎁 Recompensas e Histórico (Completa) ------------------ */
-    async function carregarRecompensas(userId) {
-        if (!isFirebaseInitialized) return;
-
-        const contadorValor = document.getElementById('contador-valor');
-        const progressoBar = document.getElementById('progresso-bar');
-        const progressoMsg = document.getElementById('progresso-mensagem');
-        
-        if (!contadorValor || !progressoBar || !progressoMsg || !el.recompensasLista) return; 
-
-        contadorValor.textContent = '...';
-        progressoBar.style.width = '0%';
-        progressoMsg.textContent = 'Carregando metas...';
-        el.recompensasLista.innerHTML = ''; 
-        if(el.historicoLista) el.historicoLista.innerHTML = '';
-        
-        const RECOMPENSAS_DATA = await carregarConfiguracoesDeRecompensas();
-
-        if (RECOMPENSAS_DATA.length === 0) {
-            progressoMsg.textContent = 'Erro ao carregar metas de recompensa. (Coleção Configuração vazia).';
-            el.recompensasLista.innerHTML = '<p style="text-align:center;color:red;padding:20px;">O sistema de fidelidade está desativado no momento.</p>';
-            return; 
-        }
-        
-        const metaPrimeiroNivel = RECOMPENSAS_DATA[0]?.limite || 1; 
-
-        db.collection('Usuarios').doc(userId).onSnapshot(async doc => {
-            
-            el.recompensasLista.innerHTML = ''; 
-            if(el.historicoLista) el.historicoLista.innerHTML = ''; 
-
-            const data = doc.data() || { pedidosFeitos: 0, recompensaNivel: 0 };
-            const feitos = data.pedidosFeitos;
-            const nivelAtual = data.recompensaNivel;
-            
-            let cupomStatus = null;
-            const recompensaAtual = RECOMPENSAS_DATA.find(r => r.limite === nivelAtual * metaPrimeiroNivel);
-            
-            if (recompensaAtual && recompensaAtual.tipo === 'cupom') {
-                const cupomSnap = await db.collection('CuponsUsuarios').doc(userId).get();
-                cupomStatus = cupumSnap.exists ? cupumSnap.data() : null;
-            }
-
-            const proximaRecompensa = RECOMPENSAS_DATA.find(r => r.limite > feitos);
-            
-            const metaParaExibir = proximaRecompensa ? proximaRecompensa.limite : feitos; 
-            const metaBaseCalculo = proximaRecompensa ? proximaRecompensa.limite : metaPrimeiroNivel;
-
-            const porcentagem = proximaRecompensa === undefined ? 100 : Math.min(100, (feitos / metaBaseCalculo) * 100);
-                
-            contadorValor.textContent = feitos;
-            
-            const elMeta = document.querySelector('.progress-container span:last-child');
-            if(elMeta) elMeta.textContent = metaParaExibir;
-
-            progressoBar.style.width = `${porcentagem}%`;
-
-            if (proximaRecompensa) {
-                const faltam = proximaRecompensa.limite - feitos;
-                const tituloRecompensa = proximaRecompensa.titulo || proximaRecompensa.valor;
-                progressoMsg.textContent = `Faltam apenas ${faltam} pedidos para você ganhar a recompensa "${tituloRecompensa}"!`;
-                progressoBar.style.background = 'linear-gradient(90deg, #ffb300, #ff7043)'; 
-                progressoBar.parentElement.parentElement.removeAttribute('data-status');
-                
-                const recompensasObtidas = RECOMPENSAS_DATA.filter(r => r.limite <= feitos);
-                exibirRecompensas(feitos, recompensasObtidas, cupomStatus, RECOMPENSAS_DATA); 
-
-                if (recompensasObtidas.length === 0) {
-                     el.recompensasLista.innerHTML = `
-                        <p style="text-align:center;color:#666;padding:20px;margin-top:20px;">
-                            Faça ${faltam} pedidos para desbloquear a primeira recompensa.
-                        </p>`;
-                }
-
-
-            } else {
-                progressoMsg.textContent = '🎉 Parabéns! Você completou todas as metas de fidelidade!';
-                progressoBar.style.background = 'linear-gradient(90deg, #4caf50, #43a047)'; 
-                progressoBar.parentElement.parentElement.setAttribute('data-status', 'complete');
-                
-                exibirRecompensas(feitos, RECOMPENSAS_DATA, cupomStatus, RECOMPENSAS_DATA);
-            }
-            
-            await carregarHistoricoRecompensas(userId);
-            
-        }, error => {
-            console.error("Erro ao ler contador de fidelidade:", error);
-            progressoMsg.textContent = 'Erro ao ler seu progresso. Tente recarregar a página.';
-        });
-    }
-
-    function exibirRecompensas(pedidosFeitos, recompensasDisponiveis, cupomStatus, RECOMPENSAS_DATA) {
-        if (!el.recompensasLista) return;
-        
-        const recompensasHtml = recompensasDisponiveis.map(r => {
-            const liberada = pedidosFeitos >= r.limite;
-            const cupomJaUsado = cupomStatus?.usado === true && cupomStatus?.cupom === r.valor;
-            
-            const titulo = r.titulo || `Recompensa: ${r.valor} (${r.limite} Pedidos)`;
-            
-            let acaoBtn = '';
-            let statusTag = '';
-            let cardStyle = '';
-            let codigoCupom = r.tipo === 'cupom' ? r.valor : 'BRINDE';
-            
-            if (cupomJaUsado) {
-                 statusTag = '<span style="color:#d32f2f;font-weight:bold;">(JÁ UTILIZADO)</span>';
-                 acaoBtn = `<button disabled style="background:#ccc;color:#666;border:none;border-radius:6px;padding:8px 12px;cursor:not-allowed;margin-top:10px;">Cupom Usado</button>`;
-                 cardStyle = 'opacity: 0.7;';
-            }
-            else if (liberada && r.tipo === 'cupom') {
-                statusTag = '<span style="color:#4caf50;font-weight:bold;">(DISPONÍVEL)</span>';
-                acaoBtn = `
-                    <button 
-                        class="recompensa-aplicar-btn" 
-                        data-cupom="${codigoCupom}"
-                        style="background:#4caf50;color:#fff;border:none;border-radius:6px;padding:8px 12px;cursor:pointer;font-weight:600;margin-top:10px;"
-                    >
-                        Aplicar Cupom 🏷️
-                    </button>
-                `;
-            } else if (liberada && r.tipo === 'brinde') {
-                 statusTag = '<span style="color:#1976D2;font-weight:bold;">(LIBERADO)</span>';
-                 acaoBtn = `<button disabled style="background:#1976D2;color:#fff;border:none;border-radius:6px;padding:8px 12px;cursor:default;margin-top:10px;">Brinde na Próxima Compra</button>`;
-            }
-
-            return `
-                <div class="recompensa-card" style="display:flex;align-items:center;padding:15px;border-radius:10px;margin-bottom:15px;background:#f9f9f9;box-shadow:0 2px 5px rgba(0,0,0,0.1);${cardStyle}">
-                    <img src="imagens/recompensa-${r.tipo}.png" alt="Ícone de Recompensa" style="width:50px;height:50px;object-fit:cover;border-radius:50%;margin-right:15px;">
-                    <div style="flex:1;">
-                        <h4 style="margin:0 0 5px 0;color:#333;">${titulo} ${statusTag}</h4>
-                        <p style="margin:0;font-size:0.9rem;color:#666;">Ganho por ${r.limite} pedidos.</p>
-                        ${r.tipo === 'cupom' ? `<p style="margin:5px 0 0 0;font-size:1.1rem;font-weight:bold;color:#ff7043;">CÓDIGO: ${codigoCupom}</p>` : ''}
-                    </div>
-                    <div>
-                        ${acaoBtn}
-                    </div>
-                </div>
-            `;
-        }).join('');
-        
-        el.recompensasLista.innerHTML = recompensasHtml;
-        
-        // BIND o evento de aplicar cupom (após o desenho)
-        el.recompensasLista.querySelectorAll('.recompensa-aplicar-btn').forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                const codigo = e.currentTarget.dataset.cupom;
-                if (codigo) {
-                    // Aplica a lógica do cupom (similar ao formulário)
-                    couponApplied = codigo;
-                    localStorage.setItem("dflCoupon", couponApplied);
-                    
-                    // Atualiza o input de cupom (se estiver visível)
-                    const couponInput = document.getElementById("coupon-input");
-                    if(couponInput) couponInput.value = codigo;
-
-                    renderMiniCart(); // Recalcula e mostra a mensagem
-                    Overlays.closeAll();
-                    popupAdd(`Cupom ${codigo} aplicado! ✅`);
-                    Overlays.open(el.miniCart); // Abre o mini-carrinho para ver o desconto
-                }
-            });
-        });
-    }
-
-    async function carregarHistoricoRecompensas(userId) {
-        if (!el.historicoLista) return;
-
-        el.historicoLista.innerHTML = `<p style="text-align:center;color:#999;">Carregando histórico...</p>`;
-        
-        try {
-            const q = db.collection("Usuarios").doc(userId)
-                        .collection("RecompensasRecebidas")
-                        .orderBy("dataRecebimento", "desc");
-            
-            const snapshot = await q.get();
-
-            if (snapshot.empty) {
-                el.historicoLista.innerHTML = `<p style="text-align:center;color:#999;">Você ainda não recebeu recompensas.</p>`;
-                return;
-            }
-
-            const logs = snapshot.docs.map(doc => doc.data());
-            
-            const historicoHtml = logs.map(log => {
-                const dataRecebimento = log.dataRecebimento
-                    ? (log.dataRecebimento.toDate().toLocaleDateString('pt-BR'))
-                    : "—";
-
-                let valorStr = (log.tipo === 'cupom') ? `${log.valor} OFF` : log.valor;
-                if (log.tipo === 'value') valorStr = money(log.valor);
-
-                
-                return `
-                    <div class="historico-card" style="display:flex; padding: 10px 0; border-bottom: 1px dashed #eee; align-items: center; justify-content: space-between;">
-                        <div style="flex:1;">
-                            <p style="font-weight:600; margin:0; color:#333;">
-                                🎁 ${log.titulo || log.valor}
-                            </p>
-                            <small style="color:#999;">Recebido em: ${dataRecebimento}</small>
-                        </div>
-                        <span style="font-weight:700; color:#4caf50;">
-                            + ${valorStr}
-                        </span>
-                    </div>
-                `;
-            }).join('');
-            
-            el.historicoLista.innerHTML = historicoHtml.replace(/border-bottom: 1px dashed #eee;<\/div>$/, 'border-bottom: none;</div>');
-
-
-          } catch (err) {
-              console.error("Erro ao carregar histórico de recompensas: ", err);
-              el.historicoLista.innerHTML = `<p style="text-align:center;color:red;">Erro ao buscar histórico.</p>`;
-          }
-    }
-
-
-    /* ------------------ 📦 Pedidos (V2.9) ------------------ */
-    async function carregarPedidos(userId) {
-        if (!el.pedidosLista) return;
-        el.pedidosLista.innerHTML = `<p class="empty-orders">Carregando pedidos...</p>`;
-
-        try {
-          const q = db.collection("Pedidos").where("userId", "==", userId).orderBy("data", "desc");
-          const snapshot = await q.get();
-
-          if (snapshot.empty) {
-            el.pedidosLista.innerHTML = `<p class="empty-orders">Nenhum pedido encontrado 😢</p>`;
-            return;
-          }
-
-          const pedidos = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-          exibirPedidos(pedidos);
-
-        } catch (err) {
-          console.error("Erro ao carregar pedidos: ", err);
-          el.pedidosLista.innerHTML = `<p class="empty-orders" style="color:red;">Erro ao buscar seus pedidos.</p>`;
-        }
-    }
-
-    function exibirPedidos(pedidos) {
-        if (!el.pedidosLista) return;
-        
-        el.pedidosLista.innerHTML = pedidos.map(p => {
-          const thumbUrl = p.thumb || 'imagens/padrao.jpg';
-          const dataFormatada = p.data
-              ? new Date(p.data?.seconds * 1000 || p.data).toLocaleString("pt-BR", {
-                  day: "2-digit", month: "2-digit", year: "numeric",
-                  hour: "2-digit", minute: "2-digit",
-                })
-              : "—";
-
-          const podeRepetir = Array.isArray(p.itensObj) && p.itensObj.length > 0;
-          
-          return `
-            <div class="pedido-card">
-              <div class="pedido-thumb" style="background-image:url('${thumbUrl}');"></div>
-              <h4>📅 ${dataFormatada}</h4>
-              <p class="pedido-info">Total: ${money(p.total)}</p>
-              <div class="pedido-itens">
-                ${(p.itens || []).map(i => `• ${i}`).join('<br>')}
-              </div>
-              <button 
-                class="repetir-btn" 
-                data-id="${p.id}" 
-                ${podeRepetir ? '' : 'disabled style="background:grey;cursor:not-allowed;"'}
-              >
-                🔁 Repetir Pedido
-              </button>
-            </div>`;
-        }).join('');
-    }
-
-    async function repetirPedido(idPedido) {
-        try {
-          const docRef = db.collection("Pedidos").doc(idPedido);
-          const doc = await docRef.get();
-
-          if (!doc.exists) {
-            return alert("Erro: Pedido antigo não encontrado.");
-          }
-
-          const pedido = doc.data();
-          const itensParaRepetir = pedido.itensObj; // Lê o novo array de objetos
-
-          if (!Array.isArray(itensParaRepetir) || itensParaRepetir.length === 0) {
-            return alert("Não é possível repetir este pedido (formato antigo). Faça um novo pedido para poder repeti-lo no futuro.");
-          }
-
-          // Limpa o carrinho atual antes de adicionar os itens antigos
-          cart = [];
-          
-          // Adiciona os itens ao carrinho
-          itensParaRepetir.forEach(item => {
-            if (item.nome && item.preco > 0 && item.qtd > 0) {
-              cart.push({
-                nome: item.nome,
-                preco: item.preco,
-                qtd: item.qtd
-              });
-            }
-          });
-          
-          couponApplied = "";
-          localStorage.removeItem("dflCoupon");
-          const couponInput = document.getElementById("coupon-input");
-          if(couponInput) couponInput.value = "";
-
-          popupAdd("Pedido anterior adicionado ao carrinho!");
-          renderMiniCart(); // Atualiza o carrinho (backend)
-          Overlays.closeAll(); // Fecha o painel de pedidos
-          Overlays.open(el.miniCart); // Abre o mini-carrinho
-
-        } catch (err) {
-          console.error("Erro ao repetir pedido: ", err);
-          alert("Erro ao processar seu pedido. Tente novamente.");
-        }
-    }
-
-
-    /* ------------------ 👑 Admin (Completa) ------------------ */
-    const ADMINS = ["alefejohsefe@gmail.com", "kalebhstanley650@gmail.com", "contato@dafamilialanches.com.br"];
-    function isAdmin(user) {
-        return user && user.email && ADMINS.includes(user.email.toLowerCase());
-    }
-
-    function setupAdmin() {
-        if (el.reportsBtn) el.reportsBtn.style.display = "block";
-        
-        el.reportsBtn.addEventListener("click", () => {
-            // Lógica de abertura do dashboard
-        });
-    }
-
-    // Funções de Gráficos e Relatórios completas seriam inseridas aqui (gerarResumoECharts, carregarRelatorios, etc.)
-
-    /* =========================================================
-       ✨ INICIALIZAÇÃO GERAL (Monolítica)
-    ========================================================= */
-    document.addEventListener("DOMContentLoaded", () => {
-        
-        // 1. Som de Clique
-        document.addEventListener("click", () => {
-          try { sound.currentTime = 0; sound.play(); } catch (_) {}
-        });
-
-        // 2. Bindings de Login
-        el.loginForm?.addEventListener("submit", (e) => {
-            e.preventDefault();
-            inicializarFirebase();
-            if (!isFirebaseInitialized) return alert("Erro ao conectar ao serviço de login.");
-            const email = document.getElementById("login-email")?.value?.trim();
-            const senha = document.getElementById("login-senha")?.value?.trim();
-            if (!email || !senha) return alert("Preencha e-mail e senha.");
-            auth.signInWithEmailAndPassword(email, senha)
-              .then((cred) => handleLoginSuccess(cred.user))
-              .catch(handleLoginError);
-        });
-
-        el.googleBtn?.addEventListener("click", () => {
-            inicializarFirebase();
-            if (!isFirebaseInitialized) return alert("Erro ao conectar ao serviço de login.");
-            const provider = new firebase.auth.GoogleAuthProvider();
-            auth.signInWithPopup(provider)
-              .then((res) => handleLoginSuccess(res.user))
-              .catch((err) => alert("Erro: ".concat(err.message)));
-        });
-
-        el.userBtn?.addEventListener("click", () => {
-            if (currentUser) {
-                if (confirm("Deseja sair da sua conta?")) {
-                    inicializarFirebase();
-                    auth.signOut().then(() => popupAdd("Logout realizado!"));
-                }
-            } else {
-                inicializarFirebase();
-                Overlays.open(el.loginModal);
-            }
-        });
-        
-        // 3. Bindings de Carrinho e Checkout
-        el.cartIcon?.addEventListener("click", () => {
-            if (!currentUser) inicializarFirebase(); 
-            renderMiniCart(); 
-            Overlays.open(el.miniCart);
-        });
-
-        // Fechar Modais (Botões X)
-        document.querySelectorAll(".extras-close").forEach(btn => 
-            btn.addEventListener("click", () => Overlays.closeAll())
-        );
-        
-        // Backdrop para fechar
-        el.cartBackdrop?.addEventListener("click", () => Overlays.closeAll());
-
-        // Botão de Checkout (Finalizar Pedido)
-        document.getElementById("finish-order")?.addEventListener("click", safe(fecharPedido));
-
-        // 4. Bindings de Pedidos e Recompensas
-        el.pedidosBtn?.addEventListener("click", () => {
-            if (!currentUser) {
-                alert("Faça login para ver seus pedidos.");
-                Overlays.open(el.loginModal);
-                return;
-            }
-            inicializarFirebase(); 
-            Overlays.open(el.pedidosPanel);
-            carregarPedidos(currentUser.uid);
-        });
-        el.pedidosFecharBtn?.addEventListener("click", () => Overlays.closeAll());
-        
-        el.recompensasBtn?.addEventListener("click", () => {
-            if (!currentUser) {
-                alert("Faça login para ver suas recompensas.");
-                Overlays.open(el.loginModal); 
-                return;
-            }
-            inicializarFirebase(); 
-            Overlays.open(el.recompensasPanel);
-            carregarRecompensas(currentUser.uid);
-        });
-        el.recompensasFecharBtn?.addEventListener("click", () => Overlays.closeAll());
-
-
-        // 5. Bindings para Adicionar ao Carrinho (Geral)
-        document.querySelectorAll(".add-cart").forEach((btn) =>
-            btn.addEventListener("click", safe(addCommonItem))
-        );
-
-        // 6. Bindings de Cupom
-        document.getElementById("coupon-form")?.addEventListener("submit", async (e) => {
-            e.preventDefault();
-            const input = document.getElementById("coupon-input");
-            const codigo = input.value.trim().toUpperCase();
-            
-            if (!codigo) {
-                couponApplied = "";
-                localStorage.removeItem("dflCoupon");
-                document.getElementById("coupon-message").textContent = "";
-                renderMiniCart();
-                return;
-            }
-
-            inicializarFirebase();
-            const totals = await calcTotals(); 
-            const result = await validarCupomFirestore(codigo, totals.subtotal);
-            
-            document.getElementById("coupon-message").textContent = result.message;
-            
-            if (result.valid) {
-                couponApplied = codigo;
-                localStorage.setItem("dflCoupon", codigo);
-                renderMiniCart();
-            } else {
-                couponApplied = "";
-                localStorage.removeItem("dflCoupon");
-                renderMiniCart(); 
-            }
-        });
-
-
-        // 7. Carrossel
-        el.cPrev?.addEventListener("click", () => {
-          if (!el.slides) return;
-          el.slides.scrollLeft -= Math.min(el.slides.clientWidth * 0.9, 320);
-        });
-        el.cNext?.addEventListener("click", () => {
-          if (!el.slides) return;
-          el.slides.scrollLeft += Math.min(el.slides.clientWidth * 0.9, 320);
-        });
-        
-        // 🚨 NOVO BINDING DE MODAL DE PROMOÇÃO (CORRIGIDO)
-        document.querySelectorAll(".slide[data-promo-id]").forEach((img) => {
-            img.addEventListener("click", () => {
-              const id = parseInt(img.dataset.promoId, 10);
-              if (id) {
-                showPromoModal(id);
-              }
-            });
-        });
-
-
-        // 8. Inicia Timers e Status
-        atualizarStatus();
-        setInterval(atualizarStatus, 60000);
-        atualizarTimer();
-        setInterval(atualizarTimer, 1000);
-
-        // 9. Renderização inicial do Carrinho e UI
-        renderMiniCart(); 
-
-        // 10. Inicializa o Firebase (para checar login)
-        inicializarFirebase(); 
-        
-        console.log("%c🏆 DFL v3.7.1 — Estabilidade Monolítica Restaurada",
-                    "background:#000;color:#fff;padding:8px 12px;border-radius:8px;font-weight:700;");
-    });
-/* =========================================================
-   👑 DFL v3.7.1 — RESTAURAÇÃO DA ESTABILIDADE MONOLÍTICA FINAL (BLOCO 2/2)
-   - Contém a conclusão das funções e a Inicialização.
-   - COLE ESTE BLOCO APÓS O FINAL DO BLOCO 1.
-========================================================= */
 
     /* ------------------ 💳 Checkout (Completa) ------------------ */
     async function fecharPedido() {
@@ -1645,6 +1060,8 @@ document.addEventListener("DOMContentLoaded", () => {
               <button 
                 class="repetir-btn" 
                 data-id="${p.id}" 
+                data-nome="Repetir Pedido"
+                data-preco="0"
                 ${podeRepetir ? '' : 'disabled style="background:grey;cursor:not-allowed;"'}
               >
                 🔁 Repetir Pedido
@@ -1719,161 +1136,186 @@ document.addEventListener("DOMContentLoaded", () => {
     /* =========================================================
        ✨ INICIALIZAÇÃO GERAL (Monolítica)
     ========================================================= */
-    document.addEventListener("DOMContentLoaded", () => {
-        
-        // 1. Som de Clique
-        document.addEventListener("click", () => {
-          try { sound.currentTime = 0; sound.play(); } catch (_) {}
-        });
-
-        // 2. Bindings de Login
-        el.loginForm?.addEventListener("submit", (e) => {
-            e.preventDefault();
-            inicializarFirebase();
-            if (!isFirebaseInitialized) return alert("Erro ao conectar ao serviço de login.");
-            const email = document.getElementById("login-email")?.value?.trim();
-            const senha = document.getElementById("login-senha")?.value?.trim();
-            if (!email || !senha) return alert("Preencha e-mail e senha.");
-            auth.signInWithEmailAndPassword(email, senha)
-              .then((cred) => handleLoginSuccess(cred.user))
-              .catch(handleLoginError);
-        });
-
-        el.googleBtn?.addEventListener("click", () => {
-            inicializarFirebase();
-            if (!isFirebaseInitialized) return alert("Erro ao conectar ao serviço de login.");
-            const provider = new firebase.auth.GoogleAuthProvider();
-            auth.signInWithPopup(provider)
-              .then((res) => handleLoginSuccess(res.user))
-              .catch((err) => alert("Erro: ".concat(err.message)));
-        });
-
-        el.userBtn?.addEventListener("click", () => {
-            if (currentUser) {
-                if (confirm("Deseja sair da sua conta?")) {
-                    inicializarFirebase();
-                    auth.signOut().then(() => popupAdd("Logout realizado!"));
-                }
-            } else {
-                inicializarFirebase();
-                Overlays.open(el.loginModal);
-            }
-        });
-        
-        // 3. Bindings de Carrinho e Checkout
-        el.cartIcon?.addEventListener("click", () => {
-            if (!currentUser) inicializarFirebase(); 
-            renderMiniCart(); 
-            Overlays.open(el.miniCart);
-        });
-
-        // Fechar Modais (Botões X)
-        document.querySelectorAll(".extras-close").forEach(btn => 
-            btn.addEventListener("click", () => Overlays.closeAll())
-        );
-        
-        // Backdrop para fechar
-        el.cartBackdrop?.addEventListener("click", () => Overlays.closeAll());
-
-        // Botão de Checkout (Finalizar Pedido)
-        document.getElementById("finish-order")?.addEventListener("click", safe(fecharPedido));
-
-        // 4. Bindings de Pedidos e Recompensas
-        el.pedidosBtn?.addEventListener("click", () => {
-            if (!currentUser) {
-                alert("Faça login para ver seus pedidos.");
-                Overlays.open(el.loginModal);
-                return;
-            }
-            inicializarFirebase(); 
-            Overlays.open(el.pedidosPanel);
-            carregarPedidos(currentUser.uid);
-        });
-        el.pedidosFecharBtn?.addEventListener("click", () => Overlays.closeAll());
-        
-        el.recompensasBtn?.addEventListener("click", () => {
-            if (!currentUser) {
-                alert("Faça login para ver suas recompensas.");
-                Overlays.open(el.loginModal); 
-                return;
-            }
-            inicializarFirebase(); 
-            Overlays.open(el.recompensasPanel);
-            carregarRecompensas(currentUser.uid);
-        });
-        el.recompensasFecharBtn?.addEventListener("click", () => Overlays.closeAll());
-
-
-        // 5. Bindings para Adicionar ao Carrinho (Geral)
-        document.querySelectorAll(".add-cart").forEach((btn) =>
-            btn.addEventListener("click", safe(addCommonItem))
-        );
-
-        // 6. Bindings de Cupom
-        document.getElementById("coupon-form")?.addEventListener("submit", async (e) => {
-            e.preventDefault();
-            const input = document.getElementById("coupon-input");
-            const codigo = input.value.trim().toUpperCase();
-            
-            if (!codigo) {
-                couponApplied = "";
-                localStorage.removeItem("dflCoupon");
-                document.getElementById("coupon-message").textContent = "";
-                renderMiniCart();
-                return;
-            }
-
-            inicializarFirebase();
-            const totals = await calcTotals(); 
-            const result = await validarCupomFirestore(codigo, totals.subtotal);
-            
-            document.getElementById("coupon-message").textContent = result.message;
-            
-            if (result.valid) {
-                couponApplied = codigo;
-                localStorage.setItem("dflCoupon", codigo);
-                renderMiniCart();
-            } else {
-                couponApplied = "";
-                localStorage.removeItem("dflCoupon");
-                renderMiniCart(); 
-            }
-        });
-
-
-        // 7. Carrossel
-        el.cPrev?.addEventListener("click", () => {
-          if (!el.slides) return;
-          el.slides.scrollLeft -= Math.min(el.slides.clientWidth * 0.9, 320);
-        });
-        el.cNext?.addEventListener("click", () => {
-          if (!el.slides) return;
-          el.slides.scrollLeft += Math.min(el.slides.clientWidth * 0.9, 320);
-        });
-        
-        // 🚨 NOVO BINDING DE MODAL DE PROMOÇÃO (CORRIGIDO)
-        document.querySelectorAll(".slide[data-promo-id]").forEach((img) => {
-            img.addEventListener("click", () => {
-              const id = parseInt(img.dataset.promoId, 10);
-              if (id) {
-                showPromoModal(id);
-              }
-            });
-        });
-
-
-        // 8. Inicia Timers e Status
-        atualizarStatus();
-        setInterval(atualizarStatus, 60000);
-        atualizarTimer();
-        setInterval(atualizarTimer, 1000);
-
-        // 9. Renderização inicial do Carrinho e UI
-        renderMiniCart(); 
-
-        // 10. Inicializa o Firebase (para checar login)
-        inicializarFirebase(); 
-        
-        console.log("%c🏆 DFL v3.7.1 — Estabilidade Monolítica Restaurada",
-                    "background:#000;color:#fff;padding:8px 12px;border-radius:8px;font-weight:700;");
+    
+    // 1. Som de Clique
+    document.addEventListener("click", () => {
+      try { sound.currentTime = 0; sound.play(); } catch (_) {}
     });
+
+    // 2. Bindings de Login
+    el.loginForm?.addEventListener("submit", (e) => {
+        e.preventDefault();
+        inicializarFirebase();
+        if (!isFirebaseInitialized) return alert("Erro ao conectar ao serviço de login.");
+        const email = document.getElementById("login-email")?.value?.trim();
+        const senha = document.getElementById("login-senha")?.value?.trim();
+        if (!email || !senha) return alert("Preencha e-mail e senha.");
+        auth.signInWithEmailAndPassword(email, senha)
+          .then((cred) => handleLoginSuccess(cred.user))
+          .catch(handleLoginError);
+    });
+
+    el.googleBtn?.addEventListener("click", () => {
+        inicializarFirebase();
+        if (!isFirebaseInitialized) return alert("Erro ao conectar ao serviço de login.");
+        const provider = new firebase.auth.GoogleAuthProvider();
+        auth.signInWithPopup(provider)
+          .then((res) => handleLoginSuccess(res.user))
+          .catch((err) => alert("Erro: ".concat(err.message)));
+    });
+
+    el.userBtn?.addEventListener("click", () => {
+        if (currentUser) {
+            if (confirm("Deseja sair da sua conta?")) {
+                inicializarFirebase();
+                auth.signOut().then(() => popupAdd("Logout realizado!"));
+            }
+        } else {
+            inicializarFirebase();
+            Overlays.open(el.loginModal);
+        }
+    });
+    
+    // 3. Bindings de Carrinho e Checkout
+    el.cartIcon?.addEventListener("click", () => {
+        if (!currentUser) inicializarFirebase(); 
+        renderMiniCart(); 
+        Overlays.open(el.miniCart);
+    });
+
+    // Fechar Modais (Botões X)
+    document.querySelectorAll(".extras-close").forEach(btn => 
+        btn.addEventListener("click", () => Overlays.closeAll())
+    );
+    
+    // Backdrop para fechar
+    el.cartBackdrop?.addEventListener("click", () => Overlays.closeAll());
+
+    // Botão de Checkout (Finalizar Pedido)
+    // OBS: O binding original estava em enhanceMiniCartUI, este é um fallback.
+    // document.getElementById("finish-order")?.addEventListener("click", safe(fecharPedido)); 
+
+    // 4. Bindings de Pedidos e Recompensas
+    el.pedidosBtn?.addEventListener("click", () => {
+        if (!currentUser) {
+            alert("Faça login para ver seus pedidos.");
+            Overlays.open(el.loginModal);
+            return;
+        }
+        inicializarFirebase(); 
+        Overlays.open(el.pedidosPanel);
+        carregarPedidos(currentUser.uid);
+    });
+    el.pedidosFecharBtn?.addEventListener("click", () => Overlays.closeAll());
+    
+    el.recompensasBtn?.addEventListener("click", () => {
+        if (!currentUser) {
+            alert("Faça login para ver suas recompensas.");
+            Overlays.open(el.loginModal); 
+            return;
+        }
+        inicializarFirebase(); 
+        Overlays.open(el.recompensasPanel);
+        carregarRecompensas(currentUser.uid);
+    });
+    el.recompensasFecharBtn?.addEventListener("click", () => Overlays.closeAll());
+    
+    // ** Binding por delegação para botões de Repetir Pedido (gerados dinamicamente)
+    el.pedidosLista?.addEventListener('click', (e) => {
+        if (e.target.classList.contains('repetir-btn')) {
+            const id = e.target.dataset.id;
+            if (id) safe(repetirPedido)(id);
+        }
+    });
+
+
+    // 5. Bindings para Adicionar ao Carrinho (Geral)
+    document.querySelectorAll(".add-cart").forEach((btn) =>
+        btn.addEventListener("click", safe(addCommonItem))
+    );
+
+    // 6. Bindings de Cupom
+    document.getElementById("coupon-form")?.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const input = document.getElementById("coupon-input");
+        const codigo = input.value.trim().toUpperCase();
+        
+        if (!codigo) {
+            couponApplied = "";
+            localStorage.removeItem("dflCoupon");
+            document.getElementById("coupon-message").textContent = "";
+            renderMiniCart();
+            return;
+        }
+
+        inicializarFirebase();
+        const totals = await calcTotals(); 
+        const result = await validarCupomFirestore(codigo, totals.subtotal);
+        
+        document.getElementById("coupon-message").textContent = result.mensagem;
+        
+        if (result.valido) {
+            couponApplied = codigo;
+            localStorage.setItem("dflCoupon", codigo);
+            renderMiniCart();
+        } else {
+            // Se inválido, limpa o cupom
+            couponApplied = "";
+            localStorage.removeItem("dflCoupon");
+            renderMiniCart(); 
+        }
+    });
+
+
+    // 7. Carrossel
+    el.cPrev?.addEventListener("click", () => {
+      if (!el.slides) return;
+      el.slides.scrollLeft -= Math.min(el.slides.clientWidth * 0.9, 320);
+    });
+    el.cNext?.addEventListener("click", () => {
+      if (!el.slides) return;
+      el.slides.scrollLeft += Math.min(el.slides.clientWidth * 0.9, 320);
+    });
+    
+    // 🚨 BINDING DE MODAL DE PROMOÇÃO (CORRIGIDO)
+    document.querySelectorAll(".slide[data-promo-id]").forEach((img) => {
+        img.addEventListener("click", () => {
+          const id = parseInt(img.dataset.promoId, 10);
+          if (id) {
+            showPromoModal(id);
+          }
+        });
+    });
+    
+    // 🎁 BINDINGS DO NOVO MODAL DE PROMOÇÃO
+    el.promoNavPrev?.addEventListener("click", () => {
+        const idAnterior = currentPromoId > 1 ? currentPromoId - 1 : currentPromoId;
+        updatePromoModal(idAnterior);
+    });
+
+    el.promoNavNext?.addEventListener("click", () => {
+        const idProximo = currentPromoId < PROMOCOES.length ? currentPromoId + 1 : currentPromoId;
+        updatePromoModal(idProximo);
+    });
+
+    el.promoAddBtn?.addEventListener("click", safe(addCommonItem));
+    el.promoClose?.addEventListener("click", () => Overlays.closeAll());
+
+
+    // 8. Inicia Timers e Status
+    atualizarStatus();
+    setInterval(atualizarStatus, 60000);
+    atualizarTimer();
+    setInterval(atualizarTimer, 1000);
+
+    // 9. Renderização inicial do Carrinho e UI
+    renderMiniCart(); 
+
+    // 10. Inicializa o Firebase (para checar login)
+    inicializarFirebase(); 
+    
+    console.log("%c🏆 DFL v3.7.1 — Estabilidade Monolítica Restaurada",
+                "background:#000;color:#fff;padding:8px 12px;border-radius:8px;font-weight:700;");
+});
+
+// REMOVIDO: O segundo e idêntico bloco 'document.addEventListener("DOMContentLoaded", ...)' foi removido para evitar duplicidade.
