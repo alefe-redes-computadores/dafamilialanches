@@ -5,6 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>🍔 Da Família Lanches</title>
 
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://www.gstatic.com https://*.firebaseio.com https://cdn.jsdelivr.net; connect-src 'self' https://*.firebaseio.com https://firestore.googleapis.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:;">
+  <meta http-equiv="Cache-control" content="public, max-age=31536000, immutable">
+
   <link rel="preconnect" href="https://www.gstatic.com" crossorigin>
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 
@@ -184,15 +187,35 @@
     .mini-cart{
       right:0; top:0; width:min(92vw,380px); height:100dvh; background:#fff;
       box-shadow:-4px 0 20px rgba(0,0,0,.25);
-      transform:translateX(100%); transition:transform .25s
+      transform:translateX(100%); transition:transform .25s;
+      /* CORREÇÃO PARA LAYOUT DE FLEXBOX VERTICAL */
+      display: flex;
+      flex-direction: column;
     }
     .mini-cart.active{transform:translateX(0)}
     .mini-head{display:flex; justify-content:space-between; align-items:center; padding:10px 14px; border-bottom:1px solid #eee}
-    .mini-list{max-height:60vh; overflow:auto; padding:10px 14px}
-    .mini-foot{padding:10px 14px; border-top:1px solid #eee}
+    .mini-list{
+      max-height:60vh; 
+      overflow-y:auto; 
+      padding:10px 14px;
+      flex-grow: 1; /* Permite que a lista de itens cresça */
+    }
+    .mini-foot{padding:10px 14px; border-top:1px solid #eee; flex-shrink: 0;}
     .coupon-form{display:flex; gap:8px}
     .coupon-form input{
       flex:1; border:1px solid #ddd; border-radius:10px; padding:10px; font-size:.95rem
+    }
+    /* Estilos para o campo de frete (DFL v3.7.1) */
+    .frete-input-container {
+        padding: 10px; 
+        background-color: #f7f7f7; /* Fundo levemente cinza */
+        border-radius: 8px; 
+        box-shadow: 0 1px 3px rgba(0,0,0,0.1); 
+        margin-bottom: 15px;
+        border: 1px solid #eee;
+    }
+    .frete-input-container input, .frete-input-container button {
+        height: 40px;
     }
 
     /* ================= MODAIS BASE ================= */
@@ -368,17 +391,49 @@
         <h3>🛍 Seu Pedido</h3>
         <button class="extras-close" type="button" aria-label="Fechar carrinho">✖</button>
       </div>
-      <div class="mini-list"></div>
+      <div class="mini-list">
+        </div>
       <div class="mini-foot">
+        
+        <div id="dfl-frete-input-container" class="frete-input-container">
+            <label for="frete-input" style="display: block; font-weight: 500; margin-bottom: 5px; font-size: 14px;">Calcular Entrega:</label>
+            
+            <div style="display: flex; gap: 8px;">
+                <input type="text" id="frete-input" placeholder="Digite seu CEP ou Bairro" style="flex-grow: 1; padding: 10px; border: 1px solid #ccc; border-radius: 8px; font-size: 1rem; outline: none; box-shadow: inset 0 1px 3px rgba(0,0,0,0.05);">
+                <button id="calcular-frete-btn" class="cart-button" type="button" style="padding: 0 12px; font-weight: 600;">
+                    Calcular Frete
+                </button>
+            </div>
+            
+            <p id="frete-status-msg" style="margin-top: 10px; font-size: 0.9rem; color: #dc3545; display: none;"></p>
+        </div>
+        
         <form id="coupon-form" class="coupon-form" novalidate>
           <input type="text" id="coupon-input" placeholder="Digite o cupom e clique em Aplicar" aria-label="Cupom de desconto"/>
           <button type="submit" id="coupon-apply-btn" class="btn-primary">Aplicar</button>
         </form>
         <div id="coupon-message" class="coupon-message" aria-live="polite"></div>
+        
+        <div class="summary-row" style="margin-top:10px;">
+          <span>Subtotal (Produtos):</span>
+          <span id="subtotal-display">R$ 0,00</span>
+        </div>
+        
         <div class="summary-row" id="coupon-discount-row" style="display:none;">
           <span>Desconto</span>
           <span id="cart-discount">R$ 0,00</span>
         </div>
+        
+        <div id="frete-display-line" class="summary-row" style="display:none; color:var(--danger); font-weight:600;">
+            <span>🚚 Frete:</span>
+            <span id="frete-valor-display">R$ 0,00</span>
+        </div>
+        
+        <div class="summary-row total-line">
+            <span>TOTAL:</span>
+            <span id="total-display">R$ 0,00</span>
+        </div>
+        
       </div>
     </aside>
 
@@ -649,7 +704,7 @@
         <a href="https://www.instagram.com/dafamilialanches" target="_blank" class="footer-btn" rel="noopener">📸 Instagram</a>
         <a href="https://www.ifood.com.br/delivery/patos-de-minas/dafamilialanches" target="_blank" class="footer-btn" rel="noopener">🍔 iFood</a>
       </div>
-      <div class="footer-copy">© 2025 Da Família Lanches — Todos os direitos reservados 🍔 • <b>v3.6.11 Design</b></div>
+      <div class="footer-copy">© 2025 Da Família Lanches — Todos os direitos reservados 🍔 • <b>v3.7.1 Design</b></div>
     </footer>
   </div>
 
@@ -703,6 +758,6 @@
     <button id="cookie-accept" type="button">Aceitar</button>
   </div>
 
-  <script defer src="script.js?v=3.6.10"></script>
+  <script defer src="script.js?v=3.7.1"></script>
 </body>
 </html>
