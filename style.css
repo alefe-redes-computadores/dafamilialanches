@@ -483,3 +483,44 @@ button, input, select {
 .minhas-recompensas {
   z-index: 1500 !important;
 }
+/* ======== PATCH ULTRA DE INTERATIVIDADE (v3.6.8r6) ======== */
+
+/* Força todos os modais, painéis e backdrops a só aceitarem clique quando ativos */
+#cart-backdrop,
+.modal,
+.pedidos-panel,
+.recompensas-panel,
+#mini-cart {
+  pointer-events: none !important;
+  opacity: 0 !important;
+  transition: opacity .3s ease !important;
+}
+
+/* Quando ativos, liberam pointer-events */
+#cart-backdrop.active,
+.modal.show,
+.pedidos-panel.active,
+.recompensas-panel.active,
+#mini-cart.active {
+  pointer-events: auto !important;
+  opacity: 1 !important;
+}
+
+/* Garante que o header e botões fiquem sempre clicáveis acima de tudo */
+.header,
+.meus-pedidos,
+.minhas-recompensas,
+button,
+.card,
+.grid,
+.carousel,
+body {
+  pointer-events: auto !important;
+  z-index: auto !important;
+}
+
+/* Corrige z-index global */
+#cart-backdrop { z-index: 900 !important; }
+.modal, #mini-cart { z-index: 1000 !important; }
+.pedidos-panel, .recompensas-panel { z-index: 1100 !important; }
+.header, .meus-pedidos, .minhas-recompensas { z-index: 1500 !important; }
