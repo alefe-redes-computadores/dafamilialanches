@@ -2068,4 +2068,4 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-});
+}); 
