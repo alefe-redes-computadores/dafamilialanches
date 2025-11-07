@@ -754,3 +754,138 @@ section h2 {
     font-size: 1.05rem;
   }
 }
+/* =======================================================
+   💰 PATCH 4 — Ajuste Fino: Estilo do Preço e Visual Final
+   ======================================================= */
+
+/* 🔧 Mantém o modal ajustado e centralizado (reforço do Patch 3) */
+#promo-modal .promo-content {
+  padding: 0;
+  max-width: 420px;
+  border-radius: 14px;
+  background: #fff;
+  overflow: hidden;
+  box-shadow: 0 8px 40px rgba(0, 0, 0, 0.4);
+}
+
+/* 💬 Centraliza texto e define hierarquia visual */
+.promo-info {
+  text-align: center;
+  padding: 14px 20px 18px;
+  background: #fff;
+}
+#promo-modal-title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  margin-bottom: 6px;
+  color: #222;
+}
+
+/* 🎨 Estilo refinado dos preços */
+#promo-modal-price {
+  font-size: 1rem;
+  margin-bottom: 12px;
+  color: #444;
+  font-weight: 500;
+}
+
+/* Preço antigo (só o número riscado e acinzentado) */
+#promo-modal-price del {
+  color: #777;
+  text-decoration: line-through;
+  font-weight: 500;
+  margin-right: 4px;
+}
+
+/* Novo preço destacado em verde */
+#promo-modal-price b {
+  color: #2e7d32;
+  font-weight: 700;
+  font-size: 1.1rem;
+}
+
+/* 🔘 Botão Adicionar ao Pedido */
+#promo-modal-add {
+  background: #388e3c;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 12px 24px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.2);
+  transition: background 0.2s, transform 0.2s;
+}
+#promo-modal-add:hover {
+  background: #2e7d32;
+  transform: scale(1.04);
+}
+
+/* 🧭 Setas laterais corretamente posicionadas */
+#promo-modal .modal-head {
+  position: absolute;
+  top: 12px;
+  left: 0;
+  right: 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 12px;
+  background: none;
+  z-index: 5;
+}
+
+/* Estilo das setas (‹ ›) */
+#promo-modal .promo-nav {
+  background: #ffca28;
+  border: none;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  font-size: 22px;
+  font-weight: 700;
+  color: #000;
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.25);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: 0.2s;
+}
+#promo-modal .promo-nav:hover {
+  background: #ffb300;
+  transform: scale(1.1);
+}
+
+/* ❌ Botão fechar (canto esquerdo superior) */
+#promo-modal .promo-close {
+  background: #ffca28;
+  border: none;
+  border-radius: 50%;
+  width: 36px;
+  height: 36px;
+  font-weight: 700;
+  color: #000;
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.25);
+  transition: 0.2s;
+}
+#promo-modal .promo-close:hover {
+  background: #ffb300;
+  transform: scale(1.1);
+}
+
+/* 📱 Responsividade (mantém leve e proporcional) */
+@media (max-width: 600px) {
+  #promo-modal .promo-content {
+    width: 92%;
+    max-width: 380px;
+  }
+  #promo-modal-img {
+    max-height: 52vh;
+  }
+  #promo-modal .promo-nav {
+    width: 34px;
+    height: 34px;
+    font-size: 20px;
+  }
+}
