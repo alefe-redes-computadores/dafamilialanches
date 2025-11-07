@@ -226,3 +226,103 @@ button, input, select {
   .promo-nav { top: 30%; }
   .meus-pedidos, .minhas-recompensas { right: 12px; }
 }
+
+
+
+/* ========== DFL v3.7 (base estável) – Styles extras para 'Frete (em breve)' e seção Hot Dogs ========== */
+.frete-coming-soon {
+  margin-top: 12px;
+  padding: 10px;
+  border: 1px dashed #ffb300;
+  border-radius: 10px;
+  background: #fffaf0;
+}
+.frete-coming-soon .frete-label {
+  display: block;
+  font-weight: 700;
+  margin-bottom: 6px;
+  color: #333;
+}
+.frete-coming-soon .frete-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+.frete-coming-soon input[disabled],
+.frete-coming-soon button[disabled] {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+.frete-coming-soon input {
+  flex: 1;
+  padding: 10px 12px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 1rem;
+  background: #fff;
+}
+.frete-coming-soon button {
+  padding: 10px 14px;
+  border: 0;
+  border-radius: 8px;
+  background: #ffb300;
+  color: #222;
+  font-weight: 700;
+}
+.frete-note { color: #666; margin-top: 6px; display: block; }
+.frete-total-line { display: flex; justify-content: space-between; margin-top: 8px; }
+.frete-total-line b { color: #d32f2f; }
+
+/* Section title basic style (case not present) */
+.section-title { font-size: 1.6rem; font-weight: 800; margin: 16px 0 10px; }
+
+/* Products grid (fallback if not present) */
+.products-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 14px;
+}
+
+/* Card disabled overlay */
+.disabled-card {
+  position: relative;
+  opacity: 0.85;
+}
+.disabled-card .actions .add-cart,
+.disabled-card .actions .extras-btn {
+  pointer-events: none;
+}
+.disabled-card .soon-overlay {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  background: #222;
+  color: #fff;
+  font-weight: 800;
+  padding: 4px 8px;
+  border-radius: 999px;
+  font-size: .8rem;
+  letter-spacing: .02em;
+}
+
+/* Badges */
+.badge {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  display: inline-block;
+  padding: 4px 8px;
+  border-radius: 999px;
+  font-size: .75rem;
+  font-weight: 800;
+  color: #222;
+  background: #ffe082; /* amarelo (molho) por padrão */
+  margin-left: 6px;
+}
+.badge + .badge { right: auto; left: 10px; } /* se duas, joga a segunda pra esquerda */
+.badge-molho { background: #ffe082; color: #222; }
+.badge-pure  { background: #a5d6a7; color: #1b5e20; } /* verde para 'com purê' */
+
+/* Card media wrapper (fallback) */
+.card .card-media { position: relative; }
+.card .card-media img { width: 100%; height: auto; display: block; border-radius: 12px 12px 0 0; }
