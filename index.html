@@ -5,9 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>🍔 Da Família Lanches</title>
 
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://www.gstatic.com https://*.firebaseio.com https://cdn.jsdelivr.net; connect-src 'self' https://www.googleapis.com https://securetoken.googleapis.com https://*.firebaseio.com https://firestore.googleapis.com https://accounts.google.com https://apis.google.com https://viacep.com.br; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:;">
-  <meta http-equiv="Cache-control" content="public, max-age=31536000, immutable">
-
   <link rel="preconnect" href="https://www.gstatic.com" crossorigin>
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 
@@ -180,42 +177,22 @@
       opacity:0; pointer-events:none; transition:opacity .2s; z-index:980
     }
     #cart-backdrop.active{opacity:1; pointer-events:auto}
-    .mini-cart,.modal,.pedidos-panel,.recompensas-panel, .reports-panel, .frete-admin-panel{position:fixed; z-index:990; display:none}
-    .mini-cart.active,.modal.show,.pedidos-panel.active,.recompensas-panel.active, .reports-panel.active, .frete-admin-panel.active{display:block}
+    .mini-cart,.modal,.pedidos-panel,.recompensas-panel{position:fixed; z-index:990; display:none}
+    .mini-cart.active,.modal.show,.pedidos-panel.active,.recompensas-panel.active{display:block}
 
     /* ================= MINI-CART LATERAL ================= */
     .mini-cart{
       right:0; top:0; width:min(92vw,380px); height:100dvh; background:#fff;
       box-shadow:-4px 0 20px rgba(0,0,0,.25);
-      transform:translateX(100%); transition:transform .25s;
-      /* CORREÇÃO PARA LAYOUT DE FLEXBOX VERTICAL */
-      display: flex;
-      flex-direction: column;
+      transform:translateX(100%); transition:transform .25s
     }
     .mini-cart.active{transform:translateX(0)}
     .mini-head{display:flex; justify-content:space-between; align-items:center; padding:10px 14px; border-bottom:1px solid #eee}
-    .mini-list{
-      max-height:60vh; 
-      overflow-y:auto; 
-      padding:10px 14px;
-      flex-grow: 1; /* Permite que a lista de itens cresça */
-    }
-    .mini-foot{padding:10px 14px; border-top:1px solid #eee; flex-shrink: 0;}
+    .mini-list{max-height:60vh; overflow:auto; padding:10px 14px}
+    .mini-foot{padding:10px 14px; border-top:1px solid #eee}
     .coupon-form{display:flex; gap:8px}
     .coupon-form input{
       flex:1; border:1px solid #ddd; border-radius:10px; padding:10px; font-size:.95rem
-    }
-    /* Estilos para o campo de frete (DFL v3.7.1) */
-    .frete-input-container {
-        padding: 10px; 
-        background-color: #f7f7f7; /* Fundo levemente cinza */
-        border-radius: 8px; 
-        box-shadow: 0 1px 3px rgba(0,0,0,0.1); 
-        margin-bottom: 15px;
-        border: 1px solid #eee;
-    }
-    .frete-input-container input, .frete-input-container button {
-        height: 40px;
     }
 
     /* ================= MODAIS BASE ================= */
@@ -244,75 +221,30 @@
     .btn-secondary{background:transparent; color:#555; border:1px solid #ddd}
     .btn-secondary:hover{background:#f1f1f1; border-color:#ccc}
 
-    /* ================= BOTÕES/Painéis (Pedidos / Recompensas / Relatórios / Admin) ================= */
+    /* ================= BOTÕES/Painéis (Pedidos / Recompensas) ================= */
     .meus-pedidos{position:fixed; bottom:20px; right:20px; z-index:1500}
-    
-    /* DFL v3.8.5: Novo botão Admin Frete */
-    .admin-actions {
-      position: fixed; 
-      bottom: 80px; 
-      right: 20px; 
-      z-index: 1500;
-      display: flex;
-      flex-direction: column;
-      align-items: flex-end;
-      gap: 10px;
-    }
-    #frete-admin-btn {
-        background: linear-gradient(135deg, #42a5f5, #1e88e5);
-        color: white;
-        border: none;
-        border-radius: 20px;
-        font-weight: 700;
-        font-size: 0.9rem;
-        padding: 10px 18px;
-        box-shadow: 0 4px 10px rgba(0,0,0,.2);
-        cursor: pointer;
-        transition: transform .2s;
-    }
-    #frete-admin-btn:hover {
-        transform: scale(1.05);
-        box-shadow: 0 6px 15px rgba(0,0,0,.3);
-    }
-    
     .meus-pedidos-btn,.recompensas-btn{
       background:linear-gradient(135deg,#ffca28,#ffb300); color:#222; border:none; border-radius:20px;
       font-weight:700; font-size:.95rem; padding:12px 22px; box-shadow:0 4px 10px rgba(0,0,0,.2); cursor:pointer; transition:.2s
     }
     .meus-pedidos-btn:hover,.recompensas-btn:hover{transform:scale(1.05); box-shadow:0 6px 15px rgba(0,0,0,.3)}
-    
-    /* Painéis Laterais */
-    .pedidos-panel,.recompensas-panel, .reports-panel, .frete-admin-panel{
+    .pedidos-panel,.recompensas-panel{
       right:-100%; top:0; width:min(95%,440px); height:100vh; background:#f4f4f4;
       box-shadow:-4px 0 18px rgba(0,0,0,.3); transition:right .4s; display:flex; flex-direction:column
     }
-    .pedidos-panel.active,.recompensas-panel.active, .reports-panel.active, .frete-admin-panel.active{right:0}
-    
-    .pedidos-header,.recompensas-header, .reports-header{
+    .pedidos-panel.active,.recompensas-panel.active{right:0}
+    .pedidos-header,.recompensas-header{
       display:flex; justify-content:space-between; align-items:center;
       padding:16px 20px; background:#ffca28; font-weight:700; font-size:1.2rem; color:#222; box-shadow:var(--shadow-in)
     }
-    .reports-header { background: #1e88e5; color: white;} /* Estilo Admin */
-
-    .pedidos-body,.recompensas-body, .reports-body{flex:1; overflow:auto; padding:16px}
-    
-    .fechar-pedidos,.fechar-recompensas,.reports-close,.extras-close,.combo-close,.login-close{
+    .pedidos-body,.recompensas-body{flex:1; overflow:auto; padding:16px}
+    .fechar-pedidos,.fechar-recompensas,.extras-close,.combo-close,.login-close{
       background:var(--botao); border:none; border-radius:50%; width:30px; height:30px; font-size:18px; font-weight:700;
       cursor:pointer; line-height:30px; text-align:center; color:#222; transition:.2s
     }
-    .fechar-pedidos:hover,.fechar-recompensas:hover,.reports-close:hover,.extras-close:hover,.combo-close:hover,.login-close:hover{
+    .fechar-pedidos:hover,.fechar-recompensas:hover,.extras-close:hover,.combo-close:hover,.login-close:hover{
       background:#ff7043; color:#fff; transform:scale(1.1)
     }
-    /* DFL v3.8.5: Botão de fechar painel admin */
-    .frete-admin-close {
-        background: #1e88e5;
-        color: white;
-    }
-    .frete-admin-close:hover {
-        background: #42a5f5;
-        color: #222;
-    }
-
     /* CORREÇÃO MODAL ADICIONAIS: Para o layout vertical e card */
     .extras-list label.extra-line {
         display: flex;
@@ -336,94 +268,6 @@
     }
     .extras-list input[type="checkbox"] {
         margin-left: 10px;
-    }
-
-    /* Estilo para Histórico de Entregas */
-    .historico-frete-card {
-        background: #fff;
-        border-radius: 10px;
-        padding: 15px;
-        margin-bottom: 12px;
-        box-shadow: 0 2px 5px rgba(0,0,0,0.08);
-        border-left: 4px solid var(--botao);
-    }
-    .historico-frete-card h4 {
-        margin: 0 0 8px 0;
-        font-size: 1.1rem;
-        color: #ff7043;
-    }
-    .historico-frete-card p {
-        margin: 5px 0;
-        font-size: 0.95rem;
-        color: #555;
-    }
-    .historico-frete-card .total {
-        font-weight: 700;
-        color: var(--danger);
-        margin-top: 10px;
-        border-top: 1px dashed #eee;
-        padding-top: 5px;
-    }
-    
-    /* DFL v3.7.3: Estilos para o Painel de Relatórios */
-    .reports-tabs {
-        display: flex;
-        border-bottom: 2px solid #ddd;
-        margin-bottom: 15px;
-        padding: 0 10px;
-    }
-    .reports-tab-btn {
-        flex: 1;
-        background: none;
-        border: none;
-        padding: 12px 0;
-        margin: 0 5px;
-        font-weight: 600;
-        cursor: pointer;
-        color: #777;
-        border-bottom: 2px solid transparent;
-        transition: all 0.2s;
-        font-size: 0.9rem;
-    }
-    .reports-tab-btn.active {
-        color: var(--danger);
-        border-bottom: 2px solid var(--danger);
-    }
-    .reports-content-tab {
-        display: none;
-        padding: 10px;
-        background: #fff;
-        border-radius: 8px;
-        margin-bottom: 10px;
-        box-shadow: var(--shadow-1);
-    }
-    .reports-content-tab.active {
-        display: block;
-    }
-    .reports-metric-card {
-        padding: 10px;
-        border-radius: 8px;
-        background: var(--bg2);
-        margin-bottom: 10px;
-        box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-        font-weight: 600;
-        font-size: 0.95rem;
-    }
-    .reports-table {
-        width: 100%;
-        border-collapse: collapse;
-        margin-top: 15px;
-        font-size: 0.85rem;
-    }
-    .reports-table th, .reports-table td {
-        border: 1px solid #eee;
-        padding: 8px;
-        text-align: left;
-    }
-    .reports-table th {
-        background: #ffb300;
-        color: #222;
-        font-weight: 700;
     }
 
     /* ================= FOOTER ================= */
@@ -454,15 +298,15 @@
       .card img{height:140px}
       .c-btn{width:32px; height:32px; font-size:20px}
       .c-prev{left:4px}.c-next{right:4px}
-      .pedidos-panel,.recompensas-panel, .reports-panel, .frete-admin-panel{width:100%; max-width:100%}
+      .pedidos-panel,.recompensas-panel{width:100%; max-width:100%}
       #cookie-banner{flex-direction:column; text-align:center; gap:12px}
       #cookie-banner p{margin-right:0}
       #cookie-banner button{width:100%; padding:12px}
     }
   </style>
 
-  <link rel="stylesheet" href="style.css?v=3.8.5" media="print" onload="this.media='all'"/>
-  <noscript><link rel="stylesheet" href="style.css?v=3.8.5"/></noscript>
+  <link rel="stylesheet" href="style.css?v=3.7.1" media="print" onload="this.media='all'"/>
+  <noscript><link rel="stylesheet" href="style.css?v=3.7.1"/></noscript>
 
   <script defer src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
   <script defer src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
@@ -487,10 +331,6 @@
       </button>
     </div>
   </header>
-
-  <div class="admin-actions">
-    <button id="frete-admin-btn" style="display: none;" type="button">🚚 Frete Admin</button>
-  </div>
 
   <div class="main-content-wrapper">
     <div id="status-banner" class="status-banner"></div>
@@ -528,60 +368,17 @@
         <h3>🛍 Seu Pedido</h3>
         <button class="extras-close" type="button" aria-label="Fechar carrinho">✖</button>
       </div>
-      <div class="mini-list">
-        </div>
+      <div class="mini-list"></div>
       <div class="mini-foot">
-        
-        <div id="dfl-frete-input-container" class="frete-input-container">
-            <label for="frete-input" style="display: block; font-weight: 500; margin-bottom: 5px; font-size: 14px;">Calcular Entrega:</label>
-            
-            <div style="display: flex; gap: 8px;">
-                <input type="text" id="frete-input" placeholder="Digite seu CEP ou Bairro" style="flex-grow: 1; padding: 10px; border: 1px solid #ccc; border-radius: 8px; font-size: 1rem; outline: none; box-shadow: inset 0 1px 3px rgba(0,0,0,0.05);">
-                <button id="calcular-frete-btn" class="cart-button" type="button" style="padding: 0 12px; font-weight: 600;">
-                    Calcular Frete
-                </button>
-            </div>
-            
-            <p id="frete-status-msg" style="margin-top: 10px; font-size: 0.9rem; color: #dc3545; display: none;"></p>
-        </div>
-        
         <form id="coupon-form" class="coupon-form" novalidate>
           <input type="text" id="coupon-input" placeholder="Digite o cupom e clique em Aplicar" aria-label="Cupom de desconto"/>
           <button type="submit" id="coupon-apply-btn" class="btn-primary">Aplicar</button>
         </form>
         <div id="coupon-message" class="coupon-message" aria-live="polite"></div>
-        
-        <div class="summary-row" style="margin-top:10px;">
-          <span>Subtotal (Produtos):</span>
-          <span id="subtotal-display">R$ 0,00</span>
-        </div>
-        
         <div class="summary-row" id="coupon-discount-row" style="display:none;">
           <span>Desconto</span>
           <span id="cart-discount">R$ 0,00</span>
         </div>
-        
-        <div id="frete-display-line" class="summary-row" style="display:none; color:var(--danger); font-weight:600;">
-            <span>🚚 Frete:</span>
-            <span id="frete-valor-display">R$ 0,00</span>
-        </div>
-        
-        <div class="summary-row total-line">
-            <span>TOTAL:</span>
-            <span id="total-display">R$ 0,00</span>
-        </div>
-        
-        <label style="display:block;font-weight:600;margin-bottom:6px;margin-top:10px;">🏠 Endereço para Entrega</label>
-        <textarea id="address-input" rows="2" placeholder="Rua, número, complemento, bairro"
-            style="width:100%;border:1px solid #ddd;border-radius:10px;padding:10px;resize:vertical;margin-bottom:10px"></textarea>
-    
-        <button id="finish-order" class="btn-primary" type="button" style="width:100%;margin-bottom:8px">
-            Finalizar Pedido 🛍️
-        </button>
-        <button id="clear-cart" class="btn-secondary" type="button" style="width:100%;">
-            Limpar Carrinho
-        </button>
-        
       </div>
     </aside>
 
@@ -841,76 +638,6 @@
       </div>
     </div>
 
-    <div class="reports-panel" id="reports-panel" aria-hidden="true">
-      <div class="reports-header">
-        <span style="display: flex; align-items: center; gap: 8px;">
-            📊 Relatórios
-            <select id="reports-period-selector" style="padding: 4px 8px; border-radius: 6px; font-size: 0.9rem; font-weight: 500; border: 1px solid #c0c0c0;">
-                <option value="30d">Últimos 30 dias</option>
-                <option value="7d">Últimos 7 dias</option>
-                <option value="90d">Últimos 90 dias</option>
-                <option value="all">Todo Período</option>
-            </select>
-        </span>
-        <button class="reports-close" type="button" aria-label="Fechar painel">✖</button>
-      </div>
-      <div class="reports-body">
-        <input type="text" id="reports-filter-input" placeholder="Filtrar por bairro ou produto..."
-            style="width: 100%; padding: 10px; margin-bottom: 15px; border: 1px solid #ccc; border-radius: 6px; font-size: 1rem; box-shadow: inset 0 1px 3px rgba(0,0,0,0.05);">
-        
-        <div class="reports-tabs" id="reports-tabs">
-            <button class="reports-tab-btn active" data-tab="overview">Visão Geral</button>
-            <button class="reports-tab-btn" data-tab="delivery">Frete</button>
-            <button class="reports-tab-btn" data-tab="orders">Pedidos</button>
-        </div>
-        <div class="reports-content" id="reports-content">
-            <div id="rep-overview" class="reports-content-tab active">
-                <p style="text-align:center; color:#999;">Carregando Visão Geral...</p>
-            </div>
-            <div id="rep-delivery" class="reports-content-tab">
-                <p style="text-align:center; color:#999;">Carregando Métricas de Frete...</p>
-            </div>
-            <div id="rep-orders" class="reports-content-tab">
-                <div style="text-align: right; margin-bottom: 10px;">
-                     <button id="export-orders-csv" class="btn-secondary" style="padding: 8px 12px;">Exportar CSV 📁</button>
-                </div>
-                <div id="orders-list">
-                    <p style="text-align:center; color:#999;">Carregando Pedidos Detalhados...</p>
-                </div>
-            </div>
-        </div>
-      </div>
-    </div>
-    <div class="reports-panel frete-admin-panel" id="frete-admin-panel" aria-hidden="true">
-        <div class="reports-header">
-            <span>🚚 Frete Admin - Zonas</span>
-            <button class="reports-close frete-admin-close" type="button" aria-label="Fechar painel">✖</button>
-        </div>
-        <div class="reports-body" style="padding: 10px;">
-            <div id="frete-admin-add-form" style="padding: 15px; background: #fff; border-radius: 8px; margin-bottom: 20px; box-shadow: 0 1px 3px rgba(0,0,0,.1);">
-                <h4>➕ Nova Zona / Edição</h4>
-                <form id="frete-zona-form" style="display: grid; gap: 10px;">
-                    <input type="hidden" id="zona-id-input">
-                    <input type="text" id="zona-nome-input" placeholder="Nome da Zona (ex: Centro)" required style="padding: 10px; border: 1px solid #ddd; border-radius: 6px;">
-                    <input type="number" id="zona-valor-input" placeholder="Valor (R$ 5.00)" step="0.01" required style="padding: 10px; border: 1px solid #ddd; border-radius: 6px;">
-                    <div style="display: flex; align-items: center; gap: 10px;">
-                        <input type="checkbox" id="zona-ativo-input" checked>
-                        <label for="zona-ativo-input">Ativa para uso</label>
-                    </div>
-                    <div style="margin-top: 10px; border-top: 1px dashed #eee; padding-top: 10px;">
-                        <label style="font-weight: 600;">Bairros (separados por vírgula):</label>
-                        <textarea id="zona-bairros-input" rows="2" placeholder="Rosário, Alvorada, Bela Vista" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; resize: vertical;"></textarea>
-                    </div>
-                    <button type="submit" id="zona-submit-btn" class="btn-primary" style="padding: 12px;">Salvar Zona</button>
-                </form>
-            </div>
-
-            <h4>📜 Zonas Cadastradas</h4>
-            <div id="frete-admin-table-container">
-                <p style="text-align: center; color: #999;">Carregando zonas...</p>
-            </div>
-        </div>
-    </div>
     <footer class="footer">
       <p>📍
         <a href="https://www.google.com/maps/search/?api=1&query=Rua+dos+Caiçaras,+212,+Patos+de+Minas,+MG" target="_blank" rel="noopener">
@@ -922,7 +649,7 @@
         <a href="https://www.instagram.com/dafamilialanches" target="_blank" class="footer-btn" rel="noopener">📸 Instagram</a>
         <a href="https://www.ifood.com.br/delivery/patos-de-minas/dafamilialanches" target="_blank" class="footer-btn" rel="noopener">🍔 iFood</a>
       </div>
-      <div class="footer-copy">© 2025 Da Família Lanches — Todos os direitos reservados 🍔 • <b>v3.8.5 Design</b></div>
+      <div class="footer-copy">© 2025 Da Família Lanches — Todos os direitos reservados 🍔 • <b>v3.6.11 Design</b></div>
     </footer>
   </div>
 
@@ -963,17 +690,8 @@
         <span>📦 Meus Pedidos</span>
         <button class="fechar-pedidos" type="button" aria-label="Fechar painel">✖</button>
       </div>
-      <div class="pedidos-body" id="pedidos-body">
-        <h4 style="margin-top:0;">🔁 Repetir Pedido Recente</h4>
-        <div id="listaPedidos">
-          <p class="empty-orders">Faça login para ver seus pedidos.</p>
-        </div>
-        
-        <h4 style="margin-top:20px;">🚚 Histórico de Entregas</h4>
-        <div id="historicoEntregas">
-            <p class="empty-history" style="text-align:center;color:#999;">Carregando histórico de entregas...</p>
-        </div>
-        
+      <div class="pedidos-body" id="listaPedidos">
+        <p class="empty-orders">Faça login para ver seus pedidos.</p>
       </div>
     </div>
   </div>
@@ -985,6 +703,6 @@
     <button id="cookie-accept" type="button">Aceitar</button>
   </div>
 
-  <script defer src="script.js?v=3.8.8"></script>
+  <script defer src="script.js?v=3.6.10"></script>
 </body>
 </html>
