@@ -1,9 +1,7 @@
 /* =========================================================
-   🚀 DFL v3.8.7 — RELATÓRIOS AUTOMÁTICOS + EXPORTAÇÃO CSV/PDF
-   - Consultas Firestore em tempo real
-   - Filtros por período (7/30/90 dias)
-   - Exportação CSV/PDF
-   - Métricas automáticas no painel de relatórios
+   🚀 DFL v3.8.8 — RELATÓRIOS GRÁFICOS + ADMIN FRETE CRUD
+   - Charts.js + Painel de Frete Integrado
+   - Mantida compatibilidade com Firestore e layout v3.8.5
 ========================================================= */
 
 // 🔧 Feature Flags (habilitar quando pronto)
@@ -27,6 +25,19 @@ const LOG = {
   admin: (...a) => (window.DFL_FLAGS?.freightDebug ? console.log("[DFL/ADMIN]", ...a) : void 0),
 };
 
+// DFL v3.8.8: Adiciona import do Chart.js (Ação 1)
+function loadChartJS(callback) {
+    if (window.Chart) {
+        callback();
+        return;
+    }
+    const script = document.createElement('script');
+    script.src = 'https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js';
+    script.onload = callback;
+    document.head.appendChild(script);
+    LOG.charts("Chart.js CDN loading...");
+}
+
 document.addEventListener("DOMContentLoaded", () => {
   /* ------------------ ⚙️ BASE (MANTIDO) ------------------ */
   const sound = new Audio("click.wav");
@@ -39,7 +50,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // 🔊 REMOVIDO: O listener de clique global foi removido daqui para melhorar a UX.
   // O som será ativado apenas na função fecharPedido().
-
   /* Banco de Dados v2.7:
     Dados das 9 promoções do carrossel.
   */
@@ -57,6 +67,7 @@ document.addEventListener("DOMContentLoaded", () => {
   ];
   
   // O array estático RECOMPENSAS_DATA FOI REMOVIDO E SERÁ CARREGADO DINAMICAMENTE
+
   /* ------------------ 🎯 ELEMENTOS (DFL v3.8.5) ------------------ */
   const el = {
     cartIcon: document.getElementById("cart-icon"),
@@ -133,7 +144,7 @@ document.addEventListener("DOMContentLoaded", () => {
     // DFL v3.8.5: Botão Admin Frete
     freteAdminBtn: document.getElementById("frete-admin-btn"),
     freteAdminPanel: document.getElementById("frete-admin-panel"),
-
+    
     // DFL v3.8.7: Novo botão de Exportação PDF (Ação 5)
     exportOrdersPDF: document.getElementById("export-orders-pdf"),
   };
@@ -209,8 +220,6 @@ document.addEventListener("DOMContentLoaded", () => {
     renderMiniCart(); 
   });
   /* ========================================================= */
-
-
   /* ------------------ 💬 POPUP (MANTIDO) ------------------ */
   function popupAdd(msg) {
     let pop = document.querySelector(".popup-add");
@@ -260,6 +269,7 @@ document.addEventListener("DOMContentLoaded", () => {
       pop.style.opacity = '0';
     }, 4000);
   }
+
 /* ------------------ 🛒 MINI-CARRINHO (MANTIDO) ------------------ */
   function renderMiniCart() {
     // ... (MANTIDO)
@@ -301,8 +311,6 @@ document.addEventListener("DOMContentLoaded", () => {
       </div>
     `).join("");
   }
-
-
   /* 🔄 Vincula botões dinâmicos (MANTIDO) */
   function bindMiniCartButtons() {
     el.miniList.querySelectorAll(".cart-plus").forEach(b => b.addEventListener("click", e => {
@@ -342,6 +350,7 @@ document.addEventListener("DOMContentLoaded", () => {
     // 3. Dispara a atualização do rodapé (agora é a função global)
     window.updateCartTotals(); 
   };
+
   /* ------------------ 🔥 FIREBASE (LAZY LOAD - V3.6.0) ------------------ */
   const firebaseConfig = {
     apiKey: "AIzaSyATQBcbYuzKpKlSwNlbpRiAM1XyHqhGeak",
@@ -393,7 +402,6 @@ document.addEventListener("DOMContentLoaded", () => {
           // Não aborta o resto do script, mas as funcionalidades dependentes falharão.
       }
   }
-
   /* ------------------ SETUP LISTENERS E AUTH (V3.6.0) ------------------ */
   const ADMINS = [
     "alefejohsefe@gmail.com",
@@ -425,6 +433,7 @@ document.addEventListener("DOMContentLoaded", () => {
       if (user && isAdmin(user)) {
         if (el.reportsBtn) {
             el.reportsBtn.style.display = 'inline-block';
+            // DFL v3.8.8: Adiciona integração para carregar Chart.js
             el.reportsBtn.removeEventListener('click', DFL_ReportsIntegration);
             el.reportsBtn.addEventListener('click', DFL_ReportsIntegration);
         }
@@ -440,6 +449,7 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     });
   }
+
   // A função setupAuthListener() é chamada APÓS a inicialização do Firebase.
   // Isso impede que o script trave na linha auth.onAuthStateChanged(user => {...}) antes do Firebase estar carregado.
 
@@ -452,7 +462,6 @@ document.addEventListener("DOMContentLoaded", () => {
     Overlays.closeAll();
     // O setupAuthListener (chamado em inicializarFirebase) garante a atualização final
   };
-
   const handleLoginError = (err) => {
     if (err.code === "auth/user-not-found") {
       if (confirm("Conta não encontrada. Deseja criar uma nova?")) {
@@ -509,6 +518,7 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   // ------------------ (CONTINUAÇÃO DO CÓDIGO DFL) ------------------
+
   /* ------------------ ➕ Adicionais (MANTIDO) ------------------ */
   const adicionais = [
     { nome: "Cebola", preco: 0.99 },
@@ -549,7 +559,6 @@ document.addEventListener("DOMContentLoaded", () => {
       </label>`).join("");
     Overlays.open(el.extrasModal);
   });
-
   document.querySelectorAll(".extras-btn").forEach((btn) =>
     btn.addEventListener("click", (e) => openExtrasFor(e.currentTarget.closest(".card")))
   );
@@ -590,6 +599,7 @@ document.addEventListener("DOMContentLoaded", () => {
   document.querySelectorAll("#extras-modal .extras-close").forEach((b) =>
     b.addEventListener("click", () => Overlays.closeAll())
   );
+
   /* ------------------ 🥤 Combos (MANTIDO) ------------------ */
   const comboDrinkOptions = {
     casal: [
@@ -643,228 +653,7 @@ document.addEventListener("DOMContentLoaded", () => {
     _comboCtx = { nomeCombo, precoBase, grupo };
     Overlays.open(el.comboModal);
   });
-
-  el.comboConfirm?.addEventListener("click", () => {
-    if (!_comboCtx) return Overlays.closeAll();
-    const sel = el.comboBody?.querySelector('input[name="combo-drink"]:checked');
-    if (!sel) return;
-    const opt = comboDrinkOptions[_comboCtx.grupo][+sel.value];
-    const finalName = `${_comboCtx.nomeCombo} + ${opt.rotulo}`;
-    const finalPrice = Number(_comboCtx.precoBase) + (opt.delta || 0);
-
-    const existente = cart.find(i => i.nome === finalName);
-    if (existente) existente.qtd++;
-    else cart.push({ nome: finalName, preco: finalPrice, qtd: 1 });
-
-    popupAdd("Combo adicionado!");
-    renderMiniCart();
-    Overlays.closeAll();
-  });
-
-  document.querySelectorAll("#combo-modal .combo-close").forEach((b) =>
-    b.addEventListener("click", () => Overlays.closeAll())
-  );
-
-  /* ------------------ 🧺 Adicionar item comum (MANTIDO) ------------------ */
-  function addCommonItem(nome, preco) {
-    // Se for um combo do *cardápio principal* (mas não uma "Promo"), abre o modal de combos
-    if (/^combo/i.test(nome) && !/^\s*Combo [0-9]/.test(nome)) {
-      openComboModal(nome, preco);
-      return;
-    }
-    // Se for uma *promoção* (ex: "Combo 2 Purizin...") ou item normal, adiciona direto
-    const found = cart.find((i) => i.nome === nome && i.preco === preco);
-    if (found) found.qtd++;
-    else cart.push({ nome, preco, qtd: 1 });
-    renderMiniCart();
-    popupAdd(`${nome} adicionado!`);
-  }
-
-  document.querySelectorAll(".add-cart").forEach((btn) =>
-    btn.addEventListener("click", (e) => {
-      const card = e.currentTarget.closest(".card");
-      if (!card) return;
-      const nome = card.dataset.name;
-      const preco = parseFloat(card.dataset.price);
-      addCommonItem(nome, preco);
-    })
-  );
-
-  /* ------------------ 🛒 ABRIR CARRINHO (MANTIDO) ------------------ */
-  // Já está acima, unificado com a inicialização do Firebase
-
-
-/* ------------------ ⚙️ CONFIGURAÇÕES V3.0 (MANTIDO) ------------------ */
-  const DELIVERY_FEE = 6.00; // Será substituído pelo valor do DFL_Frete
-
-  let couponApplied = (localStorage.getItem("dflCoupon") || "").toUpperCase();
-  let addressValue  = (localStorage.getItem("dflAddress") || "").trim();
-
-  const getCartSubtotal = () =>
-    cart.reduce((s, i) => s + (Number(i.preco) || 0) * (Number(i.qtd) || 0), 0);
-  /* =========================================================
-    ✨ v3.5.1: FUNÇÃO PARA CARREGAR METAS (CACHÊ REVISADO)
-    =========================================================
-  */
-  let configuracoesRecompensa = null; // Cache global
-  
-  async function carregarConfiguracoesDeRecompensas() {
-      if (!isFirebaseInitialized) return []; // Aborta se Firebase não estiver pronto
-      if (configuracoesRecompensa) return configuracoesRecompensa; // Usa o cache
-      
-      try {
-          const snapshot = await db.collection("RecompensasConfig").get();
-          const configs = [];
-          snapshot.forEach(doc => {
-              // 🚨 CORREÇÃO DE ESTRUTURA: Adicionamos mapeamento de campos
-              // O código espera: id, limite, tipo, valor, titulo
-              const data = doc.data();
-              configs.push({ 
-                  id: doc.id,
-                  limite: data.meta || data.limite, // Usa 'meta' ou 'limite'
-                  tipo: data.tipo,
-                  valor: data.valor || data.titulo, // Usa 'valor' ou 'titulo'
-                  titulo: data.titulo || data.valor,
-                  ...data // Mantém todos os outros campos (percent, ativo, etc.)
-              });
-          });
-          // Ordena pelo campo 'limite' (pedidos) e salva no cache
-          configuracoesRecompensa = configs.sort((a, b) => (a.limite || 0) - (b.limite || 0));
-          
-          if(configuracoesRecompensa.length === 0) {
-              console.warn("Firestore: Coleção RecompensasConfig vazia. Recompensas desativadas.");
-          }
-          
-          return configuracoesRecompensa;
-          
-      } catch (e) {
-          console.error("Erro ao carregar configurações de recompensas do Firestore:", e);
-          return [];
-      }
-  }
-
-
-  /* =========================================================
-    ✨ v3.5.0: Validação de cupons (Lê o cupom personalizado do Firestore)
-    =========================================================
-  */
-  const _cupomCache = { /* key -> { ate: ms, res: {...} } */ };
-  function _cacheKey(codigo, subtotal){
-    const faixa = Math.floor((subtotal || 0) / 5);
-    return `${(codigo||"").toUpperCase()}::${faixa}`;
-  }
-
-  async function validarCupomFirestore(codigo, subtotal) {
-    if (!isFirebaseInitialized) return { valido:false, discount:0, freeShipping:false, label:"", mensagem:"Erro de conexão. Tente recarregar." };
-    
-    const code = (codigo || "").toUpperCase();
-    const invalido = { valido:false, discount:0, freeShipping:false, label:"", mensagem:"" };
-    if (!code) return invalido;
-    const userId = currentUser?.uid;
-    
-    // Carrega as configurações (garante que temos as metas para checar o cupom)
-    const RECOMPENSAS_DATA = await carregarConfiguracoesDeRecompensas();
-
-    const key = _cacheKey(code, subtotal);
-    const now = Date.now();
-    const hit = _cupomCache[key];
-    if (hit && hit.ate > now) return hit.res;
-    
-    // Tenta primeiro em 'Cupons' (gerais)
-    let data = null;
-    let isPersonalizado = false;
-
-    try {
-      const snapGeral = await db.collection("Cupons").doc(code).get();
-      if (snapGeral.exists) {
-        data = snapGeral.data();
-      } else {
-          // Checa se o cupom é um dos códigos de recompensa configurados
-          const recompensaEncontrada = RECOMPENSAS_DATA.find(r => r.valor === code && r.tipo === 'cupom');
-          
-          if (userId && recompensaEncontrada) {
-              // Tenta em 'CuponsUsuarios' (personalizados)
-              const snapPessoal = await db.collection("CuponsUsuarios").doc(userId).get();
-              const pessoalData = snapPessoal.data();
-              
-              if (snapPessoal.exists && pessoalData?.cupom === code && !pessoalData?.usado) {
-                  data = {
-                    tipo: pessoalData.tipo, 
-                    valor: pessoalData.valor, // O valor é o R$ 10 OFF (ou 15, etc.)
-                    ativo: true, 
-                    expiraEm: pessoalData.expiraEm 
-                  };
-                  isPersonalizado = true;
-              } else if (snapPessoal.exists && pessoalData?.usado) {
-                  return { ...invalido, mensagem: "Este cupom já foi utilizado." };
-              } else {
-                  // Cupom pessoal não encontrado/liberado
-                  return { ...invalido, mensagem: "Cupom inválido ou não liberado." };
-              }
-          } else {
-              // Não achou em Cupons nem é um cupom personalizado configurado
-              const res = { ...invalido, mensagem: "Cupom inválido." };
-              _cupomCache[key] = { ate: now + 30000, res }; // 30s de cache
-              return res;
-          }
-      }
-      
-      // Validação do Cupom (Geral ou Pessoal)
-      if (!data.ativo) {
-        const res = { ...invalido, mensagem: "Este cupom não está mais ativo." };
-        _cupomCache[key] = { ate: now + 30000, res };
-        return res;
-      }
-
-      if (data.expiraEm) {
-        let expiraDate = null;
-        if (typeof data.expiraEm?.toDate === "function") expiraDate = data.expiraEm.toDate();
-        else if (typeof data.expiraEm === "string") expiraDate = new Date(data.expiraEm);
-        if (expiraDate && expiraDate < new Date()) {
-          const res = { ...invalido, mensagem: "Este cupom expirou." };
-          _cupomCache[key] = { ate: now + 30000, res };
-          return res;
-        }
-      }
-      // Cálculo
-      let discount = 0;
-      let freeShipping = false;
-      let label = "";
-
-      if (data.tipo === "percent") {
-        discount = Math.max(0, subtotal * (Number(data.percent || data.valor) / 100)); // Usa 'percent' ou 'valor'
-        label = `${Number(data.percent || data.valor)}% OFF`;
-      } else if (data.tipo === "value") {
-        const val = Math.max(0, Number(data.valor) || 0);
-        discount = Math.min(subtotal, val);
-        label = `R$ ${val.toFixed(2).replace(".", ",")} OFF`;
-      } else if (data.tipo === "frete") {
-        freeShipping = true;
-        label = "Frete Grátis";
-      } else {
-        const res = { ...invalido, mensagem: "Tipo de cupom desconhecido." };
-        _cupomCache[key] = { ate: now + 30000, res };
-        return res;
-      }
-
-      const res = { 
-          valido:true, 
-          discount, 
-          freeShipping, 
-          label, 
-          mensagem:"Cupom aplicado com sucesso!",
-          isPersonalizado: isPersonalizado // Novo campo para rastreio
-      };
-      _cupomCache[key] = { ate: now + 30000, res };
-      return res;
-
-    } catch (err) {
-      console.error("Erro ao validar cupom no Firestore:", err);
-      return { ...invalido, mensagem: "Erro ao processar o cupom." };
-    }
-  }
-
-  /* =========================================================
+/* =========================================================
     ✨ v3.7.1: FUNÇÃO 'calcTotals' (USANDO DFL_Frete.getFrete())
     =========================================================
   */
@@ -928,7 +717,6 @@ document.addEventListener("DOMContentLoaded", () => {
       
       return; 
     }
-
     // 1. CALCULA TOTAIS (AGORA É ASYNC)
     const { subtotal, delivery, discount, total, cupomInfo } = await calcTotals();
 
@@ -947,6 +735,7 @@ document.addEventListener("DOMContentLoaded", () => {
          }
       }
     }
+
     // 3. ATUALIZA LINHA DE DESCONTO (UI ESTÁTICA)
     if (couponDiscountRow && cartDiscount) {
       if (discount > 0 || cupomInfo.label) {
@@ -973,7 +762,6 @@ document.addEventListener("DOMContentLoaded", () => {
     if(totalDisplay) totalDisplay.textContent = money(total);
     
     LOG.info(`Subtotal: ${money(subtotal)}, Frete: ${money(delivery)}, Desconto: ${money(discount)}, Total: ${money(total)}`);
-
     // 5. BIND EVENTOS (mantido do antigo enhanceMiniCartUI)
     const addressInput = document.getElementById("address-input");
     if(addressInput) {
@@ -1157,6 +945,338 @@ window.DFL_Frete = (function() {
             LOG.warn(`Cálculo REAL FALHOU: ${termoLimpo}`);
         }
     }
+      // Cálculo
+      let discount = 0;
+      let freeShipping = false;
+      let label = "";
+
+      if (data.tipo === "percent") {
+        discount = Math.max(0, subtotal * (Number(data.percent || data.valor) / 100)); // Usa 'percent' ou 'valor'
+        label = `${Number(data.percent || data.valor)}% OFF`;
+      } else if (data.tipo === "value") {
+        const val = Math.max(0, Number(data.valor) || 0);
+        discount = Math.min(subtotal, val);
+        label = `R$ ${val.toFixed(2).replace(".", ",")} OFF`;
+      } else if (data.tipo === "frete") {
+        freeShipping = true;
+        label = "Frete Grátis";
+      } else {
+        const res = { ...invalido, mensagem: "Tipo de cupom desconhecido." };
+        _cupomCache[key] = { ate: now + 30000, res };
+        return res;
+      }
+
+      const res = { 
+          valido:true, 
+          discount, 
+          freeShipping, 
+          label, 
+          mensagem:"Cupom aplicado com sucesso!",
+          isPersonalizado: isPersonalizado // Novo campo para rastreio
+      };
+      _cupomCache[key] = { ate: now + 30000, res };
+      return res;
+
+    } catch (err) {
+      console.error("Erro ao validar cupom no Firestore:", err);
+      return { ...invalido, mensagem: "Erro ao processar o cupom." };
+    }
+  }
+
+  /* =========================================================
+    ✨ v3.7.1: FUNÇÃO 'calcTotals' (USANDO DFL_Frete.getFrete())
+    =========================================================
+  */
+  async function calcTotals() {
+    const subtotal = getCartSubtotal();
+    
+    // 1. Cupom e Desconto
+    const d = await validarCupomFirestore(couponApplied, subtotal); 
+    
+    // 2. Entrega (Valor obtido do módulo DFL_Frete)
+    let delivery = window.DFL_Frete?.getFreteValor() || 0.00; // Obtém o frete calculado por bairro/CEP
+
+    // 3. Aplica o frete grátis do cupom, se houver
+    if (d.freeShipping) {
+      delivery = 0.00;
+    }
+    
+    const total = Math.max(0, subtotal + delivery - d.discount);
+    
+    return {
+      subtotal,
+      delivery,
+      discount: d.discount,
+      discountLabel: d.label,
+      total,
+      cupomInfo: d // Passa a info completa (valido, mensagem, isPersonalizado)
+    };
+  }
+
+  /* =========================================================
+    ✨ v3.7.1: FUNÇÃO GLOBAL DE ATUALIZAÇÃO DE TOTAIS (Hook)
+    =========================================================
+    Substitui a antiga enhanceMiniCartUI.
+  */
+  window.updateCartTotals = async function() {
+    if (!el.miniFoot) return;
+    
+    LOG.info("Recalculando totais do carrinho (DFL v3.7.1)...");
+    
+    // Pega os elementos do cupom que JÁ EXISTEM no HTML
+    const couponMsg = document.getElementById("coupon-message");
+    const couponDiscountRow = document.getElementById("coupon-discount-row");
+    const cartDiscount = document.getElementById("cart-discount");
+    
+    // Elementos do Frete no HTML (já existem)
+    const subtotalDisplay = document.getElementById("subtotal-display");
+    const totalDisplay = document.getElementById("total-display");
+    const freteDisplayLine = document.getElementById("frete-display-line");
+    const freteValorDisplay = document.getElementById("frete-valor-display");
+
+    if (cart.length === 0) {
+      // Zera o frete e esconde a linha se o carrinho estiver vazio
+      window.DFL_Frete.resetFrete();
+      if(subtotalDisplay) subtotalDisplay.textContent = money(0);
+      if(totalDisplay) totalDisplay.textContent = money(0);
+      if(freteDisplayLine) freteDisplayLine.style.display = "none";
+      
+      // Limpeza de UI de cupom
+      if (couponMsg) couponMsg.innerHTML = "";
+      if (couponDiscountRow) couponDiscountRow.style.display = "none";
+      
+      return; 
+    }
+    // 1. CALCULA TOTAIS (AGORA É ASYNC)
+    const { subtotal, delivery, discount, total, cupomInfo } = await calcTotals();
+
+    // 2. ATUALIZA MENSAGEM DO CUPOM (UI ESTÁTICA)
+    if (couponMsg) {
+      couponMsg.textContent = cupomInfo.mensagem;
+      couponMsg.className = `coupon-message ${cupomInfo.valido ? 'success' : 'error'}`;
+      
+      // Se o cupom era inválido, mas não estava vazio, limpa ele
+      if (!cupomInfo.valido && couponApplied) {
+         couponApplied = "";
+         localStorage.removeItem("dflCoupon");
+         const couponInput = document.getElementById("coupon-input");
+         if (couponInput && document.activeElement !== couponInput) {
+           couponInput.value = "";
+         }
+      }
+    }
+
+    // 3. ATUALIZA LINHA DE DESCONTO (UI ESTÁTICA)
+    if (couponDiscountRow && cartDiscount) {
+      if (discount > 0 || cupomInfo.label) {
+        cartDiscount.textContent = `- ${money(discount)} ${couponApplied ? `(${couponApplied})` : ""}`;
+        couponDiscountRow.style.display = "flex";
+      } else {
+        couponDiscountRow.style.display = "none";
+      }
+    }
+    
+    // 4. ATUALIZA DISPLAY DE TOTAIS E FRETE (DFL v3.7.1)
+    if(subtotalDisplay) subtotalDisplay.textContent = money(subtotal);
+    
+    // Linha do frete (Mostra/Esconde e atualiza valor)
+    if (freteDisplayLine && freteValorDisplay) {
+        if (delivery > 0) {
+            freteValorDisplay.textContent = money(delivery);
+            freteDisplayLine.style.display = "flex";
+        } else {
+            freteDisplayLine.style.display = "none";
+        }
+    }
+
+    if(totalDisplay) totalDisplay.textContent = money(total);
+    
+    LOG.info(`Subtotal: ${money(subtotal)}, Frete: ${money(delivery)}, Desconto: ${money(discount)}, Total: ${money(total)}`);
+
+    // 5. BIND EVENTOS (mantido do antigo enhanceMiniCartUI)
+    const addressInput = document.getElementById("address-input");
+    if(addressInput) {
+        addressInput.value = addressValue;
+        addressInput.addEventListener("input", (e) => {
+          addressValue = (e.target.value || "").trim();
+          localStorage.setItem("dflAddress", addressValue);
+        });
+    }
+
+    document.getElementById("finish-order")?.addEventListener("click", fecharPedido);
+    document.getElementById("clear-cart")?.addEventListener("click", () => {
+      if (confirm("Limpar todo o carrinho?")) {
+        cart = [];
+        couponApplied = ""; 
+        localStorage.removeItem("dflCoupon");
+        const couponInput = document.getElementById("coupon-input");
+        if(couponInput) couponInput.value = "";
+        
+        renderMiniCart();
+        popupAdd("Carrinho limpo!");
+      }
+    });
+  }
+/* =========================================================
+    DFL v3.8.5: MÓDULO DE CÁLCULO DE FRETE REAL (Ações 1, 2)
+    Reescrito para usar frete_zonas e ViaCEP
+========================================================= */
+window.DFL_Frete = (function() {
+    const TAG = '[DFL/FRETE]';
+    let freteDestino = ""; 
+    let freteValor = 0.00; 
+    let freteZona = null;
+    
+    const config = {
+        freightEnabled: window.DFL_FLAGS.freightEnabled,
+        // DFL v3.8.0: Coleção Firestore para consulta REAL (Ação 1)
+        fretesCollection: 'frete_zonas' 
+    };
+
+    /** DFL v3.8.5: CORRIGIDO! Consulta a API ViaCEP (Ação 2) - Retorna o nome do bairro. */
+    async function fetchBairroFromCEP(cep) {
+        const cepLimpo = cep.replace(/\D/g, '');
+        if (cepLimpo.length !== 8) return null;
+        
+        try {
+            LOG.info(`Consultando ViaCEP para CEP: ${cepLimpo}`);
+            // NOTA: O index.html precisa ter connect-src https://viacep.com.br
+            const response = await fetch(`https://viacep.com.br/ws/${cepLimpo}/json/`);
+            const data = await response.json();
+            
+            if (data.erro) {
+                LOG.warn(`ViaCEP: CEP ${cepLimpo} não encontrado.`);
+                return null;
+            }
+            // Retorna o bairro (sanitizado e capitalizado)
+            return (data.bairro || '').trim();
+        } catch (error) {
+            LOG.error("Erro ao consultar ViaCEP:", error);
+            return null;
+        }
+    }
+
+
+    /** DFL v3.8.5: Consulta a coleção fretes_zonas (Ação 1). */
+    async function lookupFreight(bairro) {
+        if (!window.db) {
+            LOG.error("Firestore (window.db) não está disponível.");
+            return { valor: -1, zona: null };
+        }
+        
+        // 1. Capitaliza o bairro para a consulta
+        const bairroParaBusca = bairro.trim().toLowerCase();
+        
+        try {
+            // Busca todas as zonas (a consulta array-contains precisa ler o documento)
+            const querySnapshot = await db.collection(config.fretesCollection).get();
+
+            let docEncontrado = null;
+            
+            querySnapshot.forEach(doc => {
+                const data = doc.data();
+                // DFL v3.8.5: Garantindo que 'nome' seja lower case para comparação correta
+                const bairrosNaZona = Array.isArray(data.bairros) ? data.bairros.map(b => b.toLowerCase()) : [];
+
+                if (bairrosNaZona.some(b => b === bairroParaBusca)) {
+                    // Se o bairro for encontrado e a zona estiver ativa, usa.
+                    if (data.ativo !== false) { 
+                        docEncontrado = data;
+                    }
+                }
+            });
+
+            if (docEncontrado) {
+                const valor = parseFloat(docEncontrado.valor) || 0.00;
+                const zona = docEncontrado.nome;
+                
+                LOG.info(`Bairro '${bairro}' encontrado na Zona: ${zona} | Valor: ${money(valor)}`);
+                return { valor, zona };
+            }
+            
+            LOG.warn(`Bairro '${bairro}' não encontrado em nenhuma zona de frete ativa.`);
+            return { valor: -1, zona: null };
+            
+        } catch (error) {
+            LOG.error("Erro ao consultar fretes_zonas no Firestore:", error);
+            return { valor: -1, zona: null };
+        }
+    }
+    /** DFL v3.8.0: Função principal disparada pelo botão - Substitui a simulação. */
+    async function initCalculate(termoBusca) {
+        const msgDisplay = document.getElementById('frete-status-msg');
+        const termoLimpo = termoBusca.trim();
+        
+        msgDisplay.style.display = 'none';
+        
+        if (!termoLimpo) {
+            msgDisplay.textContent = "Digite o CEP ou Bairro para calcular.";
+            msgDisplay.style.color = '#dc3545';
+            msgDisplay.style.display = 'block';
+            resetFrete();
+            return;
+        }
+        
+        let bairroDeConsulta = termoLimpo;
+        let isCEP = false;
+
+        // Limpa o frete atual enquanto espera
+        freteValor = 0.00;
+        freteDestino = termoLimpo;
+        freteZona = null;
+        window.updateCartTotals();
+
+        // 2. Modo CEP (Opcional)
+        if (termoLimpo.length === 8 && /^\d+$/.test(termoLimpo)) {
+            isCEP = true;
+            msgDisplay.textContent = 'Buscando bairro via CEP...';
+            msgDisplay.style.color = '#ffb300';
+            msgDisplay.style.display = 'block';
+
+            const bairroViaCEP = await fetchBairroFromCEP(termoLimpo);
+            
+            if (bairroViaCEP) {
+                bairroDeConsulta = bairroViaCEP;
+            } else {
+                msgDisplay.textContent = `CEP não encontrado ou inválido. Tente digitar o Bairro.`;
+                msgDisplay.style.color = '#dc3545';
+                msgDisplay.style.display = 'block';
+                return;
+            }
+        }
+        
+        // 1. Consulta REAL no Firestore
+        const resultado = await lookupFreight(bairroDeConsulta);
+        
+        if (resultado.valor >= 0) {
+            freteValor = Number(resultado.valor.toFixed(2));
+            freteDestino = isCEP ? termoLimpo : bairroDeConsulta; // Mantém o CEP como destino se foi a entrada
+            freteZona = resultado.zona;
+            
+            window.updateCartTotals(); // Recalcula totais
+            
+            const destinoDisplay = isCEP ? `CEP ${termoLimpo} (${bairroDeConsulta})` : bairroDeConsulta;
+
+            msgDisplay.textContent = `Frete para ${destinoDisplay}: ${money(freteValor)}.`;
+            msgDisplay.style.color = '#28a745'; 
+            msgDisplay.style.display = 'block';
+            LOG.info(`Cálculo REAL SUCESSO: ${freteDestino} | Zona: ${freteZona} -> ${money(freteValor)}`); 
+
+        } else {
+            // Falha na consulta (Bairro não encontrado)
+            freteValor = 0.00;
+            freteDestino = termoLimpo;
+            freteZona = null;
+            window.updateCartTotals();
+            
+            msgDisplay.textContent = `Bairro não encontrado. Verifique o nome ou tente o CEP novamente.`;
+            msgDisplay.style.color = '#dc3545';
+            msgDisplay.style.display = 'block';
+            LOG.warn(`Cálculo REAL FALHOU: ${termoLimpo}`);
+        }
+    }
+
+
     /** Inicializa o módulo, adicionando listeners. */
     function init() {
         LOG.info(`Módulo DFL v3.8.5 (REAL) inicializado. Status: ${config.freightEnabled ? 'Ativo' : 'Inócuo'}.`);
@@ -1191,7 +1311,6 @@ window.DFL_Frete = (function() {
             config.freightEnabled = false;
         }
     }
-
     /** Retorna o valor do frete atual. */
     function getFreteValor() {
         return config.freightEnabled ? freteValor : 0.00;
@@ -1276,12 +1395,6 @@ window.DFL_Frete = (function() {
     showPromoModal(newId);
   });
 
-  el.promoNavNext?.addEventListener("click", () => {
-    let newId = currentPromoId + 1;
-    if (newId > 9) newId = 1; // Loop para o início
-    showPromoModal(newId);
-  });
-  
   // 4. Fechar o modal
   el.promoClose?.addEventListener("click", () => Overlays.closeAll());
 
@@ -1294,8 +1407,12 @@ window.DFL_Frete = (function() {
     if (!el.slides) return;
     el.slides.scrollLeft += Math.min(el.slides.clientWidth * 0.9, 320);
   });
-
-
+  el.promoNavNext?.addEventListener("click", () => {
+    let newId = currentPromoId + 1;
+    if (newId > 9) newId = 1; // Loop para o início
+    showPromoModal(newId);
+  });
+  
   /* ------------------ ⏰ Status + Timer (MANTIDO) ------------------ */
   const atualizarStatus = safe(() => {
     const agora = new Date();
@@ -1344,6 +1461,7 @@ window.DFL_Frete = (function() {
   });
   atualizarStatus();
   setInterval(atualizarStatus, 60000);
+
   // 🚨 CORREÇÃO 2: Reativação do Timer de Promoção
   const atualizarTimer = safe(() => {
     const agora = new Date();
@@ -1361,7 +1479,6 @@ window.DFL_Frete = (function() {
   });
   atualizarTimer();
   setInterval(atualizarTimer, 1000);
-
   /* =========================================================
     ✨ v3.8.0: FUNÇÃO 'FECHAR PEDIDO' (Registro de Histórico)
     =========================================================
@@ -1571,150 +1688,6 @@ window.DFL_Frete = (function() {
       alert(`Ocorreu um erro ao finalizar seu pedido. Por favor, tente novamente. Detalhe: ${err.message}`);
     }
   }
-  // Chama o renderMiniCart uma vez no início para carregar o rodapé
-  // caso haja itens no localStorage (MANTIDO)
-  renderMiniCart();
-  
-/* ------------------ 📦 MEUS PEDIDOS PREMIUM (MANTIDO) ------------------ */
-
-  // 1. Lógica de abrir/fechar o novo painel
-  el.pedidosBtn?.addEventListener("click", () => {
-    if (!currentUser) {
-      alert("Faça login para ver seus pedidos.");
-      Overlays.open(el.loginModal); 
-      return;
-    }
-    inicializarFirebase(); // Garante o Firebase se for o primeiro acesso
-    Overlays.open(el.pedidosPanel);
-    carregarPedidos(currentUser.uid); 
-    // DFL v3.8.0: Chama a função para carregar o histórico de entregas da SUBCOLEÇÃO (Ação 4)
-    carregarHistoricoEntregas(currentUser.uid);
-  });
-
-  el.pedidosFecharBtn?.addEventListener("click", () => Overlays.closeAll());
-
-  // 2. Lógica de carregar pedidos (MANTIDO)
-  async function carregarPedidos(userId) {
-    if (!el.pedidosLista) return;
-    el.pedidosLista.innerHTML = `<p class="empty-orders">Carregando pedidos...</p>`;
-
-    try {
-      const q = db.collection("Pedidos").where("userId", "==", userId).orderBy("data", "desc").limit(10); // Limita para melhor performance
-      const snapshot = await q.get();
-
-      if (snapshot.empty) {
-        el.pedidosLista.innerHTML = `<p class="empty-orders">Nenhum pedido encontrado 😢</p>`;
-        return;
-      }
-
-      const pedidos = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-      exibirPedidos(pedidos);
-
-    } catch (err) {
-      console.error("Erro ao carregar pedidos: ", err);
-      el.pedidosLista.innerHTML = `<p class="empty-orders" style="color:red;">Erro ao buscar seus pedidos.</p>`;
-    }
-  }
-
-  // 3. Lógica de exibir os pedidos no painel (MANTIDO)
-  function exibirPedidos(pedidos) {
-    if (!el.pedidosLista) return;
-    
-    el.pedidosLista.innerHTML = pedidos.map(p => {
-      const thumbUrl = p.thumb || 'imagens/padrao.jpg';
-      const dataFormatada = p.data
-          ? new Date(p.data?.seconds * 1000 || p.data).toLocaleString("pt-BR", {
-              day: "2-digit", month: "2-digit", year: "numeric",
-              hour: "2-digit", minute: "2-digit",
-            })
-          : "—";
-
-      // Verifica se o pedido tem 'itensObj' para habilitar o botão
-      const podeRepetir = Array.isArray(p.itensObj) && p.itensObj.length > 0;
-      
-      return `
-        <div class="pedido-card">
-          <div class="pedido-thumb" style="background-image:url('${thumbUrl}');"></div>
-          <h4>📅 ${dataFormatada}</h4>
-          <p class="pedido-info">Total: ${money(p.total)}</p>
-          <div class="pedido-itens">
-            ${(p.itens || []).map(i => `• ${i}`).join('<br>')}
-          </div>
-          <button 
-            class="repetir-btn" 
-            data-id="${p.id}" 
-            ${podeRepetir ? '' : 'disabled style="background:grey;cursor:not-allowed;"'}
-          >
-            🔁 Repetir Pedido
-          </button>
-        </div>`;
-    }).join('');
-  }
-  // 4. Lógica de "Repetir Pedido" (MANTIDO)
-  el.pedidosLista?.addEventListener('click', async (e) => {
-    if (e.target.classList.contains('repetir-btn') && !e.target.disabled) {
-      const idPedido = e.target.dataset.id;
-      
-      // Desativa o botão para evitar clique duplo
-      e.target.disabled = true;
-      e.target.textContent = "Carregando...";
-      
-      await repetirPedido(idPedido);
-      
-      // O botão será reativado da próxima vez que o painel for aberto
-      // (a menos que prefira reativá-lo manualmente aqui)
-    }
-  });
-
-  async function repetirPedido(idPedido) {
-    try {
-      const docRef = db.collection("Pedidos").doc(idPedido);
-      const doc = await docRef.get();
-
-      if (!doc.exists) {
-        return alert("Erro: Pedido antigo não encontrado.");
-      }
-
-      const pedido = doc.data();
-      const itensParaRepetir = pedido.itensObj; // Lê o novo array de objetos
-
-      if (!Array.isArray(itensParaRepetir) || itensParaRepetir.length === 0) {
-        return alert("Não é possível repetir este pedido (formato antigo). Faça um novo pedido para poder repeti-lo no futuro.");
-      }
-
-      // Limpa o carrinho atual antes de adicionar os itens antigos
-      cart = [];
-      
-      // Adiciona os itens ao carrinho
-      itensParaRepetir.forEach(item => {
-        // Validação simples (garante que temos o mínimo)
-        if (item.nome && item.preco > 0 && item.qtd > 0) {
-          cart.push({
-            nome: item.nome,
-            preco: item.preco,
-            qtd: item.qtd
-          });
-        }
-      });
-      
-      // v3.0: Limpa o cupom ao repetir um pedido
-      couponApplied = "";
-      localStorage.removeItem("dflCoupon");
-      const couponInput = document.getElementById("coupon-input");
-      if(couponInput) couponInput.value = "";
-
-      // Feedback ao usuário
-      popupAdd("Pedido anterior adicionado ao carrinho!");
-      renderMiniCart(); // Atualiza o carrinho (backend)
-      Overlays.closeAll(); // Fecha o painel de pedidos
-      Overlays.open(el.miniCart); // Abre o mini-carrinho
-
-    } catch (err) {
-      console.error("Erro ao repetir pedido: ", err);
-      alert("Erro ao processar seu pedido. Tente novamente.");
-    }
-  }
-
 /* =========================================================
     DFL v3.8.0: FUNÇÃO DE CARREGAMENTO DO HISTÓRICO DE ENTREGAS (Ação 4)
 ========================================================= */
@@ -1751,6 +1724,7 @@ async function carregarHistoricoEntregas(userId) {
         el.historicoEntregas.innerHTML = `<p class="empty-history" style="text-align:center;color:red;">Erro ao buscar histórico de entregas.</p>`;
     }
 }
+
 /**
  * DFL v3.8.0: Desenha o histórico de entregas.
  */
@@ -1789,8 +1763,6 @@ function exibirHistoricoEntregas(entregas) {
 
 
 /* ------------------ FIM DO BLOCO V2.10 ------------------ */
-
-
 /* =========================================================
    🎁 V3.5.3: FUNÇÃO DE CARREGAMENTO DO PAINEL DE RECOMPENSAS (CORREÇÃO UI)
 ========================================================= */
@@ -1845,6 +1817,7 @@ async function carregarRecompensas(userId) {
             // 🚨 CORREÇÃO CRÍTICA V3.6.2: Corrigindo o erro de digitação 'cupumSnap' para 'cupomSnap'
             cupomStatus = cupumSnap.exists ? cupumSnap.data() : null;
         }
+
         // Encontra a próxima meta que o cliente AINDA NÃO ATINGIU
         const proximaRecompensa = RECOMPENSAS_DATA.find(r => r.limite > feitos);
         
@@ -1986,8 +1959,6 @@ function exibirRecompensas(pedidosFeitos, recompensasDisponiveis, cupomStatus, R
         });
     });
 }
-
-
 /**
  * NOVO na V3.4: Carrega e exibe o histórico de recompensas recebidas.
  */
@@ -2043,6 +2014,8 @@ async function carregarHistoricoRecompensas(userId) {
         el.historicoLista.innerHTML = `<p style="text-align:center;color:red;">Erro ao buscar histórico.</p>`;
     }
 }
+
+
 /* ------------------ 🎁 MINHAS RECOMPENSAS (V3.5.3) ------------------ */
 
   // 1. Lógica de abrir/fechar o novo painel
@@ -2399,3 +2372,304 @@ async function carregarRecompensas(userId) {
         progressoMsg.textContent = 'Erro ao ler seu progresso. Tente recarregar a página.';
     });
 }
+/**
+ * Desenha as recompensas atuais disponíveis.
+ */
+function exibirRecompensas(pedidosFeitos, recompensasDisponiveis, cupomStatus, RECOMPENSAS_DATA) {
+    if (!el.recompensasLista) return;
+    
+    // Filtra apenas as recompensas que o usuário atingiu (ou seja, todas as do array)
+    const recompensasHtml = recompensasDisponiveis.map(r => {
+        const liberada = pedidosFeitos >= r.limite;
+        const cupomJaUsado = cupomStatus?.usado === true && cupomStatus?.cupom === r.valor;
+        
+        // Define o título de forma mais descritiva
+        const titulo = r.titulo || `Recompensa: ${r.valor} (${r.limite} Pedidos)`;
+        
+        let acaoBtn = '';
+        let statusTag = '';
+        let cardStyle = '';
+        let codigoCupom = r.tipo === 'cupom' ? r.valor : 'BRINDE';
+        
+        if (cupomJaUsado) {
+             statusTag = '<span style="color:#d32f2f;font-weight:bold;">(JÁ UTILIZADO)</span>';
+             acaoBtn = `<button disabled style="background:#ccc;color:#666;border:none;border-radius:6px;padding:8px 12px;cursor:not-allowed;margin-top:10px;">Cupom Usado</button>`;
+             cardStyle = 'opacity: 0.7;';
+        }
+        else if (liberada && r.tipo === 'cupom') {
+            statusTag = '<span style="color:#4caf50;font-weight:bold;">(DISPONÍVEL)</span>';
+            acaoBtn = `
+                <button 
+                    class="recompensa-aplicar-btn" 
+                    data-cupom="${codigoCupom}"
+                    style="background:#4caf50;color:#fff;border:none;border-radius:6px;padding:8px 12px;cursor:pointer;font-weight:600;margin-top:10px;"
+                >
+                    Aplicar Cupom 🏷️
+                </button>
+            `;
+        } else if (liberada && r.tipo === 'brinde') {
+             statusTag = '<span style="color:#1976D2;font-weight:bold;">(LIBERADO)</span>';
+             acaoBtn = `<button disabled style="background:#1976D2;color:#fff;border:none;border-radius:6px;padding:8px 12px;cursor:default;margin-top:10px;">Brinde na Próxima Compra</button>`;
+        }
+        
+        // Se ainda não liberada, o filtro já removeu. Aqui só temos as liberadas.
+
+        return `
+            <div class="recompensa-card" style="display:flex;align-items:center;padding:15px;border-radius:10px;margin-bottom:15px;background:#f9f9f9;box-shadow:0 2px 5px rgba(0,0,0,0.1);${cardStyle}">
+                <img src="imagens/recompensa-${r.tipo}.png" alt="Ícone de Recompensa" style="width:50px;height:50px;object-fit:cover;border-radius:50%;margin-right:15px;">
+                <div style="flex:1;">
+                    <h4 style="margin:0 0 5px 0;color:#333;">${titulo} ${statusTag}</h4>
+                    <p style="margin:0;font-size:0.9rem;color:#666;">Ganho por ${r.limite} pedidos.</p>
+                    ${r.tipo === 'cupom' ? `<p style="margin:5px 0 0 0;font-size:1.1rem;font-weight:bold;color:#ff7043;">CÓDIGO: ${codigoCupom}</p>` : ''}
+                </div>
+                <div>
+                    ${acaoBtn}
+                </div>
+            </div>
+        `;
+    }).join('');
+    
+    el.recompensasLista.innerHTML = recompensasHtml;
+    
+    // BIND o evento de aplicar cupom (após o desenho)
+    el.recompensasLista.querySelectorAll('.recompensa-aplicar-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            const codigo = e.currentTarget.dataset.cupom;
+            if (codigo) {
+                // Aplica a lógica do cupom (similar ao formulário)
+                couponApplied = codigo;
+                localStorage.setItem("dflCoupon", couponApplied);
+                
+                // Atualiza o input de cupom (se estiver visível)
+                const couponInput = document.getElementById("coupon-input");
+                if(couponInput) couponInput.value = codigo;
+
+                renderMiniCart(); // Recalcula e mostra a mensagem
+                Overlays.closeAll();
+                popupAdd(`Cupom ${codigo} aplicado! ✅`);
+                Overlays.open(el.miniCart); // Abre o mini-carrinho para ver o desconto
+            }
+        });
+    });
+}
+/**
+ * NOVO na V3.4: Carrega e exibe o histórico de recompensas recebidas.
+ */
+async function carregarHistoricoRecompensas(userId) {
+    if (!el.historicoLista) return;
+
+    el.historicoLista.innerHTML = `<p style="text-align:center;color:#999;">Carregando histórico...</p>`;
+    
+    try {
+        const q = db.collection("Usuarios").doc(userId)
+                    .collection("RecompensasRecebidas")
+                    .orderBy("liberadoEm", "desc"); // Corrigido para usar liberadoEm
+        
+        const snapshot = await q.get();
+
+        if (snapshot.empty) {
+            el.historicoLista.innerHTML = `<p class="empty-history" style="text-align:center;color:#999;">Você ainda não recebeu recompensas.</p>`;
+            return;
+        }
+
+        const logs = snapshot.docs.map(doc => doc.data());
+        
+        const historicoHtml = logs.map(log => {
+            const dataRecebimento = log.liberadoEm
+                ? (log.liberadoEm.toDate().toLocaleDateString('pt-BR'))
+                : "—";
+
+            let valorStr = (log.tipo === 'cupom') ? log.valor : log.valor;
+            if (log.tipo === 'value') valorStr = money(log.valor);
+
+            
+            return `
+                <div class="historico-card" style="display:flex; padding: 10px 0; border-bottom: 1px dashed #eee; align-items: center; justify-content: space-between;">
+                    <div style="flex:1;">
+                        <p style="font-weight:600; margin:0; color:#333;">
+                            🎁 ${log.titulo || log.valor}
+                        </p>
+                        <small style="color:#999;">Recebido em: ${dataRecebimento}</small>
+                    </div>
+                    <span style="font-weight:700; color:#4caf50;">
+                        + ${valorStr}
+                    </span>
+                </div>
+            `;
+        }).join('');
+        
+        // Remove a borda do último item para melhor estética
+        el.historicoLista.innerHTML = historicoHtml.replace(/border-bottom: 1px dashed #eee;<\/div>$/, 'border-bottom: none;</div>');
+
+
+    } catch (err) {
+        console.error("Erro ao carregar histórico de recompensas: ", err);
+        el.historicoLista.innerHTML = `<p style="text-align:center;color:red;">Erro ao buscar histórico.</p>`;
+    }
+}
+
+
+/* ------------------ 🎁 MINHAS RECOMPENSAS (V3.5.3) ------------------ */
+
+  // 1. Lógica de abrir/fechar o novo painel
+  el.recompensasBtn?.addEventListener("click", () => {
+    // Requer login, assim como "Meus Pedidos"
+    if (!currentUser) {
+      alert("Faça login para ver suas recompensas.");
+      Overlays.open(el.loginModal); 
+      return;
+    }
+    // 🚨 OTIMIZAÇÃO: Garante o Firebase se for o primeiro acesso
+    inicializarFirebase(); 
+    Overlays.open(el.recompensasPanel);
+    
+    // 🚨 NOVO: Chama a função para carregar e monitorar o contador
+    carregarRecompensas(currentUser.uid); 
+  });
+
+  // 2. Lógica de fechar o painel
+  el.recompensasFecharBtn?.addEventListener("click", () => Overlays.closeAll());
+
+/* ------------------ FIM DO BLOCO V3.5.3 ------------------ */
+
+
+/* ------------------ 📦 MEUS PEDIDOS PREMIUM (MANTIDO) ------------------ */
+
+  // 1. Lógica de abrir/fechar o novo painel
+  el.pedidosBtn?.addEventListener("click", () => {
+    if (!currentUser) {
+      alert("Faça login para ver seus pedidos.");
+      Overlays.open(el.loginModal); 
+      return;
+    }
+    inicializarFirebase(); // Garante o Firebase se for o primeiro acesso
+    Overlays.open(el.pedidosPanel);
+    carregarPedidos(currentUser.uid); 
+    // DFL v3.8.0: Chama a função para carregar o histórico de entregas da SUBCOLEÇÃO (Ação 4)
+    carregarHistoricoEntregas(currentUser.uid);
+  });
+
+  el.pedidosFecharBtn?.addEventListener("click", () => Overlays.closeAll());
+
+  // 2. Lógica de carregar pedidos (MANTIDO)
+  async function carregarPedidos(userId) {
+    if (!el.pedidosLista) return;
+    el.pedidosLista.innerHTML = `<p class="empty-orders">Carregando pedidos...</p>`;
+
+    try {
+      const q = db.collection("Pedidos").where("userId", "==", userId).orderBy("data", "desc").limit(10); // Limita para melhor performance
+      const snapshot = await q.get();
+
+      if (snapshot.empty) {
+        el.pedidosLista.innerHTML = `<p class="empty-orders">Nenhum pedido encontrado 😢</p>`;
+        return;
+      }
+
+      const pedidos = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      exibirPedidos(pedidos);
+
+    } catch (err) {
+      console.error("Erro ao carregar pedidos: ", err);
+      el.pedidosLista.innerHTML = `<p class="empty-orders" style="color:red;">Erro ao buscar seus pedidos.</p>`;
+    }
+  }
+
+  // 3. Lógica de exibir os pedidos no painel (MANTIDO)
+  function exibirPedidos(pedidos) {
+    if (!el.pedidosLista) return;
+    
+    el.pedidosLista.innerHTML = pedidos.map(p => {
+      const thumbUrl = p.thumb || 'imagens/padrao.jpg';
+      const dataFormatada = p.data
+          ? new Date(p.data?.seconds * 1000 || p.data).toLocaleString("pt-BR", {
+              day: "2-digit", month: "2-digit", year: "numeric",
+              hour: "2-digit", minute: "2-digit",
+            })
+          : "—";
+
+      // Verifica se o pedido tem 'itensObj' para habilitar o botão
+      const podeRepetir = Array.isArray(p.itensObj) && p.itensObj.length > 0;
+      
+      return `
+        <div class="pedido-card">
+          <div class="pedido-thumb" style="background-image:url('${thumbUrl}');"></div>
+          <h4>📅 ${dataFormatada}</h4>
+          <p class="pedido-info">Total: ${money(p.total)}</p>
+          <div class="pedido-itens">
+            ${(p.itens || []).map(i => `• ${i}`).join('<br>')}
+          </div>
+          <button 
+            class="repetir-btn" 
+            data-id="${p.id}" 
+            ${podeRepetir ? '' : 'disabled style="background:grey;cursor:not-allowed;"'}
+          >
+            🔁 Repetir Pedido
+          </button>
+        </div>`;
+    }).join('');
+  }
+  
+  // 4. Lógica de "Repetir Pedido" (MANTIDO)
+  el.pedidosLista?.addEventListener('click', async (e) => {
+    if (e.target.classList.contains('repetir-btn') && !e.target.disabled) {
+      const idPedido = e.target.dataset.id;
+      
+      // Desativa o botão para evitar clique duplo
+      e.target.disabled = true;
+      e.target.textContent = "Carregando...";
+      
+      await repetirPedido(idPedido);
+      
+      // O botão será reativado da próxima vez que o painel for aberto
+      // (a menos que prefira reativá-lo manualmente aqui)
+    }
+  });
+
+  async function repetirPedido(idPedido) {
+    try {
+      const docRef = db.collection("Pedidos").doc(idPedido);
+      const doc = await docRef.get();
+
+      if (!doc.exists) {
+        return alert("Erro: Pedido antigo não encontrado.");
+      }
+
+      const pedido = doc.data();
+      const itensParaRepetir = pedido.itensObj; // Lê o novo array de objetos
+
+      if (!Array.isArray(itensParaRepetir) || itensParaRepetir.length === 0) {
+        return alert("Não é possível repetir este pedido (formato antigo). Faça um novo pedido para poder repeti-lo no futuro.");
+      }
+
+      // Limpa o carrinho atual antes de adicionar os itens antigos
+      cart = [];
+      
+      // Adiciona os itens ao carrinho
+      itensParaRepetir.forEach(item => {
+        // Validação simples (garante que temos o mínimo)
+        if (item.nome && item.preco > 0 && item.qtd > 0) {
+          cart.push({
+            nome: item.nome,
+            preco: item.preco,
+            qtd: item.qtd
+          });
+        }
+      });
+      
+      // v3.0: Limpa o cupom ao repetir um pedido
+      couponApplied = "";
+      localStorage.removeItem("dflCoupon");
+      const couponInput = document.getElementById("coupon-input");
+      if(couponInput) couponInput.value = "";
+
+      // Feedback ao usuário
+      popupAdd("Pedido anterior adicionado ao carrinho!");
+      renderMiniCart(); // Atualiza o carrinho (backend)
+      Overlays.closeAll(); // Fecha o painel de pedidos
+      Overlays.open(el.miniCart); // Abre o mini-carrinho
+
+    } catch (err) {
+      console.error("Erro ao repetir pedido: ", err);
+      alert("Erro ao processar seu pedido. Tente novamente.");
+    }
+  }
