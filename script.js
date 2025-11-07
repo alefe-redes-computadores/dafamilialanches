@@ -249,7 +249,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if (el.cartCount) el.cartCount.textContent = totalItens;
 
     if (!cart.length) {
-      el.miniList.innerHTML = '<p style="text-align:center;color:#999;padding:20px;">🍔 Nosso programador-chapeiro foi dar um trato no grill e já volta 😅<br>Enquanto isso, dá um rolê no cardápio e escolhe um trem bão!</p>';
+      el.miniList.innerHTML = '<p style="text-align:center;color:#999;padding:20px;">🧠 Nosso sistema tá fritando umas ideias novas, segura aí que já sai do forno 🤓</p>';
       
       // v3.0: Limpa também o rodapé dinâmico e estático
       if(el.miniFoot) el.miniFoot.querySelectorAll(".cart-summary-generated").forEach(e => e.remove());
