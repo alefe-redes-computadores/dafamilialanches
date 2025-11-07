@@ -1,3 +1,9 @@
+/* =======================================================
+   🍔 DFL v3.7.1-U — Hot Dogs Clean Edition
+   Estrutura: Base + Layout + Header + Promoções + Carrossel
+   ======================================================= */
+
+/* 🎨 Variáveis globais */
 :root {
   --preto: #000;
   --bg1: #ffeb3b;
@@ -11,32 +17,32 @@
   --rad-sm: 8px;
   --rad: 10px;
   --rad-lg: 12px;
-  --shadow-1: 0 2px 5px rgba(0, 0, 0, 0.15);
-  --shadow-2: 0 3px 10px rgba(0, 0, 0, 0.2);
-  --shadow-3: 0 5px 15px rgba(0, 0, 0, 0.3);
-  --shadow-in: inset 0 1px 0 rgba(255, 255, 255, 0.25);
+  --shadow-1: 0 2px 5px rgba(0,0,0,0.15);
+  --shadow-2: 0 3px 10px rgba(0,0,0,0.2);
+  --shadow-3: 0 5px 15px rgba(0,0,0,0.3);
 }
 
+/* 🧱 Estrutura base */
 html, body {
   height: 100%;
 }
-
 body {
   margin: 0;
   color: var(--txt);
-  font-family: "Inter", "Poppins", system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-  background: linear-gradient(180deg, var(--bg1) 0%, var(--bg2) 100%);
+  font-family: "Inter","Poppins",system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+  background: linear-gradient(180deg,var(--bg1) 0%,var(--bg2) 100%);
   background-attachment: fixed;
-  scroll-behavior: smooth;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  scroll-behavior: smooth;
 }
 
-/* HEADER */
+/* =======================================================
+   🔝 HEADER
+   ======================================================= */
 .header {
   position: fixed;
-  inset-inline: 0;
-  top: 0;
+  top: 0; left: 0; right: 0;
   z-index: 900;
   display: flex;
   justify-content: space-between;
@@ -45,464 +51,180 @@ body {
   padding: 10px 16px;
   box-shadow: var(--shadow-1);
 }
-
 .header-content {
   display: flex;
   align-items: center;
   gap: 12px;
 }
-
 .logo {
   width: 52px;
   height: 52px;
 }
-
 .header-info h1 {
   margin: 0;
   font-size: 1.2rem;
 }
-
 .tagline {
   margin: 0;
-  font-size: 0.85rem;
+  font-size: .85rem;
   color: #d84315;
 }
-
 .header-actions {
   display: flex;
   align-items: center;
   gap: 10px;
 }
-
-.main-content-wrapper {
-  padding-top: 72px;
-}
-
 .user-button {
-  background: linear-gradient(135deg, #fff, #f7f7f7);
+  background: linear-gradient(135deg,#fff,#f7f7f7);
   border: 1px solid #ddd;
   border-radius: var(--rad);
   padding: 8px 12px;
   font-weight: 600;
   cursor: pointer;
-  transition: 0.2s;
-  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.6);
+  transition: .2s;
 }
-
-.user-button:hover {
-  background: #fafafa;
-}
-
-#cart-icon,
-.cart-button {
+.user-button:hover { background:#fafafa; }
+#cart-icon,.cart-button {
   background: var(--botao);
   border: none;
   border-radius: var(--rad);
   padding: 8px 12px;
   font-weight: 700;
   cursor: pointer;
-  transition: 0.2s;
   box-shadow: var(--shadow-1);
+  transition: .2s;
 }
+#cart-icon:hover,.cart-button:hover { background:#ffc107; }
+.main-content-wrapper { padding-top:72px; }
 
-#cart-icon:hover,
-.cart-button:hover {
-  background: #ffc107;
-}
-
-/* STATUS BANNERS */
+/* =======================================================
+   🕐 STATUS
+   ======================================================= */
 .status-banner {
-  text-align: center;
-  padding: 8px;
-  color: #fff;
-  font-weight: 600;
+  text-align:center;
+  padding:8px;
+  color:#fff;
+  font-weight:600;
 }
-.status-banner.open {
-  background: var(--success);
-}
-.status-banner.closed {
-  background: var(--danger);
-}
-
+.status-banner.open { background:var(--success); }
+.status-banner.closed { background:var(--danger); }
 .hours-banner {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 10px 16px;
-  background: #000;
-  color: #fff;
-  font-size: 0.9rem;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:10px 16px;
+  background:#000;
+  color:#fff;
+  font-size:.9rem;
 }
 .hours-banner b {
-  min-width: 40px;
-  display: inline-block;
-  text-align: right;
+  min-width:40px;
+  text-align:right;
+  display:inline-block;
 }
 
-/* PROMOÇÕES */
+/* =======================================================
+   🔥 PROMOÇÕES DO DIA
+   ======================================================= */
 .promo-section {
-  text-align: center;
-  padding: 20px 10px;
+  text-align:center;
+  padding:20px 10px;
 }
 .promo-section h2 {
-  color: #ff5722;
-  margin-bottom: 8px;
+  color:#ff5722;
+  margin-bottom:8px;
 }
 .promo-sub {
-  color: #444;
-  margin-bottom: 10px;
-  font-size: 0.95rem;
+  color:#444;
+  margin-bottom:10px;
+  font-size:.95rem;
 }
 .countdown-ticker {
-  background: #fff;
-  display: inline-block;
-  padding: 6px 12px;
-  border-radius: 10px;
-  margin: 8px 0 15px;
-  font-weight: 600;
-  box-shadow: var(--shadow-1);
+  background:#fff;
+  display:inline-block;
+  padding:6px 12px;
+  border-radius:10px;
+  margin:8px 0 15px;
+  font-weight:600;
+  box-shadow:var(--shadow-1);
 }
 
-/* CARROSSEL */
+/* =======================================================
+   🎠 CARROSSEL DE PROMOÇÕES
+   ======================================================= */
 .carousel {
-  position: relative;
-  max-width: 900px;
-  margin: 0 auto;
+  position:relative;
+  max-width:900px;
+  margin:0 auto;
 }
 .slides {
-  display: flex;
-  gap: 8px;
-  overflow-x: auto;
-  scroll-behavior: smooth;
-  padding: 4px;
+  display:flex;
+  gap:8px;
+  overflow-x:auto;
+  scroll-behavior:smooth;
+  padding:4px;
 }
-.slides::-webkit-scrollbar {
-  height: 8px;
-}
+.slides::-webkit-scrollbar { height:8px; }
 .slides::-webkit-scrollbar-track {
-  background: #f1f1f1;
-  border-radius: 10px;
+  background:#f1f1f1;
+  border-radius:10px;
 }
 .slides::-webkit-scrollbar-thumb {
-  background: #ffd54f;
-  border-radius: 10px;
+  background:#ffd54f;
+  border-radius:10px;
 }
 .slides::-webkit-scrollbar-thumb:hover {
-  background: #ffca28;
+  background:#ffca28;
 }
 .slide {
-  display: block;
-  border-radius: 12px;
-  flex: 0 0 auto;
-  min-width: 250px;
-  max-width: 250px;
-  height: 180px;
-  object-fit: cover;
-  box-shadow: var(--shadow-2);
-  cursor: zoom-in;
-  transition: transform 0.2s, box-shadow 0.2s;
-  background: #fff;
+  display:block;
+  border-radius:12px;
+  flex:0 0 auto;
+  min-width:250px;
+  max-width:250px;
+  height:180px;
+  object-fit:cover;
+  box-shadow:var(--shadow-2);
+  cursor:zoom-in;
+  transition:transform .2s, box-shadow .2s;
+  background:#fff;
 }
 .slide:hover {
-  transform: scale(1.05);
-  box-shadow: var(--shadow-3);
+  transform:scale(1.05);
+  box-shadow:var(--shadow-3);
 }
+
+/* Setas padrão do carrossel */
 .c-btn {
-  position: absolute;
-  top: 50%;
-  transform: translateY(-50%);
-  background: #000;
-  color: #fff;
-  border: none;
-  border-radius: 50%;
-  width: 40px;
-  height: 40px;
-  font-size: 24px;
-  opacity: 0.85;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  box-shadow: var(--shadow-2);
+  position:absolute;
+  top:50%;
+  transform:translateY(-50%);
+  background:#ffca28;
+  color:#000;
+  border:none;
+  border-radius:50%;
+  width:38px; height:38px;
+  font-size:22px; font-weight:700;
+  opacity:.9;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  box-shadow:0 3px 6px rgba(0,0,0,0.3);
+  cursor:pointer;
+  transition:.2s;
 }
 .c-btn:hover {
-  opacity: 1;
+  opacity:1;
+  background:#ffb300;
+  transform:translateY(-50%) scale(1.05);
 }
-.c-prev {
-  left: 6px;
-}
-.c-next {
-  right: 6px;
-}
-
-/* MENU DE PRODUTOS */
-section {
-  margin: 25px auto;
-  width: 95%;
-  max-width: 1000px;
-}
-section h2 {
-  font-size: 1.3rem;
-  text-align: center;
-  margin-bottom: 15px;
-  color: #ff7043;
-}
-.grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-  gap: 14px;
-}
-.card {
-  background: #fff;
-  border-radius: 16px;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
-  padding: 14px;
-  text-align: center;
-  transition: transform 0.2s, box-shadow 0.2s;
-}
-.card:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.12);
-}
-.card img {
-  width: 100%;
-  border-radius: 12px;
-  margin-bottom: 8px;
-  height: 220px;
-  object-fit: cover;
-  background: #fff;
-}
-.card h3 {
-  margin: 0 0 6px;
-  font-weight: 700;
-  font-size: 1rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  flex-wrap: wrap;
-}
-.card p {
-  font-size: 0.9rem;
-  color: #555;
-}
-.price {
-  font-weight: 600;
-  color: var(--success);
-  margin: 8px 0;
-}
-.badge {
-  display: inline-block;
-  font-size: 0.72rem;
-  font-weight: 700;
-  line-height: 1;
-  padding: 3px 8px;
-  border-radius: 999px;
-  color: #000;
-  background: linear-gradient(135deg, #f8e08b, #eac13f);
-  border: 1px solid #d4af37;
-  white-space: nowrap;
-}
-.badge-small {
-  display: inline-block;
-  font-size: 0.68rem;
-  font-weight: 600;
-  line-height: 1.2;
-  padding: 2px 7px;
-  border-radius: 6px;
-  color: #000;
-  background: linear-gradient(135deg, #ffd54f, #ffca28);
-  border: 1px solid #d4af37;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-  white-space: nowrap;
-  margin-left: 4px;
-}
-.badge-small.pure {
-  background: linear-gradient(135deg, #a5d6a7, #81c784);
-  border-color: #66bb6a;
-  color: #1b5e20;
-}
-
-.actions {
-  margin-top: 10px;
-  display: flex;
-  justify-content: center;
-  gap: 8px;
-  flex-wrap: wrap;
-}
-.actions button {
-  border: none;
-  border-radius: 10px;
-  padding: 14px;
-  font-weight: 700;
-  font-size: 1rem;
-  cursor: pointer;
-  transition: 0.2s;
-}
-.actions .add-cart {
-  background: linear-gradient(135deg, #4caf50, #43a047);
-  color: #fff;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-}
-.actions .add-cart:hover {
-  background: linear-gradient(135deg, #43a047, #388e3c);
-  transform: scale(1.03);
-}
-.actions .extras-btn {
-  background: linear-gradient(135deg, #ffb300, #ffca28);
-  color: #222;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
-}
-.actions .extras-btn:hover {
-  background: linear-gradient(135deg, #ffca28, #ffd54f);
-  transform: scale(1.03);
-}
-
-/* CAMPO DE FRETE (DESATIVADO, MAS VISÍVEL) */
-.frete-field {
-  margin-top: 12px;
-  padding: 14px;
-  border: 1px solid #ddd;
-  border-radius: 10px;
-  background: #f5f5f5;
-  color: #666;
-  font-size: 0.92rem;
-  text-align: center;
-  cursor: not-allowed;
-  line-height: 1.4;
-  font-weight: 500;
-  box-shadow: inset 0 1px 0 rgba(255,255,255,0.2);
-}
-
-/* FOOTER */
-.footer {
-  background: #ffca28;
-  text-align: center;
-  padding: 20px;
-  font-size: 0.9rem;
-  color: #222;
-}
-.footer a {
-  color: #ff7043;
-  text-decoration: none;
-  transition: color 0.2s;
-}
-.footer a:hover {
-  color: #ff5722;
-}
-.footer-links {
-  display: flex;
-  justify-content: center;
-  gap: 10px;
-  flex-wrap: wrap;
-  margin: 8px 0;
-}
-.footer-btn {
-  background: #ffb300;
-  color: #222;
-  padding: 6px 14px;
-  border-radius: 6px;
-  font-weight: 700;
-  text-decoration: none;
-  transition: 0.25s;
-}
-.footer-btn:hover {
-  background: #ffca28;
-  transform: scale(1.03);
-}
-.footer-copy {
-  font-size: 0.8rem;
-  color: #000;
-  margin-top: 10px;
-}
-
-/* COOKIE BANNER */
-#cookie-banner {
-  position: fixed;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(34, 34, 34, 0.95);
-  color: #fff;
-  padding: 16px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  z-index: 2000;
-  transform: translateY(100%);
-  transition: transform 0.5s;
-}
-#cookie-banner.show {
-  transform: translateY(0);
-}
-#cookie-banner p {
-  margin: 0;
-  font-size: 0.9rem;
-  line-height: 1.4;
-  margin-right: 16px;
-}
-#cookie-banner a {
-  color: #ffca28;
-  font-weight: 600;
-  text-decoration: underline;
-}
-#cookie-banner button {
-  background: #4caf50;
-  color: #fff;
-  border: none;
-  border-radius: 8px;
-  padding: 10px 16px;
-  font-weight: 700;
-  cursor: pointer;
-  transition: background 0.2s;
-  flex-shrink: 0;
-}
-#cookie-banner button:hover {
-  background: #43a047;
-}
-
-/* RESPONSIVIDADE */
-@media (max-width: 600px) {
-  .slides { gap: 6px; }
-  .slide { min-width: 150px; max-width: 150px; height: 120px; }
-  .card img { height: 140px; }
-  .c-btn { width: 32px; height: 32px; font-size: 20px; }
-  .c-prev { left: 4px; } 
-  .c-next { right: 4px; }
-  .pedidos-panel, .recompensas-panel { width: 100%; max-width: 100%; }
-  #cookie-banner { flex-direction: column; text-align: center; gap: 12px; }
-  #cookie-banner p { margin-right: 0; }
-  #cookie-banner button { width: 100%; padding: 12px; }
-}
+.c-prev { left:6px; }
+.c-next { right:6px; }
 /* =======================================================
-   🔧 CORREÇÕES VISUAIS — v3.7.1 Hot Dogs
+   🧩 PARTE 2 — Modais + Botões + Footer + Responsividade
    ======================================================= */
 
-/* 1️⃣ Botão "Minhas Recompensas" — flutuante acima do "Meus Pedidos" */
-.minhas-recompensas {
-  position: fixed;
-  bottom: 80px;
-  right: 20px;
-  z-index: 1490;
-}
-.recompensas-btn {
-  background: linear-gradient(135deg, #ffca28, #ffb300);
-  color: #222;
-  border: none;
-  border-radius: 20px;
-  font-weight: 700;
-  font-size: 0.95rem;
-  padding: 12px 22px;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-  cursor: pointer;
-  transition: 0.2s;
-}
-.recompensas-btn:hover {
-  transform: scale(1.05);
-  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.3);
-}
-
-/* 2️⃣ Modais (Extras, Combo, Login, Promo) — centralizados na tela */
+/* ⚙️ MODAIS GERAIS (centralizados) */
 .modal {
   inset: 0;
   display: flex;
@@ -510,7 +232,7 @@ section h2 {
   justify-content: center;
   opacity: 0;
   pointer-events: none;
-  transition: opacity 0.25s ease;
+  transition: opacity .25s ease;
   z-index: 999;
 }
 .modal.show {
@@ -524,377 +246,64 @@ section h2 {
   max-width: 520px;
   width: 90%;
   overflow-y: auto;
-  box-shadow: 0 8px 40px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 8px 40px rgba(0,0,0,0.3);
   position: relative;
   transform: translateY(0);
 }
 
-/* 3️⃣ Setas do carrossel — estilo original */
-.c-btn {
-  background: #ffca28;
-  color: #000;
-  border: none;
-  border-radius: 50%;
-  width: 38px;
-  height: 38px;
-  font-size: 22px;
-  font-weight: 700;
-  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.3);
-  display: flex;
+/* 🧾 MODAIS ESPECÍFICOS (extras, combos, login, relatórios, D-log) */
+#combo-modal .modal-content,
+#extras-modal .modal-content,
+#login-modal .modal-content,
+#logs-modal .modal-content,
+#reports-modal .modal-content {
+  margin: 0 auto;
+  align-self: center;
+  justify-self: center;
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 8px 40px rgba(0,0,0,0.35);
+  max-width: 500px;
+  width: 90%;
+  position: relative;
+}
+#combo-modal,
+#extras-modal,
+#login-modal,
+#logs-modal,
+#reports-modal {
+  display: flex !important;
   align-items: center;
   justify-content: center;
-  cursor: pointer;
-  opacity: 0.9;
-  transition: all 0.2s;
-}
-.c-btn:hover {
-  opacity: 1;
-  background: #ffb300;
-  transform: scale(1.05);
-}
-.c-prev { left: 10px; }
-.c-next { right: 10px; }
-
-/* 4️⃣ Modal do carrossel — imagem ajustada e clique fora funcional */
-#promo-modal-img {
-  width: 100%;
-  max-height: 60vh;
-  object-fit: contain;
-  border-radius: 8px;
-}
-.promo-content {
-  background: #fff;
-  border-radius: 12px;
-  box-shadow: 0 6px 25px rgba(0, 0, 0, 0.25);
-  max-width: 600px;
-  width: 92%;
-  overflow: hidden;
 }
 
-/* 5️⃣ Preços — estilo antigo (antigo riscado + novo em verde) */
+/* 💰 PREÇOS (antigo riscado + novo verde) */
 .price {
   font-weight: 600;
   color: #4caf50;
   margin: 8px 0;
 }
-.price del {
-  color: #b71c1c;
-  font-size: 0.95rem;
+.price del,
+#promo-modal-price del,
+#promo-modal-price span.old-price {
+  color: #777;
+  text-decoration: line-through;
+  text-decoration-thickness: 2px;
   margin-right: 6px;
 }
-.price b {
+.price b,
+#promo-modal-price b {
   color: #2e7d32;
   font-weight: 700;
   font-size: 1.05rem;
 }
 
-/* 6️⃣ Modal de combo — lista de opções bonita */
-#combo-body label,
-#combo-body div {
-  border: 1px solid #ffca28;
-  border-radius: 10px;
-  padding: 10px 14px;
-  background: #fff;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  transition: 0.2s;
-  font-weight: 600;
-}
-#combo-body label:hover {
-  background: #fff9e6;
-  transform: scale(1.02);
-}
-
-/* Responsivo */
-@media (max-width: 600px) {
-  .promo-content {
-    width: 95%;
-    max-height: 75vh;
-  }
-  #promo-modal-img {
-    max-height: 45vh;
-  }
-}
-/* =======================================================
-   🎨 PATCH 2 — Correção completa dos modais e carrossel
-   ======================================================= */
-
-/* Centraliza o modal de promoções e remove a margem branca gigante */
-#promo-modal .promo-content {
-  position: relative;
-  background: #fff;
-  border-radius: 18px;
-  box-shadow: 0 8px 40px rgba(0, 0, 0, 0.35);
-  max-width: 500px;
-  width: 92%;
-  margin: 0 auto;
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-
-/* Faz o modal aparecer centralizado verticalmente */
+/* 🎠 MODAL DE PROMOÇÕES (carrossel expandido) */
 #promo-modal {
   display: flex !important;
   align-items: center;
   justify-content: center;
 }
-
-/* Corrige a imagem (sem margem branca exagerada e com bordas suaves) */
-#promo-modal-img {
-  width: 100%;
-  max-height: 55vh;
-  object-fit: contain;
-  border-bottom: 2px solid #eee;
-  background: #fff;
-}
-
-/* Corrige as setas dentro do modal de promoções */
-#promo-modal .promo-nav {
-  background: #ffca28;
-  border: none;
-  border-radius: 50%;
-  width: 38px;
-  height: 38px;
-  font-size: 22px;
-  font-weight: 700;
-  color: #000;
-  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.25);
-  transition: 0.2s;
-}
-#promo-modal .promo-nav:hover {
-  background: #ffb300;
-  transform: scale(1.05);
-}
-
-/* Centraliza os textos e preços dentro do modal de promoções */
-.promo-info {
-  text-align: center;
-  width: 100%;
-  padding: 16px 20px;
-}
-#promo-modal-title {
-  font-size: 1.3rem;
-  font-weight: 700;
-  margin-bottom: 4px;
-  color: #222;
-}
-#promo-modal-price {
-  font-size: 1rem;
-  color: #2e7d32;
-  margin-bottom: 12px;
-}
-#promo-modal-price del {
-  color: #b71c1c;
-  margin-right: 6px;
-}
-#promo-modal-price b {
-  color: #2e7d32;
-  font-size: 1.1rem;
-}
-
-/* Botão do modal centralizado */
-#promo-modal-add {
-  display: block;
-  margin: 10px auto 5px auto;
-  padding: 12px 24px;
-  background: linear-gradient(135deg, #4caf50, #388e3c);
-  color: #fff;
-  font-weight: 700;
-  border: none;
-  border-radius: 10px;
-  cursor: pointer;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.25);
-  transition: 0.2s;
-}
-#promo-modal-add:hover {
-  transform: scale(1.05);
-  background: linear-gradient(135deg, #66bb6a, #43a047);
-}
-
-/* Corrige modal de refrigerante e adicionais: centraliza */
-#combo-modal .modal-content,
-#extras-modal .modal-content {
-  top: auto !important;
-  margin: 0 auto;
-  transform: none !important;
-  align-self: center;
-  justify-self: center;
-  position: relative;
-  background: #fff;
-  border-radius: 16px;
-  box-shadow: 0 8px 40px rgba(0, 0, 0, 0.35);
-  max-width: 500px;
-  width: 90%;
-}
-
-/* Evita o bug do modal surgindo no topo */
-#combo-modal,
-#extras-modal {
-  display: flex !important;
-  align-items: center;
-  justify-content: center;
-}
-
-/* Responsividade refinada */
-@media (max-width: 600px) {
-  #promo-modal .promo-content {
-    width: 95%;
-    max-width: 420px;
-  }
-  #promo-modal-img {
-    max-height: 45vh;
-  }
-  #promo-modal-title {
-    font-size: 1.15rem;
-  }
-  #promo-modal-price b {
-    font-size: 1.05rem;
-  }
-}
-/* =======================================================
-   💰 PATCH 4 — Ajuste Fino: Estilo do Preço e Visual Final
-   ======================================================= */
-
-/* 🔧 Mantém o modal ajustado e centralizado (reforço do Patch 3) */
-#promo-modal .promo-content {
-  padding: 0;
-  max-width: 420px;
-  border-radius: 14px;
-  background: #fff;
-  overflow: hidden;
-  box-shadow: 0 8px 40px rgba(0, 0, 0, 0.4);
-}
-
-/* 💬 Centraliza texto e define hierarquia visual */
-.promo-info {
-  text-align: center;
-  padding: 14px 20px 18px;
-  background: #fff;
-}
-#promo-modal-title {
-  font-size: 1.25rem;
-  font-weight: 700;
-  margin-bottom: 6px;
-  color: #222;
-}
-
-/* 🎨 Estilo refinado dos preços */
-#promo-modal-price {
-  font-size: 1rem;
-  margin-bottom: 12px;
-  color: #444;
-  font-weight: 500;
-}
-
-/* Preço antigo (só o número riscado e acinzentado) */
-#promo-modal-price del {
-  color: #777;
-  text-decoration: line-through;
-  font-weight: 500;
-  margin-right: 4px;
-}
-
-/* Novo preço destacado em verde */
-#promo-modal-price b {
-  color: #2e7d32;
-  font-weight: 700;
-  font-size: 1.1rem;
-}
-
-/* 🔘 Botão Adicionar ao Pedido */
-#promo-modal-add {
-  background: #388e3c;
-  color: white;
-  border: none;
-  border-radius: 8px;
-  padding: 12px 24px;
-  font-size: 1rem;
-  font-weight: 600;
-  cursor: pointer;
-  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.2);
-  transition: background 0.2s, transform 0.2s;
-}
-#promo-modal-add:hover {
-  background: #2e7d32;
-  transform: scale(1.04);
-}
-
-/* 🧭 Setas laterais corretamente posicionadas */
-#promo-modal .modal-head {
-  position: absolute;
-  top: 12px;
-  left: 0;
-  right: 0;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 0 12px;
-  background: none;
-  z-index: 5;
-}
-
-/* Estilo das setas (‹ ›) */
-#promo-modal .promo-nav {
-  background: #ffca28;
-  border: none;
-  border-radius: 50%;
-  width: 40px;
-  height: 40px;
-  font-size: 22px;
-  font-weight: 700;
-  color: #000;
-  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.25);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: 0.2s;
-}
-#promo-modal .promo-nav:hover {
-  background: #ffb300;
-  transform: scale(1.1);
-}
-
-/* ❌ Botão fechar (canto esquerdo superior) */
-#promo-modal .promo-close {
-  background: #ffca28;
-  border: none;
-  border-radius: 50%;
-  width: 36px;
-  height: 36px;
-  font-weight: 700;
-  color: #000;
-  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.25);
-  transition: 0.2s;
-}
-#promo-modal .promo-close:hover {
-  background: #ffb300;
-  transform: scale(1.1);
-}
-
-/* 📱 Responsividade (mantém leve e proporcional) */
-@media (max-width: 600px) {
-  #promo-modal .promo-content {
-    width: 92%;
-    max-width: 380px;
-  }
-  #promo-modal-img {
-    max-height: 52vh;
-  }
-  #promo-modal .promo-nav {
-    width: 34px;
-    height: 34px;
-    font-size: 20px;
-  }
-}
-/* =======================================================
-   🏁 PATCH 5 — FINALÍSSIMO v3.7.1-Ultimate
-   Correções finais do modal de promoções
-   ======================================================= */
-
-/* 🔧 Corrige bug visual das linhas brancas e centraliza imagem */
 #promo-modal .promo-content {
   position: relative;
   padding: 0;
@@ -902,11 +311,9 @@ section h2 {
   border-radius: 14px;
   background: #fff;
   overflow: hidden;
-  box-shadow: 0 8px 40px rgba(0, 0, 0, 0.4);
+  box-shadow: 0 8px 40px rgba(0,0,0,0.4);
   border: none;
 }
-
-/* 🖼️ Ajusta imagem no modal */
 #promo-modal-img {
   width: 100%;
   height: auto;
@@ -915,32 +322,26 @@ section h2 {
   display: block;
   border: none;
 }
-
-/* 🧭 Cabeçalho do modal sem fundo nem linhas */
 #promo-modal .modal-head {
   position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
+  top: 0; left: 0; right: 0;
   height: 100%;
   pointer-events: none;
 }
 
-/* ❌ Botão fechar (canto superior direito) */
+/* ❌ Botão fechar */
 #promo-modal .promo-close {
   position: absolute;
-  top: 12px;
-  right: 12px;
+  top: 12px; right: 12px;
   pointer-events: all;
   background: #ffca28;
   border: none;
   border-radius: 50%;
-  width: 38px;
-  height: 38px;
+  width: 38px; height: 38px;
   font-weight: 700;
   color: #000;
-  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.25);
-  transition: 0.2s;
+  box-shadow: 0 3px 6px rgba(0,0,0,0.25);
+  transition: .2s;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -951,7 +352,7 @@ section h2 {
   transform: scale(1.1);
 }
 
-/* ⬅️➡️ Setas laterais centralizadas verticalmente */
+/* ⬅️➡️ Setas laterais */
 #promo-modal .promo-nav {
   position: absolute;
   top: 50%;
@@ -960,30 +361,25 @@ section h2 {
   background: #ffca28;
   border: none;
   border-radius: 50%;
-  width: 42px;
-  height: 42px;
+  width: 42px; height: 42px;
   font-size: 22px;
   font-weight: 700;
   color: #000;
-  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.25);
+  box-shadow: 0 3px 6px rgba(0,0,0,0.25);
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: 0.2s;
+  transition: .2s;
   z-index: 9;
 }
-#promo-modal .promo-nav.prev {
-  left: 12px;
-}
-#promo-modal .promo-nav.next {
-  right: 12px;
-}
+#promo-modal .promo-nav.prev { left: 12px; }
+#promo-modal .promo-nav.next { right: 12px; }
 #promo-modal .promo-nav:hover {
   background: #ffb300;
   transform: translateY(-50%) scale(1.1);
 }
 
-/* 💰 Texto e preços centralizados e refinados */
+/* 📜 Texto e botão do modal */
 .promo-info {
   text-align: center;
   padding: 16px 20px 20px;
@@ -995,27 +391,6 @@ section h2 {
   margin-bottom: 6px;
   color: #222;
 }
-
-/* 🎨 Preço refinado (antigo riscado, novo verde) */
-#promo-modal-price {
-  font-size: 1rem;
-  margin-bottom: 12px;
-  color: #444;
-  font-weight: 500;
-}
-#promo-modal-price del {
-  color: #777;
-  text-decoration: line-through;
-  text-decoration-thickness: 2px;
-  margin-right: 6px;
-}
-#promo-modal-price b {
-  color: #2e7d32;
-  font-weight: 700;
-  font-size: 1.1rem;
-}
-
-/* 🟢 Botão Adicionar ao Pedido */
 #promo-modal-add {
   background: #388e3c;
   color: #fff;
@@ -1025,26 +400,130 @@ section h2 {
   font-size: 1rem;
   font-weight: 600;
   cursor: pointer;
-  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.2);
-  transition: background 0.2s, transform 0.2s;
+  box-shadow: 0 3px 6px rgba(0,0,0,0.2);
+  transition: background .2s, transform .2s;
 }
 #promo-modal-add:hover {
   background: #2e7d32;
   transform: scale(1.04);
 }
 
-/* 📱 Responsividade mobile */
+/* 🎁 BOTÃO MINHAS RECOMPENSAS */
+.minhas-recompensas {
+  position: fixed;
+  bottom: 80px;
+  right: 20px;
+  z-index: 1490;
+}
+.recompensas-btn {
+  background: linear-gradient(135deg,#ffca28,#ffb300);
+  color: #222;
+  border: none;
+  border-radius: 20px;
+  font-weight: 700;
+  font-size: .95rem;
+  padding: 12px 22px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+  cursor: pointer;
+  transition: .2s;
+}
+.recompensas-btn:hover {
+  transform: scale(1.05);
+  box-shadow: 0 6px 15px rgba(0,0,0,0.3);
+}
+
+/* 🦶 FOOTER */
+.footer {
+  background: #ffca28;
+  text-align: center;
+  padding: 20px;
+  font-size: .9rem;
+  color: #222;
+}
+.footer a {
+  color: #ff7043;
+  text-decoration: none;
+  transition: color .2s;
+}
+.footer a:hover { color:#ff5722; }
+.footer-links {
+  display:flex;
+  justify-content:center;
+  gap:10px;
+  flex-wrap:wrap;
+  margin:8px 0;
+}
+.footer-btn {
+  background:#ffb300;
+  color:#222;
+  padding:6px 14px;
+  border-radius:6px;
+  font-weight:700;
+  text-decoration:none;
+  transition:.25s;
+}
+.footer-btn:hover {
+  background:#ffca28;
+  transform:scale(1.03);
+}
+.footer-copy {
+  font-size:.8rem;
+  color:#000;
+  margin-top:10px;
+}
+
+/* 🍪 COOKIE BANNER */
+#cookie-banner {
+  position:fixed;
+  left:0; right:0; bottom:0;
+  background:rgba(34,34,34,0.95);
+  color:#fff;
+  padding:16px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  z-index:2000;
+  transform:translateY(100%);
+  transition:transform .5s;
+}
+#cookie-banner.show { transform:translateY(0); }
+#cookie-banner p {
+  margin:0;
+  font-size:.9rem;
+  line-height:1.4;
+  margin-right:16px;
+}
+#cookie-banner a {
+  color:#ffca28;
+  font-weight:600;
+  text-decoration:underline;
+}
+#cookie-banner button {
+  background:#4caf50;
+  color:#fff;
+  border:none;
+  border-radius:8px;
+  padding:10px 16px;
+  font-weight:700;
+  cursor:pointer;
+  transition:background .2s;
+}
+#cookie-banner button:hover { background:#43a047; }
+
+/* =======================================================
+   📱 RESPONSIVIDADE
+   ======================================================= */
 @media (max-width: 600px) {
-  #promo-modal .promo-content {
-    width: 92%;
-    max-width: 380px;
-  }
-  #promo-modal-img {
-    max-height: 52vh;
-  }
-  #promo-modal .promo-nav {
-    width: 36px;
-    height: 36px;
-    font-size: 20px;
-  }
+  .slides { gap:6px; }
+  .slide { min-width:150px; max-width:150px; height:120px; }
+  .c-btn { width:32px; height:32px; font-size:20px; }
+  .c-prev { left:4px; } 
+  .c-next { right:4px; }
+  .pedidos-panel, .recompensas-panel { width:100%; max-width:100%; }
+  #promo-modal .promo-content { width:92%; max-width:380px; }
+  #promo-modal-img { max-height:52vh; }
+  #promo-modal .promo-nav { width:36px; height:36px; font-size:20px; }
+  #cookie-banner { flex-direction:column; text-align:center; gap:12px; }
+  #cookie-banner p { margin-right:0; }
+  #cookie-banner button { width:100%; padding:12px; }
 }
