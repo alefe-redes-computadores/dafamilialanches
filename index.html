@@ -5,9 +5,15 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>🍔 Da Família Lanches</title>
 
+  <!-- CSP e Cache -->
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://www.gstatic.com https://*.firebaseio.com https://cdn.jsdelivr.net; connect-src 'self' https://www.googleapis.com https://securetoken.googleapis.com https://*.firebaseio.com https://firestore.googleapis.com https://accounts.google.com https://apis.google.com https://viacep.com.br; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:;">
+  <meta http-equiv="Cache-control" content="public, max-age=31536000, immutable">
+
+  <!-- Preconnect -->
   <link rel="preconnect" href="https://www.gstatic.com" crossorigin>
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 
+  <!-- Preloads -->
   <link rel="preload" as="image" href="logo.png">
   <link rel="preload" as="image" href="promocoes/promo1.jpg">
   <link rel="preload" as="image" href="promocoes/promo2.jpg">
@@ -83,9 +89,7 @@
     .status-banner{text-align:center; padding:8px; color:#fff; font-weight:600}
     .status-banner.open{background:var(--success)}
     .status-banner.closed{background:var(--danger)}
-    /* CORREÇÃO VISUAL: Alinhamento e Espaçamento */
     .hours-banner{
-      /* Removido o space-between para agrupar o texto, que estava causando o "espaço vago" */
       display:flex; align-items:center; 
       padding:8px 16px; 
       background:#000; color:#fff;
@@ -177,105 +181,119 @@
       opacity:0; pointer-events:none; transition:opacity .2s; z-index:980
     }
     #cart-backdrop.active{opacity:1; pointer-events:auto}
-    .mini-cart,.modal,.pedidos-panel,.recompensas-panel{position:fixed; z-index:990; display:none}
-    .mini-cart.active,.modal.show,.pedidos-panel.active,.recompensas-panel.active{display:block}
+    .mini-cart,.modal,.pedidos-panel,.recompensas-panel, .reports-panel, .frete-admin-panel{position:fixed; z-index:990; display:none}
+    .mini-cart.active,.modal.show,.pedidos-panel.active,.recompensas-panel.active, .reports-panel.active, .frete-admin-panel.active{display:block}
 
     /* ================= MINI-CART LATERAL ================= */
     .mini-cart{
       right:0; top:0; width:min(92vw,380px); height:100dvh; background:#fff;
       box-shadow:-4px 0 20px rgba(0,0,0,.25);
-      transform:translateX(100%); transition:transform .25s
+      transform:translateX(100%); transition:transform .25s;
+      display:flex; flex-direction:column;
     }
     .mini-cart.active{transform:translateX(0)}
     .mini-head{display:flex; justify-content:space-between; align-items:center; padding:10px 14px; border-bottom:1px solid #eee}
-    .mini-list{max-height:60vh; overflow:auto; padding:10px 14px}
-    .mini-foot{padding:10px 14px; border-top:1px solid #eee}
+    .mini-list{
+      max-height:60vh; 
+      overflow-y:auto; 
+      padding:10px 14px;
+      flex-grow:1;
+    }
+    .mini-foot{padding:10px 14px; border-top:1px solid #eee; flex-shrink:0;}
     .coupon-form{display:flex; gap:8px}
     .coupon-form input{
       flex:1; border:1px solid #ddd; border-radius:10px; padding:10px; font-size:.95rem
     }
 
-    /* ================= MODAIS BASE ================= */
-    .modal{inset:0; display:flex; align-items:center; justify-content:center; opacity:0; pointer-events:none; transition:opacity .25s}
-    .modal.show{opacity:1; pointer-events:auto}
-    .modal-content{
-      background:#fff; width:min(92vw,520px); border-radius:14px;
-      box-shadow:0 8px 40px rgba(0,0,0,.25); max-height:86vh; overflow:auto;
-      /* CORREÇÃO ESTÉTICA GERAL PARA MODAIS */
-      position: relative; /* Garante que os filhos fiquem dentro */
+    /* Campo de Frete (DFL v3.7.1) */
+    .frete-input-container {
+        padding:10px; background:#f7f7f7; border-radius:8px; box-shadow:0 1px 3px rgba(0,0,0,0.1); margin-bottom:15px; border:1px solid #eee;
     }
-    .modal-head{
-      display:flex; justify-content:space-between; align-items:center; padding:12px 16px;
-      border-bottom:1px solid #eee; background:#ffca28; box-shadow:var(--shadow-in)
-    }
-    .btn-primary,.btn-secondary,.btn-primario{
-      flex:1; border:none; border-radius:10px; padding:14px; font-weight:700; font-size:1rem; cursor:pointer; transition:.2s
-    }
-    /* CORREÇÃO ESTÉTICA: Botões Primários com Sombra e Gradiente */
-    .btn-primary,.btn-primario{
-      background:linear-gradient(135deg,var(--success), #388e3c); 
-      color:#fff;
-      box-shadow: 0 4px 6px rgba(0,0,0,.15);
-    }
-    .btn-primary:hover,.btn-primario:hover{background:linear-gradient(135deg, #388e3c, #2e7d32); transform:translateY(-2px); box-shadow: 0 6px 10px rgba(0,0,0,.25)}
-    .btn-secondary{background:transparent; color:#555; border:1px solid #ddd}
-    .btn-secondary:hover{background:#f1f1f1; border-color:#ccc}
+    .frete-input-container input, .frete-input-container button { height:40px; }
 
-    /* ================= BOTÕES/Painéis (Pedidos / Recompensas) ================= */
+    /* ================= BOTÕES/Painéis (Pedidos / Recompensas / Relatórios / Admin) ================= */
     .meus-pedidos{position:fixed; bottom:20px; right:20px; z-index:1500}
+    
+    /* Botão Admin Frete (DFL v3.8.5) */
+    .admin-actions {
+      position:fixed; bottom:80px; right:20px; z-index:1500;
+      display:flex; flex-direction:column; align-items:flex-end; gap:10px;
+    }
+    #frete-admin-btn {
+        background:linear-gradient(135deg,#42a5f5,#1e88e5);
+        color:#fff; border:none; border-radius:20px; font-weight:700; font-size:.9rem;
+        padding:10px 18px; box-shadow:0 4px 10px rgba(0,0,0,.2); cursor:pointer; transition:transform .2s;
+        display:none; /* controlado via JS (permissão admin) */
+    }
+    #frete-admin-btn:hover { transform:scale(1.05); box-shadow:0 6px 15px rgba(0,0,0,.3); }
+    
     .meus-pedidos-btn,.recompensas-btn{
       background:linear-gradient(135deg,#ffca28,#ffb300); color:#222; border:none; border-radius:20px;
       font-weight:700; font-size:.95rem; padding:12px 22px; box-shadow:0 4px 10px rgba(0,0,0,.2); cursor:pointer; transition:.2s
     }
     .meus-pedidos-btn:hover,.recompensas-btn:hover{transform:scale(1.05); box-shadow:0 6px 15px rgba(0,0,0,.3)}
-    .pedidos-panel,.recompensas-panel{
+    
+    /* Painéis Laterais */
+    .pedidos-panel,.recompensas-panel, .reports-panel, .frete-admin-panel{
       right:-100%; top:0; width:min(95%,440px); height:100vh; background:#f4f4f4;
       box-shadow:-4px 0 18px rgba(0,0,0,.3); transition:right .4s; display:flex; flex-direction:column
     }
-    .pedidos-panel.active,.recompensas-panel.active{right:0}
-    .pedidos-header,.recompensas-header{
+    .pedidos-panel.active,.recompensas-panel.active, .reports-panel.active, .frete-admin-panel.active{right:0}
+    
+    .pedidos-header,.recompensas-header, .reports-header{
       display:flex; justify-content:space-between; align-items:center;
       padding:16px 20px; background:#ffca28; font-weight:700; font-size:1.2rem; color:#222; box-shadow:var(--shadow-in)
     }
-    .pedidos-body,.recompensas-body{flex:1; overflow:auto; padding:16px}
-    .fechar-pedidos,.fechar-recompensas,.extras-close,.combo-close,.login-close{
+    .reports-header { background:#1e88e5; color:#fff;} /* Estilo Admin */
+
+    .pedidos-body,.recompensas-body, .reports-body{flex:1; overflow:auto; padding:16px}
+    
+    .fechar-pedidos,.fechar-recompensas,.reports-close,.extras-close,.combo-close,.login-close{
       background:var(--botao); border:none; border-radius:50%; width:30px; height:30px; font-size:18px; font-weight:700;
       cursor:pointer; line-height:30px; text-align:center; color:#222; transition:.2s
     }
-    .fechar-pedidos:hover,.fechar-recompensas:hover,.extras-close:hover,.combo-close:hover,.login-close:hover{
+    .fechar-pedidos:hover,.fechar-recompensas:hover,.reports-close:hover,.extras-close:hover,.combo-close:hover,.login-close:hover{
       background:#ff7043; color:#fff; transform:scale(1.1)
     }
-    /* CORREÇÃO MODAL ADICIONAIS: Para o layout vertical e card */
+    /* Fechar painel admin */
+    .frete-admin-close { background:#1e88e5; color:#fff; }
+    .frete-admin-close:hover { background:#42a5f5; color:#222; }
+
+    /* Modal Adicionais */
     .extras-list label.extra-line {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding: 10px;
-        margin-bottom: 8px;
-        border: 1px solid #ffb300;
-        border-radius: 8px;
-        background: #fff;
-        box-shadow: 0 1px 3px rgba(0,0,0,.08);
-        cursor: pointer;
-        transition: all 0.2s;
+        display:flex; justify-content:space-between; align-items:center;
+        padding:10px; margin-bottom:8px; border:1px solid #ffb300; border-radius:8px; background:#fff; box-shadow:0 1px 3px rgba(0,0,0,.08);
+        cursor:pointer; transition:all .2s;
     }
-    .extras-list label.extra-line:hover {
-        background: #fff7e6;
+    .extras-list label.extra-line:hover { background:#fff7e6; }
+    .extras-list label.extra-line span b { color:var(--danger); margin-left:5px; }
+    .extras-list input[type="checkbox"] { margin-left:10px; }
+
+    /* Histórico de Entregas */
+    .historico-frete-card {
+        background:#fff; border-radius:10px; padding:15px; margin-bottom:12px; box-shadow:0 2px 5px rgba(0,0,0,0.08); border-left:4px solid var(--botao);
     }
-    .extras-list label.extra-line span b {
-        color: var(--danger); /* Preço em vermelho/destaque */
-        margin-left: 5px;
-    }
-    .extras-list input[type="checkbox"] {
-        margin-left: 10px;
-    }
+    .historico-frete-card h4 { margin:0 0 8px 0; font-size:1.1rem; color:#ff7043; }
+    .historico-frete-card p { margin:5px 0; font-size:.95rem; color:#555; }
+    .historico-frete-card .total { font-weight:700; color:var(--danger); margin-top:10px; border-top:1px dashed #eee; padding-top:5px; }
+    
+    /* Relatórios (abas) */
+    .reports-tabs { display:flex; border-bottom:2px solid #ddd; margin-bottom:15px; padding:0 10px; }
+    .reports-tab-btn { flex:1; background:none; border:none; padding:12px 0; margin:0 5px; font-weight:600; cursor:pointer; color:#777; border-bottom:2px solid transparent; transition:all .2s; font-size:.9rem; }
+    .reports-tab-btn.active { color:var(--danger); border-bottom:2px solid var(--danger); }
+    .reports-content-tab { display:none; padding:10px; background:#fff; border-radius:8px; margin-bottom:10px; box-shadow:var(--shadow-1); }
+    .reports-content-tab.active { display:block; }
+    .reports-metric-card { padding:10px; border-radius:8px; background:var(--bg2); margin-bottom:10px; box-shadow:0 1px 3px rgba(0,0,0,0.1); font-weight:600; font-size:.95rem; }
+    .reports-table { width:100%; border-collapse:collapse; margin-top:15px; font-size:.85rem; }
+    .reports-table th, .reports-table td { border:1px solid #eee; padding:8px; text-align:left; }
+    .reports-table th { background:#ffb300; color:#222; font-weight:700; }
 
     /* ================= FOOTER ================= */
-    .footer{background:#ffca28; text-align:center; padding:20px; font-size:.9rem; color:#222}
+    .footer{background:var(--acento); text-align:center; padding:20px; font-size:.9rem; color:#222}
     .footer a{color:#ff7043; text-decoration:none; transition:color .2s}
     .footer a:hover{color:#ff5722}
     .footer-links{display:flex; justify-content:center; gap:10px; flex-wrap:wrap; margin:8px 0}
-    .footer-btn{background:#ffb300; color:#222; padding:6px 14px; border-radius:6px; font-weight:700; text-decoration:none; transition:.25s}
+    .footer-btn{background:var(--botao); color:#222; padding:6px 14px; border-radius:6px; font-weight:700; text-decoration:none; transition:.25s}
     .footer-btn:hover{background:#ffca28; transform:scale(1.03)}
     .footer-copy{font-size:.8rem; color:#000; margin-top:10px}
 
@@ -298,16 +316,18 @@
       .card img{height:140px}
       .c-btn{width:32px; height:32px; font-size:20px}
       .c-prev{left:4px}.c-next{right:4px}
-      .pedidos-panel,.recompensas-panel{width:100%; max-width:100%}
+      .pedidos-panel,.recompensas-panel, .reports-panel, .frete-admin-panel{width:100%; max-width:100%}
       #cookie-banner{flex-direction:column; text-align:center; gap:12px}
       #cookie-banner p{margin-right:0}
       #cookie-banner button{width:100%; padding:12px}
     }
   </style>
 
-  <link rel="stylesheet" href="style.css?v=3.7.1" media="print" onload="this.media='all'"/>
-  <noscript><link rel="stylesheet" href="style.css?v=3.7.1"/></noscript>
+  <!-- CSS externo (opcional). Mantido como no seu projeto -->
+  <link rel="stylesheet" href="style.css?v=3.8.9" media="print" onload="this.media='all'"/>
+  <noscript><link rel="stylesheet" href="style.css?v=3.8.9"/></noscript>
 
+  <!-- Firebase v8 (compatível com sua base atual) -->
   <script defer src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
   <script defer src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
   <script defer src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
@@ -332,6 +352,11 @@
     </div>
   </header>
 
+  <!-- Botão Admin Frete (controlado pelo script.js conforme permissão) -->
+  <div class="admin-actions">
+    <button id="frete-admin-btn" type="button">🚚 Frete Admin</button>
+  </div>
+
   <div class="main-content-wrapper">
     <div id="status-banner" class="status-banner"></div>
     <div class="hours-banner">
@@ -339,6 +364,7 @@
       <span id="timer" style="font-weight:700; margin-left: auto;"></span>
     </div>
 
+    <!-- Promoções -->
     <section class="promo-section">
       <h2>🔥 Promoções do Dia</h2>
       <p class="promo-sub">Aproveite antes que acabe!</p>
@@ -361,8 +387,10 @@
       </div>
     </section>
 
+    <!-- Backdrop -->
     <div id="cart-backdrop"></div>
 
+    <!-- Mini Cart -->
     <aside id="mini-cart" class="mini-cart" aria-hidden="true">
       <div class="mini-head">
         <h3>🛍 Seu Pedido</h3>
@@ -370,18 +398,53 @@
       </div>
       <div class="mini-list"></div>
       <div class="mini-foot">
+        
+        <!-- Cálculo de Frete -->
+        <div id="dfl-frete-input-container" class="frete-input-container">
+            <label for="frete-input" style="display:block;font-weight:500;margin-bottom:5px;font-size:14px;">Calcular Entrega:</label>
+            <div style="display:flex; gap:8px;">
+                <input type="text" id="frete-input" placeholder="Digite seu CEP ou Bairro" style="flex-grow:1; padding:10px; border:1px solid #ccc; border-radius:8px; font-size:1rem; outline:none; box-shadow:inset 0 1px 3px rgba(0,0,0,0.05);">
+                <button id="calcular-frete-btn" class="cart-button" type="button" style="padding:0 12px; font-weight:600;">Calcular Frete</button>
+            </div>
+            <p id="frete-status-msg" style="margin-top:10px; font-size:.9rem; color:#dc3545; display:none;"></p>
+        </div>
+        
+        <!-- Cupom -->
         <form id="coupon-form" class="coupon-form" novalidate>
           <input type="text" id="coupon-input" placeholder="Digite o cupom e clique em Aplicar" aria-label="Cupom de desconto"/>
           <button type="submit" id="coupon-apply-btn" class="btn-primary">Aplicar</button>
         </form>
         <div id="coupon-message" class="coupon-message" aria-live="polite"></div>
+        
+        <!-- Totais -->
+        <div class="summary-row" style="margin-top:10px;">
+          <span>Subtotal (Produtos):</span>
+          <span id="subtotal-display">R$ 0,00</span>
+        </div>
         <div class="summary-row" id="coupon-discount-row" style="display:none;">
           <span>Desconto</span>
           <span id="cart-discount">R$ 0,00</span>
         </div>
+        <div id="frete-display-line" class="summary-row" style="display:none; color:var(--danger); font-weight:600;">
+            <span>🚚 Frete:</span>
+            <span id="frete-valor-display">R$ 0,00</span>
+        </div>
+        <div class="summary-row total-line">
+            <span>TOTAL:</span>
+            <span id="total-display">R$ 0,00</span>
+        </div>
+        
+        <!-- Endereço -->
+        <label style="display:block;font-weight:600;margin-bottom:6px;margin-top:10px;">🏠 Endereço para Entrega</label>
+        <textarea id="address-input" rows="2" placeholder="Rua, número, complemento, bairro"
+            style="width:100%;border:1px solid #ddd;border-radius:10px;padding:10px;resize:vertical;margin-bottom:10px"></textarea>
+    
+        <button id="finish-order" class="btn-primary" type="button" style="width:100%;margin-bottom:8px">Finalizar Pedido 🛍️</button>
+        <button id="clear-cart" class="btn-secondary" type="button" style="width:100%;">Limpar Carrinho</button>
       </div>
     </aside>
 
+    <!-- Combos -->
     <section class="menu-section">
       <h2>🧡 Combos</h2>
       <div class="grid">
@@ -419,6 +482,7 @@
       </div>
     </section>
 
+    <!-- Lanches Tradicionais -->
     <section class="menu-section">
       <h2>🍔 Nossos Lanches Tradicionais</h2>
       <div class="grid">
@@ -480,6 +544,7 @@
       </div>
     </section>
 
+    <!-- Lanches Artesanais -->
     <section class="menu-section">
       <h2>🍔 Lanches Artesanais</h2>
       <div class="grid">
@@ -509,62 +574,7 @@
       </div>
     </section>
 
-    <section class="menu-section" id="bebidas-section">
-      <h2>🥤 Bebidas</h2>
-      <div class="grid">
-        <div class="card" data-name="Coca-Cola 200ml" data-price="4.00">
-          <h3>Coca-Cola 200ml</h3>
-          <p><b>R$ 4,00</b></p>
-          <div class="actions"><button class="add-cart" type="button">Adicionar</button></div>
-        </div>
-        <div class="card" data-name="Del Valle Uva 450ml" data-price="5.00">
-          <h3>Del Valle Uva 450ml</h3>
-          <p><b>R$ 5,00</b></p>
-          <div class="actions"><button class="add-cart" type="button">Adicionar</button></div>
-        </div>
-        <div class="card" data-name="Del Valle Laranja 450ml" data-price="5.00">
-          <h3>Del Valle Laranja 450ml</h3>
-          <p><b>R$ 5,00</b></p>
-          <div class="actions"><button class="add-cart" type="button">Adicionar</button></div>
-        </div>
-        <div class="card" data-name="Coca-Cola 310ml" data-price="5.50">
-          <h3>Coca-Cola 310ml</h3>
-          <p><b>R$ 5,50</b></p>
-          <div class="actions"><button class="add-cart" type="button">Adicionar</button></div>
-        </div>
-        <div class="card" data-name="Coca-Cola 310ml Zero" data-price="5.50">
-          <h3>Coca-Cola 310ml Zero</h3>
-          <p><b>R$ 5,50</b></p>
-          <div class="actions"><button class="add-cart" type="button">Adicionar</button></div>
-        </div>
-        <div class="card" data-name="Fanta 1L" data-price="8.00">
-          <h3>Fanta 1L</h3>
-          <p><b>R$ 8,00</b></p>
-          <div class="actions"><button class="add-cart" type="button">Adicionar</button></div>
-        </div>
-        <div class="card" data-name="Coca-Cola 1L" data-price="9.00">
-          <h3>Coca-Cola 1L</h3>
-          <p><b>R$ 9,00</b></p>
-          <div class="actions"><button class="add-cart" type="button">Adicionar</button></div>
-        </div>
-        <div class="card" data-name="Coca-Cola 1L Zero" data-price="9.00">
-          <h3>Coca-Cola 1L Zero</h3>
-          <p><b>R$ 9,00</b></p>
-          <div class="actions"><button class="add-cart" type="button">Adicionar</button></div>
-        </div>
-        <div class="card" data-name="Kuat Guaraná 2L" data-price="10.00">
-          <h3>Kuat Guaraná 2L</h3>
-          <p><b>R$ 10,00</b></p>
-          <div class="actions"><button class="add-cart" type="button">Adicionar</button></div>
-        </div>
-        <div class="card" data-name="Coca-Cola 2L" data-price="13.00">
-          <h3>Coca-Cola 2L</h3>
-          <p><b>R$ 13,00</b></p>
-          <div class="actions"><button class="add-cart" type="button">Adicionar</button></div>
-        </div>
-      </div>
-    </section>
-
+    <!-- Modal Promo -->
     <div id="promo-modal" class="modal" aria-hidden="true">
       <div class="promo-content modal-content" role="dialog" aria-modal="true">
         <div class="modal-head">
@@ -583,6 +593,7 @@
       </div>
     </div>
 
+    <!-- Modal Adicionais -->
     <div id="extras-modal" class="modal" aria-hidden="true">
       <div class="modal-content" role="dialog" aria-modal="true">
         <div class="modal-head">
@@ -597,6 +608,7 @@
       </div>
     </div>
 
+    <!-- Modal Combo -->
     <div id="combo-modal" class="modal" aria-hidden="true">
       <div class="modal-content" role="dialog" aria-modal="true">
         <div class="modal-head">
@@ -611,6 +623,7 @@
       </div>
     </div>
 
+    <!-- Modal Login -->
     <div id="login-modal" class="modal" aria-hidden="true">
       <div class="modal-content login-box" role="dialog" aria-modal="true">
         <div class="modal-head">
@@ -631,16 +644,151 @@
                    style="padding:14px;border:1px solid #ccc;border-radius:10px;font-size:1rem;"/>
             <input id="login-senha" type="password" placeholder="Sua Senha" required 
                    style="padding:14px;border:1px solid #ccc;border-radius:10px;font-size:1rem;"/>
-            
             <button type="submit" class="btn-primario" style="background:linear-gradient(135deg,var(--success), #388e3c); color:white; border:none; border-radius:10px; padding:14px; font-weight:700; font-size:1rem; cursor:pointer; transition:.2s; box-shadow: 0 4px 6px rgba(0,0,0,.15); margin-top:5px;">Entrar</button>
           </form>
         </div>
       </div>
     </div>
 
+    <!-- Painel Relatórios -->
+    <div class="reports-panel" id="reports-panel" aria-hidden="true">
+      <div class="reports-header">
+        <span style="display:flex; align-items:center; gap:8px;">
+            📊 Relatórios
+            <select id="reports-period-selector" style="padding:4px 8px; border-radius:6px; font-size:.9rem; font-weight:500; border:1px solid #c0c0c0;">
+                <option value="30d">Últimos 30 dias</option>
+                <option value="7d">Últimos 7 dias</option>
+                <option value="90d">Últimos 90 dias</option>
+                <option value="all">Todo Período</option>
+            </select>
+        </span>
+        <button class="reports-close" type="button" aria-label="Fechar painel">✖</button>
+      </div>
+      <div class="reports-body">
+        <input type="text" id="reports-filter-input" placeholder="Filtrar por bairro ou produto..."
+            style="width:100%; padding:10px; margin-bottom:15px; border:1px solid #ccc; border-radius:6px; font-size:1rem; box-shadow:inset 0 1px 3px rgba(0,0,0,0.05);">
+        
+        <div class="reports-tabs" id="reports-tabs">
+            <button class="reports-tab-btn active" data-tab="overview">Visão Geral</button>
+            <button class="reports-tab-btn" data-tab="delivery">Frete</button>
+            <button class="reports-tab-btn" data-tab="orders">Pedidos</button>
+        </div>
+        <div class="reports-content" id="reports-content">
+            <div id="rep-overview" class="reports-content-tab active">
+                <p style="text-align:center; color:#999;">Carregando Visão Geral...</p>
+            </div>
+            <div id="rep-delivery" class="reports-content-tab">
+                <p style="text-align:center; color:#999;">Carregando Métricas de Frete...</p>
+            </div>
+            <div id="rep-orders" class="reports-content-tab">
+                <div style="text-align:right; margin-bottom:10px;">
+                     <button id="export-orders-csv" class="btn-secondary" style="padding:8px 12px;">Exportar CSV 📁</button>
+                </div>
+                <div id="orders-list">
+                    <p style="text-align:center; color:#999;">Carregando Pedidos Detalhados...</p>
+                </div>
+            </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Painel Admin Frete -->
+    <div class="reports-panel frete-admin-panel" id="frete-admin-panel" aria-hidden="true">
+        <div class="reports-header">
+            <span>🚚 Frete Admin - Zonas</span>
+            <button class="reports-close frete-admin-close" type="button" aria-label="Fechar painel">✖</button>
+        </div>
+        <div class="reports-body" style="padding:10px;">
+            <div id="frete-admin-add-form" style="padding:15px; background:#fff; border-radius:8px; margin-bottom:20px; box-shadow:0 1px 3px rgba(0,0,0,.1);">
+                <h4>➕ Nova Zona / Edição</h4>
+                <form id="frete-zona-form" style="display:grid; gap:10px;">
+                    <input type="hidden" id="zona-id-input">
+                    <input type="text" id="zona-nome-input" placeholder="Nome da Zona (ex: Centro)" required style="padding:10px; border:1px solid #ddd; border-radius:6px;">
+                    <input type="number" id="zona-valor-input" placeholder="Valor (R$ 5.00)" step="0.01" required style="padding:10px; border:1px solid #ddd; border-radius:6px;">
+                    <div style="display:flex; align-items:center; gap:10px;">
+                        <input type="checkbox" id="zona-ativo-input" checked>
+                        <label for="zona-ativo-input">Ativa para uso</label>
+                    </div>
+                    <div style="margin-top:10px; border-top:1px dashed #eee; padding-top:10px;">
+                        <label style="font-weight:600;">Bairros (separados por vírgula):</label>
+                        <textarea id="zona-bairros-input" rows="2" placeholder="Rosário, Alvorada, Bela Vista" style="width:100%; padding:10px; border:1px solid #ddd; border-radius:6px; resize:vertical;"></textarea>
+                    </div>
+                    <button type="submit" id="zona-submit-btn" class="btn-primary" style="padding:12px;">Salvar Zona</button>
+                </form>
+            </div>
+
+            <h4>📜 Zonas Cadastradas</h4>
+            <div id="frete-admin-table-container">
+                <p style="text-align:center; color:#999;">Carregando zonas...</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recompensas -->
+    <div class="minhas-recompensas">
+      <button class="recompensas-btn" type="button">🎁 Minhas Recompensas</button>
+      <div class="recompensas-panel" id="recompensas-panel" aria-hidden="true">
+        <div class="recompensas-header">
+          <span>🎁 Minhas Recompensas</span>
+          <button class="fechar-recompensas" type="button" aria-label="Fechar painel">✖</button>
+        </div>
+        <div class="recompensas-body">
+          <h4 style="margin-top:0;">🏆 Contador de Fidelidade</h4>
+          <div class="progress-container" style="margin-bottom:20px;border:1px solid var(--botao);padding:15px;border-radius:8px;background:#fff;box-shadow:var(--shadow-1);">
+            <p style="margin:0 0 8px 0;font-size:1.1rem;">
+              Pedidos Feitos: <span id="contador-valor" style="font-weight:bold;color:var(--danger);">...</span> de <span style="font-weight:bold;">5</span>
+            </p>
+            <div class="progresso-bar-bg" style="background:#eee;height:15px;border-radius:8px;overflow:hidden;">
+              <div id="progresso-bar" style="height:100%;width:0%;transition:width .5s;"></div>
+            </div>
+            <p id="progresso-mensagem" style="margin-top:8px;font-size:.9rem;color:#666;">Carregando progresso...</p>
+          </div>
+
+          <h4 class="recompensas-header-secundario">🏷️ Recompensas Desbloqueadas</h4>
+          <div id="listaRecompensas"></div>
+
+          <h4 class="recompensas-header-secundario">📜 Histórico de Recompensas</h4>
+          <div id="historicoRecompensas">
+            <p class="empty-rewards">Você ainda não recebeu recompensas.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Meus Pedidos -->
+    <div class="meus-pedidos">
+      <button class="meus-pedidos-btn" type="button">📦 Meus Pedidos</button>
+      <div class="pedidos-panel" id="painelPedidos" aria-hidden="true">
+        <div class="pedidos-header">
+          <span>📦 Meus Pedidos</span>
+          <button class="fechar-pedidos" type="button" aria-label="Fechar painel">✖</button>
+        </div>
+        <div class="pedidos-body" id="pedidos-body">
+          <h4 style="margin-top:0;">🔁 Repetir Pedido Recente</h4>
+          <div id="listaPedidos">
+            <p class="empty-orders">Faça login para ver seus pedidos.</p>
+          </div>
+          
+          <h4 style="margin-top:20px;">🚚 Histórico de Entregas</h4>
+          <div id="historicoEntregas">
+              <p class="empty-history" style="text-align:center;color:#999;">Carregando histórico de entregas...</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Cookie Banner -->
+    <div id="cookie-banner" role="region" aria-label="Aviso de Cookies">
+      <p>Usamos cookies para garantir que você tenha a melhor experiência em nosso site.
+        <a href="politica-privacidade.html" target="_blank" rel="noopener">Saiba mais</a>.
+      </p>
+      <button id="cookie-accept" type="button">Aceitar</button>
+    </div>
+
+    <!-- Footer -->
     <footer class="footer">
       <p>📍
-        <a href="https://www.google.com/maps/search/?api=1&query=Rua+dos+Caiçaras,+212,+Patos+de+Minas,+MG" target="_blank" rel="noopener">
+        <a href="https://www.google.com/maps/search/?api=1&query=Rua+dos+Cai%C3%A7aras,+212,+Patos+de+Minas,+MG" target="_blank" rel="noopener">
           Rua dos Caiçaras, 212 — Patos de Minas/MG
         </a>
       </p>
@@ -649,60 +797,11 @@
         <a href="https://www.instagram.com/dafamilialanches" target="_blank" class="footer-btn" rel="noopener">📸 Instagram</a>
         <a href="https://www.ifood.com.br/delivery/patos-de-minas/dafamilialanches" target="_blank" class="footer-btn" rel="noopener">🍔 iFood</a>
       </div>
-      <div class="footer-copy">© 2025 Da Família Lanches — Todos os direitos reservados 🍔 • <b>v3.6.11 Design</b></div>
+      <div class="footer-copy">© 2025 Da Família Lanches — Todos os direitos reservados 🍔 • <b>v3.8.9 Estável</b></div>
     </footer>
   </div>
 
-  <div class="minhas-recompensas">
-    <button class="recompensas-btn" type="button">🎁 Minhas Recompensas</button>
-    <div class="recompensas-panel" id="recompensas-panel" aria-hidden="true">
-      <div class="recompensas-header">
-        <span>🎁 Minhas Recompensas</span>
-        <button class="fechar-recompensas" type="button" aria-label="Fechar painel">✖</button>
-      </div>
-      <div class="recompensas-body">
-        <h4 style="margin-top:0;">🏆 Contador de Fidelidade</h4>
-        <div class="progress-container" style="margin-bottom:20px;border:1px solid var(--botao);padding:15px;border-radius:8px;background:#fff;box-shadow:var(--shadow-1);">
-          <p style="margin:0 0 8px 0;font-size:1.1rem;">
-            Pedidos Feitos: <span id="contador-valor" style="font-weight:bold;color:var(--danger);">...</span> de <span style="font-weight:bold;">5</span>
-          </p>
-          <div class="progresso-bar-bg" style="background:#eee;height:15px;border-radius:8px;overflow:hidden;">
-            <div id="progresso-bar" style="height:100%;width:0%;transition:width .5s;"></div>
-          </div>
-          <p id="progresso-mensagem" style="margin-top:8px;font-size:.9rem;color:#666;">Carregando progresso...</p>
-        </div>
-
-        <h4 class="recompensas-header-secundario">🏷️ Recompensas Desbloqueadas</h4>
-        <div id="listaRecompensas"></div>
-
-        <h4 class="recompensas-header-secundario">📜 Histórico de Recompensas</h4>
-        <div id="historicoRecompensas">
-          <p class="empty-rewards">Você ainda não recebeu recompensas.</p>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <div class="meus-pedidos">
-    <button class="meus-pedidos-btn" type="button">📦 Meus Pedidos</button>
-    <div class="pedidos-panel" id="painelPedidos" aria-hidden="true">
-      <div class="pedidos-header">
-        <span>📦 Meus Pedidos</span>
-        <button class="fechar-pedidos" type="button" aria-label="Fechar painel">✖</button>
-      </div>
-      <div class="pedidos-body" id="listaPedidos">
-        <p class="empty-orders">Faça login para ver seus pedidos.</p>
-      </div>
-    </div>
-  </div>
-
-  <div id="cookie-banner" role="region" aria-label="Aviso de Cookies">
-    <p>Usamos cookies para garantir que você tenha a melhor experiência em nosso site.
-      <a href="politica-privacidade.html" target="_blank" rel="noopener">Saiba mais</a>.
-    </p>
-    <button id="cookie-accept" type="button">Aceitar</button>
-  </div>
-
-  <script defer src="script.js?v=3.6.10"></script>
+  <!-- Script principal do projeto -->
+  <script defer src="script.js?v=3.8.9"></script>
 </body>
 </html>
