@@ -180,8 +180,8 @@
       opacity:0; pointer-events:none; transition:opacity .2s; z-index:980
     }
     #cart-backdrop.active{opacity:1; pointer-events:auto}
-    .mini-cart,.modal,.pedidos-panel,.recompensas-panel{position:fixed; z-index:990; display:none}
-    .mini-cart.active,.modal.show,.pedidos-panel.active,.recompensas-panel.active{display:block}
+    .mini-cart,.modal,.pedidos-panel,.recompensas-panel, .reports-panel{position:fixed; z-index:990; display:none}
+    .mini-cart.active,.modal.show,.pedidos-panel.active,.recompensas-panel.active, .reports-panel.active{display:block}
 
     /* ================= MINI-CART LATERAL ================= */
     .mini-cart{
@@ -244,28 +244,32 @@
     .btn-secondary{background:transparent; color:#555; border:1px solid #ddd}
     .btn-secondary:hover{background:#f1f1f1; border-color:#ccc}
 
-    /* ================= BOTÕES/Painéis (Pedidos / Recompensas) ================= */
+    /* ================= BOTÕES/Painéis (Pedidos / Recompensas / Relatórios) ================= */
     .meus-pedidos{position:fixed; bottom:20px; right:20px; z-index:1500}
     .meus-pedidos-btn,.recompensas-btn{
       background:linear-gradient(135deg,#ffca28,#ffb300); color:#222; border:none; border-radius:20px;
       font-weight:700; font-size:.95rem; padding:12px 22px; box-shadow:0 4px 10px rgba(0,0,0,.2); cursor:pointer; transition:.2s
     }
     .meus-pedidos-btn:hover,.recompensas-btn:hover{transform:scale(1.05); box-shadow:0 6px 15px rgba(0,0,0,.3)}
-    .pedidos-panel,.recompensas-panel{
+    
+    /* Painéis Laterais */
+    .pedidos-panel,.recompensas-panel, .reports-panel{
       right:-100%; top:0; width:min(95%,440px); height:100vh; background:#f4f4f4;
       box-shadow:-4px 0 18px rgba(0,0,0,.3); transition:right .4s; display:flex; flex-direction:column
     }
-    .pedidos-panel.active,.recompensas-panel.active{right:0}
-    .pedidos-header,.recompensas-header{
+    .pedidos-panel.active,.recompensas-panel.active, .reports-panel.active{right:0}
+    
+    .pedidos-header,.recompensas-header, .reports-header{
       display:flex; justify-content:space-between; align-items:center;
       padding:16px 20px; background:#ffca28; font-weight:700; font-size:1.2rem; color:#222; box-shadow:var(--shadow-in)
     }
-    .pedidos-body,.recompensas-body{flex:1; overflow:auto; padding:16px}
-    .fechar-pedidos,.fechar-recompensas,.extras-close,.combo-close,.login-close{
+    .pedidos-body,.recompensas-body, .reports-body{flex:1; overflow:auto; padding:16px}
+    
+    .fechar-pedidos,.fechar-recompensas,.reports-close,.extras-close,.combo-close,.login-close{
       background:var(--botao); border:none; border-radius:50%; width:30px; height:30px; font-size:18px; font-weight:700;
       cursor:pointer; line-height:30px; text-align:center; color:#222; transition:.2s
     }
-    .fechar-pedidos:hover,.fechar-recompensas:hover,.extras-close:hover,.combo-close:hover,.login-close:hover{
+    .fechar-pedidos:hover,.fechar-recompensas:hover,.reports-close:hover,.extras-close:hover,.combo-close:hover,.login-close:hover{
       background:#ff7043; color:#fff; transform:scale(1.1)
     }
     /* CORREÇÃO MODAL ADICIONAIS: Para o layout vertical e card */
@@ -319,6 +323,67 @@
         border-top: 1px dashed #eee;
         padding-top: 5px;
     }
+    
+    /* DFL v3.7.3: Estilos para o Painel de Relatórios */
+    .reports-tabs {
+        display: flex;
+        border-bottom: 2px solid #ddd;
+        margin-bottom: 15px;
+        padding: 0 10px;
+    }
+    .reports-tab-btn {
+        flex: 1;
+        background: none;
+        border: none;
+        padding: 12px 0;
+        margin: 0 5px;
+        font-weight: 600;
+        cursor: pointer;
+        color: #777;
+        border-bottom: 2px solid transparent;
+        transition: all 0.2s;
+        font-size: 0.9rem;
+    }
+    .reports-tab-btn.active {
+        color: var(--danger);
+        border-bottom: 2px solid var(--danger);
+    }
+    .reports-content-tab {
+        display: none;
+        padding: 10px;
+        background: #fff;
+        border-radius: 8px;
+        margin-bottom: 10px;
+        box-shadow: var(--shadow-1);
+    }
+    .reports-content-tab.active {
+        display: block;
+    }
+    .reports-metric-card {
+        padding: 10px;
+        border-radius: 8px;
+        background: var(--bg2);
+        margin-bottom: 10px;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        font-weight: 600;
+        font-size: 0.95rem;
+    }
+    .reports-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 15px;
+        font-size: 0.85rem;
+    }
+    .reports-table th, .reports-table td {
+        border: 1px solid #eee;
+        padding: 8px;
+        text-align: left;
+    }
+    .reports-table th {
+        background: #ffb300;
+        color: #222;
+        font-weight: 700;
+    }
 
     /* ================= FOOTER ================= */
     .footer{background:#ffca28; text-align:center; padding:20px; font-size:.9rem; color:#222}
@@ -348,15 +413,15 @@
       .card img{height:140px}
       .c-btn{width:32px; height:32px; font-size:20px}
       .c-prev{left:4px}.c-next{right:4px}
-      .pedidos-panel,.recompensas-panel{width:100%; max-width:100%}
+      .pedidos-panel,.recompensas-panel, .reports-panel{width:100%; max-width:100%}
       #cookie-banner{flex-direction:column; text-align:center; gap:12px}
       #cookie-banner p{margin-right:0}
       #cookie-banner button{width:100%; padding:12px}
     }
   </style>
 
-  <link rel="stylesheet" href="style.css?v=3.7.2" media="print" onload="this.media='all'"/>
-  <noscript><link rel="stylesheet" href="style.css?v=3.7.2"/></noscript>
+  <link rel="stylesheet" href="style.css?v=3.7.3" media="print" onload="this.media='all'"/>
+  <noscript><link rel="stylesheet" href="style.css?v=3.7.3"/></noscript>
 
   <script defer src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
   <script defer src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
@@ -465,10 +530,10 @@
         <textarea id="address-input" rows="2" placeholder="Rua, número, complemento, bairro"
             style="width:100%;border:1px solid #ddd;border-radius:10px;padding:10px;resize:vertical;margin-bottom:10px"></textarea>
     
-        <button id="finish-order" type="button" style="width:100%;background:#4caf50;color:#fff;border:none;border-radius:10px;padding:12px;font-weight:700;cursor:pointer;margin-bottom:8px">
+        <button id="finish-order" class="btn-primary" type="button" style="width:100%;margin-bottom:8px">
             Finalizar Pedido 🛍️
         </button>
-        <button id="clear-cart" type="button" style="width:100%;background:#ff4081;color:#fff;border:none;border-radius:10px;padding:10px;font-weight:700;cursor:pointer">
+        <button id="clear-cart" class="btn-secondary" type="button" style="width:100%;">
             Limpar Carrinho
         </button>
         
@@ -731,6 +796,43 @@
       </div>
     </div>
 
+    <div class="reports-panel" id="reports-panel" aria-hidden="true">
+      <div class="reports-header">
+        <span style="display: flex; align-items: center; gap: 8px;">
+            📊 Relatórios
+            <select id="reports-period-selector" style="padding: 4px 8px; border-radius: 6px; font-size: 0.9rem; font-weight: 500; border: 1px solid #c0c0c0;">
+                <option value="30d">Últimos 30 dias</option>
+                <option value="7d">Últimos 7 dias</option>
+                <option value="90d">Últimos 90 dias</option>
+                <option value="all">Todo Período</option>
+            </select>
+        </span>
+        <button class="reports-close" type="button" aria-label="Fechar painel">✖</button>
+      </div>
+      <div class="reports-body">
+        <div class="reports-tabs" id="reports-tabs">
+            <button class="reports-tab-btn active" data-tab="overview">Visão Geral</button>
+            <button class="reports-tab-btn" data-tab="delivery">Frete</button>
+            <button class="reports-tab-btn" data-tab="orders">Pedidos</button>
+        </div>
+        <div class="reports-content" id="reports-content">
+            <div id="rep-overview" class="reports-content-tab active">
+                <p style="text-align:center; color:#999;">Carregando Visão Geral...</p>
+            </div>
+            <div id="rep-delivery" class="reports-content-tab">
+                <p style="text-align:center; color:#999;">Carregando Métricas de Frete...</p>
+            </div>
+            <div id="rep-orders" class="reports-content-tab">
+                <div style="text-align: right; margin-bottom: 10px;">
+                     <button id="export-orders-csv" class="btn-secondary" style="padding: 8px 12px;">Exportar CSV 📁</button>
+                </div>
+                <div id="orders-list">
+                    <p style="text-align:center; color:#999;">Carregando Pedidos Detalhados...</p>
+                </div>
+            </div>
+        </div>
+      </div>
+    </div>
     <footer class="footer">
       <p>📍
         <a href="https://www.google.com/maps/search/?api=1&query=Rua+dos+Caiçaras,+212,+Patos+de+Minas,+MG" target="_blank" rel="noopener">
@@ -742,7 +844,7 @@
         <a href="https://www.instagram.com/dafamilialanches" target="_blank" class="footer-btn" rel="noopener">📸 Instagram</a>
         <a href="https://www.ifood.com.br/delivery/patos-de-minas/dafamilialanches" target="_blank" class="footer-btn" rel="noopener">🍔 iFood</a>
       </div>
-      <div class="footer-copy">© 2025 Da Família Lanches — Todos os direitos reservados 🍔 • <b>v3.7.2 Design</b></div>
+      <div class="footer-copy">© 2025 Da Família Lanches — Todos os direitos reservados 🍔 • <b>v3.7.3 Design</b></div>
     </footer>
   </div>
 
@@ -805,6 +907,6 @@
     <button id="cookie-accept" type="button">Aceitar</button>
   </div>
 
-  <script defer src="script.js?v=3.7.2"></script>
+  <script defer src="script.js?v=3.7.3"></script>
 </body>
 </html>
