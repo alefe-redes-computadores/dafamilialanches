@@ -1,22 +1,19 @@
 /* =========================================================
-   🚀 DFL v3.7.2 — HISTÓRICO DE ENTREGAS + PERSISTÊNCIA DE FRETE
-   - Adiciona gravação automática do destino e valor do frete no Firestore
-   - Amplia o painel "📦 Meus Pedidos" com o Histórico de Entregas
+   🚀 DFL v3.7.3 — RELATÓRIOS INTERNOS + MÉTRICAS DE FRETE
+   - Painel de relatórios on-demand (lazy queries)
+   - Visão Geral, Frete e Pedidos (CSV)
+   - Compatível com base monolítica estável
+   - Sem dependências externas; não altera rotinas críticas
 
-   🧩 Estrutura Base:
-   1️⃣ Persistência: grava freteDestino e freteValor em cada pedido
-   2️⃣ Histórico: exibe os dados no painel de pedidos
-   3️⃣ Logs: [DFL/FRETE/HIST] em cada operação
-   4️⃣ Segurança: somente para usuários autenticados
+   ⚙️ Segurança & Performance:
+   - Executa só após Firebase pronto
+   - Carrega dados apenas quando o painel abre
+   - Logs para debug: [DFL/REPORTS]
 
-   ⚙️ Compatibilidade:
-   - Mantém integração total com Firebase Lazy Load
-   - Nenhum impacto nas funções de cupons, som ou recompensas
-
-   📅 Planejamento:
-   - v3.7.0 → módulo inócuo validado
-   - v3.7.1 → frete funcional ativo
-   - v3.7.2 → persistência e histórico de entregas
+   📅 Roadmap:
+   - v3.7.2 ✔️ Persistência & histórico de frete
+   - v3.7.3 ▶️ Relatórios internos (este pacote)
+   - v3.7.4 ⏭️ Filtros avançados + gráficos (se necessário)
    ========================================================= */
 
 // 🔧 Feature Flags (habilitar quando pronto)
@@ -67,7 +64,7 @@ document.addEventListener("DOMContentLoaded", () => {
   
   // O array estático RECOMPENSAS_DATA FOI REMOVIDO E SERÁ CARREGADO DINAMICAMENTE
 
-  /* ------------------ 🎯 ELEMENTOS (INJEÇÃO DE FRETE + HISTÓRICO) ------------------ */
+  /* ------------------ 🎯 ELEMENTOS (DFL v3.7.3: Adição de Relatórios) ------------------ */
   const el = {
     cartIcon: document.getElementById("cart-icon"),
     cartCount: document.getElementById("cart-count"),
@@ -90,8 +87,8 @@ document.addEventListener("DOMContentLoaded", () => {
     userBtn: document.getElementById("user-btn"),
     statusBanner: document.getElementById("status-banner"),
     hoursBanner: document.querySelector(".hours-banner"),
-    reportsBtn: document.getElementById("reports-btn"), 
-    
+    reportsBtn: document.getElementById("reports-btn"), // DFL v3.7.3
+
     // Elementos v2.7
     promoModal: document.getElementById("promo-modal"),
     promoImg: document.getElementById("promo-modal-img"),
@@ -124,8 +121,18 @@ document.addEventListener("DOMContentLoaded", () => {
     freteDisplayLine: document.getElementById("frete-display-line"),
     freteValorDisplay: document.getElementById("frete-valor-display"),
 
-    // DFL v3.7.2: Novo elemento para Histórico de Entregas (Ação 2)
+    // DFL v3.7.2: Novo elemento para Histórico de Entregas
     historicoEntregas: document.getElementById("historicoEntregas"),
+
+    // DFL v3.7.3: Elementos do Painel de Relatórios
+    reportsPanel: document.getElementById("reports-panel"),
+    reportsClose: document.querySelector("#reports-panel .reports-close"),
+    reportsTabs: document.getElementById("reports-tabs"),
+    repOverview: document.getElementById("rep-overview"),
+    repDelivery: document.getElementById("rep-delivery"),
+    repOrders: document.getElementById("rep-orders"),
+    repPeriodSelector: document.getElementById("reports-period-selector"),
+    exportOrdersCSV: document.getElementById("export-orders-csv"),
   };
   
   // Garantia do elemento do histórico (MANTIDO)
@@ -160,15 +167,16 @@ document.addEventListener("DOMContentLoaded", () => {
   const Overlays = {
     closeAll() {
       document
-        .querySelectorAll(".modal.show, #mini-cart.active, .pedidos-panel.active, .recompensas-panel.active, #admin-dashboard.show") 
+        .querySelectorAll(".modal.show, #mini-cart.active, .pedidos-panel.active, .recompensas-panel.active, .reports-panel.active") 
         .forEach((e) => e.classList.remove("show", "active"));
       Backdrop.hide();
     },
     open(modalLike) {
       Overlays.closeAll();
       if (!modalLike) return;
+      // DFL v3.7.3: Adicionado .reports-panel.active
       modalLike.classList.add(
-        (modalLike.id === "mini-cart" || modalLike.id === "painelPedidos" || modalLike.id === "recompensas-panel") ? "active" : "show"
+        (modalLike.id === "mini-cart" || modalLike.id === "painelPedidos" || modalLike.id === "recompensas-panel" || modalLike.id === "reports-panel") ? "active" : "show"
       );
       Backdrop.show();
     },
@@ -388,6 +396,16 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   /* ------------------ SETUP LISTENERS E AUTH (V3.6.0) ------------------ */
+  const ADMINS = [
+    "alefejohsefe@gmail.com",
+    "kalebhstanley650@gmail.com",
+    "contato@dafamilialanches.com.br"
+  ];
+  
+  function isAdmin(user) {
+    return user && user.email && ADMINS.includes(user.email.toLowerCase());
+  }
+
   function setupAuthListener() {
     auth.onAuthStateChanged(user => {
       currentUser = user; 
@@ -402,15 +420,16 @@ document.addEventListener("DOMContentLoaded", () => {
         if (el.pedidosContainer) el.pedidosContainer.style.display = 'none';
         if (el.recompensasContainer) el.recompensasContainer.style.display = 'none';
       }
-
+      
+      // DFL v3.7.3: Habilitar botão de Relatórios (Ação 1)
       if (user && isAdmin(user)) {
         if (el.reportsBtn) {
-          createAdminFab();
+            el.reportsBtn.style.display = 'inline-block';
+            el.reportsBtn.removeEventListener('click', DFL_ReportsIntegration);
+            el.reportsBtn.addEventListener('click', DFL_ReportsIntegration);
         }
       } else {
         if (el.reportsBtn) el.reportsBtn.style.display = "none";
-        document.getElementById("admin-dashboard")?.remove();
-        // Overlays.closeAll(); // Removido para evitar fechar modais no carregamento
       }
     });
   }
@@ -854,7 +873,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const d = await validarCupomFirestore(couponApplied, subtotal); 
     
     // 2. Entrega (Valor obtido do módulo DFL_Frete)
-    let delivery = window.DFL_Frete?.getFrete() || 0.00; // Obtém o frete calculado por bairro/CEP
+    let delivery = window.DFL_Frete?.getFreteValor() || 0.00; // Obtém o frete calculado por bairro/CEP
 
     // 3. Aplica o frete grátis do cupom, se houver
     if (d.freeShipping) {
@@ -1128,9 +1147,6 @@ window.DFL_Frete = (function() {
         if (el.freteStatusMsg) el.freteStatusMsg.style.display = 'none';
         if (el.freteInput) el.freteInput.value = '';
         if (el.freteDisplayLine) el.freteDisplayLine.style.display = "none";
-        
-        // Se o carrinho estava vazio, updateCartTotals() não foi chamado. Chama agora para zerar o Total.
-        // window.updateCartTotals() será chamado logo após renderMiniCart, evitando chamadas duplas aqui.
     }
 
     // Retorna a interface pública do módulo
@@ -1400,6 +1416,10 @@ window.DFL_Frete = (function() {
           r.limite === feitos && (r.limite / (RECOMPENSAS_DATA[0]?.limite || 1)) > nivelAtual
       );
       
+      // 🚨 DFL v3.7.3 - Opcional: Geração de Cupom "Fidelidade 5/5"
+      // Se a meta atingida for 5 e o tipo for cupom, podemos ter a lógica de 1ª etapa de fidelidade aqui.
+      // (O código abaixo já trata a recompensa, então não há necessidade de código extra a menos que a meta seja sempre 5)
+      
       if (recompensaAtingida) {
           const primeiroLimite = RECOMPENSAS_DATA[0]?.limite || 1;
           const novoNivel = recompensaAtingida.limite / primeiroLimite; 
@@ -1496,7 +1516,7 @@ window.DFL_Frete = (function() {
     el.pedidosLista.innerHTML = `<p class="empty-orders">Carregando pedidos...</p>`;
 
     try {
-      const q = db.collection("Pedidos").where("userId", "==", userId).orderBy("data", "desc");
+      const q = db.collection("Pedidos").where("userId", "==", userId).orderBy("data", "desc").limit(10); // Limita para melhor performance
       const snapshot = await q.get();
 
       if (snapshot.empty) {
@@ -1626,7 +1646,7 @@ async function carregarHistoricoEntregas(userId) {
 
     try {
         // Busca todos os pedidos do usuário, ordenados por data
-        const q = db.collection("Pedidos").where("userId", "==", userId).orderBy("data", "desc");
+        const q = db.collection("Pedidos").where("userId", "==", userId).orderBy("data", "desc").limit(10);
         const snapshot = await q.get();
 
         if (snapshot.empty) {
@@ -1664,12 +1684,6 @@ function exibirHistoricoEntregas(pedidos) {
               })
             : "—";
             
-        // Exemplo visual solicitado:
-        // 📦 Pedido #12345
-        // 🗓️ 06/11/2025 - 20:37
-        // 🚚 Entrega: Centro — R$ 5,00
-        // 💰 Total: R$ 74,99
-
         return `
             <div class="historico-frete-card">
                 <h4>📦 Pedido #${p.id.substring(0, 8)}</h4>
@@ -1768,7 +1782,7 @@ async function carregarRecompensas(userId) {
         // Verifica o Status da Meta
         if (proximaRecompensa) {
             // A meta ainda não foi atingida
-            const faltam = proximaRecompensa.limite - feitos;
+            const faltam = proximaRexima.limite - feitos;
             
             // 🚨 CORREÇÃO DE TEXTO: Usa o 'titulo' para exibir a recompensa na mensagem
             const tituloRecompensa = proximaRecompensa.titulo || proximaRecompensa.valor;
@@ -1970,274 +1984,409 @@ async function carregarHistoricoRecompensas(userId) {
 
 /* ------------------ FIM DO BLOCO V3.5.3 ------------------ */
 
+// =========================================================
+// DFL v3.7.3: MÓDULO DE RELATÓRIOS INTERNOS (Ações 2, 3, 4, 5)
+// =========================================================
+window.DFL_Reports = (() => {
+  let isEnabled = true;
+  let isOpen = false;
+  let currentRange = '30d';
+  let cache = { overview: null, delivery: null, orders: null };
+  const log = (...a) => console.log('[DFL/REPORTS]', ...a);
+  const logError = (msg, e) => console.error('[DFL/REPORTS] ERRO: ' + msg, e);
 
-  /* =========================================================
-     📊 ADMIN DASHBOARD (MANTIDO)
-  ========================================================= */
-  const ADMINS = [
-    "alefejohsefe@gmail.com",
-    "kalebhstanley650@gmail.com",
-    "contato@dafamilialanches.com.br"
-  ];
-  // ... (RESTANTE DO CÓDIGO DO ADMIN DASHBOARD MANTIDO)
+  function ensurePanel() {
+    // O Painel Reports já existe no HTML (reports-panel) - Ação 2
+    if (el.reportsPanel) return true;
+    logError("Painel #reports-panel não encontrado no DOM.");
+    return false;
+  }
+  
+  // DFL v3.7.3: Função auxiliar para calcular o início do período
+  function getDateRange(range) {
+    const now = new Date();
+    const start = new Date(now);
+    start.setHours(0, 0, 0, 0);
 
-  function isAdmin(user) {
-    return user && user.email && ADMINS.includes(user.email.toLowerCase());
+    if (range === '7d') start.setDate(now.getDate() - 7);
+    else if (range === '30d') start.setDate(now.getDate() - 30);
+    else if (range === '90d') start.setDate(now.getDate() - 90);
+    else if (range === 'all') return null; // Não aplica filtro de data
+    
+    return start;
   }
 
-  let chartPedidos = null;
-  let chartProdutos = null;
-
-  function ensureChartJS(cb) {
-    if (window.Chart) return cb();
-    const s = document.createElement("script");
-    s.src = "https://cdn.jsdelivr.net/npm/chart.js";
-    s.onload = cb;
-    document.head.appendChild(s);
-  }
-
-  function createDashboard() {
-    if (document.getElementById("admin-dashboard")) return;
-
-    const div = document.createElement("div");
-    div.id = "admin-dashboard";
-    div.className = "modal";
-    div.innerHTML = `
-      <div class="modal-content" style="max-width:1000px;width:95%;height:85vh;overflow:auto;background:#fff;border-radius:12px;">
-        <div class="modal-head" style="display:flex;justify-content:space-between;align-items:center;padding:10px 14px;">
-          <h3>📊 Relatórios e Estatísticas</h3>
-          <button class="dashboard-close" type="button" style="background:#ff5252;color:#fff;border:none;border-radius:6px;padding:6px 10px;cursor:pointer;font-weight:600;">✖</button>
-        </div>
-        <div class="dashboard-body" style="padding:12px;">
-          <div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:12px;">
-            <div id="card-total" class="cardBox">Total Arrecadado: —</div>
-            <div id="card-pedidos" class="cardBox">Pedidos: —</div>
-            <div id="card-ticket" class="cardBox">Ticket Médio: —</div>
-          </div>
-
-          <div style="margin-bottom:10px;">
-            <label style="font-weight:600;">Período: </label>
-            <select id="filter-period" style="padding:6px 10px;border-radius:6px;border:1px solid #ccc;font-weight:600;">
-              <option value="7">Últimos 7 dias</option>
-              <option value="30">Últimos 30 dias</option>
-              <option value="all">Todos</option>
-            </select>
-          </div>
-
-          <canvas id="chart-pedidos" style="width:100%;height:240px;"></canvas>
-          <canvas id="chart-produtos" style="width:100%;height:240px;margin-top:16px;"></canvas>
-          <div style="margin-top:12px;">
-            <button id="export-csv" type="button" style="background:#4caf50;color:#fff;border:none;border-radius:8px;padding:10px 16px;font-weight:600;cursor:pointer;">📁 Exportar CSV</button>
-          </div>
-        </div>
-      </div>`;
-    document.body.appendChild(div);
-
-    document.querySelectorAll(".cardBox").forEach(c => {
-      Object.assign(c.style, {
-        flex: "1", minWidth: "200px", padding: "12px",
-        background: "#f9f9f9", borderRadius: "8px",
-        boxShadow: "0 2px 8px rgba(0,0,0,.08)"
-      });
-    });
-
-    div.querySelector(".dashboard-close").addEventListener("click", () => Overlays.closeAll());
-  }
-
-  function createAdminFab() {
-    if (el.reportsBtn) {
-      el.reportsBtn.style.display = "block";
-      el.reportsBtn.addEventListener("click", () => {
-        createDashboard();
-        ensureChartJS(() => carregarRelatorios("7"));
-        Overlays.open(document.getElementById("admin-dashboard"));
-      });
-    }
-  }
-
-/* ------------------ 📊 Função dos Gráficos (MANTIDO) ------------------ */
-  function gerarResumoECharts(pedidos) {
-    if (!window.Chart) {
-      console.error("Chart.js não está carregado.");
+  async function open(range = currentRange) {
+    if (!currentUser || !isAdmin(currentUser)) {
+      logError("Acesso negado. Usuário não é admin.");
       return;
     }
     
-    const ctxPedidos = document.getElementById('chart-pedidos')?.getContext('2d');
-    const ctxProdutos = document.getElementById('chart-produtos')?.getContext('2d');
+    if (!ensurePanel() || !isEnabled) return;
+    
+    Overlays.open(el.reportsPanel);
+    currentRange = range;
+    isOpen = true;
+    
+    // DFL v3.7.3: BIND dos botões de abas e seletor de período
+    bindReportListeners();
 
-    if (!ctxPedidos || !ctxProdutos) {
-      console.error("Elementos <canvas> dos gráficos não encontrados.");
-      return;
-    }
+    // Resetar abas para garantir que a Overview seja a primeira
+    const tabs = document.querySelectorAll('.reports-tab-btn');
+    const contents = document.querySelectorAll('.reports-content-tab');
+    if (tabs.length) tabs[0].click(); // Abre a primeira aba
 
-    // --- Gráfico 1: Pedidos por Dia (Gráfico de Linha) ---
-    const pedidosPorDia = {};
-    pedidos.forEach(p => {
-      const dia = (p.data?.toDate?.() || new Date(p.data)).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' });
-      pedidosPorDia[dia] = (pedidosPorDia[dia] || 0) + 1;
-    });
-
-    const labelsPedidos = Object.keys(pedidosPorDia).sort((a, b) => {
-      const [diaA, mesA] = a.split('/');
-      const [diaB, mesB] = b.split('/');
-      return new Date(`${mesA}/${diaA}/2025`) - new Date(`${mesB}/${diaB}/2025`);
-    });
-    const dataPedidos = labelsPedidos.map(label => pedidosPorDia[label]);
-
-    if (chartPedidos) {
-      chartPedidos.destroy();
-    }
-    chartPedidos = new Chart(ctxPedidos, {
-      type: 'line',
-      data: {
-        labels: labelsPedidos,
-        datasets: [{
-          label: 'Pedidos por Dia',
-          data: dataPedidos,
-          backgroundColor: 'rgba(255, 179, 0, 0.2)',
-          borderColor: '#ffb300',
-          borderWidth: 2,
-          fill: true,
-          tension: 0.1
-        }]
-      },
-      options: {
-        responsive: true,
-        plugins: {
-          title: { display: true, text: 'Volume de Pedidos por Dia' }
-        }
-      }
-    });
-
-    // --- Gráfico 2: Produtos Mais Vendidos (Gráfico de Barras) ---
-    const produtosContagem = {};
-    pedidos.forEach(p => {
-      (p.itens || []).forEach(itemStr => {
-        const parts = itemStr.split(' x');
-        const nome = parts[0];
-        const qtd = parts.length > 1 ? parseInt(parts[1], 10) : 1;
-        
-        if (nome) {
-          produtosContagem[nome] = (produtosContagem[nome] || 0) + (isNaN(qtd) ? 1 : qtd);
-        }
-      });
-    });
-
-    const produtosOrdenados = Object.entries(produtosContagem)
-      .sort(([, a], [, b]) => b - a)
-      .slice(0, 10); 
-
-    const labelsProdutos = produtosOrdenados.map(p => p[0]);
-    const dataProdutos = produtosOrdenados.map(p => p[1]);
-
-    if (chartProdutos) {
-      chartProdutos.destroy();
-    }
-    chartProdutos = new Chart(ctxProdutos, {
-      type: 'bar',
-      data: {
-        labels: labelsProdutos,
-        datasets: [{
-          label: 'Itens Mais Vendidos',
-          data: dataProdutos,
-          backgroundColor: '#ff7043',
-          borderColor: '#d84315',
-          borderWidth: 1
-        }]
-      },
-      options: {
-        indexAxis: 'y',
-        responsive: true,
-        plugins: {
-          title: { display: true, text: 'Top 10 Itens Mais Vendidos' }
-        }
-      }
-    });
+    // Forçar recarga (passando range, não usando cache)
+    await loadData(range, true); 
+    log('Painel aberto com range:', range);
   }
+  
+  // DFL v3.7.3: BIND dos listeners da UI do Reports Panel
+  function bindReportListeners() {
+    if (el.reportsPanel._listenersBound) return;
+    
+    // Fechar painel
+    el.reportsClose?.addEventListener('click', () => Overlays.closeAll());
 
-/* ------------------ 📊 Carregar Relatórios (MANTIDO) ------------------ */
-  function carregarRelatorios(periodo = "7") {
-    const agora = new Date();
-    let start = new Date(0);
-    if (periodo !== "all") {
-      start = new Date(agora);
-      start.setDate(start.getDate() - Number(periodo));
-    }
-
-    db.collection("Pedidos")
-      .orderBy("data", "desc")
-      .get()
-      .then(snap => {
-        const pedidos = snap.docs.map(d => {
-          const p = d.data() || {};
-          const subtotal = Number(p.subtotal ?? 0);
-          const entrega  = Number(p.entrega  ?? 0);
-          const desconto = Number(p.desconto ?? 0);
-          const total    = Number(p.total    ?? (subtotal + entrega - desconto)) || 0;
-
-          return {
-            ...p,
-            id: d.id,
-            subtotal,
-            entrega,
-            desconto,
-            total,
-            data: typeof p.data === "string"
-              ? new Date(p.data)
-              : (p.data?.toDate?.() ? p.data.toDate() : new Date(0)),
-            itens: Array.isArray(p.itens)
-              ? p.itens
-              : (typeof p.itens === "string" ? p.itens.split("; ") : [])
-          };
+    // Abas
+    el.reportsTabs?.querySelectorAll('.reports-tab-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            const tab = e.target.dataset.tab;
+            document.querySelectorAll('.reports-tab-btn').forEach(b => b.classList.remove('active'));
+            document.querySelectorAll('.reports-content-tab').forEach(c => c.classList.remove('active'));
+            e.target.classList.add('active');
+            document.getElementById(`rep-${tab}`)?.classList.add('active');
         });
+    });
+    
+    // Seletor de Período
+    el.repPeriodSelector?.addEventListener('change', (e) => {
+        const newRange = e.target.value;
+        currentRange = newRange;
+        // Limpa o cache e recarrega os dados para o novo período
+        loadData(newRange, true);
+    });
 
-        const filtrados = pedidos.filter(p => periodo === "all" || (p.data >= start));
+    // Exportar CSV
+    el.exportOrdersCSV?.addEventListener('click', () => {
+        const data = cache.orders;
+        if (!data || data.length === 0) return popupAdd('Nenhum pedido para exportar.');
         
-        gerarResumoECharts(filtrados); 
+        // Ação 4: Exportar CSV
+        const safeRows = data.map(p => ({
+            ID: p.id.substring(0,8),
+            Data: p.data?.toLocaleString('pt-BR'),
+            Itens_Count: p.itens?.length || 0,
+            Subtotal: String(p.subtotal).replace('.', ','),
+            Desconto: String(p.desconto).replace('.', ','),
+            Frete: String(p.frete).replace('.', ','),
+            Total: String(p.total).replace('.', ','),
+            Cupom: p.cupom || '',
+            Destino_Frete: p.freteDestino || '',
+            Endereco_Completo: p.endereco ? `"${p.endereco.replace(/"/g, '""')}"` : ''
+        }));
         
-        const totalVendido = filtrados.reduce((s, p) => s + p.total, 0);
-        const numPedidos = filtrados.length;
-        const ticketMedio = numPedidos > 0 ? totalVendido / numPedidos : 0;
-        
-        document.getElementById("card-total").textContent = `Total Arrecadado: ${money(totalVendido)}`;
-        document.getElementById("card-pedidos").textContent = `Pedidos: ${numPedidos}`;
-        document.getElementById("card-ticket").textContent = `Ticket Médio: ${money(ticketMedio)}`;
+        exportCSV(safeRows, `pedidos_dfl_v373_${currentRange}.csv`);
+    });
 
-        document.getElementById("export-csv").onclick = () => {
-            let csv = "ID;Data;Usuario;Nome;Itens;Subtotal;Entrega;Desconto;Cupom;Total;Endereco\n";
-            filtrados.forEach(p => {
-                const linha = [
-                    p.id || 'N/A',
-                    (p.data?.toLocaleString ? p.data.toLocaleString('pt-BR') : new Date(p.data).toLocaleString('pt-BR')),
-                    p.usuario || p.email || '',
-                    p.nome || '',
-                    `"${(p.itens || []).join(', ')}"`,
-                    String(p.subtotal.toFixed(2)).replace('.',','),
-                    String(p.entrega.toFixed(2)).replace('.',','),
-                    String(p.desconto.toFixed(2)).replace('.',','),
-                    p.cupom || '',
-                    String(p.total.toFixed(2)).replace('.',','),
-                    `"${(p.endereco || '').replace(/"/g, '""')}"`
-                ].join(';');
-                csv += linha + '\n';
-            });
-            const blob = new Blob([`\uFEFF${csv}`], { type: 'text/csv;charset=utf-8;' });
-            const link = document.createElement('a');
-            link.href = URL.createObjectURL(blob);
-            link.download = `pedidos_dfl_${periodo}.csv`;
-            link.click();
-            popupAdd('Exportando CSV...');
-        };
+    el.reportsPanel._listenersBound = true;
+  }
+  
+  // Função central para buscar todos os dados
+  async function loadData(range, forceReload = false) {
+    if (!db) { disableForSafety(); return; }
 
-      })
-      .catch(err => alert("Erro ao carregar relatórios: ".concat(err.message)));
+    // DFL v3.7.3: Set spinners
+    el.repOverview.innerHTML = `<p style="text-align:center; color:#999;">Carregando Visão Geral...</p>`;
+    el.repDelivery.innerHTML = `<p style="text-align:center; color:#999;">Carregando Métricas de Frete...</p>`;
+    el.repOrders.querySelector('#orders-list').innerHTML = `<p style="text-align:center; color:#999;">Carregando Pedidos Detalhados...</p>`;
 
-    const sel = document.getElementById("filter-period");
-    if (sel && !sel._bound) {
-      sel.addEventListener("change", e => carregarRelatorios(e.target.value));
-      sel._bound = true;
+    if (forceReload) cache = { overview: null, delivery: null, orders: null };
+    
+    try {
+        await Promise.all([
+            fetchOverview(range),
+            fetchDelivery(range),
+            fetchOrders(range, { limit: 50 })
+        ]);
+        renderAll();
+    } catch (e) {
+        logError("Falha ao carregar dados dos relatórios. Firestore indisponível?", e);
+        el.repOverview.innerHTML = `<p style="color:red; text-align:center;">Erro ao carregar dados. Tente recarregar.</p>`;
     }
   }
+
+
+  // ======== Fetchers (Firestore) ========
+  async function fetchOrdersData(range, limit = Infinity) {
+    const start = getDateRange(range);
+    let query = db.collection("Pedidos").orderBy("data", "desc");
+    
+    if (start) {
+        // Converte o JS Date para Timestamp do Firestore
+        const startTimestamp = firebase.firestore.Timestamp.fromDate(start); 
+        query = query.where("data", ">=", startTimestamp);
+    }
+    if (limit !== Infinity) {
+        query = query.limit(limit);
+    }
+
+    const snapshot = await query.get();
+    
+    // Mapeamento e limpeza de dados (sanitização básica)
+    return snapshot.docs.map(doc => {
+        const p = doc.data() || {};
+        return {
+            id: doc.id,
+            data: p.data?.toDate?.() || new Date(p.data), // Converte Timestamp para JS Date
+            itens: p.itens || [],
+            subtotal: Number(p.subtotal || 0),
+            desconto: Number(p.desconto || 0),
+            frete: Number(p.freteValor || p.entrega || 0), // DFL v3.7.2: Usa freteValor
+            freteDestino: (p.freteDestino || '').toString().replace(/</g, '&lt;'), // Sanitizar
+            total: Number(p.total || 0),
+            cupom: (p.cupom || '').toString().replace(/</g, '&lt;'),
+            endereco: (p.endereco || '').toString().replace(/</g, '&lt;'),
+            numItens: (p.itens || []).length
+        };
+    }).filter(p => p.total > 0 && p.data && !isNaN(p.data));
+  }
+
+  async function fetchOverview(range) {
+    if (cache.overview) return cache.overview;
+
+    const pedidos = await fetchOrdersData(range, 500); // Max 500 para Overview
+
+    const totalPedidos = pedidos.length;
+    const sumTotal = pedidos.reduce((s, p) => s + p.total, 0);
+    const sumFrete = pedidos.reduce((s, p) => s + p.frete, 0);
+    const pedidosComFrete = pedidos.filter(p => p.frete > 0).length;
+
+    const ticketMedio = totalPedidos > 0 ? sumTotal / totalPedidos : 0;
+    const pctComFrete = totalPedidos > 0 ? (pedidosComFrete / totalPedidos) * 100 : 0;
+    
+    // TOP 5 Bairros
+    const bairrosMap = {};
+    pedidos.forEach(p => {
+        const bairro = p.freteDestino || 'N/A';
+        if (!bairrosMap[bairro]) {
+            bairrosMap[bairro] = { count: 0, valorFrete: 0 };
+        }
+        bairrosMap[bairro].count++;
+        bairrosMap[bairro].valorFrete += p.frete;
+    });
+
+    const topBairros = Object.entries(bairrosMap)
+        .map(([bairro, data]) => ({
+            bairro: bairro,
+            ...data,
+            freteMedio: data.count > 0 ? data.valorFrete / data.count : 0
+        }))
+        .sort((a, b) => b.count - a.count)
+        .slice(0, 5);
+
+    cache.overview = { totalPedidos, ticketMedio, pctComFrete, topBairros, sumTotal, sumFrete };
+    return cache.overview;
+  }
+
+  async function fetchDelivery(range) {
+    if (cache.delivery) return cache.delivery;
+
+    const pedidosComFrete = (await fetchOrdersData(range, 500)).filter(p => p.frete > 0);
+    
+    const freteTotal = pedidosComFrete.reduce((s, p) => s + p.frete, 0);
+    const freteMedio = pedidosComFrete.length > 0 ? freteTotal / pedidosComFrete.length : 0;
+
+    // Tabela de Distribuição por Bairro (reaproveita a lógica do Overview)
+    const bairrosMap = {};
+    pedidosComFrete.forEach(p => {
+        const bairro = p.freteDestino || 'N/A';
+        if (!bairrosMap[bairro]) {
+            bairrosMap[bairro] = { count: 0, freteTotal: 0 };
+        }
+        bairrosMap[bairro].count++;
+        bairrosMap[bairro].freteTotal += p.frete;
+    });
+    
+    const distribuicao = Object.entries(bairrosMap)
+        .map(([bairro, data]) => ({
+            bairro,
+            ...data,
+            freteMedio: data.freteTotal / data.count
+        }))
+        .sort((a, b) => b.freteTotal - a.freteTotal); // Ordena por valor arrecadado
+
+    // Últimos 10 fretes
+    const ultimosFretes = pedidosComFrete
+        .slice(0, 10)
+        .map(p => ({
+            data: p.data.toLocaleTimeString('pt-BR') + ' ' + p.data.toLocaleDateString('pt-BR'),
+            bairro: p.freteDestino,
+            valor: p.frete
+        }));
+
+    cache.delivery = { freteTotal, freteMedio, distribuicao, ultimosFretes };
+    return cache.delivery;
+  }
+
+  async function fetchOrders(range, { limit = 50 } = {}) {
+    // Ação 3: Buscar últimos N pedidos no range, não usar cache
+    cache.orders = await fetchOrdersData(range, limit);
+    return cache.orders;
+  }
+
+  // ======== Renderers ========
+  function renderAll() {
+    renderOverview(cache.overview);
+    renderDelivery(cache.delivery);
+    renderOrders(cache.orders);
+  }
+
+  function renderOverview(data) {
+    if (!data) return el.repOverview.innerHTML = `<p style="color:red; text-align:center;">Erro ao carregar dados.</p>`;
+    
+    let topBairrosHtml = `<p style="margin-top:15px; font-weight:700; color:#ff7043;">Top 5 Bairros (Volume de Pedidos)</p>`;
+    if (data.topBairros.length === 0) {
+        topBairrosHtml += `<p style="font-size:0.9rem; color:#999;">Nenhum pedido com frete no período.</p>`;
+    } else {
+        topBairrosHtml += `<table class="reports-table"><thead><tr><th>Bairro</th><th>Pedidos</th><th>Frete Médio</th></tr></thead><tbody>`;
+        data.topBairros.forEach(b => {
+            topBairrosHtml += `<tr><td>${b.bairro}</td><td>${b.count}</td><td>${money(b.freteMedio)}</td></tr>`;
+        });
+        topBairrosHtml += `</tbody></table>`;
+    }
+
+    el.repOverview.innerHTML = `
+        <div style="display:flex; flex-wrap:wrap; gap:10px;">
+            <div class="reports-metric-card">Pedidos no Período: <b>${data.totalPedidos}</b></div>
+            <div class="reports-metric-card">Arrecadação Total: <b>${money(data.sumTotal)}</b></div>
+            <div class="reports-metric-card">Ticket Médio: <b>${money(data.ticketMedio)}</b></div>
+            <div class="reports-metric-card">% Pedidos c/ Frete: <b>${data.pctComFrete.toFixed(1)}%</b></div>
+        </div>
+        ${topBairrosHtml}
+    `;
+  }
+
+  function renderDelivery(data) {
+    if (!data) return el.repDelivery.innerHTML = `<p style="color:red; text-align:center;">Erro ao carregar dados.</p>`;
+
+    let distribuicaoHtml = `<p style="margin-top:15px; font-weight:700; color:#ff7043;">Distribuição de Frete por Bairro</p>`;
+    if (data.distribuicao.length === 0) {
+        distribuicaoHtml += `<p style="font-size:0.9rem; color:#999;">Nenhum pedido com frete no período.</p>`;
+    } else {
+        distribuicaoHtml += `<table class="reports-table"><thead><tr><th>Bairro</th><th>Pedidos</th><th>Frete Arrecadado</th><th>Frete Médio</th></tr></thead><tbody>`;
+        data.distribuicao.forEach(d => {
+            distribuicaoHtml += `<tr><td>${d.bairro}</td><td>${d.count}</td><td>${money(d.freteTotal)}</td><td>${money(d.freteMedio)}</td></tr>`;
+        });
+        distribuicaoHtml += `</tbody></table>`;
+    }
+    
+    let ultimosFretesHtml = `<p style="margin-top:20px; font-weight:700; color:#ff7043;">Últimos 10 Fretes Registrados</p>`;
+    if (data.ultimosFretes.length > 0) {
+        ultimosFretesHtml += `<table class="reports-table"><thead><tr><th>Data/Hora</th><th>Bairro</th><th>Valor</th></tr></thead><tbody>`;
+        data.ultimosFretes.forEach(f => {
+            ultimosFretesHtml += `<tr><td>${f.data}</td><td>${f.bairro}</td><td>${money(f.valor)}</td></tr>`;
+        });
+        ultimosFretesHtml += `</tbody></table>`;
+    }
+
+    el.repDelivery.innerHTML = `
+        <div style="display:flex; flex-wrap:wrap; gap:10px;">
+            <div class="reports-metric-card">Frete Total Arrecadado: <b>${money(data.freteTotal)}</b></div>
+            <div class="reports-metric-card">Frete Médio: <b>${money(data.freteMedio)}</b></div>
+        </div>
+        ${distribuicaoHtml}
+        ${ultimosFretesHtml}
+    `;
+  }
+
+  function renderOrders(data) {
+    if (!data) return el.repOrders.querySelector('#orders-list').innerHTML = `<p style="color:red; text-align:center;">Erro ao carregar dados.</p>`;
+    
+    if (data.length === 0) {
+         el.repOrders.querySelector('#orders-list').innerHTML = `<p style="text-align:center; color:#999;">Nenhum pedido encontrado no período.</p>`;
+         return;
+    }
+
+    let ordersHtml = `<table class="reports-table"><thead><tr><th>Data</th><th>Itens</th><th>Subtotal</th><th>Desc.</th><th>Frete</th><th>Total</th></tr></thead><tbody>`;
+    data.forEach(p => {
+        const dataStr = p.data.toLocaleDateString('pt-BR');
+        ordersHtml += `<tr>
+            <td>${dataStr}</td>
+            <td>${p.numItens}</td>
+            <td>${money(p.subtotal)}</td>
+            <td>-${money(p.desconto)}</td>
+            <td>${money(p.frete)}</td>
+            <td><b>${money(p.total)}</b></td>
+        </tr>`;
+    });
+    ordersHtml += `</tbody></table>`;
+    
+    el.repOrders.querySelector('#orders-list').innerHTML = ordersHtml;
+  }
+  
+  // ======== Utils ========
+  // DFL v3.7.3: Função auxiliar para exportar CSV (usada no reports-panel)
+  function exportCSV(rows, filename = 'relatorios.csv') {
+    const log = (...a) => console.log('[DFL/REPORTS] CSV', ...a);
+    if (!rows || rows.length === 0) {
+        log("Nenhuma linha para exportar.");
+        return;
+    }
+    
+    // Cria o cabeçalho (keys do primeiro objeto)
+    const header = Object.keys(rows[0]).join(';');
+    
+    // Cria o corpo (values, usando ; como delimitador, tratando aspas)
+    const body = rows.map(r => 
+        Object.values(r).map(val => {
+            if (val === null || val === undefined) return '';
+            // Se for string e contiver ;, envolve em aspas duplas
+            let s = String(val);
+            if (s.includes(';') || s.includes('"') || s.includes('\n')) {
+                s = '"' + s.replace(/"/g, '""') + '"';
+            }
+            return s;
+        }).join(';')
+    ).join('\n');
+    
+    const csv = `${header}\n${body}`;
+    const blob = new Blob([`\uFEFF${csv}`], { type: 'text/csv;charset=utf-8;' }); // \uFEFF para UTF-8 BOM (compatibilidade com Excel)
+    const url = URL.createObjectURL(blob);
+    
+    const a = Object.assign(document.createElement('a'), { href: url, download: filename });
+    document.body.appendChild(a); 
+    
+    // Usa um pequeno timeout para garantir que o clique foi registrado antes de remover
+    setTimeout(() => {
+      a.click(); 
+      a.remove();
+      URL.revokeObjectURL(url);
+      log('CSV exportado com sucesso:', filename);
+    }, 100);
+  }
+
+
+  // Expor API pública
+  return { open, close: Overlays.closeAll };
+})();
+// =========================================================
+// FIM DFL v3.7.3: MÓDULO DE RELATÓRIOS INTERNOS
+// =========================================================
+
+  // DFL v3.7.3: Integração do botão de Relatórios (Ação 1)
+  const DFL_ReportsIntegration = () => {
+    inicializarFirebase();
+    if (window.DFL_Reports) {
+        try { 
+            window.DFL_Reports.open('30d'); 
+        } catch(e){ 
+            console.log('[DFL/REPORTS] erro ao abrir:', e); 
+        }
+    }
+  };
+  
+  // O listener é adicionado no setupAuthListener()
 
   /* ------------------ 🔐 Segurança/Admin + UX Final (CORRIGIDO) ------------------ */
   
@@ -2276,8 +2425,8 @@ async function carregarHistoricoRecompensas(userId) {
     console.warn("⚠️ Erro interceptado:", e?.message);
   });
 
-  /* 🚨 ATUALIZADO V3.7.2: Mensagem de console */
-  console.log("%c🚀 DFL v3.7.2 — Persistência e Histórico de Entregas Ativo",
+  /* 🚨 ATUALIZADO V3.7.3: Mensagem de console */
+  console.log("%c🚀 DFL v3.7.3 — Módulo de Relatórios Internos Ativo",
               "background:#1976D2;color:#fff;padding:8px 12px;border-radius:8px;font-weight:700;");
 
 }); // Fim do DOMContentLoaded
@@ -2317,7 +2466,7 @@ document.addEventListener('DOMContentLoaded', () => {
       // Usamos a função Overlays.closeAll() agora.
       const Overlays = {
         closeAll() {
-          document.querySelectorAll(".modal.show, #mini-cart.active, .pedidos-panel.active, .recompensas-panel.active, #admin-dashboard.show") 
+          document.querySelectorAll(".modal.show, #mini-cart.active, .pedidos-panel.active, .recompensas-panel.active, .reports-panel.active") 
             .forEach((e) => e.classList.remove("show", "active"));
           cartBackdrop.classList.remove('active');
         },
