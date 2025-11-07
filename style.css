@@ -1,301 +1,113 @@
-/* =========================================================
-   🎨 DFL v3.7 — ESTILO BASE + FRETE DESATIVADO
-   ========================================================= */
+/* ===========================================================
+   🎨 Da Família Lanches – CSS Principal (v3.7.4 FINAL)
+   - CORRIGIDO: Bug do Mini-Cart (Flexbox) e Estilo de Campos
+   =========================================================== */
 
-/* RESET */
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-  font-family: 'Poppins', sans-serif;
+/* ======== ELEMENTOS BÁSICOS ======== */
+:root {
+  --preto:#000;
+  --bg1:#ffeb3b;      /* topo do gradiente */
+  --bg2:#ffd54f;      /* base do gradiente (cor original) */
+  --acento:#ffca28;   /* header/barras */
+  --botao:#ffb300;    /* CTAs */
+  --danger:#d32f2f;   /* fechado/erros */
+  --success:#4caf50;  /* aberto/ok */
+  --txt:#222;
+
+  --rad-sm:8px; --rad:10px; --rad-lg:12px;
+  --shadow-1:0 2px 5px rgba(0,0,0,.15); --shadow-2:0 3px 10px rgba(0,0,0,.20); --shadow-3:0 5px 15px rgba(0,0,0,.30); --shadow-in:inset 0 1px 0 rgba(255,255,255,.25);
+}
+html,body{height:100%}
+body{
+  margin:0; color:var(--txt);
+  font-family:"Inter","Poppins",system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+  background:linear-gradient(180deg,var(--bg1) 0%, var(--bg2) 100%);
+  background-attachment:fixed; scroll-behavior:smooth; -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale;
+}
+button, input, select { font-family: inherit; }
+
+/* ======== HEADER ======== */
+.header{
+  position:fixed; inset-inline:0; top:0; z-index:900; display:flex; justify-content:space-between; align-items:center;
+  background:var(--acento); padding:10px 16px; box-shadow:var(--shadow-1);
+}
+.header-content{display:flex; align-items:center; gap:12px}
+.logo{width:52px; height:52px}
+.header-info h1{margin:0; font-size:1.2rem}
+.tagline{margin:0; font-size:.85rem; color:#d84315}
+.header-actions{display:flex; align-items:center; gap:10px}
+.main-content-wrapper{padding-top:72px}
+
+/* ======== BOTÕES TOPO / STATUS ======== */
+.user-button{background:linear-gradient(135deg,#fff,#f7f7f7); border:1px solid #ddd; border-radius:var(--rad); padding:8px 12px; font-weight:600; cursor:pointer; transition:.2s; box-shadow:0 1px 0 rgba(255,255,255,.6);}
+#cart-icon,.cart-button{background:var(--botao); border:none; border-radius:var(--rad); padding:8px 12px; font-weight:700; cursor:pointer; transition:.2s; box-shadow:var(--shadow-1);}
+.status-banner{text-align:center; padding:8px; color:#fff; font-weight:600}
+.status-banner.open{background:var(--success)}
+.status-banner.closed{background:var(--danger)}
+.hours-banner{display:flex; align-items:center; padding:8px 16px; background:#000; color:#fff; font-size:.9rem; overflow:hidden; white-space:nowrap; text-overflow:ellipsis}
+.hours-banner b{min-width:40px; display:inline-block; text-align:right}
+
+/* ======== PROMOÇÕES / CARDS ======== */
+.promo-section{text-align:center; padding:20px 10px}
+.slides{display:flex; gap:8px; overflow-x:auto; scroll-behavior:smooth; padding:4px;}
+.slide{display:block; border-radius:12px; flex:0 0 auto; min-width:250px; max-width:250px; height:180px; object-fit:cover; box-shadow:var(--shadow-2); cursor:zoom-in; transition:transform .2s, box-shadow .2s; background:#fff;}
+section{margin:25px auto; width:95%; max-width:1000px}
+section h2{font-size:1.3rem; text-align:center; margin-bottom:15px; color:#ff7043}
+.grid{display:grid; grid-template-columns:repeat(auto-fill,minmax(180px,1fr)); gap:14px}
+.card{background:#fff; border-radius:16px; box-shadow:0 2px 6px rgba(0,0,0,.08); padding:14px; text-align:center; transition:transform .2s, box-shadow .2s;}
+.card img{width:100%; border-radius:12px; margin-bottom:8px; height:220px; object-fit:cover; background:#fff}
+.price{font-weight:600; color:var(--success); margin:8px 0}
+.badge-small{display:inline-block; font-size:.68rem; font-weight:600; line-height:1.2; padding:2px 7px; border-radius:6px; color:#000; background:linear-gradient(135deg,#ffd54f,#ffca28); border:1px solid #d4af37; box-shadow:0 1px 3px rgba(0,0,0,.1); white-space:nowrap; margin-left:4px}
+.badge-small.pure{background:linear-gradient(135deg,#a5d6a7,#81c784); border-color:#66bb6a; color:#1b5e20}
+.actions button{border:none; border-radius:10px; padding:14px; font-weight:700; font-size:1rem; cursor:pointer; transition:.2s}
+.actions .add-cart{background:linear-gradient(135deg,#4caf50,#43a047); color:#fff; box-shadow:0 2px 4px rgba(0,0,0,.2)}
+.actions .extras-btn{background:linear-gradient(135deg,#ffb300,#ffca28); color:#222; box-shadow:0 2px 4px rgba(0,0,0,.15)}
+
+/* ================= BACKDROP / OVERLAYS ================= */
+#cart-backdrop{position:fixed; inset:0; background:rgba(0,0,0,.45); opacity:0; pointer-events:none; transition:opacity .2s; z-index:980}
+#cart-backdrop.active{opacity:1; pointer-events:auto}
+.mini-cart,.modal,.pedidos-panel,.recompensas-panel{position:fixed; z-index:990; display:none}
+.mini-cart.active,.modal.show,.pedidos-panel.active,.recompensas-panel.active{display:block}
+
+/* ================= MINI-CART LATERAL (CORREÇÃO DE FLEXBOX) ================= */
+.mini-cart{
+  right:0; top:0; width:min(92vw,380px); height:100dvh; background:#fff;
+  box-shadow:-4px 0 20px rgba(0,0,0,.25); transform:translateX(100%); transition:transform .25s;
+  position: fixed; z-index: 990; 
+  display: flex; /* CRÍTICO */
+  flex-direction: column; /* CRÍTICO */
+}
+.mini-cart.active{transform:translateX(0)}
+.mini-head{display:flex; justify-content:space-between; align-items:center; padding:10px 14px; border-bottom:1px solid #eee}
+.mini-list{max-height:60vh; overflow-y:auto; padding:10px 14px; flex-grow:1;} /* CRÍTICO: Ocupa espaço */
+.mini-foot{padding:10px 14px; border-top:1px solid #eee; flex-shrink:0;} /* CRÍTICO: Fica no rodapé */
+
+/* Estilo do campo Frete (Inativo) - GARANTE VISIBILIDADE */
+.frete-input-container {
+    padding: 10px; background-color: #fff8e1; 
+    border-radius: 10px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05); 
+    border: 1px solid #ffd54f; 
+}
+.frete-input-container input:disabled {
+    background: #f7f7f7 !important;
+    color: #999 !important;
+    cursor: not-allowed;
+    white-space: normal; /* Garante que o texto engraçado não seja cortado */
+    height: auto !important; /* Permite expansão de altura para texto longo */
 }
 
-body {
-  background-color: #fff8e1;
-  color: #222;
-  overflow-x: hidden;
-}
+/* ======== MODAIS BASE / LOGIN ======== */
+.modal{inset:0; display:flex; align-items:center; justify-content:center; opacity:0; pointer-events:none; transition:opacity .25s}
+.modal.show{opacity:1; pointer-events:auto}
+.modal-content{background:#fff; width:min(92vw,520px); border-radius:14px; box-shadow:0 8px 40px rgba(0,0,0,.25); max-height:86vh; overflow:auto; position: relative;}
+.modal-head{display:flex; justify-content:space-between; align-items:center; padding:12px 16px; border-bottom:1px solid #eee; background:#ffca28; box-shadow:var(--shadow-in)}
+.btn-primary,.btn-secondary,.btn-primario{flex:1; border:none; border-radius:10px; padding:14px; font-weight:700; font-size:1rem; cursor:pointer; transition:.2s}
+.btn-primary,.btn-primario{background:linear-gradient(135deg,var(--success), #388e3c); color:#fff; box-shadow: 0 4px 6px rgba(0,0,0,.15);}
+.btn-secondary{background:transparent; color:#555; border:1px solid #ddd}
+.fechar-pedidos,.fechar-recompensas,.extras-close,.combo-close,.login-close{background:var(--botao); border:none; border-radius:50%; width:30px; height:30px; font-size:18px; font-weight:700; cursor:pointer; line-height:30px; text-align:center; color:#222; transition:.2s}
 
-/* =========================================================
-   🕓 BANNERS DE HORÁRIO E STATUS
-   ========================================================= */
-.hours-banner, .status-banner {
-  background-color: #ffb300;
-  color: #111;
-  text-align: center;
-  padding: 8px 0;
-  font-weight: bold;
-  font-size: 15px;
-}
+/* ======== FOOTER ======== */
+.footer{background:#ffca28; text-align:center; padding:20px; font-size:.9rem; color:#222}
 
-.status-banner {
-  background-color: #000;
-  color: #fff;
-}
-
-/* =========================================================
-   🎠 CARROSSEL
-   ========================================================= */
-.carousel-section {
-  padding: 20px;
-  text-align: center;
-}
-
-.carousel {
-  position: relative;
-  width: 100%;
-  overflow: hidden;
-  border-radius: 10px;
-}
-
-.slides {
-  display: flex;
-  transition: transform 0.4s ease;
-}
-
-.slide {
-  width: 100%;
-  height: 250px;
-  object-fit: cover;
-}
-
-.c-prev, .c-next {
-  position: absolute;
-  top: 50%;
-  transform: translateY(-50%);
-  background: rgba(0,0,0,0.6);
-  color: white;
-  border: none;
-  font-size: 24px;
-  padding: 6px 12px;
-  border-radius: 5px;
-  cursor: pointer;
-}
-
-.c-prev:hover, .c-next:hover {
-  background: rgba(0,0,0,0.8);
-}
-
-.c-prev { left: 10px; }
-.c-next { right: 10px; }
-
-/* =========================================================
-   🍔 SEÇÕES DO CARDÁPIO
-   ========================================================= */
-.menu-section {
-  padding: 20px;
-}
-
-.section-title {
-  text-align: center;
-  margin-bottom: 20px;
-  font-size: 22px;
-  color: #000;
-}
-
-.cards-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-  gap: 15px;
-}
-
-.card {
-  background: #fff;
-  border-radius: 14px;
-  box-shadow: 0 3px 7px rgba(0,0,0,0.15);
-  overflow: hidden;
-  transition: transform 0.2s ease;
-}
-
-.card:hover {
-  transform: translateY(-3px);
-}
-
-.card img {
-  width: 100%;
-  height: 140px;
-  object-fit: cover;
-}
-
-.card-info {
-  padding: 10px;
-  text-align: center;
-}
-
-.card-info h3 {
-  font-size: 18px;
-  margin-bottom: 5px;
-}
-
-.card-info p {
-  font-size: 13px;
-  margin-bottom: 10px;
-}
-
-/* =========================================================
-   🏷️ ETIQUETAS
-   ========================================================= */
-.etiqueta {
-  display: inline-block;
-  font-size: 11px;
-  font-weight: 600;
-  padding: 3px 7px;
-  border-radius: 12px;
-  color: #fff;
-  margin-bottom: 5px;
-}
-
-.etiqueta.amarela {
-  background-color: #ffb300;
-  color: #222;
-}
-
-.etiqueta.verde {
-  background-color: #4caf50;
-}
-
-/* =========================================================
-   🛒 CARRINHO LATERAL
-   ========================================================= */
-.side-panel {
-  position: fixed;
-  top: 0;
-  right: -400px;
-  width: 340px;
-  height: 100vh;
-  background-color: #fff;
-  box-shadow: -4px 0 10px rgba(0,0,0,0.2);
-  overflow-y: auto;
-  transition: right 0.3s ease;
-  z-index: 999;
-}
-
-.side-panel.open {
-  right: 0;
-}
-
-.side-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  background-color: #000;
-  color: #fff;
-  padding: 12px;
-}
-
-#cart-items {
-  padding: 10px;
-}
-
-#cart-summary {
-  border-top: 1px solid #ccc;
-  padding: 10px;
-}
-
-.checkout-btn {
-  background-color: #ffb300;
-  border: none;
-  width: 100%;
-  padding: 10px;
-  font-weight: bold;
-  border-radius: 10px;
-  cursor: pointer;
-  font-size: 16px;
-}
-
-.checkout-btn:hover {
-  background-color: #ff9800;
-}
-
-/* =========================================================
-   🚧 CAMPO DE FRETE DESATIVADO
-   ========================================================= */
-#frete-box {
-  margin-top: 10px;
-  text-align: center;
-}
-
-#frete-box input {
-  width: 100%;
-  padding: 10px;
-  border-radius: 8px;
-  border: 1px solid #ccc;
-  font-size: 13px;
-  background-color: #f5f5f5;
-  color: #555;
-}
-
-#frete-box input::placeholder {
-  color: #777;
-  font-style: italic;
-  font-size: 12.5px;
-}
-
-/* =========================================================
-   🔐 MODAL DE LOGIN
-   ========================================================= */
-.modal {
-  display: none;
-  position: fixed;
-  top: 0; left: 0;
-  width: 100%; height: 100%;
-  background: rgba(0,0,0,0.5);
-  justify-content: center;
-  align-items: center;
-  z-index: 1000;
-}
-
-.modal-content {
-  background: white;
-  border-radius: 15px;
-  padding: 25px;
-  width: 300px;
-  text-align: center;
-}
-
-.modal-content input {
-  width: 100%;
-  padding: 10px;
-  margin: 6px 0;
-  border-radius: 8px;
-  border: 1px solid #ccc;
-}
-
-.modal-content button {
-  margin-top: 8px;
-  background-color: #ffb300;
-  color: black;
-  border: none;
-  padding: 10px 20px;
-  border-radius: 10px;
-  cursor: pointer;
-  width: 100%;
-}
-
-/* =========================================================
-   📜 RODAPÉ
-   ========================================================= */
-.footer {
-  text-align: center;
-  background-color: #000;
-  color: #fff;
-  padding: 15px;
-  font-size: 13px;
-}
-
-/* =========================================================
-   📱 RESPONSIVIDADE
-   ========================================================= */
-@media (max-width: 600px) {
-  .cards-grid {
-    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-  }
-
-  .side-panel {
-    width: 100%;
-  }
-
-  .modal-content {
-    width: 90%;
-  }
-}
+/* Adicione mais estilos do seu style.css aqui se necessário */
