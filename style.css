@@ -647,3 +647,58 @@ body {
   cursor: pointer !important;
   z-index: 10 !important;
 }
+/* 🚨 PATCH CORRETIVO CRÍTICO — imagem oculta e botão X do login */
+
+/* 🔧 Força o container do modal de promoções a exibir a imagem corretamente */
+#promo-modal .promo-content {
+  background: transparent !important;
+  overflow: visible !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 0 !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+
+/* ✅ Garante que a imagem apareça sobre o fundo amarelo */
+#promo-modal-img {
+  display: block !important;
+  position: relative !important;
+  z-index: 5 !important;
+  background: #fff !important;
+  width: 100% !important;
+  max-width: 420px !important;
+  height: auto !important;
+  object-fit: contain !important;
+  border-radius: 14px 14px 0 0 !important;
+}
+
+/* 💡 Remove qualquer camada amarela sobre a imagem */
+#promo-modal .promo-content::before,
+#promo-modal .promo-content::after {
+  display: none !important;
+  background: none !important;
+  content: none !important;
+}
+
+/* 🎯 Ajusta a base branca com nome/preço/botão */
+.promo-info {
+  background: #fff !important;
+  width: 100% !important;
+  max-width: 420px !important;
+  border-radius: 0 0 14px 14px !important;
+  padding: 18px 20px 22px !important;
+  box-sizing: border-box !important;
+  margin: 0 auto !important;
+  z-index: 6 !important;
+}
+
+/* 🧩 Reativa o botão X do modal de login */
+#login-modal .modal-close,
+#login-modal .promo-close {
+  pointer-events: all !important;
+  cursor: pointer !important;
+  z-index: 9999 !important;
+}
