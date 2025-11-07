@@ -14,7 +14,7 @@ window.DFL_FLAGS = Object.assign({},
   }
 );
 
-// 📝 Namespace de Logs (DFL v3.8.5: Novo TAG /ADMIN)
+// 📝 Namespace de Logs (DFL v3.7.4: Adição do TAGS /CHARTS e /FILTERS)
 const LOG = {
   info:  (...a) => (window.DFL_FLAGS?.freightDebug ? console.log("[DFL/FRETE]", ...a) : void 0),
   warn:  (...a) => console.warn("[DFL/FRETE]", ...a),
@@ -422,7 +422,7 @@ document.addEventListener("DOMContentLoaded", () => {
         if (el.recompensasContainer) el.recompensasContainer.style.display = 'none';
       }
       
-      // DFL v3.8.5: Habilitar botões de Admin
+      // DFL v3.7.3: Habilitar botão de Relatórios (Ação 1)
       if (user && isAdmin(user)) {
         if (el.reportsBtn) {
             el.reportsBtn.style.display = 'inline-block';
@@ -1020,18 +1020,17 @@ window.DFL_Frete = (function() {
     const config = {
         freightEnabled: window.DFL_FLAGS.freightEnabled,
         // DFL v3.8.0: Coleção Firestore para consulta REAL (Ação 1)
-        fretesCollection: 'fretes_zonas' 
+        fretesCollection: 'frete_zonas' 
     };
 
-    /** DFL v3.8.0: Consulta a API ViaCEP (Ação 2) - Retorna o nome do bairro. */
+    /** DFL v3.8.5: CORRIGIDO! Marcar como ASYNC para usar await (Ação 2). */
     async function fetchBairroFromCEP(cep) {
         const cepLimpo = cep.replace(/\D/g, '');
         if (cepLimpo.length !== 8) return null;
         
         try {
             LOG.info(`Consultando ViaCEP para CEP: ${cepLimpo}`);
-            // Usamos a fetch API nativa.
-            // NOTA: Para rodar em produção, o index.html deve ter connect-src atualizado no CSP!
+            // NOTA: O index.html precisa ter connect-src https://viacep.com.br
             const response = await fetch(`https://viacep.com.br/ws/${cepLimpo}/json/`);
             const data = await response.json();
             
@@ -1066,8 +1065,11 @@ window.DFL_Frete = (function() {
             
             querySnapshot.forEach(doc => {
                 const data = doc.data();
-                if (Array.isArray(data.bairros) && data.bairros.some(b => b.toLowerCase() === bairroParaBusca)) {
-                    // DFL v3.8.5: Se o bairro for encontrado e a zona estiver ativa, usa.
+                // DFL v3.8.5: Garantindo que 'nome' seja lower case para comparação correta
+                const bairrosNaZona = Array.isArray(data.bairros) ? data.bairros.map(b => b.toLowerCase()) : [];
+
+                if (bairrosNaZona.some(b => b === bairroParaBusca)) {
+                    // Se o bairro for encontrado e a zona estiver ativa, usa.
                     if (data.ativo !== false) { 
                         docEncontrado = data;
                     }
@@ -1462,7 +1464,7 @@ window.DFL_Frete = (function() {
       // 2. Marca cupom personalizado como USADO, se houver
       if (cupomInfo.isPersonalizado && couponApplied) {
           const cupomUserRef = db.collection("CuponsUsuarios").doc(userId);
-          batch.update(cupumUserRef, {
+          batch.update(cupomUserRef, {
               usado: true,
               dataUso: firebase.firestore.FieldValue.serverTimestamp(),
               pedidoId: 'PENDENTE' 
@@ -1860,7 +1862,1003 @@ async function carregarRecompensas(userId) {
         if (recompensaAtual && recompensaAtual.tipo === 'cupom') {
             const cupomSnap = await db.collection('CuponsUsuarios').doc(userId).get();
             // 🚨 CORREÇÃO CRÍTICA V3.6.2: Corrigindo o erro de digitação 'cupumSnap' para 'cupomSnap'
-            cupomStatus = cupomSnap.exists ? cupumSnap.data() : null;
+            cupomStatus = cupumSnap.exists ? cupumSnap.data() : null;
+        }
+
+        // Encontra a próxima meta que o cliente AINDA NÃO ATINGIU
+        const proximaRecompensa = RECOMPENSAS_DATA.find(r => r.limite > feitos);
+        
+        // Define a meta base para exibição. 
+        const metaParaExibir = proximaRecompensa ? proximaRecompensa.limite : feitos; 
+        const metaBaseCalculo = proximaRecompensa ? proximaRecompensa.limite : metaPrimeiroNivel;
+
+        // Se ele completou o último nível e não tem mais metas, a barra deve ser 100%
+        const porcentagem = proximaRecompensa === undefined ? 100 : Math.min(100, (feitos / metaBaseCalculo) * 100);
+            
+        // Atualiza a barra
+        contadorValor.textContent = feitos;
+        
+        // Ajusta a exibição da meta no HTML 
+        const elMeta = document.querySelector('.progress-container span:last-child');
+        if(elMeta) elMeta.textContent = metaParaExibir;
+
+        progressoBar.style.width = `${porcentagem}%`;
+
+        // Verifica o Status da Meta
+        if (proximaRecompensa) {
+            // A meta ainda não foi atingida
+            const faltam = proximaRecompensa.limite - feitos;
+            
+            // 🚨 CORREÇÃO DE TEXTO: Usa o 'titulo' para exibir a recompensa na mensagem
+            const tituloRecompensa = proximaRecompensa.titulo || proximaRecompensa.valor;
+            progressoMsg.textContent = `Faltam apenas ${faltam} pedidos para você ganhar a recompensa "${tituloRecompensa}"!`;
+            
+            progressoBar.style.background = 'linear-gradient(90deg, #ffb300, #ff7043)'; 
+            progressoBar.parentElement.parentElement.removeAttribute('data-status');
+            
+            // Exibe as recompensas já obtidas (as que têm limite <= pedidos feitos)
+            const recompensasObtidas = RECOMPENSAS_DATA.filter(r => r.limite <= feitos);
+            exibirRecompensas(feitos, recompensasObtidas, cupomStatus, RECOMPENSAS_DATA); // Passa RECOMPENSAS_DATA
+
+            if (recompensasObtidas.length === 0) {
+                 el.recompensasLista.innerHTML = `
+                    <p style="text-align:center;color:#666;padding:20px;margin-top:20px;">
+                        Faça ${faltam} pedidos para desbloquear a primeira recompensa.
+                    </p>`;
+            }
+
+
+        } else {
+             // Todas as metas foram atingidas
+            progressoMsg.textContent = '🎉 Parabéns! Você completou todas as metas de fidelidade!';
+            progressoBar.style.background = 'linear-gradient(90deg, #4caf50, #43a047)'; 
+            progressoBar.parentElement.parentElement.setAttribute('data-status', 'complete');
+            
+            // Exibe todas as recompensas como obtidas
+            exibirRecompensas(feitos, RECOMPENSAS_DATA, cupomStatus, RECOMPENSAS_DATA);
+        }
+        
+        // --- 4. Lógica de Histórico (Chamada) ---
+        await carregarHistoricoRecompensas(userId);
+        
+    }, error => {
+        console.error("Erro ao ler contador de fidelidade:", error);
+        progressoMsg.textContent = 'Erro ao ler seu progresso. Tente recarregar a página.';
+    });
+}
+
+/**
+ * Desenha as recompensas atuais disponíveis.
+ */
+function exibirRecompensas(pedidosFeitos, recompensasDisponiveis, cupomStatus, RECOMPENSAS_DATA) {
+    if (!el.recompensasLista) return;
+    
+    // Filtra apenas as recompensas que o usuário atingiu (ou seja, todas as do array)
+    const recompensasHtml = recompensasDisponiveis.map(r => {
+        const liberada = pedidosFeitos >= r.limite;
+        const cupomJaUsado = cupomStatus?.usado === true && cupomStatus?.cupom === r.valor;
+        
+        // Define o título de forma mais descritiva
+        const titulo = r.titulo || `Recompensa: ${r.valor} (${r.limite} Pedidos)`;
+        
+        let acaoBtn = '';
+        let statusTag = '';
+        let cardStyle = '';
+        let codigoCupom = r.tipo === 'cupom' ? r.valor : 'BRINDE';
+        
+        if (cupomJaUsado) {
+             statusTag = '<span style="color:#d32f2f;font-weight:bold;">(JÁ UTILIZADO)</span>';
+             acaoBtn = `<button disabled style="background:#ccc;color:#666;border:none;border-radius:6px;padding:8px 12px;cursor:not-allowed;margin-top:10px;">Cupom Usado</button>`;
+             cardStyle = 'opacity: 0.7;';
+        }
+        else if (liberada && r.tipo === 'cupom') {
+            statusTag = '<span style="color:#4caf50;font-weight:bold;">(DISPONÍVEL)</span>';
+            acaoBtn = `
+                <button 
+                    class="recompensa-aplicar-btn" 
+                    data-cupom="${codigoCupom}"
+                    style="background:#4caf50;color:#fff;border:none;border-radius:6px;padding:8px 12px;cursor:pointer;font-weight:600;margin-top:10px;"
+                >
+                    Aplicar Cupom 🏷️
+                </button>
+            `;
+        } else if (liberada && r.tipo === 'brinde') {
+             statusTag = '<span style="color:#1976D2;font-weight:bold;">(LIBERADO)</span>';
+             acaoBtn = `<button disabled style="background:#1976D2;color:#fff;border:none;border-radius:6px;padding:8px 12px;cursor:default;margin-top:10px;">Brinde na Próxima Compra</button>`;
+        }
+        
+        // Se ainda não liberada, o filtro já removeu. Aqui só temos as liberadas.
+
+        return `
+            <div class="recompensa-card" style="display:flex;align-items:center;padding:15px;border-radius:10px;margin-bottom:15px;background:#f9f9f9;box-shadow:0 2px 5px rgba(0,0,0,0.1);${cardStyle}">
+                <img src="imagens/recompensa-${r.tipo}.png" alt="Ícone de Recompensa" style="width:50px;height:50px;object-fit:cover;border-radius:50%;margin-right:15px;">
+                <div style="flex:1;">
+                    <h4 style="margin:0 0 5px 0;color:#333;">${titulo} ${statusTag}</h4>
+                    <p style="margin:0;font-size:0.9rem;color:#666;">Ganho por ${r.limite} pedidos.</p>
+                    ${r.tipo === 'cupom' ? `<p style="margin:5px 0 0 0;font-size:1.1rem;font-weight:bold;color:#ff7043;">CÓDIGO: ${codigoCupom}</p>` : ''}
+                </div>
+                <div>
+                    ${acaoBtn}
+                </div>
+            </div>
+        `;
+    }).join('');
+    
+    el.recompensasLista.innerHTML = recompensasHtml;
+    
+    // BIND o evento de aplicar cupom (após o desenho)
+    el.recompensasLista.querySelectorAll('.recompensa-aplicar-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            const codigo = e.currentTarget.dataset.cupom;
+            if (codigo) {
+                // Aplica a lógica do cupom (similar ao formulário)
+                couponApplied = codigo;
+                localStorage.setItem("dflCoupon", couponApplied);
+                
+                // Atualiza o input de cupom (se estiver visível)
+                const couponInput = document.getElementById("coupon-input");
+                if(couponInput) couponInput.value = codigo;
+
+                renderMiniCart(); // Recalcula e mostra a mensagem
+                Overlays.closeAll();
+                popupAdd(`Cupom ${codigo} aplicado! ✅`);
+                Overlays.open(el.miniCart); // Abre o mini-carrinho para ver o desconto
+            }
+        });
+    });
+}
+
+
+/**
+ * NOVO na V3.4: Carrega e exibe o histórico de recompensas recebidas.
+ */
+async function carregarHistoricoRecompensas(userId) {
+    if (!el.historicoLista) return;
+
+    el.historicoLista.innerHTML = `<p style="text-align:center;color:#999;">Carregando histórico...</p>`;
+    
+    try {
+        const q = db.collection("Usuarios").doc(userId)
+                    .collection("RecompensasRecebidas")
+                    .orderBy("liberadoEm", "desc"); // Corrigido para usar liberadoEm
+        
+        const snapshot = await q.get();
+
+        if (snapshot.empty) {
+            el.historicoLista.innerHTML = `<p class="empty-history" style="text-align:center;color:#999;">Você ainda não recebeu recompensas.</p>`;
+            return;
+        }
+
+        const logs = snapshot.docs.map(doc => doc.data());
+        
+        const historicoHtml = logs.map(log => {
+            const dataRecebimento = log.liberadoEm
+                ? (log.liberadoEm.toDate().toLocaleDateString('pt-BR'))
+                : "—";
+
+            let valorStr = (log.tipo === 'cupom') ? log.valor : log.valor;
+            if (log.tipo === 'value') valorStr = money(log.valor);
+
+            
+            return `
+                <div class="historico-card" style="display:flex; padding: 10px 0; border-bottom: 1px dashed #eee; align-items: center; justify-content: space-between;">
+                    <div style="flex:1;">
+                        <p style="font-weight:600; margin:0; color:#333;">
+                            🎁 ${log.titulo || log.valor}
+                        </p>
+                        <small style="color:#999;">Recebido em: ${dataRecebimento}</small>
+                    </div>
+                    <span style="font-weight:700; color:#4caf50;">
+                        + ${valorStr}
+                    </span>
+                </div>
+            `;
+        }).join('');
+        
+        // Remove a borda do último item para melhor estética
+        el.historicoLista.innerHTML = historicoHtml.replace(/border-bottom: 1px dashed #eee;<\/div>$/, 'border-bottom: none;</div>');
+
+
+    } catch (err) {
+        console.error("Erro ao carregar histórico de recompensas: ", err);
+        el.historicoLista.innerHTML = `<p style="text-align:center;color:red;">Erro ao buscar histórico.</p>`;
+    }
+}
+
+
+/* ------------------ 🎁 MINHAS RECOMPENSAS (V3.5.3) ------------------ */
+
+  // 1. Lógica de abrir/fechar o novo painel
+  el.recompensasBtn?.addEventListener("click", () => {
+    // Requer login, assim como "Meus Pedidos"
+    if (!currentUser) {
+      alert("Faça login para ver suas recompensas.");
+      Overlays.open(el.loginModal); 
+      return;
+    }
+    // 🚨 OTIMIZAÇÃO: Garante o Firebase se for o primeiro acesso
+    inicializarFirebase(); 
+    Overlays.open(el.recompensasPanel);
+    
+    // 🚨 NOVO: Chama a função para carregar e monitorar o contador
+    carregarRecompensas(currentUser.uid); 
+  });
+
+  // 2. Lógica de fechar o painel
+  el.recompensasFecharBtn?.addEventListener("click", () => Overlays.closeAll());
+
+/* ------------------ FIM DO BLOCO V3.5.3 ------------------ */
+
+
+/* ------------------ 📦 MEUS PEDIDOS PREMIUM (MANTIDO) ------------------ */
+
+  // 1. Lógica de abrir/fechar o novo painel
+  el.pedidosBtn?.addEventListener("click", () => {
+    if (!currentUser) {
+      alert("Faça login para ver seus pedidos.");
+      Overlays.open(el.loginModal); 
+      return;
+    }
+    inicializarFirebase(); // Garante o Firebase se for o primeiro acesso
+    Overlays.open(el.pedidosPanel);
+    carregarPedidos(currentUser.uid); 
+    // DFL v3.8.0: Chama a função para carregar o histórico de entregas da SUBCOLEÇÃO (Ação 4)
+    carregarHistoricoEntregas(currentUser.uid);
+  });
+
+  el.pedidosFecharBtn?.addEventListener("click", () => Overlays.closeAll());
+
+  // 2. Lógica de carregar pedidos (MANTIDO)
+  async function carregarPedidos(userId) {
+    if (!el.pedidosLista) return;
+    el.pedidosLista.innerHTML = `<p class="empty-orders">Carregando pedidos...</p>`;
+
+    try {
+      const q = db.collection("Pedidos").where("userId", "==", userId).orderBy("data", "desc").limit(10); // Limita para melhor performance
+      const snapshot = await q.get();
+
+      if (snapshot.empty) {
+        el.pedidosLista.innerHTML = `<p class="empty-orders">Nenhum pedido encontrado 😢</p>`;
+        return;
+      }
+
+      const pedidos = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      exibirPedidos(pedidos);
+
+    } catch (err) {
+      console.error("Erro ao carregar pedidos: ", err);
+      el.pedidosLista.innerHTML = `<p class="empty-orders" style="color:red;">Erro ao buscar seus pedidos.</p>`;
+    }
+  }
+
+  // 3. Lógica de exibir os pedidos no painel (MANTIDO)
+  function exibirPedidos(pedidos) {
+    if (!el.pedidosLista) return;
+    
+    el.pedidosLista.innerHTML = pedidos.map(p => {
+      const thumbUrl = p.thumb || 'imagens/padrao.jpg';
+      const dataFormatada = p.data
+          ? new Date(p.data?.seconds * 1000 || p.data).toLocaleString("pt-BR", {
+              day: "2-digit", month: "2-digit", year: "numeric",
+              hour: "2-digit", minute: "2-digit",
+            })
+          : "—";
+
+      // Verifica se o pedido tem 'itensObj' para habilitar o botão
+      const podeRepetir = Array.isArray(p.itensObj) && p.itensObj.length > 0;
+      
+      return `
+        <div class="pedido-card">
+          <div class="pedido-thumb" style="background-image:url('${thumbUrl}');"></div>
+          <h4>📅 ${dataFormatada}</h4>
+          <p class="pedido-info">Total: ${money(p.total)}</p>
+          <div class="pedido-itens">
+            ${(p.itens || []).map(i => `• ${i}`).join('<br>')}
+          </div>
+          <button 
+            class="repetir-btn" 
+            data-id="${p.id}" 
+            ${podeRepetir ? '' : 'disabled style="background:grey;cursor:not-allowed;"'}
+          >
+            🔁 Repetir Pedido
+          </button>
+        </div>`;
+    }).join('');
+  }
+  
+  // 4. Lógica de "Repetir Pedido" (MANTIDO)
+  el.pedidosLista?.addEventListener('click', async (e) => {
+    if (e.target.classList.contains('repetir-btn') && !e.target.disabled) {
+      const idPedido = e.target.dataset.id;
+      
+      // Desativa o botão para evitar clique duplo
+      e.target.disabled = true;
+      e.target.textContent = "Carregando...";
+      
+      await repetirPedido(idPedido);
+      
+      // O botão será reativado da próxima vez que o painel for aberto
+      // (a menos que prefira reativá-lo manualmente aqui)
+    }
+  });
+
+  async function repetirPedido(idPedido) {
+    try {
+      const docRef = db.collection("Pedidos").doc(idPedido);
+      const doc = await docRef.get();
+
+      if (!doc.exists) {
+        return alert("Erro: Pedido antigo não encontrado.");
+      }
+
+      const pedido = doc.data();
+      const itensParaRepetir = pedido.itensObj; // Lê o novo array de objetos
+
+      if (!Array.isArray(itensParaRepetir) || itensParaRepetir.length === 0) {
+        return alert("Não é possível repetir este pedido (formato antigo). Faça um novo pedido para poder repeti-lo no futuro.");
+      }
+
+      // Limpa o carrinho atual antes de adicionar os itens antigos
+      cart = [];
+      
+      // Adiciona os itens ao carrinho
+      itensParaRepetir.forEach(item => {
+        // Validação simples (garante que temos o mínimo)
+        if (item.nome && item.preco > 0 && item.qtd > 0) {
+          cart.push({
+            nome: item.nome,
+            preco: item.preco,
+            qtd: item.qtd
+          });
+        }
+      });
+      
+      // v3.0: Limpa o cupom ao repetir um pedido
+      couponApplied = "";
+      localStorage.removeItem("dflCoupon");
+      const couponInput = document.getElementById("coupon-input");
+      if(couponInput) couponInput.value = "";
+
+      // Feedback ao usuário
+      popupAdd("Pedido anterior adicionado ao carrinho!");
+      renderMiniCart(); // Atualiza o carrinho (backend)
+      Overlays.closeAll(); // Fecha o painel de pedidos
+      Overlays.open(el.miniCart); // Abre o mini-carrinho
+
+    } catch (err) {
+      console.error("Erro ao repetir pedido: ", err);
+      alert("Erro ao processar seu pedido. Tente novamente.");
+    }
+  }
+
+/* =========================================================
+    DFL v3.8.0: FUNÇÃO DE CARREGAMENTO DO HISTÓRICO DE ENTREGAS (Ação 4)
+========================================================= */
+async function carregarHistoricoEntregas(userId) {
+    if (!el.historicoEntregas) return;
+    
+    // Ação 5: Log
+    LOG.hist("Carregando histórico de entregas da subcoleção...");
+
+    el.historicoEntregas.innerHTML = `<p class="empty-history" style="text-align:center;color:#999;">Buscando entregas...</p>`;
+
+    try {
+        // DFL v3.8.0: Busca os dados da subcoleção EntregasHistorico (Ação 4)
+        const q = db.collection("Usuarios").doc(userId)
+            .collection("EntregasHistorico")
+            .orderBy("data", "desc")
+            .limit(10);
+        
+        const snapshot = await q.get();
+
+        if (snapshot.empty) {
+            el.historicoEntregas.innerHTML = `<p class="empty-history" style="text-align:center;color:#999;">Nenhuma entrega registrada ainda.</p>`;
+            return;
+        }
+
+        const entregas = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        exibirHistoricoEntregas(entregas);
+        
+        // Ação 5: Log
+        LOG.hist(`Histórico de entregas carregado. Total de ${entregas.length} registros.`);
+
+    } catch (err) {
+        LOG.error("Erro ao carregar histórico de entregas:", err);
+        el.historicoEntregas.innerHTML = `<p class="empty-history" style="text-align:center;color:red;">Erro ao buscar histórico de entregas.</p>`;
+    }
+}
+
+/**
+ * DFL v3.8.0: Desenha o histórico de entregas.
+ */
+function exibirHistoricoEntregas(entregas) {
+    if (!el.historicoEntregas) return;
+    
+    const historicoHtml = entregas.map(e => {
+        // DFL v3.8.0: Usa os campos da subcoleção
+        const destino = e.freteDestino || 'N/A';
+        const valorFrete = e.freteValor || 0.00;
+        const pedidoId = e.pedidoId || e.id;
+        
+        const dataFormatada = e.data
+            ? new Date(e.data?.seconds * 1000 || e.data).toLocaleString("pt-BR", {
+                day: "2-digit", month: "2-digit", year: "numeric",
+                hour: "2-digit", minute: "2-digit",
+              })
+            : "—";
+            
+        // Exemplo de exibição (Ação 4)
+        const zonaDisplay = e.zona ? ` (${e.zona.replace('Zona ', 'Z')})` : '';
+
+        return `
+            <div class="historico-frete-card">
+                <h4>📦 Pedido #${pedidoId.substring(0, 8)}</h4>
+                <p>🗓️ ${dataFormatada}</p>
+                <p>
+                    🚚 Entrega: <b>${destino}${zonaDisplay}</b> — ${money(valorFrete)}
+                </p>
+            </div>
+        `;
+    }).join('');
+    
+    el.historicoEntregas.innerHTML = historicoHtml;
+}
+
+
+/* ------------------ FIM DO BLOCO V2.10 ------------------ */
+
+
+/* =========================================================
+   🎁 V3.5.3: FUNÇÃO DE CARREGAMENTO DO PAINEL DE RECOMPENSAS (CORREÇÃO UI)
+========================================================= */
+async function carregarRecompensas(userId) {
+    
+    // 🚨 NOVO: Garante que o Firebase esteja inicializado antes de tudo
+    inicializarFirebase();
+    if (!isFirebaseInitialized) return;
+
+    const contadorValor = document.getElementById('contador-valor');
+    const progressoBar = document.getElementById('progresso-bar');
+    const progressoMsg = document.getElementById('progresso-mensagem');
+    
+    if (!contadorValor || !progressoBar || !progressoMsg || !el.recompensasLista) return; 
+
+    // 1. Inicializa a UI
+    contadorValor.textContent = '...';
+    progressoBar.style.width = '0%';
+    progressoMsg.textContent = 'Carregando metas...';
+    // 🚨 CORREÇÃO FINAL: Limpa a lista de recompensas (seções) aqui para remover "Aguardando o carregamento"
+    el.recompensasLista.innerHTML = ''; 
+    if(el.historicoLista) el.historicoLista.innerHTML = '';
+    
+    // 2. Carrega as metas primeiro.
+    const RECOMPENSAS_DATA = await carregarConfiguracoesDeRecompensas();
+
+    if (RECOMPENSAS_DATA.length === 0) {
+        progressoMsg.textContent = 'Erro ao carregar metas de recompensa. (Coleção Configuração vazia).';
+        el.recompensasLista.innerHTML = '<p style="text-align:center;color:red;padding:20px;">O sistema de fidelidade está desativado no momento.</p>';
+        return; 
+    }
+    
+    const metaPrimeiroNivel = RECOMPENSAS_DATA[0]?.limite || 1; 
+
+    // --- 3. Lógica de Progresso (onSnapshot para real-time) ---
+    db.collection('Usuarios').doc(userId).onSnapshot(async doc => {
+        
+        // --- LIMPEZA DE UI ---
+        el.recompensasLista.innerHTML = ''; 
+        if(el.historicoLista) el.historicoLista.innerHTML = ''; 
+
+        const data = doc.data() || { pedidosFeitos: 0, recompensaNivel: 0 };
+        const feitos = data.pedidosFeitos;
+        const nivelAtual = data.recompensaNivel;
+        
+        // Status do Cupom Personalizado
+        let cupomStatus = null;
+        const recompensaAtual = RECOMPENSAS_DATA.find(r => r.limite === nivelAtual * metaPrimeiroNivel);
+        
+        if (recompensaAtual && recompensaAtual.tipo === 'cupom') {
+            const cupomSnap = await db.collection('CuponsUsuarios').doc(userId).get();
+            // 🚨 CORREÇÃO CRÍTICA V3.6.2: Corrigindo o erro de digitação 'cupumSnap' para 'cupomSnap'
+            cupomStatus = cupumSnap.exists ? cupumSnap.data() : null;
+        }
+
+        // Encontra a próxima meta que o cliente AINDA NÃO ATINGIU
+        const proximaRecompensa = RECOMPENSAS_DATA.find(r => r.limite > feitos);
+        
+        // Define a meta base para exibição. 
+        const metaParaExibir = proximaRecompensa ? proximaRecompensa.limite : feitos; 
+        const metaBaseCalculo = proximaRecompensa ? proximaRecompensa.limite : metaPrimeiroNivel;
+
+        // Se ele completou o último nível e não tem mais metas, a barra deve ser 100%
+        const porcentagem = proximaRecompensa === undefined ? 100 : Math.min(100, (feitos / metaBaseCalculo) * 100);
+            
+        // Atualiza a barra
+        contadorValor.textContent = feitos;
+        
+        // Ajusta a exibição da meta no HTML 
+        const elMeta = document.querySelector('.progress-container span:last-child');
+        if(elMeta) elMeta.textContent = metaParaExibir;
+
+        progressoBar.style.width = `${porcentagem}%`;
+
+        // Verifica o Status da Meta
+        if (proximaRecompensa) {
+            // A meta ainda não foi atingida
+            const faltam = proximaRecompensa.limite - feitos;
+            
+            // 🚨 CORREÇÃO DE TEXTO: Usa o 'titulo' para exibir a recompensa na mensagem
+            const tituloRecompensa = proximaRecompensa.titulo || proximaRecompensa.valor;
+            progressoMsg.textContent = `Faltam apenas ${faltam} pedidos para você ganhar a recompensa "${tituloRecompensa}"!`;
+            
+            progressoBar.style.background = 'linear-gradient(90deg, #ffb300, #ff7043)'; 
+            progressoBar.parentElement.parentElement.removeAttribute('data-status');
+            
+            // Exibe as recompensas já obtidas (as que têm limite <= pedidos feitos)
+            const recompensasObtidas = RECOMPENSAS_DATA.filter(r => r.limite <= feitos);
+            exibirRecompensas(feitos, recompensasObtidas, cupomStatus, RECOMPENSAS_DATA); // Passa RECOMPENSAS_DATA
+
+            if (recompensasObtidas.length === 0) {
+                 el.recompensasLista.innerHTML = `
+                    <p style="text-align:center;color:#666;padding:20px;margin-top:20px;">
+                        Faça ${faltam} pedidos para desbloquear a primeira recompensa.
+                    </p>`;
+            }
+
+
+        } else {
+             // Todas as metas foram atingidas
+            progressoMsg.textContent = '🎉 Parabéns! Você completou todas as metas de fidelidade!';
+            progressoBar.style.background = 'linear-gradient(90deg, #4caf50, #43a047)'; 
+            progressoBar.parentElement.parentElement.setAttribute('data-status', 'complete');
+            
+            // Exibe todas as recompensas como obtidas
+            exibirRecompensas(feitos, RECOMPENSAS_DATA, cupomStatus, RECOMPENSAS_DATA);
+        }
+        
+        // --- 4. Lógica de Histórico (Chamada) ---
+        await carregarHistoricoRecompensas(userId);
+        
+    }, error => {
+        console.error("Erro ao ler contador de fidelidade:", error);
+        progressoMsg.textContent = 'Erro ao ler seu progresso. Tente recarregar a página.';
+    });
+}
+
+/**
+ * Desenha as recompensas atuais disponíveis.
+ */
+function exibirRecompensas(pedidosFeitos, recompensasDisponiveis, cupomStatus, RECOMPENSAS_DATA) {
+    if (!el.recompensasLista) return;
+    
+    // Filtra apenas as recompensas que o usuário atingiu (ou seja, todas as do array)
+    const recompensasHtml = recompensasDisponiveis.map(r => {
+        const liberada = pedidosFeitos >= r.limite;
+        const cupomJaUsado = cupomStatus?.usado === true && cupomStatus?.cupom === r.valor;
+        
+        // Define o título de forma mais descritiva
+        const titulo = r.titulo || `Recompensa: ${r.valor} (${r.limite} Pedidos)`;
+        
+        let acaoBtn = '';
+        let statusTag = '';
+        let cardStyle = '';
+        let codigoCupom = r.tipo === 'cupom' ? r.valor : 'BRINDE';
+        
+        if (cupomJaUsado) {
+             statusTag = '<span style="color:#d32f2f;font-weight:bold;">(JÁ UTILIZADO)</span>';
+             acaoBtn = `<button disabled style="background:#ccc;color:#666;border:none;border-radius:6px;padding:8px 12px;cursor:not-allowed;margin-top:10px;">Cupom Usado</button>`;
+             cardStyle = 'opacity: 0.7;';
+        }
+        else if (liberada && r.tipo === 'cupom') {
+            statusTag = '<span style="color:#4caf50;font-weight:bold;">(DISPONÍVEL)</span>';
+            acaoBtn = `
+                <button 
+                    class="recompensa-aplicar-btn" 
+                    data-cupom="${codigoCupom}"
+                    style="background:#4caf50;color:#fff;border:none;border-radius:6px;padding:8px 12px;cursor:pointer;font-weight:600;margin-top:10px;"
+                >
+                    Aplicar Cupom 🏷️
+                </button>
+            `;
+        } else if (liberada && r.tipo === 'brinde') {
+             statusTag = '<span style="color:#1976D2;font-weight:bold;">(LIBERADO)</span>';
+             acaoBtn = `<button disabled style="background:#1976D2;color:#fff;border:none;border-radius:6px;padding:8px 12px;cursor:default;margin-top:10px;">Brinde na Próxima Compra</button>`;
+        }
+        
+        // Se ainda não liberada, o filtro já removeu. Aqui só temos as liberadas.
+
+        return `
+            <div class="recompensa-card" style="display:flex;align-items:center;padding:15px;border-radius:10px;margin-bottom:15px;background:#f9f9f9;box-shadow:0 2px 5px rgba(0,0,0,0.1);${cardStyle}">
+                <img src="imagens/recompensa-${r.tipo}.png" alt="Ícone de Recompensa" style="width:50px;height:50px;object-fit:cover;border-radius:50%;margin-right:15px;">
+                <div style="flex:1;">
+                    <h4 style="margin:0 0 5px 0;color:#333;">${titulo} ${statusTag}</h4>
+                    <p style="margin:0;font-size:0.9rem;color:#666;">Ganho por ${r.limite} pedidos.</p>
+                    ${r.tipo === 'cupom' ? `<p style="margin:5px 0 0 0;font-size:1.1rem;font-weight:bold;color:#ff7043;">CÓDIGO: ${codigoCupom}</p>` : ''}
+                </div>
+                <div>
+                    ${acaoBtn}
+                </div>
+            </div>
+        `;
+    }).join('');
+    
+    el.recompensasLista.innerHTML = recompensasHtml;
+    
+    // BIND o evento de aplicar cupom (após o desenho)
+    el.recompensasLista.querySelectorAll('.recompensa-aplicar-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            const codigo = e.currentTarget.dataset.cupom;
+            if (codigo) {
+                // Aplica a lógica do cupom (similar ao formulário)
+                couponApplied = codigo;
+                localStorage.setItem("dflCoupon", couponApplied);
+                
+                // Atualiza o input de cupom (se estiver visível)
+                const couponInput = document.getElementById("coupon-input");
+                if(couponInput) couponInput.value = codigo;
+
+                renderMiniCart(); // Recalcula e mostra a mensagem
+                Overlays.closeAll();
+                popupAdd(`Cupom ${codigo} aplicado! ✅`);
+                Overlays.open(el.miniCart); // Abre o mini-carrinho para ver o desconto
+            }
+        });
+    });
+}
+
+
+/**
+ * NOVO na V3.4: Carrega e exibe o histórico de recompensas recebidas.
+ */
+async function carregarHistoricoRecompensas(userId) {
+    if (!el.historicoLista) return;
+
+    el.historicoLista.innerHTML = `<p style="text-align:center;color:#999;">Carregando histórico...</p>`;
+    
+    try {
+        const q = db.collection("Usuarios").doc(userId)
+                    .collection("RecompensasRecebidas")
+                    .orderBy("liberadoEm", "desc"); // Corrigido para usar liberadoEm
+        
+        const snapshot = await q.get();
+
+        if (snapshot.empty) {
+            el.historicoLista.innerHTML = `<p class="empty-history" style="text-align:center;color:#999;">Você ainda não recebeu recompensas.</p>`;
+            return;
+        }
+
+        const logs = snapshot.docs.map(doc => doc.data());
+        
+        const historicoHtml = logs.map(log => {
+            const dataRecebimento = log.liberadoEm
+                ? (log.liberadoEm.toDate().toLocaleDateString('pt-BR'))
+                : "—";
+
+            let valorStr = (log.tipo === 'cupom') ? log.valor : log.valor;
+            if (log.tipo === 'value') valorStr = money(log.valor);
+
+            
+            return `
+                <div class="historico-card" style="display:flex; padding: 10px 0; border-bottom: 1px dashed #eee; align-items: center; justify-content: space-between;">
+                    <div style="flex:1;">
+                        <p style="font-weight:600; margin:0; color:#333;">
+                            🎁 ${log.titulo || log.valor}
+                        </p>
+                        <small style="color:#999;">Recebido em: ${dataRecebimento}</small>
+                    </div>
+                    <span style="font-weight:700; color:#4caf50;">
+                        + ${valorStr}
+                    </span>
+                </div>
+            `;
+        }).join('');
+        
+        // Remove a borda do último item para melhor estética
+        el.historicoLista.innerHTML = historicoHtml.replace(/border-bottom: 1px dashed #eee;<\/div>$/, 'border-bottom: none;</div>');
+
+
+    } catch (err) {
+        console.error("Erro ao carregar histórico de recompensas: ", err);
+        el.historicoLista.innerHTML = `<p style="text-align:center;color:red;">Erro ao buscar histórico.</p>`;
+    }
+}
+
+
+/* ------------------ 🎁 MINHAS RECOMPENSAS (V3.5.3) ------------------ */
+
+  // 1. Lógica de abrir/fechar o novo painel
+  el.recompensasBtn?.addEventListener("click", () => {
+    // Requer login, assim como "Meus Pedidos"
+    if (!currentUser) {
+      alert("Faça login para ver suas recompensas.");
+      Overlays.open(el.loginModal); 
+      return;
+    }
+    // 🚨 OTIMIZAÇÃO: Garante o Firebase se for o primeiro acesso
+    inicializarFirebase(); 
+    Overlays.open(el.recompensasPanel);
+    
+    // 🚨 NOVO: Chama a função para carregar e monitorar o contador
+    carregarRecompensas(currentUser.uid); 
+  });
+
+  // 2. Lógica de fechar o painel
+  el.recompensasFecharBtn?.addEventListener("click", () => Overlays.closeAll());
+
+/* ------------------ FIM DO BLOCO V3.5.3 ------------------ */
+
+
+/* ------------------ 📦 MEUS PEDIDOS PREMIUM (MANTIDO) ------------------ */
+
+  // 1. Lógica de abrir/fechar o novo painel
+  el.pedidosBtn?.addEventListener("click", () => {
+    if (!currentUser) {
+      alert("Faça login para ver seus pedidos.");
+      Overlays.open(el.loginModal); 
+      return;
+    }
+    inicializarFirebase(); // Garante o Firebase se for o primeiro acesso
+    Overlays.open(el.pedidosPanel);
+    carregarPedidos(currentUser.uid); 
+    // DFL v3.8.0: Chama a função para carregar o histórico de entregas da SUBCOLEÇÃO (Ação 4)
+    carregarHistoricoEntregas(currentUser.uid);
+  });
+
+  el.pedidosFecharBtn?.addEventListener("click", () => Overlays.closeAll());
+
+  // 2. Lógica de carregar pedidos (MANTIDO)
+  async function carregarPedidos(userId) {
+    if (!el.pedidosLista) return;
+    el.pedidosLista.innerHTML = `<p class="empty-orders">Carregando pedidos...</p>`;
+
+    try {
+      const q = db.collection("Pedidos").where("userId", "==", userId).orderBy("data", "desc").limit(10); // Limita para melhor performance
+      const snapshot = await q.get();
+
+      if (snapshot.empty) {
+        el.pedidosLista.innerHTML = `<p class="empty-orders">Nenhum pedido encontrado 😢</p>`;
+        return;
+      }
+
+      const pedidos = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      exibirPedidos(pedidos);
+
+    } catch (err) {
+      console.error("Erro ao carregar pedidos: ", err);
+      el.pedidosLista.innerHTML = `<p class="empty-orders" style="color:red;">Erro ao buscar seus pedidos.</p>`;
+    }
+  }
+
+  // 3. Lógica de exibir os pedidos no painel (MANTIDO)
+  function exibirPedidos(pedidos) {
+    if (!el.pedidosLista) return;
+    
+    el.pedidosLista.innerHTML = pedidos.map(p => {
+      const thumbUrl = p.thumb || 'imagens/padrao.jpg';
+      const dataFormatada = p.data
+          ? new Date(p.data?.seconds * 1000 || p.data).toLocaleString("pt-BR", {
+              day: "2-digit", month: "2-digit", year: "numeric",
+              hour: "2-digit", minute: "2-digit",
+            })
+          : "—";
+
+      // Verifica se o pedido tem 'itensObj' para habilitar o botão
+      const podeRepetir = Array.isArray(p.itensObj) && p.itensObj.length > 0;
+      
+      return `
+        <div class="pedido-card">
+          <div class="pedido-thumb" style="background-image:url('${thumbUrl}');"></div>
+          <h4>📅 ${dataFormatada}</h4>
+          <p class="pedido-info">Total: ${money(p.total)}</p>
+          <div class="pedido-itens">
+            ${(p.itens || []).map(i => `• ${i}`).join('<br>')}
+          </div>
+          <button 
+            class="repetir-btn" 
+            data-id="${p.id}" 
+            ${podeRepetir ? '' : 'disabled style="background:grey;cursor:not-allowed;"'}
+          >
+            🔁 Repetir Pedido
+          </button>
+        </div>`;
+    }).join('');
+  }
+  
+  // 4. Lógica de "Repetir Pedido" (MANTIDO)
+  el.pedidosLista?.addEventListener('click', async (e) => {
+    if (e.target.classList.contains('repetir-btn') && !e.target.disabled) {
+      const idPedido = e.target.dataset.id;
+      
+      // Desativa o botão para evitar clique duplo
+      e.target.disabled = true;
+      e.target.textContent = "Carregando...";
+      
+      await repetirPedido(idPedido);
+      
+      // O botão será reativado da próxima vez que o painel for aberto
+      // (a menos que prefira reativá-lo manualmente aqui)
+    }
+  });
+
+  async function repetirPedido(idPedido) {
+    try {
+      const docRef = db.collection("Pedidos").doc(idPedido);
+      const doc = await docRef.get();
+
+      if (!doc.exists) {
+        return alert("Erro: Pedido antigo não encontrado.");
+      }
+
+      const pedido = doc.data();
+      const itensParaRepetir = pedido.itensObj; // Lê o novo array de objetos
+
+      if (!Array.isArray(itensParaRepetir) || itensParaRepetir.length === 0) {
+        return alert("Não é possível repetir este pedido (formato antigo). Faça um novo pedido para poder repeti-lo no futuro.");
+      }
+
+      // Limpa o carrinho atual antes de adicionar os itens antigos
+      cart = [];
+      
+      // Adiciona os itens ao carrinho
+      itensParaRepetir.forEach(item => {
+        // Validação simples (garante que temos o mínimo)
+        if (item.nome && item.preco > 0 && item.qtd > 0) {
+          cart.push({
+            nome: item.nome,
+            preco: item.preco,
+            qtd: item.qtd
+          });
+        }
+      });
+      
+      // v3.0: Limpa o cupom ao repetir um pedido
+      couponApplied = "";
+      localStorage.removeItem("dflCoupon");
+      const couponInput = document.getElementById("coupon-input");
+      if(couponInput) couponInput.value = "";
+
+      // Feedback ao usuário
+      popupAdd("Pedido anterior adicionado ao carrinho!");
+      renderMiniCart(); // Atualiza o carrinho (backend)
+      Overlays.closeAll(); // Fecha o painel de pedidos
+      Overlays.open(el.miniCart); // Abre o mini-carrinho
+
+    } catch (err) {
+      console.error("Erro ao repetir pedido: ", err);
+      alert("Erro ao processar seu pedido. Tente novamente.");
+    }
+  }
+
+/* =========================================================
+    DFL v3.8.0: FUNÇÃO DE CARREGAMENTO DO HISTÓRICO DE ENTREGAS (Ação 4)
+========================================================= */
+async function carregarHistoricoEntregas(userId) {
+    if (!el.historicoEntregas) return;
+    
+    // Ação 5: Log
+    LOG.hist("Carregando histórico de entregas da subcoleção...");
+
+    el.historicoEntregas.innerHTML = `<p class="empty-history" style="text-align:center;color:#999;">Buscando entregas...</p>`;
+
+    try {
+        // DFL v3.8.0: Busca os dados da subcoleção EntregasHistorico (Ação 4)
+        const q = db.collection("Usuarios").doc(userId)
+            .collection("EntregasHistorico")
+            .orderBy("data", "desc")
+            .limit(10);
+        
+        const snapshot = await q.get();
+
+        if (snapshot.empty) {
+            el.historicoEntregas.innerHTML = `<p class="empty-history" style="text-align:center;color:#999;">Nenhuma entrega registrada ainda.</p>`;
+            return;
+        }
+
+        const entregas = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        exibirHistoricoEntregas(entregas);
+        
+        // Ação 5: Log
+        LOG.hist(`Histórico de entregas carregado. Total de ${entregas.length} registros.`);
+
+    } catch (err) {
+        LOG.error("Erro ao carregar histórico de entregas:", err);
+        el.historicoEntregas.innerHTML = `<p class="empty-history" style="text-align:center;color:red;">Erro ao buscar histórico de entregas.</p>`;
+    }
+}
+
+/**
+ * DFL v3.8.0: Desenha o histórico de entregas.
+ */
+function exibirHistoricoEntregas(entregas) {
+    if (!el.historicoEntregas) return;
+    
+    const historicoHtml = entregas.map(e => {
+        // DFL v3.8.0: Usa os campos da subcoleção
+        const destino = e.freteDestino || 'N/A';
+        const valorFrete = e.freteValor || 0.00;
+        const pedidoId = e.pedidoId || e.id;
+        
+        const dataFormatada = e.data
+            ? new Date(e.data?.seconds * 1000 || e.data).toLocaleString("pt-BR", {
+                day: "2-digit", month: "2-digit", year: "numeric",
+                hour: "2-digit", minute: "2-digit",
+              })
+            : "—";
+            
+        // Exemplo de exibição (Ação 4)
+        const zonaDisplay = e.zona ? ` (${e.zona.replace('Zona ', 'Z')})` : '';
+
+        return `
+            <div class="historico-frete-card">
+                <h4>📦 Pedido #${pedidoId.substring(0, 8)}</h4>
+                <p>🗓️ ${dataFormatada}</p>
+                <p>
+                    🚚 Entrega: <b>${destino}${zonaDisplay}</b> — ${money(valorFrete)}
+                </p>
+            </div>
+        `;
+    }).join('');
+    
+    el.historicoEntregas.innerHTML = historicoHtml;
+}
+
+
+/* ------------------ FIM DO BLOCO V2.10 ------------------ */
+
+
+/* =========================================================
+   🎁 V3.5.3: FUNÇÃO DE CARREGAMENTO DO PAINEL DE RECOMPENSAS (CORREÇÃO UI)
+========================================================= */
+async function carregarRecompensas(userId) {
+    
+    // 🚨 NOVO: Garante que o Firebase esteja inicializado antes de tudo
+    inicializarFirebase();
+    if (!isFirebaseInitialized) return;
+
+    const contadorValor = document.getElementById('contador-valor');
+    const progressoBar = document.getElementById('progresso-bar');
+    const progressoMsg = document.getElementById('progresso-mensagem');
+    
+    if (!contadorValor || !progressoBar || !progressoMsg || !el.recompensasLista) return; 
+
+    // 1. Inicializa a UI
+    contadorValor.textContent = '...';
+    progressoBar.style.width = '0%';
+    progressoMsg.textContent = 'Carregando metas...';
+    // 🚨 CORREÇÃO FINAL: Limpa a lista de recompensas (seções) aqui para remover "Aguardando o carregamento"
+    el.recompensasLista.innerHTML = ''; 
+    if(el.historicoLista) el.historicoLista.innerHTML = '';
+    
+    // 2. Carrega as metas primeiro.
+    const RECOMPENSAS_DATA = await carregarConfiguracoesDeRecompensas();
+
+    if (RECOMPENSAS_DATA.length === 0) {
+        progressoMsg.textContent = 'Erro ao carregar metas de recompensa. (Coleção Configuração vazia).';
+        el.recompensasLista.innerHTML = '<p style="text-align:center;color:red;padding:20px;">O sistema de fidelidade está desativado no momento.</p>';
+        return; 
+    }
+    
+    const metaPrimeiroNivel = RECOMPENSAS_DATA[0]?.limite || 1; 
+
+    // --- 3. Lógica de Progresso (onSnapshot para real-time) ---
+    db.collection('Usuarios').doc(userId).onSnapshot(async doc => {
+        
+        // --- LIMPEZA DE UI ---
+        el.recompensasLista.innerHTML = ''; 
+        if(el.historicoLista) el.historicoLista.innerHTML = ''; 
+
+        const data = doc.data() || { pedidosFeitos: 0, recompensaNivel: 0 };
+        const feitos = data.pedidosFeitos;
+        const nivelAtual = data.recompensaNivel;
+        
+        // Status do Cupom Personalizado
+        let cupomStatus = null;
+        const recompensaAtual = RECOMPENSAS_DATA.find(r => r.limite === nivelAtual * metaPrimeiroNivel);
+        
+        if (recompensaAtual && recompensaAtual.tipo === 'cupom') {
+            const cupomSnap = await db.collection('CuponsUsuarios').doc(userId).get();
+            // 🚨 CORREÇÃO CRÍTICA V3.6.2: Corrigindo o erro de digitação 'cupumSnap' para 'cupomSnap'
+            cupomStatus = cupumSnap.exists ? cupumSnap.data() : null;
         }
 
         // Encontra a próxima meta que o cliente AINDA NÃO ATINGIU
@@ -2587,258 +3585,594 @@ async function carregarHistoricoRecompensas(userId) {
 
 
 // =========================================================
-// DFL v3.8.5: MÓDULO ADMIN DE ZONAS DE FRETE (CRUD)
+// DFL v3.7.3: MÓDULO DE RELATÓRIOS INTERNOS (MANTIDO)
 // =========================================================
+window.DFL_Reports = (() => {
+  let isEnabled = true;
+  let isOpen = false;
+  let currentRange = '30d';
+  // DFL v3.7.4: Cache atualizado para incluir o objeto de filtro
+  let cache = { overview: null, delivery: null, orders: null, filter: '' }; 
+  const log = LOG.reports;
+  const logCharts = LOG.charts;
+  const logFilters = LOG.filters;
+  const logError = (msg, e) => console.error('[DFL/REPORTS] ERRO: ' + msg, e);
 
-window.DFL_AdminFrete = (() => {
-    const TAG = '[DFL/ADMIN]';
-    const COLLECTION = 'frete_zonas';
+  function ensurePanel() {
+    if (el.reportsPanel) return true;
+    logError("Painel #reports-panel não encontrado no DOM.");
+    return false;
+  }
+  
+  // DFL v3.7.3: Função auxiliar para calcular o início do período
+  function getDateRange(range) {
+    const now = new Date();
+    const start = new Date(now);
+    start.setHours(0, 0, 0, 0);
+
+    if (range === '7d') start.setDate(now.getDate() - 7);
+    else if (range === '30d') start.setDate(now.getDate() - 30);
+    else if (range === '90d') start.setDate(now.getDate() - 90);
+    else if (range === 'all') return null; // Não aplica filtro de data
     
-    function ensurePanelDOM() {
-        if (el.freteAdminPanel) return;
+    return start;
+  }
 
-        // Cria a estrutura HTML do painel admin de frete
-        const panelHtml = `
-            <div class="reports-panel frete-admin-panel" id="frete-admin-panel" aria-hidden="true">
-                <div class="reports-header">
-                    <span>🚚 Frete Admin - Zonas</span>
-                    <button class="reports-close frete-admin-close" type="button" aria-label="Fechar painel">✖</button>
-                </div>
-                <div class="reports-body" style="padding: 10px;">
-                    <div id="frete-admin-add-form" style="padding: 15px; background: #fff; border-radius: 8px; margin-bottom: 20px; box-shadow: 0 1px 3px rgba(0,0,0,.1);">
-                        <h4>➕ Nova Zona / Edição</h4>
-                        <form id="frete-zona-form" style="display: grid; gap: 10px;">
-                            <input type="hidden" id="zona-id-input">
-                            <input type="text" id="zona-nome-input" placeholder="Nome da Zona (ex: Centro)" required style="padding: 10px; border: 1px solid #ddd; border-radius: 6px;">
-                            <input type="number" id="zona-valor-input" placeholder="Valor (R$ 5.00)" step="0.01" required style="padding: 10px; border: 1px solid #ddd; border-radius: 6px;">
-                            <div style="display: flex; align-items: center; gap: 10px;">
-                                <input type="checkbox" id="zona-ativo-input" checked>
-                                <label for="zona-ativo-input">Ativa para uso</label>
-                            </div>
-                            <div style="margin-top: 10px; border-top: 1px dashed #eee; padding-top: 10px;">
-                                <label style="font-weight: 600;">Bairros (separados por vírgula):</label>
-                                <textarea id="zona-bairros-input" rows="2" placeholder="Rosário, Alvorada, Bela Vista" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; resize: vertical;"></textarea>
-                            </div>
-                            <button type="submit" id="zona-submit-btn" class="btn-primary" style="padding: 12px;">Salvar Zona</button>
-                        </form>
-                    </div>
+  async function open(range = currentRange) {
+    if (!currentUser || !isAdmin(currentUser)) {
+      logError("Acesso negado. Usuário não é admin.");
+      return;
+    }
+    
+    if (!ensurePanel() || !isEnabled) return;
+    
+    Overlays.open(el.reportsPanel);
+    currentRange = range;
+    isOpen = true;
+    
+    // DFL v3.7.4: BIND do campo de filtro (ID AJUSTADO)
+    if (el.reportsFilterInput) {
+        el.reportsFilterInput.removeEventListener('keyup', handleFilterChange);
+        el.reportsFilterInput.addEventListener('keyup', handleFilterChange);
+    }
+    
+    // DFL v3.7.3: BIND dos botões de abas e seletor de período
+    bindReportListeners();
 
-                    <h4>📜 Zonas Cadastradas</h4>
-                    <div id="frete-admin-table-container">
-                        <p style="text-align: center; color: #999;">Carregando zonas...</p>
-                    </div>
+    // Resetar abas para garantir que a Overview seja a primeira
+    const tabs = document.querySelectorAll('.reports-tab-btn');
+    const contents = document.querySelectorAll('.reports-content-tab');
+    if (tabs.length) tabs[0].click(); // Abre a primeira aba
+
+    // Forçar recarga (passando range, não usando cache)
+    await loadData(range, true); 
+    log('Painel aberto com range:', range);
+  }
+  
+  // DFL v3.7.4: Handler para mudança do filtro (Ação 2)
+  const handleFilterChange = (e) => {
+    const newFilter = (e.target.value || '').toLowerCase().trim();
+    if (cache.filter === newFilter) return;
+
+    cache.filter = newFilter;
+    logFilters(`Filtro aplicado: "${newFilter}"`);
+    
+    // Recalcula todos os renderers usando os dados em cache (Ação 3: Caching de filtros)
+    renderAll();
+  };
+
+  // DFL v3.7.3: BIND dos listeners da UI do Reports Panel
+  function bindReportListeners() {
+    if (el.reportsPanel._listenersBound) return;
+    
+    // Fechar painel
+    el.reportsClose?.addEventListener('click', () => Overlays.closeAll());
+
+    // Abas
+    el.reportsTabs?.querySelectorAll('.reports-tab-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            const tab = e.target.dataset.tab;
+            document.querySelectorAll('.reports-tab-btn').forEach(b => b.classList.remove('active'));
+            document.querySelectorAll('.reports-content-tab').forEach(c => c.classList.remove('active'));
+            e.target.classList.add('active');
+            document.getElementById(`rep-${tab}`)?.classList.add('active');
+        });
+    });
+    
+    // Seletor de Período
+    el.repPeriodSelector?.addEventListener('change', (e) => {
+        const newRange = e.target.value;
+        currentRange = newRange;
+        // Limpa o cache e recarrega os dados para o novo período
+        loadData(newRange, true);
+    });
+
+    // Exportar CSV
+    el.exportOrdersCSV?.addEventListener('click', () => {
+        // Usa os dados originais (sem filtro de UI) para o CSV
+        const data = cache.orders; 
+        if (!data || data.length === 0) return popupAdd('Nenhum pedido para exportar.');
+        
+        // Ação 4: Exportar CSV
+        const safeRows = data.map(p => ({
+            ID: p.id.substring(0,8),
+            Data: p.data?.toLocaleString('pt-BR'),
+            Itens_Count: p.itens?.length || 0,
+            Subtotal: String(p.subtotal).replace('.', ','),
+            Desconto: String(p.desconto).replace('.', ','),
+            Frete: String(p.frete).replace('.', ','),
+            Total: String(p.total).replace('.', ','),
+            Cupom: p.cupom || '',
+            Destino_Frete: p.freteDestino || '',
+            Endereco_Completo: p.endereco ? `"${p.endereco.replace(/"/g, '""')}"` : ''
+        }));
+        
+        exportCSV(safeRows, `pedidos_dfl_v374_${currentRange}.csv`);
+    });
+
+    el.reportsPanel._listenersBound = true;
+  }
+  
+  // Função central para buscar todos os dados
+  async function loadData(range, forceReload = false) {
+    if (!db) { disableForSafety(); return; }
+
+    // DFL v3.7.3: Set spinners
+    el.repOverview.innerHTML = `<p style="text-align:center; color:#999;">Carregando Visão Geral...</p>`;
+    el.repDelivery.innerHTML = `<p style="text-align:center; color:#999;">Carregando Métricas de Frete...</p>`;
+    el.repOrders.querySelector('#orders-list').innerHTML = `<p style="text-align:center; color:#999;">Carregando Pedidos Detalhados...</p>`;
+
+    if (forceReload) cache = { overview: null, delivery: null, orders: null, filter: cache.filter }; // Preserva o filtro
+    
+    try {
+        await Promise.all([
+            fetchOverview(range),
+            fetchDelivery(range),
+            fetchOrders(range, { limit: 50 })
+        ]);
+        // Renderiza com o filtro atual (cache.filter)
+        renderAll();
+    } catch (e) {
+        logError("Falha ao carregar dados dos relatórios. Firestore indisponível?", e);
+        el.repOverview.innerHTML = `<p style="color:red; text-align:center;">Erro ao carregar dados. Tente recarregar.</p>`;
+    }
+  }
+
+
+  // ======== Fetchers (Firestore) ========
+  async function fetchOrdersData(range, limit = Infinity) {
+    if (!window.db) { throw new Error("Firestore indisponível."); }
+    
+    const start = getDateRange(range);
+    let query = db.collection("Pedidos").orderBy("data", "desc");
+    
+    if (start) {
+        // Converte o JS Date para Timestamp do Firestore
+        const startTimestamp = firebase.firestore.Timestamp.fromDate(start); 
+        query = query.where("data", ">=", startTimestamp);
+    }
+    if (limit !== Infinity) {
+        query = query.limit(limit);
+    }
+
+    const snapshot = await query.get();
+    
+    // Mapeamento e limpeza de dados (sanitização básica)
+    return snapshot.docs.map(doc => {
+        const p = doc.data() || {};
+        return {
+            id: doc.id,
+            data: p.data?.toDate?.() || new Date(p.data), // Converte Timestamp para JS Date
+            itens: p.itens || [],
+            subtotal: Number(p.subtotal || 0),
+            desconto: Number(p.desconto || 0),
+            frete: Number(p.freteValor || p.entrega || 0), // DFL v3.7.2: Usa freteValor
+            freteDestino: (p.freteDestino || '').toString().replace(/</g, '<'), // Sanitizar
+            total: Number(p.total || 0),
+            cupom: (p.cupom || '').toString().replace(/</g, '<'),
+            endereco: (p.endereco || '').toString().replace(/</g, '<'),
+            numItens: (p.itens || []).length
+        };
+    }).filter(p => p.total > 0 && p.data && !isNaN(p.data));
+  }
+
+  async function fetchOverview(range) {
+    if (cache.overview) return cache.overview;
+
+    const pedidos = await fetchOrdersData(range, 500); // Max 500 para Overview
+
+    const totalPedidos = pedidos.length;
+    const sumTotal = pedidos.reduce((s, p) => s + p.total, 0);
+    const sumFrete = pedidos.reduce((s, p) => s + p.frete, 0);
+    const pedidosComFrete = pedidos.filter(p => p.frete > 0).length;
+
+    const ticketMedio = totalPedidos > 0 ? sumTotal / totalPedidos : 0;
+    const pctComFrete = totalPedidos > 0 ? (pedidosComFrete / totalPedidos) * 100 : 0;
+    
+    // TOP 5 Bairros
+    const bairrosMap = {};
+    pedidos.forEach(p => {
+        const bairro = p.freteDestino || 'N/A';
+        if (!bairrosMap[bairro]) {
+            bairrosMap[bairro] = { count: 0, valorFrete: 0 };
+        }
+        bairrosMap[bairro].count++;
+        bairrosMap[bairro].valorFrete += p.frete;
+    });
+
+    const topBairros = Object.entries(bairrosMap)
+        .map(([bairro, data]) => ({
+            bairro: bairro,
+            ...data,
+            freteMedio: data.count > 0 ? data.valorFrete / data.count : 0
+        }))
+        .sort((a, b) => b.count - a.count)
+        .slice(0, 5);
+
+    cache.overview = { totalPedidos, ticketMedio, pctComFrete, topBairros, sumTotal, sumFrete, pedidos };
+    return cache.overview;
+  }
+
+  async function fetchDelivery(range) {
+    if (cache.delivery) return cache.delivery;
+
+    // Busca os dados da overview para não refazer a query
+    const overviewData = await fetchOverview(range);
+    const pedidosComFrete = overviewData.pedidos.filter(p => p.frete > 0);
+    
+    const freteTotal = pedidosComFrete.reduce((s, p) => s + p.frete, 0);
+    const freteMedio = pedidosComFrete.length > 0 ? freteTotal / pedidosComFrete.length : 0;
+
+    // Tabela de Distribuição por Bairro (reaproveita a lógica do Overview)
+    const bairrosMap = {};
+    pedidosComFrete.forEach(p => {
+        const bairro = p.freteDestino || 'N/A';
+        if (!bairrosMap[bairro]) {
+            bairrosMap[bairro] = { count: 0, freteTotal: 0 };
+        }
+        bairrosMap[bairro].count++;
+        bairrosMap[bairro].freteTotal += p.frete;
+    });
+    
+    const distribuicao = Object.entries(bairrosMap)
+        .map(([bairro, data]) => ({
+            bairro,
+            ...data,
+            freteMedio: data.freteTotal / data.count
+        }))
+        .sort((a, b) => b.freteTotal - a.freteTotal); // Ordena por valor arrecadado
+
+    // Últimos 10 fretes
+    const ultimosFretes = pedidosComFrete
+        .slice(0, 10)
+        .map(p => ({
+            data: p.data.toLocaleTimeString('pt-BR') + ' ' + p.data.toLocaleDateString('pt-BR'),
+            bairro: p.freteDestino,
+            valor: p.frete
+        }));
+
+    cache.delivery = { freteTotal, freteMedio, distribuicao, ultimosFretes };
+    return cache.delivery;
+  }
+
+  async function fetchOrders(range, { limit = 50 } = {}) {
+    // Ação 3: Buscar últimos N pedidos no range, não usar cache
+    cache.orders = await fetchOrdersData(range, limit);
+    return cache.orders;
+  }
+
+  // ======== Renderers ========
+  function renderAll() {
+    renderOverview(cache.overview);
+    renderDelivery(cache.delivery);
+    renderOrders(cache.orders);
+  }
+
+  // DFL v3.7.4: Renderizador de Gráfico de Pizza (CSS) - Ação 1
+  function renderPizzaChart(container, percentage, color = '#ff7043', baseColor = '#e0e0e0') {
+    const isReady = percentage >= 0 && percentage <= 100;
+    const finalColor = percentage > 0 ? color : baseColor;
+    const secondColor = percentage > 50 ? finalColor : baseColor;
+    const thirdColor = percentage > 50 ? baseColor : finalColor;
+    const rotation = percentage * 3.6;
+
+    container.innerHTML = `
+        <div style="
+            width: 100px; height: 100px; border-radius: 50%;
+            background-image: conic-gradient(${finalColor} ${percentage}%, ${baseColor} 0);
+            display: flex; align-items: center; justify-content: center;
+            position: relative; margin: 10px auto;
+        ">
+            <div style="
+                position: absolute; width: 80px; height: 80px; 
+                border-radius: 50%; background: #fff;
+                display: flex; align-items: center; justify-content: center;
+                font-weight: bold; font-size: 1.1rem;
+            ">${isReady ? percentage.toFixed(0) + '%' : 'N/A'}</div>
+        </div>
+    `;
+    logCharts('Gráfico de Pizza Renderizado: % Frete.');
+  }
+
+  function renderOverview(data) {
+    if (!data) return el.repOverview.innerHTML = `<p style="color:red; text-align:center;">Erro ao carregar dados.</p>`;
+    
+    // DFL v3.7.4: Gráfico de Pizza (proporção de pedidos com frete)
+    const chartContainer = document.createElement('div');
+    chartContainer.style.textAlign = 'center';
+    el.repOverview.innerHTML = ''; // Limpa o container
+    
+    el.repOverview.innerHTML += `<h4 style="margin-top:0; color:#ff7043;">Métricas Gerais do Período</h4>`;
+    
+    const metricCardsHtml = `
+        <div style="display:flex; flex-wrap:wrap; gap:10px;">
+            <div class="reports-metric-card">Pedidos no Período: <b>${data.totalPedidos}</b></div>
+            <div class="reports-metric-card">Arrecadação Total: <b>${money(data.sumTotal)}</b></div>
+            <div class="reports-metric-card">Ticket Médio: <b>${money(data.ticketMedio)}</b></div>
+            <div class="reports-metric-card">% Pedidos c/ Frete: <b>${data.pctComFrete.toFixed(1)}%</b></div>
+        </div>
+    `;
+    el.repOverview.innerHTML += metricCardsHtml;
+
+
+    chartContainer.innerHTML = '<h4>Proporção de Pedidos com Frete</h4>';
+    el.repOverview.appendChild(chartContainer);
+    renderPizzaChart(chartContainer, data.pctComFrete);
+    
+    let topBairrosHtml = `<p style="margin-top:15px; font-weight:700; color:#ff7043;">Top 5 Bairros (Volume de Pedidos)</p>`;
+    if (data.topBairros.length === 0) {
+        topBairrosHtml += `<p style="font-size:0.9rem; color:#999;">Nenhum pedido com frete no período.</p>`;
+    } else {
+        topBairrosHtml += `<table class="reports-table"><thead><tr><th>Bairro</th><th>Pedidos</th><th>Frete Médio</th></tr></thead><tbody>`;
+        data.topBairros.forEach(b => {
+            topBairrosHtml += `<tr><td>${b.bairro}</td><td>${b.count}</td><td>${money(b.freteMedio)}</td></tr>`;
+        });
+        topBairrosHtml += `</tbody></table>`;
+    }
+    el.repOverview.innerHTML += topBairrosHtml;
+  }
+
+  // DFL v3.7.4: Renderizador de Gráfico de Barras (CSS Flex) - Ação 1
+  function renderBarChart(container, data) {
+    if (data.length === 0) {
+        container.innerHTML = '<p style="text-align:center; color:#999;">Sem dados de frete para barras.</p>';
+        return;
+    }
+    
+    const maxVal = Math.max(...data.map(d => d.freteTotal));
+    
+    let barsHtml = '';
+    data.forEach(d => {
+        const percentage = (d.freteTotal / maxVal) * 95; // Max 95% para margem
+        barsHtml += `
+            <div style="display:flex; align-items:center; margin-bottom: 8px;">
+                <span style="width: 80px; font-size: 0.8rem; font-weight: 600; flex-shrink: 0;">${d.bairro.substring(0, 15)}</span>
+                <div style="flex-grow: 1; height: 18px; background: #eee; border-radius: 4px; overflow: hidden;">
+                    <div style="width: ${percentage}%; height: 100%; background: linear-gradient(90deg, #ffb300, #ff7043); transition: width 0.5s;"></div>
                 </div>
+                <span style="margin-left: 10px; font-size: 0.8rem; font-weight: 700; flex-shrink: 0;">${money(d.freteTotal)}</span>
             </div>
         `;
-        
-        document.body.insertAdjacentHTML('beforeend', panelHtml);
-        
-        // Atualiza as referências dos elementos
-        el.freteAdminPanel = document.getElementById("frete-admin-panel");
-        el.freteAdminPanel.querySelector('.frete-admin-close')?.addEventListener('click', () => Overlays.closeAll());
-        
-        bindCRUDListeners();
-    }
+    });
     
-    // DFL v3.8.5: Adiciona listeners de CRUD
-    function bindCRUDListeners() {
-        // Listener do formulário (Create/Update)
-        el.freteAdminPanel.querySelector('#frete-zona-form')?.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const id = document.getElementById('zona-id-input').value;
-            const nome = document.getElementById('zona-nome-input').value.trim();
-            const valor = parseFloat(document.getElementById('zona-valor-input').value);
-            const ativo = document.getElementById('zona-ativo-input').checked;
-            const bairrosStr = document.getElementById('zona-bairros-input').value;
+    container.innerHTML = `<h4 style="margin-top:0; color:#ff7043;">Arrecadação por Bairro (Total)</h4><div style="padding: 10px 0;">${barsHtml}</div>`;
+    logCharts('Gráfico de Barras Renderizado: Top Bairros Frete.');
+  }
 
-            if (!nome || isNaN(valor)) {
-                popupAdd("Preencha o Nome e Valor corretamente.");
-                return;
-            }
-            
-            const bairros = bairrosStr.split(',').map(b => b.trim()).filter(b => b.length > 0);
 
-            const dados = { nome, valor, ativo, bairros };
-            
-            if (id) {
-                await editarZonaFrete(id, dados);
-            } else {
-                await adicionarZonaFrete(dados);
-            }
-            
-            // Resetar formulário após salvar
-            e.target.reset();
-            document.getElementById('zona-id-input').value = '';
-            document.getElementById('zona-submit-btn').textContent = 'Salvar Zona';
+  function renderDelivery(data) {
+    if (!data) return el.repDelivery.innerHTML = `<p style="color:red; text-align:center;">Erro ao carregar dados.</p>`;
+    
+    el.repDelivery.innerHTML = `
+        <div style="display:flex; flex-wrap:wrap; gap:10px;">
+            <div class="reports-metric-card">Frete Total Arrecadado: <b>${money(data.freteTotal)}</b></div>
+            <div class="reports-metric-card">Frete Médio: <b>${money(data.freteMedio)}</b></div>
+        </div>
+        <div id="frete-bar-chart" style="margin-top:20px; padding:10px; background:#fff; border-radius:8px; box-shadow:var(--shadow-1);"></div>
+    `;
+    
+    // DFL v3.7.4: Renderiza o gráfico de barras
+    renderBarChart(document.getElementById('frete-bar-chart'), data.distribuicao.slice(0, 5));
+
+
+    let distribuicaoHtml = `<p style="margin-top:15px; font-weight:700; color:#ff7043;">Distribuição de Frete por Bairro (Detalhe)</p>`;
+    if (data.distribuicao.length === 0) {
+        distribuicaoHtml += `<p style="font-size:0.9rem; color:#999;">Nenhum pedido com frete no período.</p>`;
+    } else {
+        distribuicaoHtml += `<table class="reports-table"><thead><tr><th>Bairro</th><th>Pedidos</th><th>Frete Total</th><th>Frete Médio</th></tr></thead><tbody>`;
+        data.distribuicao.forEach(d => {
+            distribuicaoHtml += `<tr><td>${d.bairro}</td><td>${d.count}</td><td>${money(d.freteTotal)}</td><td>${money(d.freteMedio)}</td></tr>`;
         });
-        
-        // Listener da Tabela (Edit/Delete) - Delegado ao container
-        el.freteAdminPanel.querySelector('#frete-admin-table-container')?.addEventListener('click', async (e) => {
-            const target = e.target;
-            const id = target.closest('tr')?.dataset.id;
-            if (!id) return;
-            
-            if (target.classList.contains('edit-btn')) {
-                preencherFormularioEdicao(id);
-            } else if (target.classList.contains('delete-btn')) {
-                if (confirm(`Tem certeza que deseja excluir a zona ${id}?`)) {
-                    await removerZonaFrete(id);
-                }
-            }
+        distribuicaoHtml += `</tbody></table>`;
+    }
+    el.repDelivery.innerHTML += distribuicaoHtml;
+    
+    let ultimosFretesHtml = `<p style="margin-top:20px; font-weight:700; color:#ff7043;">Últimos 10 Fretes Registrados</p>`;
+    if (data.ultimosFretes.length > 0) {
+        ultimosFretesHtml += `<table class="reports-table"><thead><tr><th>Data/Hora</th><th>Bairro</th><th>Valor</th></tr></thead><tbody>`;
+        data.ultimosFretes.forEach(f => {
+            ultimosFretesHtml += `<tr><td>${f.data}</td><td>${f.bairro}</td><td>${money(f.valor)}</td></tr>`;
         });
+        ultimosFretesHtml += `</tbody></table>`;
     }
+    el.repDelivery.innerHTML += ultimosFretesHtml;
+  }
 
-
-    // DFL v3.8.5: READ (usando onSnapshot para tempo real)
-    function carregarZonasFrete() {
-        if (!db) { return; }
+  function renderOrders(data) {
+    if (!data) return el.repOrders.querySelector('#orders-list').innerHTML = `<p style="color:red; text-align:center;">Erro ao carregar dados.</p>`;
+    
+    const filterTerm = cache.filter.toLowerCase();
+    
+    // 2. Filtros Avançados: Aplica o filtro de UI (Ação 2)
+    const filteredData = data.filter(p => {
+        if (!filterTerm) return true;
         
-        db.collection(COLLECTION).onSnapshot(snapshot => {
-            const zonas = [];
-            snapshot.forEach(doc => {
-                zonas.push({ id: doc.id, ...doc.data() });
-            });
-            renderizarTabela(zonas);
-            LOG.admin(`Zonas de Frete carregadas em tempo real. Total: ${zonas.length}`);
-        }, error => {
-            LOG.error("Erro ao carregar zonas de frete (onSnapshot):", error);
-            document.getElementById('frete-admin-table-container').innerHTML = `<p style="color:red; text-align:center;">Erro de conexão com o Firestore.</p>`;
+        const matchesBairro = p.freteDestino?.toLowerCase().includes(filterTerm);
+        // Verifica se qualquer item no array 'itens' contém o termo de filtro
+        const matchesProduto = p.itens?.some(item => item.toLowerCase().includes(filterTerm));
+        
+        return matchesBairro || matchesProduto;
+    });
+    
+    const ordersListContainer = el.repOrders.querySelector('#orders-list');
+    
+    // Limpeza da lista (necessária para re-renderizar o gráfico)
+    let ordersListContent = ''; 
+
+    // DFL v3.7.4: Gráfico de Linha (Evolução Diária) - Ação 1
+    const lineChartContainer = document.createElement('div');
+    lineChartContainer.id = 'faturamento-line-chart';
+    lineChartContainer.style.height = '200px';
+    lineChartContainer.style.marginBottom = '20px';
+    lineChartContainer.style.padding = '10px';
+    lineChartContainer.style.background = '#fff';
+    lineChartContainer.style.borderRadius = '8px';
+    lineChartContainer.style.boxShadow = 'var(--shadow-1)';
+    
+    ordersListContainer.innerHTML = '';
+    ordersListContainer.appendChild(lineChartContainer);
+    
+    renderLineChart(lineChartContainer, data); // Usa data original para a linha de tendência (Filtro não afeta)
+
+    if (filteredData.length === 0) {
+         ordersListContent += `<p style="text-align:center; color:#999; margin-top:20px;">Nenhum pedido encontrado com o filtro aplicado ("${filterTerm}").</p>`;
+    } else {
+        ordersListContent += `<p style="font-weight: 600; margin-top: 15px;">Pedidos Encontrados: ${filteredData.length}</p>`;
+        ordersListContent += `<table class="reports-table"><thead><tr><th>Data</th><th>Itens</th><th>Subtotal</th><th>Desc.</th><th>Frete</th><th>Total</th></tr></thead><tbody>`;
+        filteredData.forEach(p => {
+            const dataStr = p.data.toLocaleDateString('pt-BR');
+            ordersListContent += `<tr>
+                <td>${dataStr}</td>
+                <td>${p.numItens}</td>
+                <td>${money(p.subtotal)}</td>
+                <td>-${money(p.desconto)}</td>
+                <td>${money(p.frete)}</td>
+                <td><b>${money(p.total)}</b></td>
+            </tr>`;
         });
-    }
-
-    // DFL v3.8.5: CREATE
-    async function adicionarZonaFrete(dados) {
-        try {
-            await db.collection(COLLECTION).add(dados);
-            popupAdd(`✅ Zona '${dados.nome}' adicionada com sucesso!`);
-            LOG.admin(`Zona adicionada: ${dados.nome}`);
-        } catch (e) {
-            popupAdd("❌ Erro ao adicionar zona. Cheque a segurança.");
-            LOG.error("Erro ao adicionar zona:", e);
-        }
+        ordersListContent += `</tbody></table>`;
     }
     
-    // DFL v3.8.5: UPDATE
-    async function editarZonaFrete(id, novosDados) {
-        try {
-            await db.collection(COLLECTION).doc(id).update(novosDados);
-            popupAdd(`✅ Zona '${novosDados.nome}' atualizada com sucesso!`);
-            LOG.admin(`Zona atualizada: ${novosDados.nome} (${id})`);
-        } catch (e) {
-            popupAdd("❌ Erro ao editar zona. Cheque a segurança.");
-            LOG.error("Erro ao editar zona:", e);
-        }
+    ordersListContainer.innerHTML += ordersListContent;
+  }
+  
+  // DFL v3.7.4: Renderizador de Gráfico de Linha (Evolução Diária) - Ação 1
+  function renderLineChart(container, pedidos) {
+    // Agrupa o faturamento por dia
+    const faturamentoDiario = {};
+    pedidos.forEach(p => {
+        const dataKey = p.data.toISOString().split('T')[0]; // YYYY-MM-DD
+        faturamentoDiario[dataKey] = (faturamentoDiario[dataKey] || 0) + p.total;
+    });
+
+    const labels = Object.keys(faturamentoDiario).sort();
+    const dataPoints = labels.map(key => faturamentoDiario[key]);
+
+    if (dataPoints.length === 0) {
+        container.innerHTML = '<p style="text-align:center; color:#999;">Sem dados de faturamento para o gráfico de linha.</p>';
+        return;
     }
     
-    // DFL v3.8.5: DELETE
-    async function removerZonaFrete(id) {
-        try {
-            await db.collection(COLLECTION).doc(id).delete();
-            popupAdd(`✅ Zona excluída com sucesso!`);
-            LOG.admin(`Zona excluída: ID ${id}`);
-        } catch (e) {
-            popupAdd("❌ Erro ao excluir zona. Cheque a segurança.");
-            LOG.error("Erro ao excluir zona:", e);
-        }
-    }
+    const maxVal = Math.max(...dataPoints);
     
-    // DFL v3.8.5: Popula o formulário para edição
-    async function preencherFormularioEdicao(id) {
-        const doc = await db.collection(COLLECTION).doc(id).get();
-        if (!doc.exists) return popupAdd("Zona não encontrada.");
-        
-        const data = doc.data();
-        
-        document.getElementById('zona-id-input').value = id;
-        document.getElementById('zona-nome-input').value = data.nome || '';
-        document.getElementById('zona-valor-input').value = data.valor || 0;
-        document.getElementById('zona-ativo-input').checked = data.ativo !== false;
-        document.getElementById('zona-bairros-input').value = Array.isArray(data.bairros) ? data.bairros.join(', ') : '';
-        document.getElementById('zona-submit-btn').textContent = 'Atualizar Zona';
-        
-        // Rolagem para o topo para visualização da edição
-        el.freteAdminPanel.querySelector('.reports-body').scrollTo(0, 0);
-    }
+    // Renderização simples em <div>s/CSS
+    let lineChartHtml = `<h4 style="margin-top:0; color:#ff7043; text-align:center;">Faturamento Diário (${labels.length} dias)</h4>`;
+    lineChartHtml += `<div style="display:flex; align-items:flex-end; height: 85%; border-left: 1px solid #ccc; border-bottom: 1px solid #ccc; padding: 5px 0 5px 5px; position:relative;">`;
 
-
-    // DFL v3.8.5: Renderização da Tabela de Zonas
-    function renderizarTabela(zonas) {
-        const container = document.getElementById('frete-admin-table-container');
-        if (!container) return;
+    labels.forEach((label, index) => {
+        const value = dataPoints[index];
+        const heightPct = (value / maxVal) * 90; // Altura máxima 90%
+        const displayLabel = label.split('-').slice(1).join('/'); // MM/DD
         
-        if (zonas.length === 0) {
-            container.innerHTML = `<p style="text-align:center; color:#999;">Nenhuma zona cadastrada. Use o formulário acima para adicionar.</p>`;
-            return;
-        }
-
-        const tableHtml = `
-            <table class="reports-table" style="width: 100%;">
-                <thead>
-                    <tr>
-                        <th>Bairro</th>
-                        <th>Valor (R$)</th>
-                        <th>Status</th>
-                        <th>Ações</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    ${zonas.map(z => {
-                        const status = z.ativo !== false ? '✅ Ativo' : '❌ Inativo';
-                        const statusColor = z.ativo !== false ? '#4caf50' : '#d32f2f';
-                        const bairrosDisplay = (z.bairros || []).slice(0, 3).join(', ') + (z.bairros?.length > 3 ? `...` : '');
-                        
-                        return `
-                            <tr data-id="${z.id}" style="vertical-align: top;">
-                                <td><b>${z.nome}</b><br><small style="color:#777;">(${bairrosDisplay})</small></td>
-                                <td>${money(z.valor)}</td>
-                                <td style="color: ${statusColor}; font-weight: 600;">${status}</td>
-                                <td>
-                                    <button class="edit-btn" style="background: none; border: none; cursor: pointer; color: #1976D2; font-size: 1rem; margin-right: 5px;">✏️</button>
-                                    <button class="delete-btn" style="background: none; border: none; cursor: pointer; color: #d32f2f; font-size: 1rem;">🗑️</button>
-                                </td>
-                            </tr>
-                        `;
-                    }).join('')}
-                </tbody>
-            </table>
+        lineChartHtml += `
+            <div title="${label}: ${money(value)}" style="
+                flex: 1; 
+                margin: 0 1px; 
+                height: ${heightPct}%; 
+                background: linear-gradient(0deg, #4caf50, #388e3c); 
+                transition: height 0.5s; 
+                position: relative;
+                min-width: 8px;
+            ">
+                <span style="position:absolute; bottom:-18px; left:50%; transform:translateX(-50%); font-size:9px; color:#555; white-space:nowrap;">${displayLabel}</span>
+            </div>
         `;
-        container.innerHTML = tableHtml;
+    });
+
+    lineChartHtml += '</div>';
+    container.innerHTML = lineChartHtml;
+    logCharts('Gráfico de Linha Renderizado: Evolução Diária.');
+  }
+
+  function disableForSafety() {
+    isEnabled = false;
+    // esconder / desmontar painel, manter site estável
+    if (el.reportsPanel) el.reportsPanel.classList.remove('active');
+    LOG.reports('Desativado por segurança');
+  }
+
+  // ======== Utils ========
+  // DFL v3.7.3: Função auxiliar para exportar CSV (usada no reports-panel)
+  function exportCSV(rows, filename = 'relatorios.csv') {
+    const log = LOG.reports;
+    if (!rows || rows.length === 0) {
+        log("Nenhuma linha para exportar.");
+        return;
     }
     
-    // API Pública do Módulo
-    function openAdminPanel() {
-        if (!currentUser || !isAdmin(currentUser)) {
-            popupAdd("Acesso negado. Apenas administradores podem acessar.");
-            return;
-        }
-        
-        // Garante que o painel e os listeners de CRUD existam
-        ensurePanelDOM();
-        
-        // Abre o painel e inicia a escuta em tempo real
-        Overlays.open(el.freteAdminPanel);
-        carregarZonasFrete(); 
-    }
+    // Cria o cabeçalho (keys do primeiro objeto)
+    const header = Object.keys(rows[0]).join(';');
+    
+    // Cria o corpo (values, usando ; como delimitador, tratando aspas)
+    const body = rows.map(r => 
+        Object.values(r).map(val => {
+            if (val === null || val === undefined) return '';
+            // Se for string e contiver ;, envolve em aspas duplas
+            let s = String(val);
+            if (s.includes(';') || s.includes('"') || s.includes('\n')) {
+                s = '"' + s.replace(/"/g, '""') + '"';
+            }
+            return s;
+        }).join(';')
+    ).join('\n');
+    
+    const csv = `${header}\n${body}`;
+    const blob = new Blob([`\uFEFF${csv}`], { type: 'text/csv;charset=utf-8;' }); // \uFEFF para UTF-8 BOM (compatibilidade com Excel)
+    const url = URL.createObjectURL(blob);
+    
+    const a = Object.assign(document.createElement('a'), { href: url, download: filename });
+    document.body.appendChild(a); 
+    
+    // Usa um pequeno timeout para garantir que o clique foi registrado antes de remover
+    setTimeout(() => {
+      a.click(); 
+      a.remove();
+      URL.revokeObjectURL(url);
+      log('CSV exportado com sucesso:', filename);
+    }, 100);
+  }
 
 
-    // Retorna a API pública
-    return {
-        open: openAdminPanel
-    };
+  // Expor API pública
+  return { open, close: Overlays.closeAll };
 })();
+// =========================================================
+// FIM DFL v3.7.4: MÓDULO DE RELATÓRIOS INTERNOS
+// =========================================================
 
-// DFL v3.8.5: Listener de integração (Ação 3)
-const DFL_FreteAdminIntegration = () => {
+  // DFL v3.7.3: Integração do botão de Relatórios (Ação 1)
+  const DFL_ReportsIntegration = () => {
     inicializarFirebase();
-    if (window.DFL_AdminFrete) {
+    if (window.DFL_Reports) {
         try { 
-            window.DFL_AdminFrete.open(); 
+            window.DFL_Reports.open('30d'); 
         } catch(e){ 
-            console.log('[DFL/ADMIN] erro ao abrir:', e); 
+            console.log('[DFL/REPORTS] erro ao abrir:', e); 
         }
     }
-};
-
+  };
+  
+  // O listener é adicionado no setupAuthListener()
 
   /* ------------------ 🔐 Segurança/Admin + UX Final (CORRIGIDO) ------------------ */
   
