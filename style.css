@@ -595,3 +595,55 @@ body {
 
 #promo-modal .promo-content > *{ max-width:100% !important; } /* nada estoura */
 #promo-modal .promo-close, #promo-modal .promo-nav{ z-index:5 !important; } /* controles acima */
+/* 🚑 PATCH FINAL DE EMERGÊNCIA — Corrige fundo, imagem e botão X do login */
+
+/* 🔧 Modal de promoções — remove fundo amarelo e força exibição da imagem */
+#promo-modal .promo-content {
+  background: #fff !important;
+  overflow: visible !important;
+  padding: 0 !important;
+  width: min(92vw, 420px) !important;
+  max-width: 420px !important;
+  border-radius: 14px !important;
+  box-shadow: 0 8px 40px rgba(0, 0, 0, 0.4) !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  border: none !important;
+}
+
+#promo-modal-img {
+  display: block !important;
+  width: 100% !important;
+  max-height: 60vh !important;
+  height: auto !important;
+  object-fit: contain !important;
+  background: #fff !important;
+  border: none !important;
+  z-index: 2 !important;
+}
+
+/* 🧾 Área de texto e botão alinhada e 100% da largura */
+#promo-modal .promo-info {
+  width: 100% !important;
+  background: #fff !important;
+  padding: 16px 20px 20px !important;
+  box-sizing: border-box !important;
+  text-align: center !important;
+  border-top: 1px solid #eee !important;
+}
+
+/* ✅ Garante que botões estejam sobre tudo */
+#promo-modal .promo-close,
+#promo-modal .promo-nav {
+  z-index: 5 !important;
+}
+
+/* 💬 Corrige botão “X” do modal de login inativo */
+#login-modal .promo-close,
+#login-modal .modal-close {
+  pointer-events: all !important;
+  cursor: pointer !important;
+  z-index: 10 !important;
+}
