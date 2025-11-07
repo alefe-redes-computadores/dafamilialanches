@@ -3,10 +3,9 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>🍔 Da Família Lanches v3.7.4</title>
+  <title>🍔 Da Família Lanches</title>
 
-  <!-- Implementação de Cabeçalho de Modo Seguro/Cache Boot (Conforme Ações Anteriores) -->
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://www.gstatic.com https://*.firebaseio.com https://cdn.jsdelivr.net; connect-src 'self' https://*.firebaseio.com https://firestore.googleapis.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:;">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://www.gstatic.com https://*.firebaseio.com https://cdn.jsdelivr.net; connect-src 'self' https://www.googleapis.com https://securetoken.googleapis.com https://*.firebaseio.com https://firestore.googleapis.com https://accounts.google.com https://apis.google.com https://viacep.com.br; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:;">
   <meta http-equiv="Cache-control" content="public, max-age=31536000, immutable">
 
   <link rel="preconnect" href="https://www.gstatic.com" crossorigin>
@@ -37,12 +36,6 @@
       --shadow-2:0 3px 10px rgba(0,0,0,.20);
       --shadow-3:0 5px 15px rgba(0,0,0,.30);
       --shadow-in:inset 0 1px 0 rgba(255,255,255,.25);
-
-      /* DFL v3.7.4: Cores para Gráficos Nativos */
-      --chart-color-main: #ff7043;
-      --chart-color-sec: #ffb300;
-      --chart-color-success: var(--success);
-      --chart-color-danger: var(--danger);
     }
 
     html,body{height:100%}
@@ -187,8 +180,8 @@
       opacity:0; pointer-events:none; transition:opacity .2s; z-index:980
     }
     #cart-backdrop.active{opacity:1; pointer-events:auto}
-    .mini-cart,.modal,.pedidos-panel,.recompensas-panel, .reports-panel{position:fixed; z-index:990; display:none}
-    .mini-cart.active,.modal.show,.pedidos-panel.active,.recompensas-panel.active, .reports-panel.active{display:block}
+    .mini-cart,.modal,.pedidos-panel,.recompensas-panel, .reports-panel, .frete-admin-panel{position:fixed; z-index:990; display:none}
+    .mini-cart.active,.modal.show,.pedidos-panel.active,.recompensas-panel.active, .reports-panel.active, .frete-admin-panel.active{display:block}
 
     /* ================= MINI-CART LATERAL ================= */
     .mini-cart{
@@ -251,8 +244,37 @@
     .btn-secondary{background:transparent; color:#555; border:1px solid #ddd}
     .btn-secondary:hover{background:#f1f1f1; border-color:#ccc}
 
-    /* ================= BOTÕES/Painéis (Pedidos / Recompensas / Relatórios) ================= */
+    /* ================= BOTÕES/Painéis (Pedidos / Recompensas / Relatórios / Admin) ================= */
     .meus-pedidos{position:fixed; bottom:20px; right:20px; z-index:1500}
+    
+    /* DFL v3.8.5: Novo botão Admin Frete */
+    .admin-actions {
+      position: fixed; 
+      bottom: 80px; 
+      right: 20px; 
+      z-index: 1500;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 10px;
+    }
+    #frete-admin-btn {
+        background: linear-gradient(135deg, #42a5f5, #1e88e5);
+        color: white;
+        border: none;
+        border-radius: 20px;
+        font-weight: 700;
+        font-size: 0.9rem;
+        padding: 10px 18px;
+        box-shadow: 0 4px 10px rgba(0,0,0,.2);
+        cursor: pointer;
+        transition: transform .2s;
+    }
+    #frete-admin-btn:hover {
+        transform: scale(1.05);
+        box-shadow: 0 6px 15px rgba(0,0,0,.3);
+    }
+    
     .meus-pedidos-btn,.recompensas-btn{
       background:linear-gradient(135deg,#ffca28,#ffb300); color:#222; border:none; border-radius:20px;
       font-weight:700; font-size:.95rem; padding:12px 22px; box-shadow:0 4px 10px rgba(0,0,0,.2); cursor:pointer; transition:.2s
@@ -260,16 +282,18 @@
     .meus-pedidos-btn:hover,.recompensas-btn:hover{transform:scale(1.05); box-shadow:0 6px 15px rgba(0,0,0,.3)}
     
     /* Painéis Laterais */
-    .pedidos-panel,.recompensas-panel, .reports-panel{
+    .pedidos-panel,.recompensas-panel, .reports-panel, .frete-admin-panel{
       right:-100%; top:0; width:min(95%,440px); height:100vh; background:#f4f4f4;
       box-shadow:-4px 0 18px rgba(0,0,0,.3); transition:right .4s; display:flex; flex-direction:column
     }
-    .pedidos-panel.active,.recompensas-panel.active, .reports-panel.active{right:0}
+    .pedidos-panel.active,.recompensas-panel.active, .reports-panel.active, .frete-admin-panel.active{right:0}
     
     .pedidos-header,.recompensas-header, .reports-header{
       display:flex; justify-content:space-between; align-items:center;
       padding:16px 20px; background:#ffca28; font-weight:700; font-size:1.2rem; color:#222; box-shadow:var(--shadow-in)
     }
+    .reports-header { background: #1e88e5; color: white;} /* Estilo Admin */
+
     .pedidos-body,.recompensas-body, .reports-body{flex:1; overflow:auto; padding:16px}
     
     .fechar-pedidos,.fechar-recompensas,.reports-close,.extras-close,.combo-close,.login-close{
@@ -279,6 +303,16 @@
     .fechar-pedidos:hover,.fechar-recompensas:hover,.reports-close:hover,.extras-close:hover,.combo-close:hover,.login-close:hover{
       background:#ff7043; color:#fff; transform:scale(1.1)
     }
+    /* DFL v3.8.5: Botão de fechar painel admin */
+    .frete-admin-close {
+        background: #1e88e5;
+        color: white;
+    }
+    .frete-admin-close:hover {
+        background: #42a5f5;
+        color: #222;
+    }
+
     /* CORREÇÃO MODAL ADICIONAIS: Para o layout vertical e card */
     .extras-list label.extra-line {
         display: flex;
@@ -337,10 +371,9 @@
         border-bottom: 2px solid #ddd;
         margin-bottom: 15px;
         padding: 0 10px;
-        overflow-x: auto;
     }
     .reports-tab-btn {
-        flex-shrink: 0;
+        flex: 1;
         background: none;
         border: none;
         padding: 12px 0;
@@ -393,125 +426,10 @@
         font-weight: 700;
     }
 
-    /* DFL v3.7.4: Estilos dos Gráficos Nativos */
-    .chart-container {
-        position: relative;
-        width: 100%;
-        padding: 15px 0;
-        overflow-x: auto;
-    }
-    .chart-container h5 {
-        font-size: 1rem;
-        color: #333;
-        margin: 0 0 10px 0;
-        text-align: center;
-        font-weight: 700;
-    }
-    /* Gráfico de Pizza (Frete % na Visão Geral) */
-    .chart-pie {
-        width: 150px;
-        height: 150px;
-        border-radius: 50%;
-        margin: 10px auto;
-        background: conic-gradient(var(--chart-color-main) var(--frete-pct), var(--bg2) 0);
-    }
-    .chart-pie-label {
-        text-align: center;
-        margin-top: 15px;
-        font-weight: 700;
-        color: var(--chart-color-main);
-    }
-    /* Gráfico de Barras Horizontais (Top 5 Bairros) */
-    .chart-bar-container {
-        display: flex;
-        flex-direction: column;
-        gap: 8px;
-        margin-top: 15px;
-        min-width: 300px;
-    }
-    .chart-bar-item {
-        display: flex;
-        align-items: center;
-    }
-    .chart-bar-label {
-        font-size: 0.85rem;
-        width: 30%;
-        min-width: 70px;
-        text-align: right;
-        padding-right: 5px;
-        font-weight: 600;
-    }
-    .chart-bar-fill {
-        height: 18px;
-        background: var(--chart-color-main);
-        border-radius: 4px;
-        transition: width 0.5s;
-        box-shadow: 0 1px 3px rgba(0,0,0,0.2);
-        margin-right: 5px;
-    }
-    .chart-bar-value {
-        font-size: 0.8rem;
-        font-weight: 700;
-        color: #444;
-    }
-    /* Gráfico de Linha (Evolução Diária) - Renderizado via DIVs */
-    .chart-line {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        width: 100%;
-        overflow-x: auto;
-    }
-    .chart-line-inner {
-        display: flex;
-        align-items: flex-end;
-        border-left: 1px solid #ccc;
-        border-bottom: 1px solid #ccc;
-        height: 150px;
-        min-width: 400px;
-        padding-top: 10px;
-        margin-bottom: 10px;
-    }
-    .chart-line-bar {
-        width: 15px;
-        background: var(--chart-color-sec);
-        margin: 0 5px;
-        transition: height 0.5s;
-        position: relative;
-        cursor: pointer;
-        border-top-left-radius: 3px;
-        border-top-right-radius: 3px;
-    }
-    .chart-line-bar:hover {
-        background: var(--chart-color-main);
-    }
-    .chart-line-bar::after {
-        content: attr(data-label);
-        position: absolute;
-        bottom: -20px;
-        left: 50%;
-        transform: translateX(-50%);
-        font-size: 0.7rem;
-        font-weight: 600;
-        color: #555;
-        white-space: nowrap;
-    }
-    .chart-line-bar::before {
-        content: attr(data-value);
-        position: absolute;
-        top: -15px;
-        left: 50%;
-        transform: translateX(-50%);
-        font-size: 0.7rem;
-        font-weight: 700;
-        color: #000;
-        white-space: nowrap;
-    }
-
-
     /* ================= FOOTER ================= */
     .footer{background:#ffca28; text-align:center; padding:20px; font-size:.9rem; color:#222}
     .footer a{color:#ff7043; text-decoration:none; transition:color .2s}
+    .footer a:hover{color:#ff5722}
     .footer-links{display:flex; justify-content:center; gap:10px; flex-wrap:wrap; margin:8px 0}
     .footer-btn{background:#ffb300; color:#222; padding:6px 14px; border-radius:6px; font-weight:700; text-decoration:none; transition:.25s}
     .footer-btn:hover{background:#ffca28; transform:scale(1.03)}
@@ -536,16 +454,15 @@
       .card img{height:140px}
       .c-btn{width:32px; height:32px; font-size:20px}
       .c-prev{left:4px}.c-next{right:4px}
-      .pedidos-panel,.recompensas-panel, .reports-panel{width:100%; max-width:100%}
+      .pedidos-panel,.recompensas-panel, .reports-panel, .frete-admin-panel{width:100%; max-width:100%}
       #cookie-banner{flex-direction:column; text-align:center; gap:12px}
       #cookie-banner p{margin-right:0}
       #cookie-banner button{width:100%; padding:12px}
     }
   </style>
 
-  <!-- DFL v3.7.4: Versão do style.css corrigida -->
-  <link rel="stylesheet" href="style.css?v=3.7.4" media="print" onload="this.media='all'"/>
-  <noscript><link rel="stylesheet" href="style.css?v=3.7.4"/></noscript>
+  <link rel="stylesheet" href="style.css?v=3.8.5" media="print" onload="this.media='all'"/>
+  <noscript><link rel="stylesheet" href="style.css?v=3.8.5"/></noscript>
 
   <script defer src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
   <script defer src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
@@ -563,7 +480,6 @@
     </div>
 
     <div class="header-actions">
-      <!-- DFL v3.7.3: Botão de Relatórios (Inicialmente display:none no CSS inline, mas presente) -->
       <button id="reports-btn" class="user-button" style="display:none;">Relatórios</button>
       <button id="user-btn" class="user-button" type="button">Entrar / Cadastrar</button>
       <button id="cart-icon" class="cart-button" type="button" aria-label="Ver carrinho de compras">
@@ -571,6 +487,10 @@
       </button>
     </div>
   </header>
+
+  <div class="admin-actions">
+    <button id="frete-admin-btn" style="display: none;" type="button">🚚 Frete Admin</button>
+  </div>
 
   <div class="main-content-wrapper">
     <div id="status-banner" class="status-banner"></div>
@@ -609,11 +529,9 @@
         <button class="extras-close" type="button" aria-label="Fechar carrinho">✖</button>
       </div>
       <div class="mini-list">
-        <!-- A lista de itens do carrinho será inserida aqui pelo JS -->
-      </div>
+        </div>
       <div class="mini-foot">
         
-        <!-- DFL v3.7.1: Bloco de Cálculo de Frete -->
         <div id="dfl-frete-input-container" class="frete-input-container">
             <label for="frete-input" style="display: block; font-weight: 500; margin-bottom: 5px; font-size: 14px;">Calcular Entrega:</label>
             
@@ -624,7 +542,6 @@
                 </button>
             </div>
             
-            <!-- Mensagem de status (sucesso/erro/não encontrado) -->
             <p id="frete-status-msg" style="margin-top: 10px; font-size: 0.9rem; color: #dc3545; display: none;"></p>
         </div>
         
@@ -634,7 +551,6 @@
         </form>
         <div id="coupon-message" class="coupon-message" aria-live="polite"></div>
         
-        <!-- Totais do Pedido -->
         <div class="summary-row" style="margin-top:10px;">
           <span>Subtotal (Produtos):</span>
           <span id="subtotal-display">R$ 0,00</span>
@@ -645,7 +561,6 @@
           <span id="cart-discount">R$ 0,00</span>
         </div>
         
-        <!-- DFL v3.7.1: Linha do Frete (Escondida por padrão, exibida pelo JS) -->
         <div id="frete-display-line" class="summary-row" style="display:none; color:var(--danger); font-weight:600;">
             <span>🚚 Frete:</span>
             <span id="frete-valor-display">R$ 0,00</span>
@@ -656,7 +571,6 @@
             <span id="total-display">R$ 0,00</span>
         </div>
         
-        <!-- Input de Endereço e Botões (mantido no JS, mas referenciado aqui) -->
         <label style="display:block;font-weight:600;margin-bottom:6px;margin-top:10px;">🏠 Endereço para Entrega</label>
         <textarea id="address-input" rows="2" placeholder="Rua, número, complemento, bairro"
             style="width:100%;border:1px solid #ddd;border-radius:10px;padding:10px;resize:vertical;margin-bottom:10px"></textarea>
@@ -927,7 +841,6 @@
       </div>
     </div>
 
-    <!-- DFL v3.7.3: Novo Painel de Relatórios Internos -->
     <div class="reports-panel" id="reports-panel" aria-hidden="true">
       <div class="reports-header">
         <span style="display: flex; align-items: center; gap: 8px;">
@@ -942,13 +855,9 @@
         <button class="reports-close" type="button" aria-label="Fechar painel">✖</button>
       </div>
       <div class="reports-body">
+        <input type="text" id="reports-filter-input" placeholder="Filtrar por bairro ou produto..."
+            style="width: 100%; padding: 10px; margin-bottom: 15px; border: 1px solid #ccc; border-radius: 6px; font-size: 1rem; box-shadow: inset 0 1px 3px rgba(0,0,0,0.05);">
         
-        <!-- DFL v3.7.4: Filtro Avançado -->
-        <div style="padding: 0 10px 10px 10px; border-bottom: 1px solid #eee; margin-bottom: 10px;">
-            <input type="text" id="reports-filter-input" placeholder="Filtrar por Bairro ou Produto..." 
-                   style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 8px; font-size: 1rem; outline: none;"/>
-        </div>
-
         <div class="reports-tabs" id="reports-tabs">
             <button class="reports-tab-btn active" data-tab="overview">Visão Geral</button>
             <button class="reports-tab-btn" data-tab="delivery">Frete</button>
@@ -956,32 +865,12 @@
         </div>
         <div class="reports-content" id="reports-content">
             <div id="rep-overview" class="reports-content-tab active">
-                <!-- DFL v3.7.4: Conteúdo de Visão Geral com Gráfico de Pizza -->
-                <div id="overview-metrics-container"></div>
-                <div class="chart-container">
-                    <h5>Proporção de Pedidos com Frete</h5>
-                    <div id="pie-chart-container" class="chart-pie"></div>
-                    <p id="pie-chart-label" class="chart-pie-label">Carregando...</p>
-                </div>
-                <div id="overview-top-bairros"></div>
+                <p style="text-align:center; color:#999;">Carregando Visão Geral...</p>
             </div>
             <div id="rep-delivery" class="reports-content-tab">
-                <!-- DFL v3.7.4: Conteúdo de Frete com Gráfico de Barras -->
-                <div id="delivery-metrics-container"></div>
-                <div class="chart-container">
-                    <h5>Top 5 Bairros por Frete Arrecadado</h5>
-                    <div id="bar-chart-container" class="chart-bar-container"></div>
-                </div>
-                <div id="delivery-details"></div>
+                <p style="text-align:center; color:#999;">Carregando Métricas de Frete...</p>
             </div>
             <div id="rep-orders" class="reports-content-tab">
-                <!-- DFL v3.7.4: Conteúdo de Pedidos com Gráfico de Linha -->
-                <div class="chart-container">
-                    <h5>Evolução Diária do Faturamento Total</h5>
-                    <div id="line-chart-container" class="chart-line">
-                        <div id="line-chart-inner" class="chart-line-inner"></div>
-                    </div>
-                </div>
                 <div style="text-align: right; margin-bottom: 10px;">
                      <button id="export-orders-csv" class="btn-secondary" style="padding: 8px 12px;">Exportar CSV 📁</button>
                 </div>
@@ -992,9 +881,36 @@
         </div>
       </div>
     </div>
-    <!-- Fim DFL v3.7.4: Novo Painel de Relatórios Internos -->
+    <div class="reports-panel frete-admin-panel" id="frete-admin-panel" aria-hidden="true">
+        <div class="reports-header">
+            <span>🚚 Frete Admin - Zonas</span>
+            <button class="reports-close frete-admin-close" type="button" aria-label="Fechar painel">✖</button>
+        </div>
+        <div class="reports-body" style="padding: 10px;">
+            <div id="frete-admin-add-form" style="padding: 15px; background: #fff; border-radius: 8px; margin-bottom: 20px; box-shadow: 0 1px 3px rgba(0,0,0,.1);">
+                <h4>➕ Nova Zona / Edição</h4>
+                <form id="frete-zona-form" style="display: grid; gap: 10px;">
+                    <input type="hidden" id="zona-id-input">
+                    <input type="text" id="zona-nome-input" placeholder="Nome da Zona (ex: Centro)" required style="padding: 10px; border: 1px solid #ddd; border-radius: 6px;">
+                    <input type="number" id="zona-valor-input" placeholder="Valor (R$ 5.00)" step="0.01" required style="padding: 10px; border: 1px solid #ddd; border-radius: 6px;">
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <input type="checkbox" id="zona-ativo-input" checked>
+                        <label for="zona-ativo-input">Ativa para uso</label>
+                    </div>
+                    <div style="margin-top: 10px; border-top: 1px dashed #eee; padding-top: 10px;">
+                        <label style="font-weight: 600;">Bairros (separados por vírgula):</label>
+                        <textarea id="zona-bairros-input" rows="2" placeholder="Rosário, Alvorada, Bela Vista" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; resize: vertical;"></textarea>
+                    </div>
+                    <button type="submit" id="zona-submit-btn" class="btn-primary" style="padding: 12px;">Salvar Zona</button>
+                </form>
+            </div>
 
-
+            <h4>📜 Zonas Cadastradas</h4>
+            <div id="frete-admin-table-container">
+                <p style="text-align: center; color: #999;">Carregando zonas...</p>
+            </div>
+        </div>
+    </div>
     <footer class="footer">
       <p>📍
         <a href="https://www.google.com/maps/search/?api=1&query=Rua+dos+Caiçaras,+212,+Patos+de+Minas,+MG" target="_blank" rel="noopener">
@@ -1006,7 +922,7 @@
         <a href="https://www.instagram.com/dafamilialanches" target="_blank" class="footer-btn" rel="noopener">📸 Instagram</a>
         <a href="https://www.ifood.com.br/delivery/patos-de-minas/dafamilialanches" target="_blank" class="footer-btn" rel="noopener">🍔 iFood</a>
       </div>
-      <div class="footer-copy">© 2025 Da Família Lanches — Todos os direitos reservados 🍔 • <b>v3.7.4 Design</b></div>
+      <div class="footer-copy">© 2025 Da Família Lanches — Todos os direitos reservados 🍔 • <b>v3.8.5 Design</b></div>
     </footer>
   </div>
 
@@ -1048,13 +964,11 @@
         <button class="fechar-pedidos" type="button" aria-label="Fechar painel">✖</button>
       </div>
       <div class="pedidos-body" id="pedidos-body">
-        <!-- Parte 1: Lista de Pedidos (Repetir Pedido) -->
         <h4 style="margin-top:0;">🔁 Repetir Pedido Recente</h4>
         <div id="listaPedidos">
           <p class="empty-orders">Faça login para ver seus pedidos.</p>
         </div>
         
-        <!-- DFL v3.7.2: Parte 2: Histórico de Entregas -->
         <h4 style="margin-top:20px;">🚚 Histórico de Entregas</h4>
         <div id="historicoEntregas">
             <p class="empty-history" style="text-align:center;color:#999;">Carregando histórico de entregas...</p>
@@ -1071,7 +985,6 @@
     <button id="cookie-accept" type="button">Aceitar</button>
   </div>
 
-  <!-- DFL v3.7.4: A tag script deve refletir a nova versão 3.7.4 -->
   <script defer src="script.js?v=3.8.5"></script>
 </body>
 </html>
