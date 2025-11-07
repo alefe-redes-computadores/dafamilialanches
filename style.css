@@ -889,3 +889,162 @@ section h2 {
     font-size: 20px;
   }
 }
+/* =======================================================
+   🏁 PATCH 5 — FINALÍSSIMO v3.7.1-Ultimate
+   Correções finais do modal de promoções
+   ======================================================= */
+
+/* 🔧 Corrige bug visual das linhas brancas e centraliza imagem */
+#promo-modal .promo-content {
+  position: relative;
+  padding: 0;
+  max-width: 420px;
+  border-radius: 14px;
+  background: #fff;
+  overflow: hidden;
+  box-shadow: 0 8px 40px rgba(0, 0, 0, 0.4);
+  border: none;
+}
+
+/* 🖼️ Ajusta imagem no modal */
+#promo-modal-img {
+  width: 100%;
+  height: auto;
+  max-height: 60vh;
+  object-fit: cover;
+  display: block;
+  border: none;
+}
+
+/* 🧭 Cabeçalho do modal sem fundo nem linhas */
+#promo-modal .modal-head {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 100%;
+  pointer-events: none;
+}
+
+/* ❌ Botão fechar (canto superior direito) */
+#promo-modal .promo-close {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  pointer-events: all;
+  background: #ffca28;
+  border: none;
+  border-radius: 50%;
+  width: 38px;
+  height: 38px;
+  font-weight: 700;
+  color: #000;
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.25);
+  transition: 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+}
+#promo-modal .promo-close:hover {
+  background: #ffb300;
+  transform: scale(1.1);
+}
+
+/* ⬅️➡️ Setas laterais centralizadas verticalmente */
+#promo-modal .promo-nav {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  pointer-events: all;
+  background: #ffca28;
+  border: none;
+  border-radius: 50%;
+  width: 42px;
+  height: 42px;
+  font-size: 22px;
+  font-weight: 700;
+  color: #000;
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.25);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: 0.2s;
+  z-index: 9;
+}
+#promo-modal .promo-nav.prev {
+  left: 12px;
+}
+#promo-modal .promo-nav.next {
+  right: 12px;
+}
+#promo-modal .promo-nav:hover {
+  background: #ffb300;
+  transform: translateY(-50%) scale(1.1);
+}
+
+/* 💰 Texto e preços centralizados e refinados */
+.promo-info {
+  text-align: center;
+  padding: 16px 20px 20px;
+  background: #fff;
+}
+#promo-modal-title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  margin-bottom: 6px;
+  color: #222;
+}
+
+/* 🎨 Preço refinado (antigo riscado, novo verde) */
+#promo-modal-price {
+  font-size: 1rem;
+  margin-bottom: 12px;
+  color: #444;
+  font-weight: 500;
+}
+#promo-modal-price del {
+  color: #777;
+  text-decoration: line-through;
+  text-decoration-thickness: 2px;
+  margin-right: 6px;
+}
+#promo-modal-price b {
+  color: #2e7d32;
+  font-weight: 700;
+  font-size: 1.1rem;
+}
+
+/* 🟢 Botão Adicionar ao Pedido */
+#promo-modal-add {
+  background: #388e3c;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 12px 24px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.2);
+  transition: background 0.2s, transform 0.2s;
+}
+#promo-modal-add:hover {
+  background: #2e7d32;
+  transform: scale(1.04);
+}
+
+/* 📱 Responsividade mobile */
+@media (max-width: 600px) {
+  #promo-modal .promo-content {
+    width: 92%;
+    max-width: 380px;
+  }
+  #promo-modal-img {
+    max-height: 52vh;
+  }
+  #promo-modal .promo-nav {
+    width: 36px;
+    height: 36px;
+    font-size: 20px;
+  }
+}
