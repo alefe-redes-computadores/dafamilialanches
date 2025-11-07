@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>🍔 Da Família Lanches</title>
 
+  <!-- Implementação de Cabeçalho de Modo Seguro/Cache Boot (Conforme Ações Anteriores) -->
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://www.gstatic.com https://*.firebaseio.com https://cdn.jsdelivr.net; connect-src 'self' https://*.firebaseio.com https://firestore.googleapis.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:;">
   <meta http-equiv="Cache-control" content="public, max-age=31536000, immutable">
 
@@ -384,6 +385,67 @@
         color: #222;
         font-weight: 700;
     }
+    
+    /* DFL v3.7.4: Estilos para Gráficos Nativos (Pizza/Barra) */
+    .chart-container {
+        margin: 20px 0;
+        padding: 10px;
+        border: 1px solid #eee;
+        border-radius: 10px;
+        background: #f9f9f9;
+        box-shadow: inset 0 1px 3px rgba(0,0,0,0.05);
+    }
+    .chart-label {
+        font-weight: 600;
+        color: #444;
+        margin-bottom: 10px;
+        text-align: center;
+        font-size: 1rem;
+    }
+    .pie-chart {
+        width: 100px;
+        height: 100px;
+        border-radius: 50%;
+        background: conic-gradient(var(--success) 0%, var(--danger) 0%);
+        margin: 10px auto;
+    }
+    .bar-chart-container {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        padding: 10px;
+    }
+    .bar-item {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-size: 0.8rem;
+    }
+    .bar-label {
+        flex-basis: 70px; 
+        flex-shrink: 0;
+        font-weight: 600;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        overflow: hidden;
+    }
+    .bar-fill {
+        height: 15px;
+        background: var(--botao);
+        border-radius: 4px;
+        transition: width 0.5s ease-out;
+    }
+    
+    /* DFL v3.7.4: Estilos para o Filtro */
+    #reports-search-input {
+        width: 100%;
+        padding: 10px;
+        border: 1px solid #ccc;
+        border-radius: 8px;
+        margin-bottom: 15px;
+        box-shadow: inset 0 1px 3px rgba(0,0,0,0.05);
+    }
+
 
     /* ================= FOOTER ================= */
     .footer{background:#ffca28; text-align:center; padding:20px; font-size:.9rem; color:#222}
@@ -420,8 +482,9 @@
     }
   </style>
 
-  <link rel="stylesheet" href="style.css?v=3.7.3" media="print" onload="this.media='all'"/>
-  <noscript><link rel="stylesheet" href="style.css?v=3.7.3"/></noscript>
+  <!-- DFL v3.7.4: Versão do style.css corrigida -->
+  <link rel="stylesheet" href="style.css?v=3.7.4" media="print" onload="this.media='all'"/>
+  <noscript><link rel="stylesheet" href="style.css?v=3.7.4"/></noscript>
 
   <script defer src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
   <script defer src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
@@ -439,6 +502,7 @@
     </div>
 
     <div class="header-actions">
+      <!-- DFL v3.7.3: Botão de Relatórios (Inicialmente display:none no CSS inline, mas presente) -->
       <button id="reports-btn" class="user-button" style="display:none;">Relatórios</button>
       <button id="user-btn" class="user-button" type="button">Entrar / Cadastrar</button>
       <button id="cart-icon" class="cart-button" type="button" aria-label="Ver carrinho de compras">
@@ -484,9 +548,11 @@
         <button class="extras-close" type="button" aria-label="Fechar carrinho">✖</button>
       </div>
       <div class="mini-list">
-        </div>
+        <!-- A lista de itens do carrinho será inserida aqui pelo JS -->
+      </div>
       <div class="mini-foot">
         
+        <!-- DFL v3.7.1: Bloco de Cálculo de Frete -->
         <div id="dfl-frete-input-container" class="frete-input-container">
             <label for="frete-input" style="display: block; font-weight: 500; margin-bottom: 5px; font-size: 14px;">Calcular Entrega:</label>
             
@@ -497,6 +563,7 @@
                 </button>
             </div>
             
+            <!-- Mensagem de status (sucesso/erro/não encontrado) -->
             <p id="frete-status-msg" style="margin-top: 10px; font-size: 0.9rem; color: #dc3545; display: none;"></p>
         </div>
         
@@ -506,6 +573,7 @@
         </form>
         <div id="coupon-message" class="coupon-message" aria-live="polite"></div>
         
+        <!-- Totais do Pedido -->
         <div class="summary-row" style="margin-top:10px;">
           <span>Subtotal (Produtos):</span>
           <span id="subtotal-display">R$ 0,00</span>
@@ -516,6 +584,7 @@
           <span id="cart-discount">R$ 0,00</span>
         </div>
         
+        <!-- DFL v3.7.1: Linha do Frete (Escondida por padrão, exibida pelo JS) -->
         <div id="frete-display-line" class="summary-row" style="display:none; color:var(--danger); font-weight:600;">
             <span>🚚 Frete:</span>
             <span id="frete-valor-display">R$ 0,00</span>
@@ -526,6 +595,7 @@
             <span id="total-display">R$ 0,00</span>
         </div>
         
+        <!-- Input de Endereço e Botões (mantido no JS, mas referenciado aqui) -->
         <label style="display:block;font-weight:600;margin-bottom:6px;margin-top:10px;">🏠 Endereço para Entrega</label>
         <textarea id="address-input" rows="2" placeholder="Rua, número, complemento, bairro"
             style="width:100%;border:1px solid #ddd;border-radius:10px;padding:10px;resize:vertical;margin-bottom:10px"></textarea>
@@ -796,6 +866,7 @@
       </div>
     </div>
 
+    <!-- DFL v3.7.3: Painel de Relatórios Internos -->
     <div class="reports-panel" id="reports-panel" aria-hidden="true">
       <div class="reports-header">
         <span style="display: flex; align-items: center; gap: 8px;">
@@ -810,6 +881,9 @@
         <button class="reports-close" type="button" aria-label="Fechar painel">✖</button>
       </div>
       <div class="reports-body">
+        <!-- DFL v3.7.4: Campo de Busca/Filtro -->
+        <input type="text" id="reports-search-input" placeholder="Filtrar por Bairro ou Produto..." aria-label="Filtrar Relatórios" />
+        
         <div class="reports-tabs" id="reports-tabs">
             <button class="reports-tab-btn active" data-tab="overview">Visão Geral</button>
             <button class="reports-tab-btn" data-tab="delivery">Frete</button>
@@ -833,6 +907,9 @@
         </div>
       </div>
     </div>
+    <!-- Fim DFL v3.7.3: Novo Painel de Relatórios Internos -->
+
+
     <footer class="footer">
       <p>📍
         <a href="https://www.google.com/maps/search/?api=1&query=Rua+dos+Caiçaras,+212,+Patos+de+Minas,+MG" target="_blank" rel="noopener">
@@ -844,7 +921,7 @@
         <a href="https://www.instagram.com/dafamilialanches" target="_blank" class="footer-btn" rel="noopener">📸 Instagram</a>
         <a href="https://www.ifood.com.br/delivery/patos-de-minas/dafamilialanches" target="_blank" class="footer-btn" rel="noopener">🍔 iFood</a>
       </div>
-      <div class="footer-copy">© 2025 Da Família Lanches — Todos os direitos reservados 🍔 • <b>v3.7.3 Design</b></div>
+      <div class="footer-copy">© 2025 Da Família Lanches — Todos os direitos reservados 🍔 • <b>v3.7.4 Design</b></div>
     </footer>
   </div>
 
@@ -886,11 +963,13 @@
         <button class="fechar-pedidos" type="button" aria-label="Fechar painel">✖</button>
       </div>
       <div class="pedidos-body" id="pedidos-body">
+        <!-- Parte 1: Lista de Pedidos (Repetir Pedido) -->
         <h4 style="margin-top:0;">🔁 Repetir Pedido Recente</h4>
         <div id="listaPedidos">
           <p class="empty-orders">Faça login para ver seus pedidos.</p>
         </div>
         
+        <!-- DFL v3.7.2: Parte 2: Histórico de Entregas -->
         <h4 style="margin-top:20px;">🚚 Histórico de Entregas</h4>
         <div id="historicoEntregas">
             <p class="empty-history" style="text-align:center;color:#999;">Carregando histórico de entregas...</p>
@@ -907,6 +986,7 @@
     <button id="cookie-accept" type="button">Aceitar</button>
   </div>
 
-  <script defer src="script.js?v=3.7.3"></script>
+  <!-- DFL v3.7.4: A tag script deve refletir a nova versão 3.7.4 -->
+  <script defer src="script.js?v=3.7.4"></script>
 </body>
 </html>
