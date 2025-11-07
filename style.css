@@ -558,3 +558,40 @@ body {
   width: 100%;
   border-radius: 0 0 14px 14px;
 }
+/* 🛠️ PATCH ALINHAMENTO MODAL (base branca = mesma largura do cartão) */
+#promo-modal .promo-content{
+  background:#fff !important;
+  padding:0 !important;
+  width:min(92vw, 420px) !important;
+  max-width:420px !important;
+  border-radius:14px !important;
+  overflow:hidden !important;
+  box-shadow:0 8px 40px rgba(0,0,0,.4) !important;
+  display:flex !important;
+  flex-direction:column !important;
+  align-items:center !important;
+}
+
+#promo-modal-img{
+  display:block !important;
+  width:100% !important;
+  height:auto !important;
+  max-height:60vh !important;
+  object-fit:contain !important;
+  margin:0 !important;
+  border:0 !important;
+}
+
+#promo-modal .promo-info{
+  width:100% !important;
+  box-sizing:border-box !important; /* evita passar de 100% */
+  margin:0 !important;
+  padding:16px 20px 18px !important;
+  border-top:1px solid #eee !important;
+  border-radius:0 0 14px 14px !important;
+  background:#fff !important;
+  text-align:center;
+}
+
+#promo-modal .promo-content > *{ max-width:100% !important; } /* nada estoura */
+#promo-modal .promo-close, #promo-modal .promo-nav{ z-index:5 !important; } /* controles acima */
