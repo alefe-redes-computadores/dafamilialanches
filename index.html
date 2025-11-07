@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>🍔 Da Família Lanches</title>
+  <title>🍔 Da Família Lanches v3.7.4</title>
 
   <!-- Implementação de Cabeçalho de Modo Seguro/Cache Boot (Conforme Ações Anteriores) -->
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://www.gstatic.com https://*.firebaseio.com https://cdn.jsdelivr.net; connect-src 'self' https://*.firebaseio.com https://firestore.googleapis.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:;">
@@ -37,6 +37,12 @@
       --shadow-2:0 3px 10px rgba(0,0,0,.20);
       --shadow-3:0 5px 15px rgba(0,0,0,.30);
       --shadow-in:inset 0 1px 0 rgba(255,255,255,.25);
+
+      /* DFL v3.7.4: Cores para Gráficos Nativos */
+      --chart-color-main: #ff7043;
+      --chart-color-sec: #ffb300;
+      --chart-color-success: var(--success);
+      --chart-color-danger: var(--danger);
     }
 
     html,body{height:100%}
@@ -331,9 +337,10 @@
         border-bottom: 2px solid #ddd;
         margin-bottom: 15px;
         padding: 0 10px;
+        overflow-x: auto;
     }
     .reports-tab-btn {
-        flex: 1;
+        flex-shrink: 0;
         background: none;
         border: none;
         padding: 12px 0;
@@ -385,72 +392,126 @@
         color: #222;
         font-weight: 700;
     }
-    
-    /* DFL v3.7.4: Estilos para Gráficos Nativos (Pizza/Barra) */
+
+    /* DFL v3.7.4: Estilos dos Gráficos Nativos */
     .chart-container {
-        margin: 20px 0;
-        padding: 10px;
-        border: 1px solid #eee;
-        border-radius: 10px;
-        background: #f9f9f9;
-        box-shadow: inset 0 1px 3px rgba(0,0,0,0.05);
+        position: relative;
+        width: 100%;
+        padding: 15px 0;
+        overflow-x: auto;
     }
-    .chart-label {
-        font-weight: 600;
-        color: #444;
-        margin-bottom: 10px;
-        text-align: center;
+    .chart-container h5 {
         font-size: 1rem;
+        color: #333;
+        margin: 0 0 10px 0;
+        text-align: center;
+        font-weight: 700;
     }
-    .pie-chart {
-        width: 100px;
-        height: 100px;
+    /* Gráfico de Pizza (Frete % na Visão Geral) */
+    .chart-pie {
+        width: 150px;
+        height: 150px;
         border-radius: 50%;
-        background: conic-gradient(var(--success) 0%, var(--danger) 0%);
         margin: 10px auto;
+        background: conic-gradient(var(--chart-color-main) var(--frete-pct), var(--bg2) 0);
     }
-    .bar-chart-container {
+    .chart-pie-label {
+        text-align: center;
+        margin-top: 15px;
+        font-weight: 700;
+        color: var(--chart-color-main);
+    }
+    /* Gráfico de Barras Horizontais (Top 5 Bairros) */
+    .chart-bar-container {
         display: flex;
         flex-direction: column;
         gap: 8px;
-        padding: 10px;
+        margin-top: 15px;
+        min-width: 300px;
     }
-    .bar-item {
+    .chart-bar-item {
         display: flex;
         align-items: center;
-        gap: 10px;
-        font-size: 0.8rem;
     }
-    .bar-label {
-        flex-basis: 70px; 
-        flex-shrink: 0;
+    .chart-bar-label {
+        font-size: 0.85rem;
+        width: 30%;
+        min-width: 70px;
+        text-align: right;
+        padding-right: 5px;
         font-weight: 600;
-        text-overflow: ellipsis;
-        white-space: nowrap;
-        overflow: hidden;
     }
-    .bar-fill {
-        height: 15px;
-        background: var(--botao);
+    .chart-bar-fill {
+        height: 18px;
+        background: var(--chart-color-main);
         border-radius: 4px;
-        transition: width 0.5s ease-out;
+        transition: width 0.5s;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+        margin-right: 5px;
     }
-    
-    /* DFL v3.7.4: Estilos para o Filtro */
-    #reports-search-input {
+    .chart-bar-value {
+        font-size: 0.8rem;
+        font-weight: 700;
+        color: #444;
+    }
+    /* Gráfico de Linha (Evolução Diária) - Renderizado via DIVs */
+    .chart-line {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
         width: 100%;
-        padding: 10px;
-        border: 1px solid #ccc;
-        border-radius: 8px;
-        margin-bottom: 15px;
-        box-shadow: inset 0 1px 3px rgba(0,0,0,0.05);
+        overflow-x: auto;
+    }
+    .chart-line-inner {
+        display: flex;
+        align-items: flex-end;
+        border-left: 1px solid #ccc;
+        border-bottom: 1px solid #ccc;
+        height: 150px;
+        min-width: 400px;
+        padding-top: 10px;
+        margin-bottom: 10px;
+    }
+    .chart-line-bar {
+        width: 15px;
+        background: var(--chart-color-sec);
+        margin: 0 5px;
+        transition: height 0.5s;
+        position: relative;
+        cursor: pointer;
+        border-top-left-radius: 3px;
+        border-top-right-radius: 3px;
+    }
+    .chart-line-bar:hover {
+        background: var(--chart-color-main);
+    }
+    .chart-line-bar::after {
+        content: attr(data-label);
+        position: absolute;
+        bottom: -20px;
+        left: 50%;
+        transform: translateX(-50%);
+        font-size: 0.7rem;
+        font-weight: 600;
+        color: #555;
+        white-space: nowrap;
+    }
+    .chart-line-bar::before {
+        content: attr(data-value);
+        position: absolute;
+        top: -15px;
+        left: 50%;
+        transform: translateX(-50%);
+        font-size: 0.7rem;
+        font-weight: 700;
+        color: #000;
+        white-space: nowrap;
     }
 
 
     /* ================= FOOTER ================= */
     .footer{background:#ffca28; text-align:center; padding:20px; font-size:.9rem; color:#222}
     .footer a{color:#ff7043; text-decoration:none; transition:color .2s}
-    .footer a:hover{color:#ff5722}
     .footer-links{display:flex; justify-content:center; gap:10px; flex-wrap:wrap; margin:8px 0}
     .footer-btn{background:#ffb300; color:#222; padding:6px 14px; border-radius:6px; font-weight:700; text-decoration:none; transition:.25s}
     .footer-btn:hover{background:#ffca28; transform:scale(1.03)}
@@ -866,7 +927,7 @@
       </div>
     </div>
 
-    <!-- DFL v3.7.3: Painel de Relatórios Internos -->
+    <!-- DFL v3.7.3: Novo Painel de Relatórios Internos -->
     <div class="reports-panel" id="reports-panel" aria-hidden="true">
       <div class="reports-header">
         <span style="display: flex; align-items: center; gap: 8px;">
@@ -881,9 +942,13 @@
         <button class="reports-close" type="button" aria-label="Fechar painel">✖</button>
       </div>
       <div class="reports-body">
-        <!-- DFL v3.7.4: Campo de Busca/Filtro -->
-        <input type="text" id="reports-search-input" placeholder="Filtrar por Bairro ou Produto..." aria-label="Filtrar Relatórios" />
         
+        <!-- DFL v3.7.4: Filtro Avançado -->
+        <div style="padding: 0 10px 10px 10px; border-bottom: 1px solid #eee; margin-bottom: 10px;">
+            <input type="text" id="reports-filter-input" placeholder="Filtrar por Bairro ou Produto..." 
+                   style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 8px; font-size: 1rem; outline: none;"/>
+        </div>
+
         <div class="reports-tabs" id="reports-tabs">
             <button class="reports-tab-btn active" data-tab="overview">Visão Geral</button>
             <button class="reports-tab-btn" data-tab="delivery">Frete</button>
@@ -891,12 +956,32 @@
         </div>
         <div class="reports-content" id="reports-content">
             <div id="rep-overview" class="reports-content-tab active">
-                <p style="text-align:center; color:#999;">Carregando Visão Geral...</p>
+                <!-- DFL v3.7.4: Conteúdo de Visão Geral com Gráfico de Pizza -->
+                <div id="overview-metrics-container"></div>
+                <div class="chart-container">
+                    <h5>Proporção de Pedidos com Frete</h5>
+                    <div id="pie-chart-container" class="chart-pie"></div>
+                    <p id="pie-chart-label" class="chart-pie-label">Carregando...</p>
+                </div>
+                <div id="overview-top-bairros"></div>
             </div>
             <div id="rep-delivery" class="reports-content-tab">
-                <p style="text-align:center; color:#999;">Carregando Métricas de Frete...</p>
+                <!-- DFL v3.7.4: Conteúdo de Frete com Gráfico de Barras -->
+                <div id="delivery-metrics-container"></div>
+                <div class="chart-container">
+                    <h5>Top 5 Bairros por Frete Arrecadado</h5>
+                    <div id="bar-chart-container" class="chart-bar-container"></div>
+                </div>
+                <div id="delivery-details"></div>
             </div>
             <div id="rep-orders" class="reports-content-tab">
+                <!-- DFL v3.7.4: Conteúdo de Pedidos com Gráfico de Linha -->
+                <div class="chart-container">
+                    <h5>Evolução Diária do Faturamento Total</h5>
+                    <div id="line-chart-container" class="chart-line">
+                        <div id="line-chart-inner" class="chart-line-inner"></div>
+                    </div>
+                </div>
                 <div style="text-align: right; margin-bottom: 10px;">
                      <button id="export-orders-csv" class="btn-secondary" style="padding: 8px 12px;">Exportar CSV 📁</button>
                 </div>
@@ -907,7 +992,7 @@
         </div>
       </div>
     </div>
-    <!-- Fim DFL v3.7.3: Novo Painel de Relatórios Internos -->
+    <!-- Fim DFL v3.7.4: Novo Painel de Relatórios Internos -->
 
 
     <footer class="footer">
