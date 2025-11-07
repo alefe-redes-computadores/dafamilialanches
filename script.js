@@ -1470,3 +1470,50 @@ LOG.info("DFL v3.8.9: Listeners de fechamento (X) para modais/painéis corrigido
 }); // Fim do document.addEventListener("DOMContentLoaded", ...
 
 // ------------------ FIM DO BLOCO 4/4 ------------------
+/* =========================================================
+   🚨 DFL v3.9.0: SNIPPET DE REFORÇO DE EVENTOS TOUCH/CLICK
+   - Adiciona 'touchstart' e 'touchend' para garantir que os botões respondam
+   - Isso é vital para dispositivos Android/iOS onde o 'click' falha
+========================================================= */
+
+document.addEventListener('DOMContentLoaded', () => {
+    
+    // --- Funções de Ajuda ---
+    const getTargetButton = (el) => {
+        // Encontra o elemento clicável mais próximo que não seja um card
+        while (el && el !== document.body) {
+            if (el.classList.contains('add-cart') || el.classList.contains('extras-btn') || el.classList.contains('c-btn') || el.id === 'cart-icon' || el.id === 'user-btn') {
+                return el;
+            }
+            el = el.parentElement;
+        }
+        return null;
+    };
+
+    const handleTouchEnd = (event) => {
+        // Ignora toques que envolvam rolagens (para não quebrar o carrossel)
+        if (event.touches.length > 0) return; 
+
+        const targetButton = getTargetButton(event.target);
+
+        if (targetButton) {
+            // Se um botão clicável foi encontrado, disparamos um evento de clique nativo.
+            // Isso garante que a função original do addEventListener('click', ...) seja chamada.
+            event.preventDefault(); // Impede o atraso do clique em 300ms
+            targetButton.click();
+            
+            // Log para debug
+            console.log(`[DFL/TOUCH FIX] Click disparado em: ${targetButton.id || targetButton.className}`);
+        }
+    };
+    
+    // --- Adiciona Listeners de Toque ---
+    
+    // Usamos 'touchstart' e 'touchend' nos elementos relevantes para forçar a ação.
+    document.body.addEventListener('touchend', handleTouchEnd, { passive: false });
+
+    // Dica de performance para touch em elementos que não devem ser arrastáveis
+    // Você pode adicionar a regra no seu CSS:
+    // .actions button { touch-action: manipulation; }
+
+});
