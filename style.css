@@ -1048,3 +1048,26 @@ height: 36px;
 font-size: 20px;
 }
 }
+/* =======================================================
+   🍔 ESTILO — Mensagem do Carrinho Vazio (v3.7.1b)
+   ======================================================= */
+.cart-empty-msg {
+  padding: 18px 14px;
+  text-align: center;
+  border: 2px dashed #ffca28;
+  border-radius: 12px;
+  background: #fffdf3;
+  font-weight: 600;
+  color: #444;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.6);
+  line-height: 1.4;
+}
+.cart-empty-msg div:first-child {
+  font-size: 1.05rem;
+  margin-bottom: 6px;
+  color: #222;
+}
+.cart-empty-msg div:last-child {
+  font-size: 0.95rem;
+  color: #6b6b6b;
+}
