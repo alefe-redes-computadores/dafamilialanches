@@ -527,3 +527,34 @@ body {
   #cookie-banner p { margin-right:0; }
   #cookie-banner button { width:100%; padding:12px; }
 }
+/* 🧩 PATCH URGENTE — Corrige imagem do carrossel invisível */
+#promo-modal .promo-content {
+  background: transparent !important;
+  overflow: visible !important;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+#promo-modal-img {
+  display: block !important;
+  position: relative;
+  width: 100% !important;
+  height: auto !important;
+  max-height: 65vh;
+  object-fit: contain;
+  z-index: 2 !important;
+  border-radius: 14px;
+}
+
+#promo-modal .modal-head {
+  z-index: 3;
+}
+
+#promo-modal .promo-info {
+  z-index: 4;
+  background: #fff;
+  width: 100%;
+  border-radius: 0 0 14px 14px;
+}
