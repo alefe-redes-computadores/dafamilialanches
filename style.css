@@ -474,3 +474,145 @@ section h2 {
   #cookie-banner p { margin-right: 0; }
   #cookie-banner button { width: 100%; padding: 12px; }
 }
+/* =======================================================
+   🔧 CORREÇÕES VISUAIS — v3.7.1 Hot Dogs
+   ======================================================= */
+
+/* 1️⃣ Botão "Minhas Recompensas" — flutuante acima do "Meus Pedidos" */
+.minhas-recompensas {
+  position: fixed;
+  bottom: 80px;
+  right: 20px;
+  z-index: 1490;
+}
+.recompensas-btn {
+  background: linear-gradient(135deg, #ffca28, #ffb300);
+  color: #222;
+  border: none;
+  border-radius: 20px;
+  font-weight: 700;
+  font-size: 0.95rem;
+  padding: 12px 22px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+  cursor: pointer;
+  transition: 0.2s;
+}
+.recompensas-btn:hover {
+  transform: scale(1.05);
+  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.3);
+}
+
+/* 2️⃣ Modais (Extras, Combo, Login, Promo) — centralizados na tela */
+.modal {
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.25s ease;
+  z-index: 999;
+}
+.modal.show {
+  opacity: 1;
+  pointer-events: auto;
+}
+.modal-content {
+  background: #fff;
+  border-radius: 16px;
+  max-height: 85vh;
+  max-width: 520px;
+  width: 90%;
+  overflow-y: auto;
+  box-shadow: 0 8px 40px rgba(0, 0, 0, 0.3);
+  position: relative;
+  transform: translateY(0);
+}
+
+/* 3️⃣ Setas do carrossel — estilo original */
+.c-btn {
+  background: #ffca28;
+  color: #000;
+  border: none;
+  border-radius: 50%;
+  width: 38px;
+  height: 38px;
+  font-size: 22px;
+  font-weight: 700;
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  opacity: 0.9;
+  transition: all 0.2s;
+}
+.c-btn:hover {
+  opacity: 1;
+  background: #ffb300;
+  transform: scale(1.05);
+}
+.c-prev { left: 10px; }
+.c-next { right: 10px; }
+
+/* 4️⃣ Modal do carrossel — imagem ajustada e clique fora funcional */
+#promo-modal-img {
+  width: 100%;
+  max-height: 60vh;
+  object-fit: contain;
+  border-radius: 8px;
+}
+.promo-content {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 6px 25px rgba(0, 0, 0, 0.25);
+  max-width: 600px;
+  width: 92%;
+  overflow: hidden;
+}
+
+/* 5️⃣ Preços — estilo antigo (antigo riscado + novo em verde) */
+.price {
+  font-weight: 600;
+  color: #4caf50;
+  margin: 8px 0;
+}
+.price del {
+  color: #b71c1c;
+  font-size: 0.95rem;
+  margin-right: 6px;
+}
+.price b {
+  color: #2e7d32;
+  font-weight: 700;
+  font-size: 1.05rem;
+}
+
+/* 6️⃣ Modal de combo — lista de opções bonita */
+#combo-body label,
+#combo-body div {
+  border: 1px solid #ffca28;
+  border-radius: 10px;
+  padding: 10px 14px;
+  background: #fff;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  transition: 0.2s;
+  font-weight: 600;
+}
+#combo-body label:hover {
+  background: #fff9e6;
+  transform: scale(1.02);
+}
+
+/* Responsivo */
+@media (max-width: 600px) {
+  .promo-content {
+    width: 95%;
+    max-height: 75vh;
+  }
+  #promo-modal-img {
+    max-height: 45vh;
+  }
+}
