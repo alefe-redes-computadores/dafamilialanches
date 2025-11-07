@@ -374,6 +374,22 @@
           <input type="text" id="coupon-input" placeholder="Digite o cupom e clique em Aplicar" aria-label="Cupom de desconto"/>
           <button type="submit" id="coupon-apply-btn" class="btn-primary">Aplicar</button>
         </form>
+
+<!-- DFL v3.7 – Campo de Frete (EM BREVE, desativado) -->
+<div id="dfl-frete-input-container" class="frete-coming-soon">
+  <label for="frete-input" class="frete-label">Frete (em breve)</label>
+  <div class="frete-row">
+    <input id="frete-input" type="text" inputmode="numeric" pattern="\d{8}" maxlength="9"
+           placeholder="Em breve… nosso programador tá tirando um descanso 😅😅"
+           disabled aria-disabled="true" />
+    <button id="calcular-frete-btn" type="button" disabled aria-disabled="true" title="Em breve">Calcular</button>
+  </div>
+  <small id="frete-status-msg" class="frete-note" style="display:none;"></small>
+  <div id="frete-display-line" class="frete-total-line" style="display:none">
+    Frete: <b id="frete-valor-display">R$ 0,00</b>
+  </div>
+</div>
+
         <div id="coupon-message" class="coupon-message" aria-live="polite"></div>
         <div class="summary-row" id="coupon-discount-row" style="display:none;">
           <span>Desconto</span>
@@ -651,6 +667,116 @@
       </div>
       <div class="footer-copy">© 2025 Da Família Lanches — Todos os direitos reservados 🍔 • <b>v3.6.11 Design</b></div>
     </footer>
+
+<!-- =======================
+     DFL v3.7 – Seção HOT DOGS (em breve)
+     ======================= -->
+<section id="hotdogs" class="section">
+  <h2 class="section-title">🌭 Hot Dogs</h2>
+  <div class="grid products-grid">
+    <!-- Cada card fica desativado por enquanto para evitar pedidos incorretos -->
+    <div class="card disabled-card" data-name="Nigucim" data-price="0">
+      <div class="card-media">
+        <img src="imagens/hotdogs/nigucim.jpg" alt="Hot Dog Nigucim">
+        <span class="badge badge-molho">Molho Verde</span>
+      </div>
+      <div class="card-info">
+        <h3 class="card-title">Nigucim</h3>
+        <p class="card-desc">1 salsicha, pão, ketchup, mostarda, batata palha e molho verde.</p>
+        <div class="actions">
+          <button class="add-cart" disabled aria-disabled="true" title="Em breve">Adicionar</button>
+          <button class="extras-btn" disabled aria-disabled="true" title="Em breve">Adicionais</button>
+        </div>
+        <div class="soon-overlay">Em breve</div>
+      </div>
+    </div>
+
+    <div class="card disabled-card" data-name="Simprão" data-price="0">
+      <div class="card-media">
+        <img src="imagens/hotdogs/simprao.jpg" alt="Hot Dog Simprão">
+        <span class="badge badge-molho">Molho Verde</span>
+      </div>
+      <div class="card-info">
+        <h3 class="card-title">Simprão</h3>
+        <p class="card-desc">1 salsicha, sem vinagrete, pão, ketchup, mostarda, batata palha e molho verde.</p>
+        <div class="actions">
+          <button class="add-cart" disabled aria-disabled="true" title="Em breve">Adicionar</button>
+          <button class="extras-btn" disabled aria-disabled="true" title="Em breve">Adicionais</button>
+        </div>
+        <div class="soon-overlay">Em breve</div>
+      </div>
+    </div>
+
+    <div class="card disabled-card" data-name="Nimin" data-price="0">
+      <div class="card-media">
+        <img src="imagens/hotdogs/nimin.jpg" alt="Hot Dog Nimin">
+        <span class="badge badge-molho">Molho Verde</span>
+      </div>
+      <div class="card-info">
+        <h3 class="card-title">Nimin</h3>
+        <p class="card-desc">2 salsichas, bacon, vinagrete, ketchup, mostarda, batata palha e molho verde.</p>
+        <div class="actions">
+          <button class="add-cart" disabled aria-disabled="true" title="Em breve">Adicionar</button>
+          <button class="extras-btn" disabled aria-disabled="true" title="Em breve">Adicionais</button>
+        </div>
+        <div class="soon-overlay">Em breve</div>
+      </div>
+    </div>
+
+    <div class="card disabled-card" data-name="Padaná" data-price="0">
+      <div class="card-media">
+        <img src="imagens/hotdogs/padana.jpg" alt="Hot Dog Padaná">
+        <span class="badge badge-molho">Molho Verde</span>
+      </div>
+      <div class="card-info">
+        <h3 class="card-title">Padaná</h3>
+        <p class="card-desc">Tradicional bem servido com vinagrete, ketchup, mostarda, batata palha e molho verde.</p>
+        <div class="actions">
+          <button class="add-cart" disabled aria-disabled="true" title="Em breve">Adicionar</button>
+          <button class="extras-btn" disabled aria-disabled="true" title="Em breve">Adicionais</button>
+        </div>
+        <div class="soon-overlay">Em breve</div>
+      </div>
+    </div>
+
+    <div class="card disabled-card" data-name="Purizin (com purê)" data-price="0">
+      <div class="card-media">
+        <img src="imagens/hotdogs/purizin.jpg" alt="Hot Dog Purizin">
+        <span class="badge badge-molho">Molho Verde</span>
+        <span class="badge badge-pure">Com purê</span>
+      </div>
+      <div class="card-info">
+        <h3 class="card-title">Purizin</h3>
+        <p class="card-desc">Tradicional com purê cremoso, vinagrete, ketchup, mostarda, batata palha e molho verde.</p>
+        <div class="actions">
+          <button class="add-cart" disabled aria-disabled="true" title="Em breve">Adicionar</button>
+          <button class="extras-btn" disabled aria-disabled="true" title="Em breve">Adicionais</button>
+        </div>
+        <div class="soon-overlay">Em breve</div>
+      </div>
+    </div>
+
+    <div class="card disabled-card" data-name="Trembão (com purê)" data-price="0">
+      <div class="card-media">
+        <img src="imagens/hotdogs/trembao.jpg" alt="Hot Dog Trembão">
+        <span class="badge badge-molho">Molho Verde</span>
+        <span class="badge badge-pure">Com purê</span>
+      </div>
+      <div class="card-info">
+        <h3 class="card-title">Trembão</h3>
+        <p class="card-desc">Bitela com purê, bacon, vinagrete, ketchup, mostarda, batata palha e molho verde.</p>
+        <div class="actions">
+          <button class="add-cart" disabled aria-disabled="true" title="Em breve">Adicionar</button>
+          <button class="extras-btn" disabled aria-disabled="true" title="Em breve">Adicionais</button>
+        </div>
+        <div class="soon-overlay">Em breve</div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+
   </div>
 
   <div class="minhas-recompensas">
