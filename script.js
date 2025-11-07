@@ -212,7 +212,37 @@ document.addEventListener("DOMContentLoaded", () => {
 
 /* ------------------ 🛒 MINI-CARRINHO (MANTIDO) ------------------ */
   function renderMiniCart() {
-    // ... (MANTIDO)
+    
+  // 💬 Mensagem divertida do carrinho vazio (v3.7.1b)
+  try {
+    const listEl = document.querySelector('.mini-list');
+    const footEl = document.querySelector('.mini-foot');
+    if (Array.isArray(cart) ? cart.length === 0 : (!cart || (cart.items && cart.items.length === 0))) {
+      if (listEl) {
+        listEl.innerHTML = `
+          <div class="cart-empty-msg" style="
+            padding: 18px 14px;
+            text-align: center;
+            border: 1px dashed #ffca28;
+            border-radius: 12px;
+            background: #fffdf3;
+            box-shadow: inset 0 1px 0 rgba(255,255,255,.6);
+            font-weight: 600;
+            line-height: 1.35;
+          ">
+            <div style="font-size:1.05rem; margin-bottom:6px;">🍔 Carrinho vazio por aqui…</div>
+            <div style="font-size:.95rem; color:#6b6b6b;">
+              Nosso programador‑chapeiro foi dar um trato no grill e já volta 😅<br/>
+              Enquanto isso, dá um rolê no cardápio e escolhe um trem bão!
+            </div>
+          </div>
+        `;
+      }
+      if (footEl) footEl.style.opacity = "0.85"; // mantém rodapé visível porém discreto
+      // Mantém o restante do fluxo da função sem quebrar cálculos abaixo.
+    }
+  } catch(e) { try { console.warn('Empty-cart banner guard', e); } catch(_){} }
+// ... (MANTIDO)
     if (!el.miniList) return; 
 
     const totalItens = cart.reduce((s, i) => s + i.qtd, 0);
