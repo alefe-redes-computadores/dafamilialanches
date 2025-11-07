@@ -2673,3 +2673,75 @@ async function carregarHistoricoRecompensas(userId) {
       alert("Erro ao processar seu pedido. Tente novamente.");
     }
   }
+
+
+/* =========================================================
+   ✅ DFL — Patch de Confiabilidade de Cliques (botões .add-cart)
+   - Garante que todos os botões "Adicionar" funcionem (mobile/desktop)
+   - Inclui reforço de eventos touch para Android/iOS
+========================================================= */
+
+(function ensureAddCartBindings(){
+  try {
+    // Função utilitária para adicionar ao carrinho a partir de um .card
+    function addCommonItemFromCard(cardEl){
+      if (!cardEl) return;
+      const name  = cardEl.dataset.name || cardEl.getAttribute('data-name') || '';
+      const price = parseFloat(cardEl.dataset.price || cardEl.getAttribute('data-price') || '0') || 0;
+      if (!name) return;
+      // Usa o array global 'cart' e funções já presentes no script principal
+      const found = (typeof cart !== 'undefined' ? cart.find(i => i.nome === name) : null);
+      if (found) found.qtd++;
+      else if (typeof cart !== 'undefined') cart.push({ nome: name, preco: price, qtd: 1 });
+      if (typeof renderMiniCart === 'function') renderMiniCart();
+      if (typeof popupAdd === 'function') popupAdd(`${name} adicionado!`);
+    }
+
+    // 1) Liga todos os botões .add-cart existentes
+    document.querySelectorAll(".add-cart").forEach((btn) => {
+      // evita listeners duplicados
+      btn.__dflBound || (btn.__dflBound = true, btn.addEventListener("click", function(e){
+        const card = e.currentTarget.closest(".card");
+        addCommonItemFromCard(card);
+      }));
+    });
+
+    // 2) Observer para ligar botões adicionados dinamicamente
+    const mo = new MutationObserver(() => {
+      document.querySelectorAll(".add-cart").forEach((btn) => {
+        if (!btn.__dflBound) {
+          btn.__dflBound = true;
+          btn.addEventListener("click", function(e){
+            const card = e.currentTarget.closest(".card");
+            addCommonItemFromCard(card);
+          });
+        }
+      });
+    });
+    mo.observe(document.body, { childList: true, subtree: true });
+
+    // 3) Reforço para touch (dispara click imediato no alvo)
+    function getTappable(el){
+      while (el && el !== document.body) {
+        if (el.classList && (el.classList.contains('add-cart') || el.classList.contains('extras-btn') || el.id === 'cart-icon' || el.id === 'user-btn')) {
+          return el;
+        }
+        el = el.parentElement;
+      }
+      return null;
+    }
+    function onTouchEnd(ev){
+      if (ev.touches && ev.touches.length) return; // ignorar gestos em andamento
+      const t = getTappable(ev.target);
+      if (t) {
+        ev.preventDefault();
+        t.click();
+      }
+    }
+    document.body.addEventListener('touchend', onTouchEnd, { passive: false });
+    console.log("[DFL] Patch de cliques (.add-cart + touch) aplicado com sucesso.");
+  } catch (err) {
+    console.error("[DFL] Falha ao aplicar patch de cliques:", err);
+  }
+})();
+
