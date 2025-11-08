@@ -1071,3 +1071,33 @@ font-size: 20px;
   font-size: 0.95rem;
   color: #6b6b6b;
 }
+/* ================== PATCH LOGIN MODAL ================== */
+
+/* Garante centralização perfeita do modal de login */
+#login-modal {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+/* Corrige posicionamento e responsividade */
+#login-modal .modal-content {
+  margin: 0 auto !important;
+  top: 50% !important;
+  transform: translateY(-50%) !important;
+  position: relative !important;
+}
+
+/* Reforça o funcionamento do botão de fechar ✖ */
+.login-close {
+  cursor: pointer !important;
+  pointer-events: auto !important;
+  z-index: 9999 !important;
+}
+
+/* Ajuste extra de compatibilidade visual */
+#login-modal.show {
+  opacity: 1 !important;
+  pointer-events: auto !important;
+  transition: opacity 0.25s ease-in-out !important;
+}
