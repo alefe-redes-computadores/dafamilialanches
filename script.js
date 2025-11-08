@@ -2157,7 +2157,7 @@ function clearBackdrop() {
     });
   });
 /* ======================================================
-   🧩 PATCH FINAL — Corrige X do Mini-Carrinho
+   ✅ PATCH FINAL — Mini-Carrinho com clique fora + botão X
    ====================================================== */
 (() => {
   const miniCart = document.querySelector('.mini-cart');
@@ -2172,13 +2172,9 @@ function clearBackdrop() {
     document.body.style.overflow = '';
   };
 
-  // Garante que qualquer botão X de fechar carrinho funcione
+  // Fecha pelo botão X (classe usada no seu HTML)
   document.addEventListener('click', (e) => {
-    if (
-      e.target.closest('.fechar-pedidos') ||
-      e.target.closest('.cart-close') ||
-      e.target.closest('.mini-close')
-    ) {
+    if (e.target.closest('.extras-close')) {
       e.preventDefault();
       e.stopPropagation();
       closeCart();
@@ -2192,6 +2188,6 @@ function clearBackdrop() {
     closeCart();
   });
 
-  // Bloqueia clique por baixo do modal
+  // Bloqueia clique dentro do painel
   miniCart.addEventListener('click', (e) => e.stopPropagation());
 })();
