@@ -2191,3 +2191,68 @@ function clearBackdrop() {
   // Bloqueia clique dentro do painel
   miniCart.addEventListener('click', (e) => e.stopPropagation());
 })();
+/* ======================================================
+   ✅ PATCH DEFINITIVO — X do Mini-Carrinho
+   - Fecha no X sem depender de delegation no document
+   - Mantém clique-fora via backdrop
+   ====================================================== */
+(() => {
+  const miniCart  = document.querySelector('.mini-cart');
+  const backdrop  = document.getElementById('cart-backdrop');
+  if (!miniCart || !backdrop) return;
+
+  const openCart = () => {
+    miniCart.classList.add('active');
+    backdrop.classList.add('active');
+    backdrop.style.pointerEvents = 'auto';
+    document.body.style.overflow = 'hidden';
+  };
+
+  const closeCart = () => {
+    miniCart.classList.remove('active');
+    backdrop.classList.remove('active');
+    backdrop.style.pointerEvents = 'none';
+    document.body.style.overflow = '';
+  };
+
+  // 1) Fecha pelo X — listener DIRETO no botão (não depende de bubbling)
+  const closeBtn =
+    miniCart.querySelector('.extras-close') ||
+    miniCart.querySelector('.fechar-pedidos') ||
+    miniCart.querySelector('.mini-head .promo-close') ||
+    miniCart.querySelector('.mini-head button[aria-label*="Fechar" i]');
+
+  if (closeBtn) {
+    closeBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      closeCart();
+    });
+  }
+
+  // 2) Fecha clicando fora (backdrop)
+  backdrop.addEventListener('click', (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    closeCart();
+  });
+
+  // 3) Impede que cliques dentro do painel vazem para o fundo
+  miniCart.addEventListener('click', (e) => e.stopPropagation());
+
+  // 4) (Opcional) Abrir carrinho por botões existentes, sem interferir no X
+  document.addEventListener('click', (e) => {
+    if (e.target.closest('#cart-icon') || e.target.closest('.cart-button')) {
+      e.preventDefault();
+      e.stopPropagation();
+      openCart();
+    }
+  });
+
+  // 5) Tecla Esc fecha
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && miniCart.classList.contains('active')) {
+      closeCart();
+    }
+  });
+})();
