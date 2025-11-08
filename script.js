@@ -1,12 +1,12 @@
 /* =========================================================
-   🚀 DFL v3.6.0 — OTIMIZAÇÃO DE PERFORMANCE (LAZY LOAD DO FIREBASE)
-   - Fase 2 do Plano de Performance: Implementa a inicialização tardia do Firebase SDK.
-   - Garante que a aplicação se torne interativa mais rapidamente.
+   🚀 DFL v3.7.0 — REMOÇÃO DE SOM GLOBAL DE CLIQUE (MELHORIA UX)
+   - Remove o som de clique constante e o mantém APENAS na finalização do pedido.
+   - Baseado na DFL v3.6.10 Estável e Corrigida.
 ========================================================= */
 
 document.addEventListener("DOMContentLoaded", () => {
   /* ------------------ ⚙️ BASE (MANTIDO) ------------------ */
-  const sound = new Audio("click.wav");
+  const sound = new Audio("click.wav"); // Mantemos a inicialização do áudio
   let cart = [];
   let currentUser = null;
   let isFirebaseInitialized = false; // NOVO: Flag de inicialização do Firebase
@@ -14,10 +14,8 @@ document.addEventListener("DOMContentLoaded", () => {
   const money = (n) => `R$ ${Number(n || 0).toFixed(2).replace(".", ",")}`;
   const safe = (fn) => (...a) => { try { fn(...a); } catch (e) { console.error(e); } };
 
-  // 🔊 Clique com som suave (não bloqueia o site se falhar)
-  document.addEventListener("click", () => {
-    try { sound.currentTime = 0; sound.play(); } catch (_) {}
-  });
+  // 🔊 REMOVIDO: O listener de clique global foi removido daqui para melhorar a UX.
+  // O som será ativado apenas na função fecharPedido().
 
   /* Banco de Dados v2.7:
     Dados das 9 promoções do carrossel.
@@ -214,14 +212,44 @@ document.addEventListener("DOMContentLoaded", () => {
 
 /* ------------------ 🛒 MINI-CARRINHO (MANTIDO) ------------------ */
   function renderMiniCart() {
-    // ... (MANTIDO)
+    
+  // 💬 Mensagem divertida do carrinho vazio (v3.7.1b)
+  try {
+    const listEl = document.querySelector('.mini-list');
+    const footEl = document.querySelector('.mini-foot');
+    if (Array.isArray(cart) ? cart.length === 0 : (!cart || (cart.items && cart.items.length === 0))) {
+      if (listEl) {
+        listEl.innerHTML = `
+          <div class="cart-empty-msg" style="
+            padding: 18px 14px;
+            text-align: center;
+            border: 1px dashed #ffca28;
+            border-radius: 12px;
+            background: #fffdf3;
+            box-shadow: inset 0 1px 0 rgba(255,255,255,.6);
+            font-weight: 600;
+            line-height: 1.35;
+          ">
+            <div style="font-size:1.05rem; margin-bottom:6px;">🍔 Carrinho vazio por aqui…</div>
+            <div style="font-size:.95rem; color:#6b6b6b;">
+              Nosso programador‑chapeiro foi dar um trato no grill e já volta 😅<br/>
+              Enquanto isso, dá um rolê no cardápio e escolhe um trem bão!
+            </div>
+          </div>
+        `;
+      }
+      if (footEl) footEl.style.opacity = "0.85"; // mantém rodapé visível porém discreto
+      // Mantém o restante do fluxo da função sem quebrar cálculos abaixo.
+    }
+  } catch(e) { try { console.warn('Empty-cart banner guard', e); } catch(_){} }
+// ... (MANTIDO)
     if (!el.miniList) return; 
 
     const totalItens = cart.reduce((s, i) => s + i.qtd, 0);
     if (el.cartCount) el.cartCount.textContent = totalItens;
 
     if (!cart.length) {
-      el.miniList.innerHTML = '<p style="text-align:center;color:#999;padding:20px;">Carrinho vazio 🛒</p>';
+      el.miniList.innerHTML = '<p style="text-align:center;color:#999;padding:20px;">🍔 Nosso programador-chapeiro foi dar um trato no grill e já volta 😅. Enquanto isso, dá um rolê no cardápio e pede um Trem Bão!</p>';
       
       // v3.0: Limpa também o rodapé dinâmico e estático
       if(el.miniFoot) el.miniFoot.querySelectorAll(".cart-summary-generated").forEach(e => e.remove());
@@ -456,10 +484,23 @@ document.addEventListener("DOMContentLoaded", () => {
     produtoExtras = card.dataset.name;
     produtoPrecoBase = parseFloat(card.dataset.price) || 0;
 
+    // 🚨 CORREÇÃO VISUAL V3.6.9: Aplica o estilo de CARD VERTICAL em Adicionais
     el.extrasList.innerHTML = adicionais.map((a, i) => `
-      <label class="extra-line">
-        <span>${a.nome} — <b>${money(a.preco)}</b></span>
-        <input type="checkbox" value="${i}">
+      <label class="extra-line" style="
+        display: flex; 
+        justify-content: space-between; 
+        align-items: center; 
+        padding: 12px; 
+        border: 1px solid #ffb300; /* Borda amarela var(--botao) */
+        border-radius: 8px; 
+        background: #fff; 
+        box-shadow: 0 1px 3px rgba(0,0,0,.08); /* Sombra suave */
+        cursor: pointer; 
+        transition: all 0.2s;
+        font-size: 1rem;
+      ">
+        <span style="font-weight: 600; color: #222;">${a.nome} — <b style="color: #d32f2f;">${money(a.preco)}</b></span>
+        <input type="checkbox" value="${i}" style="margin-left: 10px;">
       </label>`).join("");
     Overlays.open(el.extrasModal);
   });
@@ -535,10 +576,23 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     const opts = comboDrinkOptions[grupo];
+    // 🚨 CORREÇÃO VISUAL V3.6.9: Aplica o estilo de CARD VERTICAL no HTML injetado
     el.comboBody.innerHTML = opts.map((o, i) => `
-      <label class="extra-line">
-        <span>${o.rotulo} — + ${money(o.delta)}</span>
-        <input type="radio" name="combo-drink" value="${i}" ${i === 0 ? "checked" : ""}>
+      <label class="combo-option-line" style="
+        display: flex; 
+        justify-content: space-between; 
+        align-items: center; 
+        padding: 12px; 
+        border: 1px solid #ffb300; /* Borda amarela var(--botao) */
+        border-radius: 8px; 
+        background: #fff; 
+        box-shadow: 0 1px 3px rgba(0,0,0,.08); /* Sombra suave */
+        cursor: pointer; 
+        transition: all 0.2s;
+      ">
+        <span style="font-weight: 600; color: #222;">${o.rotulo}</span>
+        <span style="font-weight: 700; color: #d32f2f;">+ ${money(o.delta)}</span>
+        <input type="radio" name="combo-drink" value="${i}" ${i === 0 ? "checked" : ""} style="margin-left: 10px;">
       </label>
     `).join("");
 
@@ -975,8 +1029,9 @@ document.addEventListener("DOMContentLoaded", () => {
       el.statusBanner.className = `status-banner ${aberto ? "open" : "closed"}`;
     }
     if (el.hoursBanner) {
+      const elMsg = el.hoursBanner.querySelector("#hours-message");
       const elTimer = el.hoursBanner.querySelector("#timer");
-      if (!elTimer) return;
+      if (!elMsg || !elTimer) return;
 
       if (aberto) {
         const fim = new Date(agora);
@@ -988,7 +1043,9 @@ document.addEventListener("DOMContentLoaded", () => {
         const restH = Math.floor(diff / 3600);
         const restM = Math.floor((diff % 3600) / 60);
         
-        elTimer.innerHTML = `<b>${restH}h ${restM}min</b>`;
+        // 🚨 CORREÇÃO FINAL V3.6.10: Injeta o HTML na mensagem e o tempo no timer
+        elMsg.innerHTML = `⏰ Hoje atendemos até <b>23h30</b> — Faltam`;
+        elTimer.textContent = `${restH}h ${restM}min`;
 
       } else {
         const inicio = new Date(agora);
@@ -1001,7 +1058,9 @@ document.addEventListener("DOMContentLoaded", () => {
         const faltamH = Math.floor(diff / 3600);
         const faltamM = Math.floor((diff % 3600) / 60);
 
-        el.hoursBanner.innerHTML = `🔒 Fechado — Abrimos em <b>${faltamH}h ${faltamM}min</b>`;
+        // 🚨 CORREÇÃO FINAL V3.6.10: Injeta o HTML na mensagem e o tempo no timer
+        elMsg.innerHTML = `🔒 Fechado — Abrimos em`;
+        elTimer.textContent = `${faltamH}h ${faltamM}min`;
       }
     }
   });
@@ -1076,7 +1135,8 @@ document.addEventListener("DOMContentLoaded", () => {
       // 2. Marca cupom personalizado como USADO, se houver
       if (cupomInfo.isPersonalizado && couponApplied) {
           const cupomUserRef = db.collection("CuponsUsuarios").doc(userId);
-          batch.update(cupumUserRef, {
+          // 🚨 CORREÇÃO CRÍTICA V3.6.2: Corrigindo o erro de digitação 'cupumUserRef' para 'cupomUserRef'
+          batch.update(cupomUserRef, {
               usado: true,
               dataUso: firebase.firestore.FieldValue.serverTimestamp(),
               pedidoId: 'PENDENTE' 
@@ -1161,6 +1221,10 @@ document.addEventListener("DOMContentLoaded", () => {
       
       // 7. Feedback e Limpeza (MANTIDO)
       popupAdd("Pedido salvo ✅");
+      
+      // 🚨 ADIÇÃO V3.7.0: Somente na finalização do pedido!
+      try { sound.currentTime = 0; sound.play(); } catch (_) {}
+
 
       const linhas = [
         "🍔 *Pedido DFL*",
@@ -1390,7 +1454,8 @@ async function carregarRecompensas(userId) {
         
         if (recompensaAtual && recompensaAtual.tipo === 'cupom') {
             const cupomSnap = await db.collection('CuponsUsuarios').doc(userId).get();
-            cupomStatus = cupumSnap.exists ? cupumSnap.data() : null;
+            // 🚨 CORREÇÃO CRÍTICA V3.6.2: Corrigindo o erro de digitação 'cupumSnap' para 'cupomSnap'
+            cupomStatus = cupomSnap.exists ? cupomSnap.data() : null;
         }
 
         // Encontra a próxima meta que o cliente AINDA NÃO ATINGIU
@@ -2004,48 +2069,3 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
 });
-
-
-/* =======================================================
-   🔧 Patch: Garantia do botão ✖ do modal de login (v3.7.7)
-   - Não altera lógica existente; apenas adiciona um listener seguro.
-   - Fecha o #login-modal e limpa backdrop/scroll quando clicado.
-   ======================================================= */
-(function () {
-  try {
-    var loginModal = document.getElementById('login-modal');
-    if (!loginModal) return;
-    var loginClose = loginModal.querySelector('.login-close');
-    if (!loginClose) return;
-    if (!loginClose.dataset || !loginClose.dataset.bound) {
-      if (loginClose.dataset) loginClose.dataset.bound = '1';
-      loginClose.addEventListener('click', function (ev) {
-        try {
-          ev.preventDefault();
-          ev.stopPropagation();
-        } catch (_) {}
-        try { loginModal.classList.remove('show'); } catch (_) {}
-        try { loginModal.setAttribute('aria-hidden', 'true'); } catch (_) {}
-        try {
-          var bd = document.getElementById('cart-backdrop');
-          if (bd) bd.classList.remove('active');
-        } catch (_) {}
-        try { document.body.classList.remove('no-scroll'); } catch (_) {}
-      }, { passive: false });
-    }
-    // Também fecha com ESC quando o login está visível
-    document.addEventListener('keydown', function (e) {
-      if ((e.key === 'Escape' || e.keyCode === 27) && loginModal.classList.contains('show')) {
-        try { loginModal.classList.remove('show'); } catch (_) {}
-        try { loginModal.setAttribute('aria-hidden', 'true'); } catch (_) {}
-        try {
-          var bd = document.getElementById('cart-backdrop');
-          if (bd) bd.classList.remove('active');
-        } catch (_) {}
-        try { document.body.classList.remove('no-scroll'); } catch (_) {}
-      }
-    });
-  } catch (err) {
-    try { console.error('Login close patch error:', err); } catch (_) {}
-  }
-})();
