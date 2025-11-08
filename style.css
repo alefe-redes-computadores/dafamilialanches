@@ -1129,6 +1129,7 @@ font-size: 20px;
   box-shadow: 0 8px 40px rgba(0, 0, 0, 0.35) !important;
 }
 
+
 /* ❌ Botão de fechar funcional e acima de tudo */
 .login-close {
   cursor: pointer !important;
@@ -1155,3 +1156,61 @@ font-size: 20px;
 /* 🧱 Mantém botões flutuantes abaixo do modal */
 .meus-pedidos,
 .minhas-recompensas { z-index: 1500 !important; }
+
+/* ================= PATCH FINAL — LOGIN MODAL FUNCIONAL ================= */
+
+/* 🔝 Prioridade total do modal de login */
+#login-modal {
+  position: fixed !important;
+  inset: 0 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  z-index: 5000 !important;
+  background: rgba(0,0,0,0.4) !important; /* escurece só o login, sem interferir nos outros */
+}
+
+/* 📦 Caixa do modal centralizada */
+#login-modal .modal-content {
+  position: relative !important;
+  top: auto !important;
+  transform: none !important;
+  margin: 0 auto !important;
+  background: #fff !important;
+  border-radius: 14px !important;
+  box-shadow: 0 8px 40px rgba(0,0,0,0.4) !important;
+  width: 92% !important;
+  max-width: 480px !important;
+  z-index: 5001 !important;
+}
+
+/* ❌ Botão fechar funcional e acima de tudo */
+.login-close {
+  position: absolute !important;
+  top: 12px !important;
+  right: 12px !important;
+  background: #ffca28 !important;
+  border: none !important;
+  border-radius: 50% !important;
+  width: 36px !important;
+  height: 36px !important;
+  font-weight: 700 !important;
+  color: #000 !important;
+  cursor: pointer !important;
+  pointer-events: auto !important;
+  z-index: 6000 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  transition: 0.2s !important;
+}
+.login-close:hover {
+  background: #ffb300 !important;
+  transform: scale(1.08) !important;
+}
+
+/* 🚫 Evita o backdrop antigo interferir */
+#cart-backdrop.active {
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
