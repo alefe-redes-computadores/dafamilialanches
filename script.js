@@ -2157,21 +2157,13 @@ function clearBackdrop() {
     });
   });
 /* ======================================================
-   🛠️ PATCH MINI-CART — Fechamento e bloqueio de cliques
+   🧩 PATCH FINAL — Corrige X do Mini-Carrinho
    ====================================================== */
 (() => {
   const miniCart = document.querySelector('.mini-cart');
   const backdrop = document.getElementById('cart-backdrop');
 
-  if (!miniCart || !backdrop) return; // não altera nada se a marcação não existir
-
-  // Funções centrais
-  const openCart = () => {
-    miniCart.classList.add('active');
-    backdrop.classList.add('active');
-    backdrop.style.pointerEvents = 'auto';
-    document.body.style.overflow = 'hidden'; // trava rolagem do fundo
-  };
+  if (!miniCart || !backdrop) return;
 
   const closeCart = () => {
     miniCart.classList.remove('active');
@@ -2180,52 +2172,26 @@ function clearBackdrop() {
     document.body.style.overflow = '';
   };
 
-  // Impede que cliques dentro do painel vazem para o fundo
-  miniCart.addEventListener('click', (e) => {
-    e.stopPropagation();
-  });
-
-  // Fecha no X do carrinho (use o seletor que você já tem no HTML)
+  // Garante que qualquer botão X de fechar carrinho funcione
   document.addEventListener('click', (e) => {
-    if (e.target.closest('.fechar-pedidos')) {
+    if (
+      e.target.closest('.fechar-pedidos') ||
+      e.target.closest('.cart-close') ||
+      e.target.closest('.mini-close')
+    ) {
       e.preventDefault();
       e.stopPropagation();
       closeCart();
     }
   });
 
-  // Fecha ao clicar no backdrop sem disparar clique do que está por baixo
+  // Fecha clicando fora
   backdrop.addEventListener('click', (e) => {
     e.preventDefault();
     e.stopPropagation();
     closeCart();
   });
 
-  // (Opcional) Garante abertura pelos botões/ícone já existentes
-  document.addEventListener('click', (e) => {
-    if (e.target.closest('#cart-icon') || e.target.closest('.cart-button')) {
-      e.preventDefault();
-      e.stopPropagation();
-      openCart();
-    }
-  });
-
-  // Bloqueia qualquer clique global quando o carrinho está aberto
-  document.addEventListener('click', (e) => {
-    if (miniCart.classList.contains('active')) {
-      // se o clique não foi no miniCart nem no backdrop, não faça nada
-      // (impede, por ex., que o clique no carrossel abra imagem ao fechar)
-      if (!e.target.closest('.mini-cart') && e.target !== backdrop) {
-        e.preventDefault();
-        e.stopPropagation();
-      }
-    }
-  });
-
-  // Segurança extra: tecla Esc fecha o carrinho
-  document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape' && miniCart.classList.contains('active')) {
-      closeCart();
-    }
-  });
+  // Bloqueia clique por baixo do modal
+  miniCart.addEventListener('click', (e) => e.stopPropagation());
 })();
