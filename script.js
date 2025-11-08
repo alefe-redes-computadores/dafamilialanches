@@ -2135,3 +2135,24 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }, { capture: true }); // captura garante que o clique não seja "engolido" por outros handlers
 })();
+// ======================================================
+// 🧩 PATCH EXTRA — Remove o fundo acinzentado ao fechar
+// ======================================================
+function clearBackdrop() {
+  const backdrop = document.getElementById('cart-backdrop');
+  if (backdrop) {
+    backdrop.classList.remove('active');
+    backdrop.style.opacity = '0';
+    backdrop.style.pointerEvents = 'none';
+  }
+  // Garante que nenhum modal permaneça ativo visualmente
+  document.querySelectorAll('.modal.show').forEach(m => m.classList.remove('show'));
+}
+
+// Monitora o fechamento dos painéis e modais
+['.login-close', '.fechar-pedidos', '.fechar-recompensas', '.promo-close', '.extras-close', '.combo-close']
+  .forEach(sel => {
+    document.addEventListener('click', (e) => {
+      if (e.target.closest(sel)) clearBackdrop();
+    });
+  });
