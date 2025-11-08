@@ -1101,3 +1101,57 @@ font-size: 20px;
   pointer-events: auto !important;
   transition: opacity 0.25s ease-in-out !important;
 }
+/* ================== PATCH FINAL — LOGIN MODAL (v3.7.6-fix) ================== */
+
+/* 🔝 Prioridade do backdrop e modal (evita sobreposição dos botões flutuantes) */
+#cart-backdrop { z-index: 3980 !important; }
+#login-modal { z-index: 4000 !important; }
+
+/* 🧭 Centralização vertical e horizontal precisa */
+#login-modal {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  position: fixed !important;
+  inset: 0 !important;
+  min-height: 100dvh !important;
+}
+
+/* 📦 Conteúdo centralizado e responsivo */
+#login-modal .modal-content {
+  position: relative !important;
+  margin: 0 auto !important;
+  transform: none !important;
+  top: auto !important;
+  max-width: 480px !important;
+  width: 92% !important;
+  border-radius: 14px !important;
+  box-shadow: 0 8px 40px rgba(0, 0, 0, 0.35) !important;
+}
+
+/* ❌ Botão de fechar funcional e acima de tudo */
+.login-close {
+  cursor: pointer !important;
+  pointer-events: auto !important;
+  position: absolute !important;
+  top: 12px !important;
+  right: 12px !important;
+  z-index: 5000 !important;
+  background: #ffca28 !important;
+  border: none !important;
+  border-radius: 50% !important;
+  width: 36px !important;
+  height: 36px !important;
+  font-weight: 700 !important;
+  color: #000 !important;
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.25) !important;
+  transition: 0.2s !important;
+}
+.login-close:hover {
+  background: #ffb300 !important;
+  transform: scale(1.08) !important;
+}
+
+/* 🧱 Mantém botões flutuantes abaixo do modal */
+.meus-pedidos,
+.minhas-recompensas { z-index: 1500 !important; }
