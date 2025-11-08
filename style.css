@@ -1,14 +1,10 @@
-@charset "UTF-8";
 /* =========================================================
-   🍔 Da Família Lanches — style.v3.8.2.css
-   Tema: Cinza-Claro inspirado na v3.6 + estrutura v3.7
-   Layout redondinho + sombras suaves + responsivo
+   🌤️ DFL v3.8.2 — Fundo branco acinzentado + Layout limpo
    ========================================================= */
-
 :root {
   --preto: #000;
-  --bg1: #fdfdfb;
-  --bg2: #fff3cd;
+  --bg1: #f9f9f9;
+  --bg2: #f1f1f1;
   --acento: #ffca28;
   --botao: #ffb300;
   --danger: #d32f2f;
@@ -17,449 +13,73 @@
   --rad-sm: 8px;
   --rad: 10px;
   --rad-lg: 12px;
-  --shadow-1: 0 2px 5px rgba(0, 0, 0, 0.1);
-  --shadow-2: 0 3px 10px rgba(0, 0, 0, 0.15);
-  --shadow-3: 0 5px 15px rgba(0, 0, 0, 0.25);
-  --shadow-in: inset 0 1px 0 rgba(255, 255, 255, 0.25);
+  --shadow-1: 0 2px 5px rgba(0,0,0,.1);
+  --shadow-2: 0 3px 10px rgba(0,0,0,.15);
+  --shadow-3: 0 5px 15px rgba(0,0,0,.25);
+  --shadow-in: inset 0 1px 0 rgba(255,255,255,.25);
 }
 
-* {
-  box-sizing: border-box;
+body {
+  background: var(--bg1);
+  color: var(--txt);
+  font-family: 'Inter', Arial, sans-serif;
   margin: 0;
   padding: 0;
+  line-height: 1.5;
 }
-
-html, body {
-  font-family: "Poppins", Arial, sans-serif;
-  color: var(--txt);
-  background: var(--bg1);
-  scroll-behavior: smooth;
-  min-height: 100vh;
-}
-
-/* ================= HEADER ================= */
 
 .header {
   background: var(--bg2);
+  color: var(--preto);
+  padding: 10px 20px;
   display: flex;
   justify-content: space-between;
   align-items: center;
+  box-shadow: var(--shadow-1);
+}
+
+.header .logo {
+  border-radius: var(--rad);
+}
+
+button, .btn-primary, .btn-primario {
+  background: var(--botao);
+  color: #fff;
+  border: none;
   padding: 10px 16px;
+  border-radius: var(--rad);
+  font-weight: 600;
+  cursor: pointer;
   box-shadow: var(--shadow-1);
-  position: sticky;
-  top: 0;
-  z-index: 1000;
+  transition: transform .15s, box-shadow .15s;
 }
 
-.header-content {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.logo {
-  border-radius: 50%;
+button:hover {
+  transform: scale(1.03);
   box-shadow: var(--shadow-2);
 }
 
-.header-info h1 {
-  font-size: 1.25rem;
-  font-weight: 700;
-  color: var(--preto);
+.main-content-wrapper {
+  padding: 20px;
+  max-width: 1100px;
+  margin: auto;
+  background: var(--bg1);
 }
-
-.header-info .tagline {
-  font-size: 0.85rem;
-  color: #555;
-}
-
-.header-actions {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.user-button, .cart-button {
-  background: var(--botao);
-  color: #fff;
-  border: none;
-  padding: 8px 12px;
-  border-radius: var(--rad);
-  font-weight: 600;
-  cursor: pointer;
-  box-shadow: var(--shadow-1);
-  transition: background 0.2s ease;
-}
-
-.user-button:hover, .cart-button:hover {
-  background: #ffa000;
-}
-
-/* ================= BANNERS ================= */
-
-.status-banner, .hours-banner {
-  text-align: center;
-  padding: 8px;
-  font-weight: 600;
-  background: var(--acento);
-  color: var(--preto);
-  box-shadow: var(--shadow-1);
-}
-
-.countdown-ticker {
-  text-align: center;
-  background: #fff8e1;
-  padding: 6px 10px;
-  font-weight: 600;
-  color: var(--danger);
-  border-radius: var(--rad-sm);
-  box-shadow: var(--shadow-1);
-  margin: 8px auto;
-  width: fit-content;
-}
-
-/* ================= CARROSSEL ================= */
-
-.carousel {
-  position: relative;
-  display: flex;
-  align-items: center;
-  overflow: hidden;
-  margin: 20px auto;
-  max-width: 95%;
-}
-
-.slides {
-  display: flex;
-  gap: 10px;
-  transition: transform 0.3s ease;
-}
-
-.slide {
-  border-radius: var(--rad-lg);
-  box-shadow: var(--shadow-2);
-  cursor: pointer;
-  width: 300px;
-  height: 200px;
-  object-fit: cover;
-  flex-shrink: 0;
-}
-
-.c-btn {
-  position: absolute;
-  top: 50%;
-  transform: translateY(-50%);
-  background: var(--botao);
-  color: white;
-  border: none;
-  border-radius: 50%;
-  width: 35px;
-  height: 35px;
-  font-size: 1.2rem;
-  cursor: pointer;
-  box-shadow: var(--shadow-1);
-}
-
-.c-prev { left: 8px; }
-.c-next { right: 8px; }
-
-/* ================= MINI-CART ================= */
-
-#cart-backdrop {
-  display: none;
-  position: fixed;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.4);
-  z-index: 900;
-}
-
-#cart-backdrop.active {
-  display: block;
-}
-
-.mini-cart {
-  position: fixed;
-  top: 0;
-  right: -400px;
-  width: 340px;
-  height: 100%;
-  background: #fff;
-  box-shadow: var(--shadow-3);
-  border-top-left-radius: var(--rad-lg);
-  border-bottom-left-radius: var(--rad-lg);
-  z-index: 1001;
-  display: flex;
-  flex-direction: column;
-  transition: right 0.3s ease;
-}
-
-.mini-cart.active {
-  right: 0;
-}
-
-.mini-head {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 14px 16px;
-  background: var(--acento);
-  border-top-left-radius: var(--rad-lg);
-}
-
-.mini-head h3 {
-  font-size: 1.1rem;
-  font-weight: 700;
-}
-
-.mini-list {
-  flex: 1;
-  overflow-y: auto;
-  padding: 10px 14px;
-}
-
-.mini-foot {
-  padding: 12px 16px;
-  border-top: 1px solid #eee;
-  background: #fafafa;
-}
-
-/* CEP / FRETE */
-
-.frete-container {
-  background: #fff;
-  border: 1px solid #ddd;
-  padding: 12px;
-  border-radius: var(--rad);
-  box-shadow: var(--shadow-1);
-  margin-bottom: 10px;
-}
-
-.frete-container input {
-  border: 1px solid #ccc;
-  border-radius: var(--rad-sm);
-  padding: 8px;
-  font-size: 0.9rem;
-}
-
-.btn-calcular-frete {
-  background: var(--success);
-  color: #fff;
-  border: none;
-  border-radius: var(--rad-sm);
-  padding: 8px 12px;
-  font-weight: 600;
-  cursor: pointer;
-}
-
-.btn-calcular-frete:hover {
-  background: #43a047;
-}
-
-/* ================= CUPONS ================= */
-
-.coupon-form {
-  display: flex;
-  gap: 8px;
-  margin-top: 10px;
-}
-
-.coupon-form input {
-  flex: 1;
-  border: 1px solid #ccc;
-  border-radius: var(--rad-sm);
-  padding: 8px;
-}
-
-.btn-primary {
-  background: var(--botao);
-  border: none;
-  color: #fff;
-  border-radius: var(--rad-sm);
-  padding: 8px 12px;
-  font-weight: 600;
-  cursor: pointer;
-  box-shadow: var(--shadow-1);
-}
-
-.btn-primary:hover {
-  background: #ffa000;
-}
-
-/* ================= MENU ================= */
-
-.menu-section {
-  margin: 30px auto;
-  max-width: 1200px;
-  padding: 0 16px;
-}
-
-.menu-section h2 {
-  text-align: center;
-  font-size: 1.4rem;
-  margin-bottom: 16px;
-}
-
-.grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-  gap: 16px;
-}
-
-.card {
-  background: #fff;
-  border-radius: var(--rad);
-  box-shadow: var(--shadow-2);
-  padding: 16px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  transition: transform 0.2s ease;
-}
-
-.card:hover {
-  transform: translateY(-3px);
-}
-
-.card img {
-  border-radius: var(--rad);
-  width: 120px;
-  height: 120px;
-  object-fit: cover;
-}
-
-.card h3 {
-  font-size: 1.1rem;
-  text-align: center;
-  margin: 8px 0;
-}
-
-.card .price {
-  font-weight: 700;
-  color: var(--danger);
-}
-
-.actions {
-  display: flex;
-  gap: 8px;
-  margin-top: 10px;
-}
-
-.add-cart, .extras-btn {
-  background: var(--botao);
-  color: #fff;
-  border: none;
-  border-radius: var(--rad-sm);
-  padding: 8px 10px;
-  cursor: pointer;
-  font-weight: 600;
-}
-
-.add-cart:hover, .extras-btn:hover {
-  background: #ffa000;
-}
-
-/* ================= MODAIS ================= */
-
-.modal {
-  display: none;
-  position: fixed;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.45);
-  z-index: 1100;
-  justify-content: center;
-  align-items: center;
-}
-
-.modal.active {
-  display: flex;
-}
-
-.modal-content {
-  background: #fff;
-  border-radius: var(--rad-lg);
-  box-shadow: var(--shadow-3);
-  max-width: 500px;
-  width: 90%;
-  animation: pop 0.25s ease;
-}
-
-@keyframes pop {
-  from { transform: scale(0.95); opacity: 0; }
-  to { transform: scale(1); opacity: 1; }
-}
-
-/* ================= FOOTER ================= */
 
 .footer {
   background: var(--bg2);
-  color: var(--txt);
+  color: var(--preto);
   text-align: center;
   padding: 16px;
-  margin-top: 40px;
-  box-shadow: var(--shadow-1);
-  border-top: 2px solid var(--acento);
+  font-size: .9rem;
+  box-shadow: var(--shadow-in);
 }
 
 .footer a {
-  color: var(--danger);
-  font-weight: 600;
+  color: var(--preto);
   text-decoration: none;
 }
 
-.footer-links {
-  display: flex;
-  justify-content: center;
-  gap: 10px;
-  margin: 10px 0;
-}
-
-.footer-btn {
-  background: var(--botao);
-  color: white;
-  padding: 6px 10px;
-  border-radius: var(--rad-sm);
-  text-decoration: none;
-  font-weight: 600;
-  transition: 0.2s;
-}
-
-.footer-btn:hover {
-  background: #ffa000;
-}
-
-/* ================= FIXED BUTTONS ================= */
-
-.minhas-recompensas, .meus-pedidos {
-  position: fixed;
-  bottom: 90px;
-  right: 16px;
-  z-index: 1050;
-}
-
-.meus-pedidos { bottom: 30px; }
-
-.recompensas-btn, .meus-pedidos-btn {
-  background: var(--botao);
-  color: white;
-  border: none;
-  border-radius: var(--rad);
-  padding: 10px 14px;
-  font-weight: 700;
-  box-shadow: var(--shadow-2);
-  cursor: pointer;
-}
-
-/* ================= RESPONSIVO ================= */
-
-@media (max-width: 600px) {
-  .header {
-    flex-direction: column;
-    gap: 8px;
-  }
-  .mini-cart {
-    width: 90%;
-  }
-  .grid {
-    grid-template-columns: 1fr;
-  }
+.footer a:hover {
+  text-decoration: underline;
 }
