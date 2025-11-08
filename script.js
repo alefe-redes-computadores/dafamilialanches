@@ -2069,3 +2069,69 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
 });
+/* =========================================================
+   🔧 PATCH v3.7.7 — Delegação de Fechar Modais + Som no Finalizar
+   (não altera nada do restante do site)
+========================================================= */
+(function () {
+  const $ = (sel, ctx = document) => ctx.querySelector(sel);
+  const $$ = (sel, ctx = document) => Array.from(ctx.querySelectorAll(sel));
+  const byId = (id) => document.getElementById(id);
+  const hide = (el, cls = 'show') => el && el.classList.remove(cls);
+  const off = (el, cls = 'active') => el && el.classList.remove(cls);
+
+  // 🔊 Som APENAS no botão de finalizar pedido
+  const finalizarBtn = $('#finalizar-pedido, .finalizar-pedido');
+  if (finalizarBtn) {
+    finalizarBtn.addEventListener('click', () => {
+      try { new Audio('click.wav').play(); } catch (_) {}
+    });
+  }
+
+  // 🧠 Delegação única para fechar tudo o que precisa
+  document.addEventListener('click', (e) => {
+    const t = e.target;
+
+    // Login
+    if (t.closest('.login-close')) {
+      hide(byId('login-modal'));
+      return;
+    }
+
+    // Promo
+    if (t.closest('.promo-close')) {
+      hide(byId('promo-modal'));
+      return;
+    }
+
+    // Extras
+    if (t.closest('.extras-close')) {
+      hide(byId('extras-modal'));
+      return;
+    }
+
+    // Combo
+    if (t.closest('.combo-close')) {
+      hide(byId('combo-modal'));
+      return;
+    }
+
+    // Painéis laterais: Meus Pedidos / Minhas Recompensas
+    if (t.closest('.fechar-pedidos')) {
+      off($('.pedidos-panel'));
+      return;
+    }
+    if (t.closest('.fechar-recompensas')) {
+      off($('.recompensas-panel'));
+      return;
+    }
+
+    // Mini-carrinho fechado ao clicar no backdrop
+    const backdrop = byId('cart-backdrop');
+    if (backdrop && (t === backdrop || t.closest('#cart-backdrop'))) {
+      off($('.mini-cart'));
+      off(backdrop);
+      return;
+    }
+  }, { capture: true }); // captura garante que o clique não seja "engolido" por outros handlers
+})();
