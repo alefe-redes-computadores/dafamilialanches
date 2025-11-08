@@ -1148,3 +1148,9 @@ section h2 {
   background: #ffb300 !important;
   transform: scale(1.1);
 }
+/* ===========================
+   🎨 Correção do Backdrop
+   =========================== */
+#cart-backdrop {
+  transition: opacity 0.25s ease;
+}
