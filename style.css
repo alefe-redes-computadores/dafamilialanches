@@ -1,15 +1,7 @@
-/* ===========================================================
-   🍔 Da Família Lanches — CSS v3.7.2 LIMPO
-   ✅ Código organizado e sem patches duplicados
-   ✅ Modal de login funcionando corretamente (botão X fecha)
-   ✅ Todas as funcionalidades preservadas
-   =========================================================== */
-
-/* ==================== VARIÁVEIS ==================== */
 :root {
   --preto: #000;
-  --bg1: #ffeb3b;
-  --bg2: #ffd54f;
+  --bg1: #f8f9fa;
+  --bg2: #e9ecef;
   --acento: #ffca28;
   --botao: #ffb300;
   --danger: #d32f2f;
@@ -24,7 +16,6 @@
   --shadow-in: inset 0 1px 0 rgba(255, 255, 255, 0.25);
 }
 
-/* ==================== RESET E BASE ==================== */
 html, body {
   height: 100%;
   margin: 0;
@@ -41,7 +32,6 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* ==================== HEADER ==================== */
 .header {
   position: fixed;
   inset-inline: 0;
@@ -119,7 +109,6 @@ body {
   background: #ffc107;
 }
 
-/* ==================== BANNERS DE STATUS ==================== */
 .status-banner {
   text-align: center;
   padding: 8px;
@@ -151,7 +140,6 @@ body {
   text-align: right;
 }
 
-/* ==================== PROMOÇÕES ==================== */
 .promo-section {
   text-align: center;
   padding: 20px 10px;
@@ -178,7 +166,6 @@ body {
   box-shadow: var(--shadow-1);
 }
 
-/* ==================== CARROSSEL ==================== */
 .carousel {
   position: relative;
   max-width: 900px;
@@ -203,12 +190,12 @@ body {
 }
 
 .slides::-webkit-scrollbar-thumb {
-  background: #ffd54f;
+  background: #ddd;
   border-radius: 10px;
 }
 
 .slides::-webkit-scrollbar-thumb:hover {
-  background: #ffca28;
+  background: #ccc;
 }
 
 .slide {
@@ -265,7 +252,6 @@ body {
   right: 10px;
 }
 
-/* ==================== CARDS DE PRODUTOS ==================== */
 section {
   margin: 25px auto;
   width: 95%;
@@ -342,7 +328,6 @@ section h2 {
   font-size: 1.05rem;
 }
 
-/* ==================== BADGES ==================== */
 .badge {
   display: inline-block;
   font-size: 0.72rem;
@@ -390,7 +375,6 @@ section h2 {
   color: #1b5e20;
 }
 
-/* ==================== BOTÕES DE AÇÃO ==================== */
 .actions {
   margin-top: 10px;
   display: flex;
@@ -431,14 +415,13 @@ section h2 {
   transform: scale(1.03);
 }
 
-/* ==================== BACKDROP ==================== */
 #cart-backdrop {
   position: fixed;
   inset: 0;
   background: rgba(0, 0, 0, 0.45);
   opacity: 0;
   pointer-events: none;
-  transition: opacity 0.2s;
+  transition: opacity 0.25s ease;
   z-index: 980;
 }
 
@@ -447,7 +430,6 @@ section h2 {
   pointer-events: auto;
 }
 
-/* ==================== MINI CARRINHO ==================== */
 .mini-cart {
   position: fixed;
   right: 0;
@@ -500,19 +482,47 @@ section h2 {
   font-size: 0.95rem;
 }
 
-.frete-field {
-  margin-top: 12px;
-  padding: 14px;
+.frete-container {
+  margin-top: 15px;
+  padding: 12px;
   border: 1px solid #ddd;
   border-radius: 10px;
-  background: #f5f5f5;
-  color: #666;
-  font-size: 0.92rem;
-  text-align: center;
-  cursor: not-allowed;
-  line-height: 1.4;
-  font-weight: 500;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  background: #fffdf7;
+}
+
+.frete-container h4 {
+  margin: 0 0 10px 0;
+  font-size: 1rem;
+  color: #222;
+}
+
+.frete-cep-group {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.btn-calcular-frete {
+  background: var(--botao);
+  color: #222;
+  border: none;
+  border-radius: 8px;
+  padding: 8px 12px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: 0.2s;
+  box-shadow: var(--shadow-1);
+}
+
+.btn-calcular-frete:hover {
+  background: #ffc107;
+  transform: scale(1.02);
+}
+
+#frete-resultado {
+  margin-top: 8px;
+  font-weight: 600;
+  color: var(--success);
 }
 
 .cart-empty-msg {
@@ -538,7 +548,6 @@ section h2 {
   color: #6b6b6b;
 }
 
-/* ==================== MODAIS GERAIS ==================== */
 .modal {
   position: fixed;
   inset: 0;
@@ -635,7 +644,6 @@ section h2 {
   background: #f8f8f8;
 }
 
-/* ==================== BOTÕES DE FECHAR MODAIS ==================== */
 .fechar-pedidos,
 .fechar-recompensas,
 .extras-close,
@@ -668,7 +676,6 @@ section h2 {
   transform: scale(1.1);
 }
 
-/* ==================== MODAL DE LOGIN (CORRIGIDO) ==================== */
 #login-modal {
   z-index: 1000;
 }
@@ -678,7 +685,6 @@ section h2 {
   border-radius: 14px;
 }
 
-/* Garante que o botão X funcione corretamente */
 #login-modal .login-close {
   position: absolute;
   top: 12px;
@@ -687,11 +693,6 @@ section h2 {
   cursor: pointer;
   pointer-events: auto;
 }
-
-/* CONTINUA NA PARTE 2 */
-/* PARTE 2 - COLE APÓS A PARTE 1 */
-
-/* ==================== MODAL DE PROMOÇÕES ==================== */
 #promo-modal {
   z-index: 1100;
   background: rgba(0, 0, 0, 0.75);
@@ -824,7 +825,6 @@ section h2 {
   transform: scale(1.04);
 }
 
-/* ==================== MODAL DE EXTRAS ==================== */
 .extras-list label.extra-line {
   display: flex;
   justify-content: space-between;
@@ -852,7 +852,6 @@ section h2 {
   margin-left: 10px;
 }
 
-/* ==================== MODAL DE COMBO ==================== */
 #combo-body label,
 #combo-body div {
   border: 1px solid #ffca28;
@@ -872,7 +871,6 @@ section h2 {
   transform: scale(1.02);
 }
 
-/* ==================== PAINÉIS LATERAIS ==================== */
 .meus-pedidos {
   position: fixed;
   bottom: 20px;
@@ -947,7 +945,6 @@ section h2 {
   padding: 16px;
 }
 
-/* ==================== FOOTER ==================== */
 .footer {
   background: #ffca28;
   text-align: center;
@@ -995,7 +992,6 @@ section h2 {
   margin-top: 10px;
 }
 
-/* ==================== COOKIE BANNER ==================== */
 #cookie-banner {
   position: fixed;
   left: 0;
@@ -1045,7 +1041,6 @@ section h2 {
   background: #43a047;
 }
 
-/* ==================== RESPONSIVIDADE ==================== */
 @media (max-width: 600px) {
   .slides {
     gap: 6px;
@@ -1110,47 +1105,4 @@ section h2 {
     height: 36px;
     font-size: 20px;
   }
-}
-
-/* ==================== FIM DO CSS v3.7.2 ==================== */
-/* =======================================================
-   🔧 FIX — Botão X do Modal de Login (v3.7.9)
-   ======================================================= */
-#login-modal.show {
-  opacity: 1 !important;
-  pointer-events: auto !important;
-  display: flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-}
-
-#login-modal .login-close {
-  position: absolute !important;
-  top: 12px !important;
-  right: 12px !important;
-  z-index: 9999 !important;
-  background: #ffca28 !important;
-  border: none !important;
-  border-radius: 50% !important;
-  width: 38px !important;
-  height: 38px !important;
-  font-weight: 700 !important;
-  color: #000 !important;
-  display: flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  cursor: pointer !important;
-  pointer-events: all !important;
-  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.25);
-  transition: 0.2s !important;
-}
-#login-modal .login-close:hover {
-  background: #ffb300 !important;
-  transform: scale(1.1);
-}
-/* ===========================
-   🎨 Correção do Backdrop
-   =========================== */
-#cart-backdrop {
-  transition: opacity 0.25s ease;
 }
