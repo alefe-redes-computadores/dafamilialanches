@@ -1106,3 +1106,19 @@ section h2 {
     font-size: 20px;
   }
 }
+/* ===============================
+   🔧 Correção de Layout – Barra de Status
+   =============================== */
+
+/* Oculta a barra preta (redundante) */
+.hours-banner {
+  display: none !important;
+}
+
+/* Ajusta a barra vermelha para ocupar melhor o espaço */
+.status-banner {
+  padding: 12px 8px;
+  font-size: 1rem;
+  letter-spacing: 0.2px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
