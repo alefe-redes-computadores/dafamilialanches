@@ -1,10 +1,4 @@
 /* =========================================================
-   🚀 DFL v3.8.4 — Correção do Login Google (Popup Delay)
-   - Corrige o erro de popup cancelado durante autenticação Google.
-   - Adiciona mensagem visual de sucesso após login.
-   ========================================================= */
-
-/* =========================================================
    🚀 DFL v3.7.0 — REMOÇÃO DE SOM GLOBAL DE CLIQUE (MELHORIA UX)
    - Remove o som de clique constante e o mantém APENAS na finalização do pedido.
    - Baseado na DFL v3.6.10 Estável e Corrigida.
@@ -129,7 +123,7 @@ document.addEventListener("DOMContentLoaded", () => {
       Backdrop.hide();
     },
     open(modalLike) {
-      Overlays.closeAll();
+      setTimeout(()=>Overlays.closeAll(),0);
       if (!modalLike) return;
       modalLike.classList.add(
         (modalLike.id === "mini-cart" || modalLike.id === "painelPedidos" || modalLike.id === "recompensas-panel") ? "active" : "show"
@@ -137,7 +131,7 @@ document.addEventListener("DOMContentLoaded", () => {
       Backdrop.show();
     },
   };
-  el.cartBackdrop.addEventListener("click", () => Overlays.closeAll());
+  el.cartBackdrop.addEventListener("click", () => setTimeout(()=>Overlays.closeAll(),0));
 
   /* =========================================================
     ✨ v3.0: LISTENER DO FORMULÁRIO DE CUPOM (MANTIDO)
@@ -395,7 +389,7 @@ document.addEventListener("DOMContentLoaded", () => {
       } else {
         if (el.reportsBtn) el.reportsBtn.style.display = "none";
         document.getElementById("admin-dashboard")?.remove();
-        // Overlays.closeAll(); // Removido para evitar fechar modais no carregamento
+        // setTimeout(()=>Overlays.closeAll(),0); // Removido para evitar fechar modais no carregamento
       }
     });
   }
@@ -409,7 +403,7 @@ document.addEventListener("DOMContentLoaded", () => {
     // Garante que currentUser seja definido e a UI atualizada imediatamente
     currentUser = user;
     popupAdd("Login realizado com sucesso!");
-    Overlays.closeAll();
+    setTimeout(()=>Overlays.closeAll(),0);
     // O setupAuthListener (chamado em inicializarFirebase) garante a atualização final
   };
 
@@ -516,7 +510,7 @@ document.addEventListener("DOMContentLoaded", () => {
   );
 
   el.extrasConfirm?.addEventListener("click", () => {
-    if (!produtoExtras) return Overlays.closeAll();
+    if (!produtoExtras) return setTimeout(()=>Overlays.closeAll(),0);
     const checks = [...document.querySelectorAll("#extras-modal .extras-list input:checked")];
 
     const extrasContagem = {};
@@ -545,11 +539,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
     renderMiniCart();
     popupAdd("Adicionado ao carrinho!");
-    Overlays.closeAll();
+    setTimeout(()=>Overlays.closeAll(),0);
   });
 
   document.querySelectorAll("#extras-modal .extras-close").forEach((b) =>
-    b.addEventListener("click", () => Overlays.closeAll())
+    b.addEventListener("click", () => setTimeout(()=>Overlays.closeAll(),0))
   );
 
   /* ------------------ 🥤 Combos (MANTIDO) ------------------ */
@@ -607,7 +601,7 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   el.comboConfirm?.addEventListener("click", () => {
-    if (!_comboCtx) return Overlays.closeAll();
+    if (!_comboCtx) return setTimeout(()=>Overlays.closeAll(),0);
     const sel = el.comboBody?.querySelector('input[name="combo-drink"]:checked');
     if (!sel) return;
     const opt = comboDrinkOptions[_comboCtx.grupo][+sel.value];
@@ -620,11 +614,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
     popupAdd("Combo adicionado!");
     renderMiniCart();
-    Overlays.closeAll();
+    setTimeout(()=>Overlays.closeAll(),0);
   });
 
   document.querySelectorAll("#combo-modal .combo-close").forEach((b) =>
-    b.addEventListener("click", () => Overlays.closeAll())
+    b.addEventListener("click", () => setTimeout(()=>Overlays.closeAll(),0))
   );
 
   /* ------------------ 🧺 Adicionar item comum (MANTIDO) ------------------ */
@@ -994,7 +988,7 @@ document.addEventListener("DOMContentLoaded", () => {
     // Chama a função-base de adicionar, que não abre o modal de combos
     addCommonItem(promo.nome, promo.preco); 
     
-    Overlays.closeAll(); // Fecha o modal após adicionar
+    setTimeout(()=>Overlays.closeAll(),0); // Fecha o modal após adicionar
   });
 
   // 3. Navegação (Próximo / Anterior)
@@ -1011,7 +1005,7 @@ document.addEventListener("DOMContentLoaded", () => {
   });
   
   // 4. Fechar o modal
-  el.promoClose?.addEventListener("click", () => Overlays.closeAll());
+  el.promoClose?.addEventListener("click", () => setTimeout(()=>Overlays.closeAll(),0));
 
   // 5. Navegação do carrossel principal (mantido)
   el.cPrev?.addEventListener("click", () => {
@@ -1254,7 +1248,7 @@ document.addEventListener("DOMContentLoaded", () => {
       if(couponInput) couponInput.value = "";
       
       renderMiniCart();
-      Overlays.closeAll();
+      setTimeout(()=>Overlays.closeAll(),0);
 
     } catch (err) {
       console.error("Erro ao fechar pedido ou atualizar contador/recompensa:", err);
@@ -1281,7 +1275,7 @@ document.addEventListener("DOMContentLoaded", () => {
     carregarPedidos(currentUser.uid); 
   });
 
-  el.pedidosFecharBtn?.addEventListener("click", () => Overlays.closeAll());
+  el.pedidosFecharBtn?.addEventListener("click", () => setTimeout(()=>Overlays.closeAll(),0));
 
   // 2. Lógica de carregar pedidos (MANTIDO)
   async function carregarPedidos(userId) {
@@ -1397,7 +1391,7 @@ document.addEventListener("DOMContentLoaded", () => {
       // Feedback ao usuário
       popupAdd("Pedido anterior adicionado ao carrinho!");
       renderMiniCart(); // Atualiza o carrinho (backend)
-      Overlays.closeAll(); // Fecha o painel de pedidos
+      setTimeout(()=>Overlays.closeAll(),0); // Fecha o painel de pedidos
       Overlays.open(el.miniCart); // Abre o mini-carrinho
 
     } catch (err) {
@@ -1599,7 +1593,7 @@ function exibirRecompensas(pedidosFeitos, recompensasDisponiveis, cupomStatus, R
                 if(couponInput) couponInput.value = codigo;
 
                 renderMiniCart(); // Recalcula e mostra a mensagem
-                Overlays.closeAll();
+                setTimeout(()=>Overlays.closeAll(),0);
                 popupAdd(`Cupom ${codigo} aplicado! ✅`);
                 Overlays.open(el.miniCart); // Abre o mini-carrinho para ver o desconto
             }
@@ -1684,7 +1678,7 @@ async function carregarHistoricoRecompensas(userId) {
   });
 
   // 2. Lógica de fechar o painel
-  el.recompensasFecharBtn?.addEventListener("click", () => Overlays.closeAll());
+  el.recompensasFecharBtn?.addEventListener("click", () => setTimeout(()=>Overlays.closeAll(),0));
 
 /* ------------------ FIM DO BLOCO V3.5.3 ------------------ */
 
@@ -1759,7 +1753,7 @@ async function carregarHistoricoRecompensas(userId) {
       });
     });
 
-    div.querySelector(".dashboard-close").addEventListener("click", () => Overlays.closeAll());
+    div.querySelector(".dashboard-close").addEventListener("click", () => setTimeout(()=>Overlays.closeAll(),0));
   }
 
   function createAdminFab() {
@@ -1980,7 +1974,7 @@ async function carregarHistoricoRecompensas(userId) {
     } else {
       if (el.reportsBtn) el.reportsBtn.style.display = "none";
       document.getElementById("admin-dashboard")?.remove();
-      // Overlays.closeAll(); // Removido para evitar fechar modais no carregamento
+      // setTimeout(()=>Overlays.closeAll(),0); // Removido para evitar fechar modais no carregamento
     }
   });
 
@@ -2075,190 +2069,3 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
 });
-/* =========================================================
-   🔧 PATCH v3.7.7 — Delegação de Fechar Modais + Som no Finalizar
-   (não altera nada do restante do site)
-========================================================= */
-(function () {
-  const $ = (sel, ctx = document) => ctx.querySelector(sel);
-  const $$ = (sel, ctx = document) => Array.from(ctx.querySelectorAll(sel));
-  const byId = (id) => document.getElementById(id);
-  const hide = (el, cls = 'show') => el && el.classList.remove(cls);
-  const off = (el, cls = 'active') => el && el.classList.remove(cls);
-
-  // 🔊 Som APENAS no botão de finalizar pedido
-  const finalizarBtn = $('#finalizar-pedido, .finalizar-pedido');
-  if (finalizarBtn) {
-    finalizarBtn.addEventListener('click', () => {
-      try { new Audio('click.wav').play(); } catch (_) {}
-    });
-  }
-
-  // 🧠 Delegação única para fechar tudo o que precisa
-  document.addEventListener('click', (e) => {
-    const t = e.target;
-
-    // Login
-    if (t.closest('.login-close')) {
-      hide(byId('login-modal'));
-      return;
-    }
-
-    // Promo
-    if (t.closest('.promo-close')) {
-      hide(byId('promo-modal'));
-      return;
-    }
-
-    // Extras
-    if (t.closest('.extras-close')) {
-      hide(byId('extras-modal'));
-      return;
-    }
-
-    // Combo
-    if (t.closest('.combo-close')) {
-      hide(byId('combo-modal'));
-      return;
-    }
-
-    // Painéis laterais: Meus Pedidos / Minhas Recompensas
-    if (t.closest('.fechar-pedidos')) {
-      off($('.pedidos-panel'));
-      return;
-    }
-    if (t.closest('.fechar-recompensas')) {
-      off($('.recompensas-panel'));
-      return;
-    }
-
-    // Mini-carrinho fechado ao clicar no backdrop
-    const backdrop = byId('cart-backdrop');
-    if (backdrop && (t === backdrop || t.closest('#cart-backdrop'))) {
-      off($('.mini-cart'));
-      off(backdrop);
-      return;
-    }
-  }, { capture: true }); // captura garante que o clique não seja "engolido" por outros handlers
-})();
-// ======================================================
-// 🧩 PATCH EXTRA — Remove o fundo acinzentado ao fechar
-// ======================================================
-function clearBackdrop() {
-  const backdrop = document.getElementById('cart-backdrop');
-  if (backdrop) {
-    backdrop.classList.remove('active');
-    backdrop.style.opacity = '0';
-    backdrop.style.pointerEvents = 'none';
-  }
-  // Garante que nenhum modal permaneça ativo visualmente
-  document.querySelectorAll('.modal.show').forEach(m => m.classList.remove('show'));
-}
-
-// Monitora o fechamento dos painéis e modais
-['.login-close', '.fechar-pedidos', '.fechar-recompensas', '.promo-close', '.extras-close', '.combo-close']
-  .forEach(sel => {
-    document.addEventListener('click', (e) => {
-      if (e.target.closest(sel)) clearBackdrop();
-    });
-  });
-/* ======================================================
-   ✅ PATCH FINAL — Mini-Carrinho com clique fora + botão X
-   ====================================================== */
-(() => {
-  const miniCart = document.querySelector('.mini-cart');
-  const backdrop = document.getElementById('cart-backdrop');
-
-  if (!miniCart || !backdrop) return;
-
-  const closeCart = () => {
-    miniCart.classList.remove('active');
-    backdrop.classList.remove('active');
-    backdrop.style.pointerEvents = 'none';
-    document.body.style.overflow = '';
-  };
-
-  // Fecha pelo botão X (classe usada no seu HTML)
-  document.addEventListener('click', (e) => {
-    if (e.target.closest('.extras-close')) {
-      e.preventDefault();
-      e.stopPropagation();
-      closeCart();
-    }
-  });
-
-  // Fecha clicando fora
-  backdrop.addEventListener('click', (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    closeCart();
-  });
-
-  // Bloqueia clique dentro do painel
-  miniCart.addEventListener('click', (e) => e.stopPropagation());
-})();
-/* ======================================================
-   ✅ PATCH DEFINITIVO — X do Mini-Carrinho
-   - Fecha no X sem depender de delegation no document
-   - Mantém clique-fora via backdrop
-   ====================================================== */
-(() => {
-  const miniCart  = document.querySelector('.mini-cart');
-  const backdrop  = document.getElementById('cart-backdrop');
-  if (!miniCart || !backdrop) return;
-
-  const openCart = () => {
-    miniCart.classList.add('active');
-    backdrop.classList.add('active');
-    backdrop.style.pointerEvents = 'auto';
-    document.body.style.overflow = 'hidden';
-  };
-
-  const closeCart = () => {
-    miniCart.classList.remove('active');
-    backdrop.classList.remove('active');
-    backdrop.style.pointerEvents = 'none';
-    document.body.style.overflow = '';
-  };
-
-  // 1) Fecha pelo X — listener DIRETO no botão (não depende de bubbling)
-  const closeBtn =
-    miniCart.querySelector('.extras-close') ||
-    miniCart.querySelector('.fechar-pedidos') ||
-    miniCart.querySelector('.mini-head .promo-close') ||
-    miniCart.querySelector('.mini-head button[aria-label*="Fechar" i]');
-
-  if (closeBtn) {
-    closeBtn.addEventListener('click', (e) => {
-      e.preventDefault();
-      e.stopPropagation();
-      closeCart();
-    });
-  }
-
-  // 2) Fecha clicando fora (backdrop)
-  backdrop.addEventListener('click', (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    closeCart();
-  });
-
-  // 3) Impede que cliques dentro do painel vazem para o fundo
-  miniCart.addEventListener('click', (e) => e.stopPropagation());
-
-  // 4) (Opcional) Abrir carrinho por botões existentes, sem interferir no X
-  document.addEventListener('click', (e) => {
-    if (e.target.closest('#cart-icon') || e.target.closest('.cart-button')) {
-      e.preventDefault();
-      e.stopPropagation();
-      openCart();
-    }
-  });
-
-  // 5) Tecla Esc fecha
-  document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape' && miniCart.classList.contains('active')) {
-      closeCart();
-    }
-  });
-})();
