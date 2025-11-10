@@ -1122,3 +1122,40 @@ section h2 {
   letter-spacing: 0.2px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
 }
+/* 💸 Correção visual do campo de cupom (input + botão) */
+.coupon-form {
+  display: flex;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.coupon-form input[type="text"] {
+  flex: 1;
+  padding: 10px 12px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  box-shadow: inset 0 1px 2px rgba(0,0,0,0.05);
+}
+
+.coupon-form button {
+  background-color: #4caf50;
+  color: #fff;
+  font-weight: 700;
+  border: none;
+  border-radius: 8px;
+  padding: 10px 14px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.coupon-form button:hover {
+  background-color: #43a047;
+}
+
+/* Mensagem abaixo do cupom */
+.coupon-message {
+  margin-top: 6px;
+  font-size: 0.9rem;
+  color: #333;
+}
