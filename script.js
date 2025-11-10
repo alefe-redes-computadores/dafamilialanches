@@ -1,4 +1,10 @@
 /* =========================================================
+   🚀 DFL v3.8.4 — Correção do Login Google (Popup Delay)
+   - Corrige o erro de popup cancelado durante autenticação Google.
+   - Adiciona mensagem visual de sucesso após login.
+   ========================================================= */
+
+/* =========================================================
    🚀 DFL v3.7.0 — REMOÇÃO DE SOM GLOBAL DE CLIQUE (MELHORIA UX)
    - Remove o som de clique constante e o mantém APENAS na finalização do pedido.
    - Baseado na DFL v3.6.10 Estável e Corrigida.
