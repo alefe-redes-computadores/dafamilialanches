@@ -97,30 +97,39 @@
       <div class="mini-list"></div>
       <div class="mini-foot">
         
-        <div class="frete-container">
+        <!-- BLOCO DE FRETE: VISUAL (BETA) — DESABILITADO -->
+        <div class="frete-container" data-beta-frete="off" title="Em breve: cálculo automático de frete">
           <h4 style="margin-top:10px;">🚚 Entrega</h4>
+
+          <!-- Aviso amigável (opção 2) -->
+          <div style="background:#fff7e6;border:1px dashed #ffb300;border-radius:8px;padding:10px 12px;margin:8px 0;font-weight:700;color:#6b4a00;">
+            🕓 Em breve o site faz a mágica sozinho! <br/>Digite o endereço manualmente abaixo 👇🍔
+          </div>
           
-          <label for="cep-input" style="font-size:.9rem;font-weight:600;">CEP:</label>
+          <label for="cep-input" style="font-size:.9rem;font-weight:600;opacity:.6;">CEP:</label>
           <div class="frete-cep-group" style="display:flex;gap:8px;margin-bottom:8px;">
-            <input id="cep-input" type="text" placeholder="Digite o CEP" maxlength="9" style="flex:1;padding:8px;border:1px solid #ccc;border-radius:8px;">
-            <button id="btn-calcular-frete" class="btn-calcular-frete" type="button">Calcular Frete</button>
+            <input id="cep-input" type="text" placeholder="Digite o CEP" maxlength="9" style="flex:1;padding:8px;border:1px solid #ccc;border-radius:8px;opacity:.6;" disabled aria-disabled="true">
+            <button id="btn-calcular-frete" class="btn-calcular-frete" type="button" disabled aria-disabled="true" style="opacity:.6;cursor:not-allowed;">Calcular Frete</button>
           </div>
 
-          <input id="endereco-auto" type="text" placeholder="Endereço (auto)" readonly style="width:100%;padding:8px;border:1px solid #ccc;border-radius:8px;margin-bottom:8px;">
+          <input id="endereco-auto" type="text" placeholder="Endereço (auto)" readonly style="width:100%;padding:8px;border:1px solid #ccc;border-radius:8px;margin-bottom:8px;opacity:.6;" disabled aria-disabled="true">
 
           <div style="display:flex;gap:8px;margin-bottom:8px;">
-            <input id="numero-input" type="text" placeholder="Número" style="flex:1;padding:8px;border:1px solid #ccc;border-radius:8px;">
-            <input id="complemento-input" type="text" placeholder="Complemento (opcional)" style="flex:1;padding:8px;border:1px solid #ccc;border-radius:8px;">
+            <input id="numero-input" type="text" placeholder="Número" style="flex:1;padding:8px;border:1px solid #ccc;border-radius:8px;opacity:.6;" disabled aria-disabled="true">
+            <input id="complemento-input" type="text" placeholder="Complemento (opcional)" style="flex:1;padding:8px;border:1px solid #ccc;border-radius:8px;opacity:.6;" disabled aria-disabled="true">
           </div>
 
-          <label style="display:flex;align-items:center;gap:6px;margin-bottom:8px;">
-            <input type="checkbox" id="retirar-local">
+          <label style="display:flex;align-items:center;gap:6px;margin-bottom:8px;opacity:.6;">
+            <input type="checkbox" id="retirar-local" disabled aria-disabled="true">
             Retirar no Local (sem taxa)
           </label>
 
-          <div id="frete-resultado" style="margin-top:8px;font-weight:600;"></div>
+          <div id="frete-resultado" style="margin-top:8px;font-weight:600;color:#2e7d32;opacity:.6;">(em breve)</div>
         </div>
-        <textarea id="address-input" style="display:none;"></textarea>
+
+        <!-- Endereço manual: visível e editável (usa o fluxo estável v3.6.x) -->
+        <textarea id="address-input" placeholder="📝 Endereço para entrega (rua, número, bairro, ponto de referência)"
+                  rows="3" style="display:block;width:100%;padding:10px;border:1px solid #ccc;border-radius:10px;margin-top:10px;font-size:.95rem;"></textarea>
 
         <form id="coupon-form" class="coupon-form" novalidate>
           <input type="text" id="coupon-input" placeholder="Digite o cupom e clique em Aplicar" aria-label="Cupom de desconto"/>
