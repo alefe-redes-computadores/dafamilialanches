@@ -2213,7 +2213,7 @@ document.addEventListener('DOMContentLoaded', () => {
         await providers.signInWithPopup(firebaseAuth, provider);
       }catch(err){
         const code = (err && err.code) || "";
-        if (code.includes("popup-closed-by-user") or code.includes("cancelled-popup-request") or code.includes("popup-blocked")){
+        if (code.includes("popup-closed-by-user") || code.includes("cancelled-popup-request") || code.includes("popup-blocked")){
           console.warn("Popup não concluído, tentando redirect...");
           await providers.signInWithRedirect(firebaseAuth, provider);
         } else {
