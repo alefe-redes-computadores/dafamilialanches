@@ -3,30 +3,41 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>🍔 Da Família Lanches — DFL v3.8.4</title>
+  <title>🍔 Da Família Lanches — DFL v3.8</title>
 
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://www.gstatic.com https://*.firebaseio.com https://cdn.jsdelivr.net; connect-src 'self' https://www.googleapis.com https://securetoken.googleapis.com https://*.firebaseio.com https://firestore.googleapis.com https://accounts.google.com https://apis.google.com https://viacep.com.br; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:;">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://www.gstatic.com https://*.firebaseio.com https://cdn.jsdelivr.net https://accounts.google.com; frame-src 'self' https://accounts.google.com; connect-src 'self' https://www.googleapis.com https://securetoken.googleapis.com https://*.firebaseio.com https://firestore.googleapis.com https://accounts.google.com https://apis.google.com https://viacep.com.br; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:;">
   <meta http-equiv="Cache-control" content="public, max-age=31536000, immutable">
 
   <link rel="preconnect" href="https://www.gstatic.com" crossorigin>
   <link rel="preload" as="image" href="logo.png">
   
   <style>
-    /* CSS Embutido Básico */
     :root{
-      --preto:#000; --bg1:#ffeb3b; --bg2:#ffd54f; --acento:#ffca28; --botao:#ffb300; --danger:#d32f2f; --success:#4caf50; --txt:#222;
-      --rad-sm:8px; --rad:10px; --rad-lg:12px; --shadow-1:0 2px 5px rgba(0,0,0,.15); --shadow-2:0 3px 10px rgba(0,0,0,.20); --shadow-3:0 5px 15px rgba(0,0,0,.30); --shadow-in:inset 0 1px 0 rgba(255,255,255,.25);
+      --preto:#000;
+      --bg1:#f8f9fa;
+      --bg2:#e9ecef;
+      --acento:#ffca28;
+      --botao:#ffb300;
+      --danger:#d32f2f;
+      --success:#4caf50;
+      --txt:#222;
+      --rad-sm:8px;
+      --rad:10px;
+      --rad-lg:12px;
+      --shadow-1:0 2px 5px rgba(0,0,0,.15);
+      --shadow-2:0 3px 10px rgba(0,0,0,.20);
+      --shadow-3:0 5px 15px rgba(0,0,0,.30);
+      --shadow-in:inset 0 1px 0 rgba(255,255,255,.25);
     }
   </style>
 
-  <link rel="stylesheet" href="style.css?v=3.8.4" media="print" onload="this.media='all'"/>
-  <noscript><link rel="stylesheet" href="style.css?v=3.8.4"/></noscript>
+  <link rel="stylesheet" href="style.css?v=3.8.3" />
+  <noscript><link rel="stylesheet" href="style.css?v=3.8.3"/></noscript>
 
-  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+  <script defer src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+  <script defer src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+  <script defer src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
 </head>
-
 <body>
   <header class="header">
     <div class="header-content">
@@ -85,15 +96,30 @@
       <div class="mini-list"></div>
       <div class="mini-foot">
         
-        <label style="display:block; font-weight:600; margin:10px 0 6px;">🏠 Endereço para Entrega</label>
-        <textarea id="address-input" rows="2" placeholder="Rua, número, complemento, bairro"
-          style="width:100%; border:1px solid #ddd; border-radius:10px; padding:10px; resize:vertical; margin-bottom:10px"></textarea>
+        
+    <div class="frete-container">
+      <h4 style="margin-top:10px;">🚚 Entrega</h4>
+      <div id="frete-em-breve" style="margin:10px 0;padding:10px;border-radius:8px;background:#fff3cd;color:#856404;font-weight:600;text-align:center;box-shadow:var(--shadow-1);">
+        🕒 Em breve o site faz a mágica sozinho! <br>
+        <small style="font-weight:500;color:#555;">Por enquanto, preencha o endereço manualmente abaixo ⬇️</small>
+      </div>
+      <div class="frete-cep-group" style="opacity:0.6;pointer-events:none;">
+        <input id="cep-input" type="text" placeholder="Digite o CEP" readonly style="flex:1;padding:8px;border:1px solid #ccc;border-radius:8px;">
+        <button id="btn-calcular-frete" class="btn-calcular-frete" type="button" disabled>Calcular Frete</button>
+      </div>
+      <input id="endereco-auto" type="text" placeholder="Endereço (auto)" readonly style="width:100%;padding:8px;border:1px solid #ccc;border-radius:8px;margin-bottom:8px;opacity:0.6;">
+      <div style="display:flex;gap:8px;margin-bottom:8px;opacity:0.6;pointer-events:none;">
+        <input id="numero-input" type="text" placeholder="Número" readonly style="flex:1;padding:8px;border:1px solid #ccc;border-radius:8px;">
+        <input id="complemento-input" type="text" placeholder="Complemento (opcional)" readonly style="flex:1;padding:8px;border:1px solid #ccc;border-radius:8px;">
+      </div>
+      <label style="display:flex;align-items:center;gap:6px;margin-bottom:8px;opacity:0.6;pointer-events:none;">
+        <input type="checkbox" id="retirar-local" disabled>
+        Retirar no Local (sem taxa)
+      </label>
+      <div id="frete-resultado" style="margin-top:8px;font-weight:600;"></div>
+    </div>
+    <textarea id="address-input"  style="display:none;"></textarea>
 
-        <div id="dfl-frete-input-container" class="frete-input-container" style="margin-bottom: 15px;">
-          <label for="frete-input" style="display:block; font-weight:600; margin-bottom:6px;">Calcular Entrega</label>
-          <input id="frete-input" type="text" placeholder="Nosso programador tá tirando um descanso 😅😅 (em breve)" disabled
-            style="width:100%; padding:10px; border:1px solid #ddd; border-radius:10px; font-size:1rem; outline:none; box-shadow: inset 0 1px 3px rgba(0,0,0,0.05); background:#f7f7f7; color:#999; cursor:not-allowed; height: auto; white-space: normal;" />
-        </div>
         <form id="coupon-form" class="coupon-form" novalidate>
           <input type="text" id="coupon-input" placeholder="Digite o cupom e clique em Aplicar" aria-label="Cupom de desconto"/>
           <button type="submit" id="coupon-apply-btn" class="btn-primary">Aplicar</button>
@@ -257,7 +283,7 @@
           <img src="imagens/nimin.png" alt="Hot Dog Nimin" loading="lazy">
           <h3>Nimin <span class="badge-small">Molho Verde</span></h3>
           <p class="price">R$ 13,00</p>
-          <p>Pão, molho, 2 salsichas (Sadia/Perdigão), milho, batata palha, bacon, ketchup, maionese e vinagrete. Acompanha ketchup sachê.</p>
+          <p>Pão, molho, 2 salsichas (Sadia/Perdigão), milho, batata palha, bacon, vinagrete, ketchup, maionese e vinagrete. Acompanha ketchup sachê.</p>
           <div class="actions"><button class="add-cart" type="button">Adicionar</button><button class="extras-btn" type="button">Adicionais</button></div>
         </div>
 
@@ -481,6 +507,6 @@
     <button id="cookie-accept" type="button">Aceitar</button>
   </div>
 
-  <script src="script.js?v=3.7.0"></script>
+  <script defer src="script.js?v=3.9.6"></script>
 </body>
 </html>
