@@ -1,4 +1,3 @@
-const sound = new Audio('click.wav'); let isLoginInProgress=false;
 /* =========================================================
    🚀 DFL v3.7.0 — REMOÇÃO DE SOM GLOBAL DE CLIQUE (MELHORIA UX)
    - Remove o som de clique constante e o mantém APENAS na finalização do pedido.
@@ -124,7 +123,7 @@ document.addEventListener("DOMContentLoaded", () => {
       Backdrop.hide();
     },
     open(modalLike) {
-      setTimeout(()=>Overlays.closeAll(),0);
+      Overlays.closeAll();
       if (!modalLike) return;
       modalLike.classList.add(
         (modalLike.id === "mini-cart" || modalLike.id === "painelPedidos" || modalLike.id === "recompensas-panel") ? "active" : "show"
@@ -132,7 +131,7 @@ document.addEventListener("DOMContentLoaded", () => {
       Backdrop.show();
     },
   };
-  el.cartBackdrop.addEventListener("click", () => setTimeout(()=>Overlays.closeAll(),0));
+  el.cartBackdrop.addEventListener("click", () => Overlays.closeAll());
 
   /* =========================================================
     ✨ v3.0: LISTENER DO FORMULÁRIO DE CUPOM (MANTIDO)
@@ -162,13 +161,86 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
   /* ------------------ 💬 POPUP (MANTIDO) ------------------ */
-  function popupAdd(message, type){
-    ensurePopupContainer();
-    const div = document.createElement("div");
-    div.className = "toast" + (type ? " " + type : "");
-    div.textContent = message;
-    el.popupAdd.appendChild(div);
-    setTimeout(()=>{ try{ el.popupAdd.removeChild(div);}catch(_){} }, 3500);
+  function popupAdd(msg) {
+    let pop = document.querySelector(".popup-add");
+    if (!pop) {
+      pop = document.createElement("div");
+      pop.className = "popup-add";
+      document.body.appendChild(pop);
+    }
+    pop.textContent = msg;
+    pop.classList.add("show");
+    setTimeout(() => pop.classList.remove("show"), 2000);
+  }
+
+  /* ------------------ 🎉 POPUP DE CONQUISTA (MANTIDO) ------------------ */
+  function mostrarPopupRecompensa(msg) {
+    let pop = document.getElementById("conquista-popup");
+    if (!pop) {
+      pop = document.createElement("div");
+      pop.id = "conquista-popup";
+      pop.style.cssText = `
+        position: fixed;
+        bottom: 120px; 
+        left: 50%;
+        transform: translateX(-50%) scale(0);
+        background: #4CAF50; 
+        color: white;
+        padding: 15px 25px;
+        border-radius: 12px;
+        font-weight: bold;
+        text-align: center;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+        z-index: 10001;
+        opacity: 0;
+        transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.4s;
+      `;
+      document.body.appendChild(pop);
+    }
+    pop.textContent = msg;
+    
+    // Animação de entrada
+    pop.style.opacity = '1';
+    pop.style.transform = 'translateX(-50%) scale(1)';
+    
+    // Animação de saída
+    setTimeout(() => {
+      pop.style.transform = 'translateX(-50%) scale(0)';
+      pop.style.opacity = '0';
+    }, 4000);
+  }
+
+/* ------------------ 🛒 MINI-CARRINHO (MANTIDO) ------------------ */
+  function renderMiniCart() {
+    
+  // 💬 Mensagem divertida do carrinho vazio (v3.7.1b)
+  try {
+    const listEl = document.querySelector('.mini-list');
+    const footEl = document.querySelector('.mini-foot');
+    if (Array.isArray(cart) ? cart.length === 0 : (!cart || (cart.items && cart.items.length === 0))) {
+      if (listEl) {
+        listEl.innerHTML = `
+          <div class="cart-empty-msg" style="
+            padding: 18px 14px;
+            text-align: center;
+            border: 1px dashed #ffca28;
+            border-radius: 12px;
+            background: #fffdf3;
+            box-shadow: inset 0 1px 0 rgba(255,255,255,.6);
+            font-weight: 600;
+            line-height: 1.35;
+          ">
+            <div style="font-size:1.05rem; margin-bottom:6px;">🍔 Carrinho vazio por aqui…</div>
+            <div style="font-size:.95rem; color:#6b6b6b;">
+              Nosso programador‑chapeiro foi dar um trato no grill e já volta 😅<br/>
+              Enquanto isso, dá um rolê no cardápio e escolhe um trem bão!
+            </div>
+          </div>
+        `;
+      }
+      if (footEl) footEl.style.opacity = "0.85"; // mantém rodapé visível porém discreto
+      // Mantém o restante do fluxo da função sem quebrar cálculos abaixo.
+    }
   } catch(e) { try { console.warn('Empty-cart banner guard', e); } catch(_){} }
 // ... (MANTIDO)
     if (!el.miniList) return; 
@@ -317,7 +389,7 @@ document.addEventListener("DOMContentLoaded", () => {
       } else {
         if (el.reportsBtn) el.reportsBtn.style.display = "none";
         document.getElementById("admin-dashboard")?.remove();
-        // setTimeout(()=>Overlays.closeAll(),0); // Removido para evitar fechar modais no carregamento
+        // Overlays.closeAll(); // Removido para evitar fechar modais no carregamento
       }
     });
   }
@@ -331,7 +403,7 @@ document.addEventListener("DOMContentLoaded", () => {
     // Garante que currentUser seja definido e a UI atualizada imediatamente
     currentUser = user;
     popupAdd("Login realizado com sucesso!");
-    setTimeout(()=>Overlays.closeAll(),0);
+    Overlays.closeAll();
     // O setupAuthListener (chamado em inicializarFirebase) garante a atualização final
   };
 
@@ -367,20 +439,16 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   el.googleBtn?.addEventListener("click", () => {
-    if (isLoginInProgress) {
-      console.log("Login já em andamento, aguarde...");
-      return;
-    }
-    inicializarFirebase();
-    if (!isFirebaseInitialized) { alert("Erro ao conectar ao serviço de login."); return; }
-    isLoginInProgress = true;
+    inicializarFirebase(); // Garante que o Firebase esteja pronto
+    if (!isFirebaseInitialized) return alert("Erro ao conectar ao serviço de login.");
+    
     const provider = new firebase.auth.GoogleAuthProvider();
-    provider.setCustomParameters({ prompt: 'select_account' });
     auth.signInWithPopup(provider)
-      .then((res) => { isLoginInProgress = false; handleLoginSuccess(res.user); })
-      .catch((err) => { isLoginInProgress = false; handleLoginError(err); });
+      .then((res) => handleLoginSuccess(res.user))
+      .catch((err) => alert("Erro: ".concat(err.message)));
   });
-// 🚨 OTIMIZAÇÃO: Adiciona listener para inicializar o Firebase no primeiro clique.
+  
+  // 🚨 OTIMIZAÇÃO: Adiciona listener para inicializar o Firebase no primeiro clique.
   // Isto substitui o bloco 'el.userBtn?.addEventListener("click", () => Overlays.open(el.loginModal));'
   el.userBtn?.addEventListener("click", () => {
       inicializarFirebase();
@@ -442,7 +510,7 @@ document.addEventListener("DOMContentLoaded", () => {
   );
 
   el.extrasConfirm?.addEventListener("click", () => {
-    if (!produtoExtras) return setTimeout(()=>Overlays.closeAll(),0);
+    if (!produtoExtras) return Overlays.closeAll();
     const checks = [...document.querySelectorAll("#extras-modal .extras-list input:checked")];
 
     const extrasContagem = {};
@@ -471,11 +539,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
     renderMiniCart();
     popupAdd("Adicionado ao carrinho!");
-    setTimeout(()=>Overlays.closeAll(),0);
+    Overlays.closeAll();
   });
 
   document.querySelectorAll("#extras-modal .extras-close").forEach((b) =>
-    b.addEventListener("click", () => setTimeout(()=>Overlays.closeAll(),0))
+    b.addEventListener("click", () => Overlays.closeAll())
   );
 
   /* ------------------ 🥤 Combos (MANTIDO) ------------------ */
@@ -533,7 +601,7 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   el.comboConfirm?.addEventListener("click", () => {
-    if (!_comboCtx) return setTimeout(()=>Overlays.closeAll(),0);
+    if (!_comboCtx) return Overlays.closeAll();
     const sel = el.comboBody?.querySelector('input[name="combo-drink"]:checked');
     if (!sel) return;
     const opt = comboDrinkOptions[_comboCtx.grupo][+sel.value];
@@ -546,11 +614,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
     popupAdd("Combo adicionado!");
     renderMiniCart();
-    setTimeout(()=>Overlays.closeAll(),0);
+    Overlays.closeAll();
   });
 
   document.querySelectorAll("#combo-modal .combo-close").forEach((b) =>
-    b.addEventListener("click", () => setTimeout(()=>Overlays.closeAll(),0))
+    b.addEventListener("click", () => Overlays.closeAll())
   );
 
   /* ------------------ 🧺 Adicionar item comum (MANTIDO) ------------------ */
@@ -920,7 +988,7 @@ document.addEventListener("DOMContentLoaded", () => {
     // Chama a função-base de adicionar, que não abre o modal de combos
     addCommonItem(promo.nome, promo.preco); 
     
-    setTimeout(()=>Overlays.closeAll(),0); // Fecha o modal após adicionar
+    Overlays.closeAll(); // Fecha o modal após adicionar
   });
 
   // 3. Navegação (Próximo / Anterior)
@@ -937,7 +1005,7 @@ document.addEventListener("DOMContentLoaded", () => {
   });
   
   // 4. Fechar o modal
-  el.promoClose?.addEventListener("click", () => setTimeout(()=>Overlays.closeAll(),0));
+  el.promoClose?.addEventListener("click", () => Overlays.closeAll());
 
   // 5. Navegação do carrossel principal (mantido)
   el.cPrev?.addEventListener("click", () => {
@@ -1180,7 +1248,7 @@ document.addEventListener("DOMContentLoaded", () => {
       if(couponInput) couponInput.value = "";
       
       renderMiniCart();
-      setTimeout(()=>Overlays.closeAll(),0);
+      Overlays.closeAll();
 
     } catch (err) {
       console.error("Erro ao fechar pedido ou atualizar contador/recompensa:", err);
@@ -1207,7 +1275,7 @@ document.addEventListener("DOMContentLoaded", () => {
     carregarPedidos(currentUser.uid); 
   });
 
-  el.pedidosFecharBtn?.addEventListener("click", () => setTimeout(()=>Overlays.closeAll(),0));
+  el.pedidosFecharBtn?.addEventListener("click", () => Overlays.closeAll());
 
   // 2. Lógica de carregar pedidos (MANTIDO)
   async function carregarPedidos(userId) {
@@ -1237,7 +1305,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if (!el.pedidosLista) return;
     
     el.pedidosLista.innerHTML = pedidos.map(p => {
-      const thumbUrl = p.thumb || inferThumbFromItens(p.itens) || 'imagens/padrao.jpg';
+      const thumbUrl = p.thumb || 'imagens/padrao.jpg';
       const dataFormatada = p.data
           ? new Date(p.data?.seconds * 1000 || p.data).toLocaleString("pt-BR", {
               day: "2-digit", month: "2-digit", year: "numeric",
@@ -1323,7 +1391,7 @@ document.addEventListener("DOMContentLoaded", () => {
       // Feedback ao usuário
       popupAdd("Pedido anterior adicionado ao carrinho!");
       renderMiniCart(); // Atualiza o carrinho (backend)
-      setTimeout(()=>Overlays.closeAll(),0); // Fecha o painel de pedidos
+      Overlays.closeAll(); // Fecha o painel de pedidos
       Overlays.open(el.miniCart); // Abre o mini-carrinho
 
     } catch (err) {
@@ -1525,7 +1593,7 @@ function exibirRecompensas(pedidosFeitos, recompensasDisponiveis, cupomStatus, R
                 if(couponInput) couponInput.value = codigo;
 
                 renderMiniCart(); // Recalcula e mostra a mensagem
-                setTimeout(()=>Overlays.closeAll(),0);
+                Overlays.closeAll();
                 popupAdd(`Cupom ${codigo} aplicado! ✅`);
                 Overlays.open(el.miniCart); // Abre o mini-carrinho para ver o desconto
             }
@@ -1610,7 +1678,7 @@ async function carregarHistoricoRecompensas(userId) {
   });
 
   // 2. Lógica de fechar o painel
-  el.recompensasFecharBtn?.addEventListener("click", () => setTimeout(()=>Overlays.closeAll(),0));
+  el.recompensasFecharBtn?.addEventListener("click", () => Overlays.closeAll());
 
 /* ------------------ FIM DO BLOCO V3.5.3 ------------------ */
 
@@ -1685,7 +1753,7 @@ async function carregarHistoricoRecompensas(userId) {
       });
     });
 
-    div.querySelector(".dashboard-close").addEventListener("click", () => setTimeout(()=>Overlays.closeAll(),0));
+    div.querySelector(".dashboard-close").addEventListener("click", () => Overlays.closeAll());
   }
 
   function createAdminFab() {
@@ -1906,7 +1974,7 @@ async function carregarHistoricoRecompensas(userId) {
     } else {
       if (el.reportsBtn) el.reportsBtn.style.display = "none";
       document.getElementById("admin-dashboard")?.remove();
-      // setTimeout(()=>Overlays.closeAll(),0); // Removido para evitar fechar modais no carregamento
+      // Overlays.closeAll(); // Removido para evitar fechar modais no carregamento
     }
   });
 
@@ -2001,3 +2069,190 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
 });
+/* =========================================================
+   🔧 PATCH v3.7.7 — Delegação de Fechar Modais + Som no Finalizar
+   (não altera nada do restante do site)
+========================================================= */
+(function () {
+  const $ = (sel, ctx = document) => ctx.querySelector(sel);
+  const $$ = (sel, ctx = document) => Array.from(ctx.querySelectorAll(sel));
+  const byId = (id) => document.getElementById(id);
+  const hide = (el, cls = 'show') => el && el.classList.remove(cls);
+  const off = (el, cls = 'active') => el && el.classList.remove(cls);
+
+  // 🔊 Som APENAS no botão de finalizar pedido
+  const finalizarBtn = $('#finalizar-pedido, .finalizar-pedido');
+  if (finalizarBtn) {
+    finalizarBtn.addEventListener('click', () => {
+      try { new Audio('click.wav').play(); } catch (_) {}
+    });
+  }
+
+  // 🧠 Delegação única para fechar tudo o que precisa
+  document.addEventListener('click', (e) => {
+    const t = e.target;
+
+    // Login
+    if (t.closest('.login-close')) {
+      hide(byId('login-modal'));
+      return;
+    }
+
+    // Promo
+    if (t.closest('.promo-close')) {
+      hide(byId('promo-modal'));
+      return;
+    }
+
+    // Extras
+    if (t.closest('.extras-close')) {
+      hide(byId('extras-modal'));
+      return;
+    }
+
+    // Combo
+    if (t.closest('.combo-close')) {
+      hide(byId('combo-modal'));
+      return;
+    }
+
+    // Painéis laterais: Meus Pedidos / Minhas Recompensas
+    if (t.closest('.fechar-pedidos')) {
+      off($('.pedidos-panel'));
+      return;
+    }
+    if (t.closest('.fechar-recompensas')) {
+      off($('.recompensas-panel'));
+      return;
+    }
+
+    // Mini-carrinho fechado ao clicar no backdrop
+    const backdrop = byId('cart-backdrop');
+    if (backdrop && (t === backdrop || t.closest('#cart-backdrop'))) {
+      off($('.mini-cart'));
+      off(backdrop);
+      return;
+    }
+  }, { capture: true }); // captura garante que o clique não seja "engolido" por outros handlers
+})();
+// ======================================================
+// 🧩 PATCH EXTRA — Remove o fundo acinzentado ao fechar
+// ======================================================
+function clearBackdrop() {
+  const backdrop = document.getElementById('cart-backdrop');
+  if (backdrop) {
+    backdrop.classList.remove('active');
+    backdrop.style.opacity = '0';
+    backdrop.style.pointerEvents = 'none';
+  }
+  // Garante que nenhum modal permaneça ativo visualmente
+  document.querySelectorAll('.modal.show').forEach(m => m.classList.remove('show'));
+}
+
+// Monitora o fechamento dos painéis e modais
+['.login-close', '.fechar-pedidos', '.fechar-recompensas', '.promo-close', '.extras-close', '.combo-close']
+  .forEach(sel => {
+    document.addEventListener('click', (e) => {
+      if (e.target.closest(sel)) clearBackdrop();
+    });
+  });
+/* ======================================================
+   ✅ PATCH FINAL — Mini-Carrinho com clique fora + botão X
+   ====================================================== */
+(() => {
+  const miniCart = document.querySelector('.mini-cart');
+  const backdrop = document.getElementById('cart-backdrop');
+
+  if (!miniCart || !backdrop) return;
+
+  const closeCart = () => {
+    miniCart.classList.remove('active');
+    backdrop.classList.remove('active');
+    backdrop.style.pointerEvents = 'none';
+    document.body.style.overflow = '';
+  };
+
+  // Fecha pelo botão X (classe usada no seu HTML)
+  document.addEventListener('click', (e) => {
+    if (e.target.closest('.extras-close')) {
+      e.preventDefault();
+      e.stopPropagation();
+      closeCart();
+    }
+  });
+
+  // Fecha clicando fora
+  backdrop.addEventListener('click', (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    closeCart();
+  });
+
+  // Bloqueia clique dentro do painel
+  miniCart.addEventListener('click', (e) => e.stopPropagation());
+})();
+/* ======================================================
+   ✅ PATCH DEFINITIVO — X do Mini-Carrinho
+   - Fecha no X sem depender de delegation no document
+   - Mantém clique-fora via backdrop
+   ====================================================== */
+(() => {
+  const miniCart  = document.querySelector('.mini-cart');
+  const backdrop  = document.getElementById('cart-backdrop');
+  if (!miniCart || !backdrop) return;
+
+  const openCart = () => {
+    miniCart.classList.add('active');
+    backdrop.classList.add('active');
+    backdrop.style.pointerEvents = 'auto';
+    document.body.style.overflow = 'hidden';
+  };
+
+  const closeCart = () => {
+    miniCart.classList.remove('active');
+    backdrop.classList.remove('active');
+    backdrop.style.pointerEvents = 'none';
+    document.body.style.overflow = '';
+  };
+
+  // 1) Fecha pelo X — listener DIRETO no botão (não depende de bubbling)
+  const closeBtn =
+    miniCart.querySelector('.extras-close') ||
+    miniCart.querySelector('.fechar-pedidos') ||
+    miniCart.querySelector('.mini-head .promo-close') ||
+    miniCart.querySelector('.mini-head button[aria-label*="Fechar" i]');
+
+  if (closeBtn) {
+    closeBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      closeCart();
+    });
+  }
+
+  // 2) Fecha clicando fora (backdrop)
+  backdrop.addEventListener('click', (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    closeCart();
+  });
+
+  // 3) Impede que cliques dentro do painel vazem para o fundo
+  miniCart.addEventListener('click', (e) => e.stopPropagation());
+
+  // 4) (Opcional) Abrir carrinho por botões existentes, sem interferir no X
+  document.addEventListener('click', (e) => {
+    if (e.target.closest('#cart-icon') || e.target.closest('.cart-button')) {
+      e.preventDefault();
+      e.stopPropagation();
+      openCart();
+    }
+  });
+
+  // 5) Tecla Esc fecha
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && miniCart.classList.contains('active')) {
+      closeCart();
+    }
+  });
+})();
