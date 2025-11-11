@@ -2221,3 +2221,46 @@ document.addEventListener('DOMContentLoaded', () => {
   }catch(e){ console.error(e); }
 })();
 /* === /DFL v3.8.5 – updateCartTotals wrapper === */
+/* =========================
+   HOTFIX v3.8.5-a — Modais fechando sozinhos
+   - Impede que cliques dentro do modal cheguem no listener global de fechar
+   - Fecha apenas se o clique for no backdrop (fora do conteúdo)
+========================= */
+(function modalHotfix() {
+  // 1) Qualquer clique dentro de .modal-content NÃO deve borbulhar até o document
+  const stopInside = (e) => {
+    if (e.target.closest('.modal-content, .login-box, .promo-content')) {
+      e.stopPropagation(); // impede o fechamento global
+    }
+  };
+  document.addEventListener('click', stopInside, { capture: true });
+
+  // 2) No próprio elemento .modal, fecha somente se o alvo for o backdrop (o próprio .modal)
+  const attachBackdropOnly = () => {
+    document.querySelectorAll('.modal').forEach((modal) => {
+      // Evita duplicar listener se já rodou antes
+      if (modal.dataset.backdropPatch === '1') return;
+      modal.dataset.backdropPatch = '1';
+
+      modal.addEventListener('click', (ev) => {
+        // Só fecha se o clique foi no backdrop (fora do conteúdo)
+        const isBackdrop = ev.target === modal;
+        if (!isBackdrop) return;
+
+        // Se você tem uma função padrão para fechar, use-a aqui;
+        // do contrário, apenas esconde com aria-hidden:
+        modal.setAttribute('aria-hidden', 'true');
+      });
+    });
+  };
+
+  // 3) Rodar agora e sempre que o DOM mudar
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', attachBackdropOnly);
+  } else {
+    attachBackdropOnly();
+  }
+  // Se seu app injeta modais dinamicamente, reatach após pequenos delays
+  setTimeout(attachBackdropOnly, 300);
+  setTimeout(attachBackdropOnly, 1500);
+})();
