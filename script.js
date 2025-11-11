@@ -1,39 +1,51 @@
 /* =========================================================
-   ✅ PATCH v3.9.3 — CORREÇÃO SEGURA DO LOGIN GOOGLE
-   (sem interferir nos eventos e modais)
+   🧩 PATCH v3.9.4 — Login Google Seguro (Isolado e Tolerante)
+   - Evita travar o script principal
+   - Mantém o banner e os cliques funcionando
 ========================================================= */
 
-if (el.googleBtn) {
-  el.googleBtn.replaceWith(el.googleBtn.cloneNode(true)); // limpa listeners antigos
-  const googleBtn = document.getElementById('google-login');
-
-  googleBtn.addEventListener("click", async () => {
+(function() {
+  function safeGoogleLogin() {
     try {
-      inicializarFirebase();
-      if (!isFirebaseInitialized) return alert("Erro ao iniciar o login. Recarregue a página.");
+      const btn = document.getElementById("google-login");
+      if (!btn) return;
 
-      const provider = new firebase.auth.GoogleAuthProvider();
-      provider.setCustomParameters({ prompt: 'select_account' });
+      // Remove listeners antigos e cria um novo seguro
+      const fresh = btn.cloneNode(true);
+      btn.parentNode.replaceChild(fresh, btn);
 
-      // ✅ Delay pequeno pra evitar conflito com fechamento de modal
-      await new Promise(r => setTimeout(r, 300));
+      fresh.addEventListener("click", async () => {
+        try {
+          if (typeof firebase === "undefined" || !firebase.auth) {
+            alert("Erro ao iniciar login. Recarregue a página.");
+            return;
+          }
 
-      const result = await auth.signInWithPopup(provider);
-      if (result?.user) {
-        popupAdd(`Login realizado: ${result.user.displayName || result.user.email}`);
-        currentUser = result.user;
-        Overlays.closeAll();
-      }
-    } catch (error) {
-      if (error.code === "auth/popup-closed-by-user" || error.code === "auth/cancelled-popup-request") {
-        console.log("Popup fechado pelo usuário.");
-        return;
-      }
-      console.error("Erro no login Google:", error);
-      alert("Erro ao fazer login: " + (error.message || "Desconhecido"));
+          const provider = new firebase.auth.GoogleAuthProvider();
+          provider.setCustomParameters({ prompt: "select_account" });
+
+          const result = await firebase.auth().signInWithPopup(provider);
+          if (result?.user) {
+            console.log("✅ Login realizado:", result.user.email);
+            alert(`Bem-vindo, ${result.user.displayName || result.user.email}!`);
+            if (window.Overlays && Overlays.closeAll) Overlays.closeAll();
+          }
+        } catch (err) {
+          console.warn("Erro no login Google:", err.code || err.message);
+          if (err.code === "auth/popup-closed-by-user") return;
+          alert("Erro ao fazer login: " + (err.message || "desconhecido"));
+        }
+      });
+    } catch (e) {
+      console.warn("Falha ao reinstalar Google Login:", e);
     }
-  });
-}
+  }
+
+  // Aguarda DOM carregar para não travar a execução inicial
+  document.readyState === "loading"
+    ? document.addEventListener("DOMContentLoaded", safeGoogleLogin)
+    : safeGoogleLogin();
+})();
 
 document.addEventListener("DOMContentLoaded", () => {
   /* ------------------ ⚙️ BASE (MANTIDO) ------------------ */
