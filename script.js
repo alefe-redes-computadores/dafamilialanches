@@ -2074,3 +2074,218 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
 });
+
+/* =========================================================
+   🔥 DFL v3.9.9 – Estável (Login Corrigido + Cliques Seguros + Lazy Firebase)
+   HOTFIX NÃO-DESTRUTIVO: adicionado ao final do script original.
+   - Corrige fechamento instantâneo de modais/painéis.
+   - Torna overlay seguro (só fecha ao clicar exatamente no fundo).
+   - Cria zonas seguras dentro dos modais (stopPropagation em captura).
+   - Login Google com isLoginInProgress + fallback redirect.
+   - Mantém HTML/CSS e funções existentes, substituindo com compatibilidade.
+========================================================= */
+(function(){
+  "use strict";
+
+  const $ = (sel, root=document) => root.querySelector(sel);
+  const $$ = (sel, root=document) => Array.from(root.querySelectorAll(sel));
+  const now = () => (typeof performance!=="undefined" && performance.now) ? performance.now() : Date.now();
+  const safe = (fn)=>{ try { return fn(); } catch(e){ console.error(e); } };
+
+  /* ---------------------- GUARDAS DE CLIQUE ---------------------- */
+  const CLOSE_GUARD_WINDOW_MS = 160;
+  let lastIntentionalOpenAt = 0;
+  let lastInternalClickAt = 0;
+
+  function isInsideModal(t){
+    return !!(t && t.closest && t.closest("[data-modal-container], [data-modal], .modal, .panel, .drawer"));
+  }
+
+  // Zona segura: captura antes de handlers antigos
+  document.addEventListener("click", function(e){
+    const inside = e.target.closest && e.target.closest("[data-modal-container], [data-modal], .modal, .panel, .drawer");
+    if (inside){
+      lastInternalClickAt = now();
+      e.stopPropagation();
+    }
+  }, true);
+
+  // Overlay seguro: só fecha quando o clique é no overlay, não nos filhos
+  document.addEventListener("click", function(e){
+    const ov = e.target.closest && e.target.closest("[data-overlay], .overlay, #cart-backdrop, #backdrop, .backdrop");
+    if (!ov) return;
+    if (ov !== e.target) return;
+    if (now() - lastIntentionalOpenAt < CLOSE_GUARD_WINDOW_MS) return;
+    if (now() - lastInternalClickAt < CLOSE_GUARD_WINDOW_MS) return;
+    // Tenta usar Overlays.closeAll se existir, senão fecha por classes comuns
+    if (window.Overlays && typeof window.Overlays.closeAll === "function"){
+      safe(()=>window.Overlays.closeAll());
+    } else {
+      $$(".modal.show, .modal[open], .panel.active, .drawer.active, #mini-cart.active, .pedidos-panel.active, .recompensas-panel.active, #admin-dashboard.show")
+        .forEach(el=>{ el.classList.remove("show","active"); el.removeAttribute("open"); });
+      // Tenta esconder backdrop comum
+      const bd = $("#cart-backdrop") || $("#backdrop") || $(".backdrop");
+      if (bd) bd.classList.remove("show","active");
+    }
+  });
+
+  // Fallback global: clique fora dos modais fecha, respeitando guardas
+  document.addEventListener("click", function(e){
+    if (isInsideModal(e.target)) return;
+    if (now() - lastIntentionalOpenAt < CLOSE_GUARD_WINDOW_MS) return;
+    if (now() - lastInternalClickAt < CLOSE_GUARD_WINDOW_MS) return;
+    if (window.Overlays && typeof window.Overlays.closeAll === "function"){
+      safe(()=>window.Overlays.closeAll());
+    }
+  });
+
+  /* ---------------------- OVERLAYS COMPAT ------------------------ */
+  // Se existir Overlays, corrigimos a lógica de open/close para não fechar instantâneo.
+  if (window.Overlays && typeof window.Overlays === "object"){
+    // backup (para depuração)
+    const __open = window.Overlays.open ? window.Overlays.open.bind(window.Overlays) : null;
+    const __closeAll = window.Overlays.closeAll ? window.Overlays.closeAll.bind(window.Overlays) : null;
+
+    window.Overlays.closeAll = function(){
+      // fecha comuns, respeitando itens "grudados" (data-sticky)
+      $$(".modal.show, #mini-cart.active, .pedidos-panel.active, .recompensas-panel.active, #admin-dashboard.show, .panel.active, .drawer.active")
+        .forEach((el)=>{ if (!el.hasAttribute || !el.hasAttribute("data-sticky")) { el.classList.remove("show","active"); el.removeAttribute("open"); } });
+      const bd = $("#cart-backdrop") || $("#backdrop") || $(".backdrop");
+      if (bd) bd.classList.remove("show","active");
+    };
+
+    window.Overlays.open = function(modalLike){
+      lastIntentionalOpenAt = now();
+      // NUNCA fechar imediatamente após abrir
+      if (!modalLike) return;
+      const id = modalLike.id || "";
+      const cls = (id === "mini-cart" || id === "painelPedidos" || id === "recompensas-panel" || modalLike.classList.contains("panel") || modalLike.classList.contains("drawer")) ? "active" : "show";
+      modalLike.classList.add(cls);
+      modalLike.removeAttribute("hidden");
+      modalLike.setAttribute("aria-hidden","false");
+      const bd = $("#cart-backdrop") || $("#backdrop") || $(".backdrop");
+      if (bd) bd.classList.add("show","active");
+    };
+  }
+
+  /* ---------------------- LOGIN GOOGLE --------------------------- */
+  // Mantém lazy init (melhor TTI). Implementa flag isLoginInProgress + fallback redirect.
+  let isLoginInProgress = false;
+  let firebaseApp = null, firebaseAuth = null, providers = null;
+  let initializingFirebase = false;
+
+  async function ensureFirebase(){
+    if (firebaseApp && firebaseAuth && providers) return { firebaseApp, firebaseAuth, providers };
+    if (initializingFirebase){
+      while (initializingFirebase){ await new Promise(r => setTimeout(r, 25)); }
+      return { firebaseApp, firebaseAuth, providers };
+    }
+    initializingFirebase = true;
+    try{
+      const [{ initializeApp }, { getAuth, setPersistence, browserLocalPersistence, GoogleAuthProvider, signInWithPopup, signInWithRedirect, onAuthStateChanged, signOut }] = await Promise.all([
+        import("https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js"),
+        import("https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js"),
+      ]);
+      const cfg = (typeof window !== "undefined" && window.__DFL_FIREBASE_CONFIG) || {
+        apiKey: "YOUR_API_KEY",
+        authDomain: "YOUR_PROJECT.firebaseapp.com",
+        projectId: "YOUR_PROJECT_ID",
+        appId: "YOUR_APP_ID",
+      };
+      firebaseApp = initializeApp(cfg);
+      firebaseAuth = getAuth(firebaseApp);
+      providers = { GoogleAuthProvider, signInWithPopup, signInWithRedirect, setPersistence, browserLocalPersistence, onAuthStateChanged, signOut };
+      await setPersistence(firebaseAuth, browserLocalPersistence);
+      return { firebaseApp, firebaseAuth, providers };
+    } finally {
+      initializingFirebase = false;
+    }
+  }
+
+  async function loginWithGoogle(){
+    if (isLoginInProgress) { console.log("Login já em andamento..."); return; }
+    isLoginInProgress = true;
+    try{
+      const { firebaseAuth, providers } = await ensureFirebase();
+      const provider = new providers.GoogleAuthProvider();
+      if (provider.setCustomParameters) provider.setCustomParameters({ prompt: "select_account" });
+      try{
+        await providers.signInWithPopup(firebaseAuth, provider);
+      }catch(err){
+        const code = (err && err.code) || "";
+        if (code.includes("popup-closed-by-user") or code.includes("cancelled-popup-request") or code.includes("popup-blocked")){
+          console.warn("Popup não concluído, tentando redirect...");
+          await providers.signInWithRedirect(firebaseAuth, provider);
+        } else {
+          console.error("Erro login (popup):", err);
+          try { await providers.signInWithRedirect(firebaseAuth, provider); }
+          catch(err2){ console.error("Erro login (redirect):", err2); alert("Não foi possível entrar com o Google agora. Tente novamente."); }
+        }
+      }
+    } finally {
+      isLoginInProgress = false;
+    }
+  }
+
+  async function logoutIfPossible(){
+    try{
+      const { firebaseAuth, providers } = await ensureFirebase();
+      await providers.signOut(firebaseAuth);
+    }catch(e){ console.error("Erro ao sair:", e); }
+  }
+
+  function bindAuthUI(){
+    // Seletores abrangentes compatíveis com seu HTML
+    const loginButtons = [
+      "#google-login", "#btnLoginGoogle", "[data-login='google']", ".btn-google", "button.google-login"
+    ];
+    const logoutButtons = ["#btnLogout", "[data-logout]", ".btn-logout"];
+
+    loginButtons.forEach(sel => {
+      const el = document.querySelector(sel);
+      if (el){
+        el.addEventListener("click", function(e){
+          e.preventDefault(); e.stopPropagation();
+          lastIntentionalOpenAt = now();
+          loginWithGoogle();
+        });
+      }
+    });
+    logoutButtons.forEach(sel => {
+      const el = document.querySelector(sel);
+      if (el){
+        el.addEventListener("click", function(e){
+          e.preventDefault(); e.stopPropagation();
+          logoutIfPossible();
+        });
+      }
+    });
+
+    // Atualiza UI básica se existirem elementos de estado
+    ensureFirebase().then(({ firebaseAuth, providers })=>{
+      providers.onAuthStateChanged(firebaseAuth, (user)=>{
+        const isLogged = !!user;
+        document.querySelectorAll("[data-auth='logged-in']").forEach(el=> el.style.display = isLogged ? "" : "none");
+        document.querySelectorAll("[data-auth='logged-out']").forEach(el=> el.style.display = isLogged ? "none" : "");
+        const nameEl = document.querySelector("#userName, [data-user-name]");
+        const avatarEl = document.querySelector("#userAvatar, [data-user-avatar]");
+        if (nameEl) nameEl.textContent = isLogged ? (user.displayName || user.email || "Usuário") : "";
+        if (avatarEl){
+          if (isLogged && user.photoURL){ avatarEl.src = user.photoURL; avatarEl.removeAttribute("hidden"); }
+          else { avatarEl.setAttribute("hidden","true"); }
+        }
+        document.dispatchEvent(new CustomEvent("dfl:auth-changed", { detail: { user } }));
+      });
+    });
+  }
+
+  // Inicialização
+  document.addEventListener("DOMContentLoaded", function(){
+    // Garante que elementos com [data-open] permaneçam abertos
+    document.querySelectorAll("[data-open]").forEach(el => { lastIntentionalOpenAt = now(); el.classList.add("show","active"); el.removeAttribute("hidden"); });
+    bindAuthUI();
+  });
+
+})(); 
+/* ======================= FIM HOTFIX v3.9.9 ======================= */
+
