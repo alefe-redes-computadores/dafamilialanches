@@ -1,94 +1,4 @@
 /* =========================================================
-   🔥 DFL v3.9.6 Estável — Correção Definitiva do Login Google
-   - Mantém TODO o restante do código original intacto
-   - Corrige "operation cancelled due to another conflicting popup"
-   - Evita múltiplos listeners e popups concorrentes
-   - Não quebra banners/overlays/clicks existentes
-   - Pode ser usado como drop-in (substituir somente script.js)
-   - Gerado em: 2025-11-11 04:38:37
-========================================================= */
-
-(function () { 
-  if (window.__DFL_LOGIN_PATCH_APPLIED__) return;
-  window.__DFL_LOGIN_PATCH_APPLIED__ = true;
-
-  // Flag global resiliente (não conflita com variáveis do seu script)
-  window.__dflLoginBusy = false;
-
-  function waitForFirebaseAuth(maxMs=6000) {
-    return new Promise((resolve, reject) => {
-      const start = Date.now();
-      (function poll(){
-        try {
-          if (window.firebase && window.firebase.auth) {
-            return resolve(window.firebase.auth());
-          }
-        } catch (_) {}
-        if (Date.now() - start > maxMs) return reject(new Error("Firebase Auth não disponível"));
-        setTimeout(poll, 120);
-      })();
-    });
-  }
-
-  function rebindGoogleButton(auth){
-    var btn = document.getElementById("google-login");
-    if (!btn) return;
-
-    // Clona para remover listeners antigos e evitar duplicidade
-    var clone = btn.cloneNode(true);
-    btn.parentNode.replaceChild(clone, btn);
-
-    clone.addEventListener("click", function(e){
-      // Bloqueia múltiplos popups concorrentes
-      if (window.__dflLoginBusy) {
-        try { console.log("⏳ Login já em andamento, aguarde..."); } catch(_){}
-        e.preventDefault();
-        e.stopImmediatePropagation();
-        return;
-      }
-
-      window.__dflLoginBusy = true;
-
-      try {
-        var provider = new firebase.auth.GoogleAuthProvider();
-        provider.setCustomParameters({ prompt: "select_account" });
-
-        auth.signInWithPopup(provider)
-          .then(function(res){
-            window.__dflLoginBusy = false;
-            try { console.log("✅ Login Google OK:", res && res.user && res.user.email); } catch(_){}
-            // Não fechar modais aqui — deixa o fluxo original cuidar do pós-login
-          })
-          .catch(function(err){
-            window.__dflLoginBusy = false;
-            var code = (err && err.code) || "";
-            if (code === "auth/popup-closed-by-user" || code === "auth/cancelled-popup-request") {
-              try { console.log("ℹ️ Popup fechado/cancelado"); } catch(_){}
-              return;
-            }
-            try { console.error("❌ Erro login Google:", err); } catch(_){}
-            try { alert("Erro ao fazer login: " + (err && err.message ? err.message : "desconhecido")); } catch(_){}
-          });
-      } catch (e){
-        window.__dflLoginBusy = false;
-        try { console.error("Falha ao iniciar login Google:", e); } catch(_){}
-        try { alert("Erro ao iniciar login. Recarregue a página."); } catch(_){}
-      }
-    });
-  }
-
-  // Garante que o rebind só ocorre quando DOM estiver pronto
-  if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", function(){
-      waitForFirebaseAuth().then(rebindGoogleButton).catch(function(){ /* silencioso */ });
-    });
-  } else {
-    waitForFirebaseAuth().then(rebindGoogleButton).catch(function(){ /* silencioso */ });
-  }
-})();
-
-
-/* =========================================================
    🚀 DFL v3.7.0 — REMOÇÃO DE SOM GLOBAL DE CLIQUE (MELHORIA UX)
    - Remove o som de clique constante e o mantém APENAS na finalização do pedido.
    - Baseado na DFL v3.6.10 Estável e Corrigida.
@@ -213,7 +123,7 @@ document.addEventListener("DOMContentLoaded", () => {
       Backdrop.hide();
     },
     open(modalLike) {
-      setTimeout(()=>Overlays.closeAll(),0);
+      Overlays.closeAll();
       if (!modalLike) return;
       modalLike.classList.add(
         (modalLike.id === "mini-cart" || modalLike.id === "painelPedidos" || modalLike.id === "recompensas-panel") ? "active" : "show"
@@ -221,7 +131,7 @@ document.addEventListener("DOMContentLoaded", () => {
       Backdrop.show();
     },
   };
-  el.cartBackdrop.addEventListener("click", () => setTimeout(()=>Overlays.closeAll(),0));
+  el.cartBackdrop.addEventListener("click", () => Overlays.closeAll());
 
   /* =========================================================
     ✨ v3.0: LISTENER DO FORMULÁRIO DE CUPOM (MANTIDO)
@@ -302,44 +212,14 @@ document.addEventListener("DOMContentLoaded", () => {
 
 /* ------------------ 🛒 MINI-CARRINHO (MANTIDO) ------------------ */
   function renderMiniCart() {
-    
-  // 💬 Mensagem divertida do carrinho vazio (v3.7.1b)
-  try {
-    const listEl = document.querySelector('.mini-list');
-    const footEl = document.querySelector('.mini-foot');
-    if (Array.isArray(cart) ? cart.length === 0 : (!cart || (cart.items && cart.items.length === 0))) {
-      if (listEl) {
-        listEl.innerHTML = `
-          <div class="cart-empty-msg" style="
-            padding: 18px 14px;
-            text-align: center;
-            border: 1px dashed #ffca28;
-            border-radius: 12px;
-            background: #fffdf3;
-            box-shadow: inset 0 1px 0 rgba(255,255,255,.6);
-            font-weight: 600;
-            line-height: 1.35;
-          ">
-            <div style="font-size:1.05rem; margin-bottom:6px;">🍔 Carrinho vazio por aqui…</div>
-            <div style="font-size:.95rem; color:#6b6b6b;">
-              Nosso programador‑chapeiro foi dar um trato no grill e já volta 😅<br/>
-              Enquanto isso, dá um rolê no cardápio e escolhe um trem bão!
-            </div>
-          </div>
-        `;
-      }
-      if (footEl) footEl.style.opacity = "0.85"; // mantém rodapé visível porém discreto
-      // Mantém o restante do fluxo da função sem quebrar cálculos abaixo.
-    }
-  } catch(e) { try { console.warn('Empty-cart banner guard', e); } catch(_){} }
-// ... (MANTIDO)
+    // ... (MANTIDO)
     if (!el.miniList) return; 
 
     const totalItens = cart.reduce((s, i) => s + i.qtd, 0);
     if (el.cartCount) el.cartCount.textContent = totalItens;
 
     if (!cart.length) {
-      el.miniList.innerHTML = '<p style="text-align:center;color:#999;padding:20px;">🍔 Nosso programador-chapeiro foi dar um trato no grill e já volta 😅. Enquanto isso, dá um rolê no cardápio e pede um Trem Bão!</p>';
+      el.miniList.innerHTML = '<p style="text-align:center;color:#999;padding:20px;">Carrinho vazio 🛒</p>';
       
       // v3.0: Limpa também o rodapé dinâmico e estático
       if(el.miniFoot) el.miniFoot.querySelectorAll(".cart-summary-generated").forEach(e => e.remove());
@@ -479,7 +359,7 @@ document.addEventListener("DOMContentLoaded", () => {
       } else {
         if (el.reportsBtn) el.reportsBtn.style.display = "none";
         document.getElementById("admin-dashboard")?.remove();
-        // setTimeout(()=>Overlays.closeAll(),0); // Removido para evitar fechar modais no carregamento
+        // Overlays.closeAll(); // Removido para evitar fechar modais no carregamento
       }
     });
   }
@@ -493,7 +373,7 @@ document.addEventListener("DOMContentLoaded", () => {
     // Garante que currentUser seja definido e a UI atualizada imediatamente
     currentUser = user;
     popupAdd("Login realizado com sucesso!");
-    setTimeout(()=>Overlays.closeAll(),0);
+    Overlays.closeAll();
     // O setupAuthListener (chamado em inicializarFirebase) garante a atualização final
   };
 
@@ -600,7 +480,7 @@ document.addEventListener("DOMContentLoaded", () => {
   );
 
   el.extrasConfirm?.addEventListener("click", () => {
-    if (!produtoExtras) return setTimeout(()=>Overlays.closeAll(),0);
+    if (!produtoExtras) return Overlays.closeAll();
     const checks = [...document.querySelectorAll("#extras-modal .extras-list input:checked")];
 
     const extrasContagem = {};
@@ -629,11 +509,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
     renderMiniCart();
     popupAdd("Adicionado ao carrinho!");
-    setTimeout(()=>Overlays.closeAll(),0);
+    Overlays.closeAll();
   });
 
   document.querySelectorAll("#extras-modal .extras-close").forEach((b) =>
-    b.addEventListener("click", () => setTimeout(()=>Overlays.closeAll(),0))
+    b.addEventListener("click", () => Overlays.closeAll())
   );
 
   /* ------------------ 🥤 Combos (MANTIDO) ------------------ */
@@ -691,7 +571,7 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   el.comboConfirm?.addEventListener("click", () => {
-    if (!_comboCtx) return setTimeout(()=>Overlays.closeAll(),0);
+    if (!_comboCtx) return Overlays.closeAll();
     const sel = el.comboBody?.querySelector('input[name="combo-drink"]:checked');
     if (!sel) return;
     const opt = comboDrinkOptions[_comboCtx.grupo][+sel.value];
@@ -704,11 +584,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
     popupAdd("Combo adicionado!");
     renderMiniCart();
-    setTimeout(()=>Overlays.closeAll(),0);
+    Overlays.closeAll();
   });
 
   document.querySelectorAll("#combo-modal .combo-close").forEach((b) =>
-    b.addEventListener("click", () => setTimeout(()=>Overlays.closeAll(),0))
+    b.addEventListener("click", () => Overlays.closeAll())
   );
 
   /* ------------------ 🧺 Adicionar item comum (MANTIDO) ------------------ */
@@ -1078,7 +958,7 @@ document.addEventListener("DOMContentLoaded", () => {
     // Chama a função-base de adicionar, que não abre o modal de combos
     addCommonItem(promo.nome, promo.preco); 
     
-    setTimeout(()=>Overlays.closeAll(),0); // Fecha o modal após adicionar
+    Overlays.closeAll(); // Fecha o modal após adicionar
   });
 
   // 3. Navegação (Próximo / Anterior)
@@ -1095,7 +975,7 @@ document.addEventListener("DOMContentLoaded", () => {
   });
   
   // 4. Fechar o modal
-  el.promoClose?.addEventListener("click", () => setTimeout(()=>Overlays.closeAll(),0));
+  el.promoClose?.addEventListener("click", () => Overlays.closeAll());
 
   // 5. Navegação do carrossel principal (mantido)
   el.cPrev?.addEventListener("click", () => {
@@ -1338,7 +1218,7 @@ document.addEventListener("DOMContentLoaded", () => {
       if(couponInput) couponInput.value = "";
       
       renderMiniCart();
-      setTimeout(()=>Overlays.closeAll(),0);
+      Overlays.closeAll();
 
     } catch (err) {
       console.error("Erro ao fechar pedido ou atualizar contador/recompensa:", err);
@@ -1365,7 +1245,7 @@ document.addEventListener("DOMContentLoaded", () => {
     carregarPedidos(currentUser.uid); 
   });
 
-  el.pedidosFecharBtn?.addEventListener("click", () => setTimeout(()=>Overlays.closeAll(),0));
+  el.pedidosFecharBtn?.addEventListener("click", () => Overlays.closeAll());
 
   // 2. Lógica de carregar pedidos (MANTIDO)
   async function carregarPedidos(userId) {
@@ -1481,7 +1361,7 @@ document.addEventListener("DOMContentLoaded", () => {
       // Feedback ao usuário
       popupAdd("Pedido anterior adicionado ao carrinho!");
       renderMiniCart(); // Atualiza o carrinho (backend)
-      setTimeout(()=>Overlays.closeAll(),0); // Fecha o painel de pedidos
+      Overlays.closeAll(); // Fecha o painel de pedidos
       Overlays.open(el.miniCart); // Abre o mini-carrinho
 
     } catch (err) {
@@ -1683,7 +1563,7 @@ function exibirRecompensas(pedidosFeitos, recompensasDisponiveis, cupomStatus, R
                 if(couponInput) couponInput.value = codigo;
 
                 renderMiniCart(); // Recalcula e mostra a mensagem
-                setTimeout(()=>Overlays.closeAll(),0);
+                Overlays.closeAll();
                 popupAdd(`Cupom ${codigo} aplicado! ✅`);
                 Overlays.open(el.miniCart); // Abre o mini-carrinho para ver o desconto
             }
@@ -1768,7 +1648,7 @@ async function carregarHistoricoRecompensas(userId) {
   });
 
   // 2. Lógica de fechar o painel
-  el.recompensasFecharBtn?.addEventListener("click", () => setTimeout(()=>Overlays.closeAll(),0));
+  el.recompensasFecharBtn?.addEventListener("click", () => Overlays.closeAll());
 
 /* ------------------ FIM DO BLOCO V3.5.3 ------------------ */
 
@@ -1843,7 +1723,7 @@ async function carregarHistoricoRecompensas(userId) {
       });
     });
 
-    div.querySelector(".dashboard-close").addEventListener("click", () => setTimeout(()=>Overlays.closeAll(),0));
+    div.querySelector(".dashboard-close").addEventListener("click", () => Overlays.closeAll());
   }
 
   function createAdminFab() {
@@ -2064,7 +1944,7 @@ async function carregarHistoricoRecompensas(userId) {
     } else {
       if (el.reportsBtn) el.reportsBtn.style.display = "none";
       document.getElementById("admin-dashboard")?.remove();
-      // setTimeout(()=>Overlays.closeAll(),0); // Removido para evitar fechar modais no carregamento
+      // Overlays.closeAll(); // Removido para evitar fechar modais no carregamento
     }
   });
 
@@ -2159,3 +2039,84 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
 });
+
+/* =========================================================
+   🚀 DFL v3.9.0 — LOGIN GOOGLE (Opção 1: popup select_account)
+   Patch seguro adicionado ao final do arquivo para não quebrar cliques/banners.
+   - Evita múltiplos popups simultâneos (flag isLoginInProgress)
+   - Reanexa o listener do botão #google-login de forma idempotente
+   - Mantém todo o restante do código intacto
+========================================================= */
+(function () {
+  if (window.__DFL_LOGIN_PATCH_APPLIED__) return;
+  window.__DFL_LOGIN_PATCH_APPLIED__ = true;
+
+  let isLoginInProgress = false;
+
+  function bindGoogleLoginSafely() {
+    try {
+      var btn = document.getElementById("google-login");
+      if (!btn) return;
+
+      // Clona o botão para remover listeners antigos sem afetar o layout
+      var clone = btn.cloneNode(true);
+      btn.parentNode.replaceChild(clone, btn);
+
+      clone.addEventListener("click", function () {
+        if (isLoginInProgress) {
+          console.log("⏳ Login já em andamento, aguarde...");
+          return;
+        }
+
+        if (typeof firebase === "undefined" || !firebase.auth) {
+          alert("Erro ao conectar ao serviço de login. Recarregue a página.");
+          return;
+        }
+
+        isLoginInProgress = true;
+        var provider = new firebase.auth.GoogleAuthProvider();
+        provider.setCustomParameters({ prompt: "select_account" });
+
+        firebase.auth().signInWithPopup(provider)
+          .then(function (res) {
+            isLoginInProgress = false;
+            try {
+              if (window.popupAdd) popupAdd("Login realizado com sucesso!");
+            } catch (_) {}
+            try {
+              // Fecha modal de login se existir
+              var modal = document.getElementById("login-modal");
+              if (modal && modal.classList) modal.classList.remove("show");
+              var backdrop = document.getElementById("cart-backdrop");
+              if (backdrop && backdrop.classList) backdrop.classList.remove("active");
+              document.body && document.body.classList && document.body.classList.remove("no-scroll");
+            } catch (_) {}
+          })
+          .catch(function (error) {
+            isLoginInProgress = false;
+
+            // Silencia cancelamentos comuns de popup
+            if (error && (error.code === "auth/popup-closed-by-user" || error.code === "auth/cancelled-popup-request")) {
+              console.log("ℹ️ Popup fechado/cancelado pelo usuário");
+              return;
+            }
+
+            console.error("❌ Erro no login Google:", error);
+            alert("Erro ao fazer login: " + (error && error.message ? error.message : "desconhecido"));
+          });
+      });
+    } catch (e) {
+      console.error("Falha ao anexar Google Login seguro:", e);
+    }
+  }
+
+  // Liga após DOM pronto e também re-tenta quando modais abrirem
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", bindGoogleLoginSafely);
+  } else {
+    bindGoogleLoginSafely();
+  }
+  // Observa reaparição do botão
+  var mo = new MutationObserver(function () { bindGoogleLoginSafely(); });
+  try { mo.observe(document.documentElement || document.body, { childList: true, subtree: true }); } catch (_) {}
+})();
