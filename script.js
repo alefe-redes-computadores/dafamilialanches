@@ -1,4 +1,3 @@
-const sound = new Audio('click.wav'); let isLoginInProgress=false;
 /* =========================================================
    🚀 DFL v3.7.0 — REMOÇÃO DE SOM GLOBAL DE CLIQUE (MELHORIA UX)
    - Remove o som de clique constante e o mantém APENAS na finalização do pedido.
@@ -124,7 +123,7 @@ document.addEventListener("DOMContentLoaded", () => {
       Backdrop.hide();
     },
     open(modalLike) {
-      setTimeout(()=>Overlays.closeAll(),0);
+      Overlays.closeAll();
       if (!modalLike) return;
       modalLike.classList.add(
         (modalLike.id === "mini-cart" || modalLike.id === "painelPedidos" || modalLike.id === "recompensas-panel") ? "active" : "show"
@@ -132,7 +131,7 @@ document.addEventListener("DOMContentLoaded", () => {
       Backdrop.show();
     },
   };
-  el.cartBackdrop.addEventListener("click", () => setTimeout(()=>Overlays.closeAll(),0));
+  el.cartBackdrop.addEventListener("click", () => Overlays.closeAll());
 
   /* =========================================================
     ✨ v3.0: LISTENER DO FORMULÁRIO DE CUPOM (MANTIDO)
@@ -390,7 +389,7 @@ document.addEventListener("DOMContentLoaded", () => {
       } else {
         if (el.reportsBtn) el.reportsBtn.style.display = "none";
         document.getElementById("admin-dashboard")?.remove();
-        // setTimeout(()=>Overlays.closeAll(),0); // Removido para evitar fechar modais no carregamento
+        // Overlays.closeAll(); // Removido para evitar fechar modais no carregamento
       }
     });
   }
@@ -404,7 +403,7 @@ document.addEventListener("DOMContentLoaded", () => {
     // Garante que currentUser seja definido e a UI atualizada imediatamente
     currentUser = user;
     popupAdd("Login realizado com sucesso!");
-    setTimeout(()=>Overlays.closeAll(),0);
+    Overlays.closeAll();
     // O setupAuthListener (chamado em inicializarFirebase) garante a atualização final
   };
 
@@ -440,20 +439,16 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   el.googleBtn?.addEventListener("click", () => {
-    if (isLoginInProgress) {
-      console.log("Login já em andamento, aguarde...");
-      return;
-    }
-    inicializarFirebase();
-    if (!isFirebaseInitialized) { alert("Erro ao conectar ao serviço de login."); return; }
-    isLoginInProgress = true;
+    inicializarFirebase(); // Garante que o Firebase esteja pronto
+    if (!isFirebaseInitialized) return alert("Erro ao conectar ao serviço de login.");
+    
     const provider = new firebase.auth.GoogleAuthProvider();
-    provider.setCustomParameters({ prompt: 'select_account' });
     auth.signInWithPopup(provider)
-      .then((res) => { isLoginInProgress = false; handleLoginSuccess(res.user); })
-      .catch((err) => { isLoginInProgress = false; handleLoginError(err); });
+      .then((res) => handleLoginSuccess(res.user))
+      .catch((err) => alert("Erro: ".concat(err.message)));
   });
-// 🚨 OTIMIZAÇÃO: Adiciona listener para inicializar o Firebase no primeiro clique.
+  
+  // 🚨 OTIMIZAÇÃO: Adiciona listener para inicializar o Firebase no primeiro clique.
   // Isto substitui o bloco 'el.userBtn?.addEventListener("click", () => Overlays.open(el.loginModal));'
   el.userBtn?.addEventListener("click", () => {
       inicializarFirebase();
@@ -515,7 +510,7 @@ document.addEventListener("DOMContentLoaded", () => {
   );
 
   el.extrasConfirm?.addEventListener("click", () => {
-    if (!produtoExtras) return setTimeout(()=>Overlays.closeAll(),0);
+    if (!produtoExtras) return Overlays.closeAll();
     const checks = [...document.querySelectorAll("#extras-modal .extras-list input:checked")];
 
     const extrasContagem = {};
@@ -544,11 +539,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
     renderMiniCart();
     popupAdd("Adicionado ao carrinho!");
-    setTimeout(()=>Overlays.closeAll(),0);
+    Overlays.closeAll();
   });
 
   document.querySelectorAll("#extras-modal .extras-close").forEach((b) =>
-    b.addEventListener("click", () => setTimeout(()=>Overlays.closeAll(),0))
+    b.addEventListener("click", () => Overlays.closeAll())
   );
 
   /* ------------------ 🥤 Combos (MANTIDO) ------------------ */
@@ -606,7 +601,7 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   el.comboConfirm?.addEventListener("click", () => {
-    if (!_comboCtx) return setTimeout(()=>Overlays.closeAll(),0);
+    if (!_comboCtx) return Overlays.closeAll();
     const sel = el.comboBody?.querySelector('input[name="combo-drink"]:checked');
     if (!sel) return;
     const opt = comboDrinkOptions[_comboCtx.grupo][+sel.value];
@@ -619,11 +614,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
     popupAdd("Combo adicionado!");
     renderMiniCart();
-    setTimeout(()=>Overlays.closeAll(),0);
+    Overlays.closeAll();
   });
 
   document.querySelectorAll("#combo-modal .combo-close").forEach((b) =>
-    b.addEventListener("click", () => setTimeout(()=>Overlays.closeAll(),0))
+    b.addEventListener("click", () => Overlays.closeAll())
   );
 
   /* ------------------ 🧺 Adicionar item comum (MANTIDO) ------------------ */
@@ -993,7 +988,7 @@ document.addEventListener("DOMContentLoaded", () => {
     // Chama a função-base de adicionar, que não abre o modal de combos
     addCommonItem(promo.nome, promo.preco); 
     
-    setTimeout(()=>Overlays.closeAll(),0); // Fecha o modal após adicionar
+    Overlays.closeAll(); // Fecha o modal após adicionar
   });
 
   // 3. Navegação (Próximo / Anterior)
@@ -1010,7 +1005,7 @@ document.addEventListener("DOMContentLoaded", () => {
   });
   
   // 4. Fechar o modal
-  el.promoClose?.addEventListener("click", () => setTimeout(()=>Overlays.closeAll(),0));
+  el.promoClose?.addEventListener("click", () => Overlays.closeAll());
 
   // 5. Navegação do carrossel principal (mantido)
   el.cPrev?.addEventListener("click", () => {
@@ -1253,7 +1248,7 @@ document.addEventListener("DOMContentLoaded", () => {
       if(couponInput) couponInput.value = "";
       
       renderMiniCart();
-      setTimeout(()=>Overlays.closeAll(),0);
+      Overlays.closeAll();
 
     } catch (err) {
       console.error("Erro ao fechar pedido ou atualizar contador/recompensa:", err);
@@ -1280,7 +1275,7 @@ document.addEventListener("DOMContentLoaded", () => {
     carregarPedidos(currentUser.uid); 
   });
 
-  el.pedidosFecharBtn?.addEventListener("click", () => setTimeout(()=>Overlays.closeAll(),0));
+  el.pedidosFecharBtn?.addEventListener("click", () => Overlays.closeAll());
 
   // 2. Lógica de carregar pedidos (MANTIDO)
   async function carregarPedidos(userId) {
@@ -1396,7 +1391,7 @@ document.addEventListener("DOMContentLoaded", () => {
       // Feedback ao usuário
       popupAdd("Pedido anterior adicionado ao carrinho!");
       renderMiniCart(); // Atualiza o carrinho (backend)
-      setTimeout(()=>Overlays.closeAll(),0); // Fecha o painel de pedidos
+      Overlays.closeAll(); // Fecha o painel de pedidos
       Overlays.open(el.miniCart); // Abre o mini-carrinho
 
     } catch (err) {
@@ -1598,7 +1593,7 @@ function exibirRecompensas(pedidosFeitos, recompensasDisponiveis, cupomStatus, R
                 if(couponInput) couponInput.value = codigo;
 
                 renderMiniCart(); // Recalcula e mostra a mensagem
-                setTimeout(()=>Overlays.closeAll(),0);
+                Overlays.closeAll();
                 popupAdd(`Cupom ${codigo} aplicado! ✅`);
                 Overlays.open(el.miniCart); // Abre o mini-carrinho para ver o desconto
             }
@@ -1683,7 +1678,7 @@ async function carregarHistoricoRecompensas(userId) {
   });
 
   // 2. Lógica de fechar o painel
-  el.recompensasFecharBtn?.addEventListener("click", () => setTimeout(()=>Overlays.closeAll(),0));
+  el.recompensasFecharBtn?.addEventListener("click", () => Overlays.closeAll());
 
 /* ------------------ FIM DO BLOCO V3.5.3 ------------------ */
 
@@ -1758,7 +1753,7 @@ async function carregarHistoricoRecompensas(userId) {
       });
     });
 
-    div.querySelector(".dashboard-close").addEventListener("click", () => setTimeout(()=>Overlays.closeAll(),0));
+    div.querySelector(".dashboard-close").addEventListener("click", () => Overlays.closeAll());
   }
 
   function createAdminFab() {
@@ -1979,7 +1974,7 @@ async function carregarHistoricoRecompensas(userId) {
     } else {
       if (el.reportsBtn) el.reportsBtn.style.display = "none";
       document.getElementById("admin-dashboard")?.remove();
-      // setTimeout(()=>Overlays.closeAll(),0); // Removido para evitar fechar modais no carregamento
+      // Overlays.closeAll(); // Removido para evitar fechar modais no carregamento
     }
   });
 
@@ -2074,589 +2069,190 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
 });
-
 /* =========================================================
-   🔥 DFL v3.9.9 – Estável (Login Corrigido + Cliques Seguros + Lazy Firebase)
-   HOTFIX NÃO-DESTRUTIVO: adicionado ao final do script original.
-   - Corrige fechamento instantâneo de modais/painéis.
-   - Torna overlay seguro (só fecha ao clicar exatamente no fundo).
-   - Cria zonas seguras dentro dos modais (stopPropagation em captura).
-   - Login Google com isLoginInProgress + fallback redirect.
-   - Mantém HTML/CSS e funções existentes, substituindo com compatibilidade.
+   🔧 PATCH v3.7.7 — Delegação de Fechar Modais + Som no Finalizar
+   (não altera nada do restante do site)
 ========================================================= */
-(function(){
-  "use strict";
+(function () {
+  const $ = (sel, ctx = document) => ctx.querySelector(sel);
+  const $$ = (sel, ctx = document) => Array.from(ctx.querySelectorAll(sel));
+  const byId = (id) => document.getElementById(id);
+  const hide = (el, cls = 'show') => el && el.classList.remove(cls);
+  const off = (el, cls = 'active') => el && el.classList.remove(cls);
 
-  const $ = (sel, root=document) => root.querySelector(sel);
-  const $$ = (sel, root=document) => Array.from(root.querySelectorAll(sel));
-  const now = () => (typeof performance!=="undefined" && performance.now) ? performance.now() : Date.now();
-  const safe = (fn)=>{ try { return fn(); } catch(e){ console.error(e); } };
-
-  /* ---------------------- GUARDAS DE CLIQUE ---------------------- */
-  const CLOSE_GUARD_WINDOW_MS = 160;
-  let lastIntentionalOpenAt = 0;
-  let lastInternalClickAt = 0;
-
-  function isInsideModal(t){
-    return !!(t && t.closest && t.closest("[data-modal-container], [data-modal], .modal, .panel, .drawer"));
-  }
-
-  // Zona segura: captura antes de handlers antigos
-  document.addEventListener("click", function(e){
-    const inside = e.target.closest && e.target.closest("[data-modal-container], [data-modal], .modal, .panel, .drawer");
-    if (inside){
-      lastInternalClickAt = now();
-      e.stopPropagation();
-    }
-  }, true);
-
-  // Overlay seguro: só fecha quando o clique é no overlay, não nos filhos
-  document.addEventListener("click", function(e){
-    const ov = e.target.closest && e.target.closest("[data-overlay], .overlay, #cart-backdrop, #backdrop, .backdrop");
-    if (!ov) return;
-    if (ov !== e.target) return;
-    if (now() - lastIntentionalOpenAt < CLOSE_GUARD_WINDOW_MS) return;
-    if (now() - lastInternalClickAt < CLOSE_GUARD_WINDOW_MS) return;
-    // Tenta usar Overlays.closeAll se existir, senão fecha por classes comuns
-    if (window.Overlays && typeof window.Overlays.closeAll === "function"){
-      safe(()=>window.Overlays.closeAll());
-    } else {
-      $$(".modal.show, .modal[open], .panel.active, .drawer.active, #mini-cart.active, .pedidos-panel.active, .recompensas-panel.active, #admin-dashboard.show")
-        .forEach(el=>{ el.classList.remove("show","active"); el.removeAttribute("open"); });
-      // Tenta esconder backdrop comum
-      const bd = $("#cart-backdrop") || $("#backdrop") || $(".backdrop");
-      if (bd) bd.classList.remove("show","active");
-    }
-  });
-
-  // Fallback global: clique fora dos modais fecha, respeitando guardas
-  document.addEventListener("click", function(e){
-    if (isInsideModal(e.target)) return;
-    if (now() - lastIntentionalOpenAt < CLOSE_GUARD_WINDOW_MS) return;
-    if (now() - lastInternalClickAt < CLOSE_GUARD_WINDOW_MS) return;
-    if (window.Overlays && typeof window.Overlays.closeAll === "function"){
-      safe(()=>window.Overlays.closeAll());
-    }
-  });
-
-  /* ---------------------- OVERLAYS COMPAT ------------------------ */
-  // Se existir Overlays, corrigimos a lógica de open/close para não fechar instantâneo.
-  if (window.Overlays && typeof window.Overlays === "object"){
-    // backup (para depuração)
-    const __open = window.Overlays.open ? window.Overlays.open.bind(window.Overlays) : null;
-    const __closeAll = window.Overlays.closeAll ? window.Overlays.closeAll.bind(window.Overlays) : null;
-
-    window.Overlays.closeAll = function(){
-      // fecha comuns, respeitando itens "grudados" (data-sticky)
-      $$(".modal.show, #mini-cart.active, .pedidos-panel.active, .recompensas-panel.active, #admin-dashboard.show, .panel.active, .drawer.active")
-        .forEach((el)=>{ if (!el.hasAttribute || !el.hasAttribute("data-sticky")) { el.classList.remove("show","active"); el.removeAttribute("open"); } });
-      const bd = $("#cart-backdrop") || $("#backdrop") || $(".backdrop");
-      if (bd) bd.classList.remove("show","active");
-    };
-
-    window.Overlays.open = function(modalLike){
-      lastIntentionalOpenAt = now();
-      // NUNCA fechar imediatamente após abrir
-      if (!modalLike) return;
-      const id = modalLike.id || "";
-      const cls = (id === "mini-cart" || id === "painelPedidos" || id === "recompensas-panel" || modalLike.classList.contains("panel") || modalLike.classList.contains("drawer")) ? "active" : "show";
-      modalLike.classList.add(cls);
-      modalLike.removeAttribute("hidden");
-      modalLike.setAttribute("aria-hidden","false");
-      const bd = $("#cart-backdrop") || $("#backdrop") || $(".backdrop");
-      if (bd) bd.classList.add("show","active");
-    };
-  }
-
-  /* ---------------------- LOGIN GOOGLE --------------------------- */
-  // Mantém lazy init (melhor TTI). Implementa flag isLoginInProgress + fallback redirect.
-  let isLoginInProgress = false;
-  let firebaseApp = null, firebaseAuth = null, providers = null;
-  let initializingFirebase = false;
-
-  async function ensureFirebase(){
-    if (firebaseApp && firebaseAuth && providers) return { firebaseApp, firebaseAuth, providers };
-    if (initializingFirebase){
-      while (initializingFirebase){ await new Promise(r => setTimeout(r, 25)); }
-      return { firebaseApp, firebaseAuth, providers };
-    }
-    initializingFirebase = true;
-    try{
-      const [{ initializeApp }, { getAuth, setPersistence, browserLocalPersistence, GoogleAuthProvider, signInWithPopup, signInWithRedirect, onAuthStateChanged, signOut }] = await Promise.all([
-        import("https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js"),
-        import("https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js"),
-      ]);
-      const cfg = (typeof window !== "undefined" && window.__DFL_FIREBASE_CONFIG) || {
-        apiKey: "YOUR_API_KEY",
-        authDomain: "YOUR_PROJECT.firebaseapp.com",
-        projectId: "YOUR_PROJECT_ID",
-        appId: "YOUR_APP_ID",
-      };
-      firebaseApp = initializeApp(cfg);
-      firebaseAuth = getAuth(firebaseApp);
-      providers = { GoogleAuthProvider, signInWithPopup, signInWithRedirect, setPersistence, browserLocalPersistence, onAuthStateChanged, signOut };
-      await setPersistence(firebaseAuth, browserLocalPersistence);
-      return { firebaseApp, firebaseAuth, providers };
-    } finally {
-      initializingFirebase = false;
-    }
-  }
-
-  async function loginWithGoogle(){
-    if (isLoginInProgress) { console.log("Login já em andamento..."); return; }
-    isLoginInProgress = true;
-    try{
-      const { firebaseAuth, providers } = await ensureFirebase();
-      const provider = new providers.GoogleAuthProvider();
-      if (provider.setCustomParameters) provider.setCustomParameters({ prompt: "select_account" });
-      try{
-        await providers.signInWithPopup(firebaseAuth, provider);
-      }catch(err){
-        const code = (err && err.code) || "";
-        if (code.includes("popup-closed-by-user") || code.includes("cancelled-popup-request") || code.includes("popup-blocked")){
-          console.warn("Popup não concluído, tentando redirect...");
-          await providers.signInWithRedirect(firebaseAuth, provider);
-        } else {
-          console.error("Erro login (popup):", err);
-          try { await providers.signInWithRedirect(firebaseAuth, provider); }
-          catch(err2){ console.error("Erro login (redirect):", err2); alert("Não foi possível entrar com o Google agora. Tente novamente."); }
-        }
-      }
-    } finally {
-      isLoginInProgress = false;
-    }
-  }
-
-  async function logoutIfPossible(){
-    try{
-      const { firebaseAuth, providers } = await ensureFirebase();
-      await providers.signOut(firebaseAuth);
-    }catch(e){ console.error("Erro ao sair:", e); }
-  }
-
-  function bindAuthUI(){
-    // Seletores abrangentes compatíveis com seu HTML
-    const loginButtons = [
-      "#google-login", "#btnLoginGoogle", "[data-login='google']", ".btn-google", "button.google-login"
-    ];
-    const logoutButtons = ["#btnLogout", "[data-logout]", ".btn-logout"];
-
-    loginButtons.forEach(sel => {
-      const el = document.querySelector(sel);
-      if (el){
-        el.addEventListener("click", function(e){
-          e.preventDefault(); e.stopPropagation();
-          lastIntentionalOpenAt = now();
-          loginWithGoogle();
-        });
-      }
-    });
-    logoutButtons.forEach(sel => {
-      const el = document.querySelector(sel);
-      if (el){
-        el.addEventListener("click", function(e){
-          e.preventDefault(); e.stopPropagation();
-          logoutIfPossible();
-        });
-      }
-    });
-
-    // Atualiza UI básica se existirem elementos de estado
-    ensureFirebase().then(({ firebaseAuth, providers })=>{
-      providers.onAuthStateChanged(firebaseAuth, (user)=>{
-        const isLogged = !!user;
-        document.querySelectorAll("[data-auth='logged-in']").forEach(el=> el.style.display = isLogged ? "" : "none");
-        document.querySelectorAll("[data-auth='logged-out']").forEach(el=> el.style.display = isLogged ? "none" : "");
-        const nameEl = document.querySelector("#userName, [data-user-name]");
-        const avatarEl = document.querySelector("#userAvatar, [data-user-avatar]");
-        if (nameEl) nameEl.textContent = isLogged ? (user.displayName || user.email || "Usuário") : "";
-        if (avatarEl){
-          if (isLogged && user.photoURL){ avatarEl.src = user.photoURL; avatarEl.removeAttribute("hidden"); }
-          else { avatarEl.setAttribute("hidden","true"); }
-        }
-        document.dispatchEvent(new CustomEvent("dfl:auth-changed", { detail: { user } }));
-      });
+  // 🔊 Som APENAS no botão de finalizar pedido
+  const finalizarBtn = $('#finalizar-pedido, .finalizar-pedido');
+  if (finalizarBtn) {
+    finalizarBtn.addEventListener('click', () => {
+      try { new Audio('click.wav').play(); } catch (_) {}
     });
   }
 
-  // Inicialização
-  document.addEventListener("DOMContentLoaded", function(){
-    // Garante que elementos com [data-open] permaneçam abertos
-    document.querySelectorAll("[data-open]").forEach(el => { lastIntentionalOpenAt = now(); el.classList.add("show","active"); el.removeAttribute("hidden"); });
-    bindAuthUI();
-  });
+  // 🧠 Delegação única para fechar tudo o que precisa
+  document.addEventListener('click', (e) => {
+    const t = e.target;
 
-})(); 
-/* ======================= FIM HOTFIX v3.9.9 ======================= */
-
-
-/* =========================================================
-   🔧 HOTFIX v3.9.9b — Guardas para pointerdown/mousedown/touchstart
-   Motivo: Alguns handlers antigos fecham modais no "pointerdown"/"mousedown"
-           antes do "click". Este patch neutraliza o fechamento precoce.
-========================================================= */
-(function(){
-  "use strict";
-  const now = () => (typeof performance!=="undefined" && performance.now) ? performance.now() : Date.now();
-
-  // Janela de proteção ampliada
-  const GUARD_MS = 220;
-  let guardUntil = 0;
-
-  function setGuard(){
-    guardUntil = now() + GUARD_MS;
-  }
-  function isGuardActive(){
-    return now() < guardUntil;
-  }
-
-  // Marcar guardas ao acionar qualquer abridor
-  function markOpenGuardFrom(e){
-    try{
-      const opener = e.target && e.target.closest && e.target.closest("[data-open-target], .open-modal, .btn-open, [data-open]");
-      if (opener){
-        setGuard();
-      }
-    }catch(_){}
-  }
-
-  // Impedir fechamentos quando a guarda está ativa
-  function neutralizeIfGuard(e){
-    if (!isGuardActive()) return;
-    // Se o alvo estiver dentro de um modal/painel, não propaga
-    const inside = e.target && e.target.closest && e.target.closest("[data-modal-container], [data-modal], .modal, .panel, .drawer");
-    if (inside){
-      e.stopPropagation();
-      e.stopImmediatePropagation && e.stopImmediatePropagation();
-    }
-    // Se clicar no overlay enquanto ainda está guardado, também segura
-    const ov = e.target && e.target.closest && e.target.closest("[data-overlay], .overlay, #cart-backdrop, #backdrop, .backdrop");
-    if (ov){
-      e.stopPropagation();
-      e.stopImmediatePropagation && e.stopImmediatePropagation();
-      e.preventDefault();
-    }
-  }
-
-  // Captura ampla e cedo o suficiente para bloquear handlers antigos
-  ["pointerdown","mousedown","touchstart","click"].forEach(type => {
-    document.addEventListener(type, markOpenGuardFrom, true);
-    document.addEventListener(type, neutralizeIfGuard, true);
-  });
-
-  // Endurecer Overlays.closeAll (se existir) para respeitar a guarda
-  if (window.Overlays && typeof window.Overlays.closeAll === "function"){
-    const _closeAll = window.Overlays.closeAll.bind(window.Overlays);
-    window.Overlays.closeAll = function(){
-      if (isGuardActive()) return; // não fecha durante a guarda
-      return _closeAll();
-    };
-  }
-
-  // Expõe pequena API para debug (opcional)
-  window.__DFL_GUARD = { set: () => setGuard(), active: () => isGuardActive(), until: () => guardUntil };
-})(); 
-/* ==================== FIM HOTFIX v3.9.9b ==================== */
-
-
-/* =========================================================
-   🛠️ HOTFIX v3.9.9c — Escopo de fechamento refinado + debug + guards up
-   - NÃO remove mais .panel/.drawer genéricos (protege banners fixos/status).
-   - Fecha APENAS ids/áreas conhecidas (mini-cart, pedidos, recompensas, modais).
-   - Guarda reforçada: também cobre pointerup/mouseup/touchend.
-   - Switch global anti-fechamento: window.__DFL_FREEZE_CLOSES = true
-   - Logs de diagnóstico quando Overlays.closeAll() for chamado.
-========================================================= */
-(function(){
-  "use strict";
-
-  // ======== Switch global para desativar qualquer fechamento (útil p/ teste) ========
-  window.__DFL_FREEZE_CLOSES = window.__DFL_FREEZE_CLOSES || false;
-  function freezes(){ return !!window.__DFL_FREEZE_CLOSES; }
-
-  // ======== Guarda reforçada (cobre DOWN e UP) ========
-  const tNow = () => (typeof performance!=="undefined" && performance.now) ? performance.now() : Date.now();
-  const GUARD_MS = 260;
-  let guardUntil = 0;
-  function setGuard(){ guardUntil = tNow() + GUARD_MS; }
-  function isGuard(){ return tNow() < guardUntil; }
-
-  function markGuardIfOpener(e){
-    const opener = e.target && e.target.closest && e.target.closest("[data-open-target], .open-modal, .btn-open, [data-open], [data-trigger='open']");
-    if (opener) setGuard();
-  }
-
-  function neutralizeIfGuard(e){
-    if (!isGuard()) return;
-    // Bloqueia qualquer encerramento durante a guarda
-    if (e.stopImmediatePropagation) e.stopImmediatePropagation();
-    e.stopPropagation();
-  }
-
-  ["pointerdown","mousedown","touchstart","click","pointerup","mouseup","touchend"].forEach(type => {
-    document.addEventListener(type, markGuardIfOpener, true);
-    document.addEventListener(type, neutralizeIfGuard, true);
-  });
-
-  // ======== Escopo de fechamento refinado ========
-  function closeKnown(){
-    // NÃO mexer em .panel/.drawer genéricos para não sumir banners/status
-    const targets = [
-      ".modal.show",
-      ".modal[open]",
-      "#mini-cart.active",
-      ".pedidos-panel.active",
-      ".recompensas-panel.active",
-      "#admin-dashboard.show",
-      "[data-modal][data-open='true']"
-    ];
-    const list = targets.flatMap(sel => Array.from(document.querySelectorAll(sel)));
-    list.forEach(el => {
-      el.classList.remove("show","active");
-      el.removeAttribute && el.removeAttribute("open");
-      el.removeAttribute && el.removeAttribute("data-open");
-      el.setAttribute && el.setAttribute("aria-hidden","true");
-      el.setAttribute && el.setAttribute("hidden","true");
-    });
-    const bd = document.querySelector("#cart-backdrop") || document.querySelector("#backdrop");
-    if (bd) bd.classList.remove("show","active");
-  }
-
-  // ======== Overlay click: fecha apenas quando clicar EXATAMENTE no overlay conhecido ========
-  function isOverlay(el){
-    if (!el) return false;
-    // overlay aceitos explicitamente
-    return (el.id === "cart-backdrop" || el.id === "backdrop" || el.hasAttribute("data-overlay"));
-  }
-
-  document.addEventListener("click", function(e){
-    if (freezes()) return;
-    const ov = e.target;
-    if (!isOverlay(ov)) return;
-    if (isGuard()) { e.preventDefault(); return; }
-    closeKnown();
-  }, true); // captura para vencer antigos listeners
-
-  // ======== Monkey-patch Overlays.closeAll com diagnóstico e novos limites ========
-  if (window.Overlays && typeof window.Overlays.closeAll === "function"){
-    const _old = window.Overlays.closeAll.bind(window.Overlays);
-    window.Overlays.closeAll = function(){
-      if (freezes() || isGuard()) {
-        console.warn("DFL GUARD/FREEZE: closeAll() bloqueado.");
-        return;
-      }
-      try {
-        // em vez de varrer tudo, fechamos apenas conhecidos
-        closeKnown();
-      } catch (e) {
-        console.error("DFL closeKnown falhou, fallback para closeAll original", e);
-        _old();
-      }
-      // log leve p/ diagnóstico (uma linha, sem stack)
-      if (window.__DFL_DEBUG) console.debug("DFL: closeAll() executado (escopo refinado).");
-    };
-  }
-
-  // ======== Utilitário para abrir modais com proteção de guarda ========
-  window.DFL = Object.assign(window.DFL || {}, {
-    __v399_hotfixc: true,
-    guard: { set: ()=>setGuard(), active: ()=>isGuard(), until: ()=>guardUntil },
-    freezeCloses: (v)=>{ window.__DFL_FREEZE_CLOSES = !!v; },
-    openModalSafe: (elOrSel)=>{
-      const el = (typeof elOrSel === "string") ? document.querySelector(elOrSel) : elOrSel;
-      if (!el) return;
-      setGuard();
-      el.classList.add(el.id==="mini-cart" || el.classList.contains("pedidos-panel") || el.classList.contains("recompensas-panel") ? "active" : "show");
-      el.removeAttribute && el.removeAttribute("hidden");
-      el.setAttribute && el.setAttribute("aria-hidden","false");
-      const bd = document.querySelector("#cart-backdrop") || document.querySelector("#backdrop");
-      if (bd) bd.classList.add("show","active");
-    },
-    closeKnown
-  });
-
-})(); 
-/* ==================== FIM HOTFIX v3.9.9c ==================== */
-
-
-/* =========================================================
-   🚧 HOTFIX v3.9.9e — Reset prático de cliques
-   - Captura "click/pointer" nos botões de abrir e impede *qualquer*
-     outro listener de rodar naquele ciclo (stopImmediatePropagation).
-   - Abre o modal/painel imediatamente e só depois libera eventos.
-   - Backdrop (#cart-backdrop) fica com pointer-events:none até abrir algo.
-   - Nenhum som global; sons apenas quando sua função de finalizar pedido rodar.
-========================================================= */
-(function(){
-  "use strict";
-
-  const $  = (s, r=document)=>r.querySelector(s);
-  const $$ = (s, r=document)=>Array.from(r.querySelectorAll(s));
-  const now = ()=> (typeof performance!=="undefined" && performance.now) ? performance.now() : Date.now();
-
-  // Estado
-  let blockAllUntil = 0;
-  const BLOCK_MS = 180;
-
-  function blockNow(){ blockAllUntil = now() + BLOCK_MS; }
-  function blocked(){ return now() < blockAllUntil; }
-
-  // Backdrop seguro
-  function backdrop(){ return $("#cart-backdrop") || $("#backdrop"); }
-  function enableBackdrop(){
-    const bd = backdrop();
-    if (bd){ bd.classList.add("show","active"); bd.style.pointerEvents = "auto"; }
-  }
-  function disableBackdrop(){
-    const bd = backdrop();
-    if (bd){ bd.classList.remove("show","active"); bd.style.pointerEvents = "none"; }
-  }
-
-  // Open/Close centrais
-  function openEl(el){
-    if (!el) return;
-    blockNow();
-    el.removeAttribute("hidden");
-    el.setAttribute("aria-hidden","false");
-    // classe de aberto
-    const cls = (el.id==="mini-cart" || el.classList.contains("pedidos-panel") || el.classList.contains("recompensas-panel")) ? "active" : "show";
-    el.classList.add(cls);
-    enableBackdrop();
-  }
-  function closeEl(el){
-    if (!el) return;
-    el.classList.remove("show","active");
-    el.setAttribute("aria-hidden","true");
-    el.setAttribute("hidden","true");
-    // Se nada mais estiver aberto, desativa backdrop
-    const anyOpen = document.querySelector(".modal.show,.modal[open],#mini-cart.active,.pedidos-panel.active,.recompensas-panel.active");
-    if (!anyOpen) disableBackdrop();
-  }
-
-  function openBySelector(sel){ openEl($(sel)); }
-  function closeBySelector(sel){ closeEl($(sel)); }
-
-  // Expor utilitário simples
-  window.DFL = Object.assign(window.DFL||{}, { openEl, closeEl, openBySelector, closeBySelector });
-
-  // ---------- Inicialização segura do backdrop ----------
-  document.addEventListener("DOMContentLoaded", ()=>{
-    const bd = backdrop();
-    if (bd){ bd.style.pointerEvents = "none"; } // não bloqueia os cliques iniciais
-  });
-
-  // ---------- CAPTURA AGRESSIVA DE ABRIDORES ----------
-  const OPENERS = [
-    { sel: "#user-btn", target: "#login-modal" },
-    { sel: "#cart-icon", target: "#mini-cart" },
-    { sel: ".extras-btn", target: "#extras-modal" },
-    { sel: ".meus-pedidos-btn", target: "#painelPedidos" },
-    { sel: ".recompensas-btn", target: "#recompensas-panel" },
-    // Slides de promo: abre promo-modal (imagem/título tratam no JS original)
-    { sel: ".carousel .slide", target: "#promo-modal" },
-  ];
-
-  function isOpener(el){
-    for (const o of OPENERS){
-      if (el.closest && el.closest(o.sel)) return o;
-    }
-    return null;
-  }
-
-  function captureOpen(e){
-    const o = isOpener(e.target);
-    if (!o) return;
-    // mata qualquer outro handler neste ciclo
-    if (e.stopImmediatePropagation) e.stopImmediatePropagation();
-    e.stopPropagation();
-    e.preventDefault();
-    blockNow();
-    // Abre imediatamente
-    openBySelector(o.target);
-  }
-
-  ["pointerdown","mousedown","touchstart","click"].forEach(t => {
-    document.addEventListener(t, captureOpen, true);
-  });
-
-  // ---------- Fechadores (captura + bolha) ----------
-  const CLOSERS = [
-    ".login-close",
-    ".extras-close",
-    ".combo-close",
-    ".promo-close",
-    ".fechar-recompensas",
-    ".fechar-pedidos"
-  ];
-
-  function isInside(el, rootSel){
-    const r = $(rootSel);
-    return !!(r && el.closest && el.closest(rootSel));
-  }
-
-  function captureClose(e){
-    // Clique exatamente no backdrop
-    const bd = backdrop();
-    if (bd && e.target === bd){
-      if (e.stopImmediatePropagation) e.stopImmediatePropagation();
-      e.stopPropagation();
-      e.preventDefault();
-      // fecha itens conhecidos
-      closeBySelector("#login-modal");
-      closeBySelector("#extras-modal");
-      closeBySelector("#combo-modal");
-      closeBySelector("#promo-modal");
-      closeBySelector("#painelPedidos");
-      closeBySelector("#recompensas-panel");
-      closeBySelector("#mini-cart");
+    // Login
+    if (t.closest('.login-close')) {
+      hide(byId('login-modal'));
       return;
     }
-    // Botões de fechar
-    for (const sel of CLOSERS){
-      const btn = e.target.closest && e.target.closest(sel);
-      if (btn){
-        if (e.stopImmediatePropagation) e.stopImmediatePropagation();
-        e.stopPropagation();
-        e.preventDefault();
-        // Fecha por contexto
-        const modal = btn.closest(".modal") || btn.closest(".pedidos-panel") || btn.closest(".recompensas-panel") || $("#mini-cart");
-        closeEl(modal);
-        return;
-      }
-    }
-  }
 
-  ["click","pointerup","mouseup","touchend"].forEach(t => {
-    document.addEventListener(t, captureClose, true);
+    // Promo
+    if (t.closest('.promo-close')) {
+      hide(byId('promo-modal'));
+      return;
+    }
+
+    // Extras
+    if (t.closest('.extras-close')) {
+      hide(byId('extras-modal'));
+      return;
+    }
+
+    // Combo
+    if (t.closest('.combo-close')) {
+      hide(byId('combo-modal'));
+      return;
+    }
+
+    // Painéis laterais: Meus Pedidos / Minhas Recompensas
+    if (t.closest('.fechar-pedidos')) {
+      off($('.pedidos-panel'));
+      return;
+    }
+    if (t.closest('.fechar-recompensas')) {
+      off($('.recompensas-panel'));
+      return;
+    }
+
+    // Mini-carrinho fechado ao clicar no backdrop
+    const backdrop = byId('cart-backdrop');
+    if (backdrop && (t === backdrop || t.closest('#cart-backdrop'))) {
+      off($('.mini-cart'));
+      off(backdrop);
+      return;
+    }
+  }, { capture: true }); // captura garante que o clique não seja "engolido" por outros handlers
+})();
+// ======================================================
+// 🧩 PATCH EXTRA — Remove o fundo acinzentado ao fechar
+// ======================================================
+function clearBackdrop() {
+  const backdrop = document.getElementById('cart-backdrop');
+  if (backdrop) {
+    backdrop.classList.remove('active');
+    backdrop.style.opacity = '0';
+    backdrop.style.pointerEvents = 'none';
+  }
+  // Garante que nenhum modal permaneça ativo visualmente
+  document.querySelectorAll('.modal.show').forEach(m => m.classList.remove('show'));
+}
+
+// Monitora o fechamento dos painéis e modais
+['.login-close', '.fechar-pedidos', '.fechar-recompensas', '.promo-close', '.extras-close', '.combo-close']
+  .forEach(sel => {
+    document.addEventListener('click', (e) => {
+      if (e.target.closest(sel)) clearBackdrop();
+    });
+  });
+/* ======================================================
+   ✅ PATCH FINAL — Mini-Carrinho com clique fora + botão X
+   ====================================================== */
+(() => {
+  const miniCart = document.querySelector('.mini-cart');
+  const backdrop = document.getElementById('cart-backdrop');
+
+  if (!miniCart || !backdrop) return;
+
+  const closeCart = () => {
+    miniCart.classList.remove('active');
+    backdrop.classList.remove('active');
+    backdrop.style.pointerEvents = 'none';
+    document.body.style.overflow = '';
+  };
+
+  // Fecha pelo botão X (classe usada no seu HTML)
+  document.addEventListener('click', (e) => {
+    if (e.target.closest('.extras-close')) {
+      e.preventDefault();
+      e.stopPropagation();
+      closeCart();
+    }
   });
 
-  // ---------- Protege área interna dos modais (não fecha ao clicar dentro) ----------
-  document.addEventListener("click", (e)=>{
-    const inside = e.target.closest && e.target.closest(".modal,.pedidos-panel,.recompensas-panel,#mini-cart");
-    if (inside){
-      // segura propagação para evitar closeAll herdado
-      if (e.stopImmediatePropagation) e.stopImmediatePropagation();
-      e.stopPropagation();
-    }
-  }, true);
+  // Fecha clicando fora
+  backdrop.addEventListener('click', (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    closeCart();
+  });
 
-  // ---------- Overlays.closeAll compatível (se existir) ----------
-  if (window.Overlays && typeof window.Overlays.closeAll === "function"){
-    const _old = window.Overlays.closeAll.bind(window.Overlays);
-    window.Overlays.closeAll = function(){
-      if (blocked()) return;
-      // fecha apenas os conhecidos
-      closeBySelector("#login-modal");
-      closeBySelector("#extras-modal");
-      closeBySelector("#combo-modal");
-      closeBySelector("#promo-modal");
-      closeBySelector("#painelPedidos");
-      closeBySelector("#recompensas-panel");
-      closeBySelector("#mini-cart");
-      if (window.__DFL_DEBUG) console.debug("DFL v3.9.9e: closeAll (escopo seguro)");
-    };
+  // Bloqueia clique dentro do painel
+  miniCart.addEventListener('click', (e) => e.stopPropagation());
+})();
+/* ======================================================
+   ✅ PATCH DEFINITIVO — X do Mini-Carrinho
+   - Fecha no X sem depender de delegation no document
+   - Mantém clique-fora via backdrop
+   ====================================================== */
+(() => {
+  const miniCart  = document.querySelector('.mini-cart');
+  const backdrop  = document.getElementById('cart-backdrop');
+  if (!miniCart || !backdrop) return;
+
+  const openCart = () => {
+    miniCart.classList.add('active');
+    backdrop.classList.add('active');
+    backdrop.style.pointerEvents = 'auto';
+    document.body.style.overflow = 'hidden';
+  };
+
+  const closeCart = () => {
+    miniCart.classList.remove('active');
+    backdrop.classList.remove('active');
+    backdrop.style.pointerEvents = 'none';
+    document.body.style.overflow = '';
+  };
+
+  // 1) Fecha pelo X — listener DIRETO no botão (não depende de bubbling)
+  const closeBtn =
+    miniCart.querySelector('.extras-close') ||
+    miniCart.querySelector('.fechar-pedidos') ||
+    miniCart.querySelector('.mini-head .promo-close') ||
+    miniCart.querySelector('.mini-head button[aria-label*="Fechar" i]');
+
+  if (closeBtn) {
+    closeBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      closeCart();
+    });
   }
 
-})(); 
-/* ==================== FIM HOTFIX v3.9.9e ==================== */
+  // 2) Fecha clicando fora (backdrop)
+  backdrop.addEventListener('click', (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    closeCart();
+  });
 
+  // 3) Impede que cliques dentro do painel vazem para o fundo
+  miniCart.addEventListener('click', (e) => e.stopPropagation());
+
+  // 4) (Opcional) Abrir carrinho por botões existentes, sem interferir no X
+  document.addEventListener('click', (e) => {
+    if (e.target.closest('#cart-icon') || e.target.closest('.cart-button')) {
+      e.preventDefault();
+      e.stopPropagation();
+      openCart();
+    }
+  });
+
+  // 5) Tecla Esc fecha
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && miniCart.classList.contains('active')) {
+      closeCart();
+    }
+  });
+})();
