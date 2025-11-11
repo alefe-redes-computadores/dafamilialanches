@@ -5,7 +5,14 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>🍔 Da Família Lanches — DFL v3.8</title>
 
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://www.gstatic.com https://*.firebaseio.com https://cdn.jsdelivr.net https://accounts.google.com; frame-src 'self' https://accounts.google.com; connect-src 'self' https://www.googleapis.com https://securetoken.googleapis.com https://*.firebaseio.com https://firestore.googleapis.com https://accounts.google.com https://apis.google.com https://viacep.com.br; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:;">
+  <meta http-equiv="Content-Security-Policy" content="
+    default-src 'self'; 
+    script-src 'self' https://www.gstatic.com https://*.firebaseio.com https://cdn.jsdelivr.net https://accounts.google.com https://apis.google.com https://www.googleapis.com; 
+    frame-src 'self' https://accounts.google.com https://*.firebaseapp.com; 
+    connect-src 'self' https://www.googleapis.com https://securetoken.googleapis.com https://*.firebaseio.com https://firestore.googleapis.com https://accounts.google.com https://apis.google.com https://viacep.com.br; 
+    style-src 'self' 'unsafe-inline'; 
+    img-src 'self' data: https:;
+  ">
   <meta http-equiv="Cache-control" content="public, max-age=31536000, immutable">
 
   <link rel="preconnect" href="https://www.gstatic.com" crossorigin>
@@ -31,8 +38,8 @@
     }
   </style>
 
-  <link rel="stylesheet" href="style.css?v=3.8.3" />
-  <noscript><link rel="stylesheet" href="style.css?v=3.8.3"/></noscript>
+  <link rel="stylesheet" href="style.css?v=3.8.5" />
+  <noscript><link rel="stylesheet" href="style.css?v=3.8.5"/></noscript>
 
   <script defer src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
   <script defer src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
@@ -92,7 +99,6 @@
       <div class="mini-list"></div>
       <div class="mini-foot">
 
-        <!-- 🧭 Frete (desabilitado, com aviso) -->
         <div class="frete-container">
           <h4 style="margin-top:10px;">🚚 Entrega</h4>
           <div id="frete-em-breve" style="margin:10px 0;padding:10px;border-radius:8px;background:#fff3cd;color:#856404;font-weight:600;text-align:center;box-shadow:var(--shadow-1);">
@@ -116,7 +122,6 @@
         </div>
         <textarea id="address-input"  style="display:none;"></textarea>
 
-        <!-- 💸 Cupom -->
         <form id="coupon-form" class="coupon-form" novalidate>
           <input type="text" id="coupon-input" placeholder="Digite o cupom e clique em Aplicar" aria-label="Cupom de desconto"/>
           <button type="submit" id="coupon-apply-btn" class="btn-primary">Aplicar</button>
@@ -130,8 +135,6 @@
       </div>
     </aside>
 
-    <!-- ===== Seções do cardápio (igual ao seu) ===== -->
-    <!-- Combos -->
     <section class="menu-section">
       <h2>🧡 Combos</h2>
       <div class="grid">
@@ -169,7 +172,6 @@
       </div>
     </section>
 
-    <!-- Tradicionais -->
     <section class="menu-section">
       <h2>🍔 Nossos Lanches Tradicionais</h2>
       <div class="grid">
@@ -231,7 +233,6 @@
       </div>
     </section>
 
-    <!-- Artesanais -->
     <section class="menu-section">
       <h2>🍔 Lanches Artesanais</h2>
       <div class="grid">
@@ -261,7 +262,6 @@
       </div>
     </section>
     
-    <!-- Hot Dogs -->
     <section class="menu-section" id="hotdogs-section">
       <h2>🌭 DFD – Hot Dogs</h2>
       <div class="grid">
@@ -371,7 +371,6 @@
       </div>
     </section>
 
-    <!-- Modais -->
     <div id="promo-modal" class="modal" aria-hidden="true">
       <div class="promo-content modal-content" role="dialog" aria-modal="true">
         <div class="modal-head">
@@ -510,6 +509,6 @@
     <button id="cookie-accept" type="button">Aceitar</button>
   </div>
 
-  <script defer src="script.js?v=3.9.6"></script>
+  <script defer src="script.js?v=3.9.7"></script>
 </body>
 </html>
