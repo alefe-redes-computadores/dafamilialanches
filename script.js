@@ -2478,3 +2478,185 @@ document.addEventListener('DOMContentLoaded', () => {
 })(); 
 /* ==================== FIM HOTFIX v3.9.9c ==================== */
 
+
+/* =========================================================
+   🚧 HOTFIX v3.9.9e — Reset prático de cliques
+   - Captura "click/pointer" nos botões de abrir e impede *qualquer*
+     outro listener de rodar naquele ciclo (stopImmediatePropagation).
+   - Abre o modal/painel imediatamente e só depois libera eventos.
+   - Backdrop (#cart-backdrop) fica com pointer-events:none até abrir algo.
+   - Nenhum som global; sons apenas quando sua função de finalizar pedido rodar.
+========================================================= */
+(function(){
+  "use strict";
+
+  const $  = (s, r=document)=>r.querySelector(s);
+  const $$ = (s, r=document)=>Array.from(r.querySelectorAll(s));
+  const now = ()=> (typeof performance!=="undefined" && performance.now) ? performance.now() : Date.now();
+
+  // Estado
+  let blockAllUntil = 0;
+  const BLOCK_MS = 180;
+
+  function blockNow(){ blockAllUntil = now() + BLOCK_MS; }
+  function blocked(){ return now() < blockAllUntil; }
+
+  // Backdrop seguro
+  function backdrop(){ return $("#cart-backdrop") || $("#backdrop"); }
+  function enableBackdrop(){
+    const bd = backdrop();
+    if (bd){ bd.classList.add("show","active"); bd.style.pointerEvents = "auto"; }
+  }
+  function disableBackdrop(){
+    const bd = backdrop();
+    if (bd){ bd.classList.remove("show","active"); bd.style.pointerEvents = "none"; }
+  }
+
+  // Open/Close centrais
+  function openEl(el){
+    if (!el) return;
+    blockNow();
+    el.removeAttribute("hidden");
+    el.setAttribute("aria-hidden","false");
+    // classe de aberto
+    const cls = (el.id==="mini-cart" || el.classList.contains("pedidos-panel") || el.classList.contains("recompensas-panel")) ? "active" : "show";
+    el.classList.add(cls);
+    enableBackdrop();
+  }
+  function closeEl(el){
+    if (!el) return;
+    el.classList.remove("show","active");
+    el.setAttribute("aria-hidden","true");
+    el.setAttribute("hidden","true");
+    // Se nada mais estiver aberto, desativa backdrop
+    const anyOpen = document.querySelector(".modal.show,.modal[open],#mini-cart.active,.pedidos-panel.active,.recompensas-panel.active");
+    if (!anyOpen) disableBackdrop();
+  }
+
+  function openBySelector(sel){ openEl($(sel)); }
+  function closeBySelector(sel){ closeEl($(sel)); }
+
+  // Expor utilitário simples
+  window.DFL = Object.assign(window.DFL||{}, { openEl, closeEl, openBySelector, closeBySelector });
+
+  // ---------- Inicialização segura do backdrop ----------
+  document.addEventListener("DOMContentLoaded", ()=>{
+    const bd = backdrop();
+    if (bd){ bd.style.pointerEvents = "none"; } // não bloqueia os cliques iniciais
+  });
+
+  // ---------- CAPTURA AGRESSIVA DE ABRIDORES ----------
+  const OPENERS = [
+    { sel: "#user-btn", target: "#login-modal" },
+    { sel: "#cart-icon", target: "#mini-cart" },
+    { sel: ".extras-btn", target: "#extras-modal" },
+    { sel: ".meus-pedidos-btn", target: "#painelPedidos" },
+    { sel: ".recompensas-btn", target: "#recompensas-panel" },
+    // Slides de promo: abre promo-modal (imagem/título tratam no JS original)
+    { sel: ".carousel .slide", target: "#promo-modal" },
+  ];
+
+  function isOpener(el){
+    for (const o of OPENERS){
+      if (el.closest && el.closest(o.sel)) return o;
+    }
+    return null;
+  }
+
+  function captureOpen(e){
+    const o = isOpener(e.target);
+    if (!o) return;
+    // mata qualquer outro handler neste ciclo
+    if (e.stopImmediatePropagation) e.stopImmediatePropagation();
+    e.stopPropagation();
+    e.preventDefault();
+    blockNow();
+    // Abre imediatamente
+    openBySelector(o.target);
+  }
+
+  ["pointerdown","mousedown","touchstart","click"].forEach(t => {
+    document.addEventListener(t, captureOpen, true);
+  });
+
+  // ---------- Fechadores (captura + bolha) ----------
+  const CLOSERS = [
+    ".login-close",
+    ".extras-close",
+    ".combo-close",
+    ".promo-close",
+    ".fechar-recompensas",
+    ".fechar-pedidos"
+  ];
+
+  function isInside(el, rootSel){
+    const r = $(rootSel);
+    return !!(r && el.closest && el.closest(rootSel));
+  }
+
+  function captureClose(e){
+    // Clique exatamente no backdrop
+    const bd = backdrop();
+    if (bd && e.target === bd){
+      if (e.stopImmediatePropagation) e.stopImmediatePropagation();
+      e.stopPropagation();
+      e.preventDefault();
+      // fecha itens conhecidos
+      closeBySelector("#login-modal");
+      closeBySelector("#extras-modal");
+      closeBySelector("#combo-modal");
+      closeBySelector("#promo-modal");
+      closeBySelector("#painelPedidos");
+      closeBySelector("#recompensas-panel");
+      closeBySelector("#mini-cart");
+      return;
+    }
+    // Botões de fechar
+    for (const sel of CLOSERS){
+      const btn = e.target.closest && e.target.closest(sel);
+      if (btn){
+        if (e.stopImmediatePropagation) e.stopImmediatePropagation();
+        e.stopPropagation();
+        e.preventDefault();
+        // Fecha por contexto
+        const modal = btn.closest(".modal") || btn.closest(".pedidos-panel") || btn.closest(".recompensas-panel") || $("#mini-cart");
+        closeEl(modal);
+        return;
+      }
+    }
+  }
+
+  ["click","pointerup","mouseup","touchend"].forEach(t => {
+    document.addEventListener(t, captureClose, true);
+  });
+
+  // ---------- Protege área interna dos modais (não fecha ao clicar dentro) ----------
+  document.addEventListener("click", (e)=>{
+    const inside = e.target.closest && e.target.closest(".modal,.pedidos-panel,.recompensas-panel,#mini-cart");
+    if (inside){
+      // segura propagação para evitar closeAll herdado
+      if (e.stopImmediatePropagation) e.stopImmediatePropagation();
+      e.stopPropagation();
+    }
+  }, true);
+
+  // ---------- Overlays.closeAll compatível (se existir) ----------
+  if (window.Overlays && typeof window.Overlays.closeAll === "function"){
+    const _old = window.Overlays.closeAll.bind(window.Overlays);
+    window.Overlays.closeAll = function(){
+      if (blocked()) return;
+      // fecha apenas os conhecidos
+      closeBySelector("#login-modal");
+      closeBySelector("#extras-modal");
+      closeBySelector("#combo-modal");
+      closeBySelector("#promo-modal");
+      closeBySelector("#painelPedidos");
+      closeBySelector("#recompensas-panel");
+      closeBySelector("#mini-cart");
+      if (window.__DFL_DEBUG) console.debug("DFL v3.9.9e: closeAll (escopo seguro)");
+    };
+  }
+
+})(); 
+/* ==================== FIM HOTFIX v3.9.9e ==================== */
+
