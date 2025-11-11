@@ -2256,3 +2256,137 @@ function clearBackdrop() {
     }
   });
 })();
+
+
+/* =========================================================
+   🔥 DFL v3.9.9 – Login Corrigido (Popup Seguro + Fallback)
+   - Inicializa Firebase no mesmo clique do botão Google.
+   - Usa signInWithPopup; se bloqueado/fechado, fallback para signInWithRedirect.
+   - setPersistence(LOCAL) e fechamento do modal após sucesso.
+   - Não altera layout nem demais handlers.
+========================================================= */
+(function() {
+  if (window.__DFL_LOGIN_PATCH_399__) return;
+  window.__DFL_LOGIN_PATCH_399__ = true;
+
+  function ensureFirebase() {
+    try {
+      if (!window.firebase) {
+        console.warn("[DFL] Firebase não encontrado no escopo global.");
+        return null;
+      }
+      if (!firebase.apps || !firebase.apps.length) {
+        if (typeof firebaseConfig === "undefined") {
+          console.error("[DFL] firebaseConfig não definido.");
+          return null;
+        }
+        firebase.initializeApp(firebaseConfig);
+        console.log("[DFL] Firebase inicializado.");
+      }
+      return firebase.auth();
+    } catch (e) {
+      console.error("[DFL] Erro ao inicializar Firebase:", e);
+      return null;
+    }
+  }
+
+  function bindGoogleLogin() {
+    var btn = document.getElementById("google-login");
+    if (!btn) {
+      document.addEventListener("click", function once(e) {
+        if (e.target && (e.target.id === "user-btn" || (e.target.closest && e.target.closest("#user-btn")))) {
+          setTimeout(bindGoogleLogin, 0);
+          document.removeEventListener("click", once, true);
+        }
+      }, true);
+      return;
+    }
+
+    // Remove handlers antigos preservando o elemento
+    var cloned = btn.cloneNode(true);
+    btn.parentNode.replaceChild(cloned, btn);
+    btn = cloned;
+
+    btn.addEventListener("click", async function(ev) {
+      try {
+        const auth = ensureFirebase();
+        if (!auth) return;
+
+        const provider = new firebase.auth.GoogleAuthProvider();
+        provider.setCustomParameters({ prompt: "select_account" });
+
+        await auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL);
+
+        console.log("[DFL] Iniciando signInWithPopup...");
+        const result = await auth.signInWithPopup(provider);
+        const user = result && result.user;
+        console.log("[DFL] Login concluído:", user && (user.email || user.uid));
+
+        // Fecha modal de login se existir
+        try {
+          var loginModal = document.getElementById("login-modal");
+          if (loginModal) {
+            loginModal.classList.remove("show");
+            loginModal.setAttribute("aria-hidden", "true");
+          }
+          if (typeof Overlays === "object" && Overlays && Overlays.closeAll) {
+            Overlays.closeAll();
+          }
+        } catch(_) {}
+
+      } catch (err) {
+        console.warn("[DFL] Erro popup Google:", err && (err.code || err.message || err));
+        // Fallback para redirect em casos de bloqueio/fechamento
+        try {
+          if (!window.firebase) return;
+          const auth = firebase.auth();
+          const provider = new firebase.auth.GoogleAuthProvider();
+          provider.setCustomParameters({ prompt: "select_account" });
+
+          if (err && (String(err.code).includes("popup-blocked")
+                   | String(err.code).includes("popup-closed")
+                   | (String(err.message || "").toLowerCase().includes("blocked")))) {
+            console.log("[DFL] Fallback para signInWithRedirect...");
+            await auth.signInWithRedirect(provider);
+          }
+        } catch (e2) {
+          console.error("[DFL] Fallback redirect falhou:", e2);
+        }
+      }
+    }, { passive: true });
+  }
+
+  if (document.readyState === "complete" || document.readyState === "interactive") {
+    setTimeout(bindGoogleLogin, 0);
+  } else {
+    document.addEventListener("DOMContentLoaded", bindGoogleLogin);
+  }
+
+  // Trata retorno de redirect (pós-auth)
+  window.addEventListener("load", function() {
+    try {
+      const auth = ensureFirebase();
+      if (!auth) return;
+      auth.getRedirectResult().then(function(result) {
+        if (result && result.user) {
+          console.log("[DFL] Login por redirect concluído:", result.user.email || result.user.uid);
+          try {
+            if (typeof Overlays === "object" && Overlays && Overlays.closeAll) {
+              Overlays.closeAll();
+            }
+            var loginModal = document.getElementById("login-modal");
+            if (loginModal) {
+              loginModal.classList.remove("show");
+              loginModal.setAttribute("aria-hidden", "true");
+            }
+          } catch(_) {}
+        }
+      }).catch(function(e) {
+        console.warn("[DFL] getRedirectResult erro:", e && (e.code || e.message || e));
+      });
+    } catch (e) {
+      console.warn("[DFL] Erro no processamento pós-redirect:", e);
+    }
+  });
+})();
+
