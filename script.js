@@ -2363,7 +2363,23 @@ function clearBackdrop() {
   }
 
   // Trata retorno de redirect (pós-auth)
-  window.addEventListener("load", function() {
+  
+  try {
+    const auth = ensureFirebase();
+    if (auth && typeof auth.onAuthStateChanged === "function") {
+      auth.onAuthStateChanged(function(user){
+        if (user && user.uid) {
+          console.log("[DFL] onAuthStateChanged: usuário autenticado:", user.email || user.uid);
+          try {
+            var loginModal = document.getElementById("login-modal");
+            if (loginModal) { loginModal.classList.remove("show"); loginModal.setAttribute("aria-hidden","true"); }
+            if (typeof Overlays === "object" && Overlays && Overlays.closeAll) { Overlays.closeAll(); }
+          } catch(_){}
+        }
+      });
+    }
+  } catch(_){}
+window.addEventListener("load", function() {
     try {
       const auth = ensureFirebase();
       if (!auth) return;
