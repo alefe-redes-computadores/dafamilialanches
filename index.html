@@ -3,24 +3,29 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>🍔 Da Família Lanches — DFL v3.8</title>
-
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://www.gstatic.com https://*.firebaseio.com https://cdn.jsdelivr.net; connect-src 'self' https://www.googleapis.com https://securetoken.googleapis.com https://*.firebaseio.com https://firestore.googleapis.com https://accounts.google.com https://apis.google.com https://viacep.com.br; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:;">
-  <meta http-equiv="Cache-control" content="public, max-age=31536000, immutable">
+  <title>🍔 Da Família Lanches</title>
 
   <link rel="preconnect" href="https://www.gstatic.com" crossorigin>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
   <link rel="preload" as="image" href="logo.png">
-  
+  <link rel="preload" as="image" href="promocoes/promo1.jpg">
+  <link rel="preload" as="image" href="promocoes/promo2.jpg">
+  <link rel="preload" as="image" href="imagens/bitela.png">
+
   <style>
     :root{
+      /* Paleta */
       --preto:#000;
-      --bg1:#f8f9fa;
-      --bg2:#e9ecef;
-      --acento:#ffca28;
-      --botao:#ffb300;
-      --danger:#d32f2f;
-      --success:#4caf50;
+      --bg1:#ffeb3b;      /* topo do gradiente */
+      --bg2:#ffd54f;      /* base do gradiente (cor original) */
+      --acento:#ffca28;   /* header/barras */
+      --botao:#ffb300;    /* CTAs */
+      --danger:#d32f2f;   /* fechado/erros */
+      --success:#4caf50;  /* aberto/ok */
       --txt:#222;
+
+      /* UI */
       --rad-sm:8px;
       --rad:10px;
       --rad-lg:12px;
@@ -29,16 +34,285 @@
       --shadow-3:0 5px 15px rgba(0,0,0,.30);
       --shadow-in:inset 0 1px 0 rgba(255,255,255,.25);
     }
+
+    html,body{height:100%}
+    body{
+      margin:0;
+      color:var(--txt);
+      font-family:"Inter","Poppins",system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+      background:linear-gradient(180deg,var(--bg1) 0%, var(--bg2) 100%);
+      background-attachment:fixed;
+      scroll-behavior:smooth;
+      -webkit-font-smoothing:antialiased;
+      -moz-osx-font-smoothing:grayscale;
+    }
+
+    /* ================= HEADER ================= */
+    .header{
+      position:fixed; inset-inline:0; top:0; z-index:900;
+      display:flex; justify-content:space-between; align-items:center;
+      background:var(--acento);
+      padding:10px 16px;
+      box-shadow:var(--shadow-1);
+    }
+    .header-content{display:flex; align-items:center; gap:12px}
+    .logo{width:52px; height:52px}
+    .header-info h1{margin:0; font-size:1.2rem}
+    .tagline{margin:0; font-size:.85rem; color:#d84315}
+    .header-actions{display:flex; align-items:center; gap:10px}
+
+    /* ================= WRAPPER ================= */
+    .main-content-wrapper{padding-top:72px}
+
+    /* ================= BOTÕES TOPO ================= */
+    .user-button{
+      background:linear-gradient(135deg,#fff,#f7f7f7);
+      border:1px solid #ddd; border-radius:var(--rad);
+      padding:8px 12px; font-weight:600; cursor:pointer; transition:.2s;
+      box-shadow:0 1px 0 rgba(255,255,255,.6);
+    }
+    .user-button:hover{background:#fafafa}
+    #cart-icon,.cart-button{
+      background:var(--botao); border:none; border-radius:var(--rad);
+      padding:8px 12px; font-weight:700; cursor:pointer; transition:.2s;
+      box-shadow:var(--shadow-1);
+    }
+    #cart-icon:hover,.cart-button:hover{background:#ffc107}
+
+    /* ================= STATUS + HORÁRIO ================= */
+    .status-banner{text-align:center; padding:8px; color:#fff; font-weight:600}
+    .status-banner.open{background:var(--success)}
+    .status-banner.closed{background:var(--danger)}
+    /* CORREÇÃO VISUAL: Alinhamento e Espaçamento */
+    .hours-banner{
+      /* Removido o space-between para agrupar o texto, que estava causando o "espaço vago" */
+      display:flex; align-items:center; 
+      padding:8px 16px; 
+      background:#000; color:#fff;
+      font-size:.9rem; overflow:hidden; white-space:nowrap; text-overflow:ellipsis
+    }
+    .hours-banner b{min-width:40px; display:inline-block; text-align:right}
+
+    /* ================= PROMOÇÕES + CARROSSEL ================= */
+    .promo-section{text-align:center; padding:20px 10px}
+    .promo-section h2{color:#ff5722; margin-bottom:8px}
+    .promo-sub{color:#444; margin-bottom:10px; font-size:.95rem}
+    .countdown-ticker{
+      background:#fff; display:inline-block; padding:6px 12px; border-radius:10px;
+      margin:8px 0 15px; font-weight:600; box-shadow:var(--shadow-1)
+    }
+    .carousel{position:relative; max-width:900px; margin:0 auto}
+    .slides{
+      display:flex; gap:8px; overflow-x:auto; scroll-behavior:smooth; padding:4px;
+    }
+    .slides::-webkit-scrollbar{height:8px}
+    .slides::-webkit-scrollbar-track{background:#f1f1f1; border-radius:10px}
+    .slides::-webkit-scrollbar-thumb{background:#ffd54f; border-radius:10px}
+    .slides::-webkit-scrollbar-thumb:hover{background:#ffca28}
+    .slide{
+      display:block; border-radius:12px; flex:0 0 auto;
+      min-width:250px; max-width:250px; height:180px; object-fit:cover;
+      box-shadow:var(--shadow-2); cursor:zoom-in; transition:transform .2s, box-shadow .2s;
+      background:#fff;
+    }
+    .slide:hover{transform:scale(1.05); box-shadow:var(--shadow-3)}
+    .c-btn{
+      position:absolute; top:50%; transform:translateY(-50%);
+      background:#000; color:#fff; border:none; border-radius:50%;
+      width:40px; height:40px; font-size:24px; opacity:.85;
+      display:flex; align-items:center; justify-content:center; cursor:pointer;
+      box-shadow:var(--shadow-2);
+    }
+    .c-btn:hover{opacity:1}
+    .c-prev{left:6px} .c-next{right:6px}
+
+    /* ================= SEÇÕES/GRADES/CARDS ================= */
+    section{margin:25px auto; width:95%; max-width:1000px}
+    section h2{font-size:1.3rem; text-align:center; margin-bottom:15px; color:#ff7043}
+    .grid{
+      display:grid; grid-template-columns:repeat(auto-fill,minmax(180px,1fr)); gap:14px
+    }
+    .card{
+      background:#fff; border-radius:16px; box-shadow:0 2px 6px rgba(0,0,0,.08);
+      padding:14px; text-align:center; transition:transform .2s, box-shadow .2s;
+    }
+    .card:hover{transform:translateY(-3px); box-shadow:0 4px 10px rgba(0,0,0,.12)}
+    .card img{width:100%; border-radius:12px; margin-bottom:8px; height:220px; object-fit:cover; background:#fff}
+    .card h3{
+      margin:0 0 6px; font-weight:700; font-size:1rem;
+      display:flex; align-items:center; justify-content:center; gap:6px; flex-wrap:wrap
+    }
+    .card p{font-size:.9rem; color:#555}
+    .price{font-weight:600; color:var(--success); margin:8px 0}
+
+    .badge{
+      display:inline-block; font-size:.72rem; font-weight:700; line-height:1;
+      padding:3px 8px; border-radius:999px; color:#000;
+      background:linear-gradient(135deg,#f8e08b,#eac13f);
+      border:1px solid #d4af37; white-space:nowrap
+    }
+    .badge.economia{background:linear-gradient(135deg,#ffd480,#ffb74d); border-color:#e09000}
+    .badge-icon{display:inline-block; vertical-align:middle; margin-right:4px; font-size:.8rem; line-height:1}
+
+    .badge-small{
+      display:inline-block; font-size:.68rem; font-weight:600; line-height:1.2;
+      padding:2px 7px; border-radius:6px; color:#000;
+      background:linear-gradient(135deg,#ffd54f,#ffca28);
+      border:1px solid #d4af37; box-shadow:0 1px 3px rgba(0,0,0,.1); white-space:nowrap; margin-left:4px
+    }
+    .badge-small.pure{background:linear-gradient(135deg,#a5d6a7,#81c784); border-color:#66bb6a; color:#1b5e20}
+
+    .actions{margin-top:10px; display:flex; justify-content:center; gap:8px; flex-wrap:wrap}
+    .actions button{
+      border:none; border-radius:10px; padding:14px; font-weight:700; font-size:1rem; cursor:pointer; transition:.2s
+    }
+    .actions .add-cart{background:linear-gradient(135deg,#4caf50,#43a047); color:#fff; box-shadow:0 2px 4px rgba(0,0,0,.2)}
+    .actions .add-cart:hover{background:linear-gradient(135deg,#43a047,#388e3c); transform:scale(1.03)}
+    .actions .extras-btn{background:linear-gradient(135deg,#ffb300,#ffca28); color:#222; box-shadow:0 2px 4px rgba(0,0,0,.15)}
+    .actions .extras-btn:hover{background:linear-gradient(135deg,#ffca28,#ffd54f); transform:scale(1.03)}
+
+    /* ================= BACKDROP + OVERLAYS ================= */
+    #cart-backdrop{
+      position:fixed; inset:0; background:rgba(0,0,0,.45);
+      opacity:0; pointer-events:none; transition:opacity .2s; z-index:980
+    }
+    #cart-backdrop.active{opacity:1; pointer-events:auto}
+    .mini-cart,.modal,.pedidos-panel,.recompensas-panel{position:fixed; z-index:990; display:none}
+    .mini-cart.active,.modal.show,.pedidos-panel.active,.recompensas-panel.active{display:block}
+
+    /* ================= MINI-CART LATERAL ================= */
+    .mini-cart{
+      right:0; top:0; width:min(92vw,380px); height:100dvh; background:#fff;
+      box-shadow:-4px 0 20px rgba(0,0,0,.25);
+      transform:translateX(100%); transition:transform .25s
+    }
+    .mini-cart.active{transform:translateX(0)}
+    .mini-head{display:flex; justify-content:space-between; align-items:center; padding:10px 14px; border-bottom:1px solid #eee}
+    .mini-list{max-height:60vh; overflow:auto; padding:10px 14px}
+    .mini-foot{padding:10px 14px; border-top:1px solid #eee}
+    .coupon-form{display:flex; gap:8px}
+    .coupon-form input{
+      flex:1; border:1px solid #ddd; border-radius:10px; padding:10px; font-size:.95rem
+    }
+
+    /* ================= MODAIS BASE ================= */
+    .modal{inset:0; display:flex; align-items:center; justify-content:center; opacity:0; pointer-events:none; transition:opacity .25s}
+    .modal.show{opacity:1; pointer-events:auto}
+    .modal-content{
+      background:#fff; width:min(92vw,520px); border-radius:14px;
+      box-shadow:0 8px 40px rgba(0,0,0,.25); max-height:86vh; overflow:auto;
+      /* CORREÇÃO ESTÉTICA GERAL PARA MODAIS */
+      position: relative; /* Garante que os filhos fiquem dentro */
+    }
+    .modal-head{
+      display:flex; justify-content:space-between; align-items:center; padding:12px 16px;
+      border-bottom:1px solid #eee; background:#ffca28; box-shadow:var(--shadow-in)
+    }
+    .btn-primary,.btn-secondary,.btn-primario{
+      flex:1; border:none; border-radius:10px; padding:14px; font-weight:700; font-size:1rem; cursor:pointer; transition:.2s
+    }
+    /* CORREÇÃO ESTÉTICA: Botões Primários com Sombra e Gradiente */
+    .btn-primary,.btn-primario{
+      background:linear-gradient(135deg,var(--success), #388e3c); 
+      color:#fff;
+      box-shadow: 0 4px 6px rgba(0,0,0,.15);
+    }
+    .btn-primary:hover,.btn-primario:hover{background:linear-gradient(135deg, #388e3c, #2e7d32); transform:translateY(-2px); box-shadow: 0 6px 10px rgba(0,0,0,.25)}
+    .btn-secondary{background:transparent; color:#555; border:1px solid #ddd}
+    .btn-secondary:hover{background:#f1f1f1; border-color:#ccc}
+
+    /* ================= BOTÕES/Painéis (Pedidos / Recompensas) ================= */
+    .meus-pedidos{position:fixed; bottom:20px; right:20px; z-index:1500}
+    .meus-pedidos-btn,.recompensas-btn{
+      background:linear-gradient(135deg,#ffca28,#ffb300); color:#222; border:none; border-radius:20px;
+      font-weight:700; font-size:.95rem; padding:12px 22px; box-shadow:0 4px 10px rgba(0,0,0,.2); cursor:pointer; transition:.2s
+    }
+    .meus-pedidos-btn:hover,.recompensas-btn:hover{transform:scale(1.05); box-shadow:0 6px 15px rgba(0,0,0,.3)}
+    .pedidos-panel,.recompensas-panel{
+      right:-100%; top:0; width:min(95%,440px); height:100vh; background:#f4f4f4;
+      box-shadow:-4px 0 18px rgba(0,0,0,.3); transition:right .4s; display:flex; flex-direction:column
+    }
+    .pedidos-panel.active,.recompensas-panel.active{right:0}
+    .pedidos-header,.recompensas-header{
+      display:flex; justify-content:space-between; align-items:center;
+      padding:16px 20px; background:#ffca28; font-weight:700; font-size:1.2rem; color:#222; box-shadow:var(--shadow-in)
+    }
+    .pedidos-body,.recompensas-body{flex:1; overflow:auto; padding:16px}
+    .fechar-pedidos,.fechar-recompensas,.extras-close,.combo-close,.login-close{
+      background:var(--botao); border:none; border-radius:50%; width:30px; height:30px; font-size:18px; font-weight:700;
+      cursor:pointer; line-height:30px; text-align:center; color:#222; transition:.2s
+    }
+    .fechar-pedidos:hover,.fechar-recompensas:hover,.extras-close:hover,.combo-close:hover,.login-close:hover{
+      background:#ff7043; color:#fff; transform:scale(1.1)
+    }
+    /* CORREÇÃO MODAL ADICIONAIS: Para o layout vertical e card */
+    .extras-list label.extra-line {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 10px;
+        margin-bottom: 8px;
+        border: 1px solid #ffb300;
+        border-radius: 8px;
+        background: #fff;
+        box-shadow: 0 1px 3px rgba(0,0,0,.08);
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+    .extras-list label.extra-line:hover {
+        background: #fff7e6;
+    }
+    .extras-list label.extra-line span b {
+        color: var(--danger); /* Preço em vermelho/destaque */
+        margin-left: 5px;
+    }
+    .extras-list input[type="checkbox"] {
+        margin-left: 10px;
+    }
+
+    /* ================= FOOTER ================= */
+    .footer{background:#ffca28; text-align:center; padding:20px; font-size:.9rem; color:#222}
+    .footer a{color:#ff7043; text-decoration:none; transition:color .2s}
+    .footer a:hover{color:#ff5722}
+    .footer-links{display:flex; justify-content:center; gap:10px; flex-wrap:wrap; margin:8px 0}
+    .footer-btn{background:#ffb300; color:#222; padding:6px 14px; border-radius:6px; font-weight:700; text-decoration:none; transition:.25s}
+    .footer-btn:hover{background:#ffca28; transform:scale(1.03)}
+    .footer-copy{font-size:.8rem; color:#000; margin-top:10px}
+
+    /* ================= COOKIE BANNER ================= */
+    #cookie-banner{
+      position:fixed; left:0; right:0; bottom:0; background:rgba(34,34,34,.95);
+      color:#fff; padding:16px; display:flex; justify-content:space-between; align-items:center;
+      z-index:2000; transform:translateY(100%); transition:transform .5s
+    }
+    #cookie-banner.show{transform:translateY(0)}
+    #cookie-banner p{margin:0; font-size:.9rem; line-height:1.4; margin-right:16px}
+    #cookie-banner a{color:#ffca28; font-weight:600; text-decoration:underline}
+    #cookie-banner button{background:#4caf50; color:#fff; border:none; border-radius:8px; padding:10px 16px; font-weight:700; cursor:pointer; transition:background .2s; flex-shrink:0}
+    #cookie-banner button:hover{background:#43a047}
+
+    /* ================= RESPONSIVO ================= */
+    @media (max-width:600px){
+      .slides{gap:6px}
+      .slide{min-width:150px; max-width:150px; height:120px}
+      .card img{height:140px}
+      .c-btn{width:32px; height:32px; font-size:20px}
+      .c-prev{left:4px}.c-next{right:4px}
+      .pedidos-panel,.recompensas-panel{width:100%; max-width:100%}
+      #cookie-banner{flex-direction:column; text-align:center; gap:12px}
+      #cookie-banner p{margin-right:0}
+      #cookie-banner button{width:100%; padding:12px}
+    }
   </style>
 
-  <!-- FIX: carregar CSS direto, sem media=print/onload para evitar "site quebrado" -->
-  <link rel="stylesheet" href="style.css?v=3.8.2" />
-  <noscript><link rel="stylesheet" href="style.css?v=3.8.2"/></noscript>
+  <link rel="stylesheet" href="style.css?v=3.7.1" media="print" onload="this.media='all'"/>
+  <noscript><link rel="stylesheet" href="style.css?v=3.7.1"/></noscript>
 
   <script defer src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
   <script defer src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
   <script defer src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
 </head>
+
 <body>
   <header class="header">
     <div class="header-content">
@@ -61,8 +335,8 @@
   <div class="main-content-wrapper">
     <div id="status-banner" class="status-banner"></div>
     <div class="hours-banner">
-      <span id="hours-message"></span>
-      <span id="timer" style="font-weight:700; margin-left:auto;"></span>
+      <span id="hours-message"></span> 
+      <span id="timer" style="font-weight:700; margin-left: auto;"></span>
     </div>
 
     <section class="promo-section">
@@ -96,47 +370,11 @@
       </div>
       <div class="mini-list"></div>
       <div class="mini-foot">
-        
-        <!-- BLOCO DE FRETE: VISUAL (BETA) — DESABILITADO -->
-        <div class="frete-container" data-beta-frete="off" title="Em breve: cálculo automático de frete">
-          <h4 style="margin-top:10px;">🚚 Entrega</h4>
-
-          <!-- Aviso amigável (opção 2) -->
-          <div style="background:#fff7e6;border:1px dashed #ffb300;border-radius:8px;padding:10px 12px;margin:8px 0;font-weight:700;color:#6b4a00;">
-            🕓 Em breve o site faz a mágica sozinho! <br/>Digite o endereço manualmente abaixo 👇🍔
-          </div>
-          
-          <label for="cep-input" style="font-size:.9rem;font-weight:600;opacity:.6;">CEP:</label>
-          <div class="frete-cep-group" style="display:flex;gap:8px;margin-bottom:8px;">
-            <input id="cep-input" type="text" placeholder="Digite o CEP" maxlength="9" style="flex:1;padding:8px;border:1px solid #ccc;border-radius:8px;opacity:.6;" disabled aria-disabled="true">
-            <button id="btn-calcular-frete" class="btn-calcular-frete" type="button" disabled aria-disabled="true" style="opacity:.6;cursor:not-allowed;">Calcular Frete</button>
-          </div>
-
-          <input id="endereco-auto" type="text" placeholder="Endereço (auto)" readonly style="width:100%;padding:8px;border:1px solid #ccc;border-radius:8px;margin-bottom:8px;opacity:.6;" disabled aria-disabled="true">
-
-          <div style="display:flex;gap:8px;margin-bottom:8px;">
-            <input id="numero-input" type="text" placeholder="Número" style="flex:1;padding:8px;border:1px solid #ccc;border-radius:8px;opacity:.6;" disabled aria-disabled="true">
-            <input id="complemento-input" type="text" placeholder="Complemento (opcional)" style="flex:1;padding:8px;border:1px solid #ccc;border-radius:8px;opacity:.6;" disabled aria-disabled="true">
-          </div>
-
-          <label style="display:flex;align-items:center;gap:6px;margin-bottom:8px;opacity:.6;">
-            <input type="checkbox" id="retirar-local" disabled aria-disabled="true">
-            Retirar no Local (sem taxa)
-          </label>
-
-          <div id="frete-resultado" style="margin-top:8px;font-weight:600;color:#2e7d32;opacity:.6;">(em breve)</div>
-        </div>
-
-        <!-- Endereço manual: visível e editável (usa o fluxo estável v3.6.x) -->
-        <textarea id="address-input" placeholder="📝 Endereço para entrega (rua, número, bairro, ponto de referência)"
-                  rows="3" style="display:block;width:100%;padding:10px;border:1px solid #ccc;border-radius:10px;margin-top:10px;font-size:.95rem;"></textarea>
-
         <form id="coupon-form" class="coupon-form" novalidate>
           <input type="text" id="coupon-input" placeholder="Digite o cupom e clique em Aplicar" aria-label="Cupom de desconto"/>
           <button type="submit" id="coupon-apply-btn" class="btn-primary">Aplicar</button>
         </form>
         <div id="coupon-message" class="coupon-message" aria-live="polite"></div>
-
         <div class="summary-row" id="coupon-discount-row" style="display:none;">
           <span>Desconto</span>
           <span id="cart-discount">R$ 0,00</span>
@@ -271,59 +509,6 @@
       </div>
     </section>
 
-    <section class="menu-section" id="hotdogs-section">
-      <h2>🌭 DFD – Hot Dogs</h2>
-      <div class="grid">
-        <div class="card" data-name="Nigucim" data-price="10.00">
-          <img src="imagens/nigucim.png" alt="Hot Dog Nigucim" loading="lazy">
-          <h3>Nigucim <span class="badge-small">Molho Verde</span></h3>
-          <p class="price">R$ 10,00</p>
-          <p>Pão, molho, salsicha (Sadia/Perdigão), milho, batata palha, ketchup e maionese. Acompanha ketchup sachê.</p>
-          <div class="actions"><button class="add-cart" type="button">Adicionar</button><button class="extras-btn" type="button">Adicionais</button></div>
-        </div>
-
-        <div class="card" data-name="Simprão" data-price="12.00">
-          <img src="imagens/simprao.png" alt="Hot Dog Simprão" loading="lazy">
-          <h3>Simprão <span class="badge-small">Molho Verde</span></h3>
-          <p class="price">R$ 12,00</p>
-          <p>Pão, molho, salsicha (Sadia/Perdigão), milho, batata palha, bacon, ketchup e maionese. Acompanha ketchup sachê.</p>
-          <div class="actions"><button class="add-cart" type="button">Adicionar</button><button class="extras-btn" type="button">Adicionais</button></div>
-        </div>
-
-        <div class="card" data-name="Nimin" data-price="13.00">
-          <img src="imagens/nimin.png" alt="Hot Dog Nimin" loading="lazy">
-          <h3>Nimin <span class="badge-small">Molho Verde</span></h3>
-          <p class="price">R$ 13,00</p>
-          <p>Pão, molho, 2 salsichas (Sadia/Perdigão), milho, batata palha, bacon, ketchup, maionese e vinagrete. Acompanha ketchup sachê.</p>
-          <div class="actions"><button class="add-cart" type="button">Adicionar</button><button class="extras-btn" type="button">Adicionais</button></div>
-        </div>
-
-        <div class="card" data-name="Padaná" data-price="15.00">
-          <img src="imagens/padana.png" alt="Hot Dog Padaná" loading="lazy">
-          <h3>Padaná <span class="badge-small">Molho Verde</span></h3>
-          <p class="price">R$ 15,00</p>
-          <p>Pão, molho, 2 salsichas (Sadia/Perdigão), milho, batata palha, bacon, vinagrete, mussarela, ketchup e maionese. Acompanha ketchup sachê.</p>
-          <div class="actions"><button class="add-cart" type="button">Adicionar</button><button class="extras-btn" type="button">Adicionais</button></div>
-        </div>
-
-        <div class="card" data-name="Purizin" data-price="14.00">
-          <img src="imagens/purizin.png" alt="Hot Dog Purizin (com purê)" loading="lazy">
-          <h3>Purizin <span class="badge-small">Molho Verde</span><span class="badge-small pure">Com Purê</span></h3>
-          <p class="price">R$ 14,00</p>
-          <p>Pão, molho, milho, purê de batata cremoso, 1 salsicha, batata palha, ketchup e maionese. Acompanha ketchup sachê.</p>
-          <div class="actions"><button class="add-cart" type="button">Adicionar</button><button class="extras-btn" type="button">Adicionais</button></div>
-        </div>
-
-        <div class="card" data-name="Trembão" data-price="17.00">
-          <img src="imagens/trembao.png" alt="Hot Dog Trembão (com purê)" loading="lazy">
-          <h3>Trembão <span class="badge-small">Molho Verde</span><span class="badge-small pure">Com Purê</span></h3>
-          <p class="price">R$ 17,00</p>
-          <p>Pão, molho, milho, purê de batata cremoso, 2 salsichas, bacon crocante, mussarela, batata palha, vinagrete, ketchup e maionese. Acompanha ketchup sachê.</p>
-          <div class="actions"><button class="add-cart" type="button">Adicionar</button><button class="extras-btn" type="button">Adicionais</button></div>
-        </div>
-      </div>
-    </section>
-    
     <section class="menu-section" id="bebidas-section">
       <h2>🥤 Bebidas</h2>
       <div class="grid">
@@ -518,6 +703,6 @@
     <button id="cookie-accept" type="button">Aceitar</button>
   </div>
 
-  <script defer src="script.js?v=3.8.6"></script>
+  <script defer src="script.js?v=3.8.5"></script>
 </body>
 </html>
