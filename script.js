@@ -2358,3 +2358,123 @@ document.addEventListener('DOMContentLoaded', () => {
 })(); 
 /* ==================== FIM HOTFIX v3.9.9b ==================== */
 
+
+/* =========================================================
+   🛠️ HOTFIX v3.9.9c — Escopo de fechamento refinado + debug + guards up
+   - NÃO remove mais .panel/.drawer genéricos (protege banners fixos/status).
+   - Fecha APENAS ids/áreas conhecidas (mini-cart, pedidos, recompensas, modais).
+   - Guarda reforçada: também cobre pointerup/mouseup/touchend.
+   - Switch global anti-fechamento: window.__DFL_FREEZE_CLOSES = true
+   - Logs de diagnóstico quando Overlays.closeAll() for chamado.
+========================================================= */
+(function(){
+  "use strict";
+
+  // ======== Switch global para desativar qualquer fechamento (útil p/ teste) ========
+  window.__DFL_FREEZE_CLOSES = window.__DFL_FREEZE_CLOSES || false;
+  function freezes(){ return !!window.__DFL_FREEZE_CLOSES; }
+
+  // ======== Guarda reforçada (cobre DOWN e UP) ========
+  const tNow = () => (typeof performance!=="undefined" && performance.now) ? performance.now() : Date.now();
+  const GUARD_MS = 260;
+  let guardUntil = 0;
+  function setGuard(){ guardUntil = tNow() + GUARD_MS; }
+  function isGuard(){ return tNow() < guardUntil; }
+
+  function markGuardIfOpener(e){
+    const opener = e.target && e.target.closest && e.target.closest("[data-open-target], .open-modal, .btn-open, [data-open], [data-trigger='open']");
+    if (opener) setGuard();
+  }
+
+  function neutralizeIfGuard(e){
+    if (!isGuard()) return;
+    // Bloqueia qualquer encerramento durante a guarda
+    if (e.stopImmediatePropagation) e.stopImmediatePropagation();
+    e.stopPropagation();
+  }
+
+  ["pointerdown","mousedown","touchstart","click","pointerup","mouseup","touchend"].forEach(type => {
+    document.addEventListener(type, markGuardIfOpener, true);
+    document.addEventListener(type, neutralizeIfGuard, true);
+  });
+
+  // ======== Escopo de fechamento refinado ========
+  function closeKnown(){
+    // NÃO mexer em .panel/.drawer genéricos para não sumir banners/status
+    const targets = [
+      ".modal.show",
+      ".modal[open]",
+      "#mini-cart.active",
+      ".pedidos-panel.active",
+      ".recompensas-panel.active",
+      "#admin-dashboard.show",
+      "[data-modal][data-open='true']"
+    ];
+    const list = targets.flatMap(sel => Array.from(document.querySelectorAll(sel)));
+    list.forEach(el => {
+      el.classList.remove("show","active");
+      el.removeAttribute && el.removeAttribute("open");
+      el.removeAttribute && el.removeAttribute("data-open");
+      el.setAttribute && el.setAttribute("aria-hidden","true");
+      el.setAttribute && el.setAttribute("hidden","true");
+    });
+    const bd = document.querySelector("#cart-backdrop") || document.querySelector("#backdrop");
+    if (bd) bd.classList.remove("show","active");
+  }
+
+  // ======== Overlay click: fecha apenas quando clicar EXATAMENTE no overlay conhecido ========
+  function isOverlay(el){
+    if (!el) return false;
+    // overlay aceitos explicitamente
+    return (el.id === "cart-backdrop" || el.id === "backdrop" || el.hasAttribute("data-overlay"));
+  }
+
+  document.addEventListener("click", function(e){
+    if (freezes()) return;
+    const ov = e.target;
+    if (!isOverlay(ov)) return;
+    if (isGuard()) { e.preventDefault(); return; }
+    closeKnown();
+  }, true); // captura para vencer antigos listeners
+
+  // ======== Monkey-patch Overlays.closeAll com diagnóstico e novos limites ========
+  if (window.Overlays && typeof window.Overlays.closeAll === "function"){
+    const _old = window.Overlays.closeAll.bind(window.Overlays);
+    window.Overlays.closeAll = function(){
+      if (freezes() || isGuard()) {
+        console.warn("DFL GUARD/FREEZE: closeAll() bloqueado.");
+        return;
+      }
+      try {
+        // em vez de varrer tudo, fechamos apenas conhecidos
+        closeKnown();
+      } catch (e) {
+        console.error("DFL closeKnown falhou, fallback para closeAll original", e);
+        _old();
+      }
+      // log leve p/ diagnóstico (uma linha, sem stack)
+      if (window.__DFL_DEBUG) console.debug("DFL: closeAll() executado (escopo refinado).");
+    };
+  }
+
+  // ======== Utilitário para abrir modais com proteção de guarda ========
+  window.DFL = Object.assign(window.DFL || {}, {
+    __v399_hotfixc: true,
+    guard: { set: ()=>setGuard(), active: ()=>isGuard(), until: ()=>guardUntil },
+    freezeCloses: (v)=>{ window.__DFL_FREEZE_CLOSES = !!v; },
+    openModalSafe: (elOrSel)=>{
+      const el = (typeof elOrSel === "string") ? document.querySelector(elOrSel) : elOrSel;
+      if (!el) return;
+      setGuard();
+      el.classList.add(el.id==="mini-cart" || el.classList.contains("pedidos-panel") || el.classList.contains("recompensas-panel") ? "active" : "show");
+      el.removeAttribute && el.removeAttribute("hidden");
+      el.setAttribute && el.setAttribute("aria-hidden","false");
+      const bd = document.querySelector("#cart-backdrop") || document.querySelector("#backdrop");
+      if (bd) bd.classList.add("show","active");
+    },
+    closeKnown
+  });
+
+})(); 
+/* ==================== FIM HOTFIX v3.9.9c ==================== */
+
