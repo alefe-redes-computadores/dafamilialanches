@@ -212,14 +212,44 @@ document.addEventListener("DOMContentLoaded", () => {
 
 /* ------------------ 🛒 MINI-CARRINHO (MANTIDO) ------------------ */
   function renderMiniCart() {
-    // ... (MANTIDO)
+    
+  // 💬 Mensagem divertida do carrinho vazio (v3.7.1b)
+  try {
+    const listEl = document.querySelector('.mini-list');
+    const footEl = document.querySelector('.mini-foot');
+    if (Array.isArray(cart) ? cart.length === 0 : (!cart || (cart.items && cart.items.length === 0))) {
+      if (listEl) {
+        listEl.innerHTML = `
+          <div class="cart-empty-msg" style="
+            padding: 18px 14px;
+            text-align: center;
+            border: 1px dashed #ffca28;
+            border-radius: 12px;
+            background: #fffdf3;
+            box-shadow: inset 0 1px 0 rgba(255,255,255,.6);
+            font-weight: 600;
+            line-height: 1.35;
+          ">
+            <div style="font-size:1.05rem; margin-bottom:6px;">🍔 Carrinho vazio por aqui…</div>
+            <div style="font-size:.95rem; color:#6b6b6b;">
+              Nosso programador‑chapeiro foi dar um trato no grill e já volta 😅<br/>
+              Enquanto isso, dá um rolê no cardápio e escolhe um trem bão!
+            </div>
+          </div>
+        `;
+      }
+      if (footEl) footEl.style.opacity = "0.85"; // mantém rodapé visível porém discreto
+      // Mantém o restante do fluxo da função sem quebrar cálculos abaixo.
+    }
+  } catch(e) { try { console.warn('Empty-cart banner guard', e); } catch(_){} }
+// ... (MANTIDO)
     if (!el.miniList) return; 
 
     const totalItens = cart.reduce((s, i) => s + i.qtd, 0);
     if (el.cartCount) el.cartCount.textContent = totalItens;
 
     if (!cart.length) {
-      el.miniList.innerHTML = '<p style="text-align:center;color:#999;padding:20px;">Carrinho vazio 🛒</p>';
+      el.miniList.innerHTML = '<p style="text-align:center;color:#999;padding:20px;">🍔 Nosso programador-chapeiro foi dar um trato no grill e já volta 😅. Enquanto isso, dá um rolê no cardápio e pede um Trem Bão!</p>';
       
       // v3.0: Limpa também o rodapé dinâmico e estático
       if(el.miniFoot) el.miniFoot.querySelectorAll(".cart-summary-generated").forEach(e => e.remove());
@@ -2039,84 +2069,190 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
 });
-
 /* =========================================================
-   🚀 DFL v3.9.0 — LOGIN GOOGLE (Opção 1: popup select_account)
-   Patch seguro adicionado ao final do arquivo para não quebrar cliques/banners.
-   - Evita múltiplos popups simultâneos (flag isLoginInProgress)
-   - Reanexa o listener do botão #google-login de forma idempotente
-   - Mantém todo o restante do código intacto
+   🔧 PATCH v3.7.7 — Delegação de Fechar Modais + Som no Finalizar
+   (não altera nada do restante do site)
 ========================================================= */
 (function () {
-  if (window.__DFL_LOGIN_PATCH_APPLIED__) return;
-  window.__DFL_LOGIN_PATCH_APPLIED__ = true;
+  const $ = (sel, ctx = document) => ctx.querySelector(sel);
+  const $$ = (sel, ctx = document) => Array.from(ctx.querySelectorAll(sel));
+  const byId = (id) => document.getElementById(id);
+  const hide = (el, cls = 'show') => el && el.classList.remove(cls);
+  const off = (el, cls = 'active') => el && el.classList.remove(cls);
 
-  let isLoginInProgress = false;
+  // 🔊 Som APENAS no botão de finalizar pedido
+  const finalizarBtn = $('#finalizar-pedido, .finalizar-pedido');
+  if (finalizarBtn) {
+    finalizarBtn.addEventListener('click', () => {
+      try { new Audio('click.wav').play(); } catch (_) {}
+    });
+  }
 
-  function bindGoogleLoginSafely() {
-    try {
-      var btn = document.getElementById("google-login");
-      if (!btn) return;
+  // 🧠 Delegação única para fechar tudo o que precisa
+  document.addEventListener('click', (e) => {
+    const t = e.target;
 
-      // Clona o botão para remover listeners antigos sem afetar o layout
-      var clone = btn.cloneNode(true);
-      btn.parentNode.replaceChild(clone, btn);
-
-      clone.addEventListener("click", function () {
-        if (isLoginInProgress) {
-          console.log("⏳ Login já em andamento, aguarde...");
-          return;
-        }
-
-        if (typeof firebase === "undefined" || !firebase.auth) {
-          alert("Erro ao conectar ao serviço de login. Recarregue a página.");
-          return;
-        }
-
-        isLoginInProgress = true;
-        var provider = new firebase.auth.GoogleAuthProvider();
-        provider.setCustomParameters({ prompt: "select_account" });
-
-        firebase.auth().signInWithPopup(provider)
-          .then(function (res) {
-            isLoginInProgress = false;
-            try {
-              if (window.popupAdd) popupAdd("Login realizado com sucesso!");
-            } catch (_) {}
-            try {
-              // Fecha modal de login se existir
-              var modal = document.getElementById("login-modal");
-              if (modal && modal.classList) modal.classList.remove("show");
-              var backdrop = document.getElementById("cart-backdrop");
-              if (backdrop && backdrop.classList) backdrop.classList.remove("active");
-              document.body && document.body.classList && document.body.classList.remove("no-scroll");
-            } catch (_) {}
-          })
-          .catch(function (error) {
-            isLoginInProgress = false;
-
-            // Silencia cancelamentos comuns de popup
-            if (error && (error.code === "auth/popup-closed-by-user" || error.code === "auth/cancelled-popup-request")) {
-              console.log("ℹ️ Popup fechado/cancelado pelo usuário");
-              return;
-            }
-
-            console.error("❌ Erro no login Google:", error);
-            alert("Erro ao fazer login: " + (error && error.message ? error.message : "desconhecido"));
-          });
-      });
-    } catch (e) {
-      console.error("Falha ao anexar Google Login seguro:", e);
+    // Login
+    if (t.closest('.login-close')) {
+      hide(byId('login-modal'));
+      return;
     }
+
+    // Promo
+    if (t.closest('.promo-close')) {
+      hide(byId('promo-modal'));
+      return;
+    }
+
+    // Extras
+    if (t.closest('.extras-close')) {
+      hide(byId('extras-modal'));
+      return;
+    }
+
+    // Combo
+    if (t.closest('.combo-close')) {
+      hide(byId('combo-modal'));
+      return;
+    }
+
+    // Painéis laterais: Meus Pedidos / Minhas Recompensas
+    if (t.closest('.fechar-pedidos')) {
+      off($('.pedidos-panel'));
+      return;
+    }
+    if (t.closest('.fechar-recompensas')) {
+      off($('.recompensas-panel'));
+      return;
+    }
+
+    // Mini-carrinho fechado ao clicar no backdrop
+    const backdrop = byId('cart-backdrop');
+    if (backdrop && (t === backdrop || t.closest('#cart-backdrop'))) {
+      off($('.mini-cart'));
+      off(backdrop);
+      return;
+    }
+  }, { capture: true }); // captura garante que o clique não seja "engolido" por outros handlers
+})();
+// ======================================================
+// 🧩 PATCH EXTRA — Remove o fundo acinzentado ao fechar
+// ======================================================
+function clearBackdrop() {
+  const backdrop = document.getElementById('cart-backdrop');
+  if (backdrop) {
+    backdrop.classList.remove('active');
+    backdrop.style.opacity = '0';
+    backdrop.style.pointerEvents = 'none';
+  }
+  // Garante que nenhum modal permaneça ativo visualmente
+  document.querySelectorAll('.modal.show').forEach(m => m.classList.remove('show'));
+}
+
+// Monitora o fechamento dos painéis e modais
+['.login-close', '.fechar-pedidos', '.fechar-recompensas', '.promo-close', '.extras-close', '.combo-close']
+  .forEach(sel => {
+    document.addEventListener('click', (e) => {
+      if (e.target.closest(sel)) clearBackdrop();
+    });
+  });
+/* ======================================================
+   ✅ PATCH FINAL — Mini-Carrinho com clique fora + botão X
+   ====================================================== */
+(() => {
+  const miniCart = document.querySelector('.mini-cart');
+  const backdrop = document.getElementById('cart-backdrop');
+
+  if (!miniCart || !backdrop) return;
+
+  const closeCart = () => {
+    miniCart.classList.remove('active');
+    backdrop.classList.remove('active');
+    backdrop.style.pointerEvents = 'none';
+    document.body.style.overflow = '';
+  };
+
+  // Fecha pelo botão X (classe usada no seu HTML)
+  document.addEventListener('click', (e) => {
+    if (e.target.closest('.extras-close')) {
+      e.preventDefault();
+      e.stopPropagation();
+      closeCart();
+    }
+  });
+
+  // Fecha clicando fora
+  backdrop.addEventListener('click', (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    closeCart();
+  });
+
+  // Bloqueia clique dentro do painel
+  miniCart.addEventListener('click', (e) => e.stopPropagation());
+})();
+/* ======================================================
+   ✅ PATCH DEFINITIVO — X do Mini-Carrinho
+   - Fecha no X sem depender de delegation no document
+   - Mantém clique-fora via backdrop
+   ====================================================== */
+(() => {
+  const miniCart  = document.querySelector('.mini-cart');
+  const backdrop  = document.getElementById('cart-backdrop');
+  if (!miniCart || !backdrop) return;
+
+  const openCart = () => {
+    miniCart.classList.add('active');
+    backdrop.classList.add('active');
+    backdrop.style.pointerEvents = 'auto';
+    document.body.style.overflow = 'hidden';
+  };
+
+  const closeCart = () => {
+    miniCart.classList.remove('active');
+    backdrop.classList.remove('active');
+    backdrop.style.pointerEvents = 'none';
+    document.body.style.overflow = '';
+  };
+
+  // 1) Fecha pelo X — listener DIRETO no botão (não depende de bubbling)
+  const closeBtn =
+    miniCart.querySelector('.extras-close') ||
+    miniCart.querySelector('.fechar-pedidos') ||
+    miniCart.querySelector('.mini-head .promo-close') ||
+    miniCart.querySelector('.mini-head button[aria-label*="Fechar" i]');
+
+  if (closeBtn) {
+    closeBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      closeCart();
+    });
   }
 
-  // Liga após DOM pronto e também re-tenta quando modais abrirem
-  if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", bindGoogleLoginSafely);
-  } else {
-    bindGoogleLoginSafely();
-  }
-  // Observa reaparição do botão
-  var mo = new MutationObserver(function () { bindGoogleLoginSafely(); });
-  try { mo.observe(document.documentElement || document.body, { childList: true, subtree: true }); } catch (_) {}
+  // 2) Fecha clicando fora (backdrop)
+  backdrop.addEventListener('click', (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    closeCart();
+  });
+
+  // 3) Impede que cliques dentro do painel vazem para o fundo
+  miniCart.addEventListener('click', (e) => e.stopPropagation());
+
+  // 4) (Opcional) Abrir carrinho por botões existentes, sem interferir no X
+  document.addEventListener('click', (e) => {
+    if (e.target.closest('#cart-icon') || e.target.closest('.cart-button')) {
+      e.preventDefault();
+      e.stopPropagation();
+      openCart();
+    }
+  });
+
+  // 5) Tecla Esc fecha
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && miniCart.classList.contains('active')) {
+      closeCart();
+    }
+  });
 })();
