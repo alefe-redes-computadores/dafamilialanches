@@ -5,19 +5,6 @@
 ========================================================= */
 
 document.addEventListener("DOMContentLoaded", () => {
-  // ⚙️ Reativar eventos após redirect Firebase
-  setTimeout(() => {
-    console.log("[DFL] Reativando eventos pós-login redirect...");
-    try {
-      document.querySelectorAll("[data-rebind]").forEach(btn => {
-        btn.replaceWith(btn.cloneNode(true)); // remove event handlers antigos
-      });
-      if (typeof inicializarFirebase === "function") inicializarFirebase();
-    } catch (e) {
-      console.warn("[DFL] Erro ao reativar eventos:", e);
-    }
-  }, 250);
-
   /* ------------------ ⚙️ BASE (MANTIDO) ------------------ */
   const sound = new Audio("click.wav"); // Mantemos a inicialização do áudio
   let cart = [];
@@ -2037,19 +2024,6 @@ async function carregarHistoricoRecompensas(userId) {
 ========================================================= */
 
 document.addEventListener('DOMContentLoaded', () => {
-  // ⚙️ Reativar eventos após redirect Firebase
-  setTimeout(() => {
-    console.log("[DFL] Reativando eventos pós-login redirect...");
-    try {
-      document.querySelectorAll("[data-rebind]").forEach(btn => {
-        btn.replaceWith(btn.cloneNode(true)); // remove event handlers antigos
-      });
-      if (typeof inicializarFirebase === "function") inicializarFirebase();
-    } catch (e) {
-      console.warn("[DFL] Erro ao reativar eventos:", e);
-    }
-  }, 250);
-
 
   // --- 1. Lógica para fechar os MODAIS (Login, Extras, Combo) ---
   
