@@ -32,8 +32,8 @@
   </style>
 
   <!-- FIX: carregar CSS direto, sem media=print/onload para evitar "site quebrado" -->
-  <link rel="stylesheet" href="style.css?v=3.8.3" />
-  <noscript><link rel="stylesheet" href="style.css?v=3.8.3"/></noscript>
+  <link rel="stylesheet" href="style.css?v=3.8.2" />
+  <noscript><link rel="stylesheet" href="style.css?v=3.8.2"/></noscript>
 
   <script defer src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
   <script defer src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
@@ -97,29 +97,30 @@
       <div class="mini-list"></div>
       <div class="mini-foot">
         
-        
-    <div class="frete-container">
-      <h4 style="margin-top:10px;">🚚 Entrega</h4>
-      <div id="frete-em-breve" style="margin:10px 0;padding:10px;border-radius:8px;background:#fff3cd;color:#856404;font-weight:600;text-align:center;box-shadow:var(--shadow-1);">
-        🕒 Em breve o site faz a mágica sozinho! <br>
-        <small style="font-weight:500;color:#555;">Por enquanto, preencha o endereço manualmente abaixo ⬇️</small>
-      </div>
-      <div class="frete-cep-group" style="opacity:0.6;pointer-events:none;">
-        <input id="cep-input" type="text" placeholder="Digite o CEP" readonly style="flex:1;padding:8px;border:1px solid #ccc;border-radius:8px;">
-        <button id="btn-calcular-frete" class="btn-calcular-frete" type="button" disabled>Calcular Frete</button>
-      </div>
-      <input id="endereco-auto" type="text" placeholder="Endereço (auto)" readonly style="width:100%;padding:8px;border:1px solid #ccc;border-radius:8px;margin-bottom:8px;opacity:0.6;">
-      <div style="display:flex;gap:8px;margin-bottom:8px;opacity:0.6;pointer-events:none;">
-        <input id="numero-input" type="text" placeholder="Número" readonly style="flex:1;padding:8px;border:1px solid #ccc;border-radius:8px;">
-        <input id="complemento-input" type="text" placeholder="Complemento (opcional)" readonly style="flex:1;padding:8px;border:1px solid #ccc;border-radius:8px;">
-      </div>
-      <label style="display:flex;align-items:center;gap:6px;margin-bottom:8px;opacity:0.6;pointer-events:none;">
-        <input type="checkbox" id="retirar-local" disabled>
-        Retirar no Local (sem taxa)
-      </label>
-      <div id="frete-resultado" style="margin-top:8px;font-weight:600;"></div>
-    </div>
-    <textarea id="address-input"  style="display:none;"></textarea>
+        <div class="frete-container">
+          <h4 style="margin-top:10px;">🚚 Entrega</h4>
+          
+          <label for="cep-input" style="font-size:.9rem;font-weight:600;">CEP:</label>
+          <div class="frete-cep-group" style="display:flex;gap:8px;margin-bottom:8px;">
+            <input id="cep-input" type="text" placeholder="Digite o CEP" maxlength="9" style="flex:1;padding:8px;border:1px solid #ccc;border-radius:8px;">
+            <button id="btn-calcular-frete" class="btn-calcular-frete" type="button">Calcular Frete</button>
+          </div>
+
+          <input id="endereco-auto" type="text" placeholder="Endereço (auto)" readonly style="width:100%;padding:8px;border:1px solid #ccc;border-radius:8px;margin-bottom:8px;">
+
+          <div style="display:flex;gap:8px;margin-bottom:8px;">
+            <input id="numero-input" type="text" placeholder="Número" style="flex:1;padding:8px;border:1px solid #ccc;border-radius:8px;">
+            <input id="complemento-input" type="text" placeholder="Complemento (opcional)" style="flex:1;padding:8px;border:1px solid #ccc;border-radius:8px;">
+          </div>
+
+          <label style="display:flex;align-items:center;gap:6px;margin-bottom:8px;">
+            <input type="checkbox" id="retirar-local">
+            Retirar no Local (sem taxa)
+          </label>
+
+          <div id="frete-resultado" style="margin-top:8px;font-weight:600;"></div>
+        </div>
+        <textarea id="address-input" style="display:none;"></textarea>
 
         <form id="coupon-form" class="coupon-form" novalidate>
           <input type="text" id="coupon-input" placeholder="Digite o cupom e clique em Aplicar" aria-label="Cupom de desconto"/>
@@ -508,6 +509,6 @@
     <button id="cookie-accept" type="button">Aceitar</button>
   </div>
 
-  <script defer src="script.js?v=3.9.6"></script>
+  <script defer src="script.js?v=3.6.10"></script>
 </body>
 </html>
