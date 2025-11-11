@@ -2289,3 +2289,72 @@ document.addEventListener('DOMContentLoaded', () => {
 })(); 
 /* ======================= FIM HOTFIX v3.9.9 ======================= */
 
+
+/* =========================================================
+   🔧 HOTFIX v3.9.9b — Guardas para pointerdown/mousedown/touchstart
+   Motivo: Alguns handlers antigos fecham modais no "pointerdown"/"mousedown"
+           antes do "click". Este patch neutraliza o fechamento precoce.
+========================================================= */
+(function(){
+  "use strict";
+  const now = () => (typeof performance!=="undefined" && performance.now) ? performance.now() : Date.now();
+
+  // Janela de proteção ampliada
+  const GUARD_MS = 220;
+  let guardUntil = 0;
+
+  function setGuard(){
+    guardUntil = now() + GUARD_MS;
+  }
+  function isGuardActive(){
+    return now() < guardUntil;
+  }
+
+  // Marcar guardas ao acionar qualquer abridor
+  function markOpenGuardFrom(e){
+    try{
+      const opener = e.target && e.target.closest && e.target.closest("[data-open-target], .open-modal, .btn-open, [data-open]");
+      if (opener){
+        setGuard();
+      }
+    }catch(_){}
+  }
+
+  // Impedir fechamentos quando a guarda está ativa
+  function neutralizeIfGuard(e){
+    if (!isGuardActive()) return;
+    // Se o alvo estiver dentro de um modal/painel, não propaga
+    const inside = e.target && e.target.closest && e.target.closest("[data-modal-container], [data-modal], .modal, .panel, .drawer");
+    if (inside){
+      e.stopPropagation();
+      e.stopImmediatePropagation && e.stopImmediatePropagation();
+    }
+    // Se clicar no overlay enquanto ainda está guardado, também segura
+    const ov = e.target && e.target.closest && e.target.closest("[data-overlay], .overlay, #cart-backdrop, #backdrop, .backdrop");
+    if (ov){
+      e.stopPropagation();
+      e.stopImmediatePropagation && e.stopImmediatePropagation();
+      e.preventDefault();
+    }
+  }
+
+  // Captura ampla e cedo o suficiente para bloquear handlers antigos
+  ["pointerdown","mousedown","touchstart","click"].forEach(type => {
+    document.addEventListener(type, markOpenGuardFrom, true);
+    document.addEventListener(type, neutralizeIfGuard, true);
+  });
+
+  // Endurecer Overlays.closeAll (se existir) para respeitar a guarda
+  if (window.Overlays && typeof window.Overlays.closeAll === "function"){
+    const _closeAll = window.Overlays.closeAll.bind(window.Overlays);
+    window.Overlays.closeAll = function(){
+      if (isGuardActive()) return; // não fecha durante a guarda
+      return _closeAll();
+    };
+  }
+
+  // Expõe pequena API para debug (opcional)
+  window.__DFL_GUARD = { set: () => setGuard(), active: () => isGuardActive(), until: () => guardUntil };
+})(); 
+/* ==================== FIM HOTFIX v3.9.9b ==================== */
+
