@@ -123,7 +123,7 @@ document.addEventListener("DOMContentLoaded", () => {
       Backdrop.hide();
     },
     open(modalLike) {
-      setTimeout(() => Overlays.closeAll(), 800); // delay evita conflito com popup do Google
+      Overlays.closeAll();
       if (!modalLike) return;
       modalLike.classList.add(
         (modalLike.id === "mini-cart" || modalLike.id === "painelPedidos" || modalLike.id === "recompensas-panel") ? "active" : "show"
@@ -389,7 +389,7 @@ document.addEventListener("DOMContentLoaded", () => {
       } else {
         if (el.reportsBtn) el.reportsBtn.style.display = "none";
         document.getElementById("admin-dashboard")?.remove();
-        // setTimeout(() => Overlays.closeAll(), 800); // delay evita conflito com popup do Google // Removido para evitar fechar modais no carregamento
+        // Overlays.closeAll(); // Removido para evitar fechar modais no carregamento
       }
     });
   }
@@ -403,7 +403,7 @@ document.addEventListener("DOMContentLoaded", () => {
     // Garante que currentUser seja definido e a UI atualizada imediatamente
     currentUser = user;
     popupAdd("Login realizado com sucesso!");
-    setTimeout(() => Overlays.closeAll(), 800); // delay evita conflito com popup do Google
+    Overlays.closeAll();
     // O setupAuthListener (chamado em inicializarFirebase) garante a atualização final
   };
 
@@ -510,7 +510,7 @@ document.addEventListener("DOMContentLoaded", () => {
   );
 
   el.extrasConfirm?.addEventListener("click", () => {
-    if (!produtoExtras) return setTimeout(() => Overlays.closeAll(), 800); // delay evita conflito com popup do Google
+    if (!produtoExtras) return Overlays.closeAll();
     const checks = [...document.querySelectorAll("#extras-modal .extras-list input:checked")];
 
     const extrasContagem = {};
@@ -539,7 +539,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     renderMiniCart();
     popupAdd("Adicionado ao carrinho!");
-    setTimeout(() => Overlays.closeAll(), 800); // delay evita conflito com popup do Google
+    Overlays.closeAll();
   });
 
   document.querySelectorAll("#extras-modal .extras-close").forEach((b) =>
@@ -601,7 +601,7 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   el.comboConfirm?.addEventListener("click", () => {
-    if (!_comboCtx) return setTimeout(() => Overlays.closeAll(), 800); // delay evita conflito com popup do Google
+    if (!_comboCtx) return Overlays.closeAll();
     const sel = el.comboBody?.querySelector('input[name="combo-drink"]:checked');
     if (!sel) return;
     const opt = comboDrinkOptions[_comboCtx.grupo][+sel.value];
@@ -614,7 +614,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     popupAdd("Combo adicionado!");
     renderMiniCart();
-    setTimeout(() => Overlays.closeAll(), 800); // delay evita conflito com popup do Google
+    Overlays.closeAll();
   });
 
   document.querySelectorAll("#combo-modal .combo-close").forEach((b) =>
@@ -988,7 +988,7 @@ document.addEventListener("DOMContentLoaded", () => {
     // Chama a função-base de adicionar, que não abre o modal de combos
     addCommonItem(promo.nome, promo.preco); 
     
-    setTimeout(() => Overlays.closeAll(), 800); // delay evita conflito com popup do Google // Fecha o modal após adicionar
+    Overlays.closeAll(); // Fecha o modal após adicionar
   });
 
   // 3. Navegação (Próximo / Anterior)
@@ -1248,7 +1248,7 @@ document.addEventListener("DOMContentLoaded", () => {
       if(couponInput) couponInput.value = "";
       
       renderMiniCart();
-      setTimeout(() => Overlays.closeAll(), 800); // delay evita conflito com popup do Google
+      Overlays.closeAll();
 
     } catch (err) {
       console.error("Erro ao fechar pedido ou atualizar contador/recompensa:", err);
@@ -1391,7 +1391,7 @@ document.addEventListener("DOMContentLoaded", () => {
       // Feedback ao usuário
       popupAdd("Pedido anterior adicionado ao carrinho!");
       renderMiniCart(); // Atualiza o carrinho (backend)
-      setTimeout(() => Overlays.closeAll(), 800); // delay evita conflito com popup do Google // Fecha o painel de pedidos
+      Overlays.closeAll(); // Fecha o painel de pedidos
       Overlays.open(el.miniCart); // Abre o mini-carrinho
 
     } catch (err) {
@@ -1593,7 +1593,7 @@ function exibirRecompensas(pedidosFeitos, recompensasDisponiveis, cupomStatus, R
                 if(couponInput) couponInput.value = codigo;
 
                 renderMiniCart(); // Recalcula e mostra a mensagem
-                setTimeout(() => Overlays.closeAll(), 800); // delay evita conflito com popup do Google
+                Overlays.closeAll();
                 popupAdd(`Cupom ${codigo} aplicado! ✅`);
                 Overlays.open(el.miniCart); // Abre o mini-carrinho para ver o desconto
             }
@@ -1974,7 +1974,7 @@ async function carregarHistoricoRecompensas(userId) {
     } else {
       if (el.reportsBtn) el.reportsBtn.style.display = "none";
       document.getElementById("admin-dashboard")?.remove();
-      // setTimeout(() => Overlays.closeAll(), 800); // delay evita conflito com popup do Google // Removido para evitar fechar modais no carregamento
+      // Overlays.closeAll(); // Removido para evitar fechar modais no carregamento
     }
   });
 
