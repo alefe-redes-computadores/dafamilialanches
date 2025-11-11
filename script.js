@@ -1,64 +1,69 @@
 /* =========================================================
-   🚀 PATCH v3.8.1 - CORREÇÃO ESPECÍFICA DO LOGIN GOOGLE
-   Cole este código ANTES do DOMContentLoaded do seu script original
+   🚀 PATCH v3.9.1 - LOGIN GOOGLE SEGURO (ASYNC DELAY)
+   Corrige definitivamente o erro "conflicting popup"
+   Evita fechamento simultâneo do modal com o popup do Google
 ========================================================= */
 
 (function() {
   let isLoginInProgress = false;
-  
-  // Aguarda o DOM carregar
+
   document.addEventListener('DOMContentLoaded', function() {
     const googleBtn = document.getElementById('google-login');
-    
     if (!googleBtn) return;
-    
-    // Remove listeners antigos (se houver)
-    const newBtn = googleBtn.cloneNode(true);
-    googleBtn.parentNode.replaceChild(newBtn, googleBtn);
-    
-    // Adiciona novo listener corrigido
-    newBtn.addEventListener('click', function() {
+
+    // Remove listeners antigos
+    const cleanBtn = googleBtn.cloneNode(true);
+    googleBtn.parentNode.replaceChild(cleanBtn, googleBtn);
+
+    cleanBtn.addEventListener('click', async function() {
       if (isLoginInProgress) {
-        console.log('⏳ Login já em andamento, aguarde...');
+        console.log('⚠️ Login já em andamento...');
         return;
       }
-      
-      // Verifica se Firebase está pronto
+
       if (typeof firebase === 'undefined' || !firebase.auth) {
         alert('Erro ao conectar. Recarregue a página.');
         return;
       }
-      
+
       isLoginInProgress = true;
-      
-      const provider = new firebase.auth.GoogleAuthProvider();
-      provider.setCustomParameters({
-        prompt: 'select_account'
-      });
-      
-      firebase.auth().signInWithPopup(provider)
-        .then(function(result) {
-          isLoginInProgress = false;
-          console.log('✅ Login realizado:', result.user.email);
-          // O resto do fluxo continua normal
-        })
-        .catch(function(error) {
-          isLoginInProgress = false;
-          
-          // Ignora se o usuário fechou o popup
-          if (error.code === 'auth/popup-closed-by-user' || 
-              error.code === 'auth/cancelled-popup-request') {
-            console.log('ℹ️ Popup fechado pelo usuário');
-            return;
-          }
-          
-          console.error('❌ Erro no login:', error);
-          alert('Erro ao fazer login: ' + error.message);
-        });
+
+      try {
+        const provider = new firebase.auth.GoogleAuthProvider();
+        provider.setCustomParameters({ prompt: 'select_account' });
+
+        // 🔹 Delay curto antes de abrir popup (previne conflito visual)
+        await new Promise(r => setTimeout(r, 250));
+
+        const result = await firebase.auth().signInWithPopup(provider);
+
+        // 🔹 Delay antes de fechar modais (previne conflito de fechamento)
+        await new Promise(r => setTimeout(r, 600));
+
+        isLoginInProgress = false;
+        console.log('✅ Login bem-sucedido:', result.user.email);
+
+        // Força atualização do botão e fechamento suave
+        document.body.classList.remove("no-scroll");
+        const loginModal = document.getElementById('login-modal');
+        if (loginModal) loginModal.classList.remove('show');
+
+        alert(`Bem-vindo(a), ${result.user.displayName || result.user.email}!`);
+
+      } catch (error) {
+        isLoginInProgress = false;
+
+        if (error.code === 'auth/popup-closed-by-user' || error.code === 'auth/cancelled-popup-request') {
+          console.log('ℹ️ Popup fechado pelo usuário.');
+          return;
+        }
+
+        console.error('❌ Erro no login:', error);
+        alert('Erro no login: ' + (error.message || 'Desconhecido.'));
+      }
     });
   });
 })();
-
 
 document.addEventListener("DOMContentLoaded", () => {
   /* ------------------ ⚙️ BASE (MANTIDO) ------------------ */
