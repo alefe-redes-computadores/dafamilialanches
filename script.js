@@ -1,69 +1,115 @@
-/* =========================================================
-   🚀 PATCH v3.9.1 - LOGIN GOOGLE SEGURO (ASYNC DELAY)
-   Corrige definitivamente o erro "conflicting popup"
-   Evita fechamento simultâneo do modal com o popup do Google
-========================================================= */
-
+<!-- PATCH v3.9.2 — Login Google (mutex + fallback mobile + cleanup) -->
+<script>
 (function() {
-  let isLoginInProgress = false;
+  // 1) Mutex global + util
+  const LoginPatch = {
+    busy: false,
+    isMobile: /Android|iPhone|iPad|iPod|Opera Mini|IEMobile/i.test(navigator.userAgent),
+    lock(btn){ this.busy = true; if(btn){ btn.disabled = true; btn.style.opacity='0.6'; } },
+    unlock(btn){ this.busy = false; if(btn){ btn.disabled = false; btn.style.opacity=''; } },
+  };
 
+  // 2) Limpa pendência de login via redirect (se houve) ao carregar
   document.addEventListener('DOMContentLoaded', function() {
-    const googleBtn = document.getElementById('google-login');
-    if (!googleBtn) return;
+    if (!window.firebase || !firebase.auth) return;
+    try {
+      firebase.auth().getRedirectResult().then(function(res){
+        // Se veio usuário por redirect, ótimo: nada a fazer aqui.
+        // (Seu listener onAuthStateChanged no script principal já atualiza a UI)
+      }).catch(function(err){
+        // Só loga, não interrompe nada
+        console.warn('[LoginPatch] getRedirectResult:', err?.code || err);
+      });
+    } catch(e) { console.warn('[LoginPatch] redirect cleanup fail', e); }
+  });
 
-    // Remove listeners antigos
-    const cleanBtn = googleBtn.cloneNode(true);
-    googleBtn.parentNode.replaceChild(cleanBtn, googleBtn);
+  // 3) Reinstala o clique do Google com guarda forte e fallback
+  document.addEventListener('DOMContentLoaded', function(){
+    const btn = document.getElementById('google-login');
+    if (!btn || !window.firebase || !firebase.auth) return;
 
-    cleanBtn.addEventListener('click', async function() {
-      if (isLoginInProgress) {
-        console.log('⚠️ Login já em andamento...');
+    // clona o botão para remover listeners antigos
+    const fresh = btn.cloneNode(true);
+    btn.parentNode.replaceChild(fresh, btn);
+
+    fresh.addEventListener('click', async function(){
+      if (LoginPatch.busy) { console.log('⏳ Login em andamento...'); return; }
+
+      if (!window.firebase || !firebase.auth) {
+        alert('Erro ao iniciar o login. Recarregue a página.');
         return;
       }
 
-      if (typeof firebase === 'undefined' || !firebase.auth) {
-        alert('Erro ao conectar. Recarregue a página.');
-        return;
-      }
-
-      isLoginInProgress = true;
-
+      // garante linguagem/persistência
       try {
-        const provider = new firebase.auth.GoogleAuthProvider();
-        provider.setCustomParameters({ prompt: 'select_account' });
+        firebase.auth().useDeviceLanguage?.();
+        await firebase.auth().setPersistence(firebase.auth.Auth.Persistence.LOCAL);
+      } catch(e) { console.warn('[LoginPatch] persistence warn', e); }
 
-        // 🔹 Delay curto antes de abrir popup (previne conflito visual)
-        await new Promise(r => setTimeout(r, 250));
+      const provider = new firebase.auth.GoogleAuthProvider();
+      provider.setCustomParameters({ prompt: 'select_account' });
 
-        const result = await firebase.auth().signInWithPopup(provider);
+      LoginPatch.lock(fresh);
 
-        // 🔹 Delay antes de fechar modais (previne conflito de fechamento)
-        await new Promise(r => setTimeout(r, 600));
+      // Estratégia: popup primeiro; em erro típico de mobile/ambiente, cai para redirect
+      const tryRedirectFallback = async (err) => {
+        const code = err?.code || '';
+        const popupEnvErr = code === 'auth/operation-not-supported-in-this-environment' || code === 'auth/popup-blocked';
+        const cancelled = code === 'auth/cancelled-popup-request' || code === 'auth/popup-closed-by-user';
 
-        isLoginInProgress = false;
-        console.log('✅ Login bem-sucedido:', result.user.email);
-
-        // Força atualização do botão e fechamento suave
-        document.body.classList.remove("no-scroll");
-        const loginModal = document.getElementById('login-modal');
-        if (loginModal) loginModal.classList.remove('show');
-
-        alert(`Bem-vindo(a), ${result.user.displayName || result.user.email}!`);
-
-      } catch (error) {
-        isLoginInProgress = false;
-
-        if (error.code === 'auth/popup-closed-by-user' || error.code === 'auth/cancelled-popup-request') {
-          console.log('ℹ️ Popup fechado pelo usuário.');
+        // Se foi cancelado pelo usuário, apenas libera e sai silenciosamente
+        if (cancelled) {
+          console.log('ℹ️ Popup fechado/cancelado pelo usuário.');
+          LoginPatch.unlock(fresh);
           return;
         }
 
-        console.error('❌ Erro no login:', error);
-        alert('Erro no login: ' + (error.message || 'Desconhecido.'));
+        // Mobile ou ambiente que bloqueia popup → redirect
+        if (LoginPatch.isMobile || popupEnvErr) {
+          try {
+            console.log('↩️ Caindo para signInWithRedirect...');
+            await firebase.auth().signInWithRedirect(provider);
+            // Navegador sai da página; quando voltar, getRedirectResult() (acima) trata.
+            return;
+          } catch (e2) {
+            console.error('❌ Redirect também falhou:', e2);
+            alert('Erro ao abrir o login. Tente novamente mais tarde.');
+          }
+        } else {
+          // Outro erro qualquer
+          console.error('❌ Erro no login (popup):', err);
+          alert('Erro ao fazer login: ' + (err?.message || 'desconhecido'));
+        }
+        LoginPatch.unlock(fresh);
+      };
+
+      // Evita “conflicting popup” garantindo uma única chamada ativa
+      try {
+        const result = await firebase.auth().signInWithPopup(provider);
+        console.log('✅ Login Google ok:', result?.user?.email);
+        // Seu onAuthStateChanged do script principal faz o resto (fechar modal, etc.)
+      } catch (err) {
+        await tryRedirectFallback(err);
+        return;
+      } finally {
+        // se não redirecionou, libera o botão
+        if (!LoginPatch.isMobile) LoginPatch.unlock(fresh);
       }
     });
   });
+
+  // 4) Segurança extra: evita múltiplas inicializações do Firebase (v8)
+  //    (Se você já protege isso no seu script principal com uma flag, ok deixar assim)
+  if (window.firebase && firebase.apps && firebase.apps.length > 1) {
+    try {
+      // Mantém apenas o primeiro app para não duplicar listeners
+      while (firebase.apps.length > 1) {
+        firebase.app(firebase.apps[firebase.apps.length - 1].name).delete?.();
+      }
+    } catch(e) { console.warn('[LoginPatch] multi-app cleanup warn', e); }
+  }
 })();
+</script>
 
 document.addEventListener("DOMContentLoaded", () => {
   /* ------------------ ⚙️ BASE (MANTIDO) ------------------ */
