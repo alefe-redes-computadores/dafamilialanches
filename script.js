@@ -1308,7 +1308,8 @@ function exibirRecompensas(pedidosFeitos, recompensasDisponiveis, cupomStatus, R
         let acaoBtn = '';
         let statusTag = '';
         let cardStyle = '';
-        let codigoCupom = r.tipo === 'cupom' ? r.valor : 'BRINDE';
+        let codigoCupom = r.valor ? r.valor : 'BRINDE';
+
         
         // --- ÍCONES EMOJI (ANTI-CRASH: DETECÇÃO SEGURA) ---
         let icon = '🎁';
