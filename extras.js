@@ -1,122 +1,93 @@
-/* ===========================================================
-   🍔 DFL – extras.js
-   Complemento opcional e seguro para a versão 3.7 estável
-   -----------------------------------------------------------
-   ✅ Exibe toast flutuante "Login realizado com sucesso!"
-   ✅ Adiciona miniaturas em "📦 Meus Pedidos"
-   (sem alterar o script.js original)
-   =========================================================== */
+
+// =====================================================
+// 🌟 DFL Extras.js — Toast + Miniaturas de Pedidos (v1.0)
+// Compatível com v3.7+ (não altera o script.js principal)
+// =====================================================
 
 document.addEventListener("DOMContentLoaded", () => {
+  console.log("✅ extras.js carregado");
 
-  /* -------------------------------
-     🟢 1. Toast de Login com Sucesso
-  ---------------------------------- */
-  window.showLoginToast = function (msg = "Login realizado com sucesso! 🎉") {
-    // cria container se não existir
-    let container = document.querySelector("#toast-container");
-    if (!container) {
-      container = document.createElement("div");
-      container.id = "toast-container";
-      Object.assign(container.style, {
-        position: "fixed",
-        top: "20px",
-        right: "20px",
-        display: "flex",
-        flexDirection: "column",
-        gap: "10px",
-        zIndex: 9999,
-      });
-      document.body.appendChild(container);
-    }
-
-    // cria o toast
+  /* === 1️⃣ Toast de Login com Sucesso === */
+  function showLoginToast() {
     const toast = document.createElement("div");
+    toast.textContent = "🎉 Login realizado com sucesso!";
     Object.assign(toast.style, {
-      background: "linear-gradient(135deg,#4caf50,#388e3c)",
+      position: "fixed",
+      top: "20px",
+      left: "50%",
+      transform: "translateX(-50%)",
+      background: "#4caf50",
       color: "#fff",
-      padding: "12px 18px",
+      padding: "12px 20px",
       borderRadius: "8px",
-      boxShadow: "0 4px 10px rgba(0,0,0,0.3)",
       fontWeight: "600",
-      fontSize: "0.95rem",
-      animation: "fadeIn 0.4s ease",
-      opacity: "0.95",
+      boxShadow: "0 4px 12px rgba(0,0,0,0.2)",
+      zIndex: "2000",
+      opacity: "0",
+      transition: "opacity 0.3s ease"
     });
-    toast.textContent = msg;
-    container.appendChild(toast);
-
-    // remove automaticamente após 3s
+    document.body.appendChild(toast);
+    setTimeout(() => (toast.style.opacity = "1"), 100);
     setTimeout(() => {
-      toast.style.transition = "opacity 0.5s";
       toast.style.opacity = "0";
       setTimeout(() => toast.remove(), 500);
     }, 3000);
-  };
+  }
 
-  /* -------------------------------
-     🟡 2. Miniaturas em "Meus Pedidos"
-  ---------------------------------- */
-  window.getPedidoThumb = function (pedido) {
-    if (!pedido) return "/imagens/padrao.jpg";
-    if (pedido.thumb) return pedido.thumb;
-
-    // tenta identificar pelo nome do item
-    const nome = (pedido.itens?.[0]?.nome || "").toLowerCase();
-    const mapa = {
-      "bao": "bao.png",
-      "uai": "uai.png",
-      "trem": "trem.png",
-      "cadim": "cadim.png",
-      "armaria": "armaria.png",
-      "bitela": "bitela.png",
-      "apruma": "apruma.png",
-      "peleja": "peleja.png",
-      "tudibom": "tudibom.png",
-      "custoso": "custoso.png",
-      "nigucim": "nigucim.png",
-      "simprao": "simprao.png",
-      "nimin": "nimin.png",
-      "padana": "padana.png",
-      "purizin": "purizin.png",
-      "trembao": "trembao.png",
-      "combo casal tradicional": "combo-casal-tradicional.png",
-      "combo casal artesanal": "combo-casal-artesanal.png",
-      "combo familia tradicional": "combo-familia-tradicional.png",
-      "combo familia artesanal": "combo-familia-artesanal.png",
-    };
-
-    for (const chave in mapa) {
-      if (nome.includes(chave)) return `/imagens/${mapa[chave]}`;
-    }
-
-    return "/imagens/padrao.jpg";
-  };
-
-  /* ---------------------------------------------------
-     🧩 3. Integração automática (opcional e segura)
-     Substitui a imagem no painel “📦 Meus Pedidos”
-  ------------------------------------------------------ */
+  // Gatilho de login — detecta se usuário logou com sucesso (variável global usada no script principal)
   const observer = new MutationObserver(() => {
-    const cards = document.querySelectorAll(".pedido-card, .pedido-item");
-    cards.forEach(card => {
-      if (card.dataset.thumbReady) return; // evita duplicar
-      const thumbDiv = card.querySelector(".pedido-thumb");
-      const nomeItem = card.textContent.toLowerCase();
-      for (const chave of Object.keys({
-        bao: "", uai: "", trem: "", cadim: "", armaria: "", bitela: "",
-        apruma: "", peleja: "", tudibom: "", custoso: "", nigucim: "",
-        simprao: "", nimin: "", padana: "", purizin: "", trembao: "",
-      })) {
-        if (nomeItem.includes(chave)) {
-          if (thumbDiv) thumbDiv.style.backgroundImage = `url('/imagens/${chave}.png')`;
-          card.dataset.thumbReady = "1";
+    if (window.currentUser && !window._toastShown) {
+      window._toastShown = true;
+      showLoginToast();
+    }
+  });
+  observer.observe(document.body, { childList: true, subtree: true });
+
+  /* === 2️⃣ Miniaturas Automáticas dos Pedidos === */
+  const lista = document.querySelector("#listaPedidos");
+  if (lista) {
+    const itens = lista.querySelectorAll(".pedido-card, .pedido-item");
+    itens.forEach(card => {
+      // Encontra o texto do pedido
+      const texto = card.innerText.toLowerCase();
+      let imagem = "default";
+
+      // Mapeamento por palavra-chave
+      const chaves = {
+        combo: "combo1",
+        bao: "bao",
+        bitela: "bitela",
+        cadim: "cadim",
+        trem: "trem",
+        armaria: "armaria",
+        apruma: "apruma",
+        gradicido: "gradicido",
+        custoso: "custoso",
+        nimin: "nimin",
+        nigucim: "nigucim",
+        purizin: "purizin"
+      };
+
+      for (const [chave, nome] of Object.entries(chaves)) {
+        if (texto.includes(chave)) {
+          imagem = nome;
           break;
         }
       }
+
+      // Insere miniatura se não existir
+      if (!card.querySelector(".pedido-thumb")) {
+        const thumb = document.createElement("div");
+        thumb.className = "pedido-thumb";
+        thumb.style.width = "100%";
+        thumb.style.height = "140px";
+        thumb.style.borderRadius = "10px";
+        thumb.style.background = `url('./imagens/${imagem}.png') center/cover no-repeat`;
+        thumb.style.marginBottom = "10px";
+        thumb.style.border = "1px solid #eee";
+        thumb.style.backgroundColor = "#fafafa";
+        card.insertBefore(thumb, card.firstChild);
+      }
     });
-  });
-
-  observer.observe(document.body, { childList: true, subtree: true });
-
+  }
 });
