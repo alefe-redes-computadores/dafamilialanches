@@ -1,8 +1,7 @@
 /* =========================================================
-   🚀 DFL v3.7.1 — CORREÇÃO DO CAMPO DE ENDEREÇO
-   - Ajuste no ID do campo de endereço manual para evitar conflito
-     com campos ocultos antigos.
-   - Mantém todas as funcionalidades da v3.7.0.
+   🚀 DFL v3.8.0 — CORREÇÃO DO BOTÃO FECHAR (X)
+   - Ajuste no seletor do botão fechar para funcionar no carrinho.
+   - Mantém correção de endereço e funcionalidades anteriores.
 ========================================================= */
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -10,22 +9,20 @@ document.addEventListener("DOMContentLoaded", () => {
   const sound = new Audio("click.wav"); // Mantemos a inicialização do áudio
   let cart = [];
   let currentUser = null;
-  let isFirebaseInitialized = false; // NOVO: Flag de inicialização do Firebase
+  let isFirebaseInitialized = false; // Flag de inicialização do Firebase
 
   const money = (n) => `R$ ${Number(n || 0).toFixed(2).replace(".", ",")}`;
   const safe = (fn) => (...a) => { try { fn(...a); } catch (e) { console.error(e); } };
 
-  /* Banco de Dados v2.7:
-    Dados das 9 promoções do carrossel.
-  */
+  /* Banco de Dados v2.7: Promoções */
   const PROMO_DATA = [
-    null, // Para que o índice 1 corresponda à Promo 1
+    null, 
     { id: 1, nome: "Combo 2 Purizin + Fanta 1L", preco: 34.99, precoAntigo: 40.00, img: "promocoes/promo1.jpg" },
     { id: 2, nome: "Combo 3 Padaná", preco: 37.99, precoAntigo: 45.00, img: "promocoes/promo2.jpg" },
     { id: 3, nome: "Combo 2 Peleja", preco: 39.99, precoAntigo: 52.00, img: "promocoes/promo3.jpg" },
     { id: 4, nome: "Combo 3 Trem + Fanta 1L", preco: 44.99, precoAntigo: 52.00, img: "promocoes/promo4.jpg" },
     { id: 5, nome: "Combo 4 Trem + Fanta 1L", preco: 49.99, precoAntigo: 65.00, img: "promocoes/promo5.jpg" },
-    { id: 6, nome: "Combo 5 Uai", preco: 54.99, precoAntigo: 65.00, img: "promocoes/promo6.jpg" }, // Preço corrigido
+    { id: 6, nome: "Combo 5 Uai", preco: 54.99, precoAntigo: 65.00, img: "promocoes/promo6.jpg" },
     { id: 7, nome: "Combo 4 TremBão + Fanta 1L", preco: 59.99, precoAntigo: 77.00, img: "promocoes/promo7.jpg" },
     { id: 8, nome: "Combo 4 Armaria", preco: 59.99, precoAntigo: 72.00, img: "promocoes/promo8.jpg" },
     { id: 9, nome: "Combo 5 Uai + Kuat 2L", preco: 64.99, precoAntigo: 79.99, img: "promocoes/promo9.jpg" }
@@ -56,7 +53,7 @@ document.addEventListener("DOMContentLoaded", () => {
     hoursBanner: document.querySelector(".hours-banner"),
     reportsBtn: document.getElementById("reports-btn"), 
     
-    // Elementos v2.7
+    // Elementos Promo
     promoModal: document.getElementById("promo-modal"),
     promoImg: document.getElementById("promo-modal-img"),
     promoTitle: document.getElementById("promo-modal-title"),
@@ -66,14 +63,14 @@ document.addEventListener("DOMContentLoaded", () => {
     promoNavNext: document.querySelector("#promo-modal .promo-nav.next"),
     promoClose: document.querySelector("#promo-modal .promo-close"),
 
-    // Elementos v2.9
+    // Elementos Pedidos
     pedidosContainer: document.querySelector(".meus-pedidos"),
     pedidosBtn: document.querySelector(".meus-pedidos-btn"),
     pedidosPanel: document.getElementById("painelPedidos"),
     pedidosFecharBtn: document.querySelector(".fechar-pedidos"),
     pedidosLista: document.getElementById("listaPedidos"),
 
-    // Elementos v3.1 (Minhas Recompensas)
+    // Elementos Recompensas
     recompensasContainer: document.querySelector(".minhas-recompensas"),
     recompensasBtn: document.querySelector(".recompensas-btn"),
     recompensasPanel: document.getElementById("recompensas-panel"),
@@ -82,7 +79,7 @@ document.addEventListener("DOMContentLoaded", () => {
     historicoLista: document.getElementById("historicoRecompensas") 
   };
   
-  // Garantia do elemento do histórico (MANTIDO)
+  // Garantia do elemento do histórico
   if (!el.historicoLista) {
      const painelBody = document.querySelector("#recompensas-panel .recompensas-body");
      if (painelBody) {
@@ -129,10 +126,7 @@ document.addEventListener("DOMContentLoaded", () => {
   };
   el.cartBackdrop.addEventListener("click", () => Overlays.closeAll());
 
-  /* =========================================================
-    ✨ v3.0: LISTENER DO FORMULÁRIO DE CUPOM (MANTIDO)
-    =========================================================
-  */
+  /* ------------------ 🎟️ CUPOM FORM ------------------ */
   const couponForm = document.getElementById("coupon-form");
   couponForm?.addEventListener("submit", (e) => {
     e.preventDefault();
@@ -147,14 +141,10 @@ document.addEventListener("DOMContentLoaded", () => {
       return;
     }
     
-    // Salva a *tentativa* de cupom.
     couponApplied = val;
     localStorage.setItem("dflCoupon", couponApplied);
-    
     renderMiniCart(); 
   });
-  /* ========================================================= */
-
 
   /* ------------------ 💬 POPUP (MANTIDO) ------------------ */
   function popupAdd(msg) {
@@ -169,7 +159,7 @@ document.addEventListener("DOMContentLoaded", () => {
     setTimeout(() => pop.classList.remove("show"), 2000);
   }
 
-  /* ------------------ 🎉 POPUP DE CONQUISTA (MANTIDO) ------------------ */
+  /* ------------------ 🎉 POPUP DE CONQUISTA ------------------ */
   function mostrarPopupRecompensa(msg) {
     let pop = document.getElementById("conquista-popup");
     if (!pop) {
@@ -195,11 +185,9 @@ document.addEventListener("DOMContentLoaded", () => {
     }
     pop.textContent = msg;
     
-    // Animação de entrada
     pop.style.opacity = '1';
     pop.style.transform = 'translateX(-50%) scale(1)';
     
-    // Animação de saída
     setTimeout(() => {
       pop.style.transform = 'translateX(-50%) scale(0)';
       pop.style.opacity = '0';
@@ -208,7 +196,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
 /* ------------------ 🛒 MINI-CARRINHO (MANTIDO) ------------------ */
   function renderMiniCart() {
-    // ... (MANTIDO)
     if (!el.miniList) return; 
 
     const totalItens = cart.reduce((s, i) => s + i.qtd, 0);
@@ -217,7 +204,6 @@ document.addEventListener("DOMContentLoaded", () => {
     if (!cart.length) {
       el.miniList.innerHTML = '<p style="text-align:center;color:#999;padding:20px;">Carrinho vazio 🛒</p>';
       
-      // v3.0: Limpa também o rodapé dinâmico e estático
       if(el.miniFoot) el.miniFoot.querySelectorAll(".cart-summary-generated").forEach(e => e.remove());
       const couponMsg = document.getElementById("coupon-message");
       const couponDiscountRow = document.getElementById("coupon-discount-row");
@@ -246,7 +232,7 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
 
-  /* 🔄 Vincula botões dinâmicos (MANTIDO) */
+  /* 🔄 Vincula botões dinâmicos */
   function bindMiniCartButtons() {
     el.miniList.querySelectorAll(".cart-plus").forEach(b => b.addEventListener("click", e => {
       const i = +e.currentTarget.dataset.idx;
@@ -273,20 +259,14 @@ document.addEventListener("DOMContentLoaded", () => {
     }));
   }
 
-  /* =========================================================
-     ✨ v3.0: HOOK ÚNICO DO RENDERMINICART (MANTIDO)
-    =========================================================
-  */
   const _renderMiniCartOrig = renderMiniCart;
   renderMiniCart = function () {
-    _renderMiniCartOrig(); // 1. Desenha a lista de itens (síncrono)
-    bindMiniCartButtons(); // 2. Vincula botões da lista (síncrono)
-    
-    // 3. Dispara a atualização do rodapé (assíncrono)
+    _renderMiniCartOrig(); 
+    bindMiniCartButtons(); 
     enhanceMiniCartUI();
   };
 
-  /* ------------------ 🔥 FIREBASE (LAZY LOAD - V3.6.0) ------------------ */
+  /* ------------------ 🔥 FIREBASE (LAZY LOAD) ------------------ */
   const firebaseConfig = {
     apiKey: "AIzaSyATQBcbYuzKpKlSwNlbpRiAM1XyHqhGeak",
     authDomain: "da-familia-lanches.firebaseapp.com",
@@ -296,7 +276,6 @@ document.addEventListener("DOMContentLoaded", () => {
     appId: "1:106857147317:web:769c98aed26bb8fc9e87fc",
   };
   
-  // Variáveis globais para os módulos do Firebase
   let auth, db; 
   
   function inicializarFirebase() {
@@ -310,13 +289,9 @@ document.addEventListener("DOMContentLoaded", () => {
               firebase.initializeApp(firebaseConfig);
           }
           
-          // Inicializa os serviços
           auth = firebase.auth();
           db = firebase.firestore();
-
           isFirebaseInitialized = true;
-          
-          // NOVO: Chama o listener de autenticação APÓS a inicialização
           setupAuthListener(); 
 
       } catch (error) {
@@ -328,11 +303,10 @@ document.addEventListener("DOMContentLoaded", () => {
               <br><small>Verifique sua conexão com a internet e tente recarregar a página.</small>
               <br><br><small style="color:#666">Detalhe: ${error.message}</small></div>`;
           }
-          // Não aborta o resto do script, mas as funcionalidades dependentes falharão.
       }
   }
 
-  /* ------------------ SETUP LISTENERS E AUTH (V3.6.0) ------------------ */
+  /* ------------------ SETUP LISTENERS E AUTH ------------------ */
   function setupAuthListener() {
     auth.onAuthStateChanged(user => {
       currentUser = user; 
@@ -355,18 +329,15 @@ document.addEventListener("DOMContentLoaded", () => {
       } else {
         if (el.reportsBtn) el.reportsBtn.style.display = "none";
         document.getElementById("admin-dashboard")?.remove();
-        // Overlays.closeAll(); // Removido para evitar fechar modais no carregamento
       }
     });
   }
 
-  /* ------------------ ⚙️ LOGIN (CORRIGIDO V3.5.3) ------------------ */
+  /* ------------------ ⚙️ LOGIN ------------------ */
   const handleLoginSuccess = (user) => {
-    // Garante que currentUser seja definido e a UI atualizada imediatamente
     currentUser = user;
     popupAdd("Login realizado com sucesso!");
     Overlays.closeAll();
-    // O setupAuthListener (chamado em inicializarFirebase) garante a atualização final
   };
 
   const handleLoginError = (err) => {
@@ -388,7 +359,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   el.loginForm?.addEventListener("submit", (e) => {
     e.preventDefault();
-    inicializarFirebase(); // Garante que o Firebase esteja pronto
+    inicializarFirebase(); 
     if (!isFirebaseInitialized) return alert("Erro ao conectar ao serviço de login.");
     
     const email = document.getElementById("login-email")?.value?.trim();
@@ -401,7 +372,7 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   el.googleBtn?.addEventListener("click", () => {
-    inicializarFirebase(); // Garante que o Firebase esteja pronto
+    inicializarFirebase(); 
     if (!isFirebaseInitialized) return alert("Erro ao conectar ao serviço de login.");
     
     const provider = new firebase.auth.GoogleAuthProvider();
@@ -415,7 +386,6 @@ document.addEventListener("DOMContentLoaded", () => {
       Overlays.open(el.loginModal);
   });
   
-  // Inicializa o Firebase no primeiro clique do carrinho, se o usuário não estiver logado
   el.cartIcon?.addEventListener("click", () => {
       if (!currentUser) inicializarFirebase();
       renderMiniCart();
@@ -448,10 +418,10 @@ document.addEventListener("DOMContentLoaded", () => {
         justify-content: space-between; 
         align-items: center; 
         padding: 12px; 
-        border: 1px solid #ffb300; /* Borda amarela var(--botao) */
+        border: 1px solid #ffb300; 
         border-radius: 8px; 
         background: #fff; 
-        box-shadow: 0 1px 3px rgba(0,0,0,.08); /* Sombra suave */
+        box-shadow: 0 1px 3px rgba(0,0,0,.08);
         cursor: pointer; 
         transition: all 0.2s;
         font-size: 1rem;
@@ -499,11 +469,14 @@ document.addEventListener("DOMContentLoaded", () => {
     Overlays.closeAll();
   });
 
-  document.querySelectorAll("#extras-modal .extras-close").forEach((b) =>
+  // 🔥 CORREÇÃO DO BOTÃO FECHAR (X)
+  // Agora usamos apenas a classe .extras-close, sem limitar ao #extras-modal
+  // Isso faz com que funcione tanto no modal de adicionais quanto no carrinho!
+  document.querySelectorAll(".extras-close").forEach((b) =>
     b.addEventListener("click", () => Overlays.closeAll())
   );
 
-  /* ------------------ 🥤 Combos (MANTIDO) ------------------ */
+  /* ------------------ 🥤 Combos ------------------ */
   const comboDrinkOptions = {
     casal: [
       { rotulo: "Fanta 1L (padrão)", delta: 0.01 },
@@ -539,10 +512,10 @@ document.addEventListener("DOMContentLoaded", () => {
         justify-content: space-between; 
         align-items: center; 
         padding: 12px; 
-        border: 1px solid #ffb300; /* Borda amarela var(--botao) */
+        border: 1px solid #ffb300; 
         border-radius: 8px; 
         background: #fff; 
-        box-shadow: 0 1px 3px rgba(0,0,0,.08); /* Sombra suave */
+        box-shadow: 0 1px 3px rgba(0,0,0,.08);
         cursor: pointer; 
         transition: all 0.2s;
       ">
@@ -577,7 +550,7 @@ document.addEventListener("DOMContentLoaded", () => {
     b.addEventListener("click", () => Overlays.closeAll())
   );
 
-  /* ------------------ 🧺 Adicionar item comum (MANTIDO) ------------------ */
+  /* ------------------ 🧺 Adicionar item comum ------------------ */
   function addCommonItem(nome, preco) {
     if (/^combo/i.test(nome) && !/^\s*Combo [0-9]/.test(nome)) {
       openComboModal(nome, preco);
@@ -600,7 +573,7 @@ document.addEventListener("DOMContentLoaded", () => {
     })
   );
 
-/* ------------------ ⚙️ CONFIGURAÇÕES V3.0 (MANTIDO) ------------------ */
+/* ------------------ ⚙️ CONFIGURAÇÕES ------------------ */
   const DELIVERY_FEE = 6.00; 
 
   let couponApplied = (localStorage.getItem("dflCoupon") || "").toUpperCase();
@@ -792,6 +765,7 @@ document.addEventListener("DOMContentLoaded", () => {
       </div>
 
       <label style="display:block;font-weight:600;margin-bottom:6px;">🏠 Endereço para Entrega</label>
+      
       <textarea id="address-input-manual" rows="2" placeholder="Rua, número, complemento, bairro"
         style="width:100%;border:1px solid #ddd;border-radius:10px;padding:10px;resize:vertical;margin-bottom:10px">${addressValue}</textarea>
 
@@ -805,7 +779,6 @@ document.addEventListener("DOMContentLoaded", () => {
     
     el.miniFoot.appendChild(summaryDiv);
     
-    // LISTENER ATUALIZADO PARA O NOVO ID
     summaryDiv.querySelector("#address-input-manual")?.addEventListener("input", (e) => {
       addressValue = (e.target.value || "").trim();
       localStorage.setItem("dflAddress", addressValue);
@@ -825,7 +798,7 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     });
   }
-  /* =========================================================
+/* =========================================================
     ✨ v3.5.1: FUNÇÃO PARA CARREGAR METAS (CACHÊ REVISADO)
     =========================================================
   */
@@ -863,7 +836,7 @@ document.addEventListener("DOMContentLoaded", () => {
       }
   }
 
-  /* ------------------ 🖼️ CARROSSEL V2.7 (MANTIDO) ------------------ */
+  /* ------------------ 🖼️ CARROSSEL V2.7 ------------------ */
   let currentPromoId = 1;
 
   function showPromoModal(promoId) {
@@ -922,7 +895,7 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
 
-  /* ------------------ ⏰ Status + Timer (MANTIDO) ------------------ */
+  /* ------------------ ⏰ Status + Timer ------------------ */
   const atualizarStatus = safe(() => {
     const agora = new Date();
     const h = agora.getHours();
@@ -987,7 +960,7 @@ document.addEventListener("DOMContentLoaded", () => {
   setInterval(atualizarTimer, 1000);
 
   /* =========================================================
-    🔥 CORREÇÃO NA FUNÇÃO FECHAR PEDIDO
+    🔥 CORREÇÃO NA FUNÇÃO FECHAR PEDIDO (Endereço Manual)
     =========================================================
   */
   async function fecharPedido() {
@@ -1491,7 +1464,7 @@ async function carregarHistoricoRecompensas(userId) {
   el.recompensasFecharBtn?.addEventListener("click", () => Overlays.closeAll());
 
   /* =========================================================
-     📊 ADMIN DASHBOARD (MANTIDO)
+     📊 ADMIN DASHBOARD
   ========================================================= */
   const ADMINS = [
     "alefejohsefe@gmail.com",
@@ -1753,7 +1726,7 @@ async function carregarHistoricoRecompensas(userId) {
     }
   }
 
-  /* ------------------ 🍪 LÓGICA DO BANNER DE COOKIES (MANTIDO) ------------------ */
+  /* ------------------ 🍪 LÓGICA DO BANNER DE COOKIES ------------------ */
   const cookieBanner = document.getElementById("cookie-banner");
   const cookieAcceptBtn = document.getElementById("cookie-accept");
 
@@ -1787,7 +1760,7 @@ async function carregarHistoricoRecompensas(userId) {
     console.warn("⚠️ Erro interceptado:", e?.message);
   });
 
-  console.log("%c🔥 DFL v3.7.1 — Correção de Endereço OK",
+  console.log("%c🔥 DFL v3.8.0 — Botão X Corrigido",
               "background:#4CAF50;color:#fff;padding:8px 12px;border-radius:8px;font-weight:700;");
 
 }); 
