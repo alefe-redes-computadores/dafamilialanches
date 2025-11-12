@@ -1,7 +1,7 @@
 /* =========================================================
-   🚀 DFL v4.2 — CORREÇÃO FINAL (PARTE 1)
-   - Detecção Inteligente de "Cliente Ouro/Platina/Diamante"
-   - Cupom visível no Popup
+   🚀 DFL v4.3 — VERSÃO ANTI-CRASH (PARTE 1)
+   - Correção Crítica: Converte dados para String antes de ler.
+   - Evita tela branca se o título da recompensa for número.
 ========================================================= */
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -14,10 +14,11 @@ document.addEventListener("DOMContentLoaded", () => {
   const money = (n) => `R$ ${Number(n || 0).toFixed(2).replace(".", ",")}`;
   const safe = (fn) => (...a) => { try { fn(...a); } catch (e) { console.error(e); } };
 
-  /* --- 🆕 FUNÇÃO HELPER DE ÍCONES (INTELIGENTE) --- */
+  /* --- 🆕 FUNÇÃO HELPER BLINDADA (ANTI-CRASH) --- */
   function getTierIcon(tier) {
-    const level = tier ? tier.toLowerCase().trim() : '';
-    // Agora verifica se a palavra existe dentro da frase
+    // Converte para String obrigatoriamente para evitar erro se vier número
+    const level = tier ? String(tier).toLowerCase().trim() : '';
+    
     if (level.includes('ouro')) return '🥇';
     if (level.includes('platina')) return '💎';
     if (level.includes('diamante')) return '👑';
@@ -937,7 +938,7 @@ document.addEventListener("DOMContentLoaded", () => {
   setInterval(atualizarTimer, 1000);
 
   /* =========================================================
-    🔥 FUNÇÃO FECHAR PEDIDO (LÓGICA CORRIGIDA + RECOMPENSAS VISUAIS)
+    🔥 FUNÇÃO FECHAR PEDIDO (ANTI-CRASH APLICADO)
     =========================================================
   */
   async function fecharPedido() {
@@ -1009,7 +1010,7 @@ document.addEventListener("DOMContentLoaded", () => {
           });
       }
 
-      // --- NOVA LÓGICA DE RECOMPENSA (EMOJIS E CUPOM VISÍVEL) ---
+      // --- NOVA LÓGICA DE RECOMPENSA (BLINDADA) ---
       const RECOMPENSAS_DATA = await carregarConfiguracoesDeRecompensas();
       const doc = await usuarioRef.get();
       const data = doc.data() || { pedidosFeitos: 0, recompensaNivel: 0 };
@@ -1046,8 +1047,8 @@ document.addEventListener("DOMContentLoaded", () => {
           await db.collection("Usuarios").doc(userId)
                   .collection("RecompensasRecebidas").add(itemLiberado);
 
-          // --- POPUP ATUALIZADO: MOSTRA ÍCONE E CUPOM ---
-          const nomeNivel = recompensaAtingida.titulo || recompensaAtingida.valor;
+          // POPUP ATUALIZADO E PROTEGIDO
+          const nomeNivel = String(recompensaAtingida.titulo || recompensaAtingida.valor || '');
           const msg = `🎉 Parabéns! Você alcançou o nível ${nomeNivel} ${getTierIcon(nomeNivel)} e ganhou o cupom: ${recompensaAtingida.valor}`;
           mostrarPopupRecompensa(msg);
           
@@ -1206,7 +1207,7 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
 /* =========================================================
-   🎁 MINHAS RECOMPENSAS (ATUALIZADO v4.2: DETECÇÃO DE TEXTO)
+   🎁 MINHAS RECOMPENSAS (ANTI-CRASH: DADOS PROTEGIDOS)
 ========================================================= */
 async function carregarRecompensas(userId) {
     
@@ -1300,6 +1301,8 @@ function exibirRecompensas(pedidosFeitos, recompensasDisponiveis, cupomStatus, R
     const recompensasHtml = recompensasDisponiveis.map(r => {
         const liberada = pedidosFeitos >= r.limite;
         const cupomJaUsado = cupomStatus?.usado === true && cupomStatus?.cupom === r.valor;
+        // Anti-Crash: Converte o título para string
+        const tituloRaw = String(r.titulo || r.valor || '');
         const titulo = r.titulo || `Recompensa: ${r.valor}`;
         
         let acaoBtn = '';
@@ -1307,12 +1310,12 @@ function exibirRecompensas(pedidosFeitos, recompensasDisponiveis, cupomStatus, R
         let cardStyle = '';
         let codigoCupom = r.tipo === 'cupom' ? r.valor : 'BRINDE';
         
-        // --- ÍCONES EMOJI (CORRIGIDO v4.2: DETECÇÃO POR TRECHO) ---
+        // --- ÍCONES EMOJI (ANTI-CRASH: DETECÇÃO SEGURA) ---
         let icon = '🎁';
+        const tituloLower = tituloRaw.toLowerCase(); // Agora seguro porque convertemos pra string antes
         
-        // Verifica se o título contém a palavra chave (Ouro/Platina/Diamante)
-        if (r.titulo && (r.titulo.toLowerCase().includes('ouro') || r.titulo.toLowerCase().includes('platina') || r.titulo.toLowerCase().includes('diamante'))) {
-             icon = getTierIcon(r.titulo);
+        if (tituloLower.includes('ouro') || tituloLower.includes('platina') || tituloLower.includes('diamante')) {
+             icon = getTierIcon(tituloRaw);
         } else if (r.tipo === 'cupom') {
              icon = '🎟️';
         } else if (r.tipo === 'brinde') {
@@ -1333,8 +1336,7 @@ function exibirRecompensas(pedidosFeitos, recompensasDisponiveis, cupomStatus, R
         }
         
         // --- EXIBIÇÃO DE CUPOM ---
-        // Mostra o cupom se tiver valor, a não ser que o valor seja o próprio nome do nível (o que não deve ocorrer se config estiver certa)
-        const mostrarCupom = (r.valor && !r.valor.includes('Nível'));
+        const mostrarCupom = (r.valor && !String(r.valor).includes('Nível'));
         
         return `
             <div class="recompensa-card" style="display:flex;align-items:center;padding:15px;border-radius:10px;margin-bottom:10px;background:#f9f9f9;box-shadow:0 2px 5px rgba(0,0,0,0.1);${cardStyle}">
@@ -1392,10 +1394,13 @@ async function carregarHistoricoRecompensas(userId) {
             let valorStr = (log.tipo === 'cupom') ? `${log.valor} OFF` : log.valor;
             if (log.tipo === 'value') valorStr = money(log.valor);
             
-            // --- ÍCONES EMOJI (LÓGICA ATUALIZADA v4.2: DETECÇÃO POR TRECHO) ---
+            // --- ANTI-CRASH NO HISTÓRICO TAMBÉM ---
+            const tituloRaw = String(log.titulo || '');
+            const tituloLower = tituloRaw.toLowerCase();
+
             let icon = '🎁';
-            if (log.titulo && (log.titulo.toLowerCase().includes('ouro') || log.titulo.toLowerCase().includes('platina') || log.titulo.toLowerCase().includes('diamante'))) {
-                 icon = getTierIcon(log.titulo);
+            if (tituloLower.includes('ouro') || tituloLower.includes('platina') || tituloLower.includes('diamante')) {
+                 icon = getTierIcon(tituloRaw);
             } else if (log.tipo === 'cupom') {
                  icon = '🎟️';
             }
@@ -1563,7 +1568,7 @@ async function carregarHistoricoRecompensas(userId) {
     });
   }
   
-  console.log("%c🔥 DFL v4.2 — Ícones Inteligentes + Segurança", "background:#4CAF50;color:#fff;padding:5px;border-radius:5px;");
+  console.log("%c🔥 DFL v4.3 — Ícones + Segurança Anti-Crash", "background:#4CAF50;color:#fff;padding:5px;border-radius:5px;");
 
 }); 
 
