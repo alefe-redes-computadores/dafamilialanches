@@ -2257,37 +2257,7 @@ function clearBackdrop() {
   });
 })();
 
-/* =====================================================
-   DFL – Bloco seguro (colado no FINAL do script.js 3.7)
-   - Toast de login (Firebase v8)
-   - Miniaturas em "Meus Pedidos" via MutationObserver
-   ===================================================== */
-(function () {
-  // ---------- Helpers ----------
-  function $(sel, root = document) { return root.querySelector(sel); }
 
-  // ----- Injetar CSS do toast uma vez -----
-  (function injectToastCSS() {
-    if (document.getElementById('dfl-toast-style')) return;
-    const st = document.createElement('style');
-    st.id = 'dfl-toast-style';
-    st.textContent = `
-      .dfl-toast {
-        position: fixed;
-        top: 16px; left: 50%;
-        transform: translateX(-50%) translateY(-10px);
-        background: #111; color: #fff;
-        padding: 12px 16px; border-radius: 10px; font-weight: 700;
-        box-shadow: 0 10px 30px rgba(0,0,0,.25);
-        opacity: 0; z-index: 2001; pointer-events: none;
-        transition: opacity .25s ease, transform .25s ease;
-      }
-      .dfl-toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
-    `;
-    document.head.appendChild(st);
-  })();
-
-  // ----- Toast -----
   let toastTimer = null;
   function showToast(msg, ms = 2200) {
     let el = document.querySelector('.dfl-toast');
