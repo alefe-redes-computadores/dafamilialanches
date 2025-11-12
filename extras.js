@@ -1,60 +1,89 @@
 /* =====================================================
-   🍔 Da Família Lanches — Extras.js (v1.4 Final)
-   - Miniaturas corrigidas (altura e corte)
-   - Notificações transformadas (Visual Black Toast)
-   - Força visual via CSS Injection agressivo
+   🍔 Da Família Lanches — Extras.js (v2.0 Fun & Vibrant)
+   - Notificações Inteligentes (Topo vs Centro)
+   - Animações "Bouncy" e modernas
+   - Correção de Miniaturas (Mantida)
+   - Detecção de Login (Mantida)
    ===================================================== */
 
 (function () {
   
-    // 1. INJEÇÃO DE CSS (Transforma o visual do site)
+    // 1. INJEÇÃO DE CSS (Design System DFL Moderno)
     (function injectStyles() {
       if (document.getElementById('dfl-extras-style')) return;
       const st = document.createElement('style');
       st.id = 'dfl-extras-style';
       st.textContent = `
-        /* --- TRANSFORMAÇÃO DO POPUP ORIGINAL --- */
-        /* Forçamos a classe .popup-add existente a virar o Toast Preto */
+        /* --- BASE DO TOAST (Comum a todos) --- */
         .popup-add, .dfl-toast {
           position: fixed !important;
-          top: 20px !important; 
-          bottom: auto !important; /* Anula o CSS antigo */
           left: 50% !important;
-          transform: translateX(-50%) translateY(-150%) !important; /* Começa escondido pra cima */
-          
-          background: #222 !important; 
-          color: #fff !important;
-          font-family: sans-serif !important;
-          font-weight: 600 !important;
-          font-size: 0.95rem !important;
-          
-          padding: 12px 24px !important; 
-          border-radius: 50px !important; 
-          box-shadow: 0 8px 30px rgba(0,0,0,0.4) !important;
-          
-          z-index: 2147483647 !important; /* Z-index Máximo para ficar acima de tudo */
-          opacity: 0 !important;
-          transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.4s !important;
-          pointer-events: none !important;
+          z-index: 2147483647 !important; /* Acima de tudo */
           
           display: flex !important;
           align-items: center !important;
           justify-content: center !important;
-          min-width: 200px !important;
+          gap: 10px !important;
+          
+          font-family: 'Segoe UI', Roboto, sans-serif !important;
+          font-weight: 600 !important;
+          font-size: 0.95rem !important;
           white-space: nowrap !important;
+          
+          border-radius: 50px !important;
+          pointer-events: none !important;
+          
+          /* Transição Suave e Divertida (Bouncy) */
+          transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) !important;
+          opacity: 0 !important;
         }
   
-        /* Classe para mostrar o popup */
-        .popup-add.show, .dfl-toast.show {
+        /* --- MODO 1: TOAST DE TOPO (Ações Rápidas: Carrinho, Cupom) --- */
+        .dfl-toast-top {
+          top: 20px !important;
+          bottom: auto !important;
+          transform: translateX(-50%) translateY(-150%) !important; /* Escondido acima */
+          
+          background: #222 !important;
+          color: #fff !important;
+          padding: 10px 20px !important;
+          box-shadow: 0 5px 15px rgba(0,0,0,0.2) !important;
+          min-width: auto !important;
+        }
+        
+        /* Estado Visível (Topo) */
+        .dfl-toast-top.show {
           opacity: 1 !important;
           transform: translateX(-50%) translateY(0) !important;
         }
   
-        /* Ícone simulado via CSS antes do texto */
-        .popup-add::before {
-          content: "🔔";
-          margin-right: 8px;
+        /* --- MODO 2: TOAST CENTRAL (Momentos Especiais: Login, Pedido) --- */
+        .dfl-toast-center {
+          top: 50% !important;
+          left: 50% !important;
+          bottom: auto !important;
+          /* Começa pequeno e transparente (Zoom Effect) */
+          transform: translate(-50%, -50%) scale(0.8) !important; 
+          
+          background: rgba(0, 0, 0, 0.85) !important; /* Translúcido Chique */
+          backdrop-filter: blur(4px); /* Desfoque sutil no fundo */
+          color: #fff !important;
+          
+          padding: 20px 30px !important;
+          font-size: 1.1rem !important;
+          box-shadow: 0 10px 40px rgba(0,0,0,0.5) !important;
+          border: 1px solid rgba(255,255,255,0.1) !important;
         }
+  
+        /* Estado Visível (Centro) */
+        .dfl-toast-center.show {
+          opacity: 1 !important;
+          transform: translate(-50%, -50%) scale(1) !important;
+        }
+  
+        /* Cores de Contexto (Opcional, mas dá um charme) */
+        .dfl-bg-success { border-left: 4px solid #4caf50 !important; }
+        .dfl-bg-error { border-left: 4px solid #f44336 !important; }
         
         /* --- CORREÇÃO DAS MINIATURAS (MANTIDO) --- */
         .pedido-card .pedido-thumb {
@@ -65,48 +94,92 @@
           border-radius: 8px !important;
           margin-bottom: 10px !important;
           box-shadow: inset 0 0 0 1px rgba(0,0,0,0.05);
-          background-color: transparent !important; /* Remove fundo cinza */
+          background-color: transparent !important;
         }
       `;
       document.head.appendChild(st);
     })();
   
-    // 2. FUNÇÃO DE TOAST AUXILIAR (Caso o script principal falhe)
-    // Cria um elemento igual ao .popup-add se ele não existir
-    function showManualToast(msg) {
+    // 2. LÓGICA INTELIGENTE DE EXIBIÇÃO
+    function showSmartToast(msg) {
+      // Tenta usar o elemento existente do script principal ou cria um novo
       let el = document.querySelector('.popup-add');
-      
-      // Se não existir (script.js ainda não criou), cria um fake
       if (!el) {
         el = document.createElement('div');
         el.className = 'popup-add';
         document.body.appendChild(el);
       }
   
-      // Atualiza texto
-      el.textContent = msg;
+      // Detecta o "clima" da mensagem
+      const isSpecial = /Login|Sucesso|Parabéns|Pedido|Finaliz/i.test(msg);
+      const isError = /Erro|Inválido|Falha/i.test(msg);
+      const isCart = /carrinho/i.test(msg);
+  
+      // Escolhe o ícone (Emoji)
+      let icon = '';
+      if (msg.includes('Login')) icon = '🎉';
+      else if (msg.includes('Pedido')) icon = '📦';
+      else if (msg.includes('adicionado')) icon = '🛒';
+      else if (msg.includes('removido')) icon = '🗑️';
+      else if (msg.includes('Cupom')) icon = '🎟️';
+      else if (isError) icon = '⚠️';
+      else icon = '🍔'; // Padrão DFL
+  
+      // Limpa classes antigas para resetar animação
+      el.className = 'popup-add'; 
+      el.innerHTML = `<span style="font-size: 1.2em;">${icon}</span> <span>${msg}</span>`;
+  
+      // Aplica o estilo baseado no tipo
+      if (isSpecial) {
+          el.classList.add('dfl-toast-center');
+          if(!isError) el.style.color = '#fff';
+      } else {
+          el.classList.add('dfl-toast-top');
+          // Borda colorida sutil para feedback rápido
+          if(isCart) el.style.borderLeft = '4px solid #ffca28'; // Amarelo DFL
+          if(isError) el.style.borderLeft = '4px solid #f44336';
+      }
+  
+      // Trigger Reflow (Reinicia a animação CSS)
+      void el.offsetWidth;
+  
+      // Mostra
+      el.classList.add('show');
+  
+      // Tempo de exibição (Especiais ficam um pouco mais)
+      const time = isSpecial ? 3500 : 2500;
       
-      // Força animação
-      requestAnimationFrame(() => {
-        el.classList.add('show');
-        setTimeout(() => el.classList.remove('show'), 3000);
-      });
+      // Limpa timer anterior se houver (embora estejamos reaproveitando o elemento)
+      if (window.dflToastTimer) clearTimeout(window.dflToastTimer);
+      
+      window.dflToastTimer = setTimeout(() => {
+        el.classList.remove('show');
+      }, time);
     }
   
-    // 3. DETECTOR DE LOGIN (Garante a mensagem de sucesso)
+    // 3. INTEGRAÇÃO (O "Monkey Patch")
+    // Substitui a função original para usar nosso sistema bonito
+    window.addEventListener('load', () => {
+        // Salva a original se precisar (opcional), mas aqui vamos sobrescrever
+        window.popupAdd = function(msg) {
+            showSmartToast(msg);
+        };
+        console.log('✨ DFL Toast System v2.0 ativado!');
+    });
+  
+    // 4. DETECTOR DE LOGIN (Mensagem Especial)
     document.addEventListener('DOMContentLoaded', () => {
       try {
-        // Pequeno delay para garantir que o Firebase carregou
         setTimeout(() => {
             if (window.firebase && firebase.auth) {
                 firebase.auth().onAuthStateChanged(user => {
-                  // Verifica se já mostramos a mensagem nesta sessão para não ficar repetindo
+                  // Verifica sessão para não spamar
                   if (user && !sessionStorage.getItem('dfl_logged_in_msg')) {
                     sessionStorage.setItem('dfl_logged_in_msg', 'true');
                     
-                    // Dispara o toast manual
                     const nome = user.displayName ? user.displayName.split(' ')[0] : 'Cliente';
-                    showManualToast(`🎉 Login realizado! Olá, ${nome}.`);
+                    // Dispara o Toast Central Especial
+                    showSmartToast(`🎉 Login realizado com sucesso! Olá, ${nome}.`);
                   }
                 });
             }
@@ -114,7 +187,7 @@
       } catch (e) { console.warn(e); }
     });
   
-    // 4. MAPA DE IMAGENS E CORREÇÃO VISUAL (MANTIDO)
+    // 5. CORREÇÃO DE MINIATURAS (Lógica Mantida)
     const THUMB_MAP = [
       { key: 'casal', img: 'imagens/combo1.png' },
       { key: 'família', img: 'imagens/combo3.png' },
@@ -158,11 +231,9 @@
       const textContent = cardElement.innerText || '';
       const newImg = pickThumb(textContent);
   
-      if (newImg) {
-          thumbDiv.style.backgroundImage = `url('${newImg}')`;
-      }
+      if (newImg) thumbDiv.style.backgroundImage = `url('${newImg}')`;
       
-      // Garante o estilo correto
+      // Força o estilo correto
       thumbDiv.style.height = '110px'; 
       thumbDiv.style.backgroundSize = 'cover';
       thumbDiv.style.backgroundPosition = 'center';
@@ -177,7 +248,6 @@
     function watchOrders() {
       const list = document.getElementById('listaPedidos');
       if (!list) return;
-      
       processOrders();
       const mo = new MutationObserver(processOrders);
       mo.observe(list, { childList: true, subtree: true });
