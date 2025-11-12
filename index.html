@@ -3,9 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>🍔 Da Família Lanches — DFL v3.9.11</title>
+  <title>🍔 Da Família Lanches — DFL v3.9.13</title>
 
-  <!-- CSP atualizada para permitir Firebase, Google Auth e assets locais -->
   <meta http-equiv="Content-Security-Policy" content="
     default-src 'self';
     script-src 'self' https://www.gstatic.com https://*.firebaseio.com https://cdn.jsdelivr.net https://accounts.google.com https://apis.google.com https://www.googleapis.com;
@@ -42,13 +41,11 @@
   <link rel="stylesheet" href="style.css?v=3.9.11" />
   <noscript><link rel="stylesheet" href="style.css?v=3.9.11"/></noscript>
 
-  <!-- Firebase v8 (compatível com seu script atual) -->
   <script defer src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
   <script defer src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
   <script defer src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
 </head>
 <body>
-  <!-- Pré-carrega o som para minimizar latência (tocado apenas ao finalizar) -->
   <audio id="checkout-sound" src="click.wav" preload="auto" hidden></audio>
 
   <header class="header">
@@ -104,36 +101,45 @@
       <div class="mini-list"></div>
       <div class="mini-foot">
 
-        <!-- 🚚 FRETE / ENDEREÇO — habilitado (sem readonly/disabled/opacity) -->
-        <div class="frete-container">
+        <div class="frete-container" style="opacity: 0.8;">
           <h4 style="margin-top:10px;">🚚 Entrega</h4>
+          
+          <div style="background:#fff9c4; color:#664d03; padding:12px; border-radius:8px; margin-bottom:15px; font-size:0.9rem; border:1px solid #ffeeba; text-align:center; line-height:1.4;">
+             <span style="font-size:1.1rem;">🕖</span> <b>Em breve o site faz a mágica sozinho!</b><br>
+             <span style="font-size:0.85rem; color:#555;">Por enquanto, preencha o endereço manualmente abaixo ⬇️</span>
+          </div>
 
           <div class="frete-cep-group" style="display:flex;gap:8px;margin:10px 0;">
-            <input id="cep-input" type="text" placeholder="Digite o CEP" style="flex:1;padding:8px;border:1px solid #ccc;border-radius:8px;">
-            <button id="btn-calcular-frete" class="btn-calcular-frete" type="button">Calcular Frete</button>
+            <input id="cep-input" type="text" placeholder="Digite o CEP" disabled 
+                   style="flex:1;padding:8px;border:1px solid #ccc;border-radius:8px; background:#e9ecef; color:#999; cursor:not-allowed;">
+            
+            <button id="btn-calcular-frete" class="btn-calcular-frete" type="button" disabled
+                    style="background:#ccc; cursor:not-allowed; color:#fff; border:none; padding:8px; border-radius:8px;">
+              Calcular Frete
+            </button>
           </div>
 
-          <input id="endereco-auto" type="text" placeholder="Endereço (auto via CEP)" style="width:100%;padding:8px;border:1px solid #ccc;border-radius:8px;margin-bottom:8px;">
+          <input id="endereco-auto" type="text" placeholder="Endereço (auto via CEP)" disabled
+                 style="width:100%;padding:8px;border:1px solid #ccc;border-radius:8px;margin-bottom:8px; background:#e9ecef; color:#999; cursor:not-allowed;">
 
           <div style="display:flex;gap:8px;margin-bottom:8px;">
-            <input id="numero-input" type="text" placeholder="Número" style="flex:1;padding:8px;border:1px solid #ccc;border-radius:8px;">
-            <input id="complemento-input" type="text" placeholder="Complemento (opcional)" style="flex:1;padding:8px;border:1px solid #ccc;border-radius:8px;">
+            <input id="numero-input" type="text" placeholder="Número" disabled
+                   style="flex:1;padding:8px;border:1px solid #ccc;border-radius:8px; background:#e9ecef; color:#999; cursor:not-allowed;">
+            <input id="complemento-input" type="text" placeholder="Complemento (opcional)" disabled
+                   style="flex:1;padding:8px;border:1px solid #ccc;border-radius:8px; background:#e9ecef; color:#999; cursor:not-allowed;">
           </div>
 
-          <label style="display:flex;align-items:center;gap:6px;margin-bottom:8px;">
-            <input type="checkbox" id="retirar-local">
+          <label style="display:flex;align-items:center;gap:6px;margin-bottom:8px; color:#999;">
+            <input type="checkbox" id="retirar-local" disabled>
             Retirar no Local (sem taxa)
           </label>
-
-          <div id="frete-resultado" style="margin-top:8px;font-weight:600;"></div>
+          
+          <hr style="border:0; border-top:1px solid #eee; margin:15px 0;">
         </div>
 
-        <!-- Mantemos um textarea invisível apenas para compatibilidade com scripts antigos -->
-        <textarea id="address-input" style="display:none;"></textarea>
-
         <form id="coupon-form" class="coupon-form" novalidate>
-          <input type="text" id="coupon-input" placeholder="Digite o cupom e clique em Aplicar" aria-label="Cupom de desconto"/>
-          <button type="submit" id="coupon-apply-btn" class="btn-primary">Aplicar</button>
+          <input type="text" id="coupon-input" placeholder="Cupom de desconto" aria-label="Cupom de desconto"/>
+          <button type="submit" id="coupon-apply-btn" class="btn-primary">OK</button>
         </form>
         <div id="coupon-message" class="coupon-message" aria-live="polite"></div>
 
@@ -141,7 +147,8 @@
           <span>Desconto</span>
           <span id="cart-discount">R$ 0,00</span>
         </div>
-      </div>
+        
+        </div>
     </aside>
 
     <section class="menu-section">
@@ -464,7 +471,7 @@
         <a href="https://www.instagram.com/dafamilialanches" target="_blank" class="footer-btn" rel="noopener">📸 Instagram</a>
         <a href="https://www.ifood.com.br/delivery/patos-de-minas/dafamilialanches" target="_blank" class="footer-btn" rel="noopener">🍔 iFood</a>
       </div>
-      <div class="footer-copy">© 2025 Da Família Lanches — Todos os direitos reservados 🍔 • <b>v3.9.11</b></div>
+      <div class="footer-copy">© 2025 Da Família Lanches — Todos os direitos reservados 🍔 • <b>v3.9.13</b></div>
     </footer>
   </div>
 
@@ -518,8 +525,7 @@
     <button id="cookie-accept" type="button">Aceitar</button>
   </div>
 
-  <!-- Usa as versões que casam com o seu script.js principal -->
-  <script defer src="script.js?v=3.9.11"></script>
+  <script defer src="script.js?v=3.9.13"></script>
   <script defer src="extras.js?v=1.2"></script>
 </body>
 </html>
