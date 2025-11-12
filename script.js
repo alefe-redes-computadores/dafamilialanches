@@ -1,4 +1,3 @@
-const sound = new Audio('click.wav'); let isLoginInProgress=false;
 /* =========================================================
    🚀 DFL v3.7.0 — REMOÇÃO DE SOM GLOBAL DE CLIQUE (MELHORIA UX)
    - Remove o som de clique constante e o mantém APENAS na finalização do pedido.
