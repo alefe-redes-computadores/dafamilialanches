@@ -1,9 +1,9 @@
+
 /* =========================================================
-   🚀 DFL v3.9.16 — ROLLBACK DE SEGURANÇA (VERSÃO COMPLETA)
-   - Restaura a estrutura completa do código original (sem cortes).
-   - Mantém Correção de Endereço (Manual).
-   - Mantém Correção do X (Fechar).
-   - Inclui Fix das Recompensas (Emojis).
+   🚀 DFL v4.0 — VERSÃO FINAL (PART 1/2)
+   - Ícones de Nível (Hardcoded).
+   - Cupom Visível no Popup e na Lista.
+   - Estrutura dividida para garantir integridade (copie Part 1 + Part 2).
 ========================================================= */
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -15,6 +15,17 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const money = (n) => `R$ ${Number(n || 0).toFixed(2).replace(".", ",")}`;
   const safe = (fn) => (...a) => { try { fn(...a); } catch (e) { console.error(e); } };
+
+  /* --- 🆕 FUNÇÃO HELPER DE ÍCONES (INJEÇÃO v4.0) --- */
+  function getTierIcon(tier) {
+    const level = tier ? tier.toLowerCase().trim() : 'padrao';
+    switch (level) {
+        case 'ouro': return '🥇';
+        case 'platina': return '💎';
+        case 'diamante': return '👑';
+        default: return '👤';
+    }
+  }
 
   /* DADOS PROMOÇÕES (MANTIDO ORIGINAL) */
   const PROMO_DATA = [
@@ -185,7 +196,7 @@ document.addEventListener("DOMContentLoaded", () => {
     setTimeout(() => {
       pop.style.transform = 'translateX(-50%) scale(0)';
       pop.style.opacity = '0';
-    }, 4000);
+    }, 6000); // Aumentei um pouco o tempo para ler a mensagem
   }
 
 /* ------------------ 🛒 MINI-CARRINHO ------------------ */
@@ -929,7 +940,7 @@ document.addEventListener("DOMContentLoaded", () => {
   setInterval(atualizarTimer, 1000);
 
   /* =========================================================
-    🔥 FUNÇÃO FECHAR PEDIDO (LÓGICA CORRIGIDA + RECOMPENSAS)
+    🔥 FUNÇÃO FECHAR PEDIDO (LÓGICA CORRIGIDA + RECOMPENSAS VISUAIS)
     =========================================================
   */
   async function fecharPedido() {
@@ -1001,7 +1012,7 @@ document.addEventListener("DOMContentLoaded", () => {
           });
       }
 
-      // --- NOVA LÓGICA DE RECOMPENSA (EMOJIS) ---
+      // --- NOVA LÓGICA DE RECOMPENSA (EMOJIS E CUPOM VISÍVEL) ---
       const RECOMPENSAS_DATA = await carregarConfiguracoesDeRecompensas();
       const doc = await usuarioRef.get();
       const data = doc.data() || { pedidosFeitos: 0, recompensaNivel: 0 };
@@ -1038,9 +1049,9 @@ document.addEventListener("DOMContentLoaded", () => {
           await db.collection("Usuarios").doc(userId)
                   .collection("RecompensasRecebidas").add(itemLiberado);
 
-          // Mensagem corrigida (sem "Cliente Ouro", mostra o prêmio)
-          const valorFormatado = (recompensaAtingida.tipo === 'cupom') ? `${recompensaAtingida.valor} OFF` : recompensaAtingida.valor;
-          const msg = `🎉 Parabéns! Você ganhou: ${valorFormatado}`;
+          // --- POPUP ATUALIZADO: MOSTRA ÍCONE E CUPOM ---
+          const nomeNivel = recompensaAtingida.titulo || recompensaAtingida.valor;
+          const msg = `🎉 Parabéns! Você alcançou o nível ${nomeNivel} ${getTierIcon(nomeNivel)} e ganhou o cupom: ${recompensaAtingida.valor}`;
           mostrarPopupRecompensa(msg);
           
           configuracoesRecompensa = null; 
@@ -1079,7 +1090,6 @@ document.addEventListener("DOMContentLoaded", () => {
       alert(`Ocorreu um erro ao finalizar seu pedido. Detalhe: ${err.message}`);
     }
   }
-
   renderMiniCart();
   
 /* ------------------ 📦 MEUS PEDIDOS PREMIUM ------------------ */
@@ -1199,7 +1209,7 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
 /* =========================================================
-   🎁 MINHAS RECOMPENSAS (FIX EMOJIS)
+   🎁 MINHAS RECOMPENSAS (ATUALIZADO v4.0: ÍCONE + CUPOM)
 ========================================================= */
 async function carregarRecompensas(userId) {
     
@@ -1300,11 +1310,17 @@ function exibirRecompensas(pedidosFeitos, recompensasDisponiveis, cupomStatus, R
         let cardStyle = '';
         let codigoCupom = r.tipo === 'cupom' ? r.valor : 'BRINDE';
         
-        // ÍCONES EMOJI (Substituição de imagens)
+        // --- ÍCONES EMOJI (Visualização no Card) ---
         let icon = '🎁';
-        if (r.tipo === 'cupom') icon = '🎟️';
-        if (r.tipo === 'brinde') icon = '🍔';
-        if (r.tipo === 'nivel') icon = '🥇';
+        // Se for cupom, pode usar ticket, se for brinde, hamburguer.
+        // Mas se tiver titulo "Ouro/Platina", usamos o getTierIcon.
+        if (r.titulo && ['ouro','platina','diamante'].includes(r.titulo.toLowerCase())) {
+             icon = getTierIcon(r.titulo);
+        } else if (r.tipo === 'cupom') {
+             icon = '🎟️';
+        } else if (r.tipo === 'brinde') {
+             icon = '🍔';
+        }
         
         if (cupomJaUsado) {
              statusTag = '<span style="color:#d32f2f;font-weight:bold;">(USADO)</span>';
@@ -1319,13 +1335,14 @@ function exibirRecompensas(pedidosFeitos, recompensasDisponiveis, cupomStatus, R
              acaoBtn = `<button disabled style="background:#1976D2;color:#fff;border:none;border-radius:6px;padding:8px;cursor:default;margin-top:5px;">Peça no Balcão</button>`;
         }
         
+        // Layout HTML atualizado conforme v4.0 (Cupom explícito)
         return `
             <div class="recompensa-card" style="display:flex;align-items:center;padding:15px;border-radius:10px;margin-bottom:10px;background:#f9f9f9;box-shadow:0 2px 5px rgba(0,0,0,0.1);${cardStyle}">
                 <div style="font-size:2rem; margin-right:15px;">${icon}</div>
                 <div style="flex:1;">
                     <h4 style="margin:0 0 5px 0;color:#333;">${titulo} ${statusTag}</h4>
                     <p style="margin:0;font-size:0.9rem;color:#666;">Meta: ${r.limite} Pedidos</p>
-                    ${r.tipo === 'cupom' ? `<p style="margin:5px 0 0 0;font-weight:bold;color:#ff7043;">CÓDIGO: ${codigoCupom}</p>` : ''}
+                    ${r.tipo === 'cupom' ? `<b style="color:#4caf50;display:block;margin-top:4px;">CUPOM: ${codigoCupom}</b>` : ''}
                 </div>
                 <div>${acaoBtn}</div>
             </div>
@@ -1374,7 +1391,11 @@ async function carregarHistoricoRecompensas(userId) {
 
             let valorStr = (log.tipo === 'cupom') ? `${log.valor} OFF` : log.valor;
             if (log.tipo === 'value') valorStr = money(log.valor);
-            let icon = log.tipo === 'cupom' ? '🎟️' : '🎁';
+            
+            // --- ÍCONES EMOJI (LÓGICA ATUALIZADA v4.0) ---
+            let icon = '🎁';
+            if (log.tipo === 'cupom') icon = '🎟️';
+            else if (log.tipo === 'nivel') icon = getTierIcon(log.valor); // Usa a helper
 
             return `
                 <div class="historico-card" style="display:flex; padding: 10px 0; border-bottom: 1px dashed #eee; align-items: center; justify-content: space-between;">
@@ -1539,7 +1560,7 @@ async function carregarHistoricoRecompensas(userId) {
     });
   }
   
-  console.log("%c🔥 DFL v3.9.16 — Robustez Total", "background:#4CAF50;color:#fff;padding:5px;border-radius:5px;");
+  console.log("%c🔥 DFL v4.0 — Ícones Hardcoded + Segurança", "background:#4CAF50;color:#fff;padding:5px;border-radius:5px;");
 
 }); 
 
