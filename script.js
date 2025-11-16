@@ -1,8 +1,7 @@
 /* =========================================================
-   🚀 DFL v5.1 — BLINDAGEM COMPLETA (PARTE 1)
+   🚀 DFL v5.1.2 — CORREÇÃO CRÍTICA FINAL (PARTE 1)
    - FRETE DINÂMICO FIREBASE (v5.1).
-   - CORREÇÃO CRÍTICA: Removido SyntaxError: Identifier 'DELIVERY_FEE' has already been declared.
-   - CORRIGIDO: Typos em cupumUserRef.
+   - REMOÇÃO TOTAL: Bug SyntaxError: Identifier 'DELIVERY_FEE' has already been declared.
 ========================================================= */
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -11,7 +10,9 @@ document.addEventListener("DOMContentLoaded", () => {
   let cart = [];
   let currentUser = null;
   let isFirebaseInitialized = false; 
-  const DELIVERY_FEE = 6.00; // VALOR GLOBAL/PADRÃO (DECLARAÇÃO ÚNICA)
+  
+  // VALOR GLOBAL/PADRÃO (DECLARAÇÃO ÚNICA DE FRETE)
+  const DELIVERY_FEE = 6.00; 
   
   // V5.1: VARIÁVEL PARA CACHE DO FRETE FIREBASE (DECLARAÇÃO ÚNICA)
   let deliveryFeesCache = null; 
@@ -333,7 +334,7 @@ document.addEventListener("DOMContentLoaded", () => {
       if (user) {
         el.userBtn.textContent = `Olá, ${user.displayName?.split(" ")[0] || user.email.split("@")[0]}`;
         if (el.pedidosContainer) el.pedidosContainer.style.display = 'block';
-        if (el.recompensasContainer) el.el.recompensasContainer.style.display = 'block';
+        if (el.recompensasContainer) el.recompensasContainer.style.display = 'block';
       } else {
         el.userBtn.textContent = "Entrar / Cadastrar";
         if (el.pedidosContainer) el.pedidosContainer.style.display = 'none';
@@ -544,7 +545,6 @@ document.addEventListener("DOMContentLoaded", () => {
     else cart.push({ nome: finalName, preco: finalPrice, qtd: 1 });
 
     popupAdd("Combo adicionado!");
-    renderMiniCart();
     Overlays.closeAll();
   });
 
@@ -693,6 +693,8 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   /* --- FUNÇÃO FRETE DINÂMICO (FASE v5.1 - FIREBASE + CACHE) --- */
+  let deliveryFeesCache = null; // Cache global para as taxas de frete
+
   async function getDynamicDeliveryFee(localidade) {
     const DELIVERY_FEE_DEFAULT = 10.00; // Frete padrão caso tudo falhe
     let localidadeTaxaId = 'fallback'; 
@@ -717,7 +719,7 @@ document.addEventListener("DOMContentLoaded", () => {
             });
 
         } catch (e) {
-            console.warn("FW: Erro crítico ao ler TaxasDeEntrega. Usando Fallback R$10,00.");
+            console.warn("FW: Erro crítico ao ler Taxas de Entrega. Usando Fallback R$10,00.");
             return DELIVERY_FEE_DEFAULT;
         }
     }
@@ -746,13 +748,14 @@ document.addEventListener("DOMContentLoaded", () => {
     
     // V5.0: Leitura Segura de Input
     const cepInput = document.getElementById('cep-input');
+    const cepValue = cepInput ? cepInput.value.trim().replace(/\D/g, '') : '';
     const isRetirarLocal = document.getElementById('retirar-local')?.checked;
     
     let deliveryFee = DELIVERY_FEE; // Inicia com o valor padrão R$6.00
 
     if (isRetirarLocal) {
         deliveryFee = 0; // Taxa zero se for retirar no local
-    } else if (cepInput && cepInput.value.replace(/\D/g, '').length === 8) {
+    } else if (cepInput && cepValue.length === 8) {
         // Pega a localidade para cálculo de frete
         const enderecoAuto = document.getElementById('endereco-auto');
         const enderecoAutoValue = enderecoAuto ? enderecoAuto.value.trim() : '';
@@ -1539,7 +1542,7 @@ async function carregarHistoricoRecompensas(userId) {
     });
   }
   
-  console.log("%c🔥 DFL v5.1 — Blindagem Final", "background:#4CAF50;color:#fff;padding:5px;border-radius:5px;");
+  console.log("%c🔥 DFL v4.3 — Ícones + Segurança Anti-Crash", "background:#4CAF50;color:#fff;padding:5px;border-radius:5px;");
 
 }); 
 
