@@ -1,7 +1,8 @@
 /* =========================================================
-   🚀 DFL v5.1.2 — CORREÇÃO CRÍTICA FINAL (PARTE 1)
-   - SYNTAXERROR RESOLVIDO: Removida a declaração duplicada de DELIVERY_FEE e cache.
-   - FRETE DINÂMICO FIREBASE (v5.1).
+   🚀 DFL v5.0 — VIA CEP NON-BLOCKING (PARTE 1)
+   - Lógica completa ViaCEP.
+   - Cálculo de Frete Baseado no CEP (CEP 38, 39, Outros).
+   - Validação de Endereço Híbrida e Não Bloqueante.
 ========================================================= */
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -10,10 +11,6 @@ document.addEventListener("DOMContentLoaded", () => {
   let cart = [];
   let currentUser = null;
   let isFirebaseInitialized = false; 
-  const DELIVERY_FEE = 6.00; // VALOR GLOBAL/PADRÃO (DECLARAÇÃO ÚNICA)
-  
-  // V5.1: VARIÁVEL GLOBAL PARA CACHE DO FRETE FIREBASE (DECLARAÇÃO ÚNICA)
-  let deliveryFeesCache = null; 
 
   const money = (n) => `R$ ${Number(n || 0).toFixed(2).replace(".", ",")}`;
   const safe = (fn) => (...a) => { try { fn(...a); } catch (e) { console.error(e); } };
@@ -198,6 +195,7 @@ document.addEventListener("DOMContentLoaded", () => {
         padding: 15px 25px;
         border-radius: 12px;
         font-weight: bold;
+        text-align: center;
         box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
         z-index: 10001;
         opacity: 0;
@@ -521,7 +519,7 @@ document.addEventListener("DOMContentLoaded", () => {
         cursor: pointer; transition: all 0.2s;">
         <span style="font-weight: 600; color: #222;">${o.rotulo}</span>
         <span style="font-weight: 700; color: #d32f2f;">+ ${money(o.delta)}</span>
-        <input type="radio" name="combo-drink" value="${i}" style="margin-left: 10px;">
+        <input type="radio" name="combo-drink" value="${i}" ${i === 0 ? "checked" : ""} style="margin-left: 10px;">
       </label>
     `).join("");
 
@@ -542,6 +540,7 @@ document.addEventListener("DOMContentLoaded", () => {
     else cart.push({ nome: finalName, preco: finalPrice, qtd: 1 });
 
     popupAdd("Combo adicionado!");
+    renderMiniCart();
     Overlays.closeAll();
   });
 
@@ -572,6 +571,7 @@ document.addEventListener("DOMContentLoaded", () => {
   );
 
   /* ------------------ ⚙️ CONFIGURAÇÕES E CÁLCULOS ------------------ */
+  const DELIVERY_FEE = 6.00; 
   let couponApplied = (localStorage.getItem("dflCoupon") || "").toUpperCase();
   let addressValue  = (localStorage.getItem("dflAddress") || "").trim();
 
@@ -688,51 +688,21 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
-  /* --- FUNÇÃO FRETE DINÂMICO (FASE v5.1 - FIREBASE + CACHE) --- */
-  async function getDynamicDeliveryFee(localidade) {
-    const DELIVERY_FEE_DEFAULT = 10.00; // Frete padrão caso tudo falhe
-    let localidadeTaxaId = 'fallback'; 
+  /* --- FUNÇÃO FRETE DINÂMICO (FASE 3: V5.0) --- */
+  function getDynamicDeliveryFee(cep) {
+    // Regra simples:
+    const cepPrefix = cep.substring(0, 2);
+    let fee = DELIVERY_FEE; // Default R$6.00
 
-    // 1. Determinar o ID do documento (Normalizar Patos de Minas)
-    const localidadeClean = localidade ? localidade.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim() : '';
-    if (localidadeClean.includes('patos de minas')) {
-        localidadeTaxaId = 'patos-de-minas'; 
+    if (cepPrefix === '38') {
+        fee = 2.00; // Frete R$2 para CEP 38xxx
+    } else if (cepPrefix === '39') {
+        fee = 4.00; // Frete R$4 para CEP 39xxx
+    } else {
+        fee = 6.00; // Frete R$6 para outros
     }
-
-    // 2. Checar e carregar o cache do Firestore (se necessário)
-    if (!deliveryFeesCache) {
-        console.warn("FW: Buscando Taxas de Frete no Firestore (Primeiro acesso).");
-        try {
-            if (!db) throw new Error("Firestore not initialized for fee lookup."); // Blindagem
-            const snap = await db.collection("TaxasDeEntrega").get();
-            deliveryFeesCache = {}; // Inicializa o cache
-            
-            snap.forEach(doc => {
-                // Lê o campo 'valor' ou 'taxa'
-                deliveryFeesCache[doc.id] = Number(doc.data().valor || doc.data().taxa || DELIVERY_FEE_DEFAULT); 
-            });
-
-        } catch (e) {
-            console.warn("FW: Erro crítico ao ler Taxas de Entrega. Usando Fallback R$10,00.");
-            return DELIVERY_FEE_DEFAULT;
-        }
-    }
-
-    // 3. Retornar a taxa correta do cache (ou o fallback de segurança)
-    let taxa = deliveryFeesCache[localidadeTaxaId];
-
-    if (taxa === undefined) {
-        taxa = deliveryFeesCache['fallback'] || DELIVERY_FEE_DEFAULT;
-        console.warn(`FW: Cidade não mapeada (${localidade}). Usando taxa de fallback R$${taxa.toFixed(2)}.`);
-    }
-
-    // 4. Garantir que o retorno seja um número válido
-    if (isNaN(taxa) || taxa < 0) {
-        console.warn("FW: Taxa inválida do Firestore/Cache. Usando R$10,00.");
-        return DELIVERY_FEE_DEFAULT;
-    }
-    
-    return taxa;
+    // NOTE: Este é o placeholder. Na v5.1 ele fará a busca no Firebase/TaxasDeEntrega
+    return fee;
   }
   // --- FIM FUNÇÃO FRETE DINÂMICO ---
 
@@ -740,31 +710,17 @@ document.addEventListener("DOMContentLoaded", () => {
     const subtotal = getCartSubtotal();
     const d = await validarCupomFirestore(couponApplied, subtotal); 
     
-    // V5.0: Leitura Segura de Input
-    const cepInput = document.getElementById('cep-input');
+    // V5.0: Calcula o frete baseado no CEP (se houver) ou usa o padrão
+    const cep = document.getElementById('cep-input')?.value.trim().replace(/\D/g, '');
     const isRetirarLocal = document.getElementById('retirar-local')?.checked;
     
-    const cepValue = cepInput ? cepInput.value.trim().replace(/\D/g, '') : '';
-    
-    let deliveryFee = DELIVERY_FEE; // Inicia com o valor padrão R$6.00
+    let deliveryFee = DELIVERY_FEE;
 
     if (isRetirarLocal) {
-        deliveryFee = 0; // Taxa zero se for retirar no local
-    } else if (cepInput && cepValue.length === 8) {
-        // Pega a localidade para cálculo de frete
-        const enderecoAuto = document.getElementById('endereco-auto');
-        const enderecoAutoValue = enderecoAuto ? enderecoAuto.value.trim() : '';
-        // A localidade é extraída do campo preenchido pelo ViaCEP
-        const localidadeMatch = enderecoAutoValue.match(/\((.*?)\/.*?\)/);
-        const localidade = localidadeMatch ? localidadeMatch[1] : '';
-
-        // V5.1: Usa a lógica do frete dinâmico (ASSÍNCRONA)
-        try {
-            deliveryFee = await getDynamicDeliveryFee(localidade); 
-        } catch(e) {
-            console.error("Erro ao calcular frete dinâmico:", e);
-            deliveryFee = DELIVERY_FEE; // Fallback para o frete padrão hardcoded
-        }
+        deliveryFee = 0; // Taxa zero
+    } else if (cep && cep.length === 8) {
+        // Usa a lógica do frete dinâmico (com regras 38/39/outros)
+        deliveryFee = getDynamicDeliveryFee(cep); 
     }
 
     const delivery = d.freeShipping ? 0 : deliveryFee;
@@ -779,9 +735,170 @@ document.addEventListener("DOMContentLoaded", () => {
       cupomInfo: d
     };
   }
+  
+  async function enhanceMiniCartUI() {
+    if (!el.miniFoot) return;
+    
+    const couponMsg = document.getElementById("coupon-message");
+    const couponDiscountRow = document.getElementById("coupon-discount-row");
+    const cartDiscount = document.getElementById("cart-discount");
 
-  /* --- FUNÇÃO VIA CEP V5.0 (FASE 2) --- */
-  async function buscarCEP(cep) {
+    el.miniFoot.querySelectorAll(".cart-summary-generated").forEach(e => e.remove());
+    
+    if (cart.length === 0) {
+      if (couponMsg) couponMsg.innerHTML = "";
+      if (couponDiscountRow) couponDiscountRow.style.display = "none";
+      return; 
+    }
+
+    const { subtotal, delivery, discount, total, cupomInfo } = await calcTotals();
+
+    if (couponMsg) {
+      couponMsg.textContent = cupomInfo.mensagem;
+      couponMsg.className = `coupon-message ${cupomInfo.valido ? 'success' : 'error'}`;
+      
+      if (!cupomInfo.valido && couponApplied) {
+         couponApplied = "";
+         localStorage.removeItem("dflCoupon");
+         const couponInput = document.getElementById("coupon-input");
+         if (couponInput && document.activeElement !== couponInput) {
+           couponInput.value = "";
+         }
+      }
+    }
+
+    if (couponDiscountRow && cartDiscount) {
+      if (discount > 0 || cupomInfo.label) {
+        cartDiscount.textContent = `- ${money(discount)} ${couponApplied ? `(${couponApplied})` : ""}`;
+        couponDiscountRow.style.display = "flex";
+      } else {
+        couponDiscountRow.style.display = "none";
+      }
+    }
+    
+    const summaryDiv = document.createElement('div');
+    summaryDiv.className = 'cart-summary-generated';
+    
+    // --- V5.0: HTML (REMOVE A DUPLICIDADE) ---
+    // Remove o antigo textarea e injeta o fallback para evitar duplicidade.
+    
+    const addressInputsHTML = `
+      <div style="margin-top: 15px;">
+          <label style="display:block;font-weight:600;margin-bottom:6px; color: #d32f2f;">Ou preencha o endereço manualmente (Fallback)</label>
+          <textarea id="address-input-manual" rows="2" placeholder="Ex: Rua, número, complemento, bairro"
+            style="width:100%;border:1px solid #ddd;border-radius:10px;padding:10px;resize:vertical;margin-bottom:10px">${addressValue}</textarea>
+      </div>
+    `;
+
+    summaryDiv.innerHTML = `
+      <div class="summary-row" style="margin-top: 10px; border-top: 1px solid #eee; padding-top: 10px;">
+        <span>Subtotal</span><b>${money(subtotal)}</b>
+      </div>
+      <div class="summary-row">
+        <span>Entrega</span><b>${money(delivery)}</b>
+      </div>
+      
+      <div class="summary-row" style="display:flex;justify-content:space-between;align-items:center;border-top:1px solid #eee;padding-top:10px;margin: 10px 0;font-size:1.1rem;">
+        <span><b>Total</b></span><span style="color:#e53935;font-weight:800;">${money(total)}</span>
+      </div>
+
+      <label style="display:block;font-weight:600;margin-bottom:6px;">🏠 Endereço para Entrega</label>
+      
+      ${addressInputsHTML}
+
+      <button id="finish-order" type="button" style="width:100%;background:#4caf50;color:#fff;border:none;border-radius:10px;padding:12px;font-weight:700;cursor:pointer;margin-bottom:8px">
+        Finalizar Pedido 🛍️
+      </button>
+      <button id="clear-cart" type="button" style="width:100%;background:#ff4081;color:#fff;border:none;border-radius:10px;padding:10px;font-weight:700;cursor:pointer">
+        Limpar Carrinho
+      </button>
+    `;
+    
+    el.miniFoot.appendChild(summaryDiv);
+    
+    // --- LISTENERS PARA CAMPOS ESTRUTURAIS (V5.0) ---
+
+    const cepInput = document.getElementById('cep-input');
+    const btnCalcularFrete = document.getElementById('btn-calcular-frete');
+    const enderecoAuto = document.getElementById('endereco-auto');
+    const numeroInput = document.getElementById('numero-input');
+    const complementoInput = document.getElementById('complemento-input');
+    const retirarLocal = document.getElementById('retirar-local');
+    const manualFallback = document.getElementById("address-input-manual"); // O antigo textarea
+
+    // Função de limpeza (para usar no erro/reset)
+    const clearAddressFields = () => {
+        enderecoAuto.value = '';
+        numeroInput.value = '';
+        complementoInput.value = '';
+    };
+
+    // FASE 3: Gatilhos de Chamada (blur e click)
+    const lookupAction = () => {
+        const cep = cepInput.value.replace(/\D/g, ''); 
+        if (cep.length === 8) {
+            // Desabilita o fallback manual ao iniciar a busca via CEP
+            manualFallback.value = '';
+            viaCepLookup(cep);
+        } else if (cep.length > 0 && cep.length < 8) {
+             // Re-calcula para o frete padrão se o CEP for apagado/incompleto
+             renderMiniCart(); 
+        }
+    };
+
+    cepInput?.addEventListener('blur', lookupAction);
+    cepInput?.addEventListener('input', () => {
+        // Formatação simples (Adiciona o hífen)
+        let value = cepInput.value.replace(/\D/g, '');
+        if (value.length > 5) {
+            value = value.substring(0, 5) + '-' + value.substring(5);
+        }
+        cepInput.value = value.substring(0, 9);
+    });
+
+    btnCalcularFrete?.addEventListener('click', (e) => { e.preventDefault(); lookupAction(); });
+    
+    // Atualiza frete quando mudar o número ou retirar local
+    numeroInput?.addEventListener('input', renderMiniCart);
+    complementoInput?.addEventListener('input', renderMiniCart);
+    retirarLocal?.addEventListener('change', renderMiniCart);
+    // ----------------------------------------------------
+    
+    // Listener do Fallback manual original
+    manualFallback?.addEventListener("input", (e) => {
+      addressValue = (e.target.value || "").trim();
+      localStorage.setItem("dflAddress", addressValue);
+      // Recalcula o frete para o padrão se voltar ao manual
+      renderMiniCart(); 
+    });
+    
+
+    // Listener de Limpeza de campo estruturado (Limpa o manual se usar o estruturado)
+    document.querySelectorAll('.frete-container input:not(#cep-input):not([type="hidden"])').forEach(input => {
+        input.addEventListener('focus', () => {
+            manualFallback.value = '';
+        });
+    });
+    
+
+    summaryDiv.querySelector("#finish-order")?.addEventListener("click", fecharPedido);
+    summaryDiv.querySelector("#clear-cart")?.addEventListener("click", () => {
+      if (confirm("Limpar todo o carrinho?")) {
+        cart = [];
+        couponApplied = ""; 
+        localStorage.removeItem("dflCoupon");
+        const couponInput = document.getElementById("coupon-input");
+        if(couponInput) couponInput.value = "";
+        
+        renderMiniCart();
+        popupAdd("Carrinho limpo!");
+      }
+    });
+    
+  } // FIM enhanceMiniCartUI
+
+  // --- FUNÇÃO VIA CEP V5.0 (FASE 2) ---
+  async function viaCepLookup(cep) {
     const freteContainer = document.querySelector('.frete-container');
     const enderecoAuto = document.getElementById('endereco-auto');
     const numeroInput = document.getElementById('numero-input');
@@ -789,40 +906,30 @@ document.addEventListener("DOMContentLoaded", () => {
     const retirarLocal = document.getElementById('retirar-local');
     const manualFallback = document.getElementById("address-input-manual");
 
-    // Funções auxiliares para liberar/bloquear campos e atualizar o estilo
-    const toggleAddressState = (isDisabled) => {
-        if(enderecoAuto) enderecoAuto.disabled = isDisabled;
-        if(numeroInput) numeroInput.disabled = isDisabled;
-        if(complementoInput) complementoInput.disabled = isDisabled;
-        if(retirarLocal) retirarLocal.disabled = isDisabled;
-        document.querySelector('.frete-container')?.setAttribute('aria-disabled', isDisabled ? 'true' : 'false');
-    };
-
     const updateStatus = (msg, color) => {
         if (freteContainer) freteContainer.querySelector('h4').innerHTML = `🚚 Entrega: <span style="color:${color}">${msg}</span>`;
     };
 
     const clearAndEnableManual = (msg) => {
-        if (enderecoAuto) enderecoAuto.value = msg;
-        if (numeroInput) numeroInput.value = '';
-        if (complementoInput) complementoInput.value = '';
-        
-        // FASE 2: Habilita edição manual dos campos
-        toggleAddressState(false); 
-        if (enderecoAuto) enderecoAuto.disabled = false; // Permite edição manual da Rua/Endereço
-        if (numeroInput) numeroInput.disabled = false;
-        if (complementoInput) complementoInput.disabled = false;
-        if (retirarLocal) retirarLocal.disabled = false;
+        enderecoAuto.value = msg;
+        numeroInput.value = '';
+        complementoInput.value = '';
+        enderecoAuto.disabled = false; // Permite edição manual da Rua/Endereço
+        numeroInput.disabled = false;
+        complementoInput.disabled = false;
+        retirarLocal.disabled = false;
         document.querySelector('.frete-container')?.setAttribute('aria-disabled', 'false');
         updateStatus('Erro/Manual', 'var(--danger)');
-        
-        if (manualFallback) manualFallback.value = ''; // Limpa o fallback
+        manualFallback.value = ''; // Limpa o fallback
         renderMiniCart(); // Atualiza o frete para o padrão
-        popupAdd("CEP não encontrado. Verifique e tente novamente."); // Tratamento de CEP inválido/não encontrado
     };
     
     // Bloqueia campos estruturados e indica busca
-    toggleAddressState(true);
+    enderecoAuto.disabled = true;
+    numeroInput.disabled = true;
+    complementoInput.disabled = true;
+    retirarLocal.disabled = true;
+    document.querySelector('.frete-container')?.setAttribute('aria-disabled', 'true');
     updateStatus('Buscando endereço...', 'var(--botao)');
 
     try {
@@ -832,15 +939,16 @@ document.addEventListener("DOMContentLoaded", () => {
         if (data.erro || !response.ok) {
             clearAndEnableManual('CEP não encontrado ou inválido. Preencha manualmente.');
         } else {
-            // FASE 2: Preenchimento dos campos
-            const localidadeCompleta = `${data.localidade || 'Cidade não definida'}/${data.uf || 'UF'}`;
-            // FASE 2: Monta a rua, bairro, cidade e estado no campo endereco-auto
-            enderecoAuto.value = `${data.logradouro || 'Rua não definida'} - ${data.bairro || 'Bairro não definido'} (${localidadeCompleta})`;
+            // Preenchimento dos campos existentes no index.html
+            enderecoAuto.value = `${data.logradouro || ''} - ${data.bairro || ''}`;
             
-            // FASE 2: Libera o campo Número e Complemento e foca no Número.
-            toggleAddressState(false);
-            if (enderecoAuto) enderecoAuto.disabled = true; // Mantém a rua/bairro travada após a busca
-            if (numeroInput) numeroInput.focus(); 
+            // Libera o campo Número para o cliente digitar e foca nele.
+            numeroInput.disabled = false;
+            complementoInput.disabled = false;
+            retirarLocal.disabled = false;
+            enderecoAuto.disabled = true; // Mantém a rua/bairro travada após a busca
+            document.querySelector('.frete-container')?.setAttribute('aria-disabled', 'false');
+            numeroInput.focus(); 
             
             updateStatus('Endereço encontrado!', 'var(--success)');
             
@@ -849,20 +957,33 @@ document.addEventListener("DOMContentLoaded", () => {
         }
 
     } catch (error) {
-        // FASE 3.1: Tratamento de Timeouts ou erros de rede
         console.error("ViaCEP Error:", error);
-        popupAdd("Erro ao consultar CEP. Tente novamente ou preencha o manual.");
         clearAndEnableManual('Erro na consulta. Preencha manualmente.');
     }
-  } // FIM buscarCEP
-  // ----------------------------------------------------
+}
+  // --- FIM FUNÇÃO VIA CEP ---
 
-  async function fecharPedido() {
-    // 1. BLINDAGEM CRÍTICA: Carrinho Vazio
-    if (cart.length === 0) {
-        popupAdd("Seu carrinho está vazio. Adicione algum item primeiro.");
-        return;
+  /* --- FUNÇÃO FRETE DINÂMICO (FASE 3: V5.0) --- */
+  function getDynamicDeliveryFee(cep) {
+    // FASE 3: Lógica simples de frete baseada no prefixo
+    const cepPrefix = cep.substring(0, 2);
+    
+    if (cepPrefix === '38') {
+        return 2.00; // Frete R$2 para CEP 38xxx
+    } else if (cepPrefix === '39') {
+        return 4.00; // Frete R$4 para CEP 39xxx
+    } else {
+        return DELIVERY_FEE; // Frete R$6.00 para outros (DEFAULT)
     }
+  }
+  // --- FIM FUNÇÃO FRETE DINÂMICO ---
+
+  /* =========================================================
+    🔥 FUNÇÃO FECHAR PEDIDO (V5.0: VALIDAÇÃO HÍBRIDA)
+    =========================================================
+  */
+  async function fecharPedido() {
+    if (!cart.length) return alert("Carrinho vazio!");
     if (!currentUser) {
       alert("Faça login para enviar o pedido!");
       Overlays.open(el.loginModal);
@@ -871,41 +992,35 @@ document.addEventListener("DOMContentLoaded", () => {
 
     let finalAddressString = ""; // String final a ser salva e enviada
     
-    // CAMPOS EXISTENTES NO INDEX.HTML (com BLINDAGEM de leitura):
-    const manualFallback = document.getElementById("address-input-manual");
-    const autoRuaBairro = document.getElementById("endereco-auto"); 
-    const autoNumero = document.getElementById("numero-input"); 
-    const autoComp = document.getElementById("complemento-input"); 
+    // CAMPOS EXISTENTES NO INDEX.HTML:
+    const manualFallback = document.getElementById("address-input-manual")?.value.trim();
+    const autoRuaBairro = document.getElementById("endereco-auto")?.value.trim(); // Endereço principal
+    const autoNumero = document.getElementById("numero-input")?.value.trim(); // Nº
+    const autoComp = document.getElementById("complemento-input")?.value.trim(); // Comp
+    const cepInput = document.getElementById('cep-input')?.value.trim().replace(/\D/g, '');
     const isRetirarLocal = document.getElementById('retirar-local')?.checked;
-    const cepInput = document.getElementById('cep-input');
-    
-    // V5.1: Leitura segura dos valores
-    const ruaBairroValue = autoRuaBairro ? autoRuaBairro.value.trim() : '';
-    const numeroValue = autoNumero ? autoNumero.value.trim() : '';
-    const compValue = autoComp ? autoComp.value.trim() : '';
-    const cepValue = cepInput ? cepInput.value.trim().replace(/\D/g, '') : '';
-    const manualAddrValue = manualFallback ? manualFallback.value.trim() : '';
-    
+
+
     // 1. Tenta validar o modo ViaCEP (Campos estruturados)
-    if (ruaBairroValue && numeroValue) {
-        // Monta a string no formato legível para o WhatsApp/DB (Endereço completo)
-        finalAddressString = `${ruaBairroValue}, N° ${numeroValue}`;
-        if (compValue) finalAddressString += `, Comp: ${compValue}`;
-        if (cepValue.length === 8) finalAddressString += ` | CEP: ${cepValue}`;
+    if (autoRuaBairro && autoNumero) {
+        // Monta a string no formato legível para o WhatsApp/DB (FASE 4)
+        finalAddressString = `${autoRuaBairro}, N° ${autoNumero}`;
+        if (autoComp) finalAddressString += `, Comp: ${autoComp}`;
+        if (cepInput.length === 8) finalAddressString += ` | CEP: ${cepInput}`;
     }
     
     // 2. Tenta ler o modo manual (Fallback)
-    if (!finalAddressString && manualAddrValue && manualAddrValue.length > 10) {
-        finalAddressString = manualAddrValue;
+    // FASE 4: Se o modo ViaCEP falhou E o modo manual tem mais de 10 caracteres (preenchido)
+    if (!finalAddressString && manualFallback && manualFallback.length > 10) {
+        finalAddressString = manualFallback;
     } 
 
     // 3. Checagem de Falha OU Retirada no Local
     if (isRetirarLocal) {
-        finalAddressString = "CLIENTE IRÁ RETIRAR NO LOCAL"; // Retirada não precisa de endereço
+        finalAddressString = "CLIENTE IRÁ RETIRAR NO LOCAL";
     } else if (!finalAddressString) {
-        // Mensagem amigável de erro
-        popupAdd("Confere pra gente: CEP, endereço e número precisam estar preenchidos ou marque ‘Retirar no Local’ 😉");
-        return; // VALIDAÇÃO HÍBRIDA NON-BLOCKING
+        alert("Por favor, preencha o endereço completo para finalizar o pedido.");
+        return; // FASE 4: VALIDAÇÃO HÍBRIDA NON-BLOCKING
     }
     
     // --- USAR finalAddressString como o endereço salvo ---
@@ -919,7 +1034,7 @@ document.addEventListener("DOMContentLoaded", () => {
       userId: currentUser.uid,
       nome: currentUser.displayName || currentUser.email.split("@")[0],
       
-      itens: cart.map((i) => `${i.nome} x${i.qtd}`).join("\n"),
+      itens: cart.map((i) => `${i.nome} x${i.qtd}`),
       itensObj: cart.map(i => ({ nome: i.nome, preco: i.preco, qtd: i.qtd })),
       
       subtotal: Number(subtotal.toFixed(2)),
@@ -929,8 +1044,6 @@ document.addEventListener("DOMContentLoaded", () => {
       total: Number(total.toFixed(2)),
       endereco: addr, // <--- CAMPO AGORA USADO (HÍBRIDO)
       data: new Date().toISOString(),
-      tipoEntrega: isRetirarLocal ? "retirada" : "delivery", // Novo campo para o DB
-      cep: cepValue.length === 8 ? cepValue : null,
       
       thumb: 'imagens/padrao.jpg' 
     };
@@ -1263,6 +1376,7 @@ function exibirRecompensas(pedidosFeitos, recompensasDisponiveis, cupomStatus, R
         let acaoBtn = '';
         let statusTag = '';
         let cardStyle = '';
+        // MANTIDO: Sua alteração de liberdade total
         let codigoCupom = r.valor ? r.valor : 'BRINDE';
         
         // --- ÍCONES EMOJI (ANTI-CRASH + HIERARQUIA COMPLETA) ---
@@ -1321,7 +1435,7 @@ function exibirRecompensas(pedidosFeitos, recompensasDisponiveis, cupomStatus, R
             const codigo = e.currentTarget.dataset.cupom;
             if (codigo) {
                 couponApplied = codigo;
-                localStorage.setItem("dflCoupon", codigo);
+                localStorage.setItem("dflCoupon", couponApplied);
                 const couponInput = document.getElementById("coupon-input");
                 if(couponInput) couponInput.value = codigo;
                 renderMiniCart(); 
@@ -1337,26 +1451,28 @@ async function carregarHistoricoRecompensas(userId) {
     if (!el.historicoLista) return;
     el.historicoLista.innerHTML = `<p style="text-align:center;color:#999;">Carregando...</p>`;
     try {
-        const q = db.collection("Pedidos").where("userId", "==", userId).orderBy("data", "desc");
+        const q = db.collection("Usuarios").doc(userId)
+                    .collection("RecompensasRecebidas")
+                    .orderBy("liberadoEm", "desc");
         const snapshot = await q.get();
 
         if (snapshot.empty) {
-            el.historicoLista.innerHTML = `<p class="empty-orders">Nenhum pedido encontrado 😢</p>`;
+            el.historicoLista.innerHTML = `<p style="text-align:center;color:#999;">Nenhuma recompensa no histórico.</p>`;
             return;
         }
 
-        const pedidos = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-
-        const logs = pedidos.filter(p => p.endereco); // Filtra por pedidos com endereço
-
+        const logs = snapshot.docs.map(doc => doc.data());
+        
         const historicoHtml = logs.map(log => {
-            const dataRecebimento = log.data
-                ? (log.data.toDate ? log.data.toDate().toLocaleDateString('pt-BR') : new Date(log.data).toLocaleDateString('pt-BR'))
+            const dataRecebimento = log.liberadoEm
+                ? (log.liberadoEm.toDate().toLocaleDateString('pt-BR'))
                 : "—";
 
-            let valorStr = (log.tipo === 'cupom') ? `${log.valor} OFF` : (log.total ? money(log.total) : log.valor);
+            let valorStr = (log.tipo === 'cupom') ? `${log.valor} OFF` : log.valor;
+            if (log.tipo === 'value') valorStr = money(log.valor);
             
-            const tituloRaw = String(log.endereco || log.nome || '');
+            // --- ÍCONES EMOJI (HIERARQUIA NO HISTÓRICO) ---
+            const tituloRaw = String(log.titulo || '');
             const tituloLower = tituloRaw.toLowerCase();
             
             const niveisEspeciais = [
@@ -1365,8 +1481,7 @@ async function carregarHistoricoRecompensas(userId) {
                 'elite', 'supremo', 'lenda', 'mítico', 'mitico'
             ];
 
-            let icon = '📦'; // Ícone padrão para pedidos
-            
+            let icon = '🎁';
             if (niveisEspeciais.some(n => tituloLower.includes(n))) {
                  icon = getTierIcon(tituloRaw);
             } else if (log.tipo === 'cupom') {
@@ -1376,10 +1491,10 @@ async function carregarHistoricoRecompensas(userId) {
             return `
                 <div class="historico-card" style="display:flex; padding: 10px 0; border-bottom: 1px dashed #eee; align-items: center; justify-content: space-between;">
                     <div style="flex:1;">
-                        <p style="font-weight:600; margin:0; color:#333;">${icon} Pedido Finalizado</p>
-                        <small style="color:#999;">Total: ${valorStr} em ${dataRecebimento}</small>
+                        <p style="font-weight:600; margin:0; color:#333;">${icon} ${log.titulo || log.valor}</p>
+                        <small style="color:#999;">${dataRecebimento}</small>
                     </div>
-                    <span style="font-weight:700; color:#4caf50;">Finalizado</span>
+                    <span style="font-weight:700; color:#4caf50;">Recebido</span>
                 </div>
             `;
         }).join('');
@@ -1521,7 +1636,7 @@ async function carregarHistoricoRecompensas(userId) {
     });
     
     const sel = document.getElementById("filter-period");
-    if(sel && !sel._bound) { sel.addEventListener("change", e => carregarRelatorios("7")); sel._bound = true; }
+    if(sel && !sel._bound) { sel.addEventListener("change", e => carregarRelatorios(e.target.value)); sel._bound = true; }
   }
 
   /* ------------------ 🍪 COOKIES ------------------ */
@@ -1536,17 +1651,16 @@ async function carregarHistoricoRecompensas(userId) {
     });
   }
   
-  console.log("%c🔥 DFL v5.1 — Blindagem Final", "background:#4CAF50;color:#fff;padding:5px;border-radius:5px;");
+  console.log("%c🔥 DFL v5.0 — ViaCEP Ready", "background:#4CAF50;color:#fff;padding:5px;border-radius:5px;");
 
 }); 
 
 /* FECHAR MODAIS GLOBAL */
 document.addEventListener('DOMContentLoaded', () => {
   document.querySelectorAll('.modal').forEach(m => m.addEventListener('click', e => {
-    if (e.target.classList.contains('modal')) { m.classList.remove('show'); document.getElementById('cart-backdrop')?.classList.remove('active'); document.body.classList.remove('no-scroll'); }
+    if (e.target.classList.contains('modal')) { m.classList.remove('show'); document.getElementById('cart-backdrop').classList.remove('active'); }
   }));
   document.getElementById('cart-backdrop')?.addEventListener('click', () => {
-    document.querySelectorAll('.active, .show').forEach(e => e.classList.remove('active', 'show'));
-    document.body.classList.remove('no-scroll');
+    document.querySelectorAll('.active').forEach(e => e.classList.remove('active'));
   });
 });
