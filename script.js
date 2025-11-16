@@ -1,8 +1,8 @@
 /* =========================================================
    🚀 DFL v5.1 — BLINDAGEM COMPLETA (PARTE 1)
-   - Frete Dinâmico (Firebase TaxasDeEntrega) com Cache e Fallback.
-   - Validação Híbrida e Proteção Crítica (Carrinho Vazio, Endereço Incompleto).
-   - CORRIGIDO: Duplicação de constantes e erro de referência.
+   - FRETE DINÂMICO FIREBASE (v5.1).
+   - CORREÇÃO CRÍTICA: Removido SyntaxError: Identifier 'DELIVERY_FEE' has already been declared.
+   - CORRIGIDO: Typos em cupumUserRef.
 ========================================================= */
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -11,7 +11,7 @@ document.addEventListener("DOMContentLoaded", () => {
   let cart = [];
   let currentUser = null;
   let isFirebaseInitialized = false; 
-  const DELIVERY_FEE = 6.00; // Valor de fallback/padrão original (DECLARAÇÃO ÚNICA)
+  const DELIVERY_FEE = 6.00; // VALOR GLOBAL/PADRÃO (DECLARAÇÃO ÚNICA)
   
   // V5.1: VARIÁVEL PARA CACHE DO FRETE FIREBASE (DECLARAÇÃO ÚNICA)
   let deliveryFeesCache = null; 
@@ -333,7 +333,7 @@ document.addEventListener("DOMContentLoaded", () => {
       if (user) {
         el.userBtn.textContent = `Olá, ${user.displayName?.split(" ")[0] || user.email.split("@")[0]}`;
         if (el.pedidosContainer) el.pedidosContainer.style.display = 'block';
-        if (el.recompensasContainer) el.recompensasContainer.style.display = 'block';
+        if (el.recompensasContainer) el.el.recompensasContainer.style.display = 'block';
       } else {
         el.userBtn.textContent = "Entrar / Cadastrar";
         if (el.pedidosContainer) el.pedidosContainer.style.display = 'none';
@@ -693,8 +693,6 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   /* --- FUNÇÃO FRETE DINÂMICO (FASE v5.1 - FIREBASE + CACHE) --- */
-  let deliveryFeesCache = null; // Cache global para as taxas de frete
-
   async function getDynamicDeliveryFee(localidade) {
     const DELIVERY_FEE_DEFAULT = 10.00; // Frete padrão caso tudo falhe
     let localidadeTaxaId = 'fallback'; 
@@ -719,7 +717,7 @@ document.addEventListener("DOMContentLoaded", () => {
             });
 
         } catch (e) {
-            console.warn("FW: Erro crítico ao ler Taxas de Entrega. Usando Fallback R$10,00.");
+            console.warn("FW: Erro crítico ao ler TaxasDeEntrega. Usando Fallback R$10,00.");
             return DELIVERY_FEE_DEFAULT;
         }
     }
@@ -746,7 +744,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const subtotal = getCartSubtotal();
     const d = await validarCupomFirestore(couponApplied, subtotal); 
     
-    // V5.0: Calcula o frete baseado no CEP/Local (se houver) ou usa o padrão
+    // V5.0: Leitura Segura de Input
     const cepInput = document.getElementById('cep-input');
     const isRetirarLocal = document.getElementById('retirar-local')?.checked;
     
@@ -756,9 +754,10 @@ document.addEventListener("DOMContentLoaded", () => {
         deliveryFee = 0; // Taxa zero se for retirar no local
     } else if (cepInput && cepInput.value.replace(/\D/g, '').length === 8) {
         // Pega a localidade para cálculo de frete
-        const enderecoAuto = document.getElementById('endereco-auto')?.value.trim();
+        const enderecoAuto = document.getElementById('endereco-auto');
+        const enderecoAutoValue = enderecoAuto ? enderecoAuto.value.trim() : '';
         // A localidade é extraída do campo preenchido pelo ViaCEP
-        const localidadeMatch = enderecoAuto ? enderecoAuto.match(/\((.*?)\/.*?\)/) : null;
+        const localidadeMatch = enderecoAutoValue.match(/\((.*?)\/.*?\)/);
         const localidade = localidadeMatch ? localidadeMatch[1] : '';
 
         // V5.1: Usa a lógica do frete dinâmico (ASSÍNCRONA)
@@ -821,7 +820,7 @@ document.addEventListener("DOMContentLoaded", () => {
         
         if (manualFallback) manualFallback.value = ''; // Limpa o fallback
         renderMiniCart(); // Atualiza o frete para o padrão
-        popupAdd("CEP não encontrado. Verifique e tente novamente."); // FASE 3.1: Tratamento de CEP inválido/não encontrado
+        popupAdd("CEP não encontrado. Verifique e tente novamente."); // Tratamento de CEP inválido/não encontrado
     };
     
     // Bloqueia campos estruturados e indica busca
@@ -861,7 +860,8 @@ document.addEventListener("DOMContentLoaded", () => {
   // ----------------------------------------------------
 
   async function fecharPedido() {
-    if (cart.length === 0) { // FASE 3: Verifica carrinho vazio
+    // 1. BLINDAGEM CRÍTICA: Carrinho Vazio
+    if (cart.length === 0) {
         popupAdd("Seu carrinho está vazio. Adicione algum item primeiro.");
         return;
     }
@@ -873,36 +873,41 @@ document.addEventListener("DOMContentLoaded", () => {
 
     let finalAddressString = ""; // String final a ser salva e enviada
     
-    // CAMPOS EXISTENTES NO INDEX.HTML:
+    // CAMPOS EXISTENTES NO INDEX.HTML (com BLINDAGEM de leitura):
     const manualFallback = document.getElementById("address-input-manual");
-    const autoRuaBairro = document.getElementById("endereco-auto")?.value.trim(); // Endereço principal
-    const autoNumero = document.getElementById("numero-input")?.value.trim(); // Nº
-    const autoComp = document.getElementById("complemento-input")?.value.trim(); // Comp
-    const cepInput = document.getElementById('cep-input')?.value.trim().replace(/\D/g, '');
+    const autoRuaBairro = document.getElementById("endereco-auto"); 
+    const autoNumero = document.getElementById("numero-input"); 
+    const autoComp = document.getElementById("complemento-input"); 
     const isRetirarLocal = document.getElementById('retirar-local')?.checked;
-
-
+    const cepInput = document.getElementById('cep-input');
+    
+    // V5.1: Leitura segura dos valores
+    const ruaBairroValue = autoRuaBairro ? autoRuaBairro.value.trim() : '';
+    const numeroValue = autoNumero ? autoNumero.value.trim() : '';
+    const compValue = autoComp ? autoComp.value.trim() : '';
+    const cepValue = cepInput ? cepInput.value.trim().replace(/\D/g, '') : '';
+    const manualAddrValue = manualFallback ? manualFallback.value.trim() : '';
+    
     // 1. Tenta validar o modo ViaCEP (Campos estruturados)
-    if (autoRuaBairro && autoNumero) {
+    if (ruaBairroValue && numeroValue) {
         // Monta a string no formato legível para o WhatsApp/DB (Endereço completo)
-        finalAddressString = `${autoRuaBairro}, N° ${autoNumero}`;
-        if (autoComp) finalAddressString += `, Comp: ${autoComp}`;
-        if (cepInput.length === 8) finalAddressString += ` | CEP: ${cepInput}`;
+        finalAddressString = `${ruaBairroValue}, N° ${numeroValue}`;
+        if (compValue) finalAddressString += `, Comp: ${compValue}`;
+        if (cepValue.length === 8) finalAddressString += ` | CEP: ${cepValue}`;
     }
     
     // 2. Tenta ler o modo manual (Fallback)
-    const manualAddr = manualFallback?.value.trim();
-    if (!finalAddressString && manualAddr && manualAddr.length > 10) {
-        finalAddressString = manualAddr;
+    if (!finalAddressString && manualAddrValue && manualAddrValue.length > 10) {
+        finalAddressString = manualAddrValue;
     } 
 
     // 3. Checagem de Falha OU Retirada no Local
     if (isRetirarLocal) {
-        finalAddressString = "CLIENTE IRÁ RETIRAR NO LOCAL"; // FASE 3: Retirada não precisa de endereço
+        finalAddressString = "CLIENTE IRÁ RETIRAR NO LOCAL"; // Retirada não precisa de endereço
     } else if (!finalAddressString) {
-        // FASE 3: Mensagem amigável de erro
+        // Mensagem amigável de erro
         popupAdd("Confere pra gente: CEP, endereço e número precisam estar preenchidos ou marque ‘Retirar no Local’ 😉");
-        return; // FASE 4: VALIDAÇÃO HÍBRIDA NON-BLOCKING
+        return; // VALIDAÇÃO HÍBRIDA NON-BLOCKING
     }
     
     // --- USAR finalAddressString como o endereço salvo ---
@@ -926,8 +931,8 @@ document.addEventListener("DOMContentLoaded", () => {
       total: Number(total.toFixed(2)),
       endereco: addr, // <--- CAMPO AGORA USADO (HÍBRIDO)
       data: new Date().toISOString(),
-      tipoEntrega: isRetirarLocal ? "retirada" : "delivery", // FASE 3: Novo campo para o DB
-      cep: cepInput.length === 8 ? cepInput : null,
+      tipoEntrega: isRetirarLocal ? "retirada" : "delivery", // Novo campo para o DB
+      cep: cepValue.length === 8 ? cepValue : null,
       
       thumb: 'imagens/padrao.jpg' 
     };
@@ -938,7 +943,7 @@ document.addEventListener("DOMContentLoaded", () => {
       const usuarioRef = db.collection("Usuarios").doc(userId);
       
       if (cupomInfo.isPersonalizado && couponApplied) {
-          const cupomUserRef = document.getElementById("CuponsUsuarios").doc(userId); // BLINDAGEM: Não acessa diretamente db, usa a variavel
+          const cupomUserRef = db.collection("CuponsUsuarios").doc(userId);
           batch.update(cupomUserRef, {
               usado: true,
               dataUso: firebase.firestore.FieldValue.serverTimestamp(),
@@ -1534,7 +1539,7 @@ async function carregarHistoricoRecompensas(userId) {
     });
   }
   
-  console.log("%c🔥 DFL v4.3 — Ícones + Segurança Anti-Crash", "background:#4CAF50;color:#fff;padding:5px;border-radius:5px;");
+  console.log("%c🔥 DFL v5.1 — Blindagem Final", "background:#4CAF50;color:#fff;padding:5px;border-radius:5px;");
 
 }); 
 
