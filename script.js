@@ -1,8 +1,7 @@
 /* =========================================================
-   🚀 DFL v5.1 — BLINDAGEM COMPLETA (PARTE 1)
+   🚀 DFL v5.1.2 — CORREÇÃO CRÍTICA FINAL (PARTE 1)
+   - SYNTAXERROR RESOLVIDO: Removida a declaração duplicada de DELIVERY_FEE e cache.
    - FRETE DINÂMICO FIREBASE (v5.1).
-   - CORREÇÃO CRÍTICA: Removido SyntaxError: Identifier 'DELIVERY_FEE' has already been declared.
-   - CORRIGIDO: Typos em cupumUserRef.
 ========================================================= */
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -13,7 +12,7 @@ document.addEventListener("DOMContentLoaded", () => {
   let isFirebaseInitialized = false; 
   const DELIVERY_FEE = 6.00; // VALOR GLOBAL/PADRÃO (DECLARAÇÃO ÚNICA)
   
-  // V5.1: VARIÁVEL PARA CACHE DO FRETE FIREBASE (DECLARAÇÃO ÚNICA)
+  // V5.1: VARIÁVEL GLOBAL PARA CACHE DO FRETE FIREBASE (DECLARAÇÃO ÚNICA)
   let deliveryFeesCache = null; 
 
   const money = (n) => `R$ ${Number(n || 0).toFixed(2).replace(".", ",")}`;
@@ -199,7 +198,6 @@ document.addEventListener("DOMContentLoaded", () => {
         padding: 15px 25px;
         border-radius: 12px;
         font-weight: bold;
-        text-align: center;
         box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
         z-index: 10001;
         opacity: 0;
@@ -333,7 +331,7 @@ document.addEventListener("DOMContentLoaded", () => {
       if (user) {
         el.userBtn.textContent = `Olá, ${user.displayName?.split(" ")[0] || user.email.split("@")[0]}`;
         if (el.pedidosContainer) el.pedidosContainer.style.display = 'block';
-        if (el.recompensasContainer) el.el.recompensasContainer.style.display = 'block';
+        if (el.recompensasContainer) el.recompensasContainer.style.display = 'block';
       } else {
         el.userBtn.textContent = "Entrar / Cadastrar";
         if (el.pedidosContainer) el.pedidosContainer.style.display = 'none';
@@ -523,7 +521,7 @@ document.addEventListener("DOMContentLoaded", () => {
         cursor: pointer; transition: all 0.2s;">
         <span style="font-weight: 600; color: #222;">${o.rotulo}</span>
         <span style="font-weight: 700; color: #d32f2f;">+ ${money(o.delta)}</span>
-        <input type="radio" name="combo-drink" value="${i}" ${i === 0 ? "checked" : ""} style="margin-left: 10px;">
+        <input type="radio" name="combo-drink" value="${i}" style="margin-left: 10px;">
       </label>
     `).join("");
 
@@ -544,7 +542,6 @@ document.addEventListener("DOMContentLoaded", () => {
     else cart.push({ nome: finalName, preco: finalPrice, qtd: 1 });
 
     popupAdd("Combo adicionado!");
-    renderMiniCart();
     Overlays.closeAll();
   });
 
@@ -575,7 +572,6 @@ document.addEventListener("DOMContentLoaded", () => {
   );
 
   /* ------------------ ⚙️ CONFIGURAÇÕES E CÁLCULOS ------------------ */
-  // DELIVERY_FEE já declarado no topo; mantido apenas lá.
   let couponApplied = (localStorage.getItem("dflCoupon") || "").toUpperCase();
   let addressValue  = (localStorage.getItem("dflAddress") || "").trim();
 
@@ -717,7 +713,7 @@ document.addEventListener("DOMContentLoaded", () => {
             });
 
         } catch (e) {
-            console.warn("FW: Erro crítico ao ler TaxasDeEntrega. Usando Fallback R$10,00.");
+            console.warn("FW: Erro crítico ao ler Taxas de Entrega. Usando Fallback R$10,00.");
             return DELIVERY_FEE_DEFAULT;
         }
     }
@@ -748,11 +744,13 @@ document.addEventListener("DOMContentLoaded", () => {
     const cepInput = document.getElementById('cep-input');
     const isRetirarLocal = document.getElementById('retirar-local')?.checked;
     
+    const cepValue = cepInput ? cepInput.value.trim().replace(/\D/g, '') : '';
+    
     let deliveryFee = DELIVERY_FEE; // Inicia com o valor padrão R$6.00
 
     if (isRetirarLocal) {
         deliveryFee = 0; // Taxa zero se for retirar no local
-    } else if (cepInput && cepInput.value.replace(/\D/g, '').length === 8) {
+    } else if (cepInput && cepValue.length === 8) {
         // Pega a localidade para cálculo de frete
         const enderecoAuto = document.getElementById('endereco-auto');
         const enderecoAutoValue = enderecoAuto ? enderecoAuto.value.trim() : '';
@@ -1339,28 +1337,26 @@ async function carregarHistoricoRecompensas(userId) {
     if (!el.historicoLista) return;
     el.historicoLista.innerHTML = `<p style="text-align:center;color:#999;">Carregando...</p>`;
     try {
-        const q = db.collection("Usuarios").doc(userId)
-                    .collection("RecompensasRecebidas")
-                    .orderBy("liberadoEm", "desc");
+        const q = db.collection("Pedidos").where("userId", "==", userId).orderBy("data", "desc");
         const snapshot = await q.get();
 
         if (snapshot.empty) {
-            el.historicoLista.innerHTML = `<p style="text-align:center;color:#999;">Nenhuma recompensa no histórico.</p>`;
+            el.historicoLista.innerHTML = `<p class="empty-orders">Nenhum pedido encontrado 😢</p>`;
             return;
         }
 
-        const logs = snapshot.docs.map(doc => doc.data());
-        
+        const pedidos = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+
+        const logs = pedidos.filter(p => p.endereco); // Filtra por pedidos com endereço
+
         const historicoHtml = logs.map(log => {
-            const dataRecebimento = log.liberadoEm
-                ? (log.liberadoEm.toDate().toLocaleDateString('pt-BR'))
+            const dataRecebimento = log.data
+                ? (log.data.toDate ? log.data.toDate().toLocaleDateString('pt-BR') : new Date(log.data).toLocaleDateString('pt-BR'))
                 : "—";
 
-            let valorStr = (log.tipo === 'cupom') ? `${log.valor} OFF` : log.valor;
-            if (log.tipo === 'value') valorStr = money(log.valor);
+            let valorStr = (log.tipo === 'cupom') ? `${log.valor} OFF` : (log.total ? money(log.total) : log.valor);
             
-            // --- ÍCONES EMOJI (HIERARQUIA NO HISTÓRICO) ---
-            const tituloRaw = String(log.titulo || '');
+            const tituloRaw = String(log.endereco || log.nome || '');
             const tituloLower = tituloRaw.toLowerCase();
             
             const niveisEspeciais = [
@@ -1369,7 +1365,8 @@ async function carregarHistoricoRecompensas(userId) {
                 'elite', 'supremo', 'lenda', 'mítico', 'mitico'
             ];
 
-            let icon = '🎁';
+            let icon = '📦'; // Ícone padrão para pedidos
+            
             if (niveisEspeciais.some(n => tituloLower.includes(n))) {
                  icon = getTierIcon(tituloRaw);
             } else if (log.tipo === 'cupom') {
@@ -1379,10 +1376,10 @@ async function carregarHistoricoRecompensas(userId) {
             return `
                 <div class="historico-card" style="display:flex; padding: 10px 0; border-bottom: 1px dashed #eee; align-items: center; justify-content: space-between;">
                     <div style="flex:1;">
-                        <p style="font-weight:600; margin:0; color:#333;">${icon} ${log.titulo || log.valor}</p>
-                        <small style="color:#999;">${dataRecebimento}</small>
+                        <p style="font-weight:600; margin:0; color:#333;">${icon} Pedido Finalizado</p>
+                        <small style="color:#999;">Total: ${valorStr} em ${dataRecebimento}</small>
                     </div>
-                    <span style="font-weight:700; color:#4caf50;">Recebido</span>
+                    <span style="font-weight:700; color:#4caf50;">Finalizado</span>
                 </div>
             `;
         }).join('');
@@ -1546,9 +1543,10 @@ async function carregarHistoricoRecompensas(userId) {
 /* FECHAR MODAIS GLOBAL */
 document.addEventListener('DOMContentLoaded', () => {
   document.querySelectorAll('.modal').forEach(m => m.addEventListener('click', e => {
-    if (e.target.classList.contains('modal')) { m.classList.remove('show'); document.getElementById('cart-backdrop').classList.remove('active'); }
+    if (e.target.classList.contains('modal')) { m.classList.remove('show'); document.getElementById('cart-backdrop')?.classList.remove('active'); document.body.classList.remove('no-scroll'); }
   }));
   document.getElementById('cart-backdrop')?.addEventListener('click', () => {
-    document.querySelectorAll('.active').forEach(e => e.classList.remove('active'));
+    document.querySelectorAll('.active, .show').forEach(e => e.classList.remove('active', 'show'));
+    document.body.classList.remove('no-scroll');
   });
 });
