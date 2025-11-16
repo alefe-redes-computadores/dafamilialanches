@@ -1,7 +1,6 @@
 /* ===========================================================
-   🎨 Da Família Lanches – CSS Principal (v3.8 Visual Premium)
-   - Aba Meus Pedidos Estilizada (Cards, Botão Repetir, Thumb)
-   - Mantém compatibilidade total com v3.7 Estável
+   🎨 Da Família Lanches – CSS Principal (v5.0)
+   - Ajuste de Estilos para Campos ViaCEP Ativados.
    =========================================================== */
 
 /* ======== ELEMENTOS BÁSICOS ======== */
@@ -206,22 +205,49 @@ section h2 { font-size: 1.3rem; text-align: center; margin-bottom: 15px; color: 
 .mini-list { max-height: 60vh; overflow: auto; padding: 10px 14px; }
 .mini-foot { padding: 10px 14px; border-top: 1px solid #eee; }
 
-/* Frete Visual Desativado */
+/* Frete Visual: Estilo para quando a busca do CEP estiver Ativa/Livre */
 .frete-container {
   margin-top: 15px; padding: 12px; border: 1px solid #ddd;
-  border-radius: 10px; background: #fffdf7;
+  border-radius: 10px; background: #fff; 
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 .frete-container h4 { margin: 0 0 10px 0; font-size: 1rem; color: #222; }
 .frete-cep-group { display: flex; gap: 8px; margin-bottom: 8px; }
-.frete-cep-group[aria-disabled="true"], .frete-desabilitado { opacity: .6; pointer-events: none; }
 
+/* Estilo para inputs de endereço (serão ativados via JS) */
+.mini-foot input[type="text"]:not(#coupon-input),
+.mini-foot input[type="number"],
+.mini-foot textarea {
+  transition: all 0.2s;
+  background-color: #fff;
+  color: var(--txt);
+  box-sizing: border-box;
+}
+
+/* Estilo para o campo DESABILITADO (Estado inicial antes do ViaCEP) */
+.mini-foot input:disabled,
+.mini-foot textarea:disabled {
+  background-color: var(--bg2) !important; /* Cor cinza/clara para inativo */
+  color: #888 !important;
+  cursor: not-allowed !important;
+}
+
+
+/* Botão Calcular Frete - Ativo */
 .btn-calcular-frete {
   background: var(--botao); color: #222; border: none; border-radius: 8px;
   padding: 8px 12px; font-weight: 700; cursor: pointer; transition: 0.2s;
   box-shadow: var(--shadow-1);
 }
 .btn-calcular-frete:hover { background: #ffc107; transform: scale(1.02); }
-#frete-resultado { margin-top: 8px; font-weight: 600; color: var(--success); }
+
+
+/* Regra para desabilitar o container inteiro (já existe no index.html) */
+.frete-container[aria-disabled="true"] {
+  opacity: .7;
+  pointer-events: none;
+}
+
 
 /* Cupom */
 .coupon-form { display: flex; gap: 8px; margin-top: 12px; margin-bottom: 10px; }
@@ -464,22 +490,11 @@ section h2 { font-size: 1.3rem; text-align: center; margin-bottom: 15px; color: 
 
 /* Botão Repetir Pedido */
 .repetir-btn {
-  background: linear-gradient(135deg, #ffca28, #ffb300);
-  color: #222;
-  border: none;
-  border-radius: 8px;
-  padding: 12px;
-  font-weight: 700;
-  font-size: 0.95rem;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  width: 100%;
-  text-align: center;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+  background: linear-gradient(135deg, #ffca28, #ffb300); color: #222;
+  border: none; border-radius: 8px; padding: 12px; font-weight: 700;
+  font-size: 0.95rem; cursor: pointer; transition: all 0.2s ease;
+  width: 100%; text-align: center; display: flex; align-items: center;
+  justify-content: center; gap: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1);
 }
 .repetir-btn:hover {
   background: linear-gradient(135deg, #ffb300, #ff8f00);
