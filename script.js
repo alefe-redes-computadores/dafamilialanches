@@ -575,7 +575,7 @@ document.addEventListener("DOMContentLoaded", () => {
   );
 
   /* ------------------ ⚙️ CONFIGURAÇÕES E CÁLCULOS ------------------ */
-  const DELIVERY_FEE = 6.00; 
+  // DELIVERY_FEE já declarado no topo; mantido apenas lá.
   let couponApplied = (localStorage.getItem("dflCoupon") || "").toUpperCase();
   let addressValue  = (localStorage.getItem("dflAddress") || "").trim();
 
