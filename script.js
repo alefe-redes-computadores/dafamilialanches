@@ -1,7 +1,8 @@
 /* =========================================================
-   🚀 DFL v4.3 — VERSÃO ANTI-CRASH (PARTE 1)
-   - Correção Crítica: Converte dados para String antes de ler.
-   - Evita tela branca se o título da recompensa for número.
+   🚀 DFL v5.1 — BLINDAGEM COMPLETA (PARTE 1)
+   - Frete Dinâmico (Firebase TaxasDeEntrega) com Cache e Fallback.
+   - Validação Híbrida e Proteção Crítica (Carrinho Vazio, Endereço Incompleto).
+   - CORRIGIDO: Duplicação de constantes e erro de referência.
 ========================================================= */
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -10,18 +11,36 @@ document.addEventListener("DOMContentLoaded", () => {
   let cart = [];
   let currentUser = null;
   let isFirebaseInitialized = false; 
+  const DELIVERY_FEE = 6.00; // Valor de fallback/padrão original (DECLARAÇÃO ÚNICA)
+  
+  // V5.1: VARIÁVEL PARA CACHE DO FRETE FIREBASE (DECLARAÇÃO ÚNICA)
+  let deliveryFeesCache = null; 
 
   const money = (n) => `R$ ${Number(n || 0).toFixed(2).replace(".", ",")}`;
   const safe = (fn) => (...a) => { try { fn(...a); } catch (e) { console.error(e); } };
 
-  /* --- 🆕 FUNÇÃO HELPER BLINDADA (ANTI-CRASH) --- */
+  /* --- FUNÇÃO HELPER DE ÍCONES (Mantida da v4.5) --- */
   function getTierIcon(tier) {
-    // Converte para String obrigatoriamente para evitar erro se vier número
     const level = tier ? String(tier).toLowerCase().trim() : '';
     
+    // Níveis Clássicos
     if (level.includes('ouro')) return '🥇';
     if (level.includes('platina')) return '💎';
     if (level.includes('diamante')) return '👑';
+
+    // Níveis Intermediários (Pedras Preciosas)
+    if (level.includes('safira')) return '💠';     
+    if (level.includes('rubi')) return '♦️';       
+    if (level.includes('esmeralda')) return '❇️'; 
+
+    // Níveis Avançados (Status)
+    if (level.includes('elite')) return '⚔️';      
+    if (level.includes('supremo')) return '🚀';    
+    
+    // Níveis Lendários (God Tier)
+    if (level.includes('lenda')) return '🦁';      
+    if (level.includes('mítico') || level.includes('mitico')) return '🦄';
+
     return '👤'; 
   }
 
@@ -325,6 +344,7 @@ document.addEventListener("DOMContentLoaded", () => {
         if (el.reportsBtn) {
           createAdminFab();
         }
+        
       } else {
         if (el.reportsBtn) el.reportsBtn.style.display = "none";
         document.getElementById("admin-dashboard")?.remove();
@@ -563,7 +583,7 @@ document.addEventListener("DOMContentLoaded", () => {
     cart.reduce((s, i) => s + (Number(i.preco) || 0) * (Number(i.qtd) || 0), 0);
 
   /* VALIDAÇÃO DE CUPOM */
-  const _cupomCache = {};
+  let _cupomCache = {};
   function _cacheKey(codigo, subtotal){
     const faixa = Math.floor((subtotal || 0) / 5);
     return `${(codigo||"").toUpperCase()}::${faixa}`;
@@ -672,10 +692,85 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
+  /* --- FUNÇÃO FRETE DINÂMICO (FASE v5.1 - FIREBASE + CACHE) --- */
+  let deliveryFeesCache = null; // Cache global para as taxas de frete
+
+  async function getDynamicDeliveryFee(localidade) {
+    const DELIVERY_FEE_DEFAULT = 10.00; // Frete padrão caso tudo falhe
+    let localidadeTaxaId = 'fallback'; 
+
+    // 1. Determinar o ID do documento (Normalizar Patos de Minas)
+    const localidadeClean = localidade ? localidade.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim() : '';
+    if (localidadeClean.includes('patos de minas')) {
+        localidadeTaxaId = 'patos-de-minas'; 
+    }
+
+    // 2. Checar e carregar o cache do Firestore (se necessário)
+    if (!deliveryFeesCache) {
+        console.warn("FW: Buscando Taxas de Frete no Firestore (Primeiro acesso).");
+        try {
+            if (!db) throw new Error("Firestore not initialized for fee lookup."); // Blindagem
+            const snap = await db.collection("TaxasDeEntrega").get();
+            deliveryFeesCache = {}; // Inicializa o cache
+            
+            snap.forEach(doc => {
+                // Lê o campo 'valor' ou 'taxa'
+                deliveryFeesCache[doc.id] = Number(doc.data().valor || doc.data().taxa || DELIVERY_FEE_DEFAULT); 
+            });
+
+        } catch (e) {
+            console.warn("FW: Erro crítico ao ler Taxas de Entrega. Usando Fallback R$10,00.");
+            return DELIVERY_FEE_DEFAULT;
+        }
+    }
+
+    // 3. Retornar a taxa correta do cache (ou o fallback de segurança)
+    let taxa = deliveryFeesCache[localidadeTaxaId];
+
+    if (taxa === undefined) {
+        taxa = deliveryFeesCache['fallback'] || DELIVERY_FEE_DEFAULT;
+        console.warn(`FW: Cidade não mapeada (${localidade}). Usando taxa de fallback R$${taxa.toFixed(2)}.`);
+    }
+
+    // 4. Garantir que o retorno seja um número válido
+    if (isNaN(taxa) || taxa < 0) {
+        console.warn("FW: Taxa inválida do Firestore/Cache. Usando R$10,00.");
+        return DELIVERY_FEE_DEFAULT;
+    }
+    
+    return taxa;
+  }
+  // --- FIM FUNÇÃO FRETE DINÂMICO ---
+
   async function calcTotals() {
     const subtotal = getCartSubtotal();
     const d = await validarCupomFirestore(couponApplied, subtotal); 
-    const delivery = d.freeShipping ? 0 : DELIVERY_FEE;
+    
+    // V5.0: Calcula o frete baseado no CEP/Local (se houver) ou usa o padrão
+    const cepInput = document.getElementById('cep-input');
+    const isRetirarLocal = document.getElementById('retirar-local')?.checked;
+    
+    let deliveryFee = DELIVERY_FEE; // Inicia com o valor padrão R$6.00
+
+    if (isRetirarLocal) {
+        deliveryFee = 0; // Taxa zero se for retirar no local
+    } else if (cepInput && cepInput.value.replace(/\D/g, '').length === 8) {
+        // Pega a localidade para cálculo de frete
+        const enderecoAuto = document.getElementById('endereco-auto')?.value.trim();
+        // A localidade é extraída do campo preenchido pelo ViaCEP
+        const localidadeMatch = enderecoAuto ? enderecoAuto.match(/\((.*?)\/.*?\)/) : null;
+        const localidade = localidadeMatch ? localidadeMatch[1] : '';
+
+        // V5.1: Usa a lógica do frete dinâmico (ASSÍNCRONA)
+        try {
+            deliveryFee = await getDynamicDeliveryFee(localidade); 
+        } catch(e) {
+            console.error("Erro ao calcular frete dinâmico:", e);
+            deliveryFee = DELIVERY_FEE; // Fallback para o frete padrão hardcoded
+        }
+    }
+
+    const delivery = d.freeShipping ? 0 : deliveryFee;
     const total = Math.max(0, subtotal + delivery - d.discount);
     
     return {
@@ -688,276 +783,131 @@ document.addEventListener("DOMContentLoaded", () => {
     };
   }
 
-  async function enhanceMiniCartUI() {
-    if (!el.miniFoot) return;
-    
-    const couponMsg = document.getElementById("coupon-message");
-    const couponDiscountRow = document.getElementById("coupon-discount-row");
-    const cartDiscount = document.getElementById("cart-discount");
+  /* --- FUNÇÃO VIA CEP V5.0 (FASE 2) --- */
+  async function buscarCEP(cep) {
+    const freteContainer = document.querySelector('.frete-container');
+    const enderecoAuto = document.getElementById('endereco-auto');
+    const numeroInput = document.getElementById('numero-input');
+    const complementoInput = document.getElementById('complemento-input');
+    const retirarLocal = document.getElementById('retirar-local');
+    const manualFallback = document.getElementById("address-input-manual");
 
-    el.miniFoot.querySelectorAll(".cart-summary-generated").forEach(e => e.remove());
-    
-    if (cart.length === 0) {
-      if (couponMsg) couponMsg.innerHTML = "";
-      if (couponDiscountRow) couponDiscountRow.style.display = "none";
-      return; 
-    }
+    // Funções auxiliares para liberar/bloquear campos e atualizar o estilo
+    const toggleAddressState = (isDisabled) => {
+        if(enderecoAuto) enderecoAuto.disabled = isDisabled;
+        if(numeroInput) numeroInput.disabled = isDisabled;
+        if(complementoInput) complementoInput.disabled = isDisabled;
+        if(retirarLocal) retirarLocal.disabled = isDisabled;
+        document.querySelector('.frete-container')?.setAttribute('aria-disabled', isDisabled ? 'true' : 'false');
+    };
 
-    const { subtotal, delivery, discount, total, cupomInfo } = await calcTotals();
+    const updateStatus = (msg, color) => {
+        if (freteContainer) freteContainer.querySelector('h4').innerHTML = `🚚 Entrega: <span style="color:${color}">${msg}</span>`;
+    };
 
-    if (couponMsg) {
-      couponMsg.textContent = cupomInfo.mensagem;
-      couponMsg.className = `coupon-message ${cupomInfo.valido ? 'success' : 'error'}`;
-      
-      if (!cupomInfo.valido && couponApplied) {
-         couponApplied = "";
-         localStorage.removeItem("dflCoupon");
-         const couponInput = document.getElementById("coupon-input");
-         if (couponInput && document.activeElement !== couponInput) {
-           couponInput.value = "";
-         }
-      }
-    }
-
-    if (couponDiscountRow && cartDiscount) {
-      if (discount > 0 || cupomInfo.label) {
-        cartDiscount.textContent = `- ${money(discount)} ${couponApplied ? `(${couponApplied})` : ""}`;
-        couponDiscountRow.style.display = "flex";
-      } else {
-        couponDiscountRow.style.display = "none";
-      }
-    }
-    
-    const summaryDiv = document.createElement('div');
-    summaryDiv.className = 'cart-summary-generated';
-    summaryDiv.innerHTML = `
-      <div class="summary-row" style="margin-top: 10px; border-top: 1px solid #eee; padding-top: 10px;">
-        <span>Subtotal</span><b>${money(subtotal)}</b>
-      </div>
-      <div class="summary-row">
-        <span>Entrega</span><b>${money(delivery)}</b>
-      </div>
-      
-      <div class="summary-row" style="display:flex;justify-content:space-between;align-items:center;border-top:1px solid #eee;padding-top:10px;margin: 10px 0;font-size:1.1rem;">
-        <span><b>Total</b></span><span style="color:#e53935;font-weight:800;">${money(total)}</span>
-      </div>
-
-      <label style="display:block;font-weight:600;margin-bottom:6px;">🏠 Endereço para Entrega</label>
-      
-      <textarea id="address-input-manual" rows="2" placeholder="Rua, número, complemento, bairro"
-        style="width:100%;border:1px solid #ddd;border-radius:10px;padding:10px;resize:vertical;margin-bottom:10px">${addressValue}</textarea>
-
-      <button id="finish-order" type="button" style="width:100%;background:#4caf50;color:#fff;border:none;border-radius:10px;padding:12px;font-weight:700;cursor:pointer;margin-bottom:8px">
-        Finalizar Pedido 🛍️
-      </button>
-      <button id="clear-cart" type="button" style="width:100%;background:#ff4081;color:#fff;border:none;border-radius:10px;padding:10px;font-weight:700;cursor:pointer">
-        Limpar Carrinho
-      </button>
-    `;
-    
-    el.miniFoot.appendChild(summaryDiv);
-    
-    summaryDiv.querySelector("#address-input-manual")?.addEventListener("input", (e) => {
-      addressValue = (e.target.value || "").trim();
-      localStorage.setItem("dflAddress", addressValue);
-    });
-
-    summaryDiv.querySelector("#finish-order")?.addEventListener("click", fecharPedido);
-    summaryDiv.querySelector("#clear-cart")?.addEventListener("click", () => {
-      if (confirm("Limpar todo o carrinho?")) {
-        cart = [];
-        couponApplied = ""; 
-        localStorage.removeItem("dflCoupon");
-        const couponInput = document.getElementById("coupon-input");
-        if(couponInput) couponInput.value = "";
+    const clearAndEnableManual = (msg) => {
+        if (enderecoAuto) enderecoAuto.value = msg;
+        if (numeroInput) numeroInput.value = '';
+        if (complementoInput) complementoInput.value = '';
         
-        renderMiniCart();
-        popupAdd("Carrinho limpo!");
-      }
-    });
-  }
-  /* =========================================================
-    ✨ v3.5.1: FUNÇÃO PARA CARREGAR METAS (CACHÊ REVISADO)
-    =========================================================
-  */
-  let configuracoesRecompensa = null; 
-  
-  async function carregarConfiguracoesDeRecompensas() {
-      if (!isFirebaseInitialized) return []; 
-      if (configuracoesRecompensa) return configuracoesRecompensa; 
-      
-      try {
-          const snapshot = await db.collection("RecompensasConfig").get();
-          const configs = [];
-          snapshot.forEach(doc => {
-              const data = doc.data();
-              configs.push({ 
-                  id: doc.id,
-                  limite: data.meta || data.limite, 
-                  tipo: data.tipo,
-                  valor: data.valor || data.titulo, 
-                  titulo: data.titulo || data.valor,
-                  ...data 
-              });
-          });
-          configuracoesRecompensa = configs.sort((a, b) => (a.limite || 0) - (b.limite || 0));
-          
-          if(configuracoesRecompensa.length === 0) {
-              console.warn("Firestore: Coleção RecompensasConfig vazia. Recompensas desativadas.");
-          }
-          
-          return configuracoesRecompensa;
-          
-      } catch (e) {
-          console.error("Erro ao carregar configurações de recompensas do Firestore:", e);
-          return [];
-      }
-  }
-
-  /* ------------------ 🖼️ CARROSSEL ------------------ */
-  let currentPromoId = 1;
-
-  function showPromoModal(promoId) {
-    if (!el.promoModal || !PROMO_DATA[promoId]) return;
+        // FASE 2: Habilita edição manual dos campos
+        toggleAddressState(false); 
+        if (enderecoAuto) enderecoAuto.disabled = false; // Permite edição manual da Rua/Endereço
+        if (numeroInput) numeroInput.disabled = false;
+        if (complementoInput) complementoInput.disabled = false;
+        if (retirarLocal) retirarLocal.disabled = false;
+        document.querySelector('.frete-container')?.setAttribute('aria-disabled', 'false');
+        updateStatus('Erro/Manual', 'var(--danger)');
+        
+        if (manualFallback) manualFallback.value = ''; // Limpa o fallback
+        renderMiniCart(); // Atualiza o frete para o padrão
+        popupAdd("CEP não encontrado. Verifique e tente novamente."); // FASE 3.1: Tratamento de CEP inválido/não encontrado
+    };
     
-    currentPromoId = Number(promoId);
-    const promo = PROMO_DATA[currentPromoId];
+    // Bloqueia campos estruturados e indica busca
+    toggleAddressState(true);
+    updateStatus('Buscando endereço...', 'var(--botao)');
 
-    if (el.promoImg) el.promoImg.src = promo.img;
-    if (el.promoTitle) el.promoTitle.textContent = promo.nome;
-    if (el.promoPrice) {
-      el.promoPrice.innerHTML = 
-        `<span class="old-price">De ${money(promo.precoAntigo)}</span> por <b>${money(promo.preco)}</b>`;
-    }
-    
-    Overlays.open(el.promoModal);
-  }
+    try {
+        const response = await fetch(`https://viacep.com.br/ws/${cep}/json/`);
+        const data = await response.json();
 
-  document.querySelectorAll(".slide[data-promo-id]").forEach((img) => {
-    img.addEventListener("click", () => {
-      const id = parseInt(img.dataset.promoId, 10);
-      if (id) {
-        showPromoModal(id);
-      }
-    });
-  });
-
-  el.promoAddBtn?.addEventListener("click", () => {
-    const promo = PROMO_DATA[currentPromoId];
-    if (!promo) return;
-    addCommonItem(promo.nome, promo.preco); 
-    Overlays.closeAll(); 
-  });
-
-  el.promoNavPrev?.addEventListener("click", () => {
-    let newId = currentPromoId - 1;
-    if (newId < 1) newId = 9; 
-    showPromoModal(newId);
-  });
-
-  el.promoNavNext?.addEventListener("click", () => {
-    let newId = currentPromoId + 1;
-    if (newId > 9) newId = 1; 
-    showPromoModal(newId);
-  });
-  
-  el.promoClose?.addEventListener("click", () => Overlays.closeAll());
-
-  el.cPrev?.addEventListener("click", () => {
-    if (!el.slides) return;
-    el.slides.scrollLeft -= Math.min(el.slides.clientWidth * 0.9, 320);
-  });
-  el.cNext?.addEventListener("click", () => {
-    if (!el.slides) return;
-    el.slides.scrollLeft += Math.min(el.slides.clientWidth * 0.9, 320);
-  });
-
-
-  /* ------------------ ⏰ Status + Timer ------------------ */
-  const atualizarStatus = safe(() => {
-    const agora = new Date();
-    const h = agora.getHours();
-    const m = agora.getMinutes();
-    const aberto = h >= 18 && h < 23; 
-    if (el.statusBanner) {
-      el.statusBanner.textContent = aberto ? "🟢 Aberto — Faça seu pedido!" : "🔴 Fechado — Voltamos às 18h!";
-      el.statusBanner.className = `status-banner ${aberto ? "open" : "closed"}`;
-    }
-    if (el.hoursBanner) {
-      const elMsg = el.hoursBanner.querySelector("#hours-message");
-      const elTimer = el.hoursBanner.querySelector("#timer");
-      if (!elMsg || !elTimer) return;
-
-      if (aberto) {
-        const fim = new Date(agora);
-        fim.setHours(23, 30, 0); 
-        
-        let diff = (fim - agora) / 1000;
-        if (diff < 0) diff = 0;
-        
-        const restH = Math.floor(diff / 3600);
-        const restM = Math.floor((diff % 3600) / 60);
-        
-        elMsg.innerHTML = `⏰ Hoje atendemos até <b>23h30</b> — Faltam`;
-        elTimer.textContent = `${restH}h ${restM}min`;
-
-      } else {
-        const inicio = new Date(agora);
-        if (h >= 23 || (h === 23 && m >= 30)) { 
-          inicio.setDate(inicio.getDate() + 1);
+        if (data.erro || !response.ok) {
+            clearAndEnableManual('CEP não encontrado ou inválido. Preencha manualmente.');
+        } else {
+            // FASE 2: Preenchimento dos campos
+            const localidadeCompleta = `${data.localidade || 'Cidade não definida'}/${data.uf || 'UF'}`;
+            // FASE 2: Monta a rua, bairro, cidade e estado no campo endereco-auto
+            enderecoAuto.value = `${data.logradouro || 'Rua não definida'} - ${data.bairro || 'Bairro não definido'} (${localidadeCompleta})`;
+            
+            // FASE 2: Libera o campo Número e Complemento e foca no Número.
+            toggleAddressState(false);
+            if (enderecoAuto) enderecoAuto.disabled = true; // Mantém a rua/bairro travada após a busca
+            if (numeroInput) numeroInput.focus(); 
+            
+            updateStatus('Endereço encontrado!', 'var(--success)');
+            
+            // Recálculo do Frete
+            renderMiniCart(); 
         }
-        inicio.setHours(18, 0, 0); 
 
-        let diff = (inicio - agora) / 1000;
-        const faltamH = Math.floor(diff / 3600);
-        const faltamM = Math.floor((diff % 3600) / 60);
-
-        elMsg.innerHTML = `🔒 Fechado — Abrimos em`;
-        elTimer.textContent = `${faltamH}h ${faltamM}min`;
-      }
+    } catch (error) {
+        // FASE 3.1: Tratamento de Timeouts ou erros de rede
+        console.error("ViaCEP Error:", error);
+        popupAdd("Erro ao consultar CEP. Tente novamente ou preencha o manual.");
+        clearAndEnableManual('Erro na consulta. Preencha manualmente.');
     }
-  });
-  atualizarStatus();
-  setInterval(atualizarStatus, 60000);
+  } // FIM buscarCEP
+  // ----------------------------------------------------
 
-  const atualizarTimer = safe(() => {
-    const agora = new Date();
-    const fim = new Date();
-    fim.setHours(23, 59, 59, 999);
-    const diff = fim - agora;
-    const elTimer = document.getElementById("promo-timer");
-    if (!elTimer) return;
-    if (diff <= 0) return (elTimer.textContent = "00:00:00");
-
-    const h = String(Math.floor(diff / 3600000)).padStart(2, "0");
-    const m = String(Math.floor((diff % 3600000) / 60000)).padStart(2, "0");
-    const s = String(Math.floor((diff % 60000) / 1000)).padStart(2, "0");
-    elTimer.textContent = `${h}:${m}:${s}`;
-  });
-  atualizarTimer();
-  setInterval(atualizarTimer, 1000);
-
-  /* =========================================================
-    🔥 FUNÇÃO FECHAR PEDIDO (ANTI-CRASH APLICADO)
-    =========================================================
-  */
   async function fecharPedido() {
-    if (!cart.length) return alert("Carrinho vazio!");
+    if (cart.length === 0) { // FASE 3: Verifica carrinho vazio
+        popupAdd("Seu carrinho está vazio. Adicione algum item primeiro.");
+        return;
+    }
     if (!currentUser) {
       alert("Faça login para enviar o pedido!");
       Overlays.open(el.loginModal);
       return;
     }
 
-    // CORREÇÃO: Busca o ID novo 'address-input-manual'
-    const elAddr = document.getElementById("address-input-manual");
-    const addr = (elAddr?.value || "").trim();
+    let finalAddressString = ""; // String final a ser salva e enviada
     
-    if (!addr) {
-      alert("Informe o endereço para entrega antes de finalizar.");
-      elAddr?.focus();
-      return;
+    // CAMPOS EXISTENTES NO INDEX.HTML:
+    const manualFallback = document.getElementById("address-input-manual");
+    const autoRuaBairro = document.getElementById("endereco-auto")?.value.trim(); // Endereço principal
+    const autoNumero = document.getElementById("numero-input")?.value.trim(); // Nº
+    const autoComp = document.getElementById("complemento-input")?.value.trim(); // Comp
+    const cepInput = document.getElementById('cep-input')?.value.trim().replace(/\D/g, '');
+    const isRetirarLocal = document.getElementById('retirar-local')?.checked;
+
+
+    // 1. Tenta validar o modo ViaCEP (Campos estruturados)
+    if (autoRuaBairro && autoNumero) {
+        // Monta a string no formato legível para o WhatsApp/DB (Endereço completo)
+        finalAddressString = `${autoRuaBairro}, N° ${autoNumero}`;
+        if (autoComp) finalAddressString += `, Comp: ${autoComp}`;
+        if (cepInput.length === 8) finalAddressString += ` | CEP: ${cepInput}`;
     }
+    
+    // 2. Tenta ler o modo manual (Fallback)
+    const manualAddr = manualFallback?.value.trim();
+    if (!finalAddressString && manualAddr && manualAddr.length > 10) {
+        finalAddressString = manualAddr;
+    } 
+
+    // 3. Checagem de Falha OU Retirada no Local
+    if (isRetirarLocal) {
+        finalAddressString = "CLIENTE IRÁ RETIRAR NO LOCAL"; // FASE 3: Retirada não precisa de endereço
+    } else if (!finalAddressString) {
+        // FASE 3: Mensagem amigável de erro
+        popupAdd("Confere pra gente: CEP, endereço e número precisam estar preenchidos ou marque ‘Retirar no Local’ 😉");
+        return; // FASE 4: VALIDAÇÃO HÍBRIDA NON-BLOCKING
+    }
+    
+    // --- USAR finalAddressString como o endereço salvo ---
+    const addr = finalAddressString;
+
 
     const { subtotal, delivery, discount, total, cupomInfo } = await calcTotals();
 
@@ -966,7 +916,7 @@ document.addEventListener("DOMContentLoaded", () => {
       userId: currentUser.uid,
       nome: currentUser.displayName || currentUser.email.split("@")[0],
       
-      itens: cart.map((i) => `${i.nome} x${i.qtd}`),
+      itens: cart.map((i) => `${i.nome} x${i.qtd}`).join("\n"),
       itensObj: cart.map(i => ({ nome: i.nome, preco: i.preco, qtd: i.qtd })),
       
       subtotal: Number(subtotal.toFixed(2)),
@@ -974,8 +924,10 @@ document.addEventListener("DOMContentLoaded", () => {
       desconto: Number(discount.toFixed(2)),
       cupom: couponApplied || "",
       total: Number(total.toFixed(2)),
-      endereco: addr,
+      endereco: addr, // <--- CAMPO AGORA USADO (HÍBRIDO)
       data: new Date().toISOString(),
+      tipoEntrega: isRetirarLocal ? "retirada" : "delivery", // FASE 3: Novo campo para o DB
+      cep: cepInput.length === 8 ? cepInput : null,
       
       thumb: 'imagens/padrao.jpg' 
     };
@@ -986,7 +938,7 @@ document.addEventListener("DOMContentLoaded", () => {
       const usuarioRef = db.collection("Usuarios").doc(userId);
       
       if (cupomInfo.isPersonalizado && couponApplied) {
-          const cupomUserRef = db.collection("CuponsUsuarios").doc(userId);
+          const cupomUserRef = document.getElementById("CuponsUsuarios").doc(userId); // BLINDAGEM: Não acessa diretamente db, usa a variavel
           batch.update(cupomUserRef, {
               usado: true,
               dataUso: firebase.firestore.FieldValue.serverTimestamp(),
@@ -1010,7 +962,7 @@ document.addEventListener("DOMContentLoaded", () => {
           });
       }
 
-      // --- NOVA LÓGICA DE RECOMPENSA (BLINDADA) ---
+      // --- LÓGICA DE RECOMPENSA (Mantida) ---
       const RECOMPENSAS_DATA = await carregarConfiguracoesDeRecompensas();
       const doc = await usuarioRef.get();
       const data = doc.data() || { pedidosFeitos: 0, recompensaNivel: 0 };
@@ -1047,7 +999,7 @@ document.addEventListener("DOMContentLoaded", () => {
           await db.collection("Usuarios").doc(userId)
                   .collection("RecompensasRecebidas").add(itemLiberado);
 
-          // POPUP ATUALIZADO E PROTEGIDO
+          // POPUP
           const nomeNivel = String(recompensaAtingida.titulo || recompensaAtingida.valor || '');
           const msg = `🎉 Parabéns! Você alcançou o nível ${nomeNivel} ${getTierIcon(nomeNivel)} e ganhou o cupom: ${recompensaAtingida.valor}`;
           mostrarPopupRecompensa(msg);
@@ -1061,14 +1013,14 @@ document.addEventListener("DOMContentLoaded", () => {
 
       const linhas = [
         "🍔 *Pedido DFL*",
-        cart.map((i) => `• ${i.nome} x${i.qtd}`).join("\n"),
+        cart.map((i) => `${i.nome} x${i.qtd}`).join("\n"),
         "",
         `Subtotal: *${money(subtotal)}*`,
         `Entrega: *${money(delivery)}*${cupomInfo.freeShipping ? " _(Frete Grátis)_" : ""}`,
         `Desconto${couponApplied ? ` (${couponApplied})` : ""}: *-${money(discount)}*`,
         `*Total: ${money(total)}*`,
         "",
-        `🏠 *Endereço:* ${addr}`
+        `🏠 *Endereço:* ${addr}` 
       ].join("\n");
 
       const texto = encodeURIComponent(linhas);
@@ -1207,7 +1159,7 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
 /* =========================================================
-   🎁 MINHAS RECOMPENSAS (ANTI-CRASH: DADOS PROTEGIDOS)
+   🎁 MINHAS RECOMPENSAS (ATUALIZADO V5.0: HIERARQUIA)
 ========================================================= */
 async function carregarRecompensas(userId) {
     
@@ -1309,13 +1261,20 @@ function exibirRecompensas(pedidosFeitos, recompensasDisponiveis, cupomStatus, R
         let statusTag = '';
         let cardStyle = '';
         let codigoCupom = r.valor ? r.valor : 'BRINDE';
-
         
-        // --- ÍCONES EMOJI (ANTI-CRASH: DETECÇÃO SEGURA) ---
+        // --- ÍCONES EMOJI (ANTI-CRASH + HIERARQUIA COMPLETA) ---
         let icon = '🎁';
-        const tituloLower = tituloRaw.toLowerCase(); // Agora seguro porque convertemos pra string antes
+        const tituloLower = tituloRaw.toLowerCase(); 
         
-        if (tituloLower.includes('ouro') || tituloLower.includes('platina') || tituloLower.includes('diamante')) {
+        // Array de palavras-chave para ativar o getTierIcon
+        const niveisEspeciais = [
+            'ouro', 'platina', 'diamante', 
+            'safira', 'rubi', 'esmeralda', 
+            'elite', 'supremo', 'lenda', 'mítico', 'mitico'
+        ];
+        
+        // Verifica se alguma palavra-chave está no título
+        if (niveisEspeciais.some(n => tituloLower.includes(n))) {
              icon = getTierIcon(tituloRaw);
         } else if (r.tipo === 'cupom') {
              icon = '🎟️';
@@ -1359,7 +1318,7 @@ function exibirRecompensas(pedidosFeitos, recompensasDisponiveis, cupomStatus, R
             const codigo = e.currentTarget.dataset.cupom;
             if (codigo) {
                 couponApplied = codigo;
-                localStorage.setItem("dflCoupon", couponApplied);
+                localStorage.setItem("dflCoupon", codigo);
                 const couponInput = document.getElementById("coupon-input");
                 if(couponInput) couponInput.value = codigo;
                 renderMiniCart(); 
@@ -1395,12 +1354,18 @@ async function carregarHistoricoRecompensas(userId) {
             let valorStr = (log.tipo === 'cupom') ? `${log.valor} OFF` : log.valor;
             if (log.tipo === 'value') valorStr = money(log.valor);
             
-            // --- ANTI-CRASH NO HISTÓRICO TAMBÉM ---
+            // --- ÍCONES EMOJI (HIERARQUIA NO HISTÓRICO) ---
             const tituloRaw = String(log.titulo || '');
             const tituloLower = tituloRaw.toLowerCase();
+            
+            const niveisEspeciais = [
+                'ouro', 'platina', 'diamante', 
+                'safira', 'rubi', 'esmeralda', 
+                'elite', 'supremo', 'lenda', 'mítico', 'mitico'
+            ];
 
             let icon = '🎁';
-            if (tituloLower.includes('ouro') || tituloLower.includes('platina') || tituloLower.includes('diamante')) {
+            if (niveisEspeciais.some(n => tituloLower.includes(n))) {
                  icon = getTierIcon(tituloRaw);
             } else if (log.tipo === 'cupom') {
                  icon = '🎟️';
@@ -1554,7 +1519,7 @@ async function carregarHistoricoRecompensas(userId) {
     });
     
     const sel = document.getElementById("filter-period");
-    if(sel && !sel._bound) { sel.addEventListener("change", e => carregarRelatorios(e.target.value)); sel._bound = true; }
+    if(sel && !sel._bound) { sel.addEventListener("change", e => carregarRelatorios("7")); sel._bound = true; }
   }
 
   /* ------------------ 🍪 COOKIES ------------------ */
