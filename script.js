@@ -1,7 +1,8 @@
 /* =========================================================
-   🚀 DFL v5.1.2 — CORREÇÃO CRÍTICA FINAL (PARTE 1)
+   🚀 DFL v5.1.2 — CORREÇÃO CRÍTICA FINAL (COMPLETO)
    - FRETE DINÂMICO FIREBASE (v5.1).
    - REMOÇÃO TOTAL: Bug SyntaxError: Identifier 'DELIVERY_FEE' has already been declared.
+   - Som apenas na finalização do pedido.
 ========================================================= */
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -14,7 +15,7 @@ document.addEventListener("DOMContentLoaded", () => {
   // VALOR GLOBAL/PADRÃO (DECLARAÇÃO ÚNICA DE FRETE)
   const DELIVERY_FEE = 6.00; 
   
-  // V5.1: VARIÁVEL PARA CACHE DO FRETE FIREBASE (DECLARAÇÃO ÚNICA)
+  // V5.1: VARIÁVEL GLOBAL PARA CACHE DO FRETE FIREBASE (DECLARAÇÃO ÚNICA)
   let deliveryFeesCache = null; 
 
   const money = (n) => `R$ ${Number(n || 0).toFixed(2).replace(".", ",")}`;
@@ -217,8 +218,8 @@ document.addEventListener("DOMContentLoaded", () => {
     }, 6000);
   }
 
-/* ------------------ 🛒 MINI-CARRINHO ------------------ */
-  function renderMiniCart() {
+  /* ------------------ 🛒 MINI-CARRINHO ------------------ */
+  function renderMiniCartBase() {
     if (!el.miniList) return; 
 
     const totalItens = cart.reduce((s, i) => s + i.qtd, 0);
@@ -227,7 +228,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if (!cart.length) {
       el.miniList.innerHTML = '<p style="text-align:center;color:#999;padding:20px;">Carrinho vazio 🛒</p>';
       
-      if(el.miniFoot) el.miniFoot.querySelectorAll(".cart-summary-generated").forEach(e => e.remove());
+      if (el.miniFoot) el.miniFoot.querySelectorAll(".cart-summary-generated").forEach(e => e.remove());
       const couponMsg = document.getElementById("coupon-message");
       const couponDiscountRow = document.getElementById("coupon-discount-row");
       if (couponMsg) couponMsg.innerHTML = "";
@@ -255,6 +256,8 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function bindMiniCartButtons() {
+    if (!el.miniList) return;
+
     el.miniList.querySelectorAll(".cart-plus").forEach(b => b.addEventListener("click", e => {
       const i = +e.currentTarget.dataset.idx;
       if (cart[i]) {
@@ -280,12 +283,17 @@ document.addEventListener("DOMContentLoaded", () => {
     }));
   }
 
-  const _renderMiniCartOrig = renderMiniCart;
-  renderMiniCart = function () {
-    _renderMiniCartOrig(); 
-    bindMiniCartButtons(); 
-    enhanceMiniCartUI();
-  };
+  // Wrapper final do mini-cart (chama UI extra + bind)
+  function renderMiniCart() {
+    renderMiniCartBase();
+    bindMiniCartButtons();
+    try { 
+      // Função vem do extras.js (mantida)
+      if (typeof enhanceMiniCartUI === "function") enhanceMiniCartUI();
+    } catch (e) {
+      console.warn("enhanceMiniCartUI não disponível:", e);
+    }
+  }
 
   /* ------------------ 🔥 FIREBASE ------------------ */
   const firebaseConfig = {
@@ -300,31 +308,31 @@ document.addEventListener("DOMContentLoaded", () => {
   let auth, db; 
   
   function inicializarFirebase() {
-      if (isFirebaseInitialized) return;
+    if (isFirebaseInitialized) return;
 
-      try {
-          if (!window.firebase) {
-              throw new Error("Biblioteca principal do Firebase (app) não carregou.");
-          }
-          if (!firebase.apps.length) {
-              firebase.initializeApp(firebaseConfig);
-          }
-          
-          auth = firebase.auth();
-          db = firebase.firestore();
-          isFirebaseInitialized = true;
-          setupAuthListener(); 
-
-      } catch (error) {
-          console.error("ERRO FATAL AO INICIAR FIREBASE:", error);
-          const elBody = document.querySelector("body");
-          if (elBody) {
-             elBody.innerHTML = `<div style="padding:20px;text-align:center;font-size:1.2rem;color:red;font-family:sans-serif;margin-top:50px;">
-              <b>Erro Crítico</b><br>Não foi possível conectar aos nossos serviços.
-              <br><small>Verifique sua conexão com a internet e tente recarregar a página.</small>
-              <br><br><small style="color:#666">Detalhe: ${error.message}</small></div>`;
-          }
+    try {
+      if (!window.firebase) {
+        throw new Error("Biblioteca principal do Firebase (app) não carregou.");
       }
+      if (!firebase.apps.length) {
+        firebase.initializeApp(firebaseConfig);
+      }
+      
+      auth = firebase.auth();
+      db = firebase.firestore();
+      isFirebaseInitialized = true;
+      setupAuthListener(); 
+
+    } catch (error) {
+      console.error("ERRO FATAL AO INICIAR FIREBASE:", error);
+      const elBody = document.querySelector("body");
+      if (elBody) {
+        elBody.innerHTML = `<div style="padding:20px;text-align:center;font-size:1.2rem;color:red;font-family:sans-serif;margin-top:50px;">
+          <b>Erro Crítico</b><br>Não foi possível conectar aos nossos serviços.
+          <br><small>Verifique sua conexão com a internet e tente recarregar a página.</small>
+          <br><br><small style="color:#666">Detalhe: ${error.message}</small></div>`;
+      }
+    }
   }
 
   function setupAuthListener() {
@@ -345,7 +353,6 @@ document.addEventListener("DOMContentLoaded", () => {
         if (el.reportsBtn) {
           createAdminFab();
         }
-        
       } else {
         if (el.reportsBtn) el.reportsBtn.style.display = "none";
         document.getElementById("admin-dashboard")?.remove();
@@ -402,14 +409,14 @@ document.addEventListener("DOMContentLoaded", () => {
   });
   
   el.userBtn?.addEventListener("click", () => {
-      inicializarFirebase();
-      Overlays.open(el.loginModal);
+    inicializarFirebase();
+    Overlays.open(el.loginModal);
   });
   
   el.cartIcon?.addEventListener("click", () => {
-      if (!currentUser) inicializarFirebase();
-      renderMiniCart();
-      Overlays.open(el.miniCart);
+    if (!currentUser) inicializarFirebase();
+    renderMiniCart();
+    Overlays.open(el.miniCart);
   });
 
   /* ------------------ ➕ ADICIONAIS ------------------ */
@@ -481,7 +488,7 @@ document.addEventListener("DOMContentLoaded", () => {
     Overlays.closeAll();
   });
 
-  // SELETOR GLOBAL PARA FECHAR MODAIS
+  // SELETOR GLOBAL PARA FECHAR MODAIS DE EXTRAS
   document.querySelectorAll(".extras-close").forEach((b) =>
     b.addEventListener("click", () => Overlays.closeAll())
   );
@@ -575,7 +582,8 @@ document.addEventListener("DOMContentLoaded", () => {
   );
 
   /* ------------------ ⚙️ CONFIGURAÇÕES E CÁLCULOS ------------------ */
-  const DELIVERY_FEE = 6.00; 
+  // DELIVERY_FEE já foi declarado no topo (global)
+
   let couponApplied = (localStorage.getItem("dflCoupon") || "").toUpperCase();
   let addressValue  = (localStorage.getItem("dflAddress") || "").trim();
 
@@ -587,6 +595,21 @@ document.addEventListener("DOMContentLoaded", () => {
   function _cacheKey(codigo, subtotal){
     const faixa = Math.floor((subtotal || 0) / 5);
     return `${(codigo||"").toUpperCase()}::${faixa}`;
+  }
+
+  // Placeholder: função que você já tem em outro ponto do script/projeto.
+  // Aqui assumimos que existe alguma implementação global.
+  async function carregarConfiguracoesDeRecompensas() {
+    // Esta função deve retornar o array RECOMPENSAS_DATA do Firestore.
+    // Aqui deixamos só um fallback vazio para não quebrar.
+    try {
+      if (!db) return [];
+      const snap = await db.collection("RecompensasConfig").orderBy("limite", "asc").get();
+      return snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    } catch (e) {
+      console.warn("Erro ao carregar configurações de recompensas:", e);
+      return [];
+    }
   }
 
   async function validarCupomFirestore(codigo, subtotal) {
@@ -612,30 +635,30 @@ document.addEventListener("DOMContentLoaded", () => {
       if (snapGeral.exists) {
         data = snapGeral.data();
       } else {
-          const recompensaEncontrada = RECOMPENSAS_DATA.find(r => r.valor === code && r.tipo === 'cupom');
+        const recompensaEncontrada = RECOMPENSAS_DATA.find(r => r.valor === code && r.tipo === 'cupom');
+        
+        if (userId && recompensaEncontrada) {
+          const snapPessoal = await db.collection("CuponsUsuarios").doc(userId).get();
+          const pessoalData = snapPessoal.data();
           
-          if (userId && recompensaEncontrada) {
-              const snapPessoal = await db.collection("CuponsUsuarios").doc(userId).get();
-              const pessoalData = snapPessoal.data();
-              
-              if (snapPessoal.exists && pessoalData?.cupom === code && !pessoalData?.usado) {
-                  data = {
-                    tipo: pessoalData.tipo, 
-                    valor: pessoalData.valor,
-                    ativo: true, 
-                    expiraEm: pessoalData.expiraEm 
-                  };
-                  isPersonalizado = true;
-              } else if (snapPessoal.exists && pessoalData?.usado) {
-                  return { ...invalido, mensagem: "Este cupom já foi utilizado." };
-              } else {
-                  return { ...invalido, mensagem: "Cupom inválido ou não liberado." };
-              }
+          if (snapPessoal.exists && pessoalData?.cupom === code && !pessoalData?.usado) {
+            data = {
+              tipo: pessoalData.tipo, 
+              valor: pessoalData.valor,
+              ativo: true, 
+              expiraEm: pessoalData.expiraEm 
+            };
+            isPersonalizado = true;
+          } else if (snapPessoal.exists && pessoalData?.usado) {
+            return { ...invalido, mensagem: "Este cupom já foi utilizado." };
           } else {
-              const res = { ...invalido, mensagem: "Cupom inválido." };
-              _cupomCache[key] = { ate: now + 30000, res }; 
-              return res;
+            return { ...invalido, mensagem: "Cupom inválido ou não liberado." };
           }
+        } else {
+          const res = { ...invalido, mensagem: "Cupom inválido." };
+          _cupomCache[key] = { ate: now + 30000, res }; 
+          return res;
+        }
       }
       
       if (!data.ativo) {
@@ -676,12 +699,12 @@ document.addEventListener("DOMContentLoaded", () => {
       }
 
       const res = { 
-          valido:true, 
-          discount, 
-          freeShipping, 
-          label, 
-          mensagem:"Cupom aplicado com sucesso!",
-          isPersonalizado: isPersonalizado
+        valido:true, 
+        discount, 
+        freeShipping, 
+        label, 
+        mensagem:"Cupom aplicado com sucesso!",
+        isPersonalizado: isPersonalizado
       };
       _cupomCache[key] = { ate: now + 30000, res };
       return res;
@@ -693,7 +716,7 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   /* --- FUNÇÃO FRETE DINÂMICO (FASE v5.1 - FIREBASE + CACHE) --- */
-  let deliveryFeesCache = null; // Cache global para as taxas de frete
+  // deliveryFeesCache já foi declarado no topo (global)
 
   async function getDynamicDeliveryFee(localidade) {
     const DELIVERY_FEE_DEFAULT = 10.00; // Frete padrão caso tudo falhe
@@ -702,40 +725,40 @@ document.addEventListener("DOMContentLoaded", () => {
     // 1. Determinar o ID do documento (Normalizar Patos de Minas)
     const localidadeClean = localidade ? localidade.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim() : '';
     if (localidadeClean.includes('patos de minas')) {
-        localidadeTaxaId = 'patos-de-minas'; 
+      localidadeTaxaId = 'patos-de-minas'; 
     }
 
     // 2. Checar e carregar o cache do Firestore (se necessário)
     if (!deliveryFeesCache) {
-        console.warn("FW: Buscando Taxas de Frete no Firestore (Primeiro acesso).");
-        try {
-            if (!db) throw new Error("Firestore not initialized for fee lookup."); // Blindagem
-            const snap = await db.collection("TaxasDeEntrega").get();
-            deliveryFeesCache = {}; // Inicializa o cache
-            
-            snap.forEach(doc => {
-                // Lê o campo 'valor' ou 'taxa'
-                deliveryFeesCache[doc.id] = Number(doc.data().valor || doc.data().taxa || DELIVERY_FEE_DEFAULT); 
-            });
+      console.warn("FW: Buscando Taxas de Frete no Firestore (Primeiro acesso).");
+      try {
+        if (!db) throw new Error("Firestore not initialized for fee lookup."); // Blindagem
+        const snap = await db.collection("TaxasDeEntrega").get();
+        deliveryFeesCache = {}; // Inicializa o cache
+        
+        snap.forEach(doc => {
+          // Lê o campo 'valor' ou 'taxa'
+          deliveryFeesCache[doc.id] = Number(doc.data().valor || doc.data().taxa || DELIVERY_FEE_DEFAULT); 
+        });
 
-        } catch (e) {
-            console.warn("FW: Erro crítico ao ler Taxas de Entrega. Usando Fallback R$10,00.");
-            return DELIVERY_FEE_DEFAULT;
-        }
+      } catch (e) {
+        console.warn("FW: Erro crítico ao ler Taxas de Entrega. Usando Fallback R$10,00.");
+        return DELIVERY_FEE_DEFAULT;
+      }
     }
 
     // 3. Retornar a taxa correta do cache (ou o fallback de segurança)
     let taxa = deliveryFeesCache[localidadeTaxaId];
 
     if (taxa === undefined) {
-        taxa = deliveryFeesCache['fallback'] || DELIVERY_FEE_DEFAULT;
-        console.warn(`FW: Cidade não mapeada (${localidade}). Usando taxa de fallback R$${taxa.toFixed(2)}.`);
+      taxa = deliveryFeesCache['fallback'] || DELIVERY_FEE_DEFAULT;
+      console.warn(`FW: Cidade não mapeada (${localidade}). Usando taxa de fallback R$${taxa.toFixed(2)}.`);
     }
 
     // 4. Garantir que o retorno seja um número válido
     if (isNaN(taxa) || taxa < 0) {
-        console.warn("FW: Taxa inválida do Firestore/Cache. Usando R$10,00.");
-        return DELIVERY_FEE_DEFAULT;
+      console.warn("FW: Taxa inválida do Firestore/Cache. Usando R$10,00.");
+      return DELIVERY_FEE_DEFAULT;
     }
     
     return taxa;
@@ -746,7 +769,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const subtotal = getCartSubtotal();
     const d = await validarCupomFirestore(couponApplied, subtotal); 
     
-    // V5.0: Leitura Segura de Input
+    // Leitura segura de input
     const cepInput = document.getElementById('cep-input');
     const cepValue = cepInput ? cepInput.value.trim().replace(/\D/g, '') : '';
     const isRetirarLocal = document.getElementById('retirar-local')?.checked;
@@ -754,22 +777,22 @@ document.addEventListener("DOMContentLoaded", () => {
     let deliveryFee = DELIVERY_FEE; // Inicia com o valor padrão R$6.00
 
     if (isRetirarLocal) {
-        deliveryFee = 0; // Taxa zero se for retirar no local
+      deliveryFee = 0; // Taxa zero se for retirar no local
     } else if (cepInput && cepValue.length === 8) {
-        // Pega a localidade para cálculo de frete
-        const enderecoAuto = document.getElementById('endereco-auto');
-        const enderecoAutoValue = enderecoAuto ? enderecoAuto.value.trim() : '';
-        // A localidade é extraída do campo preenchido pelo ViaCEP
-        const localidadeMatch = enderecoAutoValue.match(/\((.*?)\/.*?\)/);
-        const localidade = localidadeMatch ? localidadeMatch[1] : '';
+      // Pega a localidade para cálculo de frete
+      const enderecoAuto = document.getElementById('endereco-auto');
+      const enderecoAutoValue = enderecoAuto ? enderecoAuto.value.trim() : '';
+      // A localidade é extraída do campo preenchido pelo ViaCEP
+      const localidadeMatch = enderecoAutoValue.match(/\((.*?)\/.*?\)/);
+      const localidade = localidadeMatch ? localidadeMatch[1] : '';
 
-        // V5.1: Usa a lógica do frete dinâmico (ASSÍNCRONA)
-        try {
-            deliveryFee = await getDynamicDeliveryFee(localidade); 
-        } catch(e) {
-            console.error("Erro ao calcular frete dinâmico:", e);
-            deliveryFee = DELIVERY_FEE; // Fallback para o frete padrão hardcoded
-        }
+      // V5.1: Usa a lógica do frete dinâmico (ASSÍNCRONA)
+      try {
+        deliveryFee = await getDynamicDeliveryFee(localidade); 
+      } catch(e) {
+        console.error("Erro ao calcular frete dinâmico:", e);
+        deliveryFee = DELIVERY_FEE; // Fallback para o frete padrão hardcoded
+      }
     }
 
     const delivery = d.freeShipping ? 0 : deliveryFee;
@@ -796,34 +819,34 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Funções auxiliares para liberar/bloquear campos e atualizar o estilo
     const toggleAddressState = (isDisabled) => {
-        if(enderecoAuto) enderecoAuto.disabled = isDisabled;
-        if(numeroInput) numeroInput.disabled = isDisabled;
-        if(complementoInput) complementoInput.disabled = isDisabled;
-        if(retirarLocal) retirarLocal.disabled = isDisabled;
-        document.querySelector('.frete-container')?.setAttribute('aria-disabled', isDisabled ? 'true' : 'false');
+      if(enderecoAuto) enderecoAuto.disabled = isDisabled;
+      if(numeroInput) numeroInput.disabled = isDisabled;
+      if(complementoInput) complementoInput.disabled = isDisabled;
+      if(retirarLocal) retirarLocal.disabled = isDisabled;
+      document.querySelector('.frete-container')?.setAttribute('aria-disabled', isDisabled ? 'true' : 'false');
     };
 
     const updateStatus = (msg, color) => {
-        if (freteContainer) freteContainer.querySelector('h4').innerHTML = `🚚 Entrega: <span style="color:${color}">${msg}</span>`;
+      if (freteContainer) freteContainer.querySelector('h4').innerHTML = `🚚 Entrega: <span style="color:${color}">${msg}</span>`;
     };
 
     const clearAndEnableManual = (msg) => {
-        if (enderecoAuto) enderecoAuto.value = msg;
-        if (numeroInput) numeroInput.value = '';
-        if (complementoInput) complementoInput.value = '';
-        
-        // FASE 2: Habilita edição manual dos campos
-        toggleAddressState(false); 
-        if (enderecoAuto) enderecoAuto.disabled = false; // Permite edição manual da Rua/Endereço
-        if (numeroInput) numeroInput.disabled = false;
-        if (complementoInput) complementoInput.disabled = false;
-        if (retirarLocal) retirarLocal.disabled = false;
-        document.querySelector('.frete-container')?.setAttribute('aria-disabled', 'false');
-        updateStatus('Erro/Manual', 'var(--danger)');
-        
-        if (manualFallback) manualFallback.value = ''; // Limpa o fallback
-        renderMiniCart(); // Atualiza o frete para o padrão
-        popupAdd("CEP não encontrado. Verifique e tente novamente."); // Tratamento de CEP inválido/não encontrado
+      if (enderecoAuto) enderecoAuto.value = msg;
+      if (numeroInput) numeroInput.value = '';
+      if (complementoInput) complementoInput.value = '';
+      
+      // Habilita edição manual dos campos
+      toggleAddressState(false); 
+      if (enderecoAuto) enderecoAuto.disabled = false; // Permite edição manual da Rua/Endereço
+      if (numeroInput) numeroInput.disabled = false;
+      if (complementoInput) complementoInput.disabled = false;
+      if (retirarLocal) retirarLocal.disabled = false;
+      document.querySelector('.frete-container')?.setAttribute('aria-disabled', 'false');
+      updateStatus('Erro/Manual', 'var(--danger)');
+      
+      if (manualFallback) manualFallback.value = ''; // Limpa o fallback
+      renderMiniCart(); // Atualiza o frete para o padrão
+      popupAdd("CEP não encontrado. Verifique e tente novamente."); 
     };
     
     // Bloqueia campos estruturados e indica busca
@@ -831,33 +854,30 @@ document.addEventListener("DOMContentLoaded", () => {
     updateStatus('Buscando endereço...', 'var(--botao)');
 
     try {
-        const response = await fetch(`https://viacep.com.br/ws/${cep}/json/`);
-        const data = await response.json();
+      const response = await fetch(`https://viacep.com.br/ws/${cep}/json/`);
+      const data = await response.json();
 
-        if (data.erro || !response.ok) {
-            clearAndEnableManual('CEP não encontrado ou inválido. Preencha manualmente.');
-        } else {
-            // FASE 2: Preenchimento dos campos
-            const localidadeCompleta = `${data.localidade || 'Cidade não definida'}/${data.uf || 'UF'}`;
-            // FASE 2: Monta a rua, bairro, cidade e estado no campo endereco-auto
-            enderecoAuto.value = `${data.logradouro || 'Rua não definida'} - ${data.bairro || 'Bairro não definido'} (${localidadeCompleta})`;
-            
-            // FASE 2: Libera o campo Número e Complemento e foca no Número.
-            toggleAddressState(false);
-            if (enderecoAuto) enderecoAuto.disabled = true; // Mantém a rua/bairro travada após a busca
-            if (numeroInput) numeroInput.focus(); 
-            
-            updateStatus('Endereço encontrado!', 'var(--success)');
-            
-            // Recálculo do Frete
-            renderMiniCart(); 
-        }
+      if (data.erro || !response.ok) {
+        clearAndEnableManual('CEP não encontrado ou inválido. Preencha manualmente.');
+      } else {
+        const localidadeCompleta = `${data.localidade || 'Cidade não definida'}/${data.uf || 'UF'}`;
+        enderecoAuto.value = `${data.logradouro || 'Rua não definida'} - ${data.bairro || 'Bairro não definido'} (${localidadeCompleta})`;
+        
+        // Libera Número/Complemento e foca no Número
+        toggleAddressState(false);
+        if (enderecoAuto) enderecoAuto.disabled = true; 
+        if (numeroInput) numeroInput.focus(); 
+        
+        updateStatus('Endereço encontrado!', 'var(--success)');
+        
+        // Recalcula frete
+        renderMiniCart(); 
+      }
 
     } catch (error) {
-        // FASE 3.1: Tratamento de Timeouts ou erros de rede
-        console.error("ViaCEP Error:", error);
-        popupAdd("Erro ao consultar CEP. Tente novamente ou preencha o manual.");
-        clearAndEnableManual('Erro na consulta. Preencha manualmente.');
+      console.error("ViaCEP Error:", error);
+      popupAdd("Erro ao consultar CEP. Tente novamente ou preencha o manual.");
+      clearAndEnableManual('Erro na consulta. Preencha manualmente.');
     }
   } // FIM buscarCEP
   // ----------------------------------------------------
@@ -865,8 +885,8 @@ document.addEventListener("DOMContentLoaded", () => {
   async function fecharPedido() {
     // 1. BLINDAGEM CRÍTICA: Carrinho Vazio
     if (cart.length === 0) {
-        popupAdd("Seu carrinho está vazio. Adicione algum item primeiro.");
-        return;
+      popupAdd("Seu carrinho está vazio. Adicione algum item primeiro.");
+      return;
     }
     if (!currentUser) {
       alert("Faça login para enviar o pedido!");
@@ -884,38 +904,34 @@ document.addEventListener("DOMContentLoaded", () => {
     const isRetirarLocal = document.getElementById('retirar-local')?.checked;
     const cepInput = document.getElementById('cep-input');
     
-    // V5.1: Leitura segura dos valores
+    // Leitura segura dos valores
     const ruaBairroValue = autoRuaBairro ? autoRuaBairro.value.trim() : '';
     const numeroValue = autoNumero ? autoNumero.value.trim() : '';
     const compValue = autoComp ? autoComp.value.trim() : '';
     const cepValue = cepInput ? cepInput.value.trim().replace(/\D/g, '') : '';
     const manualAddrValue = manualFallback ? manualFallback.value.trim() : '';
     
-    // 1. Tenta validar o modo ViaCEP (Campos estruturados)
+    // 1. ViaCEP (campos estruturados)
     if (ruaBairroValue && numeroValue) {
-        // Monta a string no formato legível para o WhatsApp/DB (Endereço completo)
-        finalAddressString = `${ruaBairroValue}, N° ${numeroValue}`;
-        if (compValue) finalAddressString += `, Comp: ${compValue}`;
-        if (cepValue.length === 8) finalAddressString += ` | CEP: ${cepValue}`;
+      finalAddressString = `${ruaBairroValue}, N° ${numeroValue}`;
+      if (compValue) finalAddressString += `, Comp: ${compValue}`;
+      if (cepValue.length === 8) finalAddressString += ` | CEP: ${cepValue}`;
     }
     
-    // 2. Tenta ler o modo manual (Fallback)
+    // 2. Modo manual (fallback)
     if (!finalAddressString && manualAddrValue && manualAddrValue.length > 10) {
-        finalAddressString = manualAddrValue;
+      finalAddressString = manualAddrValue;
     } 
 
     // 3. Checagem de Falha OU Retirada no Local
     if (isRetirarLocal) {
-        finalAddressString = "CLIENTE IRÁ RETIRAR NO LOCAL"; // Retirada não precisa de endereço
+      finalAddressString = "CLIENTE IRÁ RETIRAR NO LOCAL"; 
     } else if (!finalAddressString) {
-        // Mensagem amigável de erro
-        popupAdd("Confere pra gente: CEP, endereço e número precisam estar preenchidos ou marque ‘Retirar no Local’ 😉");
-        return; // VALIDAÇÃO HÍBRIDA NON-BLOCKING
+      popupAdd("Confere pra gente: CEP, endereço e número precisam estar preenchidos ou marque ‘Retirar no Local’ 😉");
+      return;
     }
     
-    // --- USAR finalAddressString como o endereço salvo ---
     const addr = finalAddressString;
-
 
     const { subtotal, delivery, discount, total, cupomInfo } = await calcTotals();
 
@@ -932,9 +948,9 @@ document.addEventListener("DOMContentLoaded", () => {
       desconto: Number(discount.toFixed(2)),
       cupom: couponApplied || "",
       total: Number(total.toFixed(2)),
-      endereco: addr, // <--- CAMPO AGORA USADO (HÍBRIDO)
+      endereco: addr,
       data: new Date().toISOString(),
-      tipoEntrega: isRetirarLocal ? "retirada" : "delivery", // Novo campo para o DB
+      tipoEntrega: isRetirarLocal ? "retirada" : "delivery",
       cep: cepValue.length === 8 ? cepValue : null,
       
       thumb: 'imagens/padrao.jpg' 
@@ -946,31 +962,31 @@ document.addEventListener("DOMContentLoaded", () => {
       const usuarioRef = db.collection("Usuarios").doc(userId);
       
       if (cupomInfo.isPersonalizado && couponApplied) {
-          const cupomUserRef = db.collection("CuponsUsuarios").doc(userId);
-          batch.update(cupomUserRef, {
-              usado: true,
-              dataUso: firebase.firestore.FieldValue.serverTimestamp(),
-              pedidoId: 'PENDENTE' 
-          });
+        const cupomUserRef = db.collection("CuponsUsuarios").doc(userId);
+        batch.update(cupomUserRef, {
+          usado: true,
+          dataUso: firebase.firestore.FieldValue.serverTimestamp(),
+          pedidoId: 'PENDENTE' 
+        });
       }
 
       const pedidoRef = db.collection("Pedidos").doc();
       batch.set(pedidoRef, pedido);
       
       batch.set(usuarioRef, {
-          email: currentUser.email,
-          pedidosFeitos: firebase.firestore.FieldValue.increment(1) 
+        email: currentUser.email,
+        pedidosFeitos: firebase.firestore.FieldValue.increment(1) 
       }, { merge: true }); 
       
       await batch.commit();
 
       if (cupomInfo.isPersonalizado && couponApplied) {
-          await db.collection("CuponsUsuarios").doc(userId).update({
-              pedidoId: pedidoRef.id
-          });
+        await db.collection("CuponsUsuarios").doc(userId).update({
+          pedidoId: pedidoRef.id
+        });
       }
 
-      // --- LÓGICA DE RECOMPENSA (Mantida) ---
+      // --- LÓGICA DE RECOMPENSA ---
       const RECOMPENSAS_DATA = await carregarConfiguracoesDeRecompensas();
       const doc = await usuarioRef.get();
       const data = doc.data() || { pedidosFeitos: 0, recompensaNivel: 0 };
@@ -978,46 +994,48 @@ document.addEventListener("DOMContentLoaded", () => {
       const nivelAtual = data.recompensaNivel;
       
       const recompensaAtingida = RECOMPENSAS_DATA.find(r => 
-          r.limite === feitos && (r.limite / (RECOMPENSAS_DATA[0]?.limite || 1)) > nivelAtual
+        r.limite === feitos && (r.limite / (RECOMPENSAS_DATA[0]?.limite || 1)) > nivelAtual
       );
       
       if (recompensaAtingida) {
-          const primeiroLimite = RECOMPENSAS_DATA[0]?.limite || 1;
-          const novoNivel = recompensaAtingida.limite / primeiroLimite; 
-          
-          const itemLiberado = {
-              cupom: recompensaAtingida.valor,
-              tipo: recompensaAtingida.tipo,
-              valor: recompensaAtingida.valor, 
-              liberadoEm: firebase.firestore.FieldValue.serverTimestamp(),
-              usado: false,
-              pedidoLiberacao: pedidoRef.id,
-              titulo: recompensaAtingida.titulo || `Recompensa Nível ${novoNivel}`
-          };
-          
-          await usuarioRef.update({
-              recompensaNivel: novoNivel,
-              ultimaRecompensa: recompensaAtingida.id
-          });
-          
-          if (recompensaAtingida.tipo === 'cupom') {
-               await db.collection("CuponsUsuarios").doc(userId).set(itemLiberado, { merge: true });
-          }
+        const primeiroLimite = RECOMPENSAS_DATA[0]?.limite || 1;
+        const novoNivel = recompensaAtingida.limite / primeiroLimite; 
+        
+        const itemLiberado = {
+          cupom: recompensaAtingida.valor,
+          tipo: recompensaAtingida.tipo,
+          valor: recompensaAtingida.valor, 
+          liberadoEm: firebase.firestore.FieldValue.serverTimestamp(),
+          usado: false,
+          pedidoLiberacao: pedidoRef.id,
+          titulo: recompensaAtingida.titulo || `Recompensa Nível ${novoNivel}`
+        };
+        
+        await usuarioRef.update({
+          recompensaNivel: novoNivel,
+          ultimaRecompensa: recompensaAtingida.id
+        });
+        
+        if (recompensaAtingida.tipo === 'cupom') {
+          await db.collection("CuponsUsuarios").doc(userId).set(itemLiberado, { merge: true });
+        }
 
-          await db.collection("Usuarios").doc(userId)
-                  .collection("RecompensasRecebidas").add(itemLiberado);
+        await db.collection("Usuarios").doc(userId)
+          .collection("RecompensasRecebidas").add(itemLiberado);
 
-          // POPUP
-          const nomeNivel = String(recompensaAtingida.titulo || recompensaAtingida.valor || '');
-          const msg = `🎉 Parabéns! Você alcançou o nível ${nomeNivel} ${getTierIcon(nomeNivel)} e ganhou o cupom: ${recompensaAtingida.valor}`;
-          mostrarPopupRecompensa(msg);
-          
-          configuracoesRecompensa = null; 
-          _cupomCache = {}; 
+        const nomeNivel = String(recompensaAtingida.titulo || recompensaAtingida.valor || '');
+        const msg = `🎉 Parabéns! Você alcançou o nível ${nomeNivel} ${getTierIcon(nomeNivel)} e ganhou o cupom: ${recompensaAtingida.valor}`;
+        mostrarPopupRecompensa(msg);
+        
+        configuracoesRecompensa = null; 
+        _cupomCache = {}; 
       }
       
       popupAdd("Pedido salvo ✅");
-      try { sound.currentTime = 0; sound.play(); } catch (_) {}
+      try { 
+        sound.currentTime = 0; 
+        sound.play();            // 🔊 Som APENAS na finalização
+      } catch (_) {}
 
       const linhas = [
         "🍔 *Pedido DFL*",
@@ -1048,9 +1066,8 @@ document.addEventListener("DOMContentLoaded", () => {
       alert(`Ocorreu um erro ao finalizar seu pedido. Detalhe: ${err.message}`);
     }
   }
-  renderMiniCart();
-  
-/* ------------------ 📦 MEUS PEDIDOS PREMIUM ------------------ */
+
+  /* ------------------ 📦 MEUS PEDIDOS PREMIUM ------------------ */
 
   el.pedidosBtn?.addEventListener("click", () => {
     if (!currentUser) {
@@ -1093,11 +1110,15 @@ document.addEventListener("DOMContentLoaded", () => {
     el.pedidosLista.innerHTML = pedidos.map(p => {
       const thumbUrl = p.thumb || 'imagens/padrao.jpg';
       const dataFormatada = p.data
-          ? new Date(p.data?.seconds * 1000 || p.data).toLocaleString("pt-BR", {
-              day: "2-digit", month: "2-digit", year: "numeric",
-              hour: "2-digit", minute: "2-digit",
-            })
-          : "—";
+        ? new Date(p.data?.seconds * 1000 || p.data).toLocaleString("pt-BR", {
+            day: "2-digit", month: "2-digit", year: "numeric",
+            hour: "2-digit", minute: "2-digit",
+          })
+        : "—";
+
+      const itensArray = Array.isArray(p.itens) ? p.itens : String(p.itens || "")
+        .split("\n")
+        .filter(Boolean);
 
       const podeRepetir = Array.isArray(p.itensObj) && p.itensObj.length > 0;
       
@@ -1107,7 +1128,7 @@ document.addEventListener("DOMContentLoaded", () => {
           <h4>📅 ${dataFormatada}</h4>
           <p class="pedido-info">Total: ${money(p.total)}</p>
           <div class="pedido-itens">
-            ${(p.itens || []).map(i => `• ${i}`).join('<br>')}
+            ${itensArray.map(i => `• ${i}`).join('<br>')}
           </div>
           <button 
             class="repetir-btn" 
@@ -1126,6 +1147,8 @@ document.addEventListener("DOMContentLoaded", () => {
       e.target.disabled = true;
       e.target.textContent = "Carregando...";
       await repetirPedido(idPedido);
+      e.target.textContent = "🔁 Repetir Pedido";
+      e.target.disabled = false;
     }
   });
 
@@ -1166,11 +1189,10 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
-/* =========================================================
-   🎁 MINHAS RECOMPENSAS (ATUALIZADO V5.0: HIERARQUIA)
-========================================================= */
-async function carregarRecompensas(userId) {
-    
+  /* =========================================================
+     🎁 MINHAS RECOMPENSAS (ATUALIZADO V5.0: HIERARQUIA)
+  ========================================================= */
+  async function carregarRecompensas(userId) {
     inicializarFirebase();
     if (!isFirebaseInitialized) return;
 
@@ -1189,217 +1211,214 @@ async function carregarRecompensas(userId) {
     const RECOMPENSAS_DATA = await carregarConfiguracoesDeRecompensas();
 
     if (RECOMPENSAS_DATA.length === 0) {
-        progressoMsg.textContent = 'Erro ao carregar metas.';
-        el.recompensasLista.innerHTML = '<p style="text-align:center;color:red;">Sistema de fidelidade offline.</p>';
-        return; 
+      progressoMsg.textContent = 'Erro ao carregar metas.';
+      el.recompensasLista.innerHTML = '<p style="text-align:center;color:red;">Sistema de fidelidade offline.</p>';
+      return; 
     }
     
     const metaPrimeiroNivel = RECOMPENSAS_DATA[0]?.limite || 1; 
 
     db.collection('Usuarios').doc(userId).onSnapshot(async doc => {
-        
-        el.recompensasLista.innerHTML = ''; 
-        if(el.historicoLista) el.historicoLista.innerHTML = ''; 
+      el.recompensasLista.innerHTML = ''; 
+      if(el.historicoLista) el.historicoLista.innerHTML = ''; 
 
-        const data = doc.data() || { pedidosFeitos: 0, recompensaNivel: 0 };
-        const feitos = data.pedidosFeitos;
-        const nivelAtual = data.recompensaNivel;
+      const data = doc.data() || { pedidosFeitos: 0, recompensaNivel: 0 };
+      const feitos = data.pedidosFeitos;
+      const nivelAtual = data.recompensaNivel;
+      
+      let cupomStatus = null;
+      const recompensaAtual = RECOMPENSAS_DATA.find(r => r.limite === nivelAtual * metaPrimeiroNivel);
+      
+      if (recompensaAtual && recompensaAtual.tipo === 'cupom') {
+        const cupomSnap = await db.collection('CuponsUsuarios').doc(userId).get();
+        cupomStatus = cupomSnap.exists ? cupomSnap.data() : null;
+      }
+
+      const proximaRecompensa = RECOMPENSAS_DATA.find(r => r.limite > feitos);
+      const metaParaExibir = proximaRecompensa ? proximaRecompensa.limite : feitos; 
+      const metaBaseCalculo = proximaRecompensa ? proximaRecompensa.limite : metaPrimeiroNivel;
+
+      const porcentagem = proximaRecompensa === undefined ? 100 : Math.min(100, (feitos / metaBaseCalculo) * 100);
+          
+      contadorValor.textContent = feitos;
+      const elMeta = document.querySelector('.progress-container span:last-child');
+      if(elMeta) elMeta.textContent = metaParaExibir;
+
+      progressoBar.style.width = `${porcentagem}%`;
+
+      if (proximaRecompensa) {
+        const faltam = proximaRecompensa.limite - feitos;
+        const tituloRecompensa = proximaRecompensa.titulo || proximaRecompensa.valor;
+        progressoMsg.textContent = `Faltam apenas ${faltam} pedidos para ganhar: ${tituloRecompensa}!`;
         
-        let cupomStatus = null;
-        const recompensaAtual = RECOMPENSAS_DATA.find(r => r.limite === nivelAtual * metaPrimeiroNivel);
+        progressoBar.style.background = 'linear-gradient(90deg, #ffb300, #ff7043)'; 
+        progressoBar.parentElement.parentElement.removeAttribute('data-status');
         
-        if (recompensaAtual && recompensaAtual.tipo === 'cupom') {
-            const cupomSnap = await db.collection('CuponsUsuarios').doc(userId).get();
-            cupomStatus = cupomSnap.exists ? cupomSnap.data() : null;
+        const recompensasObtidas = RECOMPENSAS_DATA.filter(r => r.limite <= feitos);
+        exibirRecompensas(feitos, recompensasObtidas, cupomStatus, RECOMPENSAS_DATA); 
+
+        if (recompensasObtidas.length === 0) {
+          el.recompensasLista.innerHTML = `<p style="text-align:center;color:#666;margin-top:20px;">Faça ${faltam} pedidos para desbloquear a primeira recompensa.</p>`;
         }
 
-        const proximaRecompensa = RECOMPENSAS_DATA.find(r => r.limite > feitos);
-        const metaParaExibir = proximaRecompensa ? proximaRecompensa.limite : feitos; 
-        const metaBaseCalculo = proximaRecompensa ? proximaRecompensa.limite : metaPrimeiroNivel;
-
-        const porcentagem = proximaRecompensa === undefined ? 100 : Math.min(100, (feitos / metaBaseCalculo) * 100);
-            
-        contadorValor.textContent = feitos;
-        const elMeta = document.querySelector('.progress-container span:last-child');
-        if(elMeta) elMeta.textContent = metaParaExibir;
-
-        progressoBar.style.width = `${porcentagem}%`;
-
-        if (proximaRecompensa) {
-            const faltam = proximaRecompensa.limite - feitos;
-            const tituloRecompensa = proximaRecompensa.titulo || proximaRecompensa.valor;
-            progressoMsg.textContent = `Faltam apenas ${faltam} pedidos para ganhar: ${tituloRecompensa}!`;
-            
-            progressoBar.style.background = 'linear-gradient(90deg, #ffb300, #ff7043)'; 
-            progressoBar.parentElement.parentElement.removeAttribute('data-status');
-            
-            const recompensasObtidas = RECOMPENSAS_DATA.filter(r => r.limite <= feitos);
-            exibirRecompensas(feitos, recompensasObtidas, cupomStatus, RECOMPENSAS_DATA); 
-
-            if (recompensasObtidas.length === 0) {
-                 el.recompensasLista.innerHTML = `<p style="text-align:center;color:#666;margin-top:20px;">Faça ${faltam} pedidos para desbloquear a primeira recompensa.</p>`;
-            }
-
-        } else {
-            progressoMsg.textContent = '🎉 Parabéns! Você completou todas as metas!';
-            progressoBar.style.background = 'linear-gradient(90deg, #4caf50, #43a047)'; 
-            progressoBar.parentElement.parentElement.setAttribute('data-status', 'complete');
-            exibirRecompensas(feitos, RECOMPENSAS_DATA, cupomStatus, RECOMPENSAS_DATA);
-        }
-        
-        await carregarHistoricoRecompensas(userId);
-        
+      } else {
+        progressoMsg.textContent = '🎉 Parabéns! Você completou todas as metas!';
+        progressoBar.style.background = 'linear-gradient(90deg, #4caf50, #43a047)'; 
+        progressoBar.parentElement.parentElement.setAttribute('data-status', 'complete');
+        exibirRecompensas(feitos, RECOMPENSAS_DATA, cupomStatus, RECOMPENSAS_DATA);
+      }
+      
+      await carregarHistoricoRecompensas(userId);
+      
     }, error => {
-        console.error("Erro ao ler contador:", error);
-        progressoMsg.textContent = 'Erro ao ler progresso.';
+      console.error("Erro ao ler contador:", error);
+      progressoMsg.textContent = 'Erro ao ler progresso.';
     });
-}
+  }
 
-function exibirRecompensas(pedidosFeitos, recompensasDisponiveis, cupomStatus, RECOMPENSAS_DATA) {
+  function exibirRecompensas(pedidosFeitos, recompensasDisponiveis, cupomStatus) {
     if (!el.recompensasLista) return;
     
     const recompensasHtml = recompensasDisponiveis.map(r => {
-        const liberada = pedidosFeitos >= r.limite;
-        const cupomJaUsado = cupomStatus?.usado === true && cupomStatus?.cupom === r.valor;
-        // Anti-Crash: Converte o título para string
-        const tituloRaw = String(r.titulo || r.valor || '');
-        const titulo = r.titulo || `Recompensa: ${r.valor}`;
-        
-        let acaoBtn = '';
-        let statusTag = '';
-        let cardStyle = '';
-        let codigoCupom = r.valor ? r.valor : 'BRINDE';
-        
-        // --- ÍCONES EMOJI (ANTI-CRASH + HIERARQUIA COMPLETA) ---
-        let icon = '🎁';
-        const tituloLower = tituloRaw.toLowerCase(); 
-        
-        // Array de palavras-chave para ativar o getTierIcon
-        const niveisEspeciais = [
-            'ouro', 'platina', 'diamante', 
-            'safira', 'rubi', 'esmeralda', 
-            'elite', 'supremo', 'lenda', 'mítico', 'mitico'
-        ];
-        
-        // Verifica se alguma palavra-chave está no título
-        if (niveisEspeciais.some(n => tituloLower.includes(n))) {
-             icon = getTierIcon(tituloRaw);
-        } else if (r.tipo === 'cupom') {
-             icon = '🎟️';
-        } else if (r.tipo === 'brinde') {
-             icon = '🍔';
-        }
-        
-        if (cupomJaUsado) {
-             statusTag = '<span style="color:#d32f2f;font-weight:bold;">(USADO)</span>';
-             acaoBtn = `<button disabled style="background:#ccc;color:#666;border:none;border-radius:6px;padding:8px;cursor:not-allowed;margin-top:5px;">Usado</button>`;
-             cardStyle = 'opacity: 0.7;';
-        }
-        else if (liberada && r.tipo === 'cupom') {
-            statusTag = '<span style="color:#4caf50;font-weight:bold;">(DISPONÍVEL)</span>';
-            acaoBtn = `<button class="recompensa-aplicar-btn" data-cupom="${codigoCupom}" style="background:#4caf50;color:#fff;border:none;border-radius:6px;padding:8px 12px;cursor:pointer;font-weight:600;margin-top:5px;">Aplicar Cupom 🏷️</button>`;
-        } else if (liberada && r.tipo === 'brinde') {
-             statusTag = '<span style="color:#1976D2;font-weight:bold;">(LIBERADO)</span>';
-             acaoBtn = `<button disabled style="background:#1976D2;color:#fff;border:none;border-radius:6px;padding:8px;cursor:default;margin-top:5px;">Peça no Balcão</button>`;
-        }
-        
-        // --- EXIBIÇÃO DE CUPOM ---
-        const mostrarCupom = (r.valor && !String(r.valor).includes('Nível'));
-        
-        return `
-            <div class="recompensa-card" style="display:flex;align-items:center;padding:15px;border-radius:10px;margin-bottom:10px;background:#f9f9f9;box-shadow:0 2px 5px rgba(0,0,0,0.1);${cardStyle}">
-                <div style="font-size:2rem; margin-right:15px;">${icon}</div>
-                <div style="flex:1;">
-                    <h4 style="margin:0 0 5px 0;color:#333;">${titulo} ${statusTag}</h4>
-                    <p style="margin:0;font-size:0.9rem;color:#666;">Meta: ${r.limite} Pedidos</p>
-                    ${mostrarCupom ? `<b style="color:#4caf50;display:block;margin-top:4px;">CUPOM: ${codigoCupom}</b>` : ''}
-                </div>
-                <div>${acaoBtn}</div>
-            </div>
-        `;
+      const liberada = pedidosFeitos >= r.limite;
+      const cupomJaUsado = cupomStatus?.usado === true && cupomStatus?.cupom === r.valor;
+      const tituloRaw = String(r.titulo || r.valor || '');
+      const titulo = r.titulo || `Recompensa: ${r.valor}`;
+      
+      let acaoBtn = '';
+      let statusTag = '';
+      let cardStyle = '';
+      let codigoCupom = r.valor ? r.valor : 'BRINDE';
+      
+      let icon = '🎁';
+      const tituloLower = tituloRaw.toLowerCase(); 
+      
+      const niveisEspeciais = [
+        'ouro', 'platina', 'diamante', 
+        'safira', 'rubi', 'esmeralda', 
+        'elite', 'supremo', 'lenda', 'mítico', 'mitico'
+      ];
+      
+      if (niveisEspeciais.some(n => tituloLower.includes(n))) {
+        icon = getTierIcon(tituloRaw);
+      } else if (r.tipo === 'cupom') {
+        icon = '🎟️';
+      } else if (r.tipo === 'brinde') {
+        icon = '🍔';
+      }
+      
+      if (cupomJaUsado) {
+        statusTag = '<span style="color:#d32f2f;font-weight:bold;">(USADO)</span>';
+        acaoBtn = `<button disabled style="background:#ccc;color:#666;border:none;border-radius:6px;padding:8px;cursor:not-allowed;margin-top:5px;">Usado</button>`;
+        cardStyle = 'opacity: 0.7;';
+      }
+      else if (liberada && r.tipo === 'cupom') {
+        statusTag = '<span style="color:#4caf50;font-weight:bold;">(DISPONÍVEL)</span>';
+        acaoBtn = `<button class="recompensa-aplicar-btn" data-cupom="${codigoCupom}" style="background:#4caf50;color:#fff;border:none;border-radius:6px;padding:8px 12px;cursor:pointer;font-weight:600;margin-top:5px;">Aplicar Cupom 🏷️</button>`;
+      } else if (liberada && r.tipo === 'brinde') {
+        statusTag = '<span style="color:#1976D2;font-weight:bold;">(LIBERADO)</span>';
+        acaoBtn = `<button disabled style="background:#1976D2;color:#fff;border:none;border-radius:6px;padding:8px;cursor:default;margin-top:5px;">Peça no Balcão</button>`;
+      }
+      
+      const mostrarCupom = (r.valor && !String(r.valor).includes('Nível'));
+      
+      return `
+        <div class="recompensa-card" style="display:flex;align-items:center;padding:15px;border-radius:10px;margin-bottom:10px;background:#f9f9f9;box-shadow:0 2px 5px rgba(0,0,0,0.1);${cardStyle}">
+          <div style="font-size:2rem; margin-right:15px;">${icon}</div>
+          <div style="flex:1;">
+            <h4 style="margin:0 0 5px 0;color:#333;">${titulo} ${statusTag}</h4>
+            <p style="margin:0;font-size:0.9rem;color:#666;">Meta: ${r.limite} Pedidos</p>
+            ${mostrarCupom ? `<b style="color:#4caf50;display:block;margin-top:4px;">CUPOM: ${codigoCupom}</b>` : ''}
+          </div>
+          <div>${acaoBtn}</div>
+        </div>
+      `;
     }).join('');
     
     el.recompensasLista.innerHTML = recompensasHtml;
     
     el.recompensasLista.querySelectorAll('.recompensa-aplicar-btn').forEach(btn => {
-        btn.addEventListener('click', (e) => {
-            const codigo = e.currentTarget.dataset.cupom;
-            if (codigo) {
-                couponApplied = codigo;
-                localStorage.setItem("dflCoupon", codigo);
-                const couponInput = document.getElementById("coupon-input");
-                if(couponInput) couponInput.value = codigo;
-                renderMiniCart(); 
-                Overlays.closeAll();
-                popupAdd(`Cupom ${codigo} aplicado! ✅`);
-                Overlays.open(el.miniCart); 
-            }
-        });
+      btn.addEventListener('click', (e) => {
+        const codigo = e.currentTarget.dataset.cupom;
+        if (codigo) {
+          couponApplied = codigo;
+          localStorage.setItem("dflCoupon", codigo);
+          const couponInput = document.getElementById("coupon-input");
+          if(couponInput) couponInput.value = codigo;
+          renderMiniCart(); 
+          Overlays.closeAll();
+          popupAdd(`Cupom ${codigo} aplicado! ✅`);
+          Overlays.open(el.miniCart); 
+        }
+      });
     });
-}
+  }
 
-async function carregarHistoricoRecompensas(userId) {
+  async function carregarHistoricoRecompensas(userId) {
     if (!el.historicoLista) return;
     el.historicoLista.innerHTML = `<p style="text-align:center;color:#999;">Carregando...</p>`;
     try {
-        const q = db.collection("Usuarios").doc(userId)
-                    .collection("RecompensasRecebidas")
-                    .orderBy("liberadoEm", "desc");
-        const snapshot = await q.get();
+      const q = db.collection("Usuarios").doc(userId)
+        .collection("RecompensasRecebidas")
+        .orderBy("liberadoEm", "desc");
+      const snapshot = await q.get();
 
-        if (snapshot.empty) {
-            el.historicoLista.innerHTML = `<p style="text-align:center;color:#999;">Nenhuma recompensa no histórico.</p>`;
-            return;
+      if (snapshot.empty) {
+        el.historicoLista.innerHTML = `<p style="text-align:center;color:#999;">Nenhuma recompensa no histórico.</p>`;
+        return;
+      }
+
+      const logs = snapshot.docs.map(doc => doc.data());
+      
+      const historicoHtml = logs.map(log => {
+        const dataRecebimento = log.liberadoEm
+          ? (log.liberadoEm.toDate().toLocaleDateString('pt-BR'))
+          : "—";
+
+        let valorStr = (log.tipo === 'cupom') ? `${log.valor} OFF` : log.valor;
+        if (log.tipo === 'value') valorStr = money(log.valor);
+        
+        const tituloRaw = String(log.titulo || '');
+        const tituloLower = tituloRaw.toLowerCase();
+        
+        const niveisEspeciais = [
+          'ouro', 'platina', 'diamante', 
+          'safira', 'rubi', 'esmeralda', 
+          'elite', 'supremo', 'lenda', 'mítico', 'mitico'
+        ];
+
+        let icon = '🎁';
+        if (niveisEspeciais.some(n => tituloLower.includes(n))) {
+          icon = getTierIcon(tituloRaw);
+        } else if (log.tipo === 'cupom') {
+          icon = '🎟️';
         }
 
-        const logs = snapshot.docs.map(doc => doc.data());
-        
-        const historicoHtml = logs.map(log => {
-            const dataRecebimento = log.liberadoEm
-                ? (log.liberadoEm.toDate().toLocaleDateString('pt-BR'))
-                : "—";
-
-            let valorStr = (log.tipo === 'cupom') ? `${log.valor} OFF` : log.valor;
-            if (log.tipo === 'value') valorStr = money(log.valor);
-            
-            // --- ÍCONES EMOJI (HIERARQUIA NO HISTÓRICO) ---
-            const tituloRaw = String(log.titulo || '');
-            const tituloLower = tituloRaw.toLowerCase();
-            
-            const niveisEspeciais = [
-                'ouro', 'platina', 'diamante', 
-                'safira', 'rubi', 'esmeralda', 
-                'elite', 'supremo', 'lenda', 'mítico', 'mitico'
-            ];
-
-            let icon = '🎁';
-            if (niveisEspeciais.some(n => tituloLower.includes(n))) {
-                 icon = getTierIcon(tituloRaw);
-            } else if (log.tipo === 'cupom') {
-                 icon = '🎟️';
-            }
-
-            return `
-                <div class="historico-card" style="display:flex; padding: 10px 0; border-bottom: 1px dashed #eee; align-items: center; justify-content: space-between;">
-                    <div style="flex:1;">
-                        <p style="font-weight:600; margin:0; color:#333;">${icon} ${log.titulo || log.valor}</p>
-                        <small style="color:#999;">${dataRecebimento}</small>
-                    </div>
-                    <span style="font-weight:700; color:#4caf50;">Recebido</span>
-                </div>
-            `;
-        }).join('');
-        
-        el.historicoLista.innerHTML = historicoHtml.replace(/border-bottom: 1px dashed #eee;<\/div>$/, 'border-bottom: none;</div>');
+        return `
+          <div class="historico-card" style="display:flex; padding: 10px 0; border-bottom: 1px dashed #eee; align-items: center; justify-content: space-between;">
+            <div style="flex:1;">
+              <p style="font-weight:600; margin:0; color:#333;">${icon} ${log.titulo || log.valor}</p>
+              <small style="color:#999;">${dataRecebimento}</small>
+            </div>
+            <span style="font-weight:700; color:#4caf50;">Recebido</span>
+          </div>
+        `;
+      }).join('');
+      
+      el.historicoLista.innerHTML = historicoHtml.replace(/border-bottom: 1px dashed #eee;<\/div>$/, 'border-bottom: none;</div>');
 
     } catch (err) {
-        console.error("Erro histórico:", err);
-        el.historicoLista.innerHTML = `<p style="text-align:center;color:red;">Erro.</p>`;
+      console.error("Erro histórico:", err);
+      el.historicoLista.innerHTML = `<p style="text-align:center;color:red;">Erro.</p>`;
     }
-}
+  }
 
   el.recompensasBtn?.addEventListener("click", () => {
-    if (!currentUser) { alert("Faça login!"); Overlays.open(el.loginModal); return; }
+    if (!currentUser) { 
+      alert("Faça login!"); 
+      Overlays.open(el.loginModal); 
+      return; 
+    }
     inicializarFirebase(); 
     Overlays.open(el.recompensasPanel);
     carregarRecompensas(currentUser.uid); 
@@ -1410,21 +1429,31 @@ async function carregarHistoricoRecompensas(userId) {
   /* =========================================================
      📊 ADMIN DASHBOARD (MANTIDO)
   ========================================================= */
-  const ADMINS = [ "alefejohsefe@gmail.com", "kalebhstanley650@gmail.com", "contato@dafamilialanches.com.br" ];
-  function isAdmin(user) { return user && user.email && ADMINS.includes(user.email.toLowerCase()); }
+  const ADMINS = [ 
+    "alefejohsefe@gmail.com", 
+    "kalebhstanley650@gmail.com", 
+    "contato@dafamilialanches.com.br" 
+  ];
+  function isAdmin(user) { 
+    return user && user.email && ADMINS.includes(user.email.toLowerCase()); 
+  }
 
   let chartPedidos = null;
   let chartProdutos = null;
 
   function ensureChartJS(cb) {
     if (window.Chart) return cb();
-    const s = document.createElement("script"); s.src = "https://cdn.jsdelivr.net/npm/chart.js"; s.onload = cb; document.head.appendChild(s);
+    const s = document.createElement("script"); 
+    s.src = "https://cdn.jsdelivr.net/npm/chart.js"; 
+    s.onload = cb; 
+    document.head.appendChild(s);
   }
 
   function createDashboard() {
     if (document.getElementById("admin-dashboard")) return;
     const div = document.createElement("div");
-    div.id = "admin-dashboard"; div.className = "modal";
+    div.id = "admin-dashboard"; 
+    div.className = "modal";
     div.innerHTML = `
       <div class="modal-content" style="max-width:1000px;width:95%;height:85vh;overflow:auto;background:#fff;border-radius:12px;">
         <div class="modal-head" style="display:flex;justify-content:space-between;align-items:center;padding:10px 14px;">
@@ -1438,19 +1467,30 @@ async function carregarHistoricoRecompensas(userId) {
           </div>
           <div style="margin-bottom:10px;">
             <label>Período: </label>
-            <select id="filter-period"><option value="7">7 dias</option><option value="30">30 dias</option><option value="all">Todos</option></select>
+            <select id="filter-period">
+              <option value="7">7 dias</option>
+              <option value="30">30 dias</option>
+              <option value="all">Todos</option>
+            </select>
           </div>
           <canvas id="chart-pedidos" style="width:100%;height:240px;"></canvas>
           <canvas id="chart-produtos" style="width:100%;height:240px;margin-top:16px;"></canvas>
-          <div style="margin-top:12px;"><button id="export-csv" style="background:#4caf50;color:#fff;border:none;border-radius:8px;padding:10px;">Exportar CSV</button></div>
+          <div style="margin-top:12px;">
+            <button id="export-csv" style="background:#4caf50;color:#fff;border:none;border-radius:8px;padding:10px;">Exportar CSV</button>
+          </div>
         </div>
       </div>`;
     document.body.appendChild(div);
     div.querySelector(".dashboard-close").addEventListener("click", () => Overlays.closeAll());
     
-    // Estilos básicos do dash
     document.querySelectorAll(".cardBox").forEach(c => {
-      Object.assign(c.style, { flex: "1", minWidth: "200px", padding: "12px", background: "#f9f9f9", borderRadius: "8px" });
+      Object.assign(c.style, { 
+        flex: "1", 
+        minWidth: "200px", 
+        padding: "12px", 
+        background: "#f9f9f9", 
+        borderRadius: "8px" 
+      });
     });
   }
 
@@ -1461,7 +1501,7 @@ async function carregarHistoricoRecompensas(userId) {
         createDashboard();
         ensureChartJS(() => carregarRelatorios("7"));
         Overlays.open(document.getElementById("admin-dashboard"));
-      });
+      }, { once: true });
     }
   }
 
@@ -1475,9 +1515,13 @@ async function carregarHistoricoRecompensas(userId) {
     const produtosContagem = {};
 
     pedidos.forEach(p => {
-      const dia = (p.data?.toDate?.() || new Date(p.data)).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' });
+      const dataBase = p.data?.toDate ? p.data.toDate() : new Date(p.data);
+      const dia = dataBase.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' });
       pedidosPorDia[dia] = (pedidosPorDia[dia] || 0) + 1;
-      (p.itens || []).forEach(itemStr => {
+      const itensArray = Array.isArray(p.itens) ? p.itens : String(p.itens || "")
+        .split("\n")
+        .filter(Boolean);
+      itensArray.forEach(itemStr => {
         const nome = itemStr.split(' x')[0];
         if (nome) produtosContagem[nome] = (produtosContagem[nome] || 0) + 1;
       });
@@ -1489,45 +1533,59 @@ async function carregarHistoricoRecompensas(userId) {
     if (chartPedidos) chartPedidos.destroy();
     chartPedidos = new Chart(ctxPedidos, {
       type: 'line',
-      data: { labels: labelsPedidos, datasets: [{ label: 'Pedidos', data: dataPedidos, borderColor: '#ffb300', tension: 0.1 }] }
+      data: { 
+        labels: labelsPedidos, 
+        datasets: [{ label: 'Pedidos', data: dataPedidos, borderColor: '#ffb300', tension: 0.1 }] 
+      }
     });
 
     const produtosOrdenados = Object.entries(produtosContagem).sort(([, a], [, b]) => b - a).slice(0, 10);
     if (chartProdutos) chartProdutos.destroy();
     chartProdutos = new Chart(ctxProdutos, {
       type: 'bar',
-      data: { labels: produtosOrdenados.map(p=>p[0]), datasets: [{ label: 'Mais Vendidos', data: produtosOrdenados.map(p=>p[1]), backgroundColor: '#ff7043' }] },
+      data: { 
+        labels: produtosOrdenados.map(p=>p[0]), 
+        datasets: [{ label: 'Mais Vendidos', data: produtosOrdenados.map(p=>p[1]), backgroundColor: '#ff7043' }] 
+      },
       options: { indexAxis: 'y' }
     });
   }
 
   function carregarRelatorios(periodo = "7") {
     const start = new Date();
-    if (periodo !== "all") start.setDate(start.getDate() - Number(periodo)); else start.setTime(0);
+    if (periodo !== "all") start.setDate(start.getDate() - Number(periodo)); 
+    else start.setTime(0);
 
     db.collection("Pedidos").orderBy("data", "desc").get().then(snap => {
-        const pedidos = snap.docs.map(d => ({ ...d.data(), id: d.id, data: d.data().data.toDate ? d.data().data.toDate() : new Date(d.data().data) }));
-        const filtrados = pedidos.filter(p => p.data >= start);
-        
-        gerarResumoECharts(filtrados);
-        
-        const totalVendido = filtrados.reduce((s, p) => s + (p.total || 0), 0);
-        document.getElementById("card-total").textContent = `Total: ${money(totalVendido)}`;
-        document.getElementById("card-pedidos").textContent = `Pedidos: ${filtrados.length}`;
-        document.getElementById("card-ticket").textContent = `Ticket: ${money(filtrados.length ? totalVendido/filtrados.length : 0)}`;
+      const pedidos = snap.docs.map(d => {
+        const raw = d.data().data || d.data().dataPedido || d.data().dataCadastro;
+        const dataConvertida = raw?.toDate ? raw.toDate() : new Date(raw || d.data().data);
+        return { ...d.data(), id: d.id, data: dataConvertida };
+      });
+      const filtrados = pedidos.filter(p => p.data >= start);
+      
+      gerarResumoECharts(filtrados);
+      
+      const totalVendido = filtrados.reduce((s, p) => s + (p.total || 0), 0);
+      document.getElementById("card-total").textContent = `Total: ${money(totalVendido)}`;
+      document.getElementById("card-pedidos").textContent = `Pedidos: ${filtrados.length}`;
+      document.getElementById("card-ticket").textContent = `Ticket: ${money(filtrados.length ? totalVendido/filtrados.length : 0)}`;
 
-        document.getElementById("export-csv").onclick = () => {
-            const csv = "Data;Nome;Total\n" + filtrados.map(p => `${p.data.toLocaleString()};${p.nome};${p.total}`).join("\n");
-            const blob = new Blob([`\uFEFF${csv}`], { type: 'text/csv;charset=utf-8;' });
-            const link = document.createElement('a');
-            link.href = URL.createObjectURL(blob);
-            link.download = "pedidos.csv";
-            link.click();
-        };
+      document.getElementById("export-csv").onclick = () => {
+        const csv = "Data;Nome;Total\n" + filtrados.map(p => `${p.data.toLocaleString()};${p.nome};${p.total}`).join("\n");
+        const blob = new Blob([`\uFEFF${csv}`], { type: 'text/csv;charset=utf-8;' });
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = "pedidos.csv";
+        link.click();
+      };
     });
     
     const sel = document.getElementById("filter-period");
-    if(sel && !sel._bound) { sel.addEventListener("change", e => carregarRelatorios("7")); sel._bound = true; }
+    if(sel && !sel._bound) { 
+      sel.addEventListener("change", e => carregarRelatorios(e.target.value || "7")); 
+      sel._bound = true; 
+    }
   }
 
   /* ------------------ 🍪 COOKIES ------------------ */
@@ -1542,16 +1600,20 @@ async function carregarHistoricoRecompensas(userId) {
     });
   }
   
-  console.log("%c🔥 DFL v4.3 — Ícones + Segurança Anti-Crash", "background:#4CAF50;color:#fff;padding:5px;border-radius:5px;");
-
+  console.log("%c🔥 DFL v5.1.2 — Frete Dinâmico + Recompensas + Anti-Crash", "background:#4CAF50;color:#fff;padding:5px;border-radius:5px;");
 }); 
 
-/* FECHAR MODAIS GLOBAL */
+/* FECHAR MODAIS GLOBAL (SEGUNDA CAMADA) */
 document.addEventListener('DOMContentLoaded', () => {
   document.querySelectorAll('.modal').forEach(m => m.addEventListener('click', e => {
-    if (e.target.classList.contains('modal')) { m.classList.remove('show'); document.getElementById('cart-backdrop').classList.remove('active'); }
+    if (e.target.classList.contains('modal')) { 
+      m.classList.remove('show'); 
+      document.getElementById('cart-backdrop')?.classList.remove('active'); 
+      document.body.classList.remove('no-scroll');
+    }
   }));
   document.getElementById('cart-backdrop')?.addEventListener('click', () => {
-    document.querySelectorAll('.active').forEach(e => e.classList.remove('active'));
+    document.querySelectorAll('.active, .show').forEach(e => e.classList.remove('active', 'show'));
+    document.body.classList.remove('no-scroll');
   });
 });
