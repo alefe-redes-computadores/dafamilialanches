@@ -2,6 +2,7 @@
    🚀 DFL v5.1.2 — CORREÇÃO CRÍTICA FINAL (PARTE 1)
    - SYNTAXERROR RESOLVIDO: Removida a declaração duplicada de DELIVERY_FEE e cache.
    - REFERENCEERROR RESOLVIDO: Adicionada função carregarConfiguracoesDeRecompensas.
+   - REFERENCEERROR CRÍTICO RESOLVIDO: Removida a chamada para enhanceMiniCartUI().
    - FRETE DINÂMICO FIREBASE (v5.1).
 ========================================================= */
 
@@ -215,7 +216,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }, 6000);
   }
 
-  /* --- FUNÇÃO PARA CARREGAR CONFIGURAÇÕES DE RECOMPENSAS (CORRIGIDO) --- */
+  /* --- FUNÇÃO PARA CARREGAR CONFIGURAÇÕES DE RECOMPENSAS (CRÍTICA) --- */
   let configuracoesRecompensa = null;
   async function carregarConfiguracoesDeRecompensas() {
     if (configuracoesRecompensa) return configuracoesRecompensa;
@@ -305,7 +306,7 @@ document.addEventListener("DOMContentLoaded", () => {
   renderMiniCart = function () {
     _renderMiniCartOrig(); 
     bindMiniCartButtons(); 
-    enhanceMiniCartUI();
+    // enhanceMiniCartUI(); // <<<< CORREÇÃO FINAL APLICADA: Linha removida!
   };
 //... o restante do código continua na Parte 2
 // ... continuação da Parte 1
@@ -1033,7 +1034,7 @@ async function getDynamicDeliveryFee(localidade) {
                   .collection("RecompensasRecebidas").add(itemLiberado);
 
           // POPUP
-          const nomeNivel = String(recompensaAtingida.titulo || recompensaAtingida.valor || '');
+          const nomeNivel = String(recompensaAtingida.titulo || recompensaAcomp.valor || '');
           const msg = `🎉 Parabéns! Você alcançou o nível ${nomeNivel} ${getTierIcon(nomeNivel)} e ganhou o cupom: ${recompensaAtingida.valor}`;
           mostrarPopupRecompensa(msg);
           
