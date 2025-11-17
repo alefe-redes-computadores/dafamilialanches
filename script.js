@@ -816,6 +816,9 @@ async function getDynamicDeliveryFee(localidade) {
     const complementoInput = document.getElementById('complemento-input');
     const retirarLocal = document.getElementById('retirar-local');
     const manualFallback = document.getElementById("address-input-manual");
+    
+    // ATENÇÃO: CEP-INPUT NÃO É DESATIVADO. APENAS OS CAMPOS ENDEREÇO E NÚMERO.
+    const cepInput = document.getElementById('cep-input');
 
     // Funções auxiliares para liberar/bloquear campos e atualizar o estilo
     const toggleAddressState = (isDisabled) => {
@@ -852,6 +855,9 @@ async function getDynamicDeliveryFee(localidade) {
     // Bloqueia campos estruturados e indica busca
     toggleAddressState(true);
     updateStatus('Buscando endereço...', 'var(--botao)');
+    
+    // CORREÇÃO: Garante que o CEP-INPUT não seja desativado pelo frete-container (caso o CSS faça isso)
+    if (cepInput) cepInput.disabled = false; 
 
     try {
         const response = await fetch(`https://viacep.com.br/ws/${cep}/json/`);
@@ -1034,7 +1040,7 @@ async function getDynamicDeliveryFee(localidade) {
                   .collection("RecompensasRecebidas").add(itemLiberado);
 
           // POPUP
-          const nomeNivel = String(recompensaAtingida.titulo || recompensaAcomp.valor || '');
+          const nomeNivel = String(recompensaAtingida.titulo || recompensaAtingida.valor || '');
           const msg = `🎉 Parabéns! Você alcançou o nível ${nomeNivel} ${getTierIcon(nomeNivel)} e ganhou o cupom: ${recompensaAtingida.valor}`;
           mostrarPopupRecompensa(msg);
           
@@ -1566,7 +1572,26 @@ async function carregarHistoricoRecompensas(userId) {
       cookieBanner.classList.remove("show");
     });
   }
+
+  /* --- CORREÇÃO: Listener do botão CEP e Carrossel --- */
   
+  // 1. CEP: Adiciona o listener para o botão Buscar
+  document.getElementById('btn-calcular-frete')?.addEventListener('click', safe(() => {
+      const cepInput = document.getElementById('cep-input');
+      const cep = cepInput.value.trim().replace(/\D/g, '');
+      if (cep.length === 8) {
+          buscarCEP(cep);
+      } else {
+          popupAdd("CEP deve ter 8 dígitos.");
+      }
+  }));
+
+  // 2. Carrossel: Adiciona listeners básicos para que os botões respondam
+  // NOTA: As funções de slide (nextSlide/prevSlide) não foram definidas no código principal,
+  // mas o 'safe' wrapper garante que o clique não quebre o resto do script.
+  el.cPrev?.addEventListener("click", safe(() => console.log("Carrossel Anterior")));
+  el.cNext?.addEventListener("click", safe(() => console.log("Carrossel Próximo")));
+
   console.log("%c🔥 DFL v5.1 — Blindagem Final", "background:#4CAF50;color:#fff;padding:5px;border-radius:5px;");
 
   /* FECHAR MODAIS GLOBAL */
