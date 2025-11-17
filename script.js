@@ -109,7 +109,7 @@ document.addEventListener("DOMContentLoaded", () => {
             <h4 class="recompensas-header-secundario">📜 Histórico de Recompensas</h4>
             <div id="historicoRecompensas" style="margin-top: 15px;"></div>
         `;
-        el.historicoLista = document.getElementById("historicoReimagens");
+        el.historicoLista = document.getElementById("historicoRecompensas");
      }
   }
 
@@ -1182,7 +1182,7 @@ document.addEventListener("DOMContentLoaded", () => {
       
       if (cupomInfo.isPersonalizado && couponApplied) {
           const cupomUserRef = db.collection("CuponsUsuarios").doc(userId);
-          batch.update(cupumUserRef, {
+          batch.update(cupomUserRef, {
               usado: true,
               dataUso: firebase.firestore.FieldValue.serverTimestamp(),
               pedidoId: 'PENDENTE' 
@@ -1342,7 +1342,16 @@ document.addEventListener("DOMContentLoaded", () => {
           <h4>📅 ${dataFormatada}</h4>
           <p class="pedido-info">Total: ${money(p.total)}</p>
           <div class="pedido-itens">
-            ${(p.itens || []).map(i => `• ${i}`).join('<br>')}
+            ${
+              (Array.isArray(p.itensObj) && p.itensObj.length)
+                ? p.itensObj.map(i => `• ${i.nome} x${i.qtd}`).join('<br>')
+                : String(p.itens || '')
+                    .split('\n')
+                    .map(i => i.trim())
+                    .filter(Boolean)
+                    .map(i => `• ${i}`)
+                    .join('<br>')
+            }
           </div>
           <button 
             class="repetir-btn" 
