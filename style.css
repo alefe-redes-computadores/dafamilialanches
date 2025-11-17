@@ -242,9 +242,19 @@ section h2 { font-size: 1.3rem; text-align: center; margin-bottom: 15px; color: 
 .btn-calcular-frete:hover { background: #ffc107; transform: scale(1.02); }
 
 
-/* Regra para desabilitar o container inteiro (já existe no index.html) */
+/* CORREÇÃO CRÍTICA (Antiga Regra de 366-369) */
+/* Regra para desabilitar o container inteiro (JÁ EXISTIA NO INDEX.HTML) */
 .frete-container[aria-disabled="true"] {
-  opacity: .7;
+  /* REMOVIDO: pointer-events: none; <--- ISSO BLOQUEAVA O CEP */ 
+  opacity: 1; /* Garante visibilidade total */
+}
+
+/* NOVO: Aplica o estilo de desabilitado SÓ nos inputs de endereço travados */
+.frete-container[aria-disabled="true"] input[type="text"]:not(#cep-input) {
+  /* Mantém os inputs de endereço preenchidos travados e desabilitados visualmente */
+  background-color: var(--bg2) !important; 
+  color: #888 !important;
+  cursor: not-allowed !important;
   pointer-events: none;
 }
 
