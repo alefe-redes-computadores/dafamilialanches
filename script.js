@@ -1,6 +1,7 @@
 /* =========================================================
    🚀 DFL v5.1.2 — CORREÇÃO CRÍTICA FINAL (PARTE 1)
    - SYNTAXERROR RESOLVIDO: Removida a declaração duplicada de DELIVERY_FEE e cache.
+   - REFERENCEERROR RESOLVIDO: Adicionada função carregarConfiguracoesDeRecompensas.
    - FRETE DINÂMICO FIREBASE (v5.1).
 ========================================================= */
 
@@ -214,6 +215,29 @@ document.addEventListener("DOMContentLoaded", () => {
     }, 6000);
   }
 
+  /* --- FUNÇÃO PARA CARREGAR CONFIGURAÇÕES DE RECOMPENSAS (CORRIGIDO) --- */
+  let configuracoesRecompensa = null;
+  async function carregarConfiguracoesDeRecompensas() {
+    if (configuracoesRecompensa) return configuracoesRecompensa;
+    
+    inicializarFirebase();
+    if (!db) return []; 
+
+    try {
+        const snap = await db.collection("Configuracao").doc("Recompensas").get();
+        if (snap.exists && snap.data().recompensas) {
+            configuracoesRecompensa = snap.data().recompensas
+                .filter(r => r.limite > 0)
+                .sort((a, b) => a.limite - b.limite);
+            return configuracoesRecompensa;
+        }
+    } catch (e) {
+        console.error("Erro ao carregar metas de recompensa:", e);
+    }
+    return [];
+  }
+  // --------------------------------------------------------------------
+
 /* ------------------ 🛒 MINI-CARRINHO ------------------ */
   function renderMiniCart() {
     if (!el.miniList) return; 
@@ -283,6 +307,8 @@ document.addEventListener("DOMContentLoaded", () => {
     bindMiniCartButtons(); 
     enhanceMiniCartUI();
   };
+//... o restante do código continua na Parte 2
+// ... continuação da Parte 1
 
   /* ------------------ 🔥 FIREBASE ------------------ */
   const firebaseConfig = {
@@ -689,7 +715,7 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   /* --- FUNÇÃO FRETE DINÂMICO (FASE v5.1 - FIREBASE + CACHE) --- */
-  // let deliveryFeesCache = null; // <<< LINHA REMOVIDA (ESTAVA CAUSANDO O SYNTAX ERROR DE REDECLARAÇÃO)
+  // let deliveryFeesCache = null; // <<< LINHA REMOVIDA (CORREÇÃO DE SYNTAX ERROR)
 async function getDynamicDeliveryFee(localidade) {
     const DELIVERY_FEE_DEFAULT = 10.00; // Frete padrão caso tudo falhe
     let localidadeTaxaId = 'fallback'; 
@@ -857,6 +883,9 @@ async function getDynamicDeliveryFee(localidade) {
     }
   } // FIM buscarCEP
   // ----------------------------------------------------
+
+//... o restante do código continua na Parte 3
+// ... continuação da Parte 2
 
   async function fecharPedido() {
     // 1. BLINDAGEM CRÍTICA: Carrinho Vazio
@@ -1082,6 +1111,7 @@ async function getDynamicDeliveryFee(localidade) {
       el.pedidosLista.innerHTML = `<p class="empty-orders" style="color:red;">Erro ao buscar seus pedidos.</p>`;
     }
   }
+
 function exibirPedidos(pedidos) {
     if (!el.pedidosLista) return;
     
