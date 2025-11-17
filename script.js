@@ -689,9 +689,8 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   /* --- FUNÇÃO FRETE DINÂMICO (FASE v5.1 - FIREBASE + CACHE) --- */
-  let deliveryFeesCache = null; // Cache global para as taxas de frete
-
-  async function getDynamicDeliveryFee(localidade) {
+  // let deliveryFeesCache = null; // <<< LINHA REMOVIDA (ESTAVA CAUSANDO O SYNTAX ERROR DE REDECLARAÇÃO)
+async function getDynamicDeliveryFee(localidade) {
     const DELIVERY_FEE_DEFAULT = 10.00; // Frete padrão caso tudo falhe
     let localidadeTaxaId = 'fallback'; 
 
@@ -1083,8 +1082,7 @@ document.addEventListener("DOMContentLoaded", () => {
       el.pedidosLista.innerHTML = `<p class="empty-orders" style="color:red;">Erro ao buscar seus pedidos.</p>`;
     }
   }
-
-  function exibirPedidos(pedidos) {
+function exibirPedidos(pedidos) {
     if (!el.pedidosLista) return;
     
     el.pedidosLista.innerHTML = pedidos.map(p => {
@@ -1548,4 +1546,7 @@ async function carregarHistoricoRecompensas(userId) {
     document.querySelectorAll('.active, .show').forEach(e => e.classList.remove('active', 'show'));
     document.body.classList.remove('no-scroll');
   });
-}); 
+  
+  // 🔥 CORREÇÃO CRÍTICA: Inicializa o Firebase AQUI no final do DOMContentLoaded (uma única vez).
+  inicializarFirebase();
+}); // FIM document.addEventListener("DOMContentLoaded"
