@@ -1,7 +1,8 @@
 /* =========================================================
-   🚀 DFL v5.2.2 — CORREÇÃO CRÍTICA FINAL: INICIALIZAÇÃO FIREBASE
-   - CORRIGIDO: Erro 'Firebase App already created' (chamadas duplicadas removidas).
-   - Login agora depende apenas da inicialização ÚNICA no final.
+   🚀 DFL v5.2 — INTEGRAÇÃO FINAL: V4.3 ESTÁVEL + VIACEP/FRETE
+   - Funções de UI (Carrossel, Banner, Login) Restauradas do v4.3.
+   - Adicionada Lógica de Busca por CEP (ViaCEP) e Frete Dinâmico (v5.1).
+   - Endereço manual substituído pelo formulário estruturado do HTML.
 ========================================================= */
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -65,7 +66,7 @@ document.addEventListener("DOMContentLoaded", () => {
     extrasList: document.querySelector("#extras-modal .extras-list"),
     extrasConfirm: document.getElementById("extras-confirm"),
     comboModal: document.getElementById("combo-modal"),
-    comboBody: document.querySelector("#combo-modal #combo-body"), // Corrigido o seletor aqui
+    comboBody: document.getElementById("combo-body"),
     comboConfirm: document.getElementById("combo-confirm"),
     loginModal: document.getElementById("login-modal"),
     loginForm: document.getElementById("login-form"),
@@ -404,8 +405,6 @@ document.addEventListener("DOMContentLoaded", () => {
       renderMiniCart();
       Overlays.open(el.miniCart);
   });
-//... o restante do código continua na Parte 2
-// ... continuação da Parte 1
 
   /* ------------------ ➕ ADICIONAIS ------------------ */
   const adicionais = [
@@ -735,6 +734,7 @@ document.addEventListener("DOMContentLoaded", () => {
     return taxa;
   }
   // --- FIM FUNÇÃO FRETE DINÂMICO ---
+// ... continuação da Parte 1
 
   /* --- FUNÇÃO VIA CEP V5.2 (INTEGRAÇÃO) --- */
   async function buscarCEP(cep) {
@@ -852,8 +852,6 @@ document.addEventListener("DOMContentLoaded", () => {
       cupomInfo: d
     };
   }
-//... o restante do código continua na Parte 3
-// ... continuação da Parte 2
 
   async function enhanceMiniCartUI() {
     if (!el.miniFoot) return;
@@ -1078,8 +1076,8 @@ document.addEventListener("DOMContentLoaded", () => {
         inicio.setHours(18, 0, 0); 
 
         let diff = (inicio - agora) / 1000;
-        const faltamH = Math.floor((diff) / 3600); // Uso do diff corrigido aqui
-        const faltamM = Math.floor((diff % 3600) / 60); // Uso do diff corrigido aqui
+        const faltamH = Math.floor(diff / 3600);
+        const faltamM = Math.floor((diff % 3600) / 60);
 
         elMsg.innerHTML = `🔒 Fechado — Abrimos em`;
         elTimer.textContent = `${faltamH}h ${faltamM}min`;
@@ -1107,3 +1105,673 @@ document.addEventListener("DOMContentLoaded", () => {
   setInterval(atualizarTimer, 1000);
 
 //... o restante do código continua na Parte 3
+// ... continuação da Parte 2
+
+  /* =========================================================
+    🔥 FUNÇÃO FECHAR PEDIDO (INTEGRADA COM CEP)
+    =========================================================
+  */
+  async function fecharPedido() {
+    if (!cart.length) return alert("Carrinho vazio!");
+    if (!currentUser) {
+      alert("Faça login para enviar o pedido!");
+      Overlays.open(el.loginModal);
+      return;
+    }
+
+    // NOVOS CAMPOS PARA LEITURA (DO FORMULÁRIO ESTRUTURADO)
+    const cepInput = document.getElementById('cep-input');
+    const autoRuaBairro = document.getElementById("endereco-auto"); 
+    const autoNumero = document.getElementById("numero-input"); 
+    const autoComp = document.getElementById("complemento-input"); 
+    const isRetirarLocal = document.getElementById('retirar-local')?.checked;
+    
+    // Leitura segura dos valores
+    const ruaBairroValue = autoRuaBairro ? autoRuaBairro.value.trim() : '';
+    const numeroValue = autoNumero ? autoNumero.value.trim() : '';
+    const compValue = autoComp ? autoComp.value.trim() : '';
+    const cepValue = cepInput ? cepInput.value.trim().replace(/\D/g, '') : '';
+    
+    let finalAddressString = "";
+
+    // 1. Tenta validar o modo ViaCEP (Campos estruturados)
+    if (ruaBairroValue && numeroValue) {
+        finalAddressString = `${ruaBairroValue}, N° ${numeroValue}`;
+        if (compValue) finalAddressString += `, Comp: ${compValue}`;
+        if (cepValue.length === 8) finalAddressString += ` | CEP: ${cepValue}`;
+    }
+
+    // 2. Checagem de Falha OU Retirada no Local
+    if (isRetirarLocal) {
+        finalAddressString = "CLIENTE IRÁ RETIRAR NO LOCAL"; // Retirada não precisa de endereço
+    } else if (!finalAddressString) {
+        alert("Preencha o CEP, endereço e número, ou marque 'Retirar no Local' para finalizar.");
+        return; 
+    }
+    
+    const addr = finalAddressString;
+
+    const { subtotal, delivery, discount, total, cupomInfo } = await calcTotals();
+
+    const pedido = {
+      usuario: currentUser.email,
+      userId: currentUser.uid,
+      nome: currentUser.displayName || currentUser.email.split("@")[0],
+      
+      itens: cart.map((i) => `• ${i.nome} x${i.qtd}`).join("\n"),
+      itensObj: cart.map(i => ({ nome: i.nome, preco: i.preco, qtd: i.qtd })),
+      
+      subtotal: Number(subtotal.toFixed(2)),
+      entrega: Number(delivery.toFixed(2)),
+      desconto: Number(discount.toFixed(2)),
+      cupom: couponApplied || "",
+      total: Number(total.toFixed(2)),
+      endereco: addr,
+      data: new Date().toISOString(),
+      
+      thumb: 'imagens/padrao.jpg' 
+    };
+
+    try {
+      const batch = db.batch();
+      const userId = currentUser.uid;
+      const usuarioRef = db.collection("Usuarios").doc(userId);
+      
+      if (cupomInfo.isPersonalizado && couponApplied) {
+          const cupomUserRef = db.collection("CuponsUsuarios").doc(userId);
+          batch.update(cupomUserRef, {
+              usado: true,
+              dataUso: firebase.firestore.FieldValue.serverTimestamp(),
+              pedidoId: 'PENDENTE' 
+          });
+      }
+
+      const pedidoRef = db.collection("Pedidos").doc();
+      batch.set(pedidoRef, pedido);
+      
+      batch.set(usuarioRef, {
+          email: currentUser.email,
+          pedidosFeitos: firebase.firestore.FieldValue.increment(1) 
+      }, { merge: true }); 
+      
+      await batch.commit();
+
+      if (cupomInfo.isPersonalizado && couponApplied) {
+          await db.collection("CuponsUsuarios").doc(userId).update({
+              pedidoId: pedidoRef.id
+          });
+      }
+
+      // --- LÓGICA DE RECOMPENSA (Mantida do v4.3) ---
+      const RECOMPENSAS_DATA = await carregarConfiguracoesDeRecompensas();
+      const doc = await usuarioRef.get();
+      const data = doc.data() || { pedidosFeitos: 0, recompensaNivel: 0 };
+      const feitos = data.pedidosFeitos;
+      const nivelAtual = data.recompensaNivel;
+      
+      const recompensaAtingida = RECOMPENSAS_DATA.find(r => 
+          r.limite === feitos && (r.limite / (RECOMPENSAS_DATA[0]?.limite || 1)) > nivelAtual
+      );
+      
+      if (recompensaAtingida) {
+          const primeiroLimite = RECOMPENSAS_DATA[0]?.limite || 1;
+          const novoNivel = recompensaAtingida.limite / primeiroLimite; 
+          
+          const itemLiberado = {
+              cupom: recompensaAtingida.valor,
+              tipo: recompensaAtingida.tipo,
+              valor: recompensaAtingida.valor, 
+              liberadoEm: firebase.firestore.FieldValue.serverTimestamp(),
+              usado: false,
+              pedidoLiberacao: pedidoRef.id,
+              titulo: recompensaAtingida.titulo || `Recompensa Nível ${novoNivel}`
+          };
+          
+          await usuarioRef.update({
+              recompensaNivel: novoNivel,
+              ultimaRecompensa: recompensaAtingida.id
+          });
+          
+          if (recompensaAtingida.tipo === 'cupom') {
+               await db.collection("CuponsUsuarios").doc(userId).set(itemLiberado, { merge: true });
+          }
+
+          await db.collection("Usuarios").doc(userId)
+                  .collection("RecompensasRecebidas").add(itemLiberado);
+
+          // POPUP ATUALIZADO E PROTEGIDO
+          const nomeNivel = String(recompensaAtingida.titulo || recompensaAtingida.valor || '');
+          const msg = `🎉 Parabéns! Você alcançou o nível ${nomeNivel} ${getTierIcon(nomeNivel)} e ganhou o cupom: ${recompensaAtingida.valor}`;
+          mostrarPopupRecompensa(msg);
+          
+          configuracoesRecompensa = null; 
+          _cupomCache = {}; 
+      }
+      
+      popupAdd("Pedido salvo ✅");
+      try { sound.currentTime = 0; sound.play(); } catch (_) {}
+
+      const linhas = [
+        "🍔 *Pedido DFL*",
+        cart.map((i) => `• ${i.nome} x${i.qtd}`).join("\n"),
+        "",
+        `Subtotal: *${money(subtotal)}*`,
+        `Entrega: *${money(delivery)}*${cupomInfo.freeShipping ? " _(Frete Grátis)_" : ""}`,
+        `Desconto${couponApplied ? ` (${couponApplied})` : ""}: *-${money(discount)}*`,
+        `*Total: ${money(total)}*`,
+        "",
+        `🏠 *Endereço:* ${addr}`
+      ].join("\n");
+
+      const texto = encodeURIComponent(linhas);
+      window.open(`https://wa.me/5534997178336?text=${texto}`, "_blank");
+
+      cart = [];
+      couponApplied = ""; 
+      localStorage.removeItem("dflCoupon");
+      const couponInput = document.getElementById("coupon-input");
+      if(couponInput) couponInput.value = "";
+      
+      renderMiniCart();
+      Overlays.closeAll();
+
+    } catch (err) {
+      console.error("Erro ao fechar pedido:", err);
+      alert(`Ocorreu um erro ao finalizar seu pedido. Detalhe: ${err.message}`);
+    }
+  }
+  renderMiniCart();
+  
+/* ------------------ 📦 MEUS PEDIDOS PREMIUM ------------------ */
+
+  el.pedidosBtn?.addEventListener("click", () => {
+    if (!currentUser) {
+      alert("Faça login para ver seus pedidos.");
+      Overlays.open(el.loginModal); 
+      return;
+    }
+    inicializarFirebase(); 
+    Overlays.open(el.pedidosPanel);
+    carregarPedidos(currentUser.uid); 
+  });
+
+  el.pedidosFecharBtn?.addEventListener("click", () => Overlays.closeAll());
+
+  async function carregarPedidos(userId) {
+    if (!el.pedidosLista) return;
+    el.pedidosLista.innerHTML = `<p class="empty-orders">Carregando pedidos...</p>`;
+
+    try {
+      const q = db.collection("Pedidos").where("userId", "==", userId).orderBy("data", "desc");
+      const snapshot = await q.get();
+
+      if (snapshot.empty) {
+        el.pedidosLista.innerHTML = `<p class="empty-orders">Nenhum pedido encontrado 😢</p>`;
+        return;
+      }
+
+      const pedidos = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      exibirPedidos(pedidos);
+
+    } catch (err) {
+      console.error("Erro ao carregar pedidos: ", err);
+      el.pedidosLista.innerHTML = `<p class="empty-orders" style="color:red;">Erro ao buscar seus pedidos.</p>`;
+    }
+  }
+
+  function exibirPedidos(pedidos) {
+    if (!el.pedidosLista) return;
+    
+    el.pedidosLista.innerHTML = pedidos.map(p => {
+      const thumbUrl = p.thumb || 'imagens/padrao.jpg';
+      const dataFormatada = p.data
+          ? new Date(p.data?.seconds * 1000 || p.data).toLocaleString("pt-BR", {
+              day: "2-digit", month: "2-digit", year: "numeric",
+              hour: "2-digit", minute: "2-digit",
+            })
+          : "—";
+
+      const podeRepetir = Array.isArray(p.itensObj) && p.itensObj.length > 0;
+      
+      return `
+        <div class="pedido-card">
+          <div class="pedido-thumb" style="background-image:url('${thumbUrl}');"></div>
+          <h4>📅 ${dataFormatada}</h4>
+          <p class="pedido-info">Total: ${money(p.total)}</p>
+          <div class="pedido-itens">
+            ${(p.itens || []).map(i => `• ${i}`).join('<br>')}
+          </div>
+          <button 
+            class="repetir-btn" 
+            data-id="${p.id}" 
+            ${podeRepetir ? '' : 'disabled style="background:grey;cursor:not-allowed;"'}
+          >
+            🔁 Repetir Pedido
+          </button>
+        </div>`;
+    }).join('');
+  }
+  
+  el.pedidosLista?.addEventListener('click', async (e) => {
+    if (e.target.classList.contains('repetir-btn') && !e.target.disabled) {
+      const idPedido = e.target.dataset.id;
+      e.target.disabled = true;
+      e.target.textContent = "Carregando...";
+      await repetirPedido(idPedido);
+    }
+  });
+
+  async function repetirPedido(idPedido) {
+    try {
+      const docRef = db.collection("Pedidos").doc(idPedido);
+      const doc = await docRef.get();
+
+      if (!doc.exists) return alert("Erro: Pedido antigo não encontrado.");
+
+      const pedido = doc.data();
+      const itensParaRepetir = pedido.itensObj; 
+
+      if (!Array.isArray(itensParaRepetir) || itensParaRepetir.length === 0) {
+        return alert("Não é possível repetir este pedido.");
+      }
+
+      cart = [];
+      itensParaRepetir.forEach(item => {
+        if (item.nome && item.preco > 0 && item.qtd > 0) {
+          cart.push({ nome: item.nome, preco: item.preco, qtd: item.qtd });
+        }
+      });
+      
+      couponApplied = "";
+      localStorage.removeItem("dflCoupon");
+      const couponInput = document.getElementById("coupon-input");
+      if(couponInput) couponInput.value = "";
+
+      popupAdd("Pedido anterior adicionado ao carrinho!");
+      renderMiniCart(); 
+      Overlays.closeAll(); 
+      Overlays.open(el.miniCart); 
+
+    } catch (err) {
+      console.error("Erro ao repetir pedido: ", err);
+      alert("Erro ao processar seu pedido.");
+    }
+  }
+
+/* =========================================================
+   🎁 MINHAS RECOMPENSAS (ANTI-CRASH: DADOS PROTEGIDOS)
+========================================================= */
+// ... (O restante das funções de recompensas, admin, e a chamada final do DOMContentLoaded) ...
+async function carregarRecompensas(userId) {
+    
+    inicializarFirebase();
+    if (!isFirebaseInitialized) return;
+
+    const contadorValor = document.getElementById('contador-valor');
+    const progressoBar = document.getElementById('progresso-bar');
+    const progressoMsg = document.getElementById('progresso-mensagem');
+    
+    if (!contadorValor || !progressoBar || !progressoMsg || !el.recompensasLista) return; 
+
+    contadorValor.textContent = '...';
+    progressoBar.style.width = '0%';
+    progressoMsg.textContent = 'Carregando metas...';
+    el.recompensasLista.innerHTML = ''; 
+    if(el.historicoLista) el.historicoLista.innerHTML = '';
+    
+    const RECOMPENSAS_DATA = await carregarConfiguracoesDeRecompensas();
+
+    if (RECOMPENSAS_DATA.length === 0) {
+        progressoMsg.textContent = 'Erro ao carregar metas.';
+        el.recompensasLista.innerHTML = '<p style="text-align:center;color:red;">Sistema de fidelidade offline.</p>';
+        return; 
+    }
+    
+    const metaPrimeiroNivel = RECOMPENSAS_DATA[0]?.limite || 1; 
+
+    db.collection('Usuarios').doc(userId).onSnapshot(async doc => {
+        
+        el.recompensasLista.innerHTML = ''; 
+        if(el.historicoLista) el.historicoLista.innerHTML = ''; 
+
+        const data = doc.data() || { pedidosFeitos: 0, recompensaNivel: 0 };
+        const feitos = data.pedidosFeitos;
+        const nivelAtual = data.recompensaNivel;
+        
+        let cupomStatus = null;
+        const recompensaAtual = RECOMPENSAS_DATA.find(r => r.limite === nivelAtual * metaPrimeiroNivel);
+        
+        if (recompensaAtual && recompensaAtual.tipo === 'cupom') {
+            const cupomSnap = await db.collection('CuponsUsuarios').doc(userId).get();
+            cupomStatus = cupomSnap.exists ? cupomSnap.data() : null;
+        }
+
+        const proximaRecompensa = RECOMPENSAS_DATA.find(r => r.limite > feitos);
+        const metaParaExibir = proximaRecompensa ? proximaRecompensa.limite : feitos; 
+        const metaBaseCalculo = proximaRecompensa ? proximaRexima.limite : metaPrimeiroNivel;
+
+        const porcentagem = proximaRecompensa === undefined ? 100 : Math.min(100, (feitos / metaBaseCalculo) * 100);
+            
+        contadorValor.textContent = feitos;
+        const elMeta = document.querySelector('.progress-container span:last-child');
+        if(elMeta) elMeta.textContent = metaParaExibir;
+
+        progressoBar.style.width = `${porcentagem}%`;
+
+        if (proximaRecompensa) {
+            const faltam = proximaRecompensa.limite - feitos;
+            const tituloRecompensa = proximaRecompensa.titulo || proximaRecompensa.valor;
+            progressoMsg.textContent = `Faltam apenas ${faltam} pedidos para ganhar: ${tituloRecompensa}!`;
+            
+            progressoBar.style.background = 'linear-gradient(90deg, #ffb300, #ff7043)'; 
+            progressoBar.parentElement.parentElement.removeAttribute('data-status');
+            
+            const recompensasObtidas = RECOMPENSAS_DATA.filter(r => r.limite <= feitos);
+            exibirRecompensas(feitos, recompensasObtidas, cupomStatus, RECOMPENSAS_DATA); 
+
+            if (recompensasObtidas.length === 0) {
+                 el.recompensasLista.innerHTML = `<p style="text-align:center;color:#666;margin-top:20px;">Faça ${faltam} pedidos para desbloquear a primeira recompensa.</p>`;
+            }
+
+        } else {
+            progressoMsg.textContent = '🎉 Parabéns! Você completou todas as metas!';
+            progressoBar.style.background = 'linear-gradient(90deg, #4caf50, #43a047)'; 
+            progressoBar.parentElement.parentElement.setAttribute('data-status', 'complete');
+            exibirRecompensas(feitos, RECOMPENSAS_DATA, cupomStatus, RECOMPENSAS_DATA);
+        }
+        
+        await carregarHistoricoRecompensas(userId);
+        
+    }, error => {
+        console.error("Erro ao ler contador:", error);
+        progressoMsg.textContent = 'Erro ao ler progresso.';
+    });
+}
+
+function exibirRecompensas(pedidosFeitos, recompensasDisponiveis, cupomStatus, RECOMPENSAS_DATA) {
+    if (!el.recompensasLista) return;
+    
+    const recompensasHtml = recompensasDisponiveis.map(r => {
+        const liberada = pedidosFeitos >= r.limite;
+        const cupomJaUsado = cupomStatus?.usado === true && cupomStatus?.cupom === r.valor;
+        // Anti-Crash: Converte o título para string
+        const tituloRaw = String(r.titulo || r.valor || '');
+        const titulo = r.titulo || `Recompensa: ${r.valor}`;
+        
+        let acaoBtn = '';
+        let statusTag = '';
+        let cardStyle = '';
+        let codigoCupom = r.valor ? r.valor : 'BRINDE';
+
+        
+        // --- ÍCONES EMOJI (ANTI-CRASH: DETECÇÃO SEGURA) ---
+        let icon = '🎁';
+        const tituloLower = tituloRaw.toLowerCase(); // Agora seguro porque convertemos pra string antes
+        
+        if (tituloLower.includes('ouro') || tituloLower.includes('platina') || tituloLower.includes('diamante')) {
+             icon = getTierIcon(tituloRaw);
+        } else if (r.tipo === 'cupom') {
+             icon = '🎟️';
+        } else if (r.tipo === 'brinde') {
+             icon = '🍔';
+        }
+        
+        if (cupomJaUsado) {
+             statusTag = '<span style="color:#d32f2f;font-weight:bold;">(USADO)</span>';
+             acaoBtn = `<button disabled style="background:#ccc;color:#666;border:none;border-radius:6px;padding:8px;cursor:not-allowed;margin-top:5px;">Usado</button>`;
+             cardStyle = 'opacity: 0.7;';
+        }
+        else if (liberada && r.tipo === 'cupom') {
+            statusTag = '<span style="color:#4caf50;font-weight:bold;">(DISPONÍVEL)</span>';
+            acaoBtn = `<button class="recompensa-aplicar-btn" data-cupom="${codigoCupom}" style="background:#4caf50;color:#fff;border:none;border-radius:6px;padding:8px 12px;cursor:pointer;font-weight:600;margin-top:5px;">Aplicar Cupom 🏷️</button>`;
+        } else if (liberada && r.tipo === 'brinde') {
+             statusTag = '<span style="color:#1976D2;font-weight:bold;">(LIBERADO)</span>';
+             acaoBtn = `<button disabled style="background:#1976D2;color:#fff;border:none;border-radius:6px;padding:8px;cursor:default;margin-top:5px;">Peça no Balcão</button>`;
+        }
+        
+        // --- EXIBIÇÃO DE CUPOM ---
+        const mostrarCupom = (r.valor && !String(r.valor).includes('Nível'));
+        
+        return `
+            <div class="recompensa-card" style="display:flex;align-items:center;padding:15px;border-radius:10px;margin-bottom:10px;background:#f9f9f9;box-shadow:0 2px 5px rgba(0,0,0,0.1);${cardStyle}">
+                <div style="font-size:2rem; margin-right:15px;">${icon}</div>
+                <div style="flex:1;">
+                    <h4 style="margin:0 0 5px 0;color:#333;">${titulo} ${statusTag}</h4>
+                    <p style="margin:0;font-size:0.9rem;color:#666;">Meta: ${r.limite} Pedidos</p>
+                    ${mostrarCupom ? `<b style="color:#4caf50;display:block;margin-top:4px;">CUPOM: ${codigoCupom}</b>` : ''}
+                </div>
+                <div>${acaoBtn}</div>
+            </div>
+        `;
+    }).join('');
+    
+    el.recompensasLista.innerHTML = recompensasHtml;
+    
+    el.recompensasLista.querySelectorAll('.recompensa-aplicar-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            const codigo = e.currentTarget.dataset.cupom;
+            if (codigo) {
+                couponApplied = codigo;
+                localStorage.setItem("dflCoupon", couponApplied);
+                const couponInput = document.getElementById("coupon-input");
+                if(couponInput) couponInput.value = codigo;
+                renderMiniCart(); 
+                Overlays.closeAll();
+                popupAdd(`Cupom ${codigo} aplicado! ✅`);
+                Overlays.open(el.miniCart); 
+            }
+        });
+    });
+}
+
+async function carregarHistoricoRecompensas(userId) {
+    if (!el.historicoLista) return;
+    el.historicoLista.innerHTML = `<p style="text-align:center;color:#999;">Carregando...</p>`;
+    try {
+        const q = db.collection("Usuarios").doc(userId)
+                    .collection("RecompensasRecebidas")
+                    .orderBy("liberadoEm", "desc");
+        const snapshot = await q.get();
+
+        if (snapshot.empty) {
+            el.historicoLista.innerHTML = `<p style="text-align:center;color:#999;">Nenhuma recompensa no histórico.</p>`;
+            return;
+        }
+
+        const logs = snapshot.docs.map(doc => doc.data());
+        
+        const historicoHtml = logs.map(log => {
+            const dataRecebimento = log.liberadoEm
+                ? (log.liberadoEm.toDate().toLocaleDateString('pt-BR'))
+                : "—";
+
+            let valorStr = (log.tipo === 'cupom') ? `${log.valor} OFF` : log.valor;
+            if (log.tipo === 'value') valorStr = money(log.valor);
+            
+            // --- ANTI-CRASH NO HISTÓRICO TAMBÉM ---
+            const tituloRaw = String(log.titulo || '');
+            const tituloLower = tituloRaw.toLowerCase();
+
+            let icon = '🎁';
+            if (tituloLower.includes('ouro') || tituloLower.includes('platina') || tituloLower.includes('diamante')) {
+                 icon = getTierIcon(tituloRaw);
+            } else if (log.tipo === 'cupom') {
+                 icon = '🎟️';
+            }
+
+            return `
+                <div class="historico-card" style="display:flex; padding: 10px 0; border-bottom: 1px dashed #eee; align-items: center; justify-content: space-between;">
+                    <div style="flex:1;">
+                        <p style="font-weight:600; margin:0; color:#333;">${icon} ${log.titulo || log.valor}</p>
+                        <small style="color:#999;">${dataRecebimento}</small>
+                    </div>
+                    <span style="font-weight:700; color:#4caf50;">Recebido</span>
+                </div>
+            `;
+        }).join('');
+        
+        el.historicoLista.innerHTML = historicoHtml.replace(/border-bottom: 1px dashed #eee;<\/div>$/, 'border-bottom: none;</div>');
+
+    } catch (err) {
+        console.error("Erro histórico:", err);
+        el.historicoLista.innerHTML = `<p style="text-align:center;color:red;">Erro.</p>`;
+    }
+}
+
+  el.recompensasBtn?.addEventListener("click", () => {
+    if (!currentUser) { alert("Faça login!"); Overlays.open(el.loginModal); return; }
+    inicializarFirebase(); 
+    Overlays.open(el.recompensasPanel);
+    carregarRecompensas(currentUser.uid); 
+  });
+
+  el.recompensasFecharBtn?.addEventListener("click", () => Overlays.closeAll());
+
+  /* =========================================================
+     📊 ADMIN DASHBOARD (MANTIDO)
+  ========================================================= */
+  const ADMINS = [ "alefejohsefe@gmail.com", "kalebhstanley650@gmail.com", "contato@dafamilialanches.com.br" ];
+  function isAdmin(user) { return user && user.email && ADMINS.includes(user.email.toLowerCase()); }
+
+  let chartPedidos = null;
+  let chartProdutos = null;
+
+  function ensureChartJS(cb) {
+    if (window.Chart) return cb();
+    const s = document.createElement("script"); s.src = "https://cdn.jsdelivr.net/npm/chart.js"; s.onload = cb; document.head.appendChild(s);
+  }
+
+  function createDashboard() {
+    if (document.getElementById("admin-dashboard")) return;
+    const div = document.createElement("div");
+    div.id = "admin-dashboard"; div.className = "modal";
+    div.innerHTML = `
+      <div class="modal-content" style="max-width:1000px;width:95%;height:85vh;overflow:auto;background:#fff;border-radius:12px;">
+        <div class="modal-head" style="display:flex;justify-content:space-between;align-items:center;padding:10px 14px;">
+          <h3>📊 Relatórios</h3><button class="dashboard-close">✖</button>
+        </div>
+        <div class="dashboard-body" style="padding:12px;">
+          <div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:12px;">
+            <div id="card-total" class="cardBox">Total: —</div>
+            <div id="card-pedidos" class="cardBox">Pedidos: —</div>
+            <div id="card-ticket" class="cardBox">Ticket Médio: —</div>
+          </div>
+          <div style="margin-bottom:10px;">
+            <label>Período: </label>
+            <select id="filter-period"><option value="7">7 dias</option><option value="30">30 dias</option><option value="all">Todos</option></select>
+          </div>
+          <canvas id="chart-pedidos" style="width:100%;height:240px;"></canvas>
+          <canvas id="chart-produtos" style="width:100%;height:240px;margin-top:16px;"></canvas>
+          <div style="margin-top:12px;"><button id="export-csv" style="background:#4caf50;color:#fff;border:none;border-radius:8px;padding:10px;">Exportar CSV</button></div>
+        </div>
+      </div>`;
+    document.body.appendChild(div);
+    div.querySelector(".dashboard-close").addEventListener("click", () => Overlays.closeAll());
+    
+    // Estilos básicos do dash
+    document.querySelectorAll(".cardBox").forEach(c => {
+      Object.assign(c.style, { flex: "1", minWidth: "200px", padding: "12px", background: "#f9f9f9", borderRadius: "8px" });
+    });
+  }
+
+  function createAdminFab() {
+    if (el.reportsBtn) {
+      el.reportsBtn.style.display = "block";
+      el.reportsBtn.addEventListener("click", () => {
+        createDashboard();
+        ensureChartJS(() => carregarRelatorios("7"));
+        Overlays.open(document.getElementById("admin-dashboard"));
+      });
+    }
+  }
+
+  function gerarResumoECharts(pedidos) {
+    if (!window.Chart) return;
+    const ctxPedidos = document.getElementById('chart-pedidos')?.getContext('2d');
+    const ctxProdutos = document.getElementById('chart-produtos')?.getContext('2d');
+    if (!ctxPedidos || !ctxProdutos) return;
+
+    const pedidosPorDia = {};
+    const produtosContagem = {};
+
+    pedidos.forEach(p => {
+      const dia = (p.data?.toDate?.() || new Date(p.data)).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' });
+      pedidosPorDia[dia] = (pedidosPorDia[dia] || 0) + 1;
+      (p.itens || []).forEach(itemStr => {
+        const nome = itemStr.split(' x')[0];
+        if (nome) produtosContagem[nome] = (produtosContagem[nome] || 0) + 1;
+      });
+    });
+
+    const labelsPedidos = Object.keys(pedidosPorDia).reverse();
+    const dataPedidos = Object.values(pedidosPorDia).reverse();
+
+    if (chartPedidos) chartPedidos.destroy();
+    chartPedidos = new Chart(ctxPedidos, {
+      type: 'line',
+      data: { labels: labelsPedidos, datasets: [{ label: 'Pedidos', data: dataPedidos, borderColor: '#ffb300', tension: 0.1 }] }
+    });
+
+    const produtosOrdenados = Object.entries(produtosContagem).sort(([, a], [, b]) => b - a).slice(0, 10);
+    if (chartProdutos) chartProdutos.destroy();
+    chartProdutos = new Chart(ctxProdutos, {
+      type: 'bar',
+      data: { labels: produtosOrdenados.map(p=>p[0]), datasets: [{ label: 'Mais Vendidos', data: produtosOrdenados.map(p=>p[1]), backgroundColor: '#ff7043' }] },
+      options: { indexAxis: 'y' }
+    });
+  }
+
+  function carregarRelatorios(periodo = "7") {
+    const start = new Date();
+    if (periodo !== "all") start.setDate(start.getDate() - Number(periodo)); else start.setTime(0);
+
+    db.collection("Pedidos").orderBy("data", "desc").get().then(snap => {
+        const pedidos = snap.docs.map(d => ({ ...d.data(), id: d.id, data: d.data().data.toDate ? d.data().data.toDate() : new Date(d.data().data) }));
+        const filtrados = pedidos.filter(p => p.data >= start);
+        
+        gerarResumoECharts(filtrados);
+        
+        const totalVendido = filtrados.reduce((s, p) => s + (p.total || 0), 0);
+        document.getElementById("card-total").textContent = `Total: ${money(totalVendido)}`;
+        document.getElementById("card-pedidos").textContent = `Pedidos: ${filtrados.length}`;
+        document.getElementById("card-ticket").textContent = `Ticket: ${money(filtrados.length ? totalVendido/filtrados.length : 0)}`;
+
+        document.getElementById("export-csv").onclick = () => {
+            const csv = "Data;Nome;Total\n" + filtrados.map(p => `${p.data.toLocaleString()};${p.nome};${p.total}`).join("\n");
+            const blob = new Blob([`\uFEFF${csv}`], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = "pedidos.csv";
+            link.click();
+        };
+    });
+    
+    const sel = document.getElementById("filter-period");
+    if(sel && !sel._bound) { sel.addEventListener("change", e => carregarRelatorios(e.target.value)); sel._bound = true; }
+  }
+
+  /* ------------------ 🍪 COOKIES ------------------ */
+  const cookieBanner = document.getElementById("cookie-banner");
+  const cookieAcceptBtn = document.getElementById("cookie-accept");
+  if (cookieBanner && cookieAcceptBtn) {
+    if (localStorage.getItem("dfl-cookies-accepted") === "true") cookieBanner.style.display = "none";
+    else cookieBanner.classList.add("show");
+    cookieAcceptBtn.addEventListener("click", () => {
+      localStorage.setItem("dfl-cookies-accepted", "true");
+      cookieBanner.classList.remove("show");
+    });
+  }
+  
+  console.log("%c🔥 DFL v4.3 — Ícones + Segurança Anti-Crash", "background:#4CAF50;color:#fff;padding:5px;border-radius:5px;");
+
+}); 
+
+/* FECHAR MODAIS GLOBAL */
+document.addEventListener('DOMContentLoaded', () => {
+  document.querySelectorAll('.modal').forEach(m => m.addEventListener('click', e => {
+    if (e.target.classList.contains('modal')) { m.classList.remove('show'); document.getElementById('cart-backdrop').classList.remove('active'); }
+  }));
+  document.getElementById('cart-backdrop')?.addEventListener('click', () => {
+    document.querySelectorAll('.active').forEach(e => e.classList.remove('active'));
+  });
+});
