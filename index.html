@@ -52,7 +52,182 @@
       background: var(--bg1);
     }
     
-    /* ... (O restante dos seus estilos embutidos) ... */
+    /* ======== ESTILOS EMBUTIDOS CRÍTICOS (Para evitar FOUC) ======== */
+
+    /* Classes de utilidade e reset básico */
+    * { box-sizing: border-box; }
+    h1, h2, h3 { margin-top: 0; }
+    button, input[type="submit"] { cursor: pointer; }
+    
+    /* Header e Banner de Status */
+    header {
+      display: flex; justify-content: space-between; align-items: center; 
+      padding: 10px 15px; background: #fff; box-shadow: var(--shadow-1); 
+      position: sticky; top: 30px; z-index: 1000;
+    }
+    .logo { height: 40px; }
+    .nav-icons { display: flex; gap: 10px; }
+    #user-btn, #cart-icon {
+      background: var(--botao); color: var(--txt); border: none; 
+      padding: 8px 12px; border-radius: var(--rad); font-weight: 600; 
+      font-size: 0.9rem; transition: background 0.2s;
+    }
+    #user-btn:hover, #cart-icon:hover { background: var(--acento); }
+    #cart-count { background: var(--danger); color: #fff; padding: 2px 6px; 
+      border-radius: 50%; font-size: 0.75rem; margin-left: 3px;
+    }
+    
+    /* Banner de Status */
+    .status-banner {
+      background: var(--preto); color: #fff; padding: 5px 15px; 
+      text-align: center; font-size: 0.85rem; position: sticky; 
+      top: 0; z-index: 1001;
+    }
+    .hours-banner {
+      display: flex; justify-content: center; align-items: center; gap: 8px;
+    }
+
+    /* Carrossel */
+    .carrossel-container {
+      padding: 15px 10px 10px; position: relative;
+    }
+    .carrossel {
+      position: relative; overflow: hidden; border-radius: var(--rad); 
+      box-shadow: var(--shadow-2);
+    }
+    .slides {
+      display: flex; transition: transform 0.4s ease-in-out; 
+      scroll-behavior: smooth; overflow-x: scroll; -webkit-overflow-scrolling: touch;
+      scrollbar-width: none; /* Firefox */
+    }
+    .slides::-webkit-scrollbar { display: none; } /* Chrome, Safari */
+    .slide { width: 100%; flex-shrink: 0; display: block; }
+    .c-prev, .c-next {
+      position: absolute; top: 50%; transform: translateY(-50%); 
+      background: rgba(0, 0, 0, 0.6); color: #fff; border: none; 
+      padding: 10px; font-size: 1.5rem; z-index: 10; cursor: pointer;
+      border-radius: 50%; opacity: 0.8; transition: opacity 0.2s;
+    }
+    .c-prev:hover, .c-next:hover { opacity: 1; }
+    .c-prev { left: 10px; }
+    .c-next { right: 10px; }
+    .promo-timer-box {
+        text-align: center; margin-top: 10px; background: #fff;
+        padding: 8px; border-radius: var(--rad-sm); box-shadow: var(--shadow-1);
+        font-size: 0.9rem;
+    }
+
+    /* Títulos de Seção */
+    .section-title {
+      padding: 15px; margin: 0; background: var(--bg1); color: var(--txt);
+      font-size: 1.5rem; text-align: center;
+    }
+
+    /* Cards de Menu */
+    .menu-items {
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); 
+      gap: 20px; padding: 20px;
+    }
+    .card {
+      background: #fff; border-radius: var(--rad); overflow: hidden; 
+      box-shadow: var(--shadow-2); transition: transform 0.2s;
+    }
+    .card:hover { transform: translateY(-3px); box-shadow: var(--shadow-3); }
+    .card img { width: 100%; height: 200px; object-fit: cover; }
+    .card h3 { padding: 0 15px; margin: 10px 0 5px; font-size: 1.25rem; }
+    .card p { padding: 0 15px; margin: 0 0 10px; font-size: 0.9rem; color: #666; }
+    .price { display: block; padding: 0 15px; font-size: 1.4rem; color: var(--danger); font-weight: 700; margin-bottom: 10px; }
+    .card-actions { 
+      display: flex; justify-content: space-between; padding: 10px 15px; 
+      border-top: 1px solid var(--bg2);
+    }
+    .extras-btn { background: var(--bg2); color: var(--txt); border: none; 
+      padding: 8px 12px; border-radius: var(--rad-sm); transition: background 0.2s;
+    }
+    .add-cart { background: var(--success); color: #fff; border: none; 
+      padding: 8px 12px; border-radius: var(--rad-sm); font-weight: 600; transition: background 0.2s;
+    }
+    .extras-btn:hover { background: #ccc; }
+    .add-cart:hover { background: #388e3c; }
+
+    /* Estilos de Modal e Painel (Simplificados para HTML) */
+    .modal, .mini-cart-panel, .recompensas-panel, .pedidos-panel {
+      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0, 0, 0, 0.5); z-index: 1050; 
+      display: flex; justify-content: center; align-items: center;
+      opacity: 0; visibility: hidden; transition: opacity 0.3s;
+    }
+    .modal.show, .mini-cart-panel.show, .recompensas-panel.show, .pedidos-panel.show {
+      opacity: 1; visibility: visible;
+    }
+    .modal-content {
+      background: #fff; padding: 20px; border-radius: var(--rad-lg); 
+      max-width: 400px; width: 90%; transform: translateY(-50px); 
+      transition: transform 0.3s;
+    }
+    .modal.show .modal-content { transform: translateY(0); }
+    .modal-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
+    .modal-head button { background: none; border: none; font-size: 1.5rem; cursor: pointer; }
+
+    /* Mini-Cart Panel (Lateral) */
+    .mini-cart-panel {
+      justify-content: flex-end; align-items: stretch;
+    }
+    .mini-cart-panel .modal-content {
+      max-width: 100%; width: 350px; height: 100%; border-radius: 0;
+      transform: translateX(100%); transition: transform 0.3s;
+    }
+    .mini-cart-panel.show .modal-content { transform: translateX(0); }
+
+    .full-btn {
+      width: 100%; padding: 12px; border: none; border-radius: var(--rad-sm); 
+      font-weight: 700; transition: background 0.2s;
+      background: var(--botao); color: var(--txt); margin-top: 10px;
+    }
+    .full-btn.google-btn { background: #4285f4; color: #fff; }
+    
+    /* Input Form */
+    input[type="email"], input[type="password"], input[type="text"] {
+      width: 100%; padding: 10px; margin-bottom: 10px; border: 1px solid #ccc; 
+      border-radius: var(--rad-sm); font-size: 1rem;
+    }
+    .divider {
+      text-align: center; margin: 15px 0; font-size: 0.9rem; color: #888;
+    }
+
+    /* Painéis Laterais (Recompensas/Pedidos) */
+    .minhas-recompensas, .meus-pedidos {
+      position: fixed; bottom: 20px; right: 20px; z-index: 1000;
+    }
+    .meus-pedidos { bottom: 80px; }
+    .recompensas-btn, .meus-pedidos-btn {
+      background: var(--preto); color: #fff; padding: 10px 15px; 
+      border: none; border-radius: 50px; box-shadow: var(--shadow-3);
+      font-weight: 700; transition: transform 0.2s;
+    }
+    .recompensas-btn:hover, .meus-pedidos-btn:hover { transform: scale(1.05); }
+
+    .recompensas-panel, .pedidos-panel {
+      justify-content: flex-end; align-items: stretch; z-index: 1001;
+    }
+    .recompensas-panel .recompensas-header, .pedidos-panel .pedidos-header {
+      padding: 15px; background: var(--preto); color: #fff;
+      display: flex; justify-content: space-between; align-items: center;
+    }
+    .recompensas-panel .recompensas-body, .pedidos-panel .pedidos-body {
+        padding: 15px; overflow-y: auto;
+    }
+
+    /* Backdrop */
+    .backdrop {
+        position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+        background: rgba(0, 0, 0, 0.5); z-index: 1049; 
+        opacity: 0; visibility: hidden; transition: opacity 0.3s;
+    }
+    .backdrop.active {
+        opacity: 1; visibility: visible;
+    }
+
   </style>
   <link rel="stylesheet" href="style.css" />
 </head>
@@ -157,6 +332,7 @@
       </div>
     </section>
   </main>
+  
   <div id="mini-cart" class="mini-cart-panel" aria-hidden="true">
     <div class="mini-header">
       <div style="display:flex;justify-content:space-between;align-items:center;">
@@ -321,7 +497,7 @@
   
   <div id="cart-backdrop" class="backdrop" aria-hidden="true"></div>
 
-   <script src="https://www.gstatic.com/firebasejs/7.21.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/7.21.0/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/7.21.0/firebase-auth.js"></script>
   <script src="https://www.gstatic.com/firebasejs/7.21.0/firebase-firestore.js"></script>
   
