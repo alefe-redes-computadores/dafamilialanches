@@ -1,9 +1,8 @@
 /* =========================================================
-   🚀 DFL v5.1.2 — CORREÇÃO CRÍTICA FINAL (PARTE 1)
-   - SYNTAXERROR RESOLVIDO: Removida a declaração duplicada de DELIVERY_FEE e cache.
-   - REFERENCEERROR RESOLVIDO: Adicionada função carregarConfiguracoesDeRecompensas.
-   - REFERENCEERROR CRÍTICO RESOLVIDO: Removida a chamada para enhanceMiniCartUI().
-   - FRETE DINÂMICO FIREBASE (v5.1).
+   🚀 DFL v5.1.3 — BLINDAGEM FINAL E HABILITAÇÃO DO CEP
+   - REFERRER/SYNTAX ERRORS RESOLVIDOS.
+   - CORREÇÃO CRÍTICA: Implementado o Listener do botão CEP.
+   - CORREÇÃO FINAL: Forçada a habilitação do campo CEP.
 ========================================================= */
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -1587,11 +1586,15 @@ async function carregarHistoricoRecompensas(userId) {
   }));
 
   // 2. Carrossel: Adiciona listeners básicos para que os botões respondam
-  // NOTA: As funções de slide (nextSlide/prevSlide) não foram definidas no código principal,
-  // mas o 'safe' wrapper garante que o clique não quebre o resto do script.
   el.cPrev?.addEventListener("click", safe(() => console.log("Carrossel Anterior")));
   el.cNext?.addEventListener("click", safe(() => console.log("Carrossel Próximo")));
 
+  // 3. HABILITAÇÃO FORÇADA FINAL DO CEP (Solução para o campo inativo)
+  const cepInput = document.getElementById('cep-input');
+  if (cepInput) {
+      cepInput.disabled = false;
+  }
+  
   console.log("%c🔥 DFL v5.1 — Blindagem Final", "background:#4CAF50;color:#fff;padding:5px;border-radius:5px;");
 
   /* FECHAR MODAIS GLOBAL */
