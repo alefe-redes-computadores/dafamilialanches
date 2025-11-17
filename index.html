@@ -3,15 +3,16 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>🍔 Da Família Lanches — DFL v3.9.15</title>
+  <title>🍔 Da Família Lanches — DFL v5.0 ViaCEP</title>
 
+  <!-- ✅ CSP ajustada para funcionar com Firebase 8, ViaCEP e Google Auth -->
   <meta http-equiv="Content-Security-Policy" content="
-    default-src 'self';
-    script-src 'self' https://www.gstatic.com https://*.firebaseio.com https://cdn.jsdelivr.net https://accounts.google.com https://apis.google.com https://www.googleapis.com;
-    frame-src 'self' https://accounts.google.com https://*.firebaseapp.com;
-    connect-src 'self' https://www.googleapis.com https://securetoken.googleapis.com https://*.firebaseio.com https://firestore.googleapis.com https://accounts.google.com https://apis.google.com https://viacep.com.br;
-    style-src 'self' 'unsafe-inline';
-    img-src 'self' data: https:;
+    default-src * data: blob: 'unsafe-inline' 'unsafe-eval';
+    script-src * data: blob: 'unsafe-inline' 'unsafe-eval' https://www.gstatic.com https://*.firebaseio.com https://*.firebaseapp.com https://apis.google.com https://www.googleapis.com https://viacep.com.br;
+    style-src * 'unsafe-inline' data: blob:;
+    img-src * data: blob:;
+    connect-src * data: blob:;
+    frame-src * data: blob: https://*.firebaseapp.com https://accounts.google.com;
   ">
   <meta http-equiv="Cache-control" content="public, max-age=31536000, immutable">
 
@@ -110,9 +111,10 @@
     }
   </style>
 
-  <link rel="stylesheet" href="style.css?v=3.9.15" />
-  <noscript><link rel="stylesheet" href="style.css?v=3.9.15"/></noscript>
+  <link rel="stylesheet" href="style.css?v=5.0" />
+  <noscript><link rel="stylesheet" href="style.css?v=5.0"/></noscript>
 
+  <!-- ✅ Firebase 8 (mantido) -->
   <script defer src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
   <script defer src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
   <script defer src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
@@ -173,42 +175,37 @@
       <div class="mini-list"></div>
       <div class="mini-foot">
 
-        <div class="frete-container" style="opacity: 0.8;">
+        <div class="frete-container" aria-disabled="true">
           <h4 style="margin-top:10px;">🚚 Entrega</h4>
           
-          <div style="background:#fff9c4; color:#664d03; padding:12px; border-radius:8px; margin-bottom:15px; font-size:0.9rem; border:1px solid #ffeeba; text-align:center; line-height:1.4;">
-             <span style="font-size:1.1rem;">🕖</span> <b>Em breve o site faz a mágica sozinho!</b><br>
-             <span style="font-size:0.85rem; color:#555;">Por enquanto, preencha o endereço manualmente abaixo ⬇️</span>
-          </div>
-
           <div class="frete-cep-group" style="display:flex;gap:8px;margin:10px 0;">
-            <input id="cep-input" type="text" placeholder="Digite o CEP" disabled 
-                   style="flex:1;padding:8px;border:1px solid #ccc;border-radius:8px; background:#e9ecef; color:#999; cursor:not-allowed;">
+            <input id="cep-input" type="text" placeholder="Digite o CEP" maxlength="9"
+                   style="flex:1;padding:8px;border:1px solid #ccc;border-radius:8px;">
             
-            <button id="btn-calcular-frete" class="btn-calcular-frete" type="button" disabled
-                    style="background:#ccc; cursor:not-allowed; color:#fff; border:none; padding:8px; border-radius:8px;">
-              Calcular Frete
+            <button id="btn-calcular-frete" class="btn-calcular-frete" type="button"
+                    style="background:var(--botao); color:#222; border:none; padding:8px 12px; border-radius:8px; font-weight:700; cursor:pointer;">
+              Buscar
             </button>
           </div>
 
-          <input id="endereco-auto" type="text" placeholder="Endereço (auto via CEP)" disabled
-                 style="width:100%;padding:8px;border:1px solid #ccc;border-radius:8px;margin-bottom:8px; background:#e9ecef; color:#999; cursor:not-allowed;">
+          <input id="endereco-auto" type="text" placeholder="Rua e Bairro (Preenchido via CEP)" 
+                 style="width:100%;padding:8px;border:1px solid #ccc;border-radius:8px;margin-bottom:8px;">
 
           <div style="display:flex;gap:8px;margin-bottom:8px;">
-            <input id="numero-input" type="text" placeholder="Número" disabled
-                   style="flex:1;padding:8px;border:1px solid #ccc;border-radius:8px; background:#e9ecef; color:#999; cursor:not-allowed;">
-            <input id="complemento-input" type="text" placeholder="Complemento (opcional)" disabled
-                   style="flex:1;padding:8px;border:1px solid #ccc;border-radius:8px; background:#e9ecef; color:#999; cursor:not-allowed;">
+            <input id="numero-input" type="text" placeholder="Número" 
+                   style="flex:1;padding:8px;border:1px solid #ccc;border-radius:8px;">
+            <input id="complemento-input" type="text" placeholder="Complemento (opcional)" 
+                   style="flex:1;padding:8px;border:1px solid #ccc;border-radius:8px;">
           </div>
 
-          <label style="display:flex;align-items:center;gap:6px;margin-bottom:8px; color:#999;">
-            <input type="checkbox" id="retirar-local" disabled>
+          <label style="display:flex;align-items:center;gap:6px;margin-bottom:8px; color:#555;">
+            <input type="checkbox" id="retirar-local">
             Retirar no Local (sem taxa)
           </label>
           
           <hr style="border:0; border-top:1px solid #eee; margin:15px 0;">
+          
         </div>
-
         <form id="coupon-form" class="coupon-form" novalidate>
           <input type="text" id="coupon-input" placeholder="Cupom de desconto" aria-label="Cupom de desconto"/>
           <button type="submit" id="coupon-apply-btn" class="btn-primary">OK</button>
@@ -512,7 +509,7 @@
           <button class="login-close" type="button" aria-label="Fechar modal">✖</button>
         </div>
         <div style="padding:20px 24px;">
-          <button id="google-login" class="btn-google" type="button" style="display:flex;align-items:center;justify-content:center;gap:12px;padding:12px;border:1px solid #ccc;border-radius:10px;background:#fff;width:100%;font-size:1rem;font-weight:600;box-shadow:0 3px 6px rgba(0,0,0,.1);">
+          <button id="google-login" class="btn-google" type="button" style="display:flex;align-items:center;justify-content:center;gap:12px;padding:12px;border:1px solid #ccc;border-radius:10px;background:#fff;width:100%;font-size:1rem;font-weight:600;box-shadow:0 3px 6px rgba(0,0,0,.15);">
             <img src="imagens/google-icon.png" alt="Google" class="google-icon" width="20" height="20" loading="lazy"/>
             Entrar com Google
           </button>
@@ -543,7 +540,7 @@
         <a href="https://www.instagram.com/dafamilialanches" target="_blank" class="footer-btn" rel="noopener">📸 Instagram</a>
         <a href="https://www.ifood.com.br/delivery/patos-de-minas/dafamilialanches" target="_blank" class="footer-btn" rel="noopener">🍔 iFood</a>
       </div>
-      <div class="footer-copy">© 2025 Da Família Lanches — Todos os direitos reservados 🍔 • <b>v3.9.15</b></div>
+      <div class="footer-copy">© 2025 Da Família Lanches — Todos os direitos reservados 🍔 • <b>v5.0</b></div>
     </footer>
   </div>
 
@@ -597,7 +594,8 @@
     <button id="cookie-accept" type="button">Aceitar</button>
   </div>
 
-  <script defer src="script.js?v=3.9.15"></script>
-  <script defer src="extras.js?v=3.9.15"></script>
+  <!-- ✅ Script principal e extras -->
+  <script defer src="script.js?v=5.2.2"></script>
+  <script defer src="extras.js?v=5.2.2"></script>
 </body>
 </html>
