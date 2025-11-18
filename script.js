@@ -1,6 +1,7 @@
 /* =========================================================
-   🚀 DFL v5.2.7 — VERSÃO FINAL ESTÁVEL COM CORREÇÃO DE RECOMPENSAS
-   - CORREÇÃO CRÍTICA (18/11/2025): Referência a elementos e limpeza de listas no painel de recompensas.
+   🚀 DFL v5.3.0 — CORREÇÃO FINAL DE ESTABILIDADE E USABILIDADE
+   - CORREÇÃO CRÍTICA: Frete dinâmico reescrito para iniciar em R$0,00 (Usabilidade/UX).
+   - CORREÇÕES DE FUNDO: Buscas Flexíveis e Estruturais (Array/Taxas).
 ========================================================= */
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -16,7 +17,18 @@ document.addEventListener("DOMContentLoaded", () => {
   const money = (n) => `R$ ${Number(n || 0).toFixed(2).replace(".", ",")}`;
   const safe = (fn) => (...a) => { try { fn(...a); } catch (e) { console.error(e); } };
 
-  /* --- 🆕 FUNÇÃO HELPER BLINDADA (ANTI-CRASH) --- */
+  /* --- 🆕 FUNÇÃO HELPER PADRONIZADA (NORMALIZAÇÃO) --- */
+  // 🚨 Adicionada/Mantida aqui para garantir que ela exista e não cause ReferenceError
+  const normalizeSlug = (str) => (str || "")
+    .toString()
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-z0-9\s-]/g, "")
+    .replace(/\s+/g, "-")
+    .trim();
+  // FIM FUNÇÃO PADRONIZAÇÃO
+
   function getTierIcon(tier) {
     const level = tier ? String(tier).toLowerCase().trim() : '';
     
@@ -560,7 +572,7 @@ document.addEventListener("DOMContentLoaded", () => {
       addCommonItem(nome, preco);
     })
   );
-// ... continuação da Parte 2
+
 
   /* ------------------ ⚙️ CONFIGURAÇÕES E CÁLCULOS ------------------ */
   // v4.3: Removida a declaração de DELIVERY_FEE e a declaração de addressValue,
@@ -683,49 +695,123 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
-  /* --- FUNÇÃO FRETE DINÂMICO (v5.1) --- */
-  // Incluído para futura implementação no Firestore
-  // A versão V4.3 não tinha esta função, mas ela é necessária para a v5.2
-  async function getDynamicDeliveryFee(localidade) {
-    const DELIVERY_FEE = DELIVERY_FEE_DEFAULT; 
-    let localidadeTaxaId = 'fallback'; 
+  /* --- FUNÇÃO FRETE DINÂMICO (v5.2.9 - BUSCA FLEXÍVEL) --- */
+  
+  // 🚨 Função para normalizar strings
+  // Foi definida no começo do script, mas a repito para clareza se for usar em duas partes.
+  /* const normalizeSlug = (str) => (str || "")
+    .toString()
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-z0-9\s-]/g, "")
+    .replace(/\s+/g, "-")
+    .trim(); */
+
+
+  // 🚨 REESCRITO: Função de busca de frete para ler o ARRAY do Firestore
+  let globalFeesArrayCache = null; // Cache para guardar o array completo
+
+  async function getDynamicDeliveryFee(bairroOriginal, cidadeOriginal) {
+    const DELIVERY_FEE = 6.00; // Valor padrão
+    if (!isFirebaseInitialized || !db) {
+      console.warn("FW: getDynamicDeliveryFee chamado sem Firebase inicializado.");
+      return DELIVERY_FEE;
+    }
     
-    // 1. Determinar o ID do documento (Normalizar Patos de Minas)
-    const localidadeClean = localidade ? localidade.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim() : '';
-    if (localidadeClean.includes('patos de minas')) {
-        localidadeTaxaId = 'patos-de-minas'; 
+    // Normaliza o bairro para busca
+    const bairroSlug = normalizeSlug(bairroOriginal);
+    
+    // 1. Carregar o Array completo (se ainda não estiver em cache)
+    if (!globalFeesArrayCache) {
+      try {
+        // 🚨 PONTO CRÍTICO: BUSCA O DOCUMENTO COM O ARRAY (Coleção 'lista', Documento 'tabela')
+        const feesRef = db.collection("lista").doc("tabela");
+        const feesSnap = await feesRef.get();
+
+        if (feesSnap.exists) {
+          // O array de bairros está no campo 'data'
+          globalFeesArrayCache = feesSnap.data().data || []; 
+          console.log(`FW: Cache carregado com ${globalFeesArrayCache.length} bairros.`);
+        } else {
+          globalFeesArrayCache = [];
+          console.warn("FW: Documento lista/tabela não encontrado no Firestore.");
+        }
+      } catch (e) {
+        console.error("FW: Erro ao carregar array de taxas de entrega:", e);
+        // Em caso de erro, tenta buscar o fallback simples
+        try {
+          // Tenta buscar o fallback padrão, caso a estrutura global falhe
+          const fbSnap = await db.collection("TaxasDeEntrega").doc("fallback").get();
+          if (fbSnap.exists) return Number(fbSnap.data().valor ?? DELIVERY_FEE);
+        } catch {}
+        return DELIVERY_FEE;
+      }
     }
 
-    // 2. Checar e carregar o cache do Firestore (apenas se DB estiver ativo)
-    if (isFirebaseInitialized && !deliveryFeesCache) {
-        console.warn("FW: Buscando Taxas de Frete no Firestore (Primeiro acesso).");
-        try {
-            if (!db) throw new Error("Firestore not initialized for fee lookup."); 
-            const snap = await db.collection("TaxasDeEntrega").get();
-            deliveryFeesCache = {}; 
-            
-            snap.forEach(doc => {
-                deliveryFeesCache[doc.id] = Number(doc.data().valor || doc.data().taxa || DELIVERY_FEE); 
-            });
+    // 2. Tenta encontrar a taxa no array cacheado - BUSCA EXATA NORMALIZADA
+    let foundItem = null;
+    if (bairroSlug && globalFeesArrayCache.length > 0) {
+      foundItem = globalFeesArrayCache.find(item => 
+          item.nome && normalizeSlug(item.nome) === bairroSlug
+      );
 
-        } catch (e) {
-            console.warn("FW: Erro ao ler Taxas de Entrega. Usando Fallback R$6,00.");
-            return DELIVERY_FEE;
+      if (foundItem) {
+        let taxa = Number(foundItem.taxa); 
+        if (!isNaN(taxa) && taxa >= 0) {
+          console.log(`FW: Taxa encontrada por busca EXATA: ${foundItem.nome}`);
+          return taxa; // TAXA ENCONTRADA POR EXATA
+        }
+      }
+    }
+    
+    // 🚨 2.5. NOVA BUSCA FLEXÍVEL (Se a busca exata falhou)
+    if (!foundItem && bairroSlug && globalFeesArrayCache.length > 0) {
+        // Opção: Tenta encontrar o termo principal
+        const termosBuscados = bairroSlug.split('-');
+        let termoPrincipal = bairroSlug;
+
+        if (termosBuscados.length > 1) {
+            termoPrincipal = termosBuscados[termosBuscados.length - 1]; 
+        }
+
+        const flexibleItem = globalFeesArrayCache.find(item => {
+            if (item.nome) {
+                const itemSlug = normalizeSlug(item.nome);
+                
+                // 1. Verifica se o nome do item no Firebase CONTÉM o slug completo do ViaCEP
+                if (itemSlug.includes(bairroSlug)) return true;
+                
+                // 2. Verifica se o nome do item no Firebase CONTÉM o termo principal (ex: 'caicaras')
+                if (termoPrincipal.length > 3 && itemSlug.includes(termoPrincipal)) return true;
+            }
+            return false;
+        });
+
+        if (flexibleItem) {
+            let taxa = Number(flexibleItem.taxa);
+            if (!isNaN(taxa) && taxa >= 0) {
+                console.log(`FW: Taxa encontrada via busca FLEXÍVEL/Substring: ${flexibleItem.nome}`);
+                return taxa; // TAXA ENCONTRADA VIA SUBSTRING!
+            }
         }
     }
 
-    // 3. Retornar a taxa correta do cache (ou o fallback de segurança)
-    let taxa = deliveryFeesCache ? deliveryFeesCache[localidadeTaxaId] : undefined;
 
-    if (taxa === undefined) {
-        taxa = deliveryFeesCache ? (deliveryFeesCache['fallback'] || DELIVERY_FEE) : DELIVERY_FEE;
-        console.warn(`FW: Cidade não mapeada (${localidade}). Usando taxa de fallback R$${taxa.toFixed(2)}.`);
+    // 3. Fallback: Se não achou no array, tenta achar a taxa 'fallback' no próprio array
+    if (globalFeesArrayCache.length > 0) {
+      const fallbackItem = globalFeesArrayCache.find(item => 
+          item.nome && normalizeSlug(item.nome) === 'fallback'
+      );
+      if (fallbackItem) {
+        const taxa = Number(fallbackItem.taxa ?? DELIVERY_FEE);
+        if (!isNaN(taxa) && taxa >= 0) return taxa;
+      }
     }
-
-    if (isNaN(taxa) || taxa < 0) return DELIVERY_FEE;
     
-    return taxa;
+    return DELIVERY_FEE; // Retorna o default hardcoded se tudo falhar
   }
+
   // --- FIM FUNÇÃO FRETE DINÂMICO ---
 
   /* --- FUNÇÃO VIA CEP V5.2 (INTEGRAÇÃO) --- */
@@ -814,21 +900,35 @@ document.addEventListener("DOMContentLoaded", () => {
     const isRetirarLocal = document.getElementById('retirar-local')?.checked;
     
     const cepValue = cepInput ? cepInput.value.trim().replace(/\D/g, '') : '';
-    let deliveryFee = DELIVERY_FEE_DEFAULT; 
-
+    
+    // 🚨 CORREÇÃO UX: A taxa inicia em 0.00 se o CEP não foi buscado, para não mostrar R$6,00.
+    let deliveryFee = 0.00; 
+    
     if (isRetirarLocal) {
-        deliveryFee = 0;
-    } else if (cepInput && cepValue.length === 8 && enderecoAuto && enderecoAuto.value) {
-        // Se CEP foi buscado e endereço preenchido (modo CEP)
+        deliveryFee = 0; // Stays 0
+    } else if (cepValue.length === 8 && enderecoAuto && enderecoAuto.value) {
+        // Endereço buscado/preenchido, inicia a tentativa de cálculo
         const enderecoAutoValue = enderecoAuto.value.trim();
-        const localidadeMatch = enderecoAutoValue.match(/\((.*?)\/.*?\)/);
-        const localidade = localidadeMatch ? localidadeMatch[1] : '';
+
+        // Tenta extrair o bairro a partir de "Rua X - Bairro Y (Cidade/UF)"
+        let bairro = '';
+        const partes = enderecoAutoValue.split('-');
+        if (partes.length > 1) {
+            const depoisDoTraco = partes[1].trim();
+            const matchBairro = depoisDoTraco.match(/^(.+?)\s*\(/);
+            bairro = (matchBairro ? matchBairro[1] : depoisDoTraco).trim();
+        }
 
         try {
-            deliveryFee = await getDynamicDeliveryFee(localidade); 
+            // Se o cálculo funcionar (taxa específica ou fallback), ela será definida
+            deliveryFee = await getDynamicDeliveryFee(bairro, null); 
         } catch(e) {
-            deliveryFee = DELIVERY_FEE_DEFAULT;
+            console.warn("FW: Erro ao calcular frete dinâmico, usando fallback padrão.", e);
+            deliveryFee = DELIVERY_FEE_DEFAULT; // Fallback para R$6,00 apenas em caso de erro de cálculo
         }
+    } else {
+        // Se o CEP não foi buscado/preenchido e não é retirada, a taxa é R$0.00 para fins de exibição inicial
+        deliveryFee = 0.00; 
     }
     // FIM DA INTEGRAÇÃO DE FRETE
 
@@ -844,7 +944,7 @@ document.addEventListener("DOMContentLoaded", () => {
       cupomInfo: d
     };
   }
-// ... continuação da Parte 3
+
 
   async function enhanceMiniCartUI() {
     if (!el.miniFoot) return;
@@ -932,180 +1032,8 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     });
   }
-  
-  /* =========================================================
-    ✨ v4.3: FUNÇÃO PARA CARREGAR METAS (CACHÊ REVISADO)
-    =========================================================
-  */
-  let configuracoesRecompensa = null; 
-  
-  async function carregarConfiguracoesDeRecompensas() {
-      // Aqui a chamada é feita internamente, então a checagem 'if (!isFirebaseInitialized)' no início da função 'inicializarFirebase' é suficiente.
-      if (!isFirebaseInitialized) return []; 
-      if (configuracoesRecompensa) return configuracoesRecompensa; 
-      
-      try {
-          // Nota: v4.3 usa RecompensasConfig, não Configuracao. Revertendo para o que funciona.
-          const snapshot = await db.collection("RecompensasConfig").get();
-          const configs = [];
-          snapshot.forEach(doc => {
-              const data = doc.data();
-              configs.push({ 
-                  id: doc.id,
-                  limite: data.meta || data.limite, 
-                  tipo: data.tipo,
-                  valor: data.valor || data.titulo, 
-                  titulo: data.titulo || data.valor,
-                  ...data 
-              });
-          });
-          configuracoesRecompensa = configs.sort((a, b) => (a.limite || 0) - (b.limite || 0));
-          
-          if(configuracoesRecompensa.length === 0) {
-              console.warn("Firestore: Coleção RecompensasConfig vazia. Recompensas desativadas.");
-          }
-          
-          return configuracoesRecompensa;
-          
-      } catch (e) {
-          console.error("Erro ao carregar configurações de recompensas do Firestore:", e);
-          return [];
-      }
-  }
-
-  /* ------------------ 🖼️ CARROSSEL (LÓGICA RESTAURADA) ------------------ */
-  let currentPromoId = 1;
-
-  function showPromoModal(promoId) {
-    if (!el.promoModal || !PROMO_DATA[promoId]) return;
-    
-    currentPromoId = Number(promoId);
-    const promo = PROMO_DATA[currentPromoId];
-
-    if (el.promoImg) el.promoImg.src = promo.img;
-    if (el.promoTitle) el.promoTitle.textContent = promo.nome;
-    if (el.promoPrice) {
-      el.promoPrice.innerHTML = 
-        `<span class="old-price">De ${money(promo.precoAntigo)}</span> por <b>${money(promo.preco)}</b>`;
-    }
-    
-    Overlays.open(el.promoModal);
-  }
-
-  document.querySelectorAll(".slide[data-promo-id]").forEach((img) => {
-    img.addEventListener("click", () => {
-      const id = parseInt(img.dataset.promoId, 10);
-      if (id) {
-        showPromoModal(id);
-      }
-    });
-  });
-
-  el.promoAddBtn?.addEventListener("click", () => {
-    const promo = PROMO_DATA[currentPromoId];
-    if (!promo) return;
-    addCommonItem(promo.nome, promo.preco); 
-    Overlays.closeAll(); 
-  });
-
-  el.promoNavPrev?.addEventListener("click", () => {
-    let newId = currentPromoId - 1;
-    if (newId < 1) newId = 9; 
-    showPromoModal(newId);
-  });
-
-  el.promoNavNext?.addEventListener("click", () => {
-    let newId = currentPromoId + 1;
-    if (newId > 9) newId = 1; 
-    showPromoModal(newId);
-  });
-  
-  el.promoClose?.addEventListener("click", () => Overlays.closeAll());
-
-  // Lógica de Scroll do Carrossel (v4.3)
-  el.cPrev?.addEventListener("click", () => {
-    if (!el.slides) return;
-    el.slides.scrollLeft -= Math.min(el.slides.clientWidth * 0.9, 320);
-  });
-  el.cNext?.addEventListener("click", () => {
-    if (!el.slides) return;
-    el.slides.scrollLeft += Math.min(el.slides.clientWidth * 0.9, 320);
-  });
 
 
-  /* ------------------ ⏰ Status + Timer (v4.3 Restaurado) ------------------ */
-  const atualizarStatus = safe(() => {
-    const agora = new Date();
-    const h = agora.getHours();
-    const m = agora.getMinutes();
-    const aberto = h >= 18 && h < 23; 
-    if (el.statusBanner) {
-      el.statusBanner.textContent = aberto ? "🟢 Aberto — Faça seu pedido!" : "🔴 Fechado — Voltamos às 18h!";
-      el.statusBanner.className = `status-banner ${aberto ? "open" : "closed"}`;
-    }
-    if (el.hoursBanner) {
-      // NOTE: o HTML do hoursBanner não foi fornecido, a lógica pode falhar se os IDs não existirem
-      const elMsg = el.hoursBanner.querySelector("#hours-message");
-      const elTimer = el.hoursBanner.querySelector("#timer");
-      if (!elMsg || !elTimer) return;
-
-      if (aberto) {
-        const fim = new Date(agora);
-        fim.setHours(23, 30, 0); 
-        
-        let diff = (fim - agora) / 1000;
-        if (diff < 0) diff = 0;
-        
-        const restH = Math.floor(diff / 3600);
-        const restM = Math.floor((diff % 3600) / 60);
-        
-        elMsg.innerHTML = `⏰ Hoje atendemos até <b>23h30</b> — Faltam`;
-        elTimer.textContent = `${restH}h ${restM}min`;
-
-      } else {
-        const inicio = new Date(agora);
-        if (h >= 23 || (h === 23 && m >= 30)) { 
-          inicio.setDate(inicio.getDate() + 1);
-        }
-        inicio.setHours(18, 0, 0); 
-
-        let diff = (inicio - agora) / 1000;
-        const faltamH = Math.floor((diff) / 3600); // Uso do diff corrigido aqui
-        const faltamM = Math.floor((diff % 3600) / 60); // Uso do diff corrigido aqui
-
-        elMsg.innerHTML = `🔒 Fechado — Abrimos em`;
-        elTimer.textContent = `${faltamH}h ${faltamM}min`;
-      }
-    }
-  });
-  atualizarStatus();
-  setInterval(atualizarStatus, 60000);
-
-  const atualizarTimer = safe(() => {
-    const agora = new Date();
-    const fim = new Date();
-    fim.setHours(23, 59, 59, 999);
-    const diff = fim - agora;
-    const elTimer = document.getElementById("promo-timer");
-    if (!elTimer) return;
-    if (diff <= 0) return (elTimer.textContent = "00:00:00");
-
-    const h = String(Math.floor(diff / 3600000)).padStart(2, "0");
-    const m = String(Math.floor((diff % 3600000) / 60000)).padStart(2, "0");
-    const s = String(Math.floor((diff % 60000) / 1000)).padStart(2, "0");
-    elTimer.textContent = `${h}:${m}:${s}`;
-  });
-  atualizarTimer();
-  setInterval(atualizarTimer, 1000);
-
-  /* =========================================================
-   🔥 CHAMADAS DE INICIALIZAÇÃO DE FIREBASE (REMOVIDAS)
-   ========================================================= */
-
-  /* =========================================================
-    🔥 FUNÇÃO FECHAR PEDIDO (INTEGRADA COM CEP)
-    =========================================================
-  */
   async function fecharPedido() {
     if (!cart.length) return alert("Carrinho vazio!");
     if (!currentUser) {
@@ -1175,7 +1103,7 @@ document.addEventListener("DOMContentLoaded", () => {
       
       if (cupomInfo.isPersonalizado && couponApplied) {
           const cupomUserRef = db.collection("CuponsUsuarios").doc(userId);
-          batch.update(cupomUserRef, {
+          batch.update(cupumUserRef, {
               usado: true,
               dataUso: firebase.firestore.FieldValue.serverTimestamp(),
               pedidoId: 'PENDENTE' 
@@ -1498,6 +1426,7 @@ async function carregarRecompensas(userId) {
         // Fallback visual para o contador
         contadorValor.textContent = '0';
         const elMeta = document.querySelector('.progress-container span:last-child');
+        const metaPrimeiroNivel = RECOMPENSAS_DATA[0]?.limite || 1;
         if(elMeta) elMeta.textContent = metaPrimeiroNivel; // Mostra a meta inicial
     });
 }
@@ -1821,7 +1750,7 @@ async function carregarHistoricoRecompensas(userId) {
     });
   }
   
-  console.log("%c🔥 DFL v5.2.7 — Ícones + Segurança Anti-Crash", "background:#4CAF50;color:#fff;padding:5px;border-radius:5px;");
+  console.log("%c🔥 DFL v5.2.9 — Ícones + Segurança Anti-Crash", "background:#4CAF50;color:#fff;padding:5px;border-radius:5px;");
 
   // Chamada Única de Inicialização (CORREÇÃO DE BUG CRÍTICO)
   inicializarFirebase();
