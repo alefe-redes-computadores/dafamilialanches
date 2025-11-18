@@ -1,7 +1,7 @@
 /* =========================================================
    🚀 DFL v5.2.5 — VERSÃO FINAL ESTÁVEL COM CORREÇÕES FINAIS
    - CORREÇÃO CRÍTICA (17/11/2025): Bug NaN em Relatórios.
-   - CORREÇÃO VISUAL: Remoção de estilos inline conflitantes para usar CSS externo.
+   - CORREÇÃO FINAL DE IMAGEM: O campo 'thumb' é salvo como vazio, permitindo que o extras.js defina o ícone.
 ========================================================= */
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -108,7 +108,7 @@ document.addEventListener("DOMContentLoaded", () => {
             <h4 class="recompensas-header-secundario">📜 Histórico de Recompensas</h4>
             <div id="historicoRecompensas" style="margin-top: 15px;"></div>
         `;
-        el.historicoLista = document.getElementById("historicoRecompensas");
+        el.historicoLista = document.getElementById("historicoReimagens");
      }
   }
 
@@ -1172,7 +1172,8 @@ document.addEventListener("DOMContentLoaded", () => {
       endereco: addr,
       data: new Date().toISOString(),
       
-      thumb: 'imagens/padrao.jpg' 
+      // 🚨 CORREÇÃO FINAL: Salva o thumb como vazio. O extras.js que definirá a imagem.
+      thumb: '' 
     };
 
     try {
@@ -1327,7 +1328,8 @@ document.addEventListener("DOMContentLoaded", () => {
     if (!el.pedidosLista) return;
     
     el.pedidosLista.innerHTML = pedidos.map(p => {
-      const thumbUrl = p.thumb || 'imagens/padrao.jpg';
+      // O 'p.thumb' será vazio ou terá um valor se você o salvar assim
+      const thumbUrl = p.thumb || ''; 
       const dataFormatada = p.data
           ? new Date(p.data?.seconds * 1000 || p.data).toLocaleString("pt-BR", {
               day: "2-digit", month: "2-digit", year: "numeric",
@@ -1618,7 +1620,7 @@ async function carregarHistoricoRecompensas(userId) {
 
     } catch (err) {
         console.error("Erro histórico:", err);
-        el.historicoLista.innerHTML = `<p style="text-align:center;color:red;">Erro.</p>`;
+        el.historicoLista.innerHTML = `<p class="empty-orders" style="color:red;">Erro.</p>`;
     }
 }
 
