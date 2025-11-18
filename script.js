@@ -15,6 +15,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const money = (n) => `R$ ${Number(n || 0).toFixed(2).replace(".", ",")}`;
   const safe = (fn) => (...a) => { try { fn(...a); } catch (e) { console.error(e); } };
+  const normalizeString = (str) => (str || "")
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-z0-9\s]/g, "")
+    .trim();
 
   /* --- 🆕 FUNÇÃO HELPER BLINDADA (ANTI-CRASH) --- */
   function getTierIcon(tier) {
@@ -683,47 +689,90 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
-  /* --- FUNÇÃO FRETE DINÂMICO (v5.1) --- */
-  // Incluído para futura implementação no Firestore
-  // A versão V4.3 não tinha esta função, mas ela é necessária para a v5.2
-  async function getDynamicDeliveryFee(localidade) {
-    const DELIVERY_FEE = DELIVERY_FEE_DEFAULT; 
-    let localidadeTaxaId = 'fallback'; 
-    
-    // 1. Determinar o ID do documento (Normalizar Patos de Minas)
-    const localidadeClean = localidade ? localidade.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim() : '';
-    if (localidadeClean.includes('patos de minas')) {
-        localidadeTaxaId = 'patos-de-minas'; 
-    }
+    /* --- FUNÇÃO FRETE DINÂMICO (v5.2 - Taxas por Bairro) --- */
+  // Lê a coleção "TaxasDeEntrega":
+  //  - Documento "bairros" com campo "lista" (map) de <bairro, taxa>
+  //  - Documento "fallback" com campo "valor" (taxa padrão)
+  //  - (Opcional) outros documentos por cidade (ex: "patos-de-minas")
+  async function getDynamicDeliveryFee(bairro, cidade) {
+    const DELIVERY_FEE = DELIVERY_FEE_DEFAULT;
 
-    // 2. Checar e carregar o cache do Firestore (apenas se DB estiver ativo)
+    const bairroNorm = normalizeString(bairro);
+    const cidadeNorm = normalizeString(cidade || "patos de minas");
+
     if (isFirebaseInitialized && !deliveryFeesCache) {
-        console.warn("FW: Buscando Taxas de Frete no Firestore (Primeiro acesso).");
-        try {
-            if (!db) throw new Error("Firestore not initialized for fee lookup."); 
-            const snap = await db.collection("TaxasDeEntrega").get();
-            deliveryFeesCache = {}; 
-            
-            snap.forEach(doc => {
-                deliveryFeesCache[doc.id] = Number(doc.data().valor || doc.data().taxa || DELIVERY_FEE); 
+      console.warn("FW: Buscando Taxas de Frete no Firestore (primeiro acesso).");
+      try {
+        if (!db) throw new Error("Firestore not initialized for fee lookup.");
+
+        const snap = await db.collection("TaxasDeEntrega").get();
+        deliveryFeesCache = {};
+
+        snap.forEach((doc) => {
+          const docId = doc.id;
+          const dataDoc = doc.data() || {};
+
+          // Documento especial "bairros" com mapa de bairros -> taxa
+          if (docId === "bairros" && dataDoc.lista && typeof dataDoc.lista === "object") {
+            Object.entries(dataDoc.lista).forEach(([rawBairro, taxaRaw]) => {
+              const keyNorm = normalizeString(rawBairro);
+              if (!keyNorm) return;
+
+              const valorNum = Number(taxaRaw);
+              deliveryFeesCache[`bairro:${keyNorm}`] =
+                !isNaN(valorNum) && valorNum > 0 ? valorNum : DELIVERY_FEE;
             });
+          } else {
+            // Documentos por cidade ou fallback
+            const valorNum = Number(
+              dataDoc.valor !== undefined ? dataDoc.valor : dataDoc.taxa !== undefined ? dataDoc.taxa : DELIVERY_FEE
+            );
 
-        } catch (e) {
-            console.warn("FW: Erro ao ler Taxas de Entrega. Usando Fallback R$6,00.");
-            return DELIVERY_FEE;
-        }
+            if (docId === "fallback") {
+              deliveryFeesCache["fallback"] =
+                !isNaN(valorNum) && valorNum > 0 ? valorNum : DELIVERY_FEE;
+            } else {
+              const keyNorm = normalizeString(docId);
+              if (!keyNorm) return;
+
+              deliveryFeesCache[`cidade:${keyNorm}`] =
+                !isNaN(valorNum) && valorNum > 0 ? valorNum : DELIVERY_FEE;
+            }
+          }
+        });
+      } catch (e) {
+        console.warn("FW: Erro ao ler Taxas de Entrega. Usando padrão R$ 6,00.", e);
+        return DELIVERY_FEE;
+      }
     }
 
-    // 3. Retornar a taxa correta do cache (ou o fallback de segurança)
-    let taxa = deliveryFeesCache ? deliveryFeesCache[localidadeTaxaId] : undefined;
-
-    if (taxa === undefined) {
-        taxa = deliveryFeesCache ? (deliveryFeesCache['fallback'] || DELIVERY_FEE) : DELIVERY_FEE;
-        console.warn(`FW: Cidade não mapeada (${localidade}). Usando taxa de fallback R$${taxa.toFixed(2)}.`);
+    if (!deliveryFeesCache) {
+      return DELIVERY_FEE;
     }
 
-    if (isNaN(taxa) || taxa < 0) return DELIVERY_FEE;
-    
+    let taxa;
+
+    // 1) Tentativa por bairro
+    if (bairroNorm && Object.prototype.hasOwnProperty.call(deliveryFeesCache, `bairro:${bairroNorm}`)) {
+      taxa = deliveryFeesCache[`bairro:${bairroNorm}`];
+    }
+    // 2) Tentativa por cidade
+    else if (cidadeNorm && Object.prototype.hasOwnProperty.call(deliveryFeesCache, `cidade:${cidadeNorm}`)) {
+      taxa = deliveryFeesCache[`cidade:${cidadeNorm}`];
+    }
+    // 3) Fallback explícito
+    else if (Object.prototype.hasOwnProperty.call(deliveryFeesCache, "fallback")) {
+      taxa = deliveryFeesCache["fallback"];
+    }
+    // 4) Fallback genérico
+    else {
+      taxa = DELIVERY_FEE;
+    }
+
+    if (isNaN(taxa) || taxa < 0) {
+      return DELIVERY_FEE;
+    }
+
     return taxa;
   }
   // --- FIM FUNÇÃO FRETE DINÂMICO ---
@@ -812,7 +861,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const cepInput = document.getElementById('cep-input');
     const enderecoAuto = document.getElementById('endereco-auto');
     const isRetirarLocal = document.getElementById('retirar-local')?.checked;
-    
+
     const cepValue = cepInput ? cepInput.value.trim().replace(/\D/g, '') : '';
     let deliveryFee = DELIVERY_FEE_DEFAULT; 
 
@@ -821,11 +870,16 @@ document.addEventListener("DOMContentLoaded", () => {
     } else if (cepInput && cepValue.length === 8 && enderecoAuto && enderecoAuto.value) {
         // Se CEP foi buscado e endereço preenchido (modo CEP)
         const enderecoAutoValue = enderecoAuto.value.trim();
-        const localidadeMatch = enderecoAutoValue.match(/\((.*?)\/.*?\)/);
-        const localidade = localidadeMatch ? localidadeMatch[1] : '';
+
+        // Extrai Bairro e Cidade do campo autocompletado
+        const bairroMatch = enderecoAutoValue.match(/-\s*(.*?)\s*\(/);
+        const bairro = bairroMatch ? bairroMatch[1] : '';
+
+        const cidadeMatch = enderecoAutoValue.match(/\((.*?)\/.*?\)/);
+        const cidade = cidadeMatch ? cidadeMatch[1] : '';
 
         try {
-            deliveryFee = await getDynamicDeliveryFee(localidade); 
+            deliveryFee = await getDynamicDeliveryFee(bairro, cidade); 
         } catch(e) {
             deliveryFee = DELIVERY_FEE_DEFAULT;
         }
