@@ -1,8 +1,6 @@
 /* =====================================================
-   🍔 Da Família Lanches — Extras.js (v4.1 Blindada com Correção de Observer)
-   - Lógica Inteligente (Topo vs Centro)
-   - Correção de Miniaturas
-   - INJEÇÃO DE CSS AUTOMÁTICA (Anti-Cache)
+   🍔 Da Família Lanches — Extras.js (v4.2 FINAL BLINDADA)
+   - Correção Definitiva: Garante um ícone padrão se a busca falhar (evitando a caixa branca).
    ===================================================== */
 
 (function () {
@@ -199,6 +197,12 @@
     
     if (found) {
        thumbDiv.style.backgroundImage = `url('${found.img}')`;
+    } 
+    // 🚨 BLINDAGEM FINAL: Força um ícone genérico se a busca falhar.
+    else {
+       // Se não encontrou um ícone específico, usa um ícone genérico seguro.
+       // Isso só acontecerá se o texto do pedido estiver vazio OU se o item não for mapeado.
+       thumbDiv.style.backgroundImage = `url('imagens/burger.png')`; 
     }
   }
 
