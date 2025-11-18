@@ -1,6 +1,7 @@
 /* ===========================================================
    🎨 Da Família Lanches – CSS Principal (v5.0)
    - Ajuste de Estilos para Campos ViaCEP Ativados.
+   - NOVO: Estilos para Admin Dashboard (PC/Mobile).
    =========================================================== */
 
 /* ======== ELEMENTOS BÁSICOS ======== */
@@ -423,9 +424,6 @@ section h2 { font-size: 1.3rem; text-align: center; margin-bottom: 15px; color: 
 
 /* =========================================================
    🚀 ESTILIZAÇÃO DA ABA MEUS PEDIDOS (V3.8.6)
-   - Cards bonitos com sombra suave
-   - Miniatura do pedido (placeholder ou real)
-   - Botão 'Repetir Pedido' destacado
    ========================================================= */
 
 /* Fundo do painel */
@@ -552,4 +550,71 @@ section h2 { font-size: 1.3rem; text-align: center; margin-bottom: 15px; color: 
   #cookie-banner { flex-direction: column; text-align: center; gap: 12px; }
   #cookie-banner p { margin-right: 0; }
   #cookie-banner button { width: 100%; padding: 12px; }
+}
+
+/* =========================================================
+   📊 AJUSTES DE ESTILO PARA PAINEL DE RELATÓRIOS (ADMIN)
+   ========================================================= */
+
+/* 1. Estilo Básico do Painel (Gerado via JS, mas estilizado via CSS) */
+#admin-dashboard .modal-content {
+    /* Garante mais espaço no PC */
+    max-width: 1100px !important;
+    width: 95% !important; 
+}
+#admin-dashboard .modal-head {
+    /* Cores do DFL */
+    background: var(--botao); 
+    color: var(--txt);
+}
+#admin-dashboard .dashboard-body {
+    padding: 20px;
+}
+
+/* 2. Layout dos Cards de Metas (Total, Pedidos, Ticket) */
+.dashboard-body > div:first-child {
+    display: flex; /* Habilita o layout flexível */
+    gap: 15px;     /* Espaçamento entre os cards */
+    flex-wrap: wrap; /* Permite quebrar linha no mobile */
+    margin-bottom: 20px;
+}
+
+/* 3. Estilo dos Cards Individuais (.cardBox) */
+.cardBox {
+    flex: 1; /* Distribui o espaço igualmente */
+    min-width: 200px; /* Garante que não fiquem muito pequenos no PC */
+    padding: 18px 22px;
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+    border: 1px solid #eee;
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #444;
+}
+#card-total { color: var(--success); }
+#card-pedidos { color: var(--botao); }
+#card-ticket { color: #1976D2; } /* Azul para Ticket Médio */
+
+/* 4. Estilos para Gráficos */
+#chart-pedidos, #chart-produtos {
+    margin-top: 20px;
+    padding: 10px;
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+}
+
+/* 5. Ajuste Mobile (Garante que o modal preencha a tela no celular) */
+@media (max-width: 600px) {
+    #admin-dashboard .modal-content {
+        width: 100% !important;
+        height: 100vh !important;
+        margin: 0;
+        border-radius: 0;
+    }
+    /* Cards empilham no celular */
+    .cardBox {
+        min-width: 100%;
+    }
 }
