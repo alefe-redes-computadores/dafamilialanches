@@ -1,7 +1,7 @@
 /* ===========================================================
    🎨 Da Família Lanches – CSS Principal (v5.0)
    - Ajuste de Estilos para Campos ViaCEP Ativados.
-   - NOVO: Estilos para Admin Dashboard (PC/Mobile).
+   - NOVO: Estilos para Admin Dashboard (PC/Mobile) - Otimizado para Usabilidade
    =========================================================== */
 
 /* ======== ELEMENTOS BÁSICOS ======== */
@@ -326,14 +326,14 @@ section h2 { font-size: 1.3rem; text-align: center; margin-bottom: 15px; color: 
 .btn-google:hover { background: #f8f8f8; }
 
 /* Botões de Fechar */
-.fechar-pedidos, .fechar-recompensas, .extras-close, .combo-close, .login-close, .promo-close {
+.fechar-pedidos, .fechar-recompensas, .extras-close, .combo-close, .login-close, .promo-close, .dashboard-close {
   background: var(--botao); border: none; border-radius: 50%;
   width: 30px; height: 30px; font-size: 18px; font-weight: 700;
   cursor: pointer; line-height: 30px; text-align: center; color: #222;
   transition: 0.2s; pointer-events: auto;
 }
 .fechar-pedidos:hover, .fechar-recompensas:hover, .extras-close:hover,
-.combo-close:hover, .login-close:hover, .promo-close:hover {
+.combo-close:hover, .login-close:hover, .promo-close:hover, .dashboard-close:hover {
   background: #ff7043; color: #fff; transform: scale(1.1);
 }
 
@@ -554,9 +554,10 @@ section h2 { font-size: 1.3rem; text-align: center; margin-bottom: 15px; color: 
 
 /* =========================================================
    📊 AJUSTES DE ESTILO PARA PAINEL DE RELATÓRIOS (ADMIN)
+   - CORREÇÃO VISUAL PARA MOBILE E FECHAMENTO
    ========================================================= */
 
-/* 1. Estilo Básico do Painel (Gerado via JS, mas estilizado via CSS) */
+/* 1. Estilo Básico do Painel */
 #admin-dashboard .modal-content {
     /* Garante mais espaço no PC */
     max-width: 1100px !important;
@@ -571,18 +572,18 @@ section h2 { font-size: 1.3rem; text-align: center; margin-bottom: 15px; color: 
     padding: 20px;
 }
 
-/* 2. Layout dos Cards de Metas (Total, Pedidos, Ticket) */
+/* 2. Layout dos Cards de Metas (PC) */
 .dashboard-body > div:first-child {
     display: flex; /* Habilita o layout flexível */
     gap: 15px;     /* Espaçamento entre os cards */
-    flex-wrap: wrap; /* Permite quebrar linha no mobile */
+    flex-wrap: wrap; 
     margin-bottom: 20px;
 }
 
 /* 3. Estilo dos Cards Individuais (.cardBox) */
 .cardBox {
-    flex: 1; /* Distribui o espaço igualmente */
-    min-width: 200px; /* Garante que não fiquem muito pequenos no PC */
+    flex: 1; 
+    min-width: 200px; 
     padding: 18px 22px;
     background: #fff;
     border-radius: 12px;
@@ -594,7 +595,7 @@ section h2 { font-size: 1.3rem; text-align: center; margin-bottom: 15px; color: 
 }
 #card-total { color: var(--success); }
 #card-pedidos { color: var(--botao); }
-#card-ticket { color: #1976D2; } /* Azul para Ticket Médio */
+#card-ticket { color: #1976D2; }
 
 /* 4. Estilos para Gráficos */
 #chart-pedidos, #chart-produtos {
@@ -605,13 +606,14 @@ section h2 { font-size: 1.3rem; text-align: center; margin-bottom: 15px; color: 
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
 }
 
-/* 5. Ajuste Mobile (Garante que o modal preencha a tela no celular) */
+/* 5. Ajuste Mobile (Corrigindo o problema do tamanho e fechamento) */
 @media (max-width: 600px) {
+    /* Faz o modal ocupar 90% da altura e 95% da largura, deixando margem para fechar ao clicar fora */
     #admin-dashboard .modal-content {
-        width: 100% !important;
-        height: 100vh !important;
-        margin: 0;
-        border-radius: 0;
+        width: 95% !important;
+        height: 90vh !important; /* Deixa 10% de margem vertical */
+        margin: auto; /* Centraliza o modal na tela */
+        border-radius: 16px; /* Mantém as bordas arredondadas */
     }
     /* Cards empilham no celular */
     .cardBox {
