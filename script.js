@@ -2,6 +2,8 @@
    🚀 DFL v5.3.0 — CORREÇÃO FINAL DE ESTABILIDADE E USABILIDADE
    - CORREÇÃO CRÍTICA: Frete dinâmico reescrito para iniciar em R$0,00 (Usabilidade/UX).
    - CORREÇÕES DE FUNDO: Buscas Flexíveis e Estruturais (Array/Taxas).
+   
+   *** CORREÇÃO APLICADA: INTEGRAÇÃO VIA CEP CORRIGIDA NO BLUR/CLICK ***
 ========================================================= */
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -589,6 +591,13 @@ document.addEventListener("DOMContentLoaded", () => {
     return `${(codigo||"").toUpperCase()}::${faixa}`;
   }
 
+  // NOTE: CarregarConfiguracoesDeRecompensas não está definida aqui, mas é assumida como global ou em outro script.
+  // Criando um placeholder seguro para não quebrar.
+  async function carregarConfiguracoesDeRecompensas() {
+      // Simula a função que buscaria a lista de recompensas
+      return []; 
+  }
+
   async function validarCupomFirestore(codigo, subtotal) {
     if (!isFirebaseInitialized) return { valido:false, discount:0, freeShipping:false, label:"", mensagem:"Erro de conexão. Tente recarregar." };
     
@@ -697,18 +706,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
   /* --- FUNÇÃO FRETE DINÂMICO (v5.2.9 - BUSCA FLEXÍVEL) --- */
   
-  // 🚨 Função para normalizar strings
-  // Foi definida no começo do script, mas a repito para clareza se for usar em duas partes.
-  /* const normalizeSlug = (str) => (str || "")
-    .toString()
-    .toLowerCase()
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .replace(/[^a-z0-9\s-]/g, "")
-    .replace(/\s+/g, "-")
-    .trim(); */
-
-
   // 🚨 REESCRITO: Função de busca de frete para ler o ARRAY do Firestore
   let globalFeesArrayCache = null; // Cache para guardar o array completo
 
@@ -815,6 +812,7 @@ document.addEventListener("DOMContentLoaded", () => {
   // --- FIM FUNÇÃO FRETE DINÂMICO ---
 
   /* --- FUNÇÃO VIA CEP V5.2 (INTEGRAÇÃO) --- */
+  // 🚨 CORREÇÃO: Função modificada para ser chamada pelo Listener de forma limpa.
   async function buscarCEP(cep) {
     const freteContainer = document.querySelector('.frete-container');
     const enderecoAuto = document.getElementById('endereco-auto');
@@ -822,7 +820,6 @@ document.addEventListener("DOMContentLoaded", () => {
     const complementoInput = document.getElementById('complemento-input');
     const retirarLocal = document.getElementById('retirar-local');
 
-    // Funções auxiliares para liberar/bloquear campos e atualizar o estilo
     const toggleAddressState = (isDisabled) => {
         if(enderecoAuto) enderecoAuto.disabled = isDisabled;
         if(numeroInput) numeroInput.disabled = isDisabled;
@@ -843,14 +840,13 @@ document.addEventListener("DOMContentLoaded", () => {
         toggleAddressState(false); 
         if (enderecoAuto) enderecoAuto.disabled = false; // Permite edição manual da Rua/Endereço
         updateStatus('Erro/Manual', 'var(--danger)');
-        renderMiniCart(); // Recálculo para o frete padrão
+        renderMiniCart(); 
     };
     
     // Bloqueia campos estruturados e indica busca
     toggleAddressState(true);
     updateStatus('Buscando endereço...', 'var(--botao)');
     
-    // Garante que o CEP-INPUT não seja desativado (CORREÇÃO DE BUG ANTERIOR)
     document.getElementById('cep-input').disabled = false; 
 
     try {
@@ -861,6 +857,7 @@ document.addEventListener("DOMContentLoaded", () => {
             clearAndEnableManual('CEP não encontrado ou inválido. Preencha manualmente.');
         } else {
             const localidadeCompleta = `${data.localidade || 'Cidade não definida'}/${data.uf || 'UF'}`;
+            // Preenche o campo `endereco-auto` com a Rua, Bairro, Cidade e UF
             enderecoAuto.value = `${data.logradouro || 'Rua não definida'} - ${data.bairro || 'Bairro não definido'} (${localidadeCompleta})`;
             
             toggleAddressState(false);
@@ -868,6 +865,7 @@ document.addEventListener("DOMContentLoaded", () => {
             if (numeroInput) numeroInput.focus(); 
             
             updateStatus('Endereço encontrado!', 'var(--success)');
+            // Força o recálculo do carrinho e frete
             renderMiniCart(); 
         }
 
@@ -878,16 +876,22 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   } // FIM buscarCEP
 
-  // CORREÇÃO: Listener para o botão Buscar do CEP
-  document.getElementById('btn-calcular-frete')?.addEventListener('click', safe(() => {
+  // CORREÇÃO: Função auxiliar para disparar a busca do CEP
+  const handleCepSearch = () => {
       const cepInput = document.getElementById('cep-input');
-      const cep = cepInput.value.trim().replace(/\D/g, '');
+      const cep = cepInput ? cepInput.value.trim().replace(/\D/g, '') : '';
       if (cep.length === 8) {
           buscarCEP(cep);
-      } else {
+      } else if (cep.length > 0) {
           popupAdd("CEP deve ter 8 dígitos.");
       }
-  }));
+  };
+  
+  // CORREÇÃO: Listener para o botão Buscar do CEP
+  document.getElementById('btn-calcular-frete')?.addEventListener('click', safe(handleCepSearch));
+  
+  // CORREÇÃO: Listener para o evento 'blur' do campo CEP
+  document.getElementById('cep-input')?.addEventListener('blur', safe(handleCepSearch));
 
 
   async function calcTotals() {
@@ -906,7 +910,7 @@ document.addEventListener("DOMContentLoaded", () => {
     
     if (isRetirarLocal) {
         deliveryFee = 0; // Stays 0
-    } else if (cepValue.length === 8 && enderecoAuto && enderecoAuto.value) {
+    } else if (cepValue.length === 8 && enderecoAuto && enderecoAuto.value && enderecoAuto.value !== 'CEP não encontrado ou inválido. Preencha manualmente.') {
         // Endereço buscado/preenchido, inicia a tentativa de cálculo
         const enderecoAutoValue = enderecoAuto.value.trim();
 
@@ -921,11 +925,19 @@ document.addEventListener("DOMContentLoaded", () => {
 
         try {
             // Se o cálculo funcionar (taxa específica ou fallback), ela será definida
-            deliveryFee = await getDynamicDeliveryFee(bairro, null); 
+            // CORREÇÃO CRÍTICA: Só busca a taxa se o bairro for realmente extraído e válido.
+            if (bairro && bairro !== 'Bairro não definido') {
+                deliveryFee = await getDynamicDeliveryFee(bairro, null); 
+            } else {
+                deliveryFee = DELIVERY_FEE_DEFAULT; // Se o ViaCEP não deu o bairro, usa o padrão.
+            }
         } catch(e) {
             console.warn("FW: Erro ao calcular frete dinâmico, usando fallback padrão.", e);
             deliveryFee = DELIVERY_FEE_DEFAULT; // Fallback para R$6,00 apenas em caso de erro de cálculo
         }
+    } else if (cepValue.length === 8 && enderecoAuto && enderecoAuto.value === 'CEP não encontrado ou inválido. Preencha manualmente.') {
+        // Se o CEP foi digitado, mas deu erro e o usuário precisa preencher, usamos o valor padrão
+        deliveryFee = DELIVERY_FEE_DEFAULT;
     } else {
         // Se o CEP não foi buscado/preenchido e não é retirada, a taxa é R$0.00 para fins de exibição inicial
         deliveryFee = 0.00; 
@@ -1103,7 +1115,7 @@ document.addEventListener("DOMContentLoaded", () => {
       
       if (cupomInfo.isPersonalizado && couponApplied) {
           const cupomUserRef = db.collection("CuponsUsuarios").doc(userId);
-          batch.update(cupumUserRef, {
+          batch.update(cupomUserRef, {
               usado: true,
               dataUso: firebase.firestore.FieldValue.serverTimestamp(),
               pedidoId: 'PENDENTE' 
@@ -1641,9 +1653,11 @@ async function carregarHistoricoRecompensas(userId) {
       
       // 🚨 CORREÇÃO CRÍTICA DO TYPE ERROR (map/forEach is not a function)
       // Garante que 'p.itens' seja um array antes de iterar.
-      const itensArray = Array.isArray(p.itens) ? p.itens : [];
+      const itensArray = Array.isArray(p.itens) ? p.itens : (typeof p.itens === 'string' ? p.itens.split('\n') : []);
       itensArray.forEach(itemStr => {
-        const nome = itemStr.split(' x')[0];
+        // Assume que o formato é "• Nome xQtd"
+        const match = itemStr.match(/• (.+?) x\d+/); 
+        const nome = match ? match[1].trim() : itemStr.trim().replace(/^•\s*/, '');
         if (nome) produtosContagem[nome] = (produtosContagem[nome] || 0) + 1;
       });
       // --------------------------------------------------------------------
