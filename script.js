@@ -1,6 +1,6 @@
 /* =========================================================
-   🚀 DFL v5.2.6 — VERSÃO FINAL ESTÁVEL COM CORREÇÃO DE RECOMPENSAS
-   - CORREÇÃO CRÍTICA (18/11/2025): Removido o código duplicado de criação do Histórico de Recompensas.
+   🚀 DFL v5.2.7 — VERSÃO FINAL ESTÁVEL COM CORREÇÃO DE RECOMPENSAS
+   - CORREÇÃO CRÍTICA (18/11/2025): Referência a elementos e limpeza de listas no painel de recompensas.
 ========================================================= */
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -96,11 +96,12 @@ document.addEventListener("DOMContentLoaded", () => {
     recompensasBtn: document.querySelector(".recompensas-btn"),
     recompensasPanel: document.getElementById("recompensas-panel"),
     recompensasFecharBtn: document.querySelector(".fechar-recompensas"),
+    // 🚨 AJUSTE DE REFERÊNCIA: Garante que os elementos estáticos sejam referenciados
     recompensasLista: document.getElementById("listaRecompensas"),
     historicoLista: document.getElementById("historicoRecompensas") 
   };
   
-  // 🚨 REMOÇÃO DO CÓDIGO DUPLICADO (Estava aqui entre as linhas ~163-172)
+  // 🚨 REMOÇÃO DO CÓDIGO DUPLICADO (Linhas ~163-172)
   // Agora o script confia que o Histórico já está no index.html e apenas busca o ID.
 
   /* ------------------ 🌫️ BACKDROP ------------------ */
@@ -1414,15 +1415,16 @@ async function carregarRecompensas(userId) {
     const progressoBar = document.getElementById('progresso-bar');
     const progressoMsg = document.getElementById('progresso-mensagem');
     
+    // 🚨 AJUSTE DE LIMPEZA: Garante que os containers estejam prontos e limpos
     if (!contadorValor || !progressoBar || !progressoMsg || !el.recompensasLista) return; 
 
     contadorValor.textContent = '...';
     progressoBar.style.width = '0%';
     progressoMsg.textContent = 'Carregando metas...';
+    
     el.recompensasLista.innerHTML = ''; 
-    // 🚨 CORRIGIDO: Não limpa el.historicoLista se o conteúdo for um H4 estático, 
-    // apenas limpa o conteúdo para recarregar.
-    if(el.historicoLista) el.historicoLista.innerHTML = ''; 
+    // Garante que o histórico seja limpo antes de recarregar
+    if(el.historicoLista) el.historicoLista.innerHTML = `<p class="empty-orders" style="text-align:center;color:#999;">Carregando...</p>`; 
     
     const RECOMPENSAS_DATA = await carregarConfiguracoesDeRecompensas();
 
@@ -1434,6 +1436,7 @@ async function carregarRecompensas(userId) {
     
     const metaPrimeiroNivel = RECOMPENSAS_DATA[0]?.limite || 1; 
 
+    // O onSnapshot agora deve ser o único responsável por injetar os dados de progresso
     db.collection('Usuarios').doc(userId).onSnapshot(async doc => {
         
         el.recompensasLista.innerHTML = ''; 
@@ -1453,11 +1456,13 @@ async function carregarRecompensas(userId) {
 
         const proximaRecompensa = RECOMPENSAS_DATA.find(r => r.limite > feitos);
         const metaParaExibir = proximaRecompensa ? proximaRecompensa.limite : feitos; 
-        const metaBaseCalculo = proximaReximaRecompensa ? proximaRecompensa.limite : metaPrimeiroNivel;
+        const metaBaseCalculo = proximaRecompensa ? proximaRecompensa.limite : metaPrimeiroNivel;
 
         const porcentagem = proximaRecompensa === undefined ? 100 : Math.min(100, (feitos / metaBaseCalculo) * 100);
             
+        // 🚨 CORREÇÃO DE EXIBIÇÃO: Atualiza o contador de pedidos feitos
         contadorValor.textContent = feitos;
+        
         const elMeta = document.querySelector('.progress-container span:last-child');
         if(elMeta) elMeta.textContent = metaParaExibir;
 
@@ -1490,6 +1495,10 @@ async function carregarRecompensas(userId) {
     }, error => {
         console.error("Erro ao ler contador:", error);
         progressoMsg.textContent = 'Erro ao ler progresso.';
+        // Fallback visual para o contador
+        contadorValor.textContent = '0';
+        const elMeta = document.querySelector('.progress-container span:last-child');
+        if(elMeta) elMeta.textContent = metaPrimeiroNivel; // Mostra a meta inicial
     });
 }
 
@@ -1812,7 +1821,7 @@ async function carregarHistoricoRecompensas(userId) {
     });
   }
   
-  console.log("%c🔥 DFL v5.2.6 — Ícones + Segurança Anti-Crash", "background:#4CAF50;color:#fff;padding:5px;border-radius:5px;");
+  console.log("%c🔥 DFL v5.2.7 — Ícones + Segurança Anti-Crash", "background:#4CAF50;color:#fff;padding:5px;border-radius:5px;");
 
   // Chamada Única de Inicialização (CORREÇÃO DE BUG CRÍTICO)
   inicializarFirebase();
