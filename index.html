@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>🍔 Da Família Lanches — DFL v5.0 ViaCEP</title>
 
-  <!-- ✅ CSP ajustada para funcionar com Firebase 8, ViaCEP e Google Auth -->
   <meta http-equiv="Content-Security-Policy" content="
     default-src * data: blob: 'unsafe-inline' 'unsafe-eval';
     script-src * data: blob: 'unsafe-inline' 'unsafe-eval' https://www.gstatic.com https://*.firebaseio.com https://*.firebaseapp.com https://apis.google.com https://www.googleapis.com https://viacep.com.br;
@@ -18,103 +17,10 @@
 
   <link rel="preconnect" href="https://www.gstatic.com" crossorigin>
   <link rel="preload" as="image" href="logo.png">
-
-  <style>
-    :root{
-      --preto:#000;
-      --bg1:#f8f9fa;
-      --bg2:#e9ecef;
-      --acento:#ffca28;
-      --botao:#ffb300;
-      --danger:#d32f2f;
-      --success:#4caf50;
-      --txt:#222;
-      --rad-sm:8px;
-      --rad:10px;
-      --rad-lg:12px;
-      --shadow-1:0 2px 5px rgba(0,0,0,.15);
-      --shadow-2:0 3px 10px rgba(0,0,0,.20);
-      --shadow-3:0 5px 15px rgba(0,0,0,.30);
-      --shadow-in:inset 0 1px 0 rgba(255,255,255,.25);
-    }
-
-    /* ============================================================
-       🎨 ESTILO DFL "DIVERTIDO & VIBRANTE" (TOASTS + MINIATURAS)
-       ============================================================ */
-    
-    /* 1. Base do Toast (Mensagens Comuns - Topo) */
-    .popup-add {
-      position: fixed !important;
-      top: 20px !important; 
-      bottom: auto !important;
-      left: 50% !important;
-      transform: translateX(-50%) translateY(-150%) !important; /* Começa escondido */
-      
-      background: #222 !important; 
-      color: #fff !important;
-      font-family: 'Segoe UI', Roboto, sans-serif !important;
-      font-weight: 700 !important;
-      font-size: 0.95rem !important;
-      white-space: nowrap !important;
-      
-      padding: 12px 24px !important; 
-      border-radius: 50px !important; /* Bem redondinho */
-      box-shadow: 0 8px 25px rgba(0,0,0,0.3) !important;
-      
-      z-index: 2147483647 !important; /* Acima de tudo */
-      opacity: 0 !important;
-      
-      /* Animação Bouncy (Elástica) */
-      transition: all 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55) !important;
-      pointer-events: none !important;
-      
-      display: flex !important;
-      align-items: center !important;
-      justify-content: center !important;
-      gap: 10px !important;
-    }
-
-    /* Estado Visível (Aparece) */
-    .popup-add.show {
-      opacity: 1 !important;
-      transform: translateX(-50%) translateY(0) !important;
-    }
-
-    /* 2. Modo Especial (Login/Pedido - Centro) */
-    .popup-add.dfl-center {
-      top: 50% !important;
-      background: rgba(0, 0, 0, 0.9) !important; /* Preto Translúcido */
-      backdrop-filter: blur(5px) !important;
-      
-      padding: 25px 35px !important;
-      font-size: 1.1rem !important;
-      border: 1px solid rgba(255,255,255,0.15) !important;
-      
-      /* Efeito de Zoom */
-      transform: translate(-50%, -50%) scale(0.5) !important; 
-    }
-
-    .popup-add.dfl-center.show {
-      transform: translate(-50%, -50%) scale(1) !important; /* Zoom Normal */
-    }
-
-    /* 3. Correção das Miniaturas (Meus Pedidos) */
-    .pedido-card .pedido-thumb {
-      width: 100% !important;
-      height: 110px !important; /* Altura fixa para não cortar */
-      background-size: cover !important;
-      background-position: center center !important;
-      border-radius: 8px !important;
-      margin-bottom: 10px !important;
-      background-color: transparent !important; /* Remove fundo cinza */
-      box-shadow: inset 0 0 0 1px rgba(0,0,0,0.05);
-    }
-  </style>
-
+  
   <link rel="stylesheet" href="style.css?v=5.0" />
   <noscript><link rel="stylesheet" href="style.css?v=5.0"/></noscript>
 
-  <!-- ✅ Firebase 8 (mantido) -->
   <script defer src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
   <script defer src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
   <script defer src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
@@ -370,7 +276,7 @@
           <img src="imagens/nimin.png" alt="Hot Dog Nimin" loading="lazy">
           <h3>Nimin <span class="badge-small">Molho Verde</span></h3>
           <p class="price">R$ 13,00</p>
-          <p>Pão, molho, 2 salsichas (Sadia/Perdigão), milho, batata palha, bacon, vinagrete, ketchup, maionese e vinagrete. Acompanha ketchup sachê.</p>
+          <p>Pão, molho, 2 salsichas (Sadia/Perdigão), milho, batata palha, bacon, vinagrete, ketchup e maionese. Acompanha ketchup sachê.</p>
           <div class="actions"><button class="add-cart" type="button">Adicionar</button><button class="extras-btn" type="button">Adicionais</button></div>
         </div>
 
@@ -594,7 +500,6 @@
     <button id="cookie-accept" type="button">Aceitar</button>
   </div>
 
-  <!-- ✅ Script principal e extras -->
   <script defer src="script.js?v=5.2.2"></script>
   <script defer src="extras.js?v=5.2.2"></script>
 </body>
