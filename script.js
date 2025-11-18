@@ -1,7 +1,6 @@
 /* =========================================================
-   🚀 DFL v5.2.5 — VERSÃO FINAL ESTÁVEL COM CORREÇÕES FINAIS
-   - CORREÇÃO CRÍTICA (18/11/2025): Bug NaN em Relatórios.
-   - CORREÇÃO FINAL DE EXIBIÇÃO: Garante que a lista de itens seja exibida (usando p.itensObj como fallback).
+   🚀 DFL v5.2.6 — VERSÃO FINAL ESTÁVEL COM CORREÇÃO DE RECOMPENSAS
+   - CORREÇÃO CRÍTICA (18/11/2025): Removido o código duplicado de criação do Histórico de Recompensas.
 ========================================================= */
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -98,19 +97,11 @@ document.addEventListener("DOMContentLoaded", () => {
     recompensasPanel: document.getElementById("recompensas-panel"),
     recompensasFecharBtn: document.querySelector(".fechar-recompensas"),
     recompensasLista: document.getElementById("listaRecompensas"),
-    historicoLista: document.getElementById("historicoReimagens") 
+    historicoLista: document.getElementById("historicoRecompensas") 
   };
   
-  if (!el.historicoLista) {
-     const painelBody = document.querySelector("#recompensas-panel .recompensas-body");
-     if (painelBody) {
-        painelBody.innerHTML += `
-            <h4 class="recompensas-header-secundario">📜 Histórico de Recompensas</h4>
-            <div id="historicoRecompensas" style="margin-top: 15px;"></div>
-        `;
-        el.historicoLista = document.getElementById("historicoRecompensas");
-     }
-  }
+  // 🚨 REMOÇÃO DO CÓDIGO DUPLICADO (Estava aqui entre as linhas ~163-172)
+  // Agora o script confia que o Histórico já está no index.html e apenas busca o ID.
 
   /* ------------------ 🌫️ BACKDROP ------------------ */
   if (!el.cartBackdrop) {
@@ -1429,13 +1420,15 @@ async function carregarRecompensas(userId) {
     progressoBar.style.width = '0%';
     progressoMsg.textContent = 'Carregando metas...';
     el.recompensasLista.innerHTML = ''; 
-    if(el.historicoLista) el.historicoLista.innerHTML = '';
+    // 🚨 CORRIGIDO: Não limpa el.historicoLista se o conteúdo for um H4 estático, 
+    // apenas limpa o conteúdo para recarregar.
+    if(el.historicoLista) el.historicoLista.innerHTML = ''; 
     
     const RECOMPENSAS_DATA = await carregarConfiguracoesDeRecompensas();
 
     if (RECOMPENSAS_DATA.length === 0) {
         progressoMsg.textContent = 'Erro ao carregar metas.';
-        el.recompensasLista.innerHTML = '<p class="empty-orders" style="text-align:center;color:red;">Sistema de fidelidade offline.</p>';
+        el.recompensasLista.innerHTML = `<p class="empty-orders" style="text-align:center;color:red;">Sistema de fidelidade offline.</p>`;
         return; 
     }
     
@@ -1460,7 +1453,7 @@ async function carregarRecompensas(userId) {
 
         const proximaRecompensa = RECOMPENSAS_DATA.find(r => r.limite > feitos);
         const metaParaExibir = proximaRecompensa ? proximaRecompensa.limite : feitos; 
-        const metaBaseCalculo = proximaRecompensa ? proximaRecompensa.limite : metaPrimeiroNivel;
+        const metaBaseCalculo = proximaReximaRecompensa ? proximaRecompensa.limite : metaPrimeiroNivel;
 
         const porcentagem = proximaRecompensa === undefined ? 100 : Math.min(100, (feitos / metaBaseCalculo) * 100);
             
@@ -1724,7 +1717,17 @@ async function carregarHistoricoRecompensas(userId) {
     if (chartPedidos) chartPedidos.destroy();
     chartPedidos = new Chart(ctxPedidos, {
       type: 'line',
-      data: { labels: labelsPedidos, datasets: [{ label: 'Pedidos', data: dataPedidos, borderColor: '#ffb300', tension: 0.1 }] }
+      data: { labels: labelsPedidos, datasets: [{ label: 'Pedidos', data: dataPedidos, borderColor: '#ffb300', tension: 0.1 }] },
+      options: {
+        scales: {
+          x: {
+            ticks: {
+              maxRotation: 45, // Máxima rotação de 45 graus para legibilidade
+              minRotation: 45, // Mínima rotação de 45 graus
+            }
+          }
+        }
+      }
     });
 
     const produtosOrdenados = Object.entries(produtosContagem).sort(([, a], [, b]) => b - a).slice(0, 10);
@@ -1809,7 +1812,7 @@ async function carregarHistoricoRecompensas(userId) {
     });
   }
   
-  console.log("%c🔥 DFL v5.2.5 — Ícones + Segurança Anti-Crash", "background:#4CAF50;color:#fff;padding:5px;border-radius:5px;");
+  console.log("%c🔥 DFL v5.2.6 — Ícones + Segurança Anti-Crash", "background:#4CAF50;color:#fff;padding:5px;border-radius:5px;");
 
   // Chamada Única de Inicialização (CORREÇÃO DE BUG CRÍTICO)
   inicializarFirebase();
