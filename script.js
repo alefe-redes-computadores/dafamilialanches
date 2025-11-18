@@ -1,7 +1,7 @@
 /* =========================================================
-   🚀 DFL v5.2.4 — VERSÃO FINAL ESTÁVEL COM BLINDAGEM DE DATAS
-   - BASE: Seu arquivo v4.3 (Estável) + Integrações ViaCEP.
-   - CORREÇÃO CRÍTICA (17/11/2025): Blindagem em .forEach/.map para corrigir 'is not a function' na exibição de Pedidos e Relatórios.
+   🚀 DFL v5.2.5 — VERSÃO FINAL ESTÁVEL COM CORREÇÕES FINAIS
+   - CORREÇÃO CRÍTICA (17/11/2025): Bug NaN em Relatórios.
+   - CORREÇÃO VISUAL: Remoção de estilos inline conflitantes para usar CSS externo.
 ========================================================= */
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -1672,10 +1672,7 @@ async function carregarHistoricoRecompensas(userId) {
     document.body.appendChild(div);
     div.querySelector(".dashboard-close").addEventListener("click", () => Overlays.closeAll());
     
-    // Estilos básicos do dash
-    document.querySelectorAll(".cardBox").forEach(c => {
-      Object.assign(c.style, { flex: "1", minWidth: "200px", padding: "12px", background: "#f9f9f9", borderRadius: "8px" });
-    });
+    // REMOVIDO: Estilos básicos do dash (AGORA NO CSS)
   }
 
   function createAdminFab() {
@@ -1769,10 +1766,11 @@ async function carregarHistoricoRecompensas(userId) {
         // 3. Processamento e Exibição
         gerarResumoECharts(filtrados);
         
-        const totalVendido = filtrados.reduce((s, p) => s + (p.total || 0), 0);
+        // 🚨 CORREÇÃO DO BUG NaN: Força a conversão para Number.
+        const totalVendido = filtrados.reduce((s, p) => s + (Number(p.total) || 0), 0);
         document.getElementById("card-total").textContent = `Total: ${money(totalVendido)}`;
         document.getElementById("card-pedidos").textContent = `Pedidos: ${filtrados.length}`;
-        document.getElementById("card-ticket").textContent = `Ticket: ${money(filtrados.length ? totalVendido/filtrados.length : 0)}`;
+        document.getElementById("card-ticket").textContent = `Ticket Médio: ${money(filtrados.length ? totalVendido/filtrados.length : 0)}`;
 
         document.getElementById("export-csv").onclick = () => {
             const csv = "Data;Nome;Total\n" + filtrados.map(p => `${p.data.toLocaleString()};${p.nome};${p.total}`).join("\n");
@@ -1802,7 +1800,7 @@ async function carregarHistoricoRecompensas(userId) {
     });
   }
   
-  console.log("%c🔥 DFL v5.2.4 — Ícones + Segurança Anti-Crash", "background:#4CAF50;color:#fff;padding:5px;border-radius:5px;");
+  console.log("%c🔥 DFL v5.2.5 — Ícones + Segurança Anti-Crash", "background:#4CAF50;color:#fff;padding:5px;border-radius:5px;");
 
   // Chamada Única de Inicialização (CORREÇÃO DE BUG CRÍTICO)
   inicializarFirebase();
