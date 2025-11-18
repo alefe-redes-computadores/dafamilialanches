@@ -1,5 +1,5 @@
 /* =====================================================
-   🍔 Da Família Lanches — Extras.js (v4.1 Blindada)
+   🍔 Da Família Lanches — Extras.js (v4.1 Blindada com Correção de Observer)
    - Lógica Inteligente (Topo vs Centro)
    - Correção de Miniaturas
    - INJEÇÃO DE CSS AUTOMÁTICA (Anti-Cache)
@@ -162,7 +162,7 @@
     } catch (e) { console.warn(e); }
   });
 
-  // 5. CORREÇÃO DE MINIATURAS
+  // 5. MAPA DE MINIATURAS
   const THUMB_MAP = [
     { key: 'casal', img: 'imagens/combo1.png' },
     { key: 'família', img: 'imagens/combo3.png' },
@@ -202,14 +202,29 @@
     }
   }
 
+  // 🚨 CORREÇÃO DE ROBUSTEZ NO OBSERVADOR DE PEDIDOS
   function watchOrders() {
     const list = document.getElementById('listaPedidos');
     if (!list) return;
     
-    const mo = new MutationObserver(() => {
+    const mo = new MutationObserver((mutations) => {
+        mutations.forEach(mutation => {
+            // Verifica a adição de novos nós
+            mutation.addedNodes.forEach(node => {
+                // Garante que o nó adicionado é um elemento e tem a classe 'pedido-card'
+                if (node.nodeType === 1 && node.classList.contains('pedido-card')) {
+                    fixThumbnail(node);
+                }
+            });
+        });
+        // Tenta aplicar o fix também nos cards que já estavam lá para garantir o carregamento inicial.
         Array.from(list.children).forEach(fixThumbnail);
     });
+    
+    // Observa mudanças de elementos filhos no painel de pedidos
     mo.observe(list, { childList: true, subtree: true });
+    
+    // Tenta aplicar as miniaturas nos pedidos que já estão na lista (para carregamento inicial)
     Array.from(list.children).forEach(fixThumbnail);
   }
 
@@ -220,6 +235,7 @@
         watchOrders();
     });
   } else {
+    // Tenta inicializar imediatamente se a DOM já estiver pronta
     setupPopupObserver();
     watchOrders();
   }
