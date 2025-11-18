@@ -1,7 +1,7 @@
 /* =========================================================
    🚀 DFL v5.2.4 — VERSÃO FINAL ESTÁVEL COM BLINDAGEM DE DATAS
    - BASE: Seu arquivo v4.3 (Estável) + Integrações ViaCEP.
-   - CORREÇÃO CRÍTICA: Blindagem da função carregarRelatorios() para eliminar TypeError no processamento de datas.
+   - CORREÇÃO CRÍTICA (17/11/2025): Blindagem em .forEach/.map para corrigir 'is not a function' na exibição de Pedidos e Relatórios.
 ========================================================= */
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -108,7 +108,7 @@ document.addEventListener("DOMContentLoaded", () => {
             <h4 class="recompensas-header-secundario">📜 Histórico de Recompensas</h4>
             <div id="historicoRecompensas" style="margin-top: 15px;"></div>
         `;
-        el.historicoLista = document.getElementById("historicoReimagens");
+        el.historicoLista = document.getElementById("historicoRecompensas");
      }
   }
 
@@ -1313,6 +1313,7 @@ document.addEventListener("DOMContentLoaded", () => {
         return;
       }
 
+      // CORREÇÃO: Usando .map para garantir a estrutura correta para 'pedidos'
       const pedidos = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
       exibirPedidos(pedidos);
 
@@ -1342,7 +1343,7 @@ document.addEventListener("DOMContentLoaded", () => {
           <h4>📅 ${dataFormatada}</h4>
           <p class="pedido-info">Total: ${money(p.total)}</p>
           <div class="pedido-itens">
-            ${(p.itens || []).map(i => `• ${i}`).join('<br>')}
+            ${(Array.isArray(p.itens) ? p.itens : []).map(i => `• ${i}`).join('<br>')}
           </div>
           <button 
             class="repetir-btn" 
@@ -1493,7 +1494,8 @@ async function carregarRecompensas(userId) {
 function exibirRecompensas(pedidosFeitos, recompensasDisponiveis, cupomStatus, RECOMPENSAS_DATA) {
     if (!el.recompensasLista) return;
     
-    const recompensasHtml = recompensasDisponiveis.map(r => {
+    // 🚨 CORREÇÃO CRÍTICA AQUI: Garante que recompensasDisponiveis seja um array antes de mapear
+    const recompensasHtml = (Array.isArray(recompensasDisponiveis) ? recompensasDisponiveis : []).map(r => {
         const liberada = pedidosFeitos >= r.limite;
         const cupomJaUsado = cupomStatus?.usado === true && cupomStatus?.cupom === r.valor;
         // Anti-Crash: Converte o título para string
@@ -1699,10 +1701,15 @@ async function carregarHistoricoRecompensas(userId) {
     pedidos.forEach(p => {
       const dia = (p.data?.toDate?.() || new Date(p.data)).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' });
       pedidosPorDia[dia] = (pedidosPorDia[dia] || 0) + 1;
-      (p.itens || []).forEach(itemStr => {
+      
+      // 🚨 CORREÇÃO CRÍTICA DO TYPE ERROR (map/forEach is not a function)
+      // Garante que 'p.itens' seja um array antes de iterar.
+      const itensArray = Array.isArray(p.itens) ? p.itens : [];
+      itensArray.forEach(itemStr => {
         const nome = itemStr.split(' x')[0];
         if (nome) produtosContagem[nome] = (produtosContagem[nome] || 0) + 1;
       });
+      // --------------------------------------------------------------------
     });
 
     const labelsPedidos = Object.keys(pedidosPorDia).reverse();
@@ -1795,7 +1802,7 @@ async function carregarHistoricoRecompensas(userId) {
     });
   }
   
-  console.log("%c🔥 DFL v4.3 — Ícones + Segurança Anti-Crash", "background:#4CAF50;color:#fff;padding:5px;border-radius:5px;");
+  console.log("%c🔥 DFL v5.2.4 — Ícones + Segurança Anti-Crash", "background:#4CAF50;color:#fff;padding:5px;border-radius:5px;");
 
   // Chamada Única de Inicialização (CORREÇÃO DE BUG CRÍTICO)
   inicializarFirebase();
