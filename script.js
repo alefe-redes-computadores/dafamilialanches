@@ -1,7 +1,7 @@
 /* =========================================================
    🚀 DFL v5.2.5 — VERSÃO FINAL ESTÁVEL COM CORREÇÕES FINAIS
-   - CORREÇÃO CRÍTICA (17/11/2025): Bug NaN em Relatórios.
-   - CORREÇÃO FINAL DE IMAGEM: O campo 'thumb' é salvo como vazio, permitindo que o extras.js defina o ícone.
+   - CORREÇÃO CRÍTICA (18/11/2025): Bug NaN em Relatórios.
+   - CORREÇÃO FINAL DE EXIBIÇÃO: Garante que a lista de itens seja exibida (usando p.itensObj como fallback).
 ========================================================= */
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -98,7 +98,7 @@ document.addEventListener("DOMContentLoaded", () => {
     recompensasPanel: document.getElementById("recompensas-panel"),
     recompensasFecharBtn: document.querySelector(".fechar-recompensas"),
     recompensasLista: document.getElementById("listaRecompensas"),
-    historicoLista: document.getElementById("historicoRecompensas") 
+    historicoLista: document.getElementById("historicoReimagens") 
   };
   
   if (!el.historicoLista) {
@@ -108,7 +108,7 @@ document.addEventListener("DOMContentLoaded", () => {
             <h4 class="recompensas-header-secundario">📜 Histórico de Recompensas</h4>
             <div id="historicoRecompensas" style="margin-top: 15px;"></div>
         `;
-        el.historicoLista = document.getElementById("historicoReimagens");
+        el.historicoLista = document.getElementById("historicoRecompensas");
      }
   }
 
@@ -1339,13 +1339,20 @@ document.addEventListener("DOMContentLoaded", () => {
 
       const podeRepetir = Array.isArray(p.itensObj) && p.itensObj.length > 0;
       
+      // 🚨 CORREÇÃO DE EXIBIÇÃO DE ITENS: 
+      // 1. Tenta usar p.itens (a lista formatada), que deve ser um array de strings (corrigido anteriormente).
+      // 2. Se for vazio ou string, usa p.itensObj para RECONSTRUIR a lista (mais seguro).
+      const itensParaExibir = (Array.isArray(p.itens) && p.itens.length > 0) ? p.itens.join('<br>') : 
+                             (p.itensObj && p.itensObj.length > 0) ? p.itensObj.map(i => `• ${i.nome} x${i.qtd}`).join('<br>') : 
+                             '• Sem itens registrados no pedido'; // Fallback final
+
       return `
         <div class="pedido-card">
           <div class="pedido-thumb" style="background-image:url('${thumbUrl}');"></div>
           <h4>📅 ${dataFormatada}</h4>
           <p class="pedido-info">Total: ${money(p.total)}</p>
           <div class="pedido-itens">
-            ${(Array.isArray(p.itens) ? p.itens : []).map(i => `• ${i}`).join('<br>')}
+            ${itensParaExibir}
           </div>
           <button 
             class="repetir-btn" 
@@ -1428,7 +1435,7 @@ async function carregarRecompensas(userId) {
 
     if (RECOMPENSAS_DATA.length === 0) {
         progressoMsg.textContent = 'Erro ao carregar metas.';
-        el.recompensasLista.innerHTML = '<p style="text-align:center;color:red;">Sistema de fidelidade offline.</p>';
+        el.recompensasLista.innerHTML = '<p class="empty-orders" style="text-align:center;color:red;">Sistema de fidelidade offline.</p>';
         return; 
     }
     
@@ -1475,7 +1482,7 @@ async function carregarRecompensas(userId) {
             exibirRecompensas(feitos, recompensasObtidas, cupomStatus, RECOMPENSAS_DATA); 
 
             if (recompensasObtidas.length === 0) {
-                 el.recompensasLista.innerHTML = `<p style="text-align:center;color:#666;margin-top:20px;">Faça ${faltam} pedidos para desbloquear a primeira recompensa.</p>`;
+                 el.recompensasLista.innerHTML = `<p class="empty-orders" style="text-align:center;color:#666;margin-top:20px;">Faça ${faltam} pedidos para desbloquear a primeira recompensa.</p>`;
             }
 
         } else {
@@ -1572,7 +1579,7 @@ function exibirRecompensas(pedidosFeitos, recompensasDisponiveis, cupomStatus, R
 
 async function carregarHistoricoRecompensas(userId) {
     if (!el.historicoLista) return;
-    el.historicoLista.innerHTML = `<p style="text-align:center;color:#999;">Carregando...</p>`;
+    el.historicoLista.innerHTML = `<p class="empty-orders" style="text-align:center;color:#999;">Carregando...</p>`;
     try {
         const q = db.collection("Usuarios").doc(userId)
                     .collection("RecompensasRecebidas")
@@ -1580,7 +1587,7 @@ async function carregarHistoricoRecompensas(userId) {
         const snapshot = await q.get();
 
         if (snapshot.empty) {
-            el.historicoLista.innerHTML = `<p style="text-align:center;color:#999;">Nenhuma recompensa no histórico.</p>`;
+            el.historicoLista.innerHTML = `<p class="empty-orders" style="text-align:center;color:#999;">Nenhuma recompensa no histórico.</p>`;
             return;
         }
 
