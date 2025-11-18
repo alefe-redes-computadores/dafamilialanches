@@ -1,7 +1,7 @@
 # 🍔 Da Família Lanches  
 
 Site oficial da **Da Família Lanches (DFL)** — uma lanchonete mineira que combina sabor, qualidade e alegria em cada lanche.  
-Feito com ❤️ e muito sabor, direto de Minas Gerais!
+Feito com ❤️ e muito sabor, direto de Minas Gerais
 
 ---
 
