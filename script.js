@@ -1,6 +1,6 @@
 /* =========================================================
-   🚀 DFL v5.2.9 — CORREÇÃO CRÍTICA DE FRETE ARRAY E BUSCA FLEXÍVEL
-   - CORREÇÃO (18/11/2025): Implementação de lógica de busca por substring após falha na busca exata.
+   🚀 DFL v5.2.9 — CORREÇÃO FINAL DE ESTABILIDADE E FRETE ARRAY
+   - CORREÇÃO CRÍTICA: Adição da função normalizeSlug e lógica de busca Array/Flexível.
 ========================================================= */
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -407,11 +407,7 @@ document.addEventListener("DOMContentLoaded", () => {
       renderMiniCart();
       Overlays.open(el.miniCart);
   });
-// ... continuação da Parte 1 (fim)
-
-// ----------------------------------------------------------------------------------
-// INÍCIO DA PARTE 2 DE 2
-// ----------------------------------------------------------------------------------
+// ... continuação da Parte 1
 
   /* ------------------ ➕ ADICIONAIS ------------------ */
   const adicionais = [
@@ -753,43 +749,40 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     // 2. Tenta encontrar a taxa no array cacheado - BUSCA EXATA NORMALIZADA
+    let foundItem = null;
     if (bairroSlug && globalFeesArrayCache.length > 0) {
-      const exactItem = globalFeesArrayCache.find(item => 
+      foundItem = globalFeesArrayCache.find(item => 
           item.nome && normalizeSlug(item.nome) === bairroSlug
       );
 
-      if (exactItem) {
-        let taxa = Number(exactItem.taxa); 
+      if (foundItem) {
+        let taxa = Number(foundItem.taxa); 
         if (!isNaN(taxa) && taxa >= 0) {
+          console.log(`FW: Taxa encontrada por busca EXATA: ${foundItem.nome}`);
           return taxa; // TAXA ENCONTRADA POR EXATA
         }
       }
     }
     
     // 🚨 2.5. NOVA BUSCA FLEXÍVEL (Se a busca exata falhou)
-    if (bairroSlug && globalFeesArrayCache.length > 0) {
-        // Itera para ver se o nome do bairro no Firebase contém o termo buscado.
+    if (!foundItem && bairroSlug && globalFeesArrayCache.length > 0) {
+        // Opção: Tenta encontrar o termo principal
+        const termosBuscados = bairroSlug.split('-');
+        let termoPrincipal = bairroSlug;
+
+        if (termosBuscados.length > 1) {
+            termoPrincipal = termosBuscados[termosBuscados.length - 1]; 
+        }
+
         const flexibleItem = globalFeesArrayCache.find(item => {
             if (item.nome) {
                 const itemSlug = normalizeSlug(item.nome);
                 
-                // 1. Verifica se o nome do item no Firebase CONTÉM o slug do ViaCEP
+                // 1. Verifica se o nome do item no Firebase CONTÉM o slug completo do ViaCEP
                 if (itemSlug.includes(bairroSlug)) return true;
                 
-                // 2. Verifica se o slug do ViaCEP CONTÉM o nome do item no Firebase (Útil para Alto dos Caiçaras vs Caiçaras)
-                // Usaremos a lógica mais simples e robusta para evitar falsos positivos
-                
-                // Exemplo: Se o ViaCEP for 'alto-dos-caicaras' e o Firebase for 'caicaras', e 'alto-dos-caicaras' não achou.
-                // Isso requer mais lógica para remover prefixos comuns como 'alto', 'dos', 'da', etc.
-                
-                // Vamos tentar a busca por partes do termo, como 'caicaras'.
-                const termosBuscados = bairroSlug.split('-');
-                if (termosBuscados.length > 1) {
-                    const termoPrincipal = termosBuscados[termosBuscados.length - 1]; // Ex: 'caicaras'
-                    if (itemSlug.includes(termoPrincipal) && termoPrincipal.length > 3) {
-                         return true;
-                    }
-                }
+                // 2. Verifica se o nome do item no Firebase CONTÉM o termo principal (ex: 'caicaras')
+                if (termoPrincipal.length > 3 && itemSlug.includes(termoPrincipal)) return true;
             }
             return false;
         });
@@ -797,7 +790,7 @@ document.addEventListener("DOMContentLoaded", () => {
         if (flexibleItem) {
             let taxa = Number(flexibleItem.taxa);
             if (!isNaN(taxa) && taxa >= 0) {
-                console.log(`FW: Taxa encontrada via busca flexível: ${flexibleItem.nome}`);
+                console.log(`FW: Taxa encontrada via busca FLEXÍVEL/Substring: ${flexibleItem.nome}`);
                 return taxa; // TAXA ENCONTRADA VIA SUBSTRING!
             }
         }
@@ -913,10 +906,6 @@ document.addEventListener("DOMContentLoaded", () => {
     } else if (cepInput && cepValue.length === 8 && enderecoAuto && enderecoAuto.value) {
         // Se CEP foi buscado e endereço preenchido (modo CEP)
         const enderecoAutoValue = enderecoAuto.value.trim();
-
-        // Extrai cidade a partir de "(Cidade/UF)"
-        // const localidadeMatch = enderecoAutoValue.match(/\((.*?)\/.*?\)/);
-        // const cidade = localidadeMatch ? localidadeMatch[1] : ''; // Cidade não usada na busca de array, mas mantida
 
         // Tenta extrair o bairro a partir de "Rua X - Bairro Y (Cidade/UF)"
         let bairro = '';
@@ -1756,7 +1745,7 @@ async function carregarHistoricoRecompensas(userId) {
     });
   }
   
-  console.log("%c🔥 DFL v5.2.8 — Ícones + Segurança Anti-Crash", "background:#4CAF50;color:#fff;padding:5px;border-radius:5px;");
+  console.log("%c🔥 DFL v5.2.9 — Ícones + Segurança Anti-Crash", "background:#4CAF50;color:#fff;padding:5px;border-radius:5px;");
 
   // Chamada Única de Inicialização (CORREÇÃO DE BUG CRÍTICO)
   inicializarFirebase();
