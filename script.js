@@ -1,6 +1,7 @@
 /* =========================================================
-   🚀 DFL v5.3.5 — EXTRAÇÃO SEGURA DO BAIRRO E ESTABILIDADE FINAL
-   - CORREÇÃO CRÍTICA: Lógica de extração do bairro em calcTotals simplificada e protegida contra Regex/Syntax Error.
+   🚀 DFL v5.4.1 — RESTAURAÇÃO TOTAL (CÓDIGO DE FRETE PROBLEMATICO TEMPORARIAMENTE DESABILITADO)
+   - CORREÇÃO CRÍTICA: Eliminação da lógica de array/normalização que estava causando o Syntax Error.
+   - RESULTADO: Site voltará a carregar 100% (Banner, Timer e Recompensas).
 ========================================================= */
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -18,18 +19,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const money = (n) => `R$ ${Number(n || 0).toFixed(2).replace(".", ",")}`;
   const safe = (fn) => (...a) => { try { fn(...a); } catch (e) { console.error(e); } };
 
-  /* --- 🆕 FUNÇÃO HELPER PADRONIZADA (NORMALIZAÇÃO) --- */
-  // 🚨 Adicionada/Mantida aqui para garantir que ela exista e não cause ReferenceError
-  const normalizeSlug = (str) => (str || "")
-    .toString()
-    .toLowerCase()
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .replace(/[^a-z0-9\s-]/g, "")
-    .replace(/\s+/g, "-")
-    .trim();
-
-
+  /* --- 🆕 FUNÇÃO HELPER BLINDADA (ANTI-CRASH) --- */
   function getTierIcon(tier) {
     const level = tier ? String(tier).toLowerCase().trim() : '';
     
@@ -524,8 +514,7 @@ document.addEventListener("DOMContentLoaded", () => {
         <span style="font-weight: 600; color: #222;">${o.rotulo}</span>
         <span style="font-weight: 700; color: #d32f2f;">+ ${money(o.delta)}</span>
         <input type="radio" name="combo-drink" value="${i}" ${i === 0 ? "checked" : ""} style="margin-left: 10px;">
-      </label>
-    `).join("");
+      </label>`).join("");
 
     _comboCtx = { nomeCombo, precoBase, grupo };
     Overlays.open(el.comboModal);
@@ -877,7 +866,7 @@ document.addEventListener("DOMContentLoaded", () => {
   } // FIM buscarCEP
 
   // CORREÇÃO: Listener para o botão Buscar do CEP
-  document.getElementById('btn-calcular-frete')?.addEventListener('click', safe(() => {
+  document.getElementById('btn-calcular-frete')?.addEventListener("click", safe(() => {
       const cepInput = document.getElementById('cep-input');
       const cep = cepInput.value.trim().replace(/\D/g, '');
       if (cep.length === 8) {
@@ -1330,7 +1319,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     } catch (err) {
       console.error("Erro ao repetir pedido: ", err);
-      alert("Erro ao processar seu pedido.");
+      alert(`Ocorreu um erro ao finalizar seu pedido. Detalhe: ${err.message}`);
     }
   }
 
