@@ -1,8 +1,5 @@
-/* ===========================================================
-   🎨 Da Família Lanches – CSS Principal (v5.0)
-   - Ajuste de Estilos para Campos ViaCEP Ativados.
-   - NOVO: Estilos para Admin Dashboard (PC/Mobile) - Otimizado para Usabilidade
-   =========================================================== */
+/* 🎨 Da Família Lanches – CSS Principal (v5.3) */
+
 
 /* ======== ELEMENTOS BÁSICOS ======== */
 :root {
@@ -620,3 +617,22 @@ section h2 { font-size: 1.3rem; text-align: center; margin-bottom: 15px; color: 
         min-width: 100%;
     }
 }
+
+
+/* ===== Endereço Auto (v5.3 – Clean, scroll invisível) ===== */
+#endereco-auto {
+    font-size: 13px !important;
+    padding: 6px 10px !important;
+    line-height: 1.2 !important;
+
+    white-space: nowrap;
+    overflow-x: auto;
+    overflow-y: hidden;
+    -webkit-overflow-scrolling: touch;
+
+    scrollbar-width: none;
+}
+#endereco-auto::-webkit-scrollbar {
+    display: none;
+}
+
