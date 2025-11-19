@@ -215,6 +215,36 @@ section h2 { font-size: 1.3rem; text-align: center; margin-bottom: 15px; color: 
 .frete-container h4 { margin: 0 0 10px 0; font-size: 1rem; color: #222; }
 .frete-cep-group { display: flex; gap: 8px; margin-bottom: 8px; }
 
+/* Campos de CEP, endereço, número e complemento padronizados */
+.frete-container input[type="text"] {
+  padding: 8px 10px;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  font-size: 0.9rem;
+  box-sizing: border-box;
+}
+
+/* CEP ocupa o espaço flex dentro do grupo */
+.frete-cep-group input[type="text"] {
+  flex: 1;
+}
+
+/* Campo de endereço longo com elipse para não quebrar o layout */
+.input-endereco-longo {
+  margin-bottom: 8px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Número e complemento alinhados e com o mesmo visual dos demais inputs */
+.endereco-duplo input[type="text"] {
+  padding: 8px 10px;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  font-size: 0.9rem;
+}
+
 /* Estilo para inputs de endereço (serão ativados via JS) */
 .mini-foot input[type="text"]:not(#coupon-input),
 .mini-foot input[type="number"],
