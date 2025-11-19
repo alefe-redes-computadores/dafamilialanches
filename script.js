@@ -6,7 +6,19 @@
    - CORREÇÃO FIREBASE (CAMINHO EXATO DA ESTRUTURA ANINHADA)
 ========================================================= */  
   
-document.addEventListener("DOMContentLoaded", () => {  
+document.addEventListener("DOMContentLoaded", () => {
+    // MÁSCARA AUTOMÁTICA DO CEP (v5.3)
+    const cepInputMask = document.getElementById("cep-input");
+    if (cepInputMask) {
+        cepInputMask.addEventListener("input", function(e) {
+            let v = e.target.value.replace(/\D/g, "");
+            if (v.length > 5) {
+                v = v.slice(0, 5) + "-" + v.slice(5, 8);
+            }
+            e.target.value = v;
+        });
+    }
+  
   /* ------------------ ⚙️ BASE ------------------ */  
   const sound = new Audio("click.wav");   
   let cart = [];  
@@ -17,140 +29,9 @@ document.addEventListener("DOMContentLoaded", () => {
   // Adicionado um limite (o valor que estava faltando na discussão anterior) para simular o frete grátis do cupom.  
   // NOTE: Se o limite para FRETE GRÁTIS POR VALOR for diferente do cupom, este valor deve ser ajustado.  
   // Mantendo a lógica de frete grátis apenas via cupom e frete normal por localidade.  
-  const LIMITE_PARA_FRETE_GRATIS_POR_VALOR = 200.00;   
+  const LIMITE_PARA_FRETE_GRATIS_POR_VALOR =  80.00;   
   
-  let deliveryFeesCache = null;
-
-// ============================================================
-// FRETE DINÂMICO — V5.2 DEFINITIVA (CORRIGIDA COM CAMINHO FIREBASE ANINHADO)
-// Extrai o bairro corretamente do endereço completo
-// Normaliza, tenta match EXATO e depois por palavra-chave
-// ============================================================
-
-async function getDynamicDeliveryFee(enderecoCompleto) {
-    const DELIVERY_FEE = DELIVERY_FEE_DEFAULT;
-
-    // 1. SE NÃO HOUVER ENDEREÇO, RETORNA FALLBACK
-    if (!enderecoCompleto || typeof enderecoCompleto !== "string") {
-        console.warn("FW: Endereço vazio, usando fallback.");
-        return DELIVERY_FEE;
-    }
-
-    // ------------------------------------------------------------
-    // 2. EXTRAI O BAIRRO DO FORMATO:
-    //    "Rua Netuno - Jardim Andrades (Patos de Minas/MG)"
-    // ------------------------------------------------------------
-
-    let bairroExtraido = "";
-
-    try {
-        const partePrincipal = enderecoCompleto.split("(")[0].trim(); // remove a cidade
-
-        const partes = partePrincipal.split(" - ");
-        // Tenta pegar a parte entre a Rua e o parênteses (ex: "Jardim Andrades")
-        bairroExtraido = partes.length > 1 ? partes[1].trim() : partePrincipal.trim();
-
-    } catch (_) {
-        console.warn("FW: Falha ao extrair bairro. Usando fallback.");
-        return DELIVERY_FEE;
-    }
-
-    // ------------------------------------------------------------
-    // 3. NORMALIZA O BAIRRO PARA COMPARAÇÃO
-    // ------------------------------------------------------------
-
-    const bairroClean = bairroExtraido
-        .toLowerCase()
-        .normalize("NFD")
-        .replace(/[\u0300-\u036f]/g, "")
-        .trim();
-
-    // ------------------------------------------------------------
-    // 4. GARANTE QUE O CACHE FOI CARREGADO DO FIREBASE
-    // ------------------------------------------------------------
-
-    try {
-        if (isFirebaseInitialized && !deliveryFeesCache) {
-
-            console.warn("FW: Carregando taxas do Firebase (Bairros)...");
-            
-            // 🚨 CAMINHO CORRETO ANINHADO:
-            // TaxasDeEntrega / bairros / lista / tabela  (campo: data [array de bairros])
-            const snap = await db
-                .collection("TaxasDeEntrega")
-                .doc("bairros")
-                .collection("lista")
-                .doc("tabela")
-                .get();
-
-            if (!snap.exists) {
-                console.warn("FW: Documento 'tabela' dentro de 'lista' não encontrado. Fallback.");
-                return DELIVERY_FEE;
-            }
-
-            const arr = snap.data()?.data || [];
-
-            deliveryFeesCache = {};
-
-            arr.forEach(item => {
-                if (!item || !item.nome) return;
-
-                const key = item.nome
-                    .toLowerCase()
-                    .normalize("NFD")
-                    .replace(/[\u0300-\u036f]/g, "")
-                    .trim();
-
-                const valor = Number(item.taxa);
-
-                if (!isNaN(valor) && valor >= 0) {
-                    deliveryFeesCache[key] = valor;
-                }
-            });
-            
-            console.log("FW: Cache de taxas carregado com sucesso.");
-        }
-    } catch (e) {
-        console.warn("FW: Erro ao carregar taxas. Usando fallback.", e);
-        return DELIVERY_FEE;
-    }
-
-    if (!deliveryFeesCache) return DELIVERY_FEE;
-
-    // ------------------------------------------------------------
-    // 5. BUSCA EXATA PELO BAIRRO
-    // ------------------------------------------------------------
-
-    if (deliveryFeesCache[bairroClean] !== undefined) {
-        console.log(`FW: Match Exato para ${bairroClean}. Taxa: ${deliveryFeesCache[bairroClean]}`);
-        return deliveryFeesCache[bairroClean];
-    }
-
-    // ------------------------------------------------------------
-    // 6. BUSCA "POR PALAVRA-CHAVE" (SUBSTRING)
-    //    Exemplo: Jardim Andrades → andrades
-    // ------------------------------------------------------------
-
-    const palavras = bairroClean.split(" ");
-
-    for (const palavra of palavras) {
-        if (palavra.length < 4) continue; // ignora palavras muito curtas
-
-        for (const key in deliveryFeesCache) {
-            if (key.includes(palavra)) {
-                console.log(`FW: Match Palavra-Chave '${palavra}' em ${key}. Taxa: ${deliveryFeesCache[key]}`);
-                return deliveryFeesCache[key];
-            }
-        }
-    }
-
-    // ------------------------------------------------------------
-    // 7. FALLBACK FINAL (pode ser o valor da cidade, se houver, ou o padrão)
-    // ------------------------------------------------------------
-    console.warn(`FW: Bairro não mapeado (${bairroExtraido}). Fallback R$ ${DELIVERY_FEE}.`);
-    return DELIVERY_FEE;
-}
-   
+  let deliveryFeesCache = null;   
   
   const money = (n) => `R$ ${Number(n || 0).toFixed(2).replace(".", ",")}`;  
   const safe = (fn) => (...a) => { try { fn(...a); } catch (e) { console.error(e); } };  
@@ -920,7 +801,7 @@ async function getDynamicDeliveryFee(enderecoCompleto) {
   
         try {  
             // A função getDynamicDeliveryFee agora espera o endereço completo para extrair o bairro  
-            // O getDynamicDeliveryFee agora está DENTRO do DOMContentLoaded (usa DELIVERY_FEE_DEFAULT com escopo correto)
+            // O getDynamicDeliveryFee está fora do DOMContentLoaded
             deliveryFee = await getDynamicDeliveryFee(enderecoCompleto);   
         } catch(e) {  
             console.error("Erro no cálculo do frete dinâmico:", e);  
@@ -963,7 +844,8 @@ async function getDynamicDeliveryFee(enderecoCompleto) {
       return;   
     }  
   
-    const { subtotal, delivery, discount, total, cupomInfo } = await calcTotals();  
+    const { subtotal, delivery, discount, total, cupomInfo } = await calcTotals();
+  const deliveryLabel = delivery === 0 ? "Grátis 🎉" : money(delivery);  
   
     if (couponMsg) {  
       couponMsg.textContent = cupomInfo.mensagem;  
@@ -995,7 +877,7 @@ async function getDynamicDeliveryFee(enderecoCompleto) {
         <span>Subtotal</span><b>${money(subtotal)}</b>  
       </div>  
       <div class="summary-row">  
-        <span>Entrega</span><b>${money(delivery)}</b>  
+        <span>Entrega</span><b>${deliveryLabel}</b>  
       </div>  
         
       <div class="summary-row" style="display:flex;justify-content:space-between;align-items:center;border-top:1px solid #eee;padding-top:10px;margin: 10px 0;font-size:1.1rem;">  
@@ -1939,4 +1821,137 @@ document.addEventListener('DOMContentLoaded', () => {
     document.querySelectorAll('.active').forEach(e => e.classList.remove('active'));  
   });  
 });
+// ============================================================
+// FRETE DINÂMICO — V5.2 DEFINITIVA (CORRIGIDA COM CAMINHO FIREBASE ANINHADO)
+// Extrai o bairro corretamente do endereço completo
+// Normaliza, tenta match EXATO e depois por palavra-chave
+// ============================================================
+
+async function getDynamicDeliveryFee(enderecoCompleto) {
+    const DELIVERY_FEE = DELIVERY_FEE_DEFAULT;
+
+    // 1. SE NÃO HOUVER ENDEREÇO, RETORNA FALLBACK
+    if (!enderecoCompleto || typeof enderecoCompleto !== "string") {
+        console.warn("FW: Endereço vazio, usando fallback.");
+        return DELIVERY_FEE;
+    }
+
+    // ------------------------------------------------------------
+    // 2. EXTRAI O BAIRRO DO FORMATO:
+    //    "Rua Netuno - Jardim Andrades (Patos de Minas/MG)"
+    // ------------------------------------------------------------
+
+    let bairroExtraido = "";
+
+    try {
+        const partePrincipal = enderecoCompleto.split("(")[0].trim(); // remove a cidade
+
+        const partes = partePrincipal.split(" - ");
+        // Tenta pegar a parte entre a Rua e o parênteses (ex: "Jardim Andrades")
+        bairroExtraido = partes.length > 1 ? partes[1].trim() : partePrincipal.trim();
+
+    } catch (_) {
+        console.warn("FW: Falha ao extrair bairro. Usando fallback.");
+        return DELIVERY_FEE;
+    }
+
+    // ------------------------------------------------------------
+    // 3. NORMALIZA O BAIRRO PARA COMPARAÇÃO
+    // ------------------------------------------------------------
+
+    const bairroClean = bairroExtraido
+        .toLowerCase()
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .trim();
+
+    // ------------------------------------------------------------
+    // 4. GARANTE QUE O CACHE FOI CARREGADO DO FIREBASE
+    // ------------------------------------------------------------
+
+    try {
+        if (isFirebaseInitialized && !deliveryFeesCache) {
+
+            console.warn("FW: Carregando taxas do Firebase (Bairros)...");
+            
+            // 🚨 CORREÇÃO CRÍTICA DO CAMINHO ANINHADO (CONFIRMADO PELAS IMAGENS)
+            // Caminho correto: TaxasDeEntrega / bairros / lista / tabela
+            const snap = await db
+                .collection("TaxasDeEntrega")
+                .doc("bairros")
+                .collection("lista")
+                .doc("tabela")
+                .get();
+
+            if (!snap.exists) {
+                console.warn("FW: Documento 'tabela' dentro de 'lista' não encontrado. Fallback.");
+                return DELIVERY_FEE;
+            }
+
+            // O campo que contém o array de bairros é 'data' (CONFIRMADO NA IMAGEM 4)
+            const arr = snap.data()?.data || [];
+
+            // MONTA O CACHE
+            deliveryFeesCache = {};
+
+            arr.forEach(item => {
+                // Os itens do array têm os campos 'nome' e 'taxa' (CONFIRMADO NA IMAGEM 4)
+                if (!item || !item.nome) return;
+
+                const key = item.nome
+                    .toLowerCase()
+                    .normalize("NFD")
+                    .replace(/[\u0300-\u036f]/g, "")
+                    .trim();
+
+                const valor = Number(item.taxa);
+
+                if (!isNaN(valor) && valor >= 0) {
+                    deliveryFeesCache[key] = valor;
+                }
+            });
+            
+            console.log("FW: Cache de taxas carregado com sucesso.");
+        }
+    } catch (e) {
+        console.warn("FW: Erro ao carregar taxas. Usando fallback.", e);
+        return DELIVERY_FEE;
+    }
+
+    if (!deliveryFeesCache) return DELIVERY_FEE;
+
+    // ------------------------------------------------------------
+    // 5. BUSCA EXATA PELO BAIRRO
+    // ------------------------------------------------------------
+
+    if (deliveryFeesCache[bairroClean] !== undefined) {
+        console.log(`FW: Match Exato para ${bairroClean}. Taxa: ${deliveryFeesCache[bairroClean]}`);
+        return deliveryFeesCache[bairroClean];
+    }
+
+    // ------------------------------------------------------------
+    // 6. BUSCA "POR PALAVRA-CHAVE" (SUBSTRING)
+    //    Exemplo: Jardim Andrades → andrades
+    // ------------------------------------------------------------
+
+    const palavras = bairroClean.split(" ");
+
+    for (const palavra of palavras) {
+        if (palavra.length < 4) continue; // ignora palavras muito curtas
+
+        for (const key in deliveryFeesCache) {
+            if (key.includes(palavra)) {
+                console.log(`FW: Match Palavra-Chave '${palavra}' em ${key}. Taxa: ${deliveryFeesCache[key]}`);
+                return deliveryFeesCache[key];
+            }
+        }
+    }
+
+    // ------------------------------------------------------------
+    // 7. FALLBACK FINAL (pode ser o valor da cidade, se houver, ou o padrão)
+    // ------------------------------------------------------------
+    console.warn(`FW: Bairro não mapeado (${bairroExtraido}). Fallback R$ ${DELIVERY_FEE}.`);
+    return DELIVERY_FEE;
+}
+
 // ============================================================
