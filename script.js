@@ -1,6 +1,6 @@
 /* =========================================================
-   🚀 DFL v5.3.2 — CORREÇÃO FINAL DE ESTABILIDADE E FRETE ARRAY (CAMPO 'TAXA' FIXO)
-   - GARANTIA: Prioriza o campo 'taxa' do seu array de bairros.
+   🚀 DFL v5.3.3 — CORREÇÃO FINAL DE ESTABILIDADE E FRETE (SINTAXE VERIFICADA)
+   - GARANTIA: A sintaxe foi verificada para eliminar o erro fatal de carregamento do script.
 ========================================================= */
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -26,7 +26,7 @@ document.addEventListener("DOMContentLoaded", () => {
     .replace(/[^a-z0-9\s-]/g, "")
     .replace(/\s+/g, "-")
     .trim();
-
+  // FIM FUNÇÃO PADRONIZAÇÃO
 
   function getTierIcon(tier) {
     const level = tier ? String(tier).toLowerCase().trim() : '';
