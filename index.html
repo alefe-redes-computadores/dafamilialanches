@@ -84,20 +84,17 @@
         <div class="frete-container" aria-disabled="true">
           <h4 style="margin-top:10px;">🚚 Entrega</h4>
           
-          <div class="frete-cep-group" style="display:flex;gap:8px;margin:10px 0;">
-            <input id="cep-input" type="text" placeholder="Digite o CEP" maxlength="9"
-                   style="flex:1;padding:8px;border:1px solid #ccc;border-radius:8px;">
-            
-            <button id="btn-calcular-frete" class="btn-calcular-frete" type="button"
-                    style="background:var(--botao); color:#222; border:none; padding:8px 12px; border-radius:8px; font-weight:700; cursor:pointer;">
+          <div class="frete-cep-group">
+            <input id="cep-input" type="text" placeholder="Digite o CEP" maxlength="9">
+
+            <button id="btn-calcular-frete" class="btn-calcular-frete" type="button">
               Buscar
             </button>
           </div>
 
-          <input id="endereco-auto" type="text" placeholder="Rua e Bairro (Preenchido via CEP)" 
-                 style="width:100%;padding:8px;border:1px solid #ccc;border-radius:8px;margin-bottom:8px;">
+          <input id="endereco-auto" type="text" class="input-endereco-longo" placeholder="Rua e Bairro (Preenchido via CEP)">
 <p class="frete-gratis-aviso">
-    💛 Frete grátis acima de R$ 80,00 (até 5 km). Um mimo da DFL pra matar a fome sem pesar no bolso 😋
+rete grátis acima de R$ 80,00 (até 5 km). Um mimo da DFL pra matar a fome sem pesar no bolso 😋
 </p>
 
 
