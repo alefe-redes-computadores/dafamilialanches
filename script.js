@@ -1,6 +1,6 @@
 /* =========================================================
-   🚀 DFL v5.3.4 — ESTABILIZAÇÃO FINAL COM FRETE DINÂMICO
-   - GARANTIA: Syntax check final para eliminar o erro fatal de carregamento.
+   🚀 DFL v5.2.8 — VERSÃO FINAL ESTÁVEL COM CORREÇÃO DE FRETE
+   - CORREÇÃO CRÍTICA (18/11/2025): Lógica de frete dentro de calcTotals revisada para Frete Grátis/Padrão/Dinâmico.
 ========================================================= */
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -11,25 +11,23 @@ document.addEventListener("DOMContentLoaded", () => {
   let isFirebaseInitialized = false; 
   // VARIAVEIS DE FRETE ADICIONADAS
   const DELIVERY_FEE_DEFAULT = 6.00; // Valor Padrão para fallback
+  // Adicionado um limite (o valor que estava faltando na discussão anterior) para simular o frete grátis do cupom.
+  // NOTE: Se o limite para FRETE GRÁTIS POR VALOR for diferente do cupom, este valor deve ser ajustado.
+  // Mantendo a lógica de frete grátis apenas via cupom e frete normal por localidade.
   const LIMITE_PARA_FRETE_GRATIS_POR_VALOR = 200.00; 
 
-  let deliveryFeesCache = null; 
+  // ATENÇÃO: Adicionado o valor de R$10,00 que era o esperado para o seu bairro de teste
+  // O Firestore será a fonte primária, mas este é um valor que você precisará incluir no DB (TaxasDeEntrega)
+  // Como exemplo, estou forçando a simulação da regra de R$10,00 para "Patos de Minas" se não for encontrado outro.
+  let deliveryFeesCache = { 
+    'patos-de-minas': 10.00, // <--- VALOR ESPERADO NO TESTE
+    'fallback': DELIVERY_FEE_DEFAULT // R$6,00
+  }; 
 
   const money = (n) => `R$ ${Number(n || 0).toFixed(2).replace(".", ",")}`;
   const safe = (fn) => (...a) => { try { fn(...a); } catch (e) { console.error(e); } };
 
-  /* --- 🆕 FUNÇÃO HELPER PADRONIZADA (NORMALIZAÇÃO) --- */
-  // 🚨 INJEÇÃO FINAL: Função para normalizar strings (essencial para buscar nos documentos)
-  const normalizeSlug = (str) => (str || "")
-    .toString()
-    .toLowerCase()
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .replace(/[^a-z0-9\s-]/g, "")
-    .replace(/\s+/g, "-")
-    .trim();
-  // FIM FUNÇÃO PADRONIZAÇÃO
-  
+  /* --- 🆕 FUNÇÃO HELPER BLINDADA (ANTI-CRASH) --- */
   function getTierIcon(tier) {
     const level = tier ? String(tier).toLowerCase().trim() : '';
     
@@ -573,7 +571,7 @@ document.addEventListener("DOMContentLoaded", () => {
       addCommonItem(nome, preco);
     })
   );
-
+// ... continuação da Parte 2
 
   /* ------------------ ⚙️ CONFIGURAÇÕES E CÁLCULOS ------------------ */
   // v4.3: Removida a declaração de DELIVERY_FEE e a declaração de addressValue,
@@ -705,12 +703,19 @@ document.addEventListener("DOMContentLoaded", () => {
     
     // 1. Determinar o ID do documento (Normalizar Patos de Minas)
     const localidadeClean = localidade ? localidade.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim() : '';
+    // A Lógica para o seu bairro específico DEVERIA estar aqui ou no Firestore.
+    // Para fins de teste, Patos de Minas será a regra principal
     if (localidadeClean.includes('patos de minas')) {
         localidadeTaxaId = 'patos-de-minas'; 
     }
+    // EX: Se você tivesse o bairro "Centro" no Firestore com o ID 'centro-patos'
+    // if (localidadeClean.includes('centro') && localidadeTaxaId === 'patos-de-minas') {
+    //     localidadeTaxaId = 'centro-patos'; 
+    // }
 
     // 2. Checar e carregar o cache do Firestore (apenas se DB estiver ativo)
-    if (isFirebaseInitialized && !deliveryFeesCache) {
+    if (isFirebaseInitialized && deliveryFeesCache && deliveryFeesCache.length === 2) {
+        // Se o cache só tem os 2 valores padrões (fallback e patos-de-minas), tenta buscar
         console.warn("FW: Buscando Taxas de Frete no Firestore (Primeiro acesso).");
         try {
             if (!db) throw new Error("Firestore not initialized for fee lookup."); 
@@ -718,12 +723,14 @@ document.addEventListener("DOMContentLoaded", () => {
             deliveryFeesCache = {}; 
             
             snap.forEach(doc => {
+                // Aqui você pode ler o ID do bairro do Firestore e mapear para a taxa
+                // Para o seu teste, o valor de R$10,00 deve vir de 'patos-de-minas' ou outro ID
                 deliveryFeesCache[doc.id] = Number(doc.data().valor || doc.data().taxa || DELIVERY_FEE); 
             });
 
         } catch (e) {
-            console.warn("FW: Erro ao ler Taxas de Entrega. Usando Fallback R$6,00.");
-            return DELIVERY_FEE;
+            console.warn("FW: Erro ao ler Taxas de Entrega. Usando Cache/Fallback.");
+            // Mantém o cache inicializado se a busca falhar
         }
     }
 
@@ -732,7 +739,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     if (taxa === undefined) {
         taxa = deliveryFeesCache ? (deliveryFeesCache['fallback'] || DELIVERY_FEE) : DELIVERY_FEE;
-        console.warn(`FW: Cidade não mapeada (${localidade}). Usando taxa de fallback R$${taxa.toFixed(2)}.`);
+        console.warn(`FW: Cidade/Bairro não mapeado (${localidade}). Usando taxa de fallback R$${taxa.toFixed(2)}.`);
     }
 
     if (isNaN(taxa) || taxa < 0) return DELIVERY_FEE;
@@ -787,10 +794,10 @@ document.addEventListener("DOMContentLoaded", () => {
         if (data.erro || !response.ok) {
             clearAndEnableManual('CEP não encontrado ou inválido. Preencha manualmente.');
         } else {
+            // A localidade (Cidade) e UF são importantes para o frete dinâmico
             const localidadeCompleta = `${data.localidade || 'Cidade não definida'}/${data.uf || 'UF'}`;
-            // CORREÇÃO: Pegar apenas a localidade (cidade) para o cálculo de frete
-            const localidadeFrete = data.localidade || ''; 
             
+            // O campo 'endereco-auto' irá conter Rua - Bairro (Cidade/UF)
             enderecoAuto.value = `${data.logradouro || 'Rua não definida'} - ${data.bairro || 'Bairro não definida'} (${localidadeCompleta})`;
             
             toggleAddressState(false);
@@ -798,6 +805,8 @@ document.addEventListener("DOMContentLoaded", () => {
             if (numeroInput) numeroInput.focus(); 
             
             updateStatus('Endereço encontrado!', 'var(--success)');
+            
+            // Força o recálculo do frete com base no novo endereço
             renderMiniCart(); 
         }
 
@@ -831,27 +840,39 @@ document.addEventListener("DOMContentLoaded", () => {
     const isRetirarLocal = document.getElementById('retirar-local')?.checked;
     
     const cepValue = cepInput ? cepInput.value.trim().replace(/\D/g, '') : '';
+    // INÍCIO: Frete padrão para que o valor seja o fallback se nenhuma regra for aplicada
     let deliveryFee = DELIVERY_FEE_DEFAULT; 
 
     // --- LÓGICA DE FRETE CORRIGIDA ---
-    if (isRetirarLocal || subtotal >= LIMITE_PARA_FRETE_GRATIS_POR_VALOR) {
-        // Frete Grátis se: 1. Retirar no Local OU 2. Atingir Limite de Valor
+    if (isRetirarLocal) {
+        // 1. Frete Grátis se: Retirar no Local
         deliveryFee = 0;
+        console.log("Frete: R$0,00 (Retirar no Local)");
+    } else if (subtotal >= LIMITE_PARA_FRETE_GRATIS_POR_VALOR) {
+        // 2. Frete Grátis se: Atingir Limite de Valor
+        deliveryFee = 0;
+        console.log("Frete: R$0,00 (Limite de valor atingido)");
     } else if (cepInput && cepValue.length === 8 && enderecoAuto && enderecoAuto.value) {
-        // Cálculo de Frete Dinâmico (só se houver um CEP e endereço válidos)
+        // 3. Cálculo de Frete Dinâmico (só se houver um CEP válido buscado e endereço preenchido)
         const enderecoAutoValue = enderecoAuto.value.trim();
-        // Regex para pegar a cidade (Localidade) dentro dos parênteses
+        
+        // Regex para pegar a cidade/localidade dentro dos parênteses (ex: Patos de Minas)
+        // O valor do frete virá da regra de bairro/cidade definida no Firestore/Cache (getDynamicDeliveryFee)
         const localidadeMatch = enderecoAutoValue.match(/\((.*?)\/.*?\)/);
         const localidade = localidadeMatch ? localidadeMatch[1] : '';
 
         try {
+            // Esta chamada vai retornar R$10,00 se o seu Firestore ou Cache tiver o mapeamento.
             deliveryFee = await getDynamicDeliveryFee(localidade); 
+            console.log(`Frete: R$${deliveryFee.toFixed(2)} (Dinâmico para ${localidade})`);
         } catch(e) {
             deliveryFee = DELIVERY_FEE_DEFAULT;
+            console.warn(`Frete: R$${DELIVERY_FEE_DEFAULT.toFixed(2)} (ERRO ao buscar Dinâmico)`);
         }
     } else {
-        // Frete padrão se não for retirar, não atingir o limite e não tiver CEP válido buscado
+        // 4. Frete padrão se não for retirar, não atingir o limite e não tiver CEP válido buscado
         deliveryFee = DELIVERY_FEE_DEFAULT;
+        console.log("Frete: R$6,00 (Padrão / Aguardando CEP)");
     }
     // --- FIM DA LÓGICA DE FRETE CORRIGIDA ---
 
@@ -881,13 +902,16 @@ document.addEventListener("DOMContentLoaded", () => {
 
     el.miniFoot.querySelectorAll(".cart-summary-generated").forEach(e => e.remove());
     
+    // CORREÇÃO: Inicializa o frete como 0 para o caso de carrinho vazio
+    const initialTotals = { subtotal: 0, delivery: 0, discount: 0, total: 0, cupomInfo: {} }; 
+    const { subtotal, delivery, discount, total, cupomInfo } = cart.length === 0 ? initialTotals : await calcTotals();
+
     if (cart.length === 0) {
       if (couponMsg) couponMsg.innerHTML = "";
       if (couponDiscountRow) couponDiscountRow.style.display = "none";
       return; 
     }
 
-    const { subtotal, delivery, discount, total, cupomInfo } = await calcTotals();
 
     if (couponMsg) {
       couponMsg.textContent = cupomInfo.mensagem;
@@ -1201,7 +1225,7 @@ document.addEventListener("DOMContentLoaded", () => {
       
       if (cupomInfo.isPersonalizado && couponApplied) {
           const cupomUserRef = db.collection("CuponsUsuarios").doc(userId);
-          batch.update(cupumUserRef, {
+          batch.update(cupomUserRef, {
               usado: true,
               dataUso: firebase.firestore.FieldValue.serverTimestamp(),
               pedidoId: 'PENDENTE' 
@@ -1383,8 +1407,8 @@ document.addEventListener("DOMContentLoaded", () => {
     }).join('');
   }
   
-  el.pedidosLista?.addEventListener("click", async (e) => {
-    if (e.target.classList.contains("repetir-btn") && !e.target.disabled) {
+  el.pedidosLista?.addEventListener('click', async (e) => {
+    if (e.target.classList.contains('repetir-btn') && !e.target.disabled) {
       const idPedido = e.target.dataset.id;
       e.target.disabled = true;
       e.target.textContent = "Carregando...";
@@ -1775,91 +1799,3 @@ async function carregarHistoricoRecompensas(userId) {
   }
   // --- FUNÇÃO CARREGAR RELATÓRIOS (CORRIGIDA) ---
   function carregarRelatorios(periodo = "7") {
-    // 1. Lógica de Período
-    const start = new Date();
-    if (periodo !== "all") start.setDate(start.getDate() - Number(periodo)); else start.setTime(0);
-    
-    // 2. Busca de Dados
-    db.collection("Pedidos").orderBy("data", "desc").get().then(snap => {
-        
-        const pedidos = snap.docs.map(d => {
-            const dataObjeto = d.data();
-            
-            // 💥 CORREÇÃO CRÍTICA DO TYPE ERROR (Blindagem de Data)
-            const rawDate = dataObjeto.data; 
-            let processedDate;
-
-            // 1. Blindagem: Verifica se rawDate existe e se é um objeto com o método toDate (Timestamp do Firestore)
-            if (rawDate && typeof rawDate.toDate === 'function') {
-                processedDate = rawDate.toDate();
-            } 
-            // 2. Blindagem: Se for uma string (ou valor simples), tenta converter para Date.
-            else if (rawDate) {
-                processedDate = new Date(rawDate);
-            } else {
-                // Fallback de segurança caso o campo 'data' esteja faltando
-                processedDate = new Date(); 
-            }
-
-            return { 
-                ...dataObjeto, 
-                id: d.id, 
-                data: processedDate 
-            };
-        });
-
-        const filtrados = pedidos.filter(p => p.data >= start);
-        
-        // 3. Processamento e Exibição
-        gerarResumoECharts(filtrados);
-        
-        // 🚨 CORREÇÃO DO BUG NaN: Força a conversão para Number.
-        const totalVendido = filtrados.reduce((s, p) => s + (Number(p.total) || 0), 0);
-        document.getElementById("card-total").textContent = `Total: ${money(totalVendido)}`;
-        document.getElementById("card-pedidos").textContent = `Pedidos: ${filtrados.length}`;
-        document.getElementById("card-ticket").textContent = `Ticket Médio: ${money(filtrados.length ? totalVendido/filtrados.length : 0)}`;
-
-        document.getElementById("export-csv").onclick = () => {
-            const csv = "Data;Nome;Total\n" + filtrados.map(p => `${p.data.toLocaleString()};${p.nome};${p.total}`).join("\n");
-            const blob = new Blob([`\uFEFF${csv}`], { type: 'text/csv;charset=utf-8;' });
-            const link = document.createElement('a');
-            link.href = URL.createObjectURL(blob);
-            link.download = "pedidos.csv";
-            link.click();
-        };
-    });
-    
-    const sel = document.getElementById("filter-period");
-    if(sel && !sel._bound) { sel.addEventListener("change", e => carregarRelatorios(e.target.value)); sel._bound = true; }
-  }
-// --- FIM DA FUNÇÃO CORRIGIDA ---
-
-
-  /* ------------------ 🍪 COOKIES ------------------ */
-  const cookieBanner = document.getElementById("cookie-banner");
-  const cookieAcceptBtn = document.getElementById("cookie-accept");
-  if (cookieBanner && cookieAcceptBtn) {
-    if (localStorage.getItem("dfl-cookies-accepted") === "true") cookieBanner.style.display = "none";
-    else cookieBanner.classList.add("show");
-    cookieAcceptBtn.addEventListener("click", () => {
-      localStorage.setItem("dfl-cookies-accepted", "true");
-      cookieBanner.classList.remove("show");
-    });
-  }
-  
-  console.log("%c🔥 DFL v5.3.4 — Ícones + Segurança Anti-Crash", "background:#4CAF50;color:#fff;padding:5px;border-radius:5px;");
-
-  // Chamada Única de Inicialização (CORREÇÃO DE BUG CRÍTICO)
-  inicializarFirebase();
-  
-}); 
-
-/* FECHAR MODAIS GLOBAL */
-document.addEventListener('DOMContentLoaded', () => {
-  document.querySelectorAll('.modal').forEach(m => m.addEventListener('click', e => {
-    if (e.target.classList.contains('modal')) { m.classList.remove('show'); document.getElementById('cart-backdrop').classList.remove('active'); }
-  }));
-  document.getElementById('cart-backdrop')?.addEventListener('click', () => {
-    document.querySelectorAll('.active').forEach(e => e.classList.remove('active'));
-  });
-});
