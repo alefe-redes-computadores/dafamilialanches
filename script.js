@@ -3,6 +3,7 @@
    - CORREÇÃO CRÍTICA (18/11/2025): Referência a elementos e limpeza de listas no painel de recompensas.  
    - CORREÇÃO FRETE (18/11/2025): Lógica de frete dentro de calcTotals revisada para Frete Grátis/Padrão  
    - CORREÇÃO FRETE DINÂMICO (NOVA VERSÃO POR BAIRRO) - FUNÇÃO ANTIGA REMOVIDA
+   - CORREÇÃO FIREBASE (CAMINHO EXATO DA ESTRUTURA ANINHADA)
 ========================================================= */  
   
 document.addEventListener("DOMContentLoaded", () => {  
@@ -788,7 +789,7 @@ document.addEventListener("DOMContentLoaded", () => {
   
         try {  
             // A função getDynamicDeliveryFee agora espera o endereço completo para extrair o bairro  
-            // O getDynamicDeliveryFee foi movido para fora do DOMContentLoaded para não ser duplicado
+            // O getDynamicDeliveryFee está fora do DOMContentLoaded
             deliveryFee = await getDynamicDeliveryFee(enderecoCompleto);   
         } catch(e) {  
             console.error("Erro no cálculo do frete dinâmico:", e);  
@@ -1808,7 +1809,7 @@ document.addEventListener('DOMContentLoaded', () => {
   });  
 });
 // ============================================================
-// FRETE DINÂMICO — V5.2 DEFINITIVA (CORRIGIDA)
+// FRETE DINÂMICO — V5.2 DEFINITIVA (CORRIGIDA COM CAMINHO FIREBASE ANINHADO)
 // Extrai o bairro corretamente do endereço completo
 // Normaliza, tenta match EXATO e depois por palavra-chave
 // ============================================================
@@ -1860,26 +1861,28 @@ async function getDynamicDeliveryFee(enderecoCompleto) {
 
             console.warn("FW: Carregando taxas do Firebase (Bairros)...");
             
-            // 🚨 CORREÇÃO DE REFERÊNCIA CRÍTICA (Diagnóstico 3): 
-            // Agora usa um caminho de documento único e simples.
-            const DOC_ID_BAIRROS = "tabelaBairros"; // <-- AJUSTE SE NECESSÁRIO
-            
+            // 🚨 CORREÇÃO CRÍTICA DO CAMINHO ANINHADO (CONFIRMADO PELAS IMAGENS)
+            // Caminho correto: TaxasDeEntrega / bairros / lista / tabela
             const snap = await db
                 .collection("TaxasDeEntrega")
-                .doc(DOC_ID_BAIRROS)
+                .doc("bairros")
+                .collection("lista")
+                .doc("tabela")
                 .get();
 
             if (!snap.exists) {
-                console.warn(`FW: Documento de Bairros '${DOC_ID_BAIRROS}' não encontrado. Fallback.`);
+                console.warn("FW: Documento 'tabela' dentro de 'lista' não encontrado. Fallback.");
                 return DELIVERY_FEE;
             }
 
+            // O campo que contém o array de bairros é 'data' (CONFIRMADO NA IMAGEM 4)
             const arr = snap.data()?.data || [];
 
             // MONTA O CACHE
             deliveryFeesCache = {};
 
             arr.forEach(item => {
+                // Os itens do array têm os campos 'nome' e 'taxa' (CONFIRMADO NA IMAGEM 4)
                 if (!item || !item.nome) return;
 
                 const key = item.nome
@@ -1894,6 +1897,8 @@ async function getDynamicDeliveryFee(enderecoCompleto) {
                     deliveryFeesCache[key] = valor;
                 }
             });
+            
+            console.log("FW: Cache de taxas carregado com sucesso.");
         }
     } catch (e) {
         console.warn("FW: Erro ao carregar taxas. Usando fallback.", e);
