@@ -1,8 +1,8 @@
 /* =========================================================  
-   🚀 DFL v5.2.7 — VERSÃO FINAL ESTÁVEL COM CORREÇÃO DE RECOMPENSAS  
+   🚀 DFL v5.2.8 — VERSÃO FINAL ESTÁVEL COM CORREÇÃO DE RECOMPENSAS  
    - CORREÇÃO CRÍTICA (18/11/2025): Referência a elementos e limpeza de listas no painel de recompensas.  
    - CORREÇÃO FRETE (18/11/2025): Lógica de frete dentro de calcTotals revisada para Frete Grátis/Padrão  
-   - CORREÇÃO FRETE DINÂMICO (NOVA VERSÃO POR BAIRRO)  
+   - CORREÇÃO FRETE DINÂMICO (NOVA VERSÃO POR BAIRRO) - FUNÇÃO ANTIGA REMOVIDA
 ========================================================= */  
   
 document.addEventListener("DOMContentLoaded", () => {  
@@ -732,10 +732,10 @@ document.addEventListener("DOMContentLoaded", () => {
         if (data.erro || !response.ok) {  
             clearAndEnableManual('CEP não encontrado ou inválido. Preencha manualmente.');  
         } else {  
+            // CORREÇÃO (Diagnóstico 1): Manter o formato completo, a função de cálculo extrai o bairro.  
             const localidadeCompleta = `${data.localidade || 'Cidade não definida'}/${data.uf || 'UF'}`;  
             const enderecoString = `${data.logradouro || 'Rua não definida'} - ${data.bairro || 'Bairro não definida'} (${localidadeCompleta})`;  
             
-            // O endereço completo será usado na função getDynamicDeliveryFee (que agora extrai o bairro)  
             enderecoAuto.value = enderecoString;  
               
             toggleAddressState(false);  
@@ -788,6 +788,7 @@ document.addEventListener("DOMContentLoaded", () => {
   
         try {  
             // A função getDynamicDeliveryFee agora espera o endereço completo para extrair o bairro  
+            // O getDynamicDeliveryFee foi movido para fora do DOMContentLoaded para não ser duplicado
             deliveryFee = await getDynamicDeliveryFee(enderecoCompleto);   
         } catch(e) {  
             console.error("Erro no cálculo do frete dinâmico:", e);  
@@ -1790,7 +1791,7 @@ async function carregarHistoricoRecompensas(userId) {
     });  
   }  
     
-  console.log("%c🔥 DFL v5.2.7 — Ícones + Segurança Anti-Crash", "background:#4CAF50;color:#fff;padding:5px;border-radius:5px;");  
+  console.log("%c🔥 DFL v5.2.8 — Ícones + Segurança Anti-Crash", "background:#4CAF50;color:#fff;padding:5px;border-radius:5px;");  
   
   // Chamada Única de Inicialização (CORREÇÃO DE BUG CRÍTICO)  
   inicializarFirebase();  
@@ -1807,7 +1808,7 @@ document.addEventListener('DOMContentLoaded', () => {
   });  
 });
 // ============================================================
-// FRETE DINÂMICO — V5.2 DEFINITIVA (INJETADA)
+// FRETE DINÂMICO — V5.2 DEFINITIVA (CORRIGIDA)
 // Extrai o bairro corretamente do endereço completo
 // Normaliza, tenta match EXATO e depois por palavra-chave
 // ============================================================
@@ -1857,22 +1858,23 @@ async function getDynamicDeliveryFee(enderecoCompleto) {
     try {
         if (isFirebaseInitialized && !deliveryFeesCache) {
 
-            console.warn("FW: Carregando taxas do Firebase...");
-
-            // ATENÇÃO: A nova lógica busca a coleção 'lista' dentro do doc 'bairros'
+            console.warn("FW: Carregando taxas do Firebase (Bairros)...");
+            
+            // 🚨 CORREÇÃO DE REFERÊNCIA CRÍTICA (Diagnóstico 3): 
+            // Agora usa um caminho de documento único e simples.
+            const DOC_ID_BAIRROS = "tabelaBairros"; // <-- AJUSTE SE NECESSÁRIO
+            
             const snap = await db
                 .collection("TaxasDeEntrega")
-                .doc("bairros")
-                .collection("lista")
-                .doc("tabela")
+                .doc(DOC_ID_BAIRROS)
                 .get();
 
             if (!snap.exists) {
-                console.warn("FW: Documento 'tabela' não encontrado. Fallback.");
+                console.warn(`FW: Documento de Bairros '${DOC_ID_BAIRROS}' não encontrado. Fallback.`);
                 return DELIVERY_FEE;
             }
 
-            const arr = snap.data().data || [];
+            const arr = snap.data()?.data || [];
 
             // MONTA O CACHE
             deliveryFeesCache = {};
