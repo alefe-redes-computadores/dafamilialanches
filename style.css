@@ -1,5 +1,8 @@
-/* 🎨 Da Família Lanches – CSS Principal (v5.3) */
-
+/* ===========================================================
+   🎨 Da Família Lanches – CSS Principal (v5.0)
+   - Ajuste de Estilos para Campos ViaCEP Ativados.
+   - NOVO: Estilos para Admin Dashboard (PC/Mobile) - Otimizado para Usabilidade
+   =========================================================== */
 
 /* ======== ELEMENTOS BÁSICOS ======== */
 :root {
@@ -619,20 +622,29 @@ section h2 { font-size: 1.3rem; text-align: center; margin-bottom: 15px; color: 
 }
 
 
-/* ===== Endereço Auto (v5.3 – Clean, scroll invisível) ===== */
-#endereco-auto {
-    font-size: 13px !important;
-    padding: 6px 10px !important;
-    line-height: 1.2 !important;
-
-    white-space: nowrap;
-    overflow-x: auto;
-    overflow-y: hidden;
-    -webkit-overflow-scrolling: touch;
-
-    scrollbar-width: none;
+/* ===== v5.3 Ajustes Número + Complemento ===== */
+.endereco-duplo {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 8px;
 }
-#endereco-auto::-webkit-scrollbar {
-    display: none;
+#numero-input {
+    flex: 0 0 30%;
+    max-width: 120px;
+}
+#complemento-input {
+    flex: 1;
+    min-width: 0;
 }
 
+/* ===== Aviso Frete Grátis ===== */
+.frete-gratis-aviso {
+    margin: 6px 0 10px 0;
+    font-size: 0.85rem;
+    color: #444;
+    background: #fff8d6;
+    padding: 8px 10px;
+    border-radius: 8px;
+    border-left: 4px solid #ffca28;
+    line-height: 1.3;
+}
