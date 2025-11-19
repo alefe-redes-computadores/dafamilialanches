@@ -96,13 +96,15 @@
 
           <input id="endereco-auto" type="text" placeholder="Rua e Bairro (Preenchido via CEP)" 
                  style="width:100%;padding:8px;border:1px solid #ccc;border-radius:8px;margin-bottom:8px;">
+<p class="frete-gratis-aviso">
+    💛 Frete grátis acima de R$ 80,00 (até 5 km). Um mimo da DFL pra matar a fome sem pesar no bolso 😋
+</p>
 
-          <div style="display:flex;gap:8px;margin-bottom:8px;">
-            <input id="numero-input" type="text" placeholder="Número" 
-                   style="flex:1;padding:8px;border:1px solid #ccc;border-radius:8px;">
-            <input id="complemento-input" type="text" placeholder="Complemento (opcional)" 
-                   style="flex:1;padding:8px;border:1px solid #ccc;border-radius:8px;">
-          </div>
+
+          <div class="endereco-duplo">
+    <input id="numero-input" type="text" placeholder="Número">
+    <input id="complemento-input" type="text" placeholder="Complemento (opcional)">
+</div>
 
           <label style="display:flex;align-items:center;gap:6px;margin-bottom:8px; color:#555;">
             <input type="checkbox" id="retirar-local">
@@ -500,7 +502,7 @@
     <button id="cookie-accept" type="button">Aceitar</button>
   </div>
 
-  <script defer src="script.js?v=5.3.0"></script>
-  <script defer src="extras.js?v=5.3.0"></script>
+  <script defer src="script.js?v=5.2.2"></script>
+  <script defer src="extras.js?v=5.2.2"></script>
 </body>
 </html>
