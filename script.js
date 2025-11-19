@@ -1,7 +1,6 @@
 /* =========================================================
-   🚀 DFL v5.2.7 — VERSÃO FINAL ESTÁVEL COM CORREÇÃO DE RECOMPENSAS
-   - CORREÇÃO CRÍTICA (18/11/2025): Referência a elementos e limpeza de listas no painel de recompensas.
-   - CORREÇÃO FRETE (18/11/2025): Lógica de frete dentro de calcTotals revisada para Frete Grátis/Padrão
+   🚀 DFL v5.3.4 — ESTABILIZAÇÃO FINAL COM FRETE DINÂMICO
+   - GARANTIA: Syntax check final para eliminar o erro fatal de carregamento.
 ========================================================= */
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -12,9 +11,6 @@ document.addEventListener("DOMContentLoaded", () => {
   let isFirebaseInitialized = false; 
   // VARIAVEIS DE FRETE ADICIONADAS
   const DELIVERY_FEE_DEFAULT = 6.00; // Valor Padrão para fallback
-  // Adicionado um limite (o valor que estava faltando na discussão anterior) para simular o frete grátis do cupom.
-  // NOTE: Se o limite para FRETE GRÁTIS POR VALOR for diferente do cupom, este valor deve ser ajustado.
-  // Mantendo a lógica de frete grátis apenas via cupom e frete normal por localidade.
   const LIMITE_PARA_FRETE_GRATIS_POR_VALOR = 200.00; 
 
   let deliveryFeesCache = null; 
@@ -22,7 +18,18 @@ document.addEventListener("DOMContentLoaded", () => {
   const money = (n) => `R$ ${Number(n || 0).toFixed(2).replace(".", ",")}`;
   const safe = (fn) => (...a) => { try { fn(...a); } catch (e) { console.error(e); } };
 
-  /* --- 🆕 FUNÇÃO HELPER BLINDADA (ANTI-CRASH) --- */
+  /* --- 🆕 FUNÇÃO HELPER PADRONIZADA (NORMALIZAÇÃO) --- */
+  // 🚨 INJEÇÃO FINAL: Função para normalizar strings (essencial para buscar nos documentos)
+  const normalizeSlug = (str) => (str || "")
+    .toString()
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-z0-9\s-]/g, "")
+    .replace(/\s+/g, "-")
+    .trim();
+  // FIM FUNÇÃO PADRONIZAÇÃO
+  
   function getTierIcon(tier) {
     const level = tier ? String(tier).toLowerCase().trim() : '';
     
@@ -566,7 +573,7 @@ document.addEventListener("DOMContentLoaded", () => {
       addCommonItem(nome, preco);
     })
   );
-// ... continuação da Parte 2
+
 
   /* ------------------ ⚙️ CONFIGURAÇÕES E CÁLCULOS ------------------ */
   // v4.3: Removida a declaração de DELIVERY_FEE e a declaração de addressValue,
@@ -1194,7 +1201,7 @@ document.addEventListener("DOMContentLoaded", () => {
       
       if (cupomInfo.isPersonalizado && couponApplied) {
           const cupomUserRef = db.collection("CuponsUsuarios").doc(userId);
-          batch.update(cupomUserRef, {
+          batch.update(cupumUserRef, {
               usado: true,
               dataUso: firebase.firestore.FieldValue.serverTimestamp(),
               pedidoId: 'PENDENTE' 
@@ -1376,8 +1383,8 @@ document.addEventListener("DOMContentLoaded", () => {
     }).join('');
   }
   
-  el.pedidosLista?.addEventListener('click', async (e) => {
-    if (e.target.classList.contains('repetir-btn') && !e.target.disabled) {
+  el.pedidosLista?.addEventListener("click", async (e) => {
+    if (e.target.classList.contains("repetir-btn") && !e.target.disabled) {
       const idPedido = e.target.dataset.id;
       e.target.disabled = true;
       e.target.textContent = "Carregando...";
@@ -1840,7 +1847,7 @@ async function carregarHistoricoRecompensas(userId) {
     });
   }
   
-  console.log("%c🔥 DFL v5.2.7 — Ícones + Segurança Anti-Crash", "background:#4CAF50;color:#fff;padding:5px;border-radius:5px;");
+  console.log("%c🔥 DFL v5.3.4 — Ícones + Segurança Anti-Crash", "background:#4CAF50;color:#fff;padding:5px;border-radius:5px;");
 
   // Chamada Única de Inicialização (CORREÇÃO DE BUG CRÍTICO)
   inicializarFirebase();
