@@ -1,10 +1,9 @@
 /* =========================================================  
-   🚀 DFL v5.2.9 — CORREÇÃO CRÍTICA: ESCOPO DO FRETE DINÂMICO
-   - FIX: Função getDynamicDeliveryFee movida para DENTRO do DOMContentLoaded
-   - FIX: Variável db agora acessível pela função de frete
-========================================================= */  
+   🚀 DFL v5.2.9 — Lógica Principal e Frete Dinâmico
+   ========================================================= */  
 
 document.addEventListener("DOMContentLoaded", () => {
+
     // MÁSCARA AUTOMÁTICA DO CEP
     const cepInputMask = document.getElementById("cep-input");
     if (cepInputMask) {
@@ -17,7 +16,7 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-    /* ------------------ ⚙️ BASE ------------------ */  
+    /* ------------------ ⚙️ BASE DE CONFIGURAÇÕES ------------------ */  
     const sound = new Audio("click.wav");   
     let cart = [];  
     let currentUser = null;  
@@ -58,7 +57,7 @@ document.addEventListener("DOMContentLoaded", () => {
         { id: 9, nome: "Combo 5 Uai + Kuat 2L", preco: 64.99, precoAntigo: 79.99, img: "promocoes/promo9.jpg" }  
     ];  
 
-    /* ------------------ 🎯 ELEMENTOS ------------------ */  
+    /* ------------------ 🎯 MAPEAMENTO DE ELEMENTOS DOM ------------------ */  
     const el = {  
         cartIcon: document.getElementById("cart-icon"),  
         cartCount: document.getElementById("cart-count"),  
@@ -103,7 +102,7 @@ document.addEventListener("DOMContentLoaded", () => {
         historicoLista: document.getElementById("historicoRecompensas")   
     };
 
-    /* ------------------ 🌫️ BACKDROP ------------------ */  
+    /* ------------------ 🌫️ BACKDROP (Fundo Transparente) ------------------ */  
     if (!el.cartBackdrop) {  
         const bd = document.createElement("div");  
         bd.id = "cart-backdrop";  
@@ -115,7 +114,7 @@ document.addEventListener("DOMContentLoaded", () => {
         hide() { el.cartBackdrop.classList.remove("active"); document.body.classList.remove("no-scroll"); },  
     };
 
-    /* ------------------ 🧩 OVERLAYS ------------------ */  
+    /* ------------------ 🧩 OVERLAYS (Gerenciamento de Modais) ------------------ */  
     const Overlays = {  
         closeAll() {  
             document.querySelectorAll(".modal.show, #mini-cart.active, .pedidos-panel.active, .recompensas-panel.active, #admin-dashboard.show")
@@ -153,7 +152,7 @@ document.addEventListener("DOMContentLoaded", () => {
         renderMiniCart();   
     });
 
-    /* ------------------ 💬 POPUP ------------------ */  
+    /* ------------------ 💬 POPUP E NOTIFICAÇÕES ------------------ */  
     function popupAdd(msg) {  
         let pop = document.querySelector(".popup-add");  
         if (!pop) {  
@@ -182,9 +181,6 @@ document.addEventListener("DOMContentLoaded", () => {
             pop.style.opacity = '0';  
         }, 6000);  
     }
-
-// CONTINUA NA PARTE 2...
-// PARTE 2/5 - MINI-CARRINHO + FIREBASE + LOGIN
 
     /* ------------------ 🛒 MINI-CARRINHO ------------------ */  
     function renderMiniCart() {  
@@ -241,6 +237,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }));  
     }  
 
+    // Reescrita para garantir que os botões são ligados após a renderização
     const _renderMiniCartOrig = renderMiniCart;  
     renderMiniCart = function () {  
         _renderMiniCartOrig();   
@@ -279,6 +276,7 @@ document.addEventListener("DOMContentLoaded", () => {
         auth.onAuthStateChanged(user => {  
             currentUser = user;   
             if (user) {  
+                // Atualiza botão de usuário e visibilidade dos painéis
                 el.userBtn.textContent = `Olá, ${user.displayName?.split(" ")[0] || user.email.split("@")[0]}`;  
                 if (el.pedidosContainer) el.pedidosContainer.style.display = 'block';  
                 if (el.recompensasContainer) el.recompensasContainer.style.display = 'block';  
@@ -287,6 +285,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 if (el.pedidosContainer) el.pedidosContainer.style.display = 'none';  
                 if (el.recompensasContainer) el.recompensasContainer.style.display = 'none';  
             }  
+            // Checa e configura painel Admin
             if (user && isAdmin(user)) {  
                 if (el.reportsBtn) createAdminFab();  
             } else {  
@@ -296,7 +295,7 @@ document.addEventListener("DOMContentLoaded", () => {
         });  
     }
 
-    /* ------------------ ⚙️ LOGIN ------------------ */  
+    /* ------------------ ⚙️ LOGIN E AUTENTICAÇÃO ------------------ */  
     const handleLoginSuccess = (user) => {  
         currentUser = user;  
         popupAdd("Login realizado com sucesso!");  
@@ -318,6 +317,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }  
     };  
 
+    // Login com E-mail e Senha
     el.loginForm?.addEventListener("submit", (e) => {  
         e.preventDefault();  
         inicializarFirebase();
@@ -330,6 +330,7 @@ document.addEventListener("DOMContentLoaded", () => {
             .catch(handleLoginError);  
     });  
 
+    // Login com Google
     el.googleBtn?.addEventListener("click", () => {  
         inicializarFirebase();
         if (!isFirebaseInitialized) return alert("Erro ao conectar ao serviço de login.");  
@@ -339,10 +340,11 @@ document.addEventListener("DOMContentLoaded", () => {
             .catch((err) => alert("Erro: ".concat(err.message)));  
     });  
 
+    // Abrir modais
     el.userBtn?.addEventListener("click", () => Overlays.open(el.loginModal));  
     el.cartIcon?.addEventListener("click", () => { renderMiniCart(); Overlays.open(el.miniCart); });
 
-    /* ------------------ ➕ ADICIONAIS ------------------ */  
+    /* ------------------ ➕ ADICIONAIS (Extras) ------------------ */  
     const adicionais = [  
         { nome: "Cebola", preco: 0.99 },  
         { nome: "Salada", preco: 1.99 },  
@@ -402,10 +404,7 @@ document.addEventListener("DOMContentLoaded", () => {
         b.addEventListener("click", () => Overlays.closeAll())
     );
 
-// CONTINUA NA PARTE 3...
-// PARTE 3/5 - COMBOS + CEP + FRETE DINÂMICO (CORRIGIDO!)
-
-    /* ------------------ 🥤 COMBOS ------------------ */  
+    /* ------------------ 🥤 COMBOS E OPÇÕES DE BEBIDA ------------------ */  
     const comboDrinkOptions = {  
         casal: [  
             { rotulo: "Fanta 1L (padrão)", delta: 0.01 },  
@@ -455,6 +454,7 @@ document.addEventListener("DOMContentLoaded", () => {
     );  
 
     function addCommonItem(nome, preco) {  
+        // Tenta abrir modal de combo se o item for um combo
         if (/^combo/i.test(nome) && !/^\s*Combo [0-9]/.test(nome)) { openComboModal(nome, preco); return; }  
         const found = cart.find((i) => i.nome === nome && i.preco === preco);  
         if (found) found.qtd++;  
@@ -471,7 +471,7 @@ document.addEventListener("DOMContentLoaded", () => {
         })
     );
 
-    /* ------------------ ⚙️ CÁLCULOS ------------------ */  
+    /* ------------------ ⚙️ CÁLCULOS GERAIS ------------------ */  
     const getCartSubtotal = () => cart.reduce((s, i) => s + (Number(i.preco) || 0) * (Number(i.qtd) || 0), 0);
 
     /* VALIDAÇÃO DE CUPOM */  
@@ -500,6 +500,7 @@ document.addEventListener("DOMContentLoaded", () => {
             const snapGeral = await db.collection("Cupons").doc(code).get();  
             if (snapGeral.exists) { data = snapGeral.data(); }  
             else {  
+                // Tenta achar cupom de recompensa personalizado
                 const recompensaEncontrada = RECOMPENSAS_DATA.find(r => r.valor === code && r.tipo === 'cupom');  
                 if (userId && recompensaEncontrada) {  
                     const snapPessoal = await db.collection("CuponsUsuarios").doc(userId).get();  
@@ -516,6 +517,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 }  
             }  
 
+            // Checagem de validade e expiração
             if (!data.ativo) { const res = { ...invalido, mensagem: "Este cupom não está mais ativo." }; _cupomCache[key] = { ate: now + 30000, res }; return res; }  
             if (data.expiraEm) {  
                 let expiraDate = null;  
@@ -524,6 +526,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 if (expiraDate && expiraDate < new Date()) { const res = { ...invalido, mensagem: "Este cupom expirou." }; _cupomCache[key] = { ate: now + 30000, res }; return res; }  
             }  
 
+            // Aplica desconto
             let discount = 0, freeShipping = false, label = "";  
             if (data.tipo === "percent") { discount = Math.max(0, subtotal * (Number(data.percent || data.valor) / 100)); label = `${Number(data.percent || data.valor)}% OFF`; }  
             else if (data.tipo === "value") { const val = Math.max(0, Number(data.valor) || 0); discount = Math.min(subtotal, val); label = `R$ ${val.toFixed(2).replace(".", ",")} OFF`; }  
@@ -593,7 +596,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }));
 
     // ============================================================
-    // 🚀 FRETE DINÂMICO — CORRIGIDO (AGORA DENTRO DO ESCOPO!)
+    // 🚀 FUNÇÃO CRÍTICA: CÁLCULO DE FRETE DINÂMICO (FIREBASE)
     // ============================================================
     async function getDynamicDeliveryFee(enderecoCompleto) {
         if (!enderecoCompleto || typeof enderecoCompleto !== "string") {
@@ -603,6 +606,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
         let bairroExtraido = "";
         try {
+            // Tenta extrair o bairro
             const partePrincipal = enderecoCompleto.split("(")[0].trim();
             const partes = partePrincipal.split(" - ");
             if (partes.length >= 2) bairroExtraido = partes[partes.length - 1].trim();
@@ -612,12 +616,14 @@ document.addEventListener("DOMContentLoaded", () => {
             return DELIVERY_FEE_DEFAULT;
         }
 
+        // Normalização: minúsculas, remove acentos e espaços extras
         const bairroClean = bairroExtraido.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim();
         console.log("FW: Bairro extraído:", bairroExtraido, "| Normalizado:", bairroClean);
 
         try {
             if (!db) { console.warn("FW: db não disponível."); return DELIVERY_FEE_DEFAULT; }
 
+            // Carrega o cache de taxas de entrega do Firebase (apenas na primeira vez)
             if (!window.deliveryFeesCacheGlobal) {
                 console.log("FW: Carregando taxas do Firebase...");
                 const snap = await db.collection("TaxasDeEntrega").doc("bairros").collection("lista").doc("tabela").get();
@@ -639,16 +645,16 @@ document.addEventListener("DOMContentLoaded", () => {
         const cacheAtual = window.deliveryFeesCacheGlobal || {};
         if (!Object.keys(cacheAtual).length) return DELIVERY_FEE_DEFAULT;
 
-        // BUSCA EXATA
+        // BUSCA 1: Match EXATO
         if (cacheAtual[bairroClean] !== undefined) {
             console.log(`FW: Match EXATO para "${bairroClean}". Taxa: R$ ${cacheAtual[bairroClean]}`);
             return cacheAtual[bairroClean];
         }
 
-        // BUSCA POR PALAVRA-CHAVE
+        // BUSCA 2: Match por PALAVRA-CHAVE (para bairros compostos)
         const palavras = bairroClean.split(" ");
         for (const palavra of palavras) {
-            if (palavra.length < 4) continue;
+            if (palavra.length < 4) continue; // Ignora palavras curtas
             for (const key in cacheAtual) {
                 if (key.includes(palavra)) {
                     console.log(`FW: Match PALAVRA '${palavra}' em "${key}". Taxa: R$ ${cacheAtual[key]}`);
@@ -661,9 +667,6 @@ document.addEventListener("DOMContentLoaded", () => {
         return DELIVERY_FEE_DEFAULT;
     }
 
-// CONTINUA NA PARTE 4...
-// PARTE 4/5 - CALC TOTALS + ENHANCE UI + FECHAR PEDIDO + RECOMPENSAS
-
     // FUNÇÃO CRÍTICA DE CÁLCULO DE TOTAIS
     async function calcTotals() {  
         const subtotal = getCartSubtotal();  
@@ -675,8 +678,10 @@ document.addEventListener("DOMContentLoaded", () => {
         let deliveryFee = DELIVERY_FEE_DEFAULT;   
 
         if (isRetirarLocal || subtotal >= LIMITE_PARA_FRETE_GRATIS_POR_VALOR) {  
+            // Frete grátis por Retirada ou Valor
             deliveryFee = 0;  
         } else if (cepInput && cepValue.length === 8 && enderecoAuto && enderecoAuto.value) {  
+            // Frete dinâmico via CEP/Endereço
             try { deliveryFee = await getDynamicDeliveryFee(enderecoAuto.value.trim()); }  
             catch(e) { console.error("Erro frete dinâmico:", e); deliveryFee = DELIVERY_FEE_DEFAULT; }  
         }  
@@ -686,6 +691,7 @@ document.addEventListener("DOMContentLoaded", () => {
         return { subtotal, delivery, discount: d.discount, discountLabel: d.label, total, cupomInfo: d };  
     }  
 
+    // Atualiza o resumo do carrinho (subtotal, frete, total)
     async function enhanceMiniCartUI() {  
         if (!el.miniFoot) return;  
         const couponMsg = document.getElementById("coupon-message");  
@@ -697,6 +703,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const { subtotal, delivery, discount, total, cupomInfo } = await calcTotals();
         const deliveryLabel = delivery === 0 ? "Grátis 🎉" : money(delivery);  
 
+        // Atualiza mensagem de cupom
         if (couponMsg) {  
             couponMsg.textContent = cupomInfo.mensagem;  
             couponMsg.className = `coupon-message ${cupomInfo.valido ? 'success' : 'error'}`;  
@@ -706,11 +713,13 @@ document.addEventListener("DOMContentLoaded", () => {
                 if (couponInput && document.activeElement !== couponInput) couponInput.value = "";  
             }  
         }  
+        // Atualiza linha de desconto
         if (couponDiscountRow && cartDiscount) {  
             if (discount > 0 || cupomInfo.label) { cartDiscount.textContent = `- ${money(discount)} ${couponApplied ? `(${couponApplied})` : ""}`; couponDiscountRow.style.display = "flex"; }  
             else couponDiscountRow.style.display = "none";  
         }  
 
+        // Cria e insere o resumo e botões
         const summaryDiv = document.createElement('div');  
         summaryDiv.className = 'cart-summary-generated';  
         summaryDiv.innerHTML = `  
@@ -721,15 +730,20 @@ document.addEventListener("DOMContentLoaded", () => {
       <button id="clear-cart" type="button" style="width:100%;background:#ff4081;color:#fff;border:none;border-radius:10px;padding:10px;font-weight:700;cursor:pointer">Limpar Carrinho</button>`;  
 
         el.miniFoot.appendChild(summaryDiv);  
+        
+        // Liga eventos de recalculo
         document.getElementById('retirar-local')?.addEventListener('change', renderMiniCart);  
         document.getElementById('numero-input')?.addEventListener('input', renderMiniCart);  
         document.getElementById('complemento-input')?.addEventListener('input', renderMiniCart);  
+        
+        // Liga botões
         summaryDiv.querySelector("#finish-order")?.addEventListener("click", fecharPedido);  
         summaryDiv.querySelector("#clear-cart")?.addEventListener("click", () => {  
             if (confirm("Limpar todo o carrinho?")) { cart = []; couponApplied = ""; localStorage.removeItem("dflCoupon"); document.getElementById("coupon-input").value = ""; renderMiniCart(); popupAdd("Carrinho limpo!"); }  
         });  
     }
 
+    /* ------------------ 🎁 RECOMPENSAS CONFIGURAÇÃO ------------------ */  
     let configuracoesRecompensa = null;   
     async function carregarConfiguracoesDeRecompensas() {  
         if (!isFirebaseInitialized) return [];   
@@ -743,7 +757,7 @@ document.addEventListener("DOMContentLoaded", () => {
         } catch (e) { console.error("Erro recompensas:", e); return []; }  
     }
 
-    /* CARROSSEL */  
+    /* CARROSSEL DE PROMOÇÕES */  
     let currentPromoId = 1;  
     function showPromoModal(promoId) {  
         if (!el.promoModal || !PROMO_DATA[promoId]) return;  
@@ -762,7 +776,7 @@ document.addEventListener("DOMContentLoaded", () => {
     el.cPrev?.addEventListener("click", () => { if (!el.slides) return; el.slides.scrollLeft -= Math.min(el.slides.clientWidth * 0.9, 320); });  
     el.cNext?.addEventListener("click", () => { if (!el.slides) return; el.slides.scrollLeft += Math.min(el.slides.clientWidth * 0.9, 320); });
 
-    /* STATUS + TIMER */  
+    /* STATUS DA LOJA + TIMER */  
     const atualizarStatus = safe(() => {  
         const agora = new Date(); const h = agora.getHours();  
         const aberto = h >= 18 && h < 23;   
@@ -774,7 +788,7 @@ document.addEventListener("DOMContentLoaded", () => {
             else { const inicio = new Date(agora); if (h >= 23) inicio.setDate(inicio.getDate() + 1); inicio.setHours(18, 0, 0); let diff = (inicio - agora) / 1000; const faltamH = Math.floor(diff / 3600); const faltamM = Math.floor((diff % 3600) / 60); elMsg.innerHTML = `🔒 Fechado — Abrimos em`; elTimer.textContent = `${faltamH}h ${faltamM}min`; }  
         }  
     });  
-    atualizarStatus(); setInterval(atualizarStatus, 60000);  
+    atualizarStatus(); setInterval(atualizarStatus, 60000); // Atualiza a cada 1 minuto
 
     const atualizarTimer = safe(() => {  
         const agora = new Date(); const fim = new Date(); fim.setHours(23, 59, 59, 999); const diff = fim - agora;  
@@ -783,177 +797,471 @@ document.addEventListener("DOMContentLoaded", () => {
         const h = String(Math.floor(diff / 3600000)).padStart(2, "0"); const m = String(Math.floor((diff % 3600000) / 60000)).padStart(2, "0"); const s = String(Math.floor((diff % 60000) / 1000)).padStart(2, "0");  
         elTimer.textContent = `${h}:${m}:${s}`;  
     });  
-    atualizarTimer(); setInterval(atualizarTimer, 1000);
+    atualizarTimer(); setInterval(atualizarTimer, 1000); // Atualiza a cada 1 segundo
 
     /* FECHAR PEDIDO */  
     async function fecharPedido() {  
         if (!cart.length) return alert("Carrinho vazio!");  
         if (!currentUser) { alert("Faça login para enviar o pedido!"); Overlays.open(el.loginModal); return; }  
-        const cepInput = document.getElementById('cep-input'); const autoRuaBairro = document.getElementById("endereco-auto"); const autoNumero = document.getElementById("numero-input"); const autoComp = document.getElementById("complemento-input"); const isRetirarLocal = document.getElementById('retirar-local')?.checked;  
-        const ruaBairroValue = autoRuaBairro ? autoRuaBairro.value.trim() : ''; const numeroValue = autoNumero ? autoNumero.value.trim() : ''; const compValue = autoComp ? autoComp.value.trim() : ''; const cepValue = cepInput ? cepInput.value.trim().replace(/\D/g, '') : '';  
+        
+        const cepInput = document.getElementById('cep-input'); 
+        const autoRuaBairro = document.getElementById("endereco-auto"); 
+        const autoNumero = document.getElementById("numero-input"); 
+        const autoComp = document.getElementById("complemento-input"); 
+        const isRetirarLocal = document.getElementById('retirar-local')?.checked;  
+        
+        const ruaBairroValue = autoRuaBairro ? autoRuaBairro.value.trim() : ''; 
+        const numeroValue = autoNumero ? autoNumero.value.trim() : ''; 
+        const compValue = autoComp ? autoComp.value.trim() : ''; 
+        const cepValue = cepInput ? cepInput.value.trim().replace(/\D/g, '') : '';  
 
         let finalAddressString = "";  
-        if (ruaBairroValue && numeroValue) { finalAddressString = `${ruaBairroValue}, N° ${numeroValue}`; if (compValue) finalAddressString += `, Comp: ${compValue}`; if (cepValue.length === 8) finalAddressString += ` | CEP: ${cepValue}`; }  
+        if (ruaBairroValue && numeroValue) { 
+            finalAddressString = `${ruaBairroValue}, N° ${numeroValue}`; 
+            if (compValue) finalAddressString += `, Comp: ${compValue}`; 
+            if (cepValue.length === 8) finalAddressString += ` | CEP: ${cepValue}`; 
+        }  
         if (isRetirarLocal) finalAddressString = "CLIENTE IRÁ RETIRAR NO LOCAL";  
         else if (!finalAddressString) { alert("Preencha o CEP, endereço e número, ou marque 'Retirar no Local'."); return; }  
 
         const addr = finalAddressString;  
         const { subtotal, delivery, discount, total, cupomInfo } = await calcTotals();  
-        const pedido = { usuario: currentUser.email, userId: currentUser.uid, nome: currentUser.displayName || currentUser.email.split("@")[0], itens: cart.map((i) => `• ${i.nome} x${i.qtd}`).join("\n"), itensObj: cart.map(i => ({ nome: i.nome, preco: i.preco, qtd: i.qtd })), subtotal: Number(subtotal.toFixed(2)), entrega: Number(delivery.toFixed(2)), desconto: Number(discount.toFixed(2)), cupom: couponApplied || "", total: Number(total.toFixed(2)), endereco: addr, data: new Date().toISOString(), thumb: '' };  
+        
+        // Objeto do Pedido
+        const pedido = { 
+            usuario: currentUser.email, 
+            userId: currentUser.uid, 
+            nome: currentUser.displayName || currentUser.email.split("@")[0], 
+            itens: cart.map((i) => `• ${i.nome} x${i.qtd}`).join("\n"), 
+            itensObj: cart.map(i => ({ nome: i.nome, preco: i.preco, qtd: i.qtd })), 
+            subtotal: Number(subtotal.toFixed(2)), 
+            entrega: Number(delivery.toFixed(2)), 
+            desconto: Number(discount.toFixed(2)), 
+            cupom: couponApplied || "", 
+            total: Number(total.toFixed(2)), 
+            endereco: addr, 
+            data: new Date().toISOString(), 
+            thumb: '' 
+        };  
 
         try {  
-            const batch = db.batch(); const userId = currentUser.uid; const usuarioRef = db.collection("Usuarios").doc(userId);  
-            if (cupomInfo.isPersonalizado && couponApplied) { const cupomUserRef = db.collection("CuponsUsuarios").doc(userId); batch.update(cupomUserRef, { usado: true, dataUso: firebase.firestore.FieldValue.serverTimestamp(), pedidoId: 'PENDENTE' }); }  
-            const pedidoRef = db.collection("Pedidos").doc(); batch.set(pedidoRef, pedido);  
+            // Transação Batch (Salva pedido e atualiza status de cupom/usuário)
+            const batch = db.batch(); 
+            const userId = currentUser.uid; 
+            const usuarioRef = db.collection("Usuarios").doc(userId);  
+            
+            if (cupomInfo.isPersonalizado && couponApplied) { 
+                const cupomUserRef = db.collection("CuponsUsuarios").doc(userId); 
+                batch.update(cupomUserRef, { usado: true, dataUso: firebase.firestore.FieldValue.serverTimestamp(), pedidoId: 'PENDENTE' }); 
+            }  
+            
+            const pedidoRef = db.collection("Pedidos").doc(); 
+            batch.set(pedidoRef, pedido);  
             batch.set(usuarioRef, { email: currentUser.email, pedidosFeitos: firebase.firestore.FieldValue.increment(1) }, { merge: true });  
+            
             await batch.commit();  
+            
             if (cupomInfo.isPersonalizado && couponApplied) await db.collection("CuponsUsuarios").doc(userId).update({ pedidoId: pedidoRef.id });  
 
+            // Lógica de Recompensa/Nível
             const RECOMPENSAS_DATA = await carregarConfiguracoesDeRecompensas();  
-            const doc = await usuarioRef.get(); const data = doc.data() || { pedidosFeitos: 0, recompensaNivel: 0 }; const feitos = data.pedidosFeitos; const nivelAtual = data.recompensaNivel;  
+            const doc = await usuarioRef.get(); 
+            const data = doc.data() || { pedidosFeitos: 0, recompensaNivel: 0 }; 
+            const feitos = data.pedidosFeitos; 
+            const nivelAtual = data.recompensaNivel;  
+            
             const recompensaAtingida = RECOMPENSAS_DATA.find(r => r.limite === feitos && (r.limite / (RECOMPENSAS_DATA[0]?.limite || 1)) > nivelAtual);  
 
             if (recompensaAtingida) {  
-                const primeiroLimite = RECOMPENSAS_DATA[0]?.limite || 1; const novoNivel = recompensaAtingida.limite / primeiroLimite;  
+                const primeiroLimite = RECOMPENSAS_DATA[0]?.limite || 1; 
+                const novoNivel = recompensaAtingida.limite / primeiroLimite;  
+                
                 const itemLiberado = { cupom: recompensaAtingida.valor, tipo: recompensaAtingida.tipo, valor: recompensaAtingida.valor, liberadoEm: firebase.firestore.FieldValue.serverTimestamp(), usado: false, pedidoLiberacao: pedidoRef.id, titulo: recompensaAtingida.titulo || `Recompensa Nível ${novoNivel}` };  
+                
                 await usuarioRef.update({ recompensaNivel: novoNivel, ultimaRecompensa: recompensaAtingida.id });  
                 if (recompensaAtingida.tipo === 'cupom') await db.collection("CuponsUsuarios").doc(userId).set(itemLiberado, { merge: true });  
                 await db.collection("Usuarios").doc(userId).collection("RecompensasRecebidas").add(itemLiberado);  
+                
                 const nomeNivel = String(recompensaAtingida.titulo || recompensaAtingida.valor || '');  
                 mostrarPopupRecompensa(`🎉 Parabéns! Você alcançou ${nomeNivel} ${getTierIcon(nomeNivel)} e ganhou: ${recompensaAtingida.valor}`);  
-                configuracoesRecompensa = null;  
+                configuracoesRecompensa = null; // Força recarregamento do cache
             }  
 
-            popupAdd("Pedido salvo ✅"); try { sound.currentTime = 0; sound.play(); } catch (_) {}  
+            // Notificação, som e WhatsApp
+            popupAdd("Pedido salvo ✅"); 
+            try { sound.currentTime = 0; sound.play(); } catch (_) {}  
             const linhas = ["🍔 *Pedido DFL*", cart.map((i) => `• ${i.nome} x${i.qtd}`).join("\n"), "", `Subtotal: *${money(subtotal)}*`, `Entrega: *${money(delivery)}*${cupomInfo.freeShipping ? " _(Frete Grátis)_" : ""}`, `Desconto${couponApplied ? ` (${couponApplied})` : ""}: *-${money(discount)}*`, `*Total: ${money(total)}*`, "", `🏠 *Endereço:* ${addr}`].join("\n");  
             window.open(`https://wa.me/5534997178336?text=${encodeURIComponent(linhas)}`, "_blank");  
-            cart = []; couponApplied = ""; localStorage.removeItem("dflCoupon"); document.getElementById("coupon-input").value = ""; renderMiniCart(); Overlays.closeAll();  
-        } catch (err) { console.error("Erro fechar pedido:", err); alert(`Erro: ${err.message}`); }  
+            
+            // Limpa e atualiza UI
+            cart = []; 
+            couponApplied = ""; 
+            localStorage.removeItem("dflCoupon"); 
+            document.getElementById("coupon-input").value = ""; 
+            renderMiniCart(); 
+            Overlays.closeAll();  
+        } catch (err) { 
+            console.error("Erro fechar pedido:", err); 
+            alert(`Erro: ${err.message}`); 
+        }  
     }  
     renderMiniCart();
 
-// CONTINUA NA PARTE 5...
-// PARTE 5/5 - MEUS PEDIDOS + RECOMPENSAS + ADMIN + COOKIES + FECHAMENTO
-
-    /* MEUS PEDIDOS */  
+    /* ------------------ 📜 MEUS PEDIDOS ------------------ */  
     el.pedidosBtn?.addEventListener("click", () => { if (!currentUser) { alert("Faça login para ver seus pedidos."); Overlays.open(el.loginModal); return; } Overlays.open(el.pedidosPanel); carregarPedidos(currentUser.uid); });  
     el.pedidosFecharBtn?.addEventListener("click", () => Overlays.closeAll());  
 
     async function carregarPedidos(userId) {  
-        if (!el.pedidosLista) return; el.pedidosLista.innerHTML = `<p class="empty-orders">Carregando pedidos...</p>`;  
-        try { const q = db.collection("Pedidos").where("userId", "==", userId).orderBy("data", "desc"); const snapshot = await q.get();  
+        if (!el.pedidosLista) return; 
+        el.pedidosLista.innerHTML = `<p class="empty-orders">Carregando pedidos...</p>`;  
+        try { 
+            const q = db.collection("Pedidos").where("userId", "==", userId).orderBy("data", "desc"); 
+            const snapshot = await q.get();  
             if (snapshot.empty) { el.pedidosLista.innerHTML = `<p class="empty-orders">Nenhum pedido encontrado 😢</p>`; return; }  
             exibirPedidos(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));  
-        } catch (err) { console.error("Erro pedidos:", err); el.pedidosLista.innerHTML = `<p class="empty-orders" style="color:red;">Erro ao buscar pedidos.</p>`; }  
+        } catch (err) { 
+            console.error("Erro pedidos:", err); 
+            el.pedidosLista.innerHTML = `<p class="empty-orders" style="color:red;">Erro ao buscar pedidos.</p>`; 
+        }  
     }  
 
     function exibirPedidos(pedidos) {  
         if (!el.pedidosLista) return;  
         el.pedidosLista.innerHTML = pedidos.map(p => {  
-            const thumbUrl = p.thumb || ''; const dataFormatada = p.data ? new Date(p.data?.seconds * 1000 || p.data).toLocaleString("pt-BR", { day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit" }) : "—";  
+            const thumbUrl = p.thumb || ''; 
+            const dataFormatada = p.data ? new Date(p.data?.seconds * 1000 || p.data).toLocaleString("pt-BR", { day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit" }) : "—";  
             const podeRepetir = Array.isArray(p.itensObj) && p.itensObj.length > 0;  
             const itensParaExibir = (Array.isArray(p.itens) && p.itens.length > 0) ? p.itens.join('<br>') : (p.itensObj && p.itensObj.length > 0) ? p.itensObj.map(i => `• ${i.nome} x${i.qtd}`).join('<br>') : '• Sem itens';  
             return `<div class="pedido-card"><div class="pedido-thumb" style="background-image:url('${thumbUrl}');"></div><h4>📅 ${dataFormatada}</h4><p class="pedido-info">Total: ${money(p.total)}</p><div class="pedido-itens">${itensParaExibir}</div><button class="repetir-btn" data-id="${p.id}" ${podeRepetir ? '' : 'disabled style="background:grey;cursor:not-allowed;"'}>🔁 Repetir Pedido</button></div>`;  
         }).join('');  
     }  
 
-    el.pedidosLista?.addEventListener('click', async (e) => { if (e.target.classList.contains('repetir-btn') && !e.target.disabled) { e.target.disabled = true; e.target.textContent = "Carregando..."; await repetirPedido(e.target.dataset.id); } });  
+    el.pedidosLista?.addEventListener('click', async (e) => { 
+        if (e.target.classList.contains('repetir-btn') && !e.target.disabled) { 
+            e.target.disabled = true; 
+            e.target.textContent = "Carregando..."; 
+            await repetirPedido(e.target.dataset.id); 
+        } 
+    });  
 
     async function repetirPedido(idPedido) {  
-        try { const docRef = db.collection("Pedidos").doc(idPedido); const doc = await docRef.get();  
+        try { 
+            const docRef = db.collection("Pedidos").doc(idPedido); 
+            const doc = await docRef.get();  
             if (!doc.exists) return alert("Pedido não encontrado.");  
             const itensParaRepetir = doc.data().itensObj;  
             if (!Array.isArray(itensParaRepetir) || itensParaRepetir.length === 0) return alert("Não é possível repetir este pedido.");  
-            cart = []; itensParaRepetir.forEach(item => { if (item.nome && item.preco > 0 && item.qtd > 0) cart.push({ nome: item.nome, preco: item.preco, qtd: item.qtd }); });  
-            couponApplied = ""; localStorage.removeItem("dflCoupon"); document.getElementById("coupon-input").value = "";  
-            popupAdd("Pedido adicionado ao carrinho!"); renderMiniCart(); Overlays.closeAll(); Overlays.open(el.miniCart);  
-        } catch (err) { console.error("Erro repetir:", err); alert("Erro ao processar."); }  
+            
+            // Adiciona itens ao carrinho
+            cart = []; 
+            itensParaRepetir.forEach(item => { if (item.nome && item.preco > 0 && item.qtd > 0) cart.push({ nome: item.nome, preco: item.preco, qtd: item.qtd }); });  
+            
+            // Limpa cupom aplicado
+            couponApplied = ""; 
+            localStorage.removeItem("dflCoupon"); 
+            document.getElementById("coupon-input").value = "";  
+            
+            popupAdd("Pedido adicionado ao carrinho!"); 
+            renderMiniCart(); 
+            Overlays.closeAll(); 
+            Overlays.open(el.miniCart);  
+        } catch (err) { 
+            console.error("Erro repetir:", err); 
+            alert("Erro ao processar."); 
+        }  
     }
 
-    /* RECOMPENSAS */  
+    /* ------------------ 🏆 RECOMPENSAS E PROGRESSO ------------------ */  
     async function carregarRecompensas(userId) {  
         if (!isFirebaseInitialized) return;  
-        const contadorValor = document.getElementById('contador-valor'); const progressoBar = document.getElementById('progresso-bar'); const progressoMsg = document.getElementById('progresso-mensagem');  
+        const contadorValor = document.getElementById('contador-valor'); 
+        const progressoBar = document.getElementById('progresso-bar'); 
+        const progressoMsg = document.getElementById('progresso-mensagem');  
+        
         if (!contadorValor || !progressoBar || !progressoMsg || !el.recompensasLista) return;  
-        contadorValor.textContent = '...'; progressoBar.style.width = '0%'; progressoMsg.textContent = 'Carregando metas...';  
-        el.recompensasLista.innerHTML = ''; if(el.historicoLista) el.historicoLista.innerHTML = `<p class="empty-orders" style="text-align:center;color:#999;">Carregando...</p>`;  
+        
+        contadorValor.textContent = '...'; 
+        progressoBar.style.width = '0%'; 
+        progressoMsg.textContent = 'Carregando metas...';  
+        el.recompensasLista.innerHTML = ''; 
+        if(el.historicoLista) el.historicoLista.innerHTML = `<p class="empty-orders" style="text-align:center;color:#999;">Carregando...</p>`;  
+        
         const RECOMPENSAS_DATA = await carregarConfiguracoesDeRecompensas();  
-        if (RECOMPENSAS_DATA.length === 0) { progressoMsg.textContent = 'Erro ao carregar metas.'; el.recompensasLista.innerHTML = `<p class="empty-orders" style="text-align:center;color:red;">Sistema offline.</p>`; return; }  
+        if (RECOMPENSAS_DATA.length === 0) { 
+            progressoMsg.textContent = 'Erro ao carregar metas.'; 
+            el.recompensasLista.innerHTML = `<p class="empty-orders" style="text-align:center;color:red;">Sistema offline.</p>`; 
+            return; 
+        }  
         const metaPrimeiroNivel = RECOMPENSAS_DATA[0]?.limite || 1;  
 
         db.collection('Usuarios').doc(userId).onSnapshot(async doc => {  
-            el.recompensasLista.innerHTML = ''; if(el.historicoLista) el.historicoLista.innerHTML = '';  
-            const data = doc.data() || { pedidosFeitos: 0, recompensaNivel: 0 }; const feitos = data.pedidosFeitos; const nivelAtual = data.recompensaNivel;  
-            let cupomStatus = null; const recompensaAtual = RECOMPENSAS_DATA.find(r => r.limite === nivelAtual * metaPrimeiroNivel);  
-            if (recompensaAtual && recompensaAtual.tipo === 'cupom') { const cupomSnap = await db.collection('CuponsUsuarios').doc(userId).get(); cupomStatus = cupomSnap.exists ? cupomSnap.data() : null; }  
+            el.recompensasLista.innerHTML = ''; 
+            if(el.historicoLista) el.historicoLista.innerHTML = '';  
+            
+            const data = doc.data() || { pedidosFeitos: 0, recompensaNivel: 0 }; 
+            const feitos = data.pedidosFeitos; 
+            const nivelAtual = data.recompensaNivel;  
+            let cupomStatus = null; 
+            
+            const recompensaAtual = RECOMPENSAS_DATA.find(r => r.limite === nivelAtual * metaPrimeiroNivel);  
+            if (recompensaAtual && recompensaAtual.tipo === 'cupom') { 
+                const cupomSnap = await db.collection('CuponsUsuarios').doc(userId).get(); 
+                cupomStatus = cupomSnap.exists ? cupomSnap.data() : null; 
+            }  
+            
             const proximaRecompensa = RECOMPENSAS_DATA.find(r => r.limite > feitos);  
             const metaParaExibir = proximaRecompensa ? proximaRecompensa.limite : feitos;  
             const metaBaseCalculo = proximaRecompensa ? proximaRecompensa.limite : metaPrimeiroNivel;  
             const porcentagem = proximaRecompensa === undefined ? 100 : Math.min(100, (feitos / metaBaseCalculo) * 100);  
+            
             contadorValor.textContent = feitos;  
-            const elMeta = document.querySelector('.progress-container span:last-child'); if(elMeta) elMeta.textContent = metaParaExibir;  
+            const elMeta = document.querySelector('.progress-container span:last-child'); 
+            if(elMeta) elMeta.textContent = metaParaExibir;  
             progressoBar.style.width = `${porcentagem}%`;  
-            if (proximaRecompensa) { const faltam = proximaRecompensa.limite - feitos; progressoMsg.textContent = `Faltam ${faltam} pedidos para: ${proximaRecompensa.titulo || proximaRecompensa.valor}!`; progressoBar.style.background = 'linear-gradient(90deg, #ffb300, #ff7043)'; const recompensasObtidas = RECOMPENSAS_DATA.filter(r => r.limite <= feitos); exibirRecompensas(feitos, recompensasObtidas, cupomStatus, RECOMPENSAS_DATA); if (recompensasObtidas.length === 0) el.recompensasLista.innerHTML = `<p class="empty-orders" style="text-align:center;color:#666;margin-top:20px;">Faça ${faltam} pedidos para desbloquear.</p>`; }  
-            else { progressoMsg.textContent = '🎉 Parabéns! Todas as metas completas!'; progressoBar.style.background = 'linear-gradient(90deg, #4caf50, #43a047)'; exibirRecompensas(feitos, RECOMPENSAS_DATA, cupomStatus, RECOMPENSAS_DATA); }  
+            
+            if (proximaRecompensa) { 
+                const faltam = proximaRecompensa.limite - feitos; 
+                progressoMsg.textContent = `Faltam ${faltam} pedidos para: ${proximaRecompensa.titulo || proximaRecompensa.valor}!`; 
+                progressoBar.style.background = 'linear-gradient(90deg, #ffb300, #ff7043)'; 
+                const recompensasObtidas = RECOMPENSAS_DATA.filter(r => r.limite <= feitos); 
+                exibirRecompensas(feitos, recompensasObtidas, cupomStatus, RECOMPENSAS_DATA); 
+                if (recompensasObtidas.length === 0) el.recompensasLista.innerHTML = `<p class="empty-orders" style="text-align:center;color:#666;margin-top:20px;">Faça ${faltam} pedidos para desbloquear.</p>`; 
+            }  
+            else { 
+                progressoMsg.textContent = '🎉 Parabéns! Todas as metas completas!'; 
+                progressoBar.style.background = 'linear-gradient(90deg, #4caf50, #43a047)'; 
+                exibirRecompensas(feitos, RECOMPENSAS_DATA, cupomStatus, RECOMPENSAS_DATA); 
+            }  
             await carregarHistoricoRecompensas(userId);  
-        }, error => { console.error("Erro contador:", error); progressoMsg.textContent = 'Erro ao ler progresso.'; contadorValor.textContent = '0'; });  
+        }, error => { 
+            console.error("Erro contador:", error); 
+            progressoMsg.textContent = 'Erro ao ler progresso.'; 
+            contadorValor.textContent = '0'; 
+        });  
     }  
 
     function exibirRecompensas(pedidosFeitos, recompensasDisponiveis, cupomStatus, RECOMPENSAS_DATA) {  
         if (!el.recompensasLista) return;  
         el.recompensasLista.innerHTML = (recompensasDisponiveis || []).map(r => {  
-            const liberada = pedidosFeitos >= r.limite; const cupomJaUsado = cupomStatus?.usado === true && cupomStatus?.cupom === r.valor;  
-            const tituloRaw = String(r.titulo || r.valor || ''); const titulo = r.titulo || `Recompensa: ${r.valor}`;  
+            const liberada = pedidosFeitos >= r.limite; 
+            const cupomJaUsado = cupomStatus?.usado === true && cupomStatus?.cupom === r.valor;  
+            const tituloRaw = String(r.titulo || r.valor || ''); 
+            const titulo = r.titulo || `Recompensa: ${r.valor}`;  
             let acaoBtn = '', statusTag = '', cardStyle = '', codigoCupom = r.valor || 'BRINDE';  
-            let icon = '🎁'; const tituloLower = tituloRaw.toLowerCase();  
+            let icon = '🎁'; 
+            const tituloLower = tituloRaw.toLowerCase();  
+            
             if (tituloLower.includes('ouro') || tituloLower.includes('platina') || tituloLower.includes('diamante')) icon = getTierIcon(tituloRaw);  
-            else if (r.tipo === 'cupom') icon = '🎟️'; else if (r.tipo === 'brinde') icon = '🍔';  
-            if (cupomJaUsado) { statusTag = '<span style="color:#d32f2f;font-weight:bold;">(USADO)</span>'; acaoBtn = `<button disabled style="background:#ccc;color:#666;border:none;border-radius:6px;padding:8px;cursor:not-allowed;margin-top:5px;">Usado</button>`; cardStyle = 'opacity: 0.7;'; }  
-            else if (liberada && r.tipo === 'cupom') { statusTag = '<span style="color:#4caf50;font-weight:bold;">(DISPONÍVEL)</span>'; acaoBtn = `<button class="recompensa-aplicar-btn" data-cupom="${codigoCupom}" style="background:#4caf50;color:#fff;border:none;border-radius:6px;padding:8px 12px;cursor:pointer;font-weight:600;margin-top:5px;">Aplicar Cupom 🏷️</button>`; }  
-            else if (liberada && r.tipo === 'brinde') { statusTag = '<span style="color:#1976D2;font-weight:bold;">(LIBERADO)</span>'; acaoBtn = `<button disabled style="background:#1976D2;color:#fff;border:none;border-radius:6px;padding:8px;cursor:default;margin-top:5px;">Peça no Balcão</button>`; }  
+            else if (r.tipo === 'cupom') icon = '🎟️'; 
+            else if (r.tipo === 'brinde') icon = '🍔';  
+            
+            if (cupomJaUsado) { 
+                statusTag = '<span style="color:#d32f2f;font-weight:bold;">(USADO)</span>'; 
+                acaoBtn = `<button disabled style="background:#ccc;color:#666;border:none;border-radius:6px;padding:8px;cursor:not-allowed;margin-top:5px;">Usado</button>`; 
+                cardStyle = 'opacity: 0.7;'; 
+            }  
+            else if (liberada && r.tipo === 'cupom') { 
+                statusTag = '<span style="color:#4caf50;font-weight:bold;">(DISPONÍVEL)</span>'; 
+                acaoBtn = `<button class="recompensa-aplicar-btn" data-cupom="${codigoCupom}" style="background:#4caf50;color:#fff;border:none;border-radius:6px;padding:8px 12px;cursor:pointer;font-weight:600;margin-top:5px;">Aplicar Cupom 🏷️</button>`; 
+            }  
+            else if (liberada && r.tipo === 'brinde') { 
+                statusTag = '<span style="color:#1976D2;font-weight:bold;">(LIBERADO)</span>'; 
+                acaoBtn = `<button disabled style="background:#1976D2;color:#fff;border:none;border-radius:6px;padding:8px;cursor:default;margin-top:5px;">Peça no Balcão</button>`; 
+            }  
             const mostrarCupom = (r.valor && !String(r.valor).includes('Nível'));  
             return `<div class="recompensa-card" style="display:flex;align-items:center;padding:15px;border-radius:10px;margin-bottom:10px;background:#f9f9f9;box-shadow:0 2px 5px rgba(0,0,0,0.1);${cardStyle}"><div style="font-size:2rem;margin-right:15px;">${icon}</div><div style="flex:1;"><h4 style="margin:0 0 5px 0;color:#333;">${titulo} ${statusTag}</h4><p style="margin:0;font-size:0.9rem;color:#666;">Meta: ${r.limite} Pedidos</p>${mostrarCupom ? `<b style="color:#4caf50;display:block;margin-top:4px;">CUPOM: ${codigoCupom}</b>` : ''}</div><div>${acaoBtn}</div></div>`;  
         }).join('');  
-        el.recompensasLista.querySelectorAll('.recompensa-aplicar-btn').forEach(btn => { btn.addEventListener('click', (e) => { const codigo = e.currentTarget.dataset.cupom; if (codigo) { couponApplied = codigo; localStorage.setItem("dflCoupon", couponApplied); document.getElementById("coupon-input").value = codigo; renderMiniCart(); Overlays.closeAll(); popupAdd(`Cupom ${codigo} aplicado! ✅`); Overlays.open(el.miniCart); } }); });  
+        
+        el.recompensasLista.querySelectorAll('.recompensa-aplicar-btn').forEach(btn => { 
+            btn.addEventListener('click', (e) => { 
+                const codigo = e.currentTarget.dataset.cupom; 
+                if (codigo) { 
+                    couponApplied = codigo; 
+                    localStorage.setItem("dflCoupon", couponApplied); 
+                    document.getElementById("coupon-input").value = codigo; 
+                    renderMiniCart(); 
+                    Overlays.closeAll(); 
+                    popupAdd(`Cupom ${codigo} aplicado! ✅`); 
+                    Overlays.open(el.miniCart); 
+                } 
+            }); 
+        });  
     }  
 
     async function carregarHistoricoRecompensas(userId) {  
-        if (!el.historicoLista) return; el.historicoLista.innerHTML = `<p class="empty-orders" style="text-align:center;color:#999;">Carregando...</p>`;  
-        try { const q = db.collection("Usuarios").doc(userId).collection("RecompensasRecebidas").orderBy("liberadoEm", "desc"); const snapshot = await q.get();  
+        if (!el.historicoLista) return; 
+        el.historicoLista.innerHTML = `<p class="empty-orders" style="text-align:center;color:#999;">Carregando...</p>`;  
+        try { 
+            const q = db.collection("Usuarios").doc(userId).collection("RecompensasRecebidas").orderBy("liberadoEm", "desc"); 
+            const snapshot = await q.get();  
             if (snapshot.empty) { el.historicoLista.innerHTML = `<p class="empty-orders" style="text-align:center;color:#999;">Nenhuma recompensa no histórico.</p>`; return; }  
-            el.historicoLista.innerHTML = snapshot.docs.map(doc => { const log = doc.data(); const dataRecebimento = log.liberadoEm ? log.liberadoEm.toDate().toLocaleDateString('pt-BR') : "—"; let icon = '🎁'; const tituloRaw = String(log.titulo || '').toLowerCase(); if (tituloRaw.includes('ouro') || tituloRaw.includes('platina') || tituloRaw.includes('diamante')) icon = getTierIcon(log.titulo); else if (log.tipo === 'cupom') icon = '🎟️'; return `<div class="historico-card" style="display:flex;padding:10px 0;border-bottom:1px dashed #eee;align-items:center;justify-content:space-between;"><div style="flex:1;"><p style="font-weight:600;margin:0;color:#333;">${icon} ${log.titulo || log.valor}</p><small style="color:#999;">${dataRecebimento}</small></div><span style="font-weight:700;color:#4caf50;">Recebido</span></div>`; }).join('');  
-        } catch (err) { console.error("Erro histórico:", err); el.historicoLista.innerHTML = `<p class="empty-orders" style="color:red;">Erro.</p>`; }  
+            el.historicoLista.innerHTML = snapshot.docs.map(doc => { 
+                const log = doc.data(); 
+                const dataRecebimento = log.liberadoEm ? log.liberadoEm.toDate().toLocaleDateString('pt-BR') : "—"; 
+                let icon = '🎁'; 
+                const tituloRaw = String(log.titulo || '').toLowerCase(); 
+                if (tituloRaw.includes('ouro') || tituloRaw.includes('platina') || tituloRaw.includes('diamante')) icon = getTierIcon(log.titulo); 
+                else if (log.tipo === 'cupom') icon = '🎟️'; 
+                return `<div class="historico-card" style="display:flex;padding:10px 0;border-bottom:1px dashed #eee;align-items:center;justify-content:space-between;"><div style="flex:1;"><p style="font-weight:600;margin:0;color:#333;">${icon} ${log.titulo || log.valor}</p><small style="color:#999;">${dataRecebimento}</small></div><span style="font-weight:700;color:#4caf50;">Recebido</span></div>`; 
+            }).join('');  
+        } catch (err) { 
+            console.error("Erro histórico:", err); 
+            el.historicoLista.innerHTML = `<p class="empty-orders" style="color:red;">Erro.</p>`; 
+        }  
     }  
 
-    el.recompensasBtn?.addEventListener("click", () => { if (!currentUser) { alert("Faça login!"); Overlays.open(el.loginModal); return; } Overlays.open(el.recompensasPanel); carregarRecompensas(currentUser.uid); });  
+    el.recompensasBtn?.addEventListener("click", () => { 
+        if (!currentUser) { alert("Faça login!"); Overlays.open(el.loginModal); return; } 
+        Overlays.open(el.recompensasPanel); 
+        carregarRecompensas(currentUser.uid); 
+    });  
     el.recompensasFecharBtn?.addEventListener("click", () => Overlays.closeAll());
 
-    /* ADMIN */  
+    /* ------------------ 🔒 ADMIN (RELATÓRIOS) ------------------ */  
     const ADMINS = [ "alefejohsefe@gmail.com", "kalebhstanley650@gmail.com", "contato@dafamilialanches.com.br" ];  
     function isAdmin(user) { return user && user.email && ADMINS.includes(user.email.toLowerCase()); }  
-    let chartPedidos = null; let chartProdutos = null;  
-    function ensureChartJS(cb) { if (window.Chart) return; const s = document.createElement("script"); s.src = "https://cdn.jsdelivr.net/npm/chart.js"; s.onload = cb; document.head.appendChild(s); }  
-    function createDashboard() { if (document.getElementById("admin-dashboard")) return; const div = document.createElement("div"); div.id = "admin-dashboard"; div.className = "modal"; div.innerHTML = `<div class="modal-content" style="max-width:1000px;width:95%;height:85vh;overflow:auto;background:#fff;border-radius:12px;"><div class="modal-head" style="display:flex;justify-content:space-between;align-items:center;padding:10px 14px;"><h3>📊 Relatórios</h3><button class="dashboard-close">✖</button></div><div class="dashboard-body" style="padding:12px;"><div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:12px;"><div id="card-total" class="cardBox">Total: —</div><div id="card-pedidos" class="cardBox">Pedidos: —</div><div id="card-ticket" class="cardBox">Ticket Médio: —</div></div><div style="margin-bottom:10px;"><label>Período: </label><select id="filter-period"><option value="7">7 dias</option><option value="30">30 dias</option><option value="all">Todos</option></select></div><canvas id="chart-pedidos" style="width:100%;height:240px;"></canvas><canvas id="chart-produtos" style="width:100%;height:240px;margin-top:16px;"></canvas><div style="margin-top:12px;"><button id="export-csv" style="background:#4caf50;color:#fff;border:none;border-radius:8px;padding:10px;">Exportar CSV</button></div></div></div>`; document.body.appendChild(div); div.querySelector(".dashboard-close").addEventListener("click", () => Overlays.closeAll()); }  
-    function createAdminFab() { if (el.reportsBtn) { el.reportsBtn.style.display = "block"; el.reportsBtn.addEventListener("click", () => { createDashboard(); ensureChartJS(() => carregarRelatorios("7")); Overlays.open(document.getElementById("admin-dashboard")); }); } }  
-    function gerarResumoECharts(pedidos) { if (!window.Chart) return; const ctxPedidos = document.getElementById('chart-pedidos')?.getContext('2d'); const ctxProdutos = document.getElementById('chart-produtos')?.getContext('2d'); if (!ctxPedidos || !ctxProdutos) return; const pedidosPorDia = {}; const produtosContagem = {}; pedidos.forEach(p => { const dia = (p.data?.toDate?.() || new Date(p.data)).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' }); pedidosPorDia[dia] = (pedidosPorDia[dia] || 0) + 1; (Array.isArray(p.itens) ? p.itens : []).forEach(itemStr => { const nome = itemStr.split(' x')[0]; if (nome) produtosContagem[nome] = (produtosContagem[nome] || 0) + 1; }); }); const labelsPedidos = Object.keys(pedidosPorDia).reverse(); const dataPedidos = Object.values(pedidosPorDia).reverse(); if (chartPedidos) chartPedidos.destroy(); chartPedidos = new Chart(ctxPedidos, { type: 'line', data: { labels: labelsPedidos, datasets: [{ label: 'Pedidos', data: dataPedidos, borderColor: '#ffb300', tension: 0.1 }] }, options: { scales: { x: { ticks: { maxRotation: 45, minRotation: 45 } } } } }); const produtosOrdenados = Object.entries(produtosContagem).sort(([, a], [, b]) => b - a).slice(0, 10); if (chartProdutos) chartProdutos.destroy(); chartProdutos = new Chart(ctxProdutos, { type: 'bar', data: { labels: produtosOrdenados.map(p=>p[0]), datasets: [{ label: 'Mais Vendidos', data: produtosOrdenados.map(p=>p[1]), backgroundColor: '#ff7043' }] }, options: { indexAxis: 'y' } }); }  
-    function carregarRelatorios(periodo = "7") { const start = new Date(); if (periodo !== "all") start.setDate(start.getDate() - Number(periodo)); else start.setTime(0); db.collection("Pedidos").orderBy("data", "desc").get().then(snap => { const pedidos = snap.docs.map(d => { const dataObjeto = d.data(); const rawDate = dataObjeto.data; let processedDate; if (rawDate && typeof rawDate.toDate === 'function') processedDate = rawDate.toDate(); else if (rawDate) processedDate = new Date(rawDate); else processedDate = new Date(); return { ...dataObjeto, id: d.id, data: processedDate }; }); const filtrados = pedidos.filter(p => p.data >= start); gerarResumoECharts(filtrados); document.getElementById("card-total").textContent = `Total: ${money(filtrados.reduce((s, p) => s + (Number(p.total) || 0), 0))}`; document.getElementById("card-pedidos").textContent = `Pedidos: ${filtrados.length}`; document.getElementById("card-ticket").textContent = `Ticket Médio: ${money(filtrados.length ? filtrados.reduce((s, p) => s + (Number(p.total) || 0), 0)/filtrados.length : 0)}`; document.getElementById("export-csv").onclick = () => { const csv = "Data;Nome;Total\n" + filtrados.map(p => `${p.data.toLocaleString()};${p.nome};${p.total}`).join("\n"); const blob = new Blob([`\uFEFF${csv}`], { type: 'text/csv;charset=utf-8;' }); const link = document.createElement('a'); link.href = URL.createObjectURL(blob); link.download = "pedidos.csv"; link.click(); }; }); const sel = document.getElementById("filter-period"); if(sel && !sel._bound) { sel.addEventListener("change", e => carregarRelatorios(e.target.value)); sel._bound = true; } }
+    let chartPedidos = null; 
+    let chartProdutos = null;  
+    
+    function ensureChartJS(cb) { 
+        if (window.Chart) return; 
+        const s = document.createElement("script"); 
+        s.src = "https://cdn.jsdelivr.net/npm/chart.js"; 
+        s.onload = cb; 
+        document.head.appendChild(s); 
+    }  
+    
+    function createDashboard() { 
+        if (document.getElementById("admin-dashboard")) return; 
+        const div = document.createElement("div"); 
+        div.id = "admin-dashboard"; 
+        div.className = "modal"; 
+        div.innerHTML = `<div class="modal-content" style="max-width:1000px;width:95%;height:85vh;overflow:auto;background:#fff;border-radius:12px;"><div class="modal-head" style="display:flex;justify-content:space-between;align-items:center;padding:10px 14px;"><h3>📊 Relatórios</h3><button class="dashboard-close">✖</button></div><div class="dashboard-body" style="padding:12px;"><div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:12px;"><div id="card-total" class="cardBox">Total: —</div><div id="card-pedidos" class="cardBox">Pedidos: —</div><div id="card-ticket" class="cardBox">Ticket Médio: —</div></div><div style="margin-bottom:10px;"><label>Período: </label><select id="filter-period"><option value="7">7 dias</option><option value="30">30 dias</option><option value="all">Todos</option></select></div><canvas id="chart-pedidos" style="width:100%;height:240px;"></canvas><canvas id="chart-produtos" style="width:100%;height:240px;margin-top:16px;"></canvas><div style="margin-top:12px;"><button id="export-csv" style="background:#4caf50;color:#fff;border:none;border-radius:8px;padding:10px;">Exportar CSV</button></div></div></div>`; 
+        document.body.appendChild(div); 
+        div.querySelector(".dashboard-close").addEventListener("click", () => Overlays.closeAll()); 
+    }  
+    
+    function createAdminFab() { 
+        if (el.reportsBtn) { 
+            el.reportsBtn.style.display = "block"; 
+            el.reportsBtn.addEventListener("click", () => { 
+                createDashboard(); 
+                ensureChartJS(() => carregarRelatorios("7")); 
+                Overlays.open(document.getElementById("admin-dashboard")); 
+            }); 
+        } 
+    }  
+    
+    function gerarResumoECharts(pedidos) { 
+        if (!window.Chart) return; 
+        const ctxPedidos = document.getElementById('chart-pedidos')?.getContext('2d'); 
+        const ctxProdutos = document.getElementById('chart-produtos')?.getContext('2d'); 
+        if (!ctxPedidos || !ctxProdutos) return; 
+        
+        const pedidosPorDia = {}; 
+        const produtosContagem = {}; 
+        
+        pedidos.forEach(p => { 
+            const dia = (p.data?.toDate?.() || new Date(p.data)).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' }); 
+            pedidosPorDia[dia] = (pedidosPorDia[dia] || 0) + 1; 
+            (Array.isArray(p.itens) ? p.itens : []).forEach(itemStr => { 
+                const nome = itemStr.split(' x')[0]; 
+                if (nome) produtosContagem[nome] = (produtosContagem[nome] || 0) + 1; 
+            }); 
+        }); 
+        
+        const labelsPedidos = Object.keys(pedidosPorDia).reverse(); 
+        const dataPedidos = Object.values(pedidosPorDia).reverse(); 
+        
+        if (chartPedidos) chartPedidos.destroy(); 
+        chartPedidos = new Chart(ctxPedidos, { 
+            type: 'line', 
+            data: { labels: labelsPedidos, datasets: [{ label: 'Pedidos', data: dataPedidos, borderColor: '#ffb300', tension: 0.1 }] }, 
+            options: { scales: { x: { ticks: { maxRotation: 45, minRotation: 45 } } } } 
+        }); 
+        
+        const produtosOrdenados = Object.entries(produtosContagem).sort(([, a], [, b]) => b - a).slice(0, 10); 
+        if (chartProdutos) chartProdutos.destroy(); 
+        chartProdutos = new Chart(ctxProdutos, { 
+            type: 'bar', 
+            data: { labels: produtosOrdenados.map(p=>p[0]), datasets: [{ label: 'Mais Vendidos', data: produtosOrdenados.map(p=>p[1]), backgroundColor: '#ff7043' }] }, 
+            options: { indexAxis: 'y' } 
+        }); 
+    }  
+    
+    function carregarRelatorios(periodo = "7") { 
+        const start = new Date(); 
+        if (periodo !== "all") start.setDate(start.getDate() - Number(periodo)); 
+        else start.setTime(0); 
+        
+        db.collection("Pedidos").orderBy("data", "desc").get().then(snap => { 
+            const pedidos = snap.docs.map(d => { 
+                const dataObjeto = d.data(); 
+                const rawDate = dataObjeto.data; 
+                let processedDate; 
+                if (rawDate && typeof rawDate.toDate === 'function') processedDate = rawDate.toDate(); 
+                else if (rawDate) processedDate = new Date(rawDate); 
+                else processedDate = new Date(); 
+                return { ...dataObjeto, id: d.id, data: processedDate }; 
+            }); 
+            
+            const filtrados = pedidos.filter(p => p.data >= start); 
+            gerarResumoECharts(filtrados); 
+            
+            // Atualiza Cards
+            const total = filtrados.reduce((s, p) => s + (Number(p.total) || 0), 0);
+            const numPedidos = filtrados.length;
+            const ticketMedio = numPedidos ? total / numPedidos : 0;
+            
+            document.getElementById("card-total").textContent = `Total: ${money(total)}`; 
+            document.getElementById("card-pedidos").textContent = `Pedidos: ${numPedidos}`; 
+            document.getElementById("card-ticket").textContent = `Ticket Médio: ${money(ticketMedio)}`; 
+            
+            // Exportar CSV
+            document.getElementById("export-csv").onclick = () => { 
+                const csv = "Data;Nome;Total\n" + filtrados.map(p => `${p.data.toLocaleString()};${p.nome};${p.total}`).join("\n"); 
+                const blob = new Blob([`\uFEFF${csv}`], { type: 'text/csv;charset=utf-8;' }); 
+                const link = document.createElement('a'); 
+                link.href = URL.createObjectURL(blob); 
+                link.download = "pedidos.csv"; 
+                link.click(); 
+            }; 
+        }); 
+        
+        // Liga o Listener de Período
+        const sel = document.getElementById("filter-period"); 
+        if(sel && !sel._bound) { 
+            sel.addEventListener("change", e => carregarRelatorios(e.target.value)); 
+            sel._bound = true; 
+        } 
+    }
 
-    /* COOKIES */  
-    const cookieBanner = document.getElementById("cookie-banner"); const cookieAcceptBtn = document.getElementById("cookie-accept");  
-    if (cookieBanner && cookieAcceptBtn) { if (localStorage.getItem("dfl-cookies-accepted") === "true") cookieBanner.style.display = "none"; else cookieBanner.classList.add("show"); cookieAcceptBtn.addEventListener("click", () => { localStorage.setItem("dfl-cookies-accepted", "true"); cookieBanner.classList.remove("show"); }); }
+    /* ------------------ COOKIES ------------------ */  
+    const cookieBanner = document.getElementById("cookie-banner"); 
+    const cookieAcceptBtn = document.getElementById("cookie-accept");  
+    if (cookieBanner && cookieAcceptBtn) { 
+        if (localStorage.getItem("dfl-cookies-accepted") === "true") cookieBanner.style.display = "none"; 
+        else cookieBanner.classList.add("show"); 
+        cookieAcceptBtn.addEventListener("click", () => { 
+            localStorage.setItem("dfl-cookies-accepted", "true"); 
+            cookieBanner.classList.remove("show"); 
+        }); 
+    }
 
     console.log("%c🔥 DFL v5.2.9 — FRETE DINÂMICO CORRIGIDO", "background:#4CAF50;color:#fff;padding:5px;border-radius:5px;");  
     inicializarFirebase();  
 
 }); // FIM DO DOMContentLoaded
 
-/* FECHAR MODAIS GLOBAL */  
+/* FECHAR MODAIS GLOBAL: Lida com cliques no backdrop fora do DOMContentLoaded */  
 document.addEventListener('DOMContentLoaded', () => {  
-    document.querySelectorAll('.modal').forEach(m => m.addEventListener('click', e => { if (e.target.classList.contains('modal')) { m.classList.remove('show'); document.getElementById('cart-backdrop').classList.remove('active'); } }));  
-    document.getElementById('cart-backdrop')?.addEventListener('click', () => { document.querySelectorAll('.active').forEach(e => e.classList.remove('active')); });  
+    document.querySelectorAll('.modal').forEach(m => m.addEventListener('click', e => { 
+        if (e.target.classList.contains('modal')) { 
+            m.classList.remove('show'); 
+            document.getElementById('cart-backdrop').classList.remove('active'); 
+        } 
+    }));  
+    document.getElementById('cart-backdrop')?.addEventListener('click', () => { 
+        document.querySelectorAll('.active').forEach(e => e.classList.remove('active')); 
+    });  
 });
-
-// ============================================================
-// FIM DO CÓDIGO v5.2.9 — TUDO EM UM ÚNICO ARQUIVO
-// PARA USAR: Junte as 5 partes em sequência em um único arquivo .js
-// ============================================================
