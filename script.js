@@ -1,7 +1,7 @@
 /* =========================================================  
-   🚀 DFL v5.3.3 — Estabilidade e Implementação Final
-   - FIX CRÍTICO: Remoção de lógica que causava crash na inicialização do Status da Loja.
-   - Implementação COMPLETA e robusta da Barra de Progresso, Endereço Manual e Frete Inteligente.
+   🚀 DFL v5.3.4 — Estabilidade Final e Implementação Completa
+   - FIX CRÍTICO: Correção de erro de sintaxe na definição do objeto 'pedido' em fecharPedido.
+   - Implementação COMPLETA e segura da Barra de Progresso, Endereço Manual e Frete Inteligente.
    ========================================================= */  
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -60,7 +60,6 @@ document.addEventListener("DOMContentLoaded", () => {
     ];  
 
     /* ------------------ 🎯 MAPEAMENTO DE ELEMENTOS DOM ------------------ */  
-    // Mapeamento global é mantido o mais próximo possível do original
     const el = {  
         cartIcon: document.getElementById("cart-icon"),  
         cartCount: document.getElementById("cart-count"),  
@@ -198,7 +197,7 @@ document.addEventListener("DOMContentLoaded", () => {
             const couponDiscountRow = document.getElementById("coupon-discount-row");  
             if (couponMsg) couponMsg.innerHTML = "";  
             if (couponDiscountRow) couponDiscountRow.style.display = "none";  
-            // Limpa a barra de progresso
+            // [NOVO] Limpa a barra de progresso
             document.getElementById("frete-progresso-container")?.innerHTML = '';
             return;  
         }  
@@ -542,7 +541,7 @@ document.addEventListener("DOMContentLoaded", () => {
             _cupomCache[key] = { ate: now + 30000, res }; return res;  
         } catch (err) { console.error("Erro ao validar cupom:", err); return { ...invalido, mensagem: "Erro ao processar cupom." }; }  
     }
-    
+
     // [NOVO] Função para controlar o estado dos campos de endereço
     const toggleAddressState = (isDisabled, isManual = false) => {
         const enderecoAuto = document.getElementById('endereco-auto');
@@ -895,7 +894,6 @@ document.addEventListener("DOMContentLoaded", () => {
         const aberto = h >= 18 && h < 23;   
         if (el.statusBanner) { el.statusBanner.textContent = aberto ? "🟢 Aberto — Faça seu pedido!" : "🔴 Fechado — Voltamos às 18h!"; el.statusBanner.className = `status-banner ${aberto ? "open" : "closed"}`; }  
         
-        // [BLOCO CRÍTICO CORRIGIDO PARA EVITAR CRASH]
         if (el.hoursBanner) {  
             const elMsg = el.hoursBanner.querySelector("#hours-message"); 
             const elTimer = el.hoursBanner.querySelector("#timer");  
@@ -974,7 +972,8 @@ document.addEventListener("DOMContentLoaded", () => {
             usuario: currentUser.email, 
             userId: currentUser.uid, 
             nome: currentUser.displayName || currentUser.email.split("@")[0], 
-            itens: cart.map((i) => `• ${i.nome} x${i.qtd}`).join("\n`), 
+            // CORREÇÃO DE SINTAXE: Utilizando a sintaxe de template string correta
+            itens: cart.map(i => `• ${i.nome} x${i.qtd}`).join('\n'),
             itensObj: cart.map(i => ({ nome: i.nome, preco: i.preco, qtd: i.qtd })), 
             subtotal: Number(subtotal.toFixed(2)), 
             entrega: Number(delivery.toFixed(2)), 
@@ -994,7 +993,7 @@ document.addEventListener("DOMContentLoaded", () => {
             
             if (cupomInfo.isPersonalizado && couponApplied) { 
                 const cupomUserRef = db.collection("CuponsUsuarios").doc(userId); 
-                batch.update(cupumUserRef, { usado: true, dataUso: firebase.firestore.FieldValue.serverTimestamp(), pedidoId: 'PENDENTE' }); 
+                batch.update(cupomUserRef, { usado: true, dataUso: firebase.firestore.FieldValue.serverTimestamp(), pedidoId: 'PENDENTE' }); 
             }  
             
             const pedidoRef = db.collection("Pedidos").doc(); 
@@ -1032,7 +1031,7 @@ document.addEventListener("DOMContentLoaded", () => {
             // Notificação, som e WhatsApp
             popupAdd("Pedido salvo ✅"); 
             try { sound.currentTime = 0; sound.play(); } catch (_) {}  
-            const linhas = ["🍔 *Pedido DFL*", cart.map((i) => `• ${i.nome} x${i.qtd}`).join("\n`), "", `Subtotal: *${money(subtotal)}*`, `Entrega: *${money(delivery)}*${cupomInfo.freeShipping ? " _(Frete Grátis)_" : ""}`, `Desconto${couponApplied ? ` (${couponApplied})` : ""}: *-${money(discount)}*`, `*Total: ${money(total)}*`, "", `🏠 *Endereço:* ${addr}`].join("\n`);  
+            const linhas = ["🍔 *Pedido DFL*", cart.map(i => `• ${i.nome} x${i.qtd}`).join("\n"), "", `Subtotal: *${money(subtotal)}*`, `Entrega: *${money(delivery)}*${cupomInfo.freeShipping ? " _(Frete Grátis)_" : ""}`, `Desconto${couponApplied ? ` (${couponApplied})` : ""}: *-${money(discount)}*`, `*Total: ${money(total)}*`, "", `🏠 *Endereço:* ${addr}`].join("\n");  
             window.open(`https://wa.me/5534997178336?text=${encodeURIComponent(linhas)}`, "_blank");  
             
             // Limpa e atualiza UI
@@ -1390,9 +1389,20 @@ document.addEventListener("DOMContentLoaded", () => {
         }); 
     }
 
-    console.log("%c🔥 DFL v5.3.3 — FIX DE ESTABILIDADE", "background:#4CAF50;color:#fff;padding:5px;border-radius:5px;");  
+    console.log("%c🔥 DFL v5.3.4 — FIX DE SINTAXE E ESTABILIDADE", "background:#4CAF50;color:#fff;padding:5px;border-radius:5px;");  
     inicializarFirebase();  
 
 }); // FIM DO DOMContentLoaded
 
-/* FECHAR
+/* FECHAR MODAIS GLOBAL: Lida com cliques no backdrop fora do DOMContentLoaded */  
+document.addEventListener('DOMContentLoaded', () => {  
+    document.querySelectorAll('.modal').forEach(m => m.addEventListener('click', e => { 
+        if (e.target.classList.contains('modal')) { 
+            m.classList.remove('show'); 
+            document.getElementById('cart-backdrop').classList.remove('active'); 
+        } 
+    }));  
+    document.getElementById('cart-backdrop')?.addEventListener('click', () => { 
+        document.querySelectorAll('.active').forEach(e => e.classList.remove('active')); 
+    });  
+});
