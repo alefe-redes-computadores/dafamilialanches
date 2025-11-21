@@ -3,265 +3,203 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Da Família Lanches - v5.5</title>
+    <title>Da Família Lanches - Delivery</title>
+    <link rel="stylesheet" href="style.css" />
+    <link rel="stylesheet" href="extras.css" />
+    <link rel="shortcut icon" href="img/favicon.png" type="image/png" />
 
-    <!-- FONTS -->
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
-        rel="stylesheet"
-    />
-
-    <!-- CSS PRINCIPAL -->
-    <link rel="stylesheet" href="style.css?v=5.5" />
-
-    <!-- Firebase -->
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
 </head>
 
 <body>
 
-    <!-- HEADER -->
-    <header class="main-header">
+    <!-- 🟡 CABEÇALHO -->
+    <header class="header">
         <div class="header-left">
-            <img src="public/img/logo-dfl.png" class="logo" alt="DFL" />
-            <span class="header-title">Da Família Lanches</span>
+            <img src="img/logo-dfl.png" alt="Logo DFL" class="logo-header" />
         </div>
 
         <div class="header-right">
-            <button id="openCartBtn" class="icon-btn">
+            <button id="btnAbrirCarrinho" class="btn-icon">
                 🛒
             </button>
-
-            <button id="openProfileBtn" class="icon-btn">
+            <button id="btnPerfilUsuario" class="btn-icon">
                 👤
             </button>
         </div>
     </header>
 
-    <!-- =============================== -->
-    <!-- 🚀 BARRA DE PROGRESSO v5.5 (OPÇÃO B) -->
-    <!-- =============================== -->
+    <!-- 🟡 PAINEL DE LOGIN -->
+    <div id="modalLogin" class="modal hidden">
+        <div class="modal-content">
+            <h2>Entrar</h2>
+            <p>Faça login para continuar</p>
 
-    <section class="progress-container">
-        <div class="progress-steps">
-            <div class="step-item">
-                <div class="step-icon" id="stepCart">🛒</div>
-                <span class="step-label">Carrinho</span>
+            <div class="login-buttons">
+                <button id="btnLoginGoogle" class="btn-google">Entrar com Google</button>
+
+                <input type="email" id="emailLogin" placeholder="Seu e-mail" />
+                <input type="password" id="senhaLogin" placeholder="Sua senha" />
+                <button id="btnLoginEmail" class="btn-principal">Entrar</button>
             </div>
 
-            <div class="step-separator"></div>
-
-            <div class="step-item">
-                <div class="step-icon" id="stepAddress">📍</div>
-                <span class="step-label">Endereço</span>
-            </div>
-
-            <div class="step-separator"></div>
-
-            <div class="step-item">
-                <div class="step-icon" id="stepPayment">💳</div>
-                <span class="step-label">Pagamento</span>
-            </div>
-
-            <div class="step-separator"></div>
-
-            <div class="step-item">
-                <div class="step-icon" id="stepFinish">✔️</div>
-                <span class="step-label">Finalização</span>
-            </div>
+            <button class="btn-fechar" data-close>✖</button>
         </div>
-
-        <div class="progress-bar-wrapper">
-            <div id="mainProgressBar" class="progress-bar"></div>
-        </div>
-    </section>
-
-    <!-- STATUS BANNER -->
-    <div id="status-banner" class="status-banner">
-        ⏳ Carregando status da loja...
     </div>
 
-    <!-- CONTEÚDO PRINCIPAL -->
-    <main id="app">
+    <!-- 🟡 MODAL DE ENDEREÇO -->
+    <div id="modalEndereco" class="modal hidden">
+        <div class="modal-content">
+            <h2>Endereço de Entrega</h2>
 
-        <!-- CARROSSEL -->
-        <section class="home-carousel">
-            <div class="carousel-item">
-                <img src="public/img/banner1.png" alt="Promoção 1" />
-            </div>
-            <div class="carousel-item">
-                <img src="public/img/banner2.png" alt="Promoção 2" />
-            </div>
-        </section>
+            <label>CEP:</label>
+            <input type="text" id="inputCEP" maxlength="9" placeholder="00000-000" />
 
-        <!-- CARDÁPIO -->
-        <section class="menu-section">
-            <h2 class="menu-title">Cardápio</h2>
+            <button id="btnBuscarCEP" class="btn-principal">Buscar CEP</button>
 
-            <div id="menuList" class="menu-list">
-                <!-- Produtos do Firestore entram aqui -->
-            </div>
-        </section>
-<!-- FIM DO CARDÁPIO E INÍCIO DOS PAINÉIS -->
-        
-        <!-- MINI-CARRINHO -->
-        <aside id="miniCart" class="mini-cart hidden">
+            <!-- NOVO: Opções adicionais -->
+            <p class="link-cep" id="btnNaoSeiCEP">Não sei meu CEP</p>
+            <p class="link-cep" id="btnPreencherManual">Preencher endereço manualmente</p>
 
-            <div class="mini-cart-header">
-                <h3>🛒 Meu Carrinho</h3>
-                <button id="closeMiniCartBtn" class="close-btn">✖</button>
-            </div>
+            <!-- Campos do endereço após ViaCEP ou manual -->
+            <label>Endereço:</label>
+            <input type="text" id="inputEndereco" placeholder="Rua, bairro..." />
 
-            <div id="miniCartList" class="mini-cart-list">
-                <!-- Itens do carrinho aparecem aqui -->
-            </div>
+            <label>Número:</label>
+            <input type="text" id="inputNumero" placeholder="Ex: 123" />
 
-            <!-- ============================ -->
-            <!-- 🚀 BARRA DE PROGRESSO DO FRETE (mini-carrinho) -->
-            <!-- ============================ -->
-            <div class="frete-progress-area">
-                <div id="frete-progress-bar"></div>
-                <p id="frete-progress-text"></p>
-            </div>
+            <label>Complemento:</label>
+            <input type="text" id="inputComplemento" placeholder="Ex: Apto 12" />
 
-            <!-- RESUMO DO CARRINHO -->
-            <div class="mini-foot-summary">
+            <button id="btnSalvarEndereco" class="btn-principal">Salvar Endereço</button>
 
-                <div class="summary-row">
-                    <span>Subtotal</span>
-                    <span id="miniSubtotal">R$ 0,00</span>
-                </div>
+            <button class="btn-fechar" data-close>✖</button>
+        </div>
+    </div>
 
-                <div class="summary-row">
-                    <span>Entrega</span>
-                    <span id="miniDeliveryFee">R$ 0,00</span>
-                </div>
-
-                <div class="summary-row total-row">
-                    <strong>Total</strong>
-                    <strong id="miniTotal">R$ 0,00</strong>
-                </div>
-
-                <button id="finishOrderBtn" class="finish-btn">
-                    Finalizar Pedido
-                </button>
-            </div>
-
-        </aside>
-
-        <!-- MODAL LOGIN -->
-        <div id="loginModal" class="modal hidden">
-            <div class="modal-content">
-                <h2>Entrar</h2>
-
-                <button id="googleLoginBtn" class="google-btn">
-                    Entrar com Google
-                </button>
-
-                <button id="emailLoginBtn" class="email-btn">
-                    Entrar com E-mail
-                </button>
-
-                <button class="close-btn" id="closeLoginModal">✖</button>
-            </div>
+    <!-- 🟡 MINI-CARRINHO (começa escondido) -->
+    <div id="miniCarrinho" class="carrinho hidden">
+        <div class="carrinho-header">
+            <h2>🛍 Seu Pedido</h2>
+            <button class="btn-fechar" id="btnFecharCarrinho">✖</button>
         </div>
 
-        <!-- MODAL ADICIONAIS -->
-        <div id="extrasModal" class="modal hidden">
-            <div class="modal-content">
-
-                <h2>Adicionais</h2>
-
-                <div id="extrasList" class="extras-list">
-                    <!-- Adicionais via JS -->
-                </div>
-
-                <button id="extrasConfirmBtn" class="confirm-btn">
-                    Confirmar
-                </button>
-
-                <button id="closeExtrasModal" class="close-btn">✖</button>
-            </div>
+        <div id="itensCarrinho" class="carrinho-itens">
+            <!-- Itens serão renderizados aqui -->
         </div>
 
-        <!-- MODAL MEUS PEDIDOS -->
-        <div id="ordersModal" class="modal hidden">
-            <div class="modal-content">
-
-                <h2>📦 Meus Pedidos</h2>
-                <div id="ordersList" class="orders-list">
-                    <!-- Pedidos -->
-                </div>
-
-                <button id="closeOrdersModal" class="close-btn">✖</button>
+        <div class="carrinho-resumo">
+            <div class="linha-resumo">
+                <span>Subtotal</span>
+                <span id="subtotalValor">R$ 0,00</span>
             </div>
-        </div>
-
-        <!-- MODAL ENDEREÇO -->
-        <div id="addressModal" class="modal hidden">
-            <div class="modal-content">
-
-                <h2>📍 Endereço de Entrega</h2>
-
-                <!-- CEP Automático -->
-                <label>CEP</label>
-                <input type="text" id="cepInput" placeholder="Digite seu CEP" maxlength="9" />
-
-                <button id="buscarCEPBtn" class="search-btn">Buscar CEP</button>
-
-                <p class="cep-helper">
-                    <span id="openCepManual" class="cep-manual-link">Preencher endereço manualmente</span>
+<!-- 🔥 NOVO: BARRA DE PROGRESSO DO FRETE GRÁTIS -->
+            <div id="progressFreteContainer" class="progress-frete hidden">
+                <p id="progressFreteTexto" class="progress-text">
+                    <!-- Texto dinâmico entra via JS -->
                 </p>
 
-                <!-- ENDEREÇO RESULTADO -->
-                <div id="autoAddressArea">
-                    <label>Endereço</label>
-                    <input type="text" id="addressFull" readonly />
-
-                    <div class="two-fields">
-                        <div>
-                            <label>Número</label>
-                            <input type="text" id="addressNumber" maxlength="6" />
-                        </div>
-
-                        <div>
-                            <label>Complemento</label>
-                            <input type="text" id="addressComplement" />
-                        </div>
-                    </div>
+                <div class="progress-bar">
+                    <div id="progressFrete" class="progress-fill"></div>
                 </div>
-
-                <!-- ENDEREÇO MANUAL -->
-                <div id="manualAddressArea" class="hidden">
-                    <label>Rua</label>
-                    <input type="text" id="manualRua" />
-
-                    <label>Bairro</label>
-                    <input type="text" id="manualBairro" />
-
-                    <label>Cidade</label>
-                    <input type="text" id="manualCidade" value="Patos de Minas" />
-
-                    <label>Estado</label>
-                    <input type="text" id="manualEstado" value="MG" />
-
-                    <button id="usarManualBtn" class="confirm-btn">
-                        Usar este endereço
-                    </button>
-                </div>
-
-                <button id="closeAddressModal" class="close-btn">✖</button>
             </div>
+
+            <!-- Linha Entrega -->
+            <div class="linha-resumo">
+                <span>Entrega</span>
+                <span id="entregaValor">R$ 0,00</span>
+            </div>
+
+            <!-- Linha Total -->
+            <div class="linha-resumo total">
+                <span>Total</span>
+                <span id="totalValor">R$ 0,00</span>
+            </div>
+
+            <!-- Botão Finalizar Pedido -->
+            <button id="btnFinalizarPedido" class="btn-principal btn-finalizar">
+                Finalizar Pedido
+            </button>
+        </div>
+    </div>
+
+    <!-- 🟡 PAINEL "MEUS PEDIDOS" -->
+    <div id="painelPedidos" class="painel hidden">
+        <div class="painel-header">
+            <h2>📦 Meus Pedidos</h2>
+            <button class="btn-fechar" id="btnFecharPedidos">✖</button>
         </div>
 
+        <div id="listaPedidos" class="painel-conteudo">
+            <!-- Pedidos renderizados via JS -->
+        </div>
+    </div>
+
+    <!-- 🟡 PAINEL "MINHAS RECOMPENSAS" -->
+    <div id="painelRecompensas" class="painel hidden">
+        <div class="painel-header">
+            <h2>🎁 Minhas Recompensas</h2>
+            <button class="btn-fechar" id="btnFecharRecompensas">✖</button>
+        </div>
+
+        <div id="listaRecompensas" class="painel-conteudo">
+            <!-- Recompensas renderizadas via JS -->
+        </div>
+    </div>
+
+    <!-- 🟡 MODAL DE CUPOM -->
+    <div id="modalCupom" class="modal hidden">
+        <div class="modal-content">
+            <h2>Inserir Cupom</h2>
+
+            <input type="text" id="inputCupom" placeholder="Digite seu cupom..." />
+
+            <button id="btnAplicarCupom" class="btn-principal">Aplicar</button>
+
+            <button class="btn-fechar" data-close>✖</button>
+        </div>
+    </div>
+
+    <!-- 🟡 MODAL DE ADICIONAIS -->
+    <div id="modalAdicionais" class="modal hidden">
+        <div class="modal-content">
+            <h2>Adicionais</h2>
+
+            <div id="listaAdicionais">
+                <!-- Itens via JS -->
+            </div>
+
+            <button id="btnAdicionarAdicionais" class="btn-principal">
+                Adicionar ao Carrinho
+            </button>
+
+            <button class="btn-fechar" data-close>✖</button>
+        </div>
+    </div>
+
+    <!-- 🟡 MODAL DE LOADING -->
+    <div id="modalLoading" class="modal-loading hidden">
+        <div class="spinner"></div>
+        <p>Carregando...</p>
+    </div>
+
+    <!-- 🟡 CONTAINER DO MENU -->
+    <main id="menuContainer">
+        <!-- Conteúdo renderizado via JS dinamicamente -->
     </main>
+<!-- 🟡 RODAPÉ -->
+    <footer class="footer">
+        <p>© 2025 Da Família Lanches — Todos os direitos reservados.</p>
+    </footer>
 
-    <!-- SCRIPTS -->
-    <script src="script.js?v=5.5"></script>
+    <!-- 🟡 SCRIPTS -->
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
 
+    <!-- Seus scripts -->
+    <script src="extras.js"></script>
+    <script src="script.js"></script>
 </body>
 </html>
