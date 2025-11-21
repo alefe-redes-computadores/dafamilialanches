@@ -1,5 +1,5 @@
 /* =========================================================  
-   🚀 DFL v5.5 — Lógica Principal, Frete Manual e Barra de Progresso (Estável e Corrigido)
+   🚀 DFL v5.5.1 — Lógica Principal, Frete Manual e Barra de Progresso (Estável Final)
    ========================================================= */  
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -96,7 +96,7 @@ document.addEventListener("DOMContentLoaded", () => {
         cNext: document.querySelector(".c-next"),  
         reportsBtn: document.getElementById("reports-btn"),
         
-        // Banners (REVISADO: se não existirem no HTML, serão null e o JS não irá quebrar)
+        // Banners (REVISADO para evitar quebra)
         statusBanner: document.getElementById("status-banner"),  
         hoursBanner: document.querySelector(".hours-banner"),  
         
@@ -257,8 +257,7 @@ document.addEventListener("DOMContentLoaded", () => {
         bindMiniCartButtons();   
         enhanceMiniCartUI();  
         
-        // Liga os eventos de Frete Manual/CEP NOVAMENTE após o render
-        bindFreteManualEvents();
+        // Os eventos de Frete Manual agora são ligados fora do ciclo renderMiniCart
     };
 
     /* ------------------ 🔥 FIREBASE ------------------ */  
@@ -621,7 +620,8 @@ document.addEventListener("DOMContentLoaded", () => {
         }  
     }
 
-    // --- LIGA EVENTOS DE FRETE MANUAL (NOVA IMPLEMENTAÇÃO) ---
+    // --- LIGA EVENTOS DE FRETE MANUAL (Implementação de Eventos Estáticos) ---
+    // Esta função liga os eventos de troca de aba e inputs manuais, fora do ciclo de renderização do carrinho.
     function bindFreteManualEvents() {
         el.btnNaoSeiCEP?.addEventListener("click", () => {
             // 1. Abre a aba para o cliente buscar o CEP
@@ -658,8 +658,8 @@ document.addEventListener("DOMContentLoaded", () => {
         el.manualEndereco?.addEventListener('input', renderMiniCart);
         el.manualNumero?.addEventListener('input', renderMiniCart);
     }
-    // Chama o bind no início para os botões do HTML e ele será chamado novamente no renderMiniCart
     bindFreteManualEvents(); 
+    // Fim da ligação de eventos de frete manual estáticos.
 
     document.getElementById('btn-calcular-frete')?.addEventListener('click', safe(() => {  
         const cepInput = document.getElementById('cep-input');  
@@ -770,11 +770,11 @@ document.addEventListener("DOMContentLoaded", () => {
             // Verifica se o contêiner Manual está visível (fluxo manual)
             const isManualContainerVisible = el.manualArea?.style.display !== 'none';
 
-            // Prioridade A: Endereço preenchido pelo ViaCEP (se o container CEP estiver ativo)
-            if (isCepContainerVisible && cepValue.length === 8 && enderecoAuto && enderecoAuto.value) {
+            // Prioridade A: Endereço preenchido pelo ViaCEP (se o container CEP estiver ativo E os campos obrigatórios preenchidos)
+            if (isCepContainerVisible && enderecoAuto?.value.trim() && document.getElementById('numero-input')?.value.trim()) {
                 enderecoParaCalculo = enderecoAuto.value.trim();
             }
-            // Prioridade B: Endereço preenchido manualmente (se o container manual estiver ativo)
+            // Prioridade B: Endereço preenchido manualmente (se o container manual estiver ativo E os campos obrigatórios preenchidos)
             else if (isManualContainerVisible && enderecoManualCompleto && numeroManual) {
                 enderecoParaCalculo = enderecoManualCompleto;
             }
@@ -867,7 +867,6 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     /* ------------------ 🎁 RECOMPENSAS CONFIGURAÇÃO ------------------ */  
-    let configuracoesRecompensa = null;   
     async function carregarConfiguracoesDeRecompensas() {  
         if (!isFirebaseInitialized) return [];   
         if (configuracoesRecompensa) return configuracoesRecompensa;   
@@ -977,7 +976,7 @@ document.addEventListener("DOMContentLoaded", () => {
              if (cepValue.length === 8) finalAddressString += ` | CEP: ${cepValue}`; 
         }
         // Lógica: Frete ViaCEP Padrão (se a área de CEP estiver visível)
-        else if (autoRuaBairro?.value.trim() && autoNumero?.value.trim()) { 
+        else if (document.querySelector('.frete-container')?.style.display !== 'none' && autoRuaBairro?.value.trim() && autoNumero?.value.trim()) { 
             finalAddressString = `${autoRuaBairro.value.trim()}, N° ${autoNumero.value.trim()}`; 
             if (autoComp) finalAddressString += `, Comp: ${autoComp.value.trim()}`; 
             if (cepValue.length === 8) finalAddressString += ` | CEP: ${cepValue}`; 
@@ -1343,7 +1342,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }); 
         
         const produtosOrdenados = Object.entries(produtosContagem).sort(([, a], [, b]) => b - a).slice(0, 10); 
-        if (chartProdutos) chartPedidos.destroy(); // Corrigido bug de referência aqui (era chartProdutos)
+        if (chartPedidos) chartPedidos.destroy(); // Corrigido bug de referência aqui (era chartProdutos)
         chartProdutos = new Chart(ctxProdutos, { 
             type: 'bar', 
             data: { labels: produtosOrdenados.map(p=>p[0]), datasets: [{ label: 'Mais Vendidos', data: produtosOrdenados.map(p=>p[1]), backgroundColor: '#ff7043' }] }, 
@@ -1410,7 +1409,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }); 
     }
 
-    console.log("%c🔥 DFL v5.5 — IMPLEMENTAÇÃO COMPLETA", "background:#007bff;color:#fff;padding:5px;border-radius:5px;");  
+    console.log("%c🔥 DFL v5.5.1 — IMPLEMENTAÇÃO COMPLETA", "background:#007bff;color:#fff;padding:5px;border-radius:5px;");  
     inicializarFirebase();  
 
 }); // FIM DO DOMContentLoaded
