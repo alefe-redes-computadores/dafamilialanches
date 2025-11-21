@@ -3,202 +3,182 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Da Família Lanches - Delivery</title>
-    <link rel="stylesheet" href="style.css" />
-    <link rel="stylesheet" href="extras.css" />
-    <link rel="shortcut icon" href="img/favicon.png" type="image/png" />
+    <title>Da Família Lanches</title>
 
-    <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+    <!-- Ícones e Metas -->
+    <link rel="icon" type="image/png" href="public/img/icon.png" />
+    <meta name="theme-color" content="#FFD54F" />
+
+    <!-- Estilos -->
+    <link rel="stylesheet" href="style.css" />
 </head>
 
 <body>
-
-    <!-- 🟡 CABEÇALHO -->
-    <header class="header">
-        <div class="header-left">
-            <img src="img/logo-dfl.png" alt="Logo DFL" class="logo-header" />
-        </div>
-
-        <div class="header-right">
-            <button id="btnAbrirCarrinho" class="btn-icon">
-                🛒
-            </button>
-            <button id="btnPerfilUsuario" class="btn-icon">
-                👤
-            </button>
-        </div>
+    <header id="header">
+        <img src="public/img/logo-dfl.png" alt="Logo" class="logo-header" />
+        <button id="open-cart" class="btn-cart-header">🛒</button>
+        <button id="open-orders" class="btn-orders-header">📦</button>
+        <button id="open-rewards" class="btn-rewards-header">🎁</button>
     </header>
 
-    <!-- 🟡 PAINEL DE LOGIN -->
-    <div id="modalLogin" class="modal hidden">
-        <div class="modal-content">
-            <h2>Entrar</h2>
-            <p>Faça login para continuar</p>
+    <main id="main-content">
 
-            <div class="login-buttons">
-                <button id="btnLoginGoogle" class="btn-google">Entrar com Google</button>
-
-                <input type="email" id="emailLogin" placeholder="Seu e-mail" />
-                <input type="password" id="senhaLogin" placeholder="Sua senha" />
-                <button id="btnLoginEmail" class="btn-principal">Entrar</button>
+        <!-- CARROSSEL -->
+        <section id="carousel-container">
+            <div id="carousel">
+                <img src="public/img/banner1.jpg" alt="Banner 1" />
+                <img src="public/img/banner2.jpg" alt="Banner 2" />
+                <img src="public/img/banner3.jpg" alt="Banner 3" />
             </div>
+        </section>
 
-            <button class="btn-fechar" data-close>✖</button>
-        </div>
-    </div>
+        <!-- MENU -->
+        <section id="menu">
+<h2 class="menu-title">Cardápio</h2>
 
-    <!-- 🟡 MODAL DE ENDEREÇO -->
-    <div id="modalEndereco" class="modal hidden">
-        <div class="modal-content">
-            <h2>Endereço de Entrega</h2>
-
-            <label>CEP:</label>
-            <input type="text" id="inputCEP" maxlength="9" placeholder="00000-000" />
-
-            <button id="btnBuscarCEP" class="btn-principal">Buscar CEP</button>
-
-            <!-- NOVO: Opções adicionais -->
-            <p class="link-cep" id="btnNaoSeiCEP">Não sei meu CEP</p>
-            <p class="link-cep" id="btnPreencherManual">Preencher endereço manualmente</p>
-
-            <!-- Campos do endereço após ViaCEP ou manual -->
-            <label>Endereço:</label>
-            <input type="text" id="inputEndereco" placeholder="Rua, bairro..." />
-
-            <label>Número:</label>
-            <input type="text" id="inputNumero" placeholder="Ex: 123" />
-
-            <label>Complemento:</label>
-            <input type="text" id="inputComplemento" placeholder="Ex: Apto 12" />
-
-            <button id="btnSalvarEndereco" class="btn-principal">Salvar Endereço</button>
-
-            <button class="btn-fechar" data-close>✖</button>
-        </div>
-    </div>
-
-    <!-- 🟡 MINI-CARRINHO (começa escondido) -->
-    <div id="miniCarrinho" class="carrinho hidden">
-        <div class="carrinho-header">
-            <h2>🛍 Seu Pedido</h2>
-            <button class="btn-fechar" id="btnFecharCarrinho">✖</button>
-        </div>
-
-        <div id="itensCarrinho" class="carrinho-itens">
-            <!-- Itens serão renderizados aqui -->
-        </div>
-
-        <div class="carrinho-resumo">
-            <div class="linha-resumo">
-                <span>Subtotal</span>
-                <span id="subtotalValor">R$ 0,00</span>
+            <div id="products-container">
+                <!-- Os produtos são carregados dinamicamente pelo script.js -->
             </div>
-<!-- 🔥 NOVO: BARRA DE PROGRESSO DO FRETE GRÁTIS -->
-            <div id="progressFreteContainer" class="progress-frete hidden">
-                <p id="progressFreteTexto" class="progress-text">
-                    <!-- Texto dinâmico entra via JS -->
-                </p>
+        </section>
 
-                <div class="progress-bar">
-                    <div id="progressFrete" class="progress-fill"></div>
+        <!-- MODAL DE LOGIN -->
+        <div id="login-modal" class="modal hidden">
+            <div class="modal-content">
+                <h2>Entrar</h2>
+
+                <button id="login-google" class="btn google-login">
+                    Entrar com Google
+                </button>
+
+                <p class="or-divider">ou</p>
+
+                <input type="email" id="login-email" placeholder="E-mail" />
+                <input type="password" id="login-password" placeholder="Senha" />
+
+                <button id="login-email-btn" class="btn primary">Entrar</button>
+
+                <button class="close-modal">Fechar</button>
+            </div>
+        </div>
+
+        <!-- MODAL DO CARRINHO -->
+        <div id="cart-modal" class="modal hidden">
+            <div class="modal-content cart-content">
+
+                <h2>Seu Carrinho</h2>
+
+                <div id="cart-items"></div>
+
+                <div class="divider"></div>
+
+                <!-- ENDEREÇO / VIA CEP -->
+                <div class="address-block">
+
+                    <label for="cep-input">CEP</label>
+                    <div class="cep-row">
+                        <input 
+                            type="text"
+                            id="cep-input"
+                            maxlength="9"
+                            placeholder="Digite seu CEP"
+                        />
+                        <button id="buscar-cep" class="btn small">Buscar</button>
+                    </div>
+
+                    <!-- 🔵 BOTÕES NOVOS -->
+                    <button id="nao-sei-cep" class="btn-link blue">
+                        🔵 Não sei meu CEP
+                    </button>
+
+                    <button id="manual-endereco" class="btn-link gray">
+                        ✏️ Digitar endereço manualmente
+                    </button>
+
+                    <label for="endereco-auto">Endereço completo</label>
+                    <input 
+                        type="text" 
+                        id="endereco-auto"
+                        placeholder="Preenchido automaticamente pelo CEP"
+                        readonly
+                    />
+
+                    <label for="numero-input">Número</label>
+                    <input 
+                        type="text" 
+                        id="numero-input"
+                        placeholder="Ex.: 123"
+                        maxlength="6"
+                    />
+
+                    <label for="complemento-input">Complemento</label>
+                    <input 
+                        type="text"
+                        id="complemento-input"
+                        placeholder="Ex.: Apto 202"
+                    />
+
+                    <p id="frete-info" class="frete-info">
+                        Frete grátis acima de R$ 80,00 até 5 km 🚀
+                    </p>
                 </div>
+
+                <div class="divider"></div>
+
+                <!-- TOTAIS -->
+                <div id="cart-totals">
+                    <p class="line">
+                        <span>Subtotal:</span>
+                        <strong id="subtotal">R$ 0,00</strong>
+                    </p>
+
+                    <p class="line">
+                        <span>Entrega:</span>
+                        <strong id="frete-total">R$ 0,00</strong>
+                    </p>
+
+                    <p class="line total">
+                        <span>Total:</span>
+                        <strong id="cart-final-total">R$ 0,00</strong>
+                    </p>
+                </div>
+
+                <button id="finalizar-pedido" class="btn confirm">
+                    Finalizar Pedido
+                </button>
+
+                <button class="close-modal">Fechar</button>
             </div>
+        </div>
 
-            <!-- Linha Entrega -->
-            <div class="linha-resumo">
-                <span>Entrega</span>
-                <span id="entregaValor">R$ 0,00</span>
+
+        <!-- MODAL MEUS PEDIDOS -->
+        <div id="orders-modal" class="modal hidden">
+            <div class="modal-content">
+                <h2>📦 Meus Pedidos</h2>
+                <div id="orders-list"></div>
+
+                <button class="close-modal">Fechar</button>
             </div>
+        </div>
+<!-- MODAL RECOMPENSAS -->
+        <div id="rewards-modal" class="modal hidden">
+            <div class="modal-content">
+                <h2>🎁 Minhas Recompensas</h2>
 
-            <!-- Linha Total -->
-            <div class="linha-resumo total">
-                <span>Total</span>
-                <span id="totalValor">R$ 0,00</span>
+                <div id="rewards-list"></div>
+
+                <button class="close-modal">Fechar</button>
             </div>
-
-            <!-- Botão Finalizar Pedido -->
-            <button id="btnFinalizarPedido" class="btn-principal btn-finalizar">
-                Finalizar Pedido
-            </button>
-        </div>
-    </div>
-
-    <!-- 🟡 PAINEL "MEUS PEDIDOS" -->
-    <div id="painelPedidos" class="painel hidden">
-        <div class="painel-header">
-            <h2>📦 Meus Pedidos</h2>
-            <button class="btn-fechar" id="btnFecharPedidos">✖</button>
         </div>
 
-        <div id="listaPedidos" class="painel-conteudo">
-            <!-- Pedidos renderizados via JS -->
-        </div>
-    </div>
-
-    <!-- 🟡 PAINEL "MINHAS RECOMPENSAS" -->
-    <div id="painelRecompensas" class="painel hidden">
-        <div class="painel-header">
-            <h2>🎁 Minhas Recompensas</h2>
-            <button class="btn-fechar" id="btnFecharRecompensas">✖</button>
-        </div>
-
-        <div id="listaRecompensas" class="painel-conteudo">
-            <!-- Recompensas renderizadas via JS -->
-        </div>
-    </div>
-
-    <!-- 🟡 MODAL DE CUPOM -->
-    <div id="modalCupom" class="modal hidden">
-        <div class="modal-content">
-            <h2>Inserir Cupom</h2>
-
-            <input type="text" id="inputCupom" placeholder="Digite seu cupom..." />
-
-            <button id="btnAplicarCupom" class="btn-principal">Aplicar</button>
-
-            <button class="btn-fechar" data-close>✖</button>
-        </div>
-    </div>
-
-    <!-- 🟡 MODAL DE ADICIONAIS -->
-    <div id="modalAdicionais" class="modal hidden">
-        <div class="modal-content">
-            <h2>Adicionais</h2>
-
-            <div id="listaAdicionais">
-                <!-- Itens via JS -->
-            </div>
-
-            <button id="btnAdicionarAdicionais" class="btn-principal">
-                Adicionar ao Carrinho
-            </button>
-
-            <button class="btn-fechar" data-close>✖</button>
-        </div>
-    </div>
-
-    <!-- 🟡 MODAL DE LOADING -->
-    <div id="modalLoading" class="modal-loading hidden">
-        <div class="spinner"></div>
-        <p>Carregando...</p>
-    </div>
-
-    <!-- 🟡 CONTAINER DO MENU -->
-    <main id="menuContainer">
-        <!-- Conteúdo renderizado via JS dinamicamente -->
     </main>
-<!-- 🟡 RODAPÉ -->
-    <footer class="footer">
-        <p>© 2025 Da Família Lanches — Todos os direitos reservados.</p>
+
+    <!-- FOOTER -->
+    <footer id="footer">
+        <p>© Da Família Lanches • Todos os direitos reservados</p>
     </footer>
 
-    <!-- 🟡 SCRIPTS -->
-    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
-
-    <!-- Seus scripts -->
+    <!-- SCRIPTS -->
     <script src="extras.js"></script>
     <script src="script.js"></script>
 </body>
