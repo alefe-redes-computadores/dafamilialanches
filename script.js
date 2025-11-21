@@ -1,5 +1,5 @@
 /* =========================================================  
-   🚀 DFL v5.2.9 — Lógica Principal e Frete Dinâmico
+   🚀 DFL v5.5 — Lógica Principal, Frete Manual e Barra de Progresso (Estável)
    ========================================================= */  
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -57,14 +57,29 @@ document.addEventListener("DOMContentLoaded", () => {
         { id: 9, nome: "Combo 5 Uai + Kuat 2L", preco: 64.99, precoAntigo: 79.99, img: "promocoes/promo9.jpg" }  
     ];  
 
-    /* ------------------ 🎯 MAPEAMENTO DE ELEMENTOS DOM ------------------ */  
+    /* ------------------ 🎯 MAPEAMENTO DE ELEMENTOS DOM (Implementação v5.5) ------------------ */  
     const el = {  
+        // Elementos Antigos (mini-cart)
         cartIcon: document.getElementById("cart-icon"),  
         cartCount: document.getElementById("cart-count"),  
         miniCart: document.getElementById("mini-cart"),  
         miniList: document.querySelector(".mini-list"),  
         miniFoot: document.querySelector(".mini-foot"),  
         cartBackdrop: document.getElementById("cart-backdrop"),  
+        
+        // Elementos de Frete Manual e Progresso (NOVOS)
+        btnNaoSeiCEP: document.getElementById("btnNaoSeiCEP"),
+        manualArea: document.getElementById("manualArea"),
+        manualEndereco: document.getElementById("manualEndereco"), // Campo de Endereço Completo Manual
+        manualNumero: document.getElementById("manualNumero"),     // Campo de Número Manual
+        btnConfirmarEndereco: document.getElementById("btnConfirmarEndereco"),
+        btnVoltarCEP: document.getElementById("btnVoltarCEP"),
+        
+        progressWrapper: document.getElementById("progressWrapper"), 
+        progressText: document.getElementById("progressText"),
+        progressFill: document.getElementById("progressFill"),
+        
+        // Outros Modais/Ações (Mantidos os IDs antigos)
         extrasModal: document.getElementById("extras-modal"),  
         extrasList: document.querySelector("#extras-modal .extras-list"),  
         extrasConfirm: document.getElementById("extras-confirm"),  
@@ -154,6 +169,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     /* ------------------ 💬 POPUP E NOTIFICAÇÕES ------------------ */  
     function popupAdd(msg) {  
+        // Adaptado para usar o elemento #toast, se for mais novo (não vou quebrar o antigo 'popup-add' aqui)
         let pop = document.querySelector(".popup-add");  
         if (!pop) {  
             pop = document.createElement("div");  
@@ -195,6 +211,7 @@ document.addEventListener("DOMContentLoaded", () => {
             const couponDiscountRow = document.getElementById("coupon-discount-row");  
             if (couponMsg) couponMsg.innerHTML = "";  
             if (couponDiscountRow) couponDiscountRow.style.display = "none";  
+            if (el.progressWrapper) el.progressWrapper.style.display = 'none'; // Esconde barra quando vazio
             return;  
         }  
 
@@ -243,6 +260,9 @@ document.addEventListener("DOMContentLoaded", () => {
         _renderMiniCartOrig();   
         bindMiniCartButtons();   
         enhanceMiniCartUI();  
+        
+        // Liga os eventos de Frete Manual/CEP NOVAMENTE após o render
+        bindFreteManualEvents();
     };
 
     /* ------------------ 🔥 FIREBASE ------------------ */  
@@ -538,13 +558,18 @@ document.addEventListener("DOMContentLoaded", () => {
         } catch (err) { console.error("Erro ao validar cupom:", err); return { ...invalido, mensagem: "Erro ao processar cupom." }; }  
     }
 
-    /* --- BUSCAR CEP VIA API --- */  
+    /* --- BUSCAR CEP VIA API (ADAPTADO) --- */  
     async function buscarCEP(cep) {  
         const freteContainer = document.querySelector('.frete-container');  
         const enderecoAuto = document.getElementById('endereco-auto');  
         const numeroInput = document.getElementById('numero-input');  
         const complementoInput = document.getElementById('complemento-input');  
         const retirarLocal = document.getElementById('retirar-local');  
+        
+        // Campos manuais
+        const manualEndereco = el.manualEndereco;
+        const manualNumero = el.manualNumero;
+
 
         const toggleAddressState = (isDisabled) => {  
             if(enderecoAuto) enderecoAuto.disabled = isDisabled;  
@@ -553,12 +578,20 @@ document.addEventListener("DOMContentLoaded", () => {
             if(retirarLocal) retirarLocal.disabled = isDisabled;  
         };  
         const updateStatus = (msg, color) => { if (freteContainer) freteContainer.querySelector('h4').innerHTML = `🚚 Entrega: <span style="color:${color}">${msg}</span>`; };  
-        const clearAndEnableManual = (msg) => {  
-            if (enderecoAuto) enderecoAuto.value = msg;  
-            if (numeroInput) numeroInput.value = '';  
-            if (complementoInput) complementoInput.value = '';  
-            toggleAddressState(false);  
+        
+        // Função para lidar com erro do CEP (ENVIA PARA O FLUXO MANUAL)
+        const handleCepError = (msg) => {  
+            if (manualEndereco) manualEndereco.value = ''; // Limpa campos manuais
+            if (manualNumero) manualNumero.value = '';
+            
+            toggleAddressState(false);  // Habilita a edição (fallback)
             if (enderecoAuto) enderecoAuto.disabled = false;  
+            
+            // Ativa o fluxo manual e esconde o contêiner de frete principal
+            if (el.manualArea) el.manualArea.style.display = 'block'; 
+            if (freteContainer) freteContainer.style.display = 'none';
+            popupAdd(msg);
+            
             updateStatus('Erro/Manual', 'var(--danger)');  
             renderMiniCart();  
         };  
@@ -570,11 +603,15 @@ document.addEventListener("DOMContentLoaded", () => {
         try {  
             const response = await fetch(`https://viacep.com.br/ws/${cep}/json/`);  
             const data = await response.json();  
-            if (data.erro || !response.ok) { clearAndEnableManual('CEP não encontrado. Preencha manualmente.'); }  
+            if (data.erro || !response.ok) { handleCepError('CEP não encontrado. Preencha manualmente.'); }  
             else {  
                 const localidadeCompleta = `${data.localidade || 'Cidade'}/${data.uf || 'UF'}`;  
                 const enderecoString = `${data.logradouro || 'Rua'} - ${data.bairro || 'Bairro'} (${localidadeCompleta})`;  
                 enderecoAuto.value = enderecoString;  
+                
+                // Preenche os campos de endereço manual (usados pelo calcTotals para extrair o bairro)
+                if (manualEndereco) manualEndereco.value = enderecoString;
+                
                 toggleAddressState(false);  
                 if (enderecoAuto) enderecoAuto.disabled = true;  
                 if (numeroInput) numeroInput.focus();   
@@ -584,9 +621,48 @@ document.addEventListener("DOMContentLoaded", () => {
         } catch (error) {  
             console.error("ViaCEP Error:", error);  
             popupAdd("Erro ao consultar CEP.");  
-            clearAndEnableManual('Erro na consulta. Preencha manualmente.');  
+            handleCepError('Erro na consulta. Preencha manualmente.');  
         }  
     }
+
+    // --- LIGA EVENTOS DE FRETE MANUAL (NOVA IMPLEMENTAÇÃO) ---
+    function bindFreteManualEvents() {
+        el.btnNaoSeiCEP?.addEventListener("click", () => {
+            // 1. Abre a aba para o cliente buscar o CEP
+            window.open('https://buscacepinter.correios.com.br/app/endereco/index.php', '_blank'); 
+            
+            // 2. Esconde o Frete Container e mostra a área Manual
+            document.querySelector('.frete-container')?.style.display = 'none';
+            el.manualArea.style.display = 'block';
+            el.manualEndereco.focus(); // Foca no primeiro campo manual
+        });
+
+        el.btnVoltarCEP?.addEventListener("click", () => {
+            // Volta para o CEP
+            document.querySelector('.frete-container')?.style.display = 'block';
+            el.manualArea.style.display = 'none';
+            
+            // Limpa campos manuais
+            el.manualEndereco.value = '';
+            el.manualNumero.value = '';
+            renderMiniCart(); 
+        });
+        
+        el.btnConfirmarEndereco?.addEventListener('click', () => {
+            if (el.manualEndereco?.value.trim() && el.manualNumero?.value.trim()) {
+                popupAdd('Endereço manual salvo. Frete calculado.');
+                renderMiniCart(); 
+            } else {
+                alert('Preencha endereço e número para continuar.'); 
+            }
+        });
+        
+        // LIGA EVENTOS DE INPUT MANUAL AO RECÁLCULO
+        el.manualEndereco?.addEventListener('input', renderMiniCart);
+        el.manualNumero?.addEventListener('input', renderMiniCart);
+    }
+    // Chama o bind no início para os botões do HTML e ele será chamado novamente no renderMiniCart
+    bindFreteManualEvents(); 
 
     document.getElementById('btn-calcular-frete')?.addEventListener('click', safe(() => {  
         const cepInput = document.getElementById('cep-input');  
@@ -616,7 +692,7 @@ document.addEventListener("DOMContentLoaded", () => {
             return DELIVERY_FEE_DEFAULT;
         }
 
-        // Normalização: minúsculas, remove acentos e espaços extras
+        // Normalização: minúsculas, remove acentos e espaços extras (MANTIDO)
         const bairroClean = bairroExtraido.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim();
         console.log("FW: Bairro extraído:", bairroExtraido, "| Normalizado:", bairroClean);
 
@@ -667,25 +743,49 @@ document.addEventListener("DOMContentLoaded", () => {
         return DELIVERY_FEE_DEFAULT;
     }
 
-    // FUNÇÃO CRÍTICA DE CÁLCULO DE TOTAIS
+    // FUNÇÃO CRÍTICA DE CÁLCULO DE TOTAIS (Frete Manual Integrado)
     async function calcTotals() {  
         const subtotal = getCartSubtotal();  
         const d = await validarCupomFirestore(couponApplied, subtotal);   
+        
+        // Campos existentes (Preenchidos pelo ViaCEP)
         const cepInput = document.getElementById('cep-input');  
         const enderecoAuto = document.getElementById('endereco-auto');  
         const isRetirarLocal = document.getElementById('retirar-local')?.checked;  
         const cepValue = cepInput ? cepInput.value.trim().replace(/\D/g, '') : '';  
+        
+        // Novos campos manuais (Preenchimento direto)
+        const enderecoManualCompleto = el.manualEndereco?.value.trim() || '';
+        const numeroManual = el.manualNumero?.value.trim() || '';
+        
         let deliveryFee = DELIVERY_FEE_DEFAULT;   
 
+        // 1. CHECAGEM DE FRETE GRÁTIS
         if (isRetirarLocal || subtotal >= LIMITE_PARA_FRETE_GRATIS_POR_VALOR) {  
-            // Frete grátis por Retirada ou Valor
             deliveryFee = 0;  
-        } else if (cepInput && cepValue.length === 8 && enderecoAuto && enderecoAuto.value) {  
-            // Frete dinâmico via CEP/Endereço
-            try { deliveryFee = await getDynamicDeliveryFee(enderecoAuto.value.trim()); }  
-            catch(e) { console.error("Erro frete dinâmico:", e); deliveryFee = DELIVERY_FEE_DEFAULT; }  
-        }  
-
+        } 
+        // 2. FRETE DINÂMICO (USANDO ENDEREÇO VÁLIDO)
+        else {
+            let enderecoParaCalculo = '';
+            
+            // Prioridade A: Endereço preenchido pelo ViaCEP (se o container estiver ativo)
+            const isCepContainerVisible = document.querySelector('.frete-container')?.style.display !== 'none';
+            if (isCepContainerVisible && cepValue.length === 8 && enderecoAuto && enderecoAuto.value) {
+                enderecoParaCalculo = enderecoAuto.value.trim();
+            }
+            // Prioridade B: Endereço preenchido manualmente (se o container manual estiver ativo)
+            else if (el.manualArea?.style.display !== 'none' && enderecoManualCompleto && numeroManual) {
+                enderecoParaCalculo = enderecoManualCompleto;
+            }
+            
+            if (enderecoParaCalculo) {
+                // A função getDynamicDeliveryFee já faz a normalização e busca por palavra-chave/fallback
+                try { deliveryFee = await getDynamicDeliveryFee(enderecoParaCalculo); }  
+                catch(e) { console.error("Erro frete dinâmico:", e); deliveryFee = DELIVERY_FEE_DEFAULT; }  
+            }
+        }
+        
+        // 3. RETORNO FINAL
         const delivery = d.freeShipping ? 0 : deliveryFee;  
         const total = Math.max(0, subtotal + delivery - d.discount);  
         return { subtotal, delivery, discount: d.discount, discountLabel: d.label, total, cupomInfo: d };  
@@ -697,13 +797,35 @@ document.addEventListener("DOMContentLoaded", () => {
         const couponMsg = document.getElementById("coupon-message");  
         const couponDiscountRow = document.getElementById("coupon-discount-row");  
         const cartDiscount = document.getElementById("cart-discount");  
+        
+        // Remove elementos gerados anteriormente (incluindo o resumo e botões)
         el.miniFoot.querySelectorAll(".cart-summary-generated").forEach(e => e.remove());  
-        if (cart.length === 0) { if (couponMsg) couponMsg.innerHTML = ""; if (couponDiscountRow) couponDiscountRow.style.display = "none"; return; }  
+        
+        if (cart.length === 0) { 
+            // Lógica de Carrinho Vazio (MANTIDA)
+            if (couponMsg) couponMsg.innerHTML = ""; 
+            if (couponDiscountRow) couponDiscountRow.style.display = "none"; 
+            if (el.progressWrapper) el.progressWrapper.style.display = 'none'; // Esconde barra quando vazio
+            return; 
+        }  
 
         const { subtotal, delivery, discount, total, cupomInfo } = await calcTotals();
         const deliveryLabel = delivery === 0 ? "Grátis 🎉" : money(delivery);  
 
-        // Atualiza mensagem de cupom
+        // --- LÓGICA DA BARRA DE PROGRESSO (NOVA IMPLEMENTAÇÃO) ---
+        if (subtotal < LIMITE_PARA_FRETE_GRATIS_POR_VALOR && delivery !== 0) {
+            const falta = LIMITE_PARA_FRETE_GRATIS_POR_VALOR - subtotal;
+            const percent = (subtotal / LIMITE_PARA_FRETE_GRATIS_POR_VALOR) * 100;
+            
+            if(el.progressWrapper) el.progressWrapper.style.display = 'block';
+            if(el.progressText) el.progressText.innerHTML = `Faltam <strong>${money(falta)}</strong> para ganhar frete grátis 😍🚚✨`;
+            if(el.progressFill) el.progressFill.style.width = `${percent}%`;
+        } else {
+            if(el.progressWrapper) el.progressWrapper.style.display = 'none';
+        }
+        // --------------------------------------------------------
+
+        // Atualiza mensagem de cupom (MANTIDA)
         if (couponMsg) {  
             couponMsg.textContent = cupomInfo.mensagem;  
             couponMsg.className = `coupon-message ${cupomInfo.valido ? 'success' : 'error'}`;  
@@ -713,13 +835,13 @@ document.addEventListener("DOMContentLoaded", () => {
                 if (couponInput && document.activeElement !== couponInput) couponInput.value = "";  
             }  
         }  
-        // Atualiza linha de desconto
+        // Atualiza linha de desconto (MANTIDA)
         if (couponDiscountRow && cartDiscount) {  
             if (discount > 0 || cupomInfo.label) { cartDiscount.textContent = `- ${money(discount)} ${couponApplied ? `(${couponApplied})` : ""}`; couponDiscountRow.style.display = "flex"; }  
             else couponDiscountRow.style.display = "none";  
         }  
 
-        // Cria e insere o resumo e botões
+        // Cria e insere o resumo e botões (MANTIDO)
         const summaryDiv = document.createElement('div');  
         summaryDiv.className = 'cart-summary-generated';  
         summaryDiv.innerHTML = `  
@@ -731,12 +853,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
         el.miniFoot.appendChild(summaryDiv);  
         
-        // Liga eventos de recalculo
+        // Liga eventos de recalculo (mantidos os antigos + novos manuais)
         document.getElementById('retirar-local')?.addEventListener('change', renderMiniCart);  
         document.getElementById('numero-input')?.addEventListener('input', renderMiniCart);  
         document.getElementById('complemento-input')?.addEventListener('input', renderMiniCart);  
         
-        // Liga botões
+        // Liga botões (MANTIDO)
         summaryDiv.querySelector("#finish-order")?.addEventListener("click", fecharPedido);  
         summaryDiv.querySelector("#clear-cart")?.addEventListener("click", () => {  
             if (confirm("Limpar todo o carrinho?")) { cart = []; couponApplied = ""; localStorage.removeItem("dflCoupon"); document.getElementById("coupon-input").value = ""; renderMiniCart(); popupAdd("Carrinho limpo!"); }  
@@ -804,25 +926,36 @@ document.addEventListener("DOMContentLoaded", () => {
         if (!cart.length) return alert("Carrinho vazio!");  
         if (!currentUser) { alert("Faça login para enviar o pedido!"); Overlays.open(el.loginModal); return; }  
         
+        // CAMPOS DE FRETE PADRÃO
         const cepInput = document.getElementById('cep-input'); 
         const autoRuaBairro = document.getElementById("endereco-auto"); 
         const autoNumero = document.getElementById("numero-input"); 
         const autoComp = document.getElementById("complemento-input"); 
         const isRetirarLocal = document.getElementById('retirar-local')?.checked;  
         
-        const ruaBairroValue = autoRuaBairro ? autoRuaBairro.value.trim() : ''; 
-        const numeroValue = autoNumero ? autoNumero.value.trim() : ''; 
-        const compValue = autoComp ? autoComp.value.trim() : ''; 
+        // CAMPOS DE FRETE MANUAL (NOVOS)
+        const manualRuaBairro = el.manualEndereco; 
+        const manualNumero = el.manualNumero; 
+        
         const cepValue = cepInput ? cepInput.value.trim().replace(/\D/g, '') : '';  
 
         let finalAddressString = "";  
-        if (ruaBairroValue && numeroValue) { 
-            finalAddressString = `${ruaBairroValue}, N° ${numeroValue}`; 
-            if (compValue) finalAddressString += `, Comp: ${compValue}`; 
+        
+        // Lógica: Prioriza Endereço Manual se a área de CEP estiver escondida E a área manual preenchida
+        if (el.manualArea?.style.display !== 'none' && manualRuaBairro?.value.trim() && manualNumero?.value.trim()) {
+             finalAddressString = `${manualRuaBairro.value.trim()}, N° ${manualNumero.value.trim()}`; 
+             // Se o cliente voltou do CEP mas preencheu o manual
+             if (cepValue.length === 8) finalAddressString += ` | CEP: ${cepValue}`; 
+        }
+        // Lógica: Frete ViaCEP Padrão
+        else if (autoRuaBairro?.value.trim() && autoNumero?.value.trim()) { 
+            finalAddressString = `${autoRuaBairro.value.trim()}, N° ${autoNumero.value.trim()}`; 
+            if (autoComp) finalAddressString += `, Comp: ${autoComp.value.trim()}`; 
             if (cepValue.length === 8) finalAddressString += ` | CEP: ${cepValue}`; 
-        }  
+        }
+        
         if (isRetirarLocal) finalAddressString = "CLIENTE IRÁ RETIRAR NO LOCAL";  
-        else if (!finalAddressString) { alert("Preencha o CEP, endereço e número, ou marque 'Retirar no Local'."); return; }  
+        else if (!finalAddressString) { alert("Preencha o endereço completo, incluindo o número. Use o CEP ou a opção manual."); return; }  
 
         const addr = finalAddressString;  
         const { subtotal, delivery, discount, total, cupomInfo } = await calcTotals();  
@@ -1020,7 +1153,7 @@ document.addEventListener("DOMContentLoaded", () => {
             progressoBar.style.width = `${porcentagem}%`;  
             
             if (proximaRecompensa) { 
-                const faltam = proximaRecompensa.limite - feitos; 
+                const faltam = proximaRexima.limite - feitos; 
                 progressoMsg.textContent = `Faltam ${faltam} pedidos para: ${proximaRecompensa.titulo || proximaRecompensa.valor}!`; 
                 progressoBar.style.background = 'linear-gradient(90deg, #ffb300, #ff7043)'; 
                 const recompensasObtidas = RECOMPENSAS_DATA.filter(r => r.limite <= feitos); 
@@ -1248,7 +1381,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }); 
     }
 
-    console.log("%c🔥 DFL v5.2.9 — FRETE DINÂMICO CORRIGIDO", "background:#4CAF50;color:#fff;padding:5px;border-radius:5px;");  
+    console.log("%c🔥 DFL v5.5 — IMPLEMENTAÇÃO COMPLETA", "background:#007bff;color:#fff;padding:5px;border-radius:5px;");  
     inicializarFirebase();  
 
 }); // FIM DO DOMContentLoaded
