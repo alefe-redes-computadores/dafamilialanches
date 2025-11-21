@@ -1,6 +1,7 @@
 /* =========================================================  
-   🚀 DFL v5.3 — Lógica Principal e Frete Dinâmico (UX/Frete Aprimorado)
-   - FIX CRÍTICO: Removida lógica de status que travava a inicialização (hoursBanner)
+   🚀 DFL v5.3.1 — Lógica Principal, Frete Dinâmico e Correção Crítica
+   - FIX: Estabilidade na inicialização e Status da Loja.
+   - NOVO: Barra de Progresso, Gerenciamento Manual de Endereço e Normalização de Bairro.
    ========================================================= */  
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -80,7 +81,7 @@ document.addEventListener("DOMContentLoaded", () => {
         cNext: document.querySelector(".c-next"),  
         userBtn: document.getElementById("user-btn"),  
         statusBanner: document.getElementById("status-banner"),  
-        hoursBanner: document.querySelector(".hours-banner"),  
+        hoursBanner: document.querySelector(".hours-banner"), // Mantido por compatibilidade, mas a lógica foi corrigida abaixo
         reportsBtn: document.getElementById("reports-btn"),   
         promoModal: document.getElementById("promo-modal"),  
         promoImg: document.getElementById("promo-modal-img"),  
@@ -541,7 +542,10 @@ document.addEventListener("DOMContentLoaded", () => {
         } catch (err) { console.error("Erro ao validar cupom:", err); return { ...invalido, mensagem: "Erro ao processar cupom." }; }  
     }
 
-    // [NOVO] Função para controlar o estado dos campos de endereço
+    /* --- BUSCAR CEP VIA API --- */  
+    // [MANTER O BLOCO ORIGINAL E AJUSTAR A FUNÇÃO DE ESTADO DOS CAMPOS]
+    
+    // [NOVO] Função para controlar o estado dos campos de endereço (A versão que está falhando)
     const toggleAddressState = (isDisabled, isManual = false) => {
         const enderecoAuto = document.getElementById('endereco-auto');
         const numeroInput = document.getElementById('numero-input');
@@ -555,67 +559,77 @@ document.addEventListener("DOMContentLoaded", () => {
             if(numeroInput) numeroInput.disabled = false;
             if(complementoInput) complementoInput.disabled = false;
             if(cepInput) cepInput.disabled = true;
-            if(enderecoAuto) enderecoAuto.placeholder = 'Digite Rua, Número, Bairro, Cidade/UF'; // Hint para o usuário
+            if(enderecoAuto) enderecoAuto.placeholder = 'Digite Rua, Número, Bairro, Cidade/UF'; 
         } 
         // Se for modo via CEP
         else {
             if(cepInput) cepInput.disabled = false;
-            // Campos de endereço ficam desabilitados, exceto Numero/Complemento se o ViaCEP achou o endereço
             if(enderecoAuto) enderecoAuto.disabled = isDisabled; 
             if(numeroInput) numeroInput.disabled = isDisabled;
             if(complementoInput) complementoInput.disabled = isDisabled;
         }
 
-        if(retirarLocal) retirarLocal.disabled = false; // Retirar no Local sempre ativo
+        if(retirarLocal) retirarLocal.disabled = false; 
     };
 
-    /* --- BUSCAR CEP VIA API / FALLBACK MANUAL --- */  
     async function buscarCEP(cep) {  
         const freteContainer = document.querySelector('.frete-container');  
         const enderecoAuto = document.getElementById('endereco-auto');  
         const numeroInput = document.getElementById('numero-input');  
         const complementoInput = document.getElementById('complemento-input');  
-        
-        const updateStatus = (msg, color) => { 
-            const titleElement = freteContainer ? freteContainer.querySelector('h4') : null;
-            if (titleElement) titleElement.innerHTML = `🚚 Entrega: <span style="color:${color}; font-size: 0.9em;">${msg}</span>`; 
+        const retirarLocal = document.getElementById('retirar-local');  
+
+        // Versão original do toggleAddressState (que estava no código 5.2.9)
+        const toggleAddressStateOriginal = (isDisabled) => {  
+            if(enderecoAuto) enderecoAuto.disabled = isDisabled;  
+            if(numeroInput) numeroInput.disabled = isDisabled;  
+            if(complementoInput) complementoInput.disabled = isDisabled;  
+            if(retirarLocal) retirarLocal.disabled = isDisabled;  
         };  
         
-        // Função local para limpar e habilitar preenchimento manual (fallback)
+        const updateStatus = (msg, color) => { if (freteContainer) freteContainer.querySelector('h4').innerHTML = `🚚 Entrega: <span style="color:${color}">${msg}</span>`; };  
         const clearAndEnableManual = (msg) => {  
-            if (enderecoAuto) { enderecoAuto.value = ''; enderecoAuto.placeholder = msg; }
+            if (enderecoAuto) enderecoAuto.value = msg;  
             if (numeroInput) numeroInput.value = '';  
             if (complementoInput) complementoInput.value = '';  
-            toggleAddressState(false, true); // Habilita manual
-            updateStatus('Preenchimento Manual', '#d32f2f');  
+            // *** PONTO DE CORREÇÃO: Usar a nova toggleAddressState aqui ***
+            // toggleAddressStateOriginal(false); 
+            
+            // Habilita manualmente em caso de erro do ViaCEP (Usando a nova lógica)
+            toggleAddressState(false, true); 
+            
+            // if (enderecoAuto) enderecoAuto.disabled = false;  
+            updateStatus('Erro/Manual', 'var(--danger)');  
             renderMiniCart();  
         };  
 
-        toggleAddressState(true);  // Desabilita tudo (em modo de busca)
-        updateStatus('Buscando endereço...', '#ffb300');  
+        // toggleAddressStateOriginal(true); // *** PONTO DE CORREÇÃO: Usar a nova toggleAddressState aqui ***
+        toggleAddressState(true, false); // Desabilita em modo CEP
+        
+        updateStatus('Buscando endereço...', 'var(--botao)');  
         document.getElementById('cep-input').disabled = false;   
 
         try {  
             const response = await fetch(`https://viacep.com.br/ws/${cep}/json/`);  
             const data = await response.json();  
-            if (data.erro || !response.ok) { 
-                clearAndEnableManual('CEP não encontrado. Digite a rua e bairro.'); 
-            }  
+            if (data.erro || !response.ok) { clearAndEnableManual('CEP não encontrado. Preencha manualmente.'); }  
             else {  
                 const localidadeCompleta = `${data.localidade || 'Cidade'}/${data.uf || 'UF'}`;  
                 const enderecoString = `${data.logradouro || 'Rua'} - ${data.bairro || 'Bairro'} (${localidadeCompleta})`;  
-                
                 enderecoAuto.value = enderecoString;  
-                toggleAddressState(false, false); // Habilita Número/Complemento (Via CEP)
                 
+                // toggleAddressStateOriginal(false); // *** PONTO DE CORREÇÃO: Usar a nova toggleAddressState aqui ***
+                toggleAddressState(false, false); // Habilita Campos de Número/Comp
+                
+                if (enderecoAuto) enderecoAuto.disabled = true;  
                 if (numeroInput) numeroInput.focus();   
-                updateStatus('Endereço encontrado!', '#4caf50');  
+                updateStatus('Endereço encontrado!', 'var(--success)');  
                 renderMiniCart();   
             }  
         } catch (error) {  
             console.error("ViaCEP Error:", error);  
             popupAdd("Erro ao consultar CEP.");  
-            clearAndEnableManual('Erro na consulta. Digite a rua e bairro.');  
+            clearAndEnableManual('Erro na consulta. Preencha manualmente.');  
         }  
     }
 
@@ -626,7 +640,7 @@ document.addEventListener("DOMContentLoaded", () => {
         else popupAdd("CEP deve ter 8 dígitos.");  
     }));
     
-    // [NOVO] Habilitar preenchimento Manual Listener
+    // [NOVO] Habilitar preenchimento Manual Listener (Mantido)
     document.getElementById('manual-address-btn')?.addEventListener('click', safe((e) => {
         e.preventDefault();
         const enderecoAuto = document.getElementById('endereco-auto');
@@ -634,24 +648,22 @@ document.addEventListener("DOMContentLoaded", () => {
         const complementoInput = document.getElementById('complemento-input');
         const cepInput = document.getElementById('cep-input');
 
-        // Limpa os campos
         if (enderecoAuto) { enderecoAuto.value = ''; enderecoAuto.placeholder = 'Digite Rua e Bairro (Ex: Rua A, Bairro X)'; }
         if (numeroInput) numeroInput.value = '';
         if (complementoInput) complementoInput.value = '';
         if (cepInput) cepInput.value = '';
         
-        // Habilita a edição manual dos campos
         toggleAddressState(false, true); 
         
         if (enderecoAuto) enderecoAuto.focus();
         
-        renderMiniCart(); // Recalcula totais/frete se necessário
+        renderMiniCart(); 
         popupAdd("Preenchimento manual habilitado.");
     }));
+    
 
     // ============================================================
     // 🚀 FUNÇÃO CRÍTICA: CÁLCULO DE FRETE DINÂMICO (FIREBASE)
-    // [AJUSTADO PARA ENDEREÇO MANUAL]
     // ============================================================
     async function getDynamicDeliveryFee(enderecoCompleto) {
         if (!enderecoCompleto || typeof enderecoCompleto !== "string") {
@@ -661,33 +673,17 @@ document.addEventListener("DOMContentLoaded", () => {
 
         let bairroExtraido = "";
         try {
-            // [AJUSTE] Extração de Bairro: Lida com formatos ViaCEP ("Rua - Bairro (Cidade)") E formatos manuais ("Rua, Bairro...")
-            
-            // 1. Tenta formato ViaCEP com parênteses
-            const matchViaCep = enderecoCompleto.match(/\((.*?)\)$/);
-            if (!matchViaCep) {
-                // 2. Tenta extrair o último segmento após vírgula ou hífen (para entrada manual)
-                const partes = enderecoCompleto.split(/,|-/).map(p => p.trim());
-                // Assume que o bairro ou a informação mais relevante está na penúltima ou última parte
-                const parteBairro = partes.length >= 2 ? partes[partes.length - 2] : partes[partes.length - 1];
-                
-                // Tenta extrair a palavra Bairro se existir
-                const matchBairroKeyword = parteBairro.match(/bairro\s+(.*)/i);
-                bairroExtraido = matchBairroKeyword ? matchBairroKeyword[1].trim() : parteBairro.trim();
-
-            } else {
-                // Formato ViaCEP encontrado
-                const partePrincipal = enderecoCompleto.split("(")[0].trim();
-                const partes = partePrincipal.split(" - ");
-                bairroExtraido = partes[partes.length - 1].trim();
-            }
-
+            // Tenta extrair o bairro
+            const partePrincipal = enderecoCompleto.split("(")[0].trim();
+            const partes = partePrincipal.split(" - ");
+            if (partes.length >= 2) bairroExtraido = partes[partes.length - 1].trim();
+            else bairroExtraido = partePrincipal.trim();
         } catch (_) {
-            console.warn("FW: Falha ao extrair bairro na entrada manual.");
+            console.warn("FW: Falha ao extrair bairro.");
             return DELIVERY_FEE_DEFAULT;
         }
-        
-        // [AJUSTE] Normalização: minúsculas, remove acentos e espaços extras (APLICADO EM TODAS AS ENTRADAS)
+
+        // Normalização: minúsculas, remove acentos e espaços extras
         const bairroClean = bairroExtraido.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim();
         console.log("FW: Bairro extraído:", bairroExtraido, "| Normalizado:", bairroClean);
 
@@ -722,7 +718,7 @@ document.addEventListener("DOMContentLoaded", () => {
             return cacheAtual[bairroClean];
         }
 
-        // BUSCA 2: Match por PALAVRA-CHAVE (para bairros compostos ou nomes incompletos)
+        // BUSCA 2: Match por PALAVRA-CHAVE (para bairros compostos)
         const palavras = bairroClean.split(" ");
         for (const palavra of palavras) {
             if (palavra.length < 4) continue; // Ignora palavras curtas
@@ -734,7 +730,6 @@ document.addEventListener("DOMContentLoaded", () => {
             }
         }
 
-        // BUSCA 3: Fallback (Frete Padrão)
         console.warn(`FW: Bairro "${bairroExtraido}" não mapeado. Fallback R$ ${DELIVERY_FEE_DEFAULT}`);
         return DELIVERY_FEE_DEFAULT;
     }
@@ -748,16 +743,13 @@ document.addEventListener("DOMContentLoaded", () => {
         const isRetirarLocal = document.getElementById('retirar-local')?.checked;  
         const cepValue = cepInput ? cepInput.value.trim().replace(/\D/g, '') : '';  
         let deliveryFee = DELIVERY_FEE_DEFAULT;   
-        
-        const enderecoValue = enderecoAuto ? enderecoAuto.value.trim() : '';
-        const isEnderecoValido = (cepValue.length === 8 && enderecoValue) || (enderecoValue && !cepValue); // Válido se tiver CEP+Endereço ou Endereço Manual
 
         if (isRetirarLocal || subtotal >= LIMITE_PARA_FRETE_GRATIS_POR_VALOR) {  
             // Frete grátis por Retirada ou Valor
             deliveryFee = 0;  
-        } else if (isEnderecoValido) {  
-            // Frete dinâmico via CEP/Endereço (funciona com ViaCEP e Manual)
-            try { deliveryFee = await getDynamicDeliveryFee(enderecoValue); }  
+        } else if (cepInput && cepValue.length === 8 && enderecoAuto && enderecoAuto.value) {  
+            // Frete dinâmico via CEP/Endereço
+            try { deliveryFee = await getDynamicDeliveryFee(enderecoAuto.value.trim()); }  
             catch(e) { console.error("Erro frete dinâmico:", e); deliveryFee = DELIVERY_FEE_DEFAULT; }  
         }  
 
@@ -778,7 +770,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
         const { subtotal, delivery, discount, total, cupomInfo } = await calcTotals();
         const deliveryLabel = delivery === 0 ? "Grátis 🎉" : money(delivery);  
-        
+
         // 1. LÓGICA DA BARRA DE PROGRESSO DO FRETE GRÁTIS
         const progressoContainer = document.getElementById("frete-progresso-container");
         const limite = LIMITE_PARA_FRETE_GRATIS_POR_VALOR;
@@ -814,8 +806,8 @@ document.addEventListener("DOMContentLoaded", () => {
             progressoContainer.innerHTML = progressoHTML;
         }
         // FIM DA LÓGICA DA BARRA DE PROGESSO
-
-        // 2. Atualiza UI de Cupom
+        
+        // Atualiza mensagem de cupom
         if (couponMsg) {  
             couponMsg.textContent = cupomInfo.mensagem;  
             couponMsg.className = `coupon-message ${cupomInfo.valido ? 'success' : 'error'}`;  
@@ -825,12 +817,13 @@ document.addEventListener("DOMContentLoaded", () => {
                 if (couponInput && document.activeElement !== couponInput) couponInput.value = "";  
             }  
         }  
+        // Atualiza linha de desconto
         if (couponDiscountRow && cartDiscount) {  
             if (discount > 0 || cupomInfo.label) { cartDiscount.textContent = `- ${money(discount)} ${couponApplied ? `(${couponApplied})` : ""}`; couponDiscountRow.style.display = "flex"; }  
             else couponDiscountRow.style.display = "none";  
         }  
 
-        // 3. Cria e insere o resumo e botões
+        // Cria e insere o resumo e botões
         const summaryDiv = document.createElement('div');  
         summaryDiv.className = 'cart-summary-generated';  
         summaryDiv.innerHTML = `  
@@ -846,7 +839,7 @@ document.addEventListener("DOMContentLoaded", () => {
         document.getElementById('retirar-local')?.addEventListener('change', renderMiniCart);  
         document.getElementById('numero-input')?.addEventListener('input', renderMiniCart);  
         document.getElementById('complemento-input')?.addEventListener('input', renderMiniCart);  
-        document.getElementById('endereco-auto')?.addEventListener('input', renderMiniCart); // [NOVO] Adicionado para modo manual
+        document.getElementById('endereco-auto')?.addEventListener('input', renderMiniCart); // Adicionado para modo manual
         
         // Liga botões
         summaryDiv.querySelector("#finish-order")?.addEventListener("click", fecharPedido);  
@@ -894,9 +887,33 @@ document.addEventListener("DOMContentLoaded", () => {
         const aberto = h >= 18 && h < 23;   
         if (el.statusBanner) { el.statusBanner.textContent = aberto ? "🟢 Aberto — Faça seu pedido!" : "🔴 Fechado — Voltamos às 18h!"; el.statusBanner.className = `status-banner ${aberto ? "open" : "closed"}`; }  
         
-        // [REMOVIDO] Bloco el.hoursBanner que causava erro de referência em alguns ambientes
-        // A lógica de tempo restante está no atualizador de promo-timer
-
+        // [BLOCO ORIGINAL CORRIGIDO para evitar erro de referência e travamento]
+        if (el.hoursBanner) {  
+            const elMsg = el.hoursBanner.querySelector("#hours-message"); 
+            const elTimer = el.hoursBanner.querySelector("#timer");  
+            if (elMsg && elTimer) { // Garante que os elementos existem antes de tentar manipulá-los
+                if (aberto) { 
+                    const fim = new Date(agora); 
+                    fim.setHours(23, 30, 0); 
+                    let diff = (fim - agora) / 1000; 
+                    if (diff < 0) diff = 0; 
+                    const restH = Math.floor(diff / 3600); 
+                    const restM = Math.floor((diff % 3600) / 60); 
+                    elMsg.innerHTML = `⏰ Hoje atendemos até <b>23h30</b> — Faltam`; 
+                    elTimer.textContent = `${restH}h ${restM}min`; 
+                }  
+                else { 
+                    const inicio = new Date(agora); 
+                    if (h >= 23) inicio.setDate(inicio.getDate() + 1); 
+                    inicio.setHours(18, 0, 0); 
+                    let diff = (inicio - agora) / 1000; 
+                    const faltamH = Math.floor(diff / 3600); 
+                    const faltamM = Math.floor((diff % 3600) / 60); 
+                    elMsg.innerHTML = `🔒 Fechado — Abrimos em`; 
+                    elTimer.textContent = `${faltamH}h ${faltamM}min`; 
+                }  
+            }
+        }  
     });  
     atualizarStatus(); setInterval(atualizarStatus, 60000); // Atualiza a cada 1 minuto
 
@@ -914,7 +931,6 @@ document.addEventListener("DOMContentLoaded", () => {
         if (!cart.length) return alert("Carrinho vazio!");  
         if (!currentUser) { alert("Faça login para enviar o pedido!"); Overlays.open(el.loginModal); return; }  
         
-        // 1. Coleta e Normaliza Dados do Endereço
         const cepInput = document.getElementById('cep-input'); 
         const autoRuaBairro = document.getElementById("endereco-auto"); 
         const autoNumero = document.getElementById("numero-input"); 
@@ -927,19 +943,13 @@ document.addEventListener("DOMContentLoaded", () => {
         const cepValue = cepInput ? cepInput.value.trim().replace(/\D/g, '') : '';  
 
         let finalAddressString = "";  
-        
-        if (isRetirarLocal) {
-            finalAddressString = "CLIENTE IRÁ RETIRAR NO LOCAL";
-        } else if (ruaBairroValue && numeroValue) { 
-            // Constrói a String de Endereço Final
+        if (ruaBairroValue && numeroValue) { 
             finalAddressString = `${ruaBairroValue}, N° ${numeroValue}`; 
             if (compValue) finalAddressString += `, Comp: ${compValue}`; 
             if (cepValue.length === 8) finalAddressString += ` | CEP: ${cepValue}`; 
-        } else {
-            // Validação de Falha
-            alert("Preencha o endereço completo (Rua/Bairro e Número) ou marque 'Retirar no Local'."); 
-            return; 
-        }
+        }  
+        if (isRetirarLocal) finalAddressString = "CLIENTE IRÁ RETIRAR NO LOCAL";  
+        else if (!finalAddressString) { alert("Preencha o CEP, endereço e número, ou marque 'Retirar no Local'."); return; }  
 
         const addr = finalAddressString;  
         const { subtotal, delivery, discount, total, cupomInfo } = await calcTotals();  
@@ -949,7 +959,7 @@ document.addEventListener("DOMContentLoaded", () => {
             usuario: currentUser.email, 
             userId: currentUser.uid, 
             nome: currentUser.displayName || currentUser.email.split("@")[0], 
-            itens: cart.map((i) => `• ${i.nome} x${i.qtd}`).join("\n"), 
+            itens: cart.map((i) => `• ${i.nome} x${i.qtd}`).join("\n`), 
             itensObj: cart.map(i => ({ nome: i.nome, preco: i.preco, qtd: i.qtd })), 
             subtotal: Number(subtotal.toFixed(2)), 
             entrega: Number(delivery.toFixed(2)), 
@@ -1209,7 +1219,7 @@ document.addEventListener("DOMContentLoaded", () => {
         if (!el.historicoLista) return; 
         el.historicoLista.innerHTML = `<p class="empty-orders" style="text-align:center;color:#999;">Carregando...</p>`;  
         try { 
-            const q = db.collection("Usuarios").doc(userId).collection("RecompensasRecebidas").orderBy("liberadoEm", "desc"); 
+            const q = db.collection("Pedidos").where("userId", "==", userId).orderBy("data", "desc"); 
             const snapshot = await q.get();  
             if (snapshot.empty) { el.historicoLista.innerHTML = `<p class="empty-orders" style="text-align:center;color:#999;">Nenhuma recompensa no histórico.</p>`; return; }  
             el.historicoLista.innerHTML = snapshot.docs.map(doc => { 
@@ -1365,7 +1375,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }); 
     }
 
-    console.log("%c🔥 DFL v5.3 — NOVAS FUNÇÕES IMPLEMENTADAS", "background:#4CAF50;color:#fff;padding:5px;border-radius:5px;");  
+    console.log("%c🔥 DFL v5.2.9 — FRETE DINÂMICO CORRIGIDO", "background:#4CAF50;color:#fff;padding:5px;border-radius:5px;");  
     inicializarFirebase();  
 
 }); // FIM DO DOMContentLoaded
