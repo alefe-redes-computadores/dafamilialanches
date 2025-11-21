@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>🍔 Da Família Lanches — DFL v5.0 ViaCEP</title>
+  <title>🍔 Da Família Lanches — DFL v5.3.6</title>
 
   <meta http-equiv="Content-Security-Policy" content="
     default-src * data: blob: 'unsafe-inline' 'unsafe-eval';
@@ -18,8 +18,8 @@
   <link rel="preconnect" href="https://www.gstatic.com" crossorigin>
   <link rel="preload" as="image" href="logo.png">
   
-  <link rel="stylesheet" href="style.css?v=5.0" />
-  <noscript><link rel="stylesheet" href="style.css?v=5.0"/></noscript>
+  <link rel="stylesheet" href="style.css?v=5.3.6" />
+  <noscript><link rel="stylesheet" href="style.css?v=5.3.6"/></noscript>
 
   <script defer src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
   <script defer src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
@@ -81,27 +81,43 @@
       <div class="mini-list"></div>
       <div class="mini-foot">
 
+        <div id="progressWrapper" class="progress-wrapper">
+            <p id="progressText" class="progress-text">
+                Faltam <strong>R$ 80,00</strong> para Frete Grátis 🚀
+            </p>
+            <div class="progress-bar">
+                <div id="progressFill" class="progress-fill"></div>
+            </div>
+        </div>
         <div class="frete-container" aria-disabled="true">
           <h4 style="margin-top:10px;">🚚 Entrega</h4>
           
           <div class="frete-cep-group">
-            <input id="cep-input" type="text" placeholder="Digite o CEP" maxlength="9">
+            <input id="cep-input" type="text" placeholder="Digite o CEP" maxlength="9" autocomplete="postal-code">
 
             <button id="btn-calcular-frete" class="btn-calcular-frete" type="button">
               Buscar
             </button>
           </div>
 
-          <input id="endereco-auto" type="text" class="input-endereco-longo" placeholder="Rua e Bairro (Preenchido via CEP)">
-<p class="frete-gratis-aviso">
-Frete grátis acima de R$ 80,00 (até 5 km). Um mimo da DFL pra matar a fome sem pesar no bolso 😋
-</p>
+          <button id="btnNaoSeiCEP" class="link-acao" type="button">
+            Não sei meu CEP 🤔
+          </button>
+          
+          <button id="btnManual" class="link-acao" type="button">
+            Preencher endereço manualmente ✏️
+          </button>
 
+          <input id="endereco-auto" type="text" class="input-endereco-longo" placeholder="Rua e Bairro (Preenchido via CEP)" disabled>
+          
+          <p class="frete-gratis-aviso">
+            Frete grátis acima de R$ 80,00 (até 5 km). Um mimo da DFL pra matar a fome sem pesar no bolso 😋
+          </p>
 
           <div class="endereco-duplo">
-    <input id="numero-input" type="text" placeholder="Número">
-    <input id="complemento-input" type="text" placeholder="Complemento (opcional)">
-</div>
+            <input id="numero-input" type="text" placeholder="Número" disabled>
+            <input id="complemento-input" type="text" placeholder="Complemento (opcional)" disabled>
+          </div>
 
           <label style="display:flex;align-items:center;gap:6px;margin-bottom:8px; color:#555;">
             <input type="checkbox" id="retirar-local">
@@ -111,6 +127,26 @@ Frete grátis acima de R$ 80,00 (até 5 km). Um mimo da DFL pra matar a fome sem
           <hr style="border:0; border-top:1px solid #eee; margin:15px 0;">
           
         </div>
+        
+        <div id="manualArea" class="frete-container" style="display:none;">
+            <h4>Endereço Manual</h4>
+            
+            <label for="manualEndereco">Endereço completo (Rua, Bairro, Cidade):</label>
+            <textarea id="manualEndereco" placeholder="Ex: Rua Netuno - Jardim Andrades (Patos de Minas/MG)" style="width: 100%; min-height: 70px; margin-bottom: 8px; padding: 8px; border: 1px solid #ccc; border-radius: 8px;"></textarea>
+
+            <label for="manualNumero">Número:</label>
+            <input type="text" id="manualNumero" placeholder="Ex: 123" style="width: 100%; margin-bottom: 8px; padding: 8px; border: 1px solid #ccc; border-radius: 8px;" />
+
+            <button id="btnConfirmarEndereco" class="btn-primary" type="button" style="width: 100%; margin-bottom: 8px;">
+                Confirmar endereço 🔍
+            </button>
+
+            <button id="btnVoltarCEP" class="btn-secondary" type="button" style="width: 100%;">
+                Voltar e Usar CEP
+            </button>
+        </div>
+
+
         <form id="coupon-form" class="coupon-form" novalidate>
           <input type="text" id="coupon-input" placeholder="Cupom de desconto" aria-label="Cupom de desconto"/>
           <button type="submit" id="coupon-apply-btn" class="btn-primary">OK</button>
@@ -499,7 +535,7 @@ Frete grátis acima de R$ 80,00 (até 5 km). Um mimo da DFL pra matar a fome sem
     <button id="cookie-accept" type="button">Aceitar</button>
   </div>
 
-  <script defer src="script.js?v=5.2.2"></script>
+  <script defer src="script.js?v=5.3.6"></script>
   <script defer src="extras.js?v=5.2.2"></script>
 </body>
 </html>
