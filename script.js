@@ -532,16 +532,22 @@ document.addEventListener("DOMContentLoaded", () => {
     // Variável para controlar modo de endereço
     let modoEnderecoManual = false;
 
-    // Função para MUDAR PARA O MODO MANUAL
+    // Botão "Não sei meu CEP" → Redireciona para Correios
+    document.getElementById("btnNaoSeiCEP")?.addEventListener("click", () => {
+        window.open("https://buscacepinter.correios.com.br/app/endereco/index.php", "_blank");
+    });
+    document.getElementById("btnManual")?.addEventListener("click", mostrarModoManual);
+
+    // Botão "Preencher Manualmente" → Mostra área manual
+    // (Se não existir no HTML, vamos criar dinamicamente)
     function mostrarModoManual() {
         modoEnderecoManual = true;
         
-        // Esconde a área de CEP (que está na div pai) e mostra a área manual
         const freteContainer = document.querySelector('.frete-container');
         const manualArea = document.getElementById('manualArea');
         
-        if (freteContainer) freteContainer.style.display = 'none'; // Esconde a área do CEP
-        if (manualArea) manualArea.style.display = 'block'; // Mostra a área manual
+        if (freteContainer) freteContainer.style.display = 'none';
+        if (manualArea) manualArea.style.display = 'block';
         
         // Limpa campos do CEP
         const cepInput = document.getElementById('cep-input');
@@ -554,14 +560,6 @@ document.addEventListener("DOMContentLoaded", () => {
         if (numeroInput) numeroInput.value = '';
         if (complementoInput) complementoInput.value = '';
     }
-
-    // Botão "Não sei meu CEP" → Redireciona para Correios
-    document.getElementById("btnNaoSeiCEP")?.addEventListener("click", () => {
-        window.open("https://buscacepinter.correios.com.br/app/endereco/index.php", "_blank");
-    });
-
-    // 🌟 CORREÇÃO: Adiciona o listener diretamente ao botão que existe no HTML
-    document.getElementById("btnManual")?.addEventListener("click", mostrarModoManual);
 
     // Botão "Voltar e Usar CEP" → Volta ao modo CEP
     document.getElementById("btnVoltarCEP")?.addEventListener("click", () => {
@@ -615,6 +613,8 @@ document.addEventListener("DOMContentLoaded", () => {
         
         renderMiniCart();
     });
+
+ 
 
 // CONTINUA NA PARTE 4...
 // PARTE 4/6 - CUPOM + CEP + FRETE DINÂMICO + CALC TOTALS
@@ -815,7 +815,7 @@ document.addEventListener("DOMContentLoaded", () => {
         let deliveryFee = DELIVERY_FEE_DEFAULT;   
         let enderecoParaCalculo = "";
 
-        // Verifica se está no modo manual ou CEP
+        // Verifica se está no  ou CEP
         if (modoEnderecoManual) {
             const manualEndereco = document.getElementById('manualEndereco');
             enderecoParaCalculo = manualEndereco?.value?.trim() || "";
@@ -1122,7 +1122,7 @@ document.addEventListener("DOMContentLoaded", () => {
     function createDashboard() { if (document.getElementById("admin-dashboard")) return; const div = document.createElement("div"); div.id = "admin-dashboard"; div.className = "modal"; div.innerHTML = `<div class="modal-content" style="max-width:1000px;width:95%;height:85vh;overflow:auto;background:#fff;border-radius:12px;"><div class="modal-head" style="display:flex;justify-content:space-between;align-items:center;padding:10px 14px;"><h3>📊 Relatórios</h3><button class="dashboard-close">✖</button></div><div class="dashboard-body" style="padding:12px;"><div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:12px;"><div id="card-total" class="cardBox">Total: —</div><div id="card-pedidos" class="cardBox">Pedidos: —</div><div id="card-ticket" class="cardBox">Ticket Médio: —</div></div><div style="margin-bottom:10px;"><label>Período: </label><select id="filter-period"><option value="7">7 dias</option><option value="30">30 dias</option><option value="all">Todos</option></select></div><canvas id="chart-pedidos" style="width:100%;height:240px;"></canvas><canvas id="chart-produtos" style="width:100%;height:240px;margin-top:16px;"></canvas><div style="margin-top:12px;"><button id="export-csv" style="background:#4caf50;color:#fff;border:none;border-radius:8px;padding:10px;">Exportar CSV</button></div></div></div>`; document.body.appendChild(div); div.querySelector(".dashboard-close").addEventListener("click", () => Overlays.closeAll()); }  
     function createAdminFab() { if (el.reportsBtn) { el.reportsBtn.style.display = "block"; el.reportsBtn.addEventListener("click", () => { createDashboard(); ensureChartJS(() => carregarRelatorios("7")); Overlays.open(document.getElementById("admin-dashboard")); }); } }  
     function gerarResumoECharts(pedidos) { if (!window.Chart) return; const ctxPedidos = document.getElementById('chart-pedidos')?.getContext('2d'); const ctxProdutos = document.getElementById('chart-produtos')?.getContext('2d'); if (!ctxPedidos || !ctxProdutos) return; const pedidosPorDia = {}; const produtosContagem = {}; pedidos.forEach(p => { const dia = (p.data?.toDate?.() || new Date(p.data)).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' }); pedidosPorDia[dia] = (pedidosPorDia[dia] || 0) + 1; (Array.isArray(p.itens) ? p.itens : []).forEach(itemStr => { const nome = itemStr.split(' x')[0]; if (nome) produtosContagem[nome] = (produtosContagem[nome] || 0) + 1; }); }); const labelsPedidos = Object.keys(pedidosPorDia).reverse(); const dataPedidos = Object.values(pedidosPorDia).reverse(); if (chartPedidos) chartPedidos.destroy(); chartPedidos = new Chart(ctxPedidos, { type: 'line', data: { labels: labelsPedidos, datasets: [{ label: 'Pedidos', data: dataPedidos, borderColor: '#ffb300', tension: 0.1 }] }, options: { scales: { x: { ticks: { maxRotation: 45, minRotation: 45 } } } } }); const produtosOrdenados = Object.entries(produtosContagem).sort(([, a], [, b]) => b - a).slice(0, 10); if (chartProdutos) chartProdutos.destroy(); chartProdutos = new Chart(ctxProdutos, { type: 'bar', data: { labels: produtosOrdenados.map(p=>p[0]), datasets: [{ label: 'Mais Vendidos', data: produtosOrdenados.map(p=>p[1]), backgroundColor: '#ff7043' }] }, options: { indexAxis: 'y' } }); }  
-    function carregarRelatorios(periodo = "7") { const start = new Date(); if (periodo !== "all") start.setDate(start.getDate() - Number(periodo)); else start.setTime(0); db.collection("Pedidos").orderBy("data", "desc").get().then(snap => { const pedidos = snap.docs.map(d => { const dataObjeto = d.data(); const rawDate = dataObjeto.data; let processedDate; if (rawDate && typeof rawDate.toDate === 'function') processedDate = rawDate.toDate(); else if (rawDate) processedDate = new Date(rawDate); else processedDate = new Date(); return { ...dataObjeto, id: d.id, data: processedDate }; }); const filtrados = pedidos.filter(p => p.data >= start); gerarResumoECharts(filtrados); document.getElementById("card-total").textContent = `Total: ${money(filtrados.reduce((s, p) => s + (Number(p.total) || 0), 0))}`; document.getElementById("card-pedidos").textContent = `Pedidos: ${filtrados.length}`; document.getElementById("card-ticket").textContent = `Ticket Médio: ${money(filtrados.length ? filtrados.reduce((s, p) => s + (Number(p.total) || 0), 0)/filtrados.length : 0)}`; document.getElementById("export-csv").onclick = () => { const csv = "Data;Nome;Total\n" + filtrados.map(p => `${p.data.toLocaleString()};${p.nome};${p.total}`).join("\n"); const blob = new Blob([`\uFEFF${csv}`], { type: 'text/csv;charset=utf-8;' }); const link = document.createElement('a'); link.href = URL.createObjectURL(blob); link.download = "pedidos.csv"; link.click(); }; }; }); const sel = document.getElementById("filter-period"); if(sel && !sel._bound) { sel.addEventListener("change", e => carregarRelatorios(e.target.value)); sel._bound = true; } }
+    function carregarRelatorios(periodo = "7") { const start = new Date(); if (periodo !== "all") start.setDate(start.getDate() - Number(periodo)); else start.setTime(0); db.collection("Pedidos").orderBy("data", "desc").get().then(snap => { const pedidos = snap.docs.map(d => { const dataObjeto = d.data(); const rawDate = dataObjeto.data; let processedDate; if (rawDate && typeof rawDate.toDate === 'function') processedDate = rawDate.toDate(); else if (rawDate) processedDate = new Date(rawDate); else processedDate = new Date(); return { ...dataObjeto, id: d.id, data: processedDate }; }); const filtrados = pedidos.filter(p => p.data >= start); gerarResumoECharts(filtrados); document.getElementById("card-total").textContent = `Total: ${money(filtrados.reduce((s, p) => s + (Number(p.total) || 0), 0))}`; document.getElementById("card-pedidos").textContent = `Pedidos: ${filtrados.length}`; document.getElementById("card-ticket").textContent = `Ticket Médio: ${money(filtrados.length ? filtrados.reduce((s, p) => s + (Number(p.total) || 0), 0)/filtrados.length : 0)}`; document.getElementById("export-csv").onclick = () => { const csv = "Data;Nome;Total\n" + filtrados.map(p => `${p.data.toLocaleString()};${p.nome};${p.total}`).join("\n"); const blob = new Blob([`\uFEFF${csv}`], { type: 'text/csv;charset=utf-8;' }); const link = document.createElement('a'); link.href = URL.createObjectURL(blob); link.download = "pedidos.csv"; link.click(); }; }); const sel = document.getElementById("filter-period"); if(sel && !sel._bound) { sel.addEventListener("change", e => carregarRelatorios(e.target.value)); sel._bound = true; } }
 
     /* COOKIES */  
     const cookieBanner = document.getElementById("cookie-banner"); const cookieAcceptBtn = document.getElementById("cookie-accept");  
