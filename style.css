@@ -1043,3 +1043,38 @@ section h2 {
     padding: 12px;
   }
 }
+/* ===========================================================
+   ⚙️ DFL v5.5 — BARRA DE PROGRESSO FRETE GRÁTIS
+   =========================================================== */
+
+.progress-wrapper {
+    background: #fff8d6;
+    padding: 12px;
+    border-radius: var(--rad);
+    margin-top: 15px;
+    margin-bottom: 10px;
+    border: 1px solid var(--acento); /* #ffca28 */
+}
+
+.progress-text {
+    font-size: 0.95rem;
+    margin-bottom: 8px;
+    font-weight: 600;
+    color: #444;
+    text-align: center;
+}
+
+.progress-bar {
+    width: 100%;
+    height: 12px;
+    background: #ffe79b; /* Fundo mais claro que o acento */
+    border-radius: 999px; /* Pill shape */
+    overflow: hidden;
+}
+
+.progress-fill {
+    width: 0%;
+    height: 100%;
+    background: var(--success); /* Cor de sucesso para o progresso */
+    transition: width 0.4s ease; /* Transição suave para o progresso */
+}
