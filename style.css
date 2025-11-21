@@ -1,388 +1,696 @@
-/* =========================================================
-   🎨 ESTILOS PRINCIPAIS — DFL v5.4 (Base v5.3 + Ajustes)
-   ========================================================= */
+/* ===========================================================
+   🎨 Da Família Lanches – CSS Principal (v5.3 - UX/Frete)
+   - NOVO: Estilos para Barra de Progresso do Frete Grátis
+   - NOVO: Estilos para Links de Ajuda/Manual (CEP)
+   =========================================================== */
 
-/* Reset básico */
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-    -webkit-tap-highlight-color: transparent;
+/* ======== ELEMENTOS BÁSICOS ======== */
+:root {
+  --preto: #000;
+  --bg1: #f8f9fa;
+  --bg2: #e9ecef;
+  --acento: #ffca28;
+  --botao: #ffb300;
+  --danger: #d32f2f;
+  --success: #4caf50;
+  --txt: #222;
+  --rad-sm: 8px;
+  --rad: 10px;
+  --rad-lg: 12px;
+  --shadow-1: 0 2px 5px rgba(0, 0, 0, 0.15);
+  --shadow-2: 0 3px 10px rgba(0, 0, 0, 0.2);
+  --shadow-3: 0 5px 15px rgba(0, 0, 0, 0.3);
+  --shadow-in: inset 0 1px 0 rgba(255, 255, 255, 0.25);
+}
+
+html, body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
 }
 
 body {
-    font-family: "Poppins", Arial, sans-serif;
-    background: #fafafa;
-    color: #222;
+  color: var(--txt);
+  font-family: "Inter", "Poppins", system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+  background: linear-gradient(180deg, var(--bg1) 0%, var(--bg2) 100%);
+  background-attachment: fixed;
+  scroll-behavior: smooth;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
-/* ================================
-   HEADER
-   ================================= */
-#header {
-    width: 100%;
-    background: #ffca28;
-    padding: 12px 14px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
+/* ======== HEADER & LAYOUT ======== */
+.header {
+  position: fixed;
+  inset-inline: 0;
+  top: 0;
+  z-index: 900;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: var(--acento);
+  padding: 10px 16px;
+  box-shadow: var(--shadow-1);
 }
 
-.logo-header {
-    width: 160px;
-    height: auto;
+.header-content { display: flex; align-items: center; gap: 12px; }
+.logo { width: 52px; height: 52px; }
+.header-info h1 { margin: 0; font-size: 1.2rem; }
+.tagline { margin: 0; font-size: 0.85rem; color: #d84315; }
+.header-actions { display: flex; align-items: center; gap: 10px; }
+.main-content-wrapper { padding-top: 72px; }
+
+/* ======== BOTÕES TOPO ======== */
+.user-button {
+  background: linear-gradient(135deg, #fff, #f7f7f7);
+  border: 1px solid #ddd;
+  border-radius: var(--rad);
+  padding: 8px 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: 0.2s;
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.6);
+}
+.user-button:hover { background: #fafafa; }
+
+#cart-icon, .cart-button {
+  background: var(--botao);
+  border: none;
+  border-radius: var(--rad);
+  padding: 8px 12px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: 0.2s;
+  box-shadow: var(--shadow-1);
+}
+#cart-icon:hover, .cart-button:hover { background: #ffc107; }
+
+/* ======== BANNERS ======== */
+.status-banner {
+  text-align: center;
+  padding: 12px 8px;
+  color: #fff;
+  font-weight: 600;
+  font-size: 1rem;
+  letter-spacing: 0.2px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+  width: 100vw;
+  margin-left: calc(50% - 50vw); /* Full-bleed */
+}
+.status-banner.open { background: var(--success); }
+.status-banner.closed { background: var(--danger); }
+
+/* Remove banner antigo se existir no HTML para evitar duplicação */
+.hours-banner {
+  height: 0 !important;
+  padding: 0 !important;
+  border: 0 !important;
+  overflow: hidden !important;
 }
 
-.btn-cart-header,
-.btn-orders-header,
-.btn-rewards-header {
-    font-size: 22px;
-    background: none;
-    border: none;
-    cursor: pointer;
+/* ======== PROMO / CARROSSEL ======== */
+.promo-section { text-align: center; padding: 20px 10px; }
+.promo-section h2 { color: #ff5722; margin-bottom: 8px; }
+.promo-sub { color: #444; margin-bottom: 10px; font-size: 0.95rem; }
+.countdown-ticker {
+  background: #fff; display: inline-block; padding: 6px 12px;
+  border-radius: 10px; margin: 8px 0 15px; font-weight: 600;
+  box-shadow: var(--shadow-1);
+}
+.carousel { position: relative; max-width: 900px; margin: 0 auto; }
+.slides { display: flex; gap: 8px; overflow-x: auto; scroll-behavior: smooth; padding: 4px; }
+.slides::-webkit-scrollbar { height: 8px; }
+.slides::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 10px; }
+.slides::-webkit-scrollbar-thumb { background: #ddd; border-radius: 10px; }
+.slide {
+  display: block; border-radius: 12px; flex: 0 0 auto;
+  min-width: 250px; max-width: 250px; height: 180px; object-fit: cover;
+  box-shadow: var(--shadow-2); cursor: zoom-in;
+  transition: transform 0.2s, box-shadow 0.2s; background: #fff;
+}
+.slide:hover { transform: scale(1.05); box-shadow: var(--shadow-3); }
+.c-btn {
+  position: absolute; top: 50%; transform: translateY(-50%);
+  background: #ffca28; color: #000; border: none; border-radius: 50%;
+  width: 40px; height: 40px; font-size: 24px; font-weight: 700; opacity: 0.9;
+  display: flex; align-items: center; justify-content: center; cursor: pointer;
+  box-shadow: var(--shadow-2); transition: all 0.2s;
+}
+.c-btn:hover { opacity: 1; background: #ffb300; transform: translateY(-50%) scale(1.05); }
+.c-prev { left: 10px; }
+.c-next { right: 10px; }
+
+/* ======== SEÇÕES / GRID ======== */
+section { margin: 25px auto; width: 95%; max-width: 1000px; }
+section h2 { font-size: 1.3rem; text-align: center; margin-bottom: 15px; color: #ff7043; }
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 14px; }
+.card {
+  background: #fff; border-radius: 16px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+  padding: 14px; text-align: center;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+.card:hover { transform: translateY(-3px); box-shadow: 0 4px 10px rgba(0, 0, 0, 0.12); }
+.card img { width: 100%; border-radius: 12px; margin-bottom: 8px; height: 220px; object-fit: cover; background: #fff; }
+.card h3 { margin: 0 0 6px; font-weight: 700; font-size: 1rem; display: flex; align-items: center; justify-content: center; gap: 6px; flex-wrap: wrap; }
+.card p { font-size: 0.9rem; color: #555; }
+.price { font-weight: 600; color: var(--success); margin: 8px 0; }
+.price del { color: #b71c1c; font-size: 0.95rem; margin-right: 6px; }
+.price b { color: #2e7d32; font-weight: 700; font-size: 1.05rem; }
+
+/* Badges */
+.badge {
+  display: inline-block; font-size: 0.72rem; font-weight: 700; line-height: 1;
+  padding: 3px 8px; border-radius: 999px; color: #000;
+  background: linear-gradient(135deg, #f8e08b, #eac13f);
+  border: 1px solid #d4af37; white-space: nowrap;
+}
+.badge.economia { background: linear-gradient(135deg, #ffd480, #ffb74d); border-color: #e09000; }
+.badge-icon { display: inline-block; vertical-align: middle; margin-right: 4px; font-size: 0.8rem; line-height: 1; }
+.badge-small {
+  display: inline-block; font-size: 0.68rem; font-weight: 600; line-height: 1.2;
+  padding: 2px 7px; border-radius: 6px; color: #000;
+  background: linear-gradient(135deg, #ffd54f, #ffca28);
+  border: 1px solid #d4af37; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  white-space: nowrap; margin-left: 4px;
+}
+.badge-small.pure { background: linear-gradient(135deg, #a5d6a7, #81c784); border-color: #66bb6a; color: #1b5e20; }
+
+/* Actions */
+.actions { margin-top: 10px; display: flex; justify-content: center; gap: 8px; flex-wrap: wrap; }
+.actions button { border: none; border-radius: 10px; padding: 14px; font-weight: 700; font-size: 1rem; cursor: pointer; transition: 0.2s; }
+.actions .add-cart { background: linear-gradient(135deg, #4caf50, #43a047); color: #fff; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); }
+.actions .add-cart:hover { background: linear-gradient(135deg, #43a047, #388e3c); transform: scale(1.03); }
+.actions .extras-btn { background: linear-gradient(135deg, #ffb300, #ffca28); color: #222; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15); }
+.actions .extras-btn:hover { background: linear-gradient(135deg, #ffca28, #ffd54f); transform: scale(1.03); }
+
+/* ======== MINI-CART / MODAIS ======== */
+#cart-backdrop {
+  position: fixed; inset: 0; background: rgba(0, 0, 0, 0.45);
+  opacity: 0; pointer-events: none; transition: opacity 0.25s ease; z-index: 980;
+}
+#cart-backdrop.active { opacity: 1; pointer-events: auto; }
+
+.mini-cart {
+  position: fixed; right: 0; top: 0; width: min(92vw, 380px); height: 100dvh;
+  background: #fff; box-shadow: -4px 0 20px rgba(0, 0, 0, 0.25);
+  transform: translateX(100%); transition: transform 0.25s; z-index: 990; display: none;
+  flex-direction: column; /* Garante layout flex */
+}
+.mini-cart.active { display: flex; transform: translateX(0); }
+
+.mini-head {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 10px 14px; border-bottom: 1px solid #eee;
+}
+.mini-list { max-height: 60vh; overflow: auto; padding: 10px 14px; }
+.mini-foot { padding: 10px 14px; border-top: 1px solid #eee; }
+
+/* Frete Visual: Estilo para quando a busca do CEP estiver Ativa/Livre */
+.frete-container {
+  margin-top: 15px; padding: 12px; border: 1px solid #ddd;
+  border-radius: 10px; background: #fff; 
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+.frete-container h4 { margin: 0 0 10px 0; font-size: 1rem; color: #222; }
+.frete-cep-group { display: flex; gap: 8px; margin-bottom: 8px; }
+
+/* Campos de CEP, endereço, número e complemento padronizados */
+.frete-container input[type="text"] {
+  padding: 8px 10px;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  font-size: 0.9rem;
+  box-sizing: border-box;
 }
 
-/* ================================
-   CARROSSEL
-   ================================= */
-#carousel-container {
-    width: 100%;
-    overflow: hidden;
-    margin-bottom: 12px;
+/* CEP ocupa o espaço flex dentro do grupo */
+.frete-cep-group input[type="text"] {
+  flex: 1;
 }
 
-#carousel {
-    display: flex;
-    width: 300%;
-    animation: slide 14s infinite;
+/* Campo de endereço longo com elipse para não quebrar o layout */
+.input-endereco-longo {
+  margin-bottom: 8px;
+  white-space: nowrap;
+  overflow-x: auto;
+  overflow-y: hidden;
+  text-overflow: initial;
+  display: block;
+  width: 100%;
 }
 
-#carousel img {
-    width: 100%;
-    border-radius: 12px;
+/* Número e complemento alinhados e com o mesmo visual dos demais inputs */
+.endereco-duplo input[type="text"] {
+  padding: 8px 10px;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  font-size: 0.9rem;
 }
 
-@keyframes slide {
-    0% { transform: translateX(0%); }
-    33% { transform: translateX(-100%); }
-    66% { transform: translateX(-200%); }
-    100% { transform: translateX(0%); }
+/* Estilo para inputs de endereço (serão ativados via JS) */
+.mini-foot input[type="text"]:not(#coupon-input),
+.mini-foot input[type="number"],
+.mini-foot textarea {
+  transition: all 0.2s;
+  background-color: #fff;
+  color: var(--txt);
+  box-sizing: border-box;
 }
 
-/* ================================
-   CARDÁPIO
-   ================================= */
-.menu-title {
-    font-size: 24px;
-    font-weight: 700;
-    margin: 16px 12px 6px 12px;
+/* Estilo para o campo DESABILITADO (Estado inicial antes do ViaCEP) */
+.mini-foot input:disabled,
+.mini-foot textarea:disabled {
+  background-color: var(--bg2) !important; /* Cor cinza/clara para inativo */
+  color: #888 !important;
+  cursor: not-allowed !important;
 }
 
-#products-container {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 14px;
-    padding: 10px;
+
+/* Botão Calcular Frete - Ativo */
+.btn-calcular-frete {
+  background: var(--botao); color: #222; border: none; border-radius: 8px;
+  padding: 8px 12px; font-weight: 700; cursor: pointer; transition: 0.2s;
+  box-shadow: var(--shadow-1);
+}
+.btn-calcular-frete:hover { background: #ffc107; transform: scale(1.02); }
+
+
+/* CORREÇÃO CRÍTICA (Antiga Regra de 366-369) */
+/* Regra para desabilitar o container inteiro (JÁ EXISTIA NO INDEX.HTML) */
+.frete-container[aria-disabled="true"] {
+  /* REMOVIDO: pointer-events: none; <--- ISSO BLOQUEAVA O CEP */ 
+  opacity: 1; /* Garante visibilidade total */
 }
 
-.product-card {
-    background: #fff;
-    border-radius: 18px;
-    padding: 12px;
-    box-shadow: 0 3px 8px rgba(0,0,0,0.15);
-    cursor: pointer;
+/* NOVO: Aplica o estilo de desabilitado SÓ nos inputs de endereço travados */
+.frete-container[aria-disabled="true"] input[type="text"]:not(#cep-input) {
+  /* Mantém os inputs de endereço preenchidos travados e desabilitados visualmente */
+  background-color: var(--bg2) !important; 
+  color: #888 !important;
+  cursor: not-allowed !important;
+  pointer-events: none;
 }
 
-.product-card img {
-    width: 100%;
-    border-radius: 15px;
-}
 
-/* ================================
-   MODAIS
-   ================================= */
+/* Cupom */
+.coupon-form { display: flex; gap: 8px; margin-top: 12px; margin-bottom: 10px; }
+.coupon-form input[type="text"] {
+  flex: 1; padding: 10px 12px; border: 1px solid #ccc; border-radius: 8px;
+  font-size: 0.95rem; box-shadow: inset 0 1px 2px rgba(0,0,0,0.05);
+}
+.coupon-form button {
+  background-color: #4caf50; color: #fff; font-weight: 700; border: none;
+  border-radius: 8px; padding: 10px 14px; cursor: pointer;
+  transition: background-color .2s ease;
+}
+.coupon-form button:hover { background-color: #43a047; }
+.coupon-message { margin-top: 6px; font-size: 0.9rem; color: #333; }
+
+/* Carrinho Vazio */
+.cart-empty-msg {
+  padding: 18px 14px; text-align: center; border: 2px dashed #ffca28;
+  border-radius: 12px; background: #fffdf3; font-weight: 600; color: #444;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.6); line-height: 1.4;
+}
+.cart-empty-msg div:first-child { font-size: 1.05rem; margin-bottom: 6px; color: #222; }
+.cart-empty-msg div:last-child { font-size: 0.95rem; color: #6b6b6b; }
+
+/* ======== MODAIS GERAIS ======== */
 .modal {
-    position: fixed;
-    inset: 0;
-    background: rgba(0,0,0,0.55);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    backdrop-filter: blur(4px);
-    z-index: 999;
+  position: fixed; inset: 0; display: flex; align-items: center;
+  justify-content: center; opacity: 0; pointer-events: none;
+  transition: opacity 0.25s; z-index: 999; background: rgba(0, 0, 0, 0.5);
 }
-
-.modal.hidden {
-    display: none !important;
-}
-
+.modal.show { opacity: 1; pointer-events: auto; }
 .modal-content {
-    background: #fff;
+  background: #fff; border-radius: 16px; max-height: 85vh;
+  max-width: 520px; width: 90%; overflow-y: auto;
+  box-shadow: 0 8px 40px rgba(0, 0, 0, 0.3); position: relative;
+}
+.modal-head {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 12px 16px; border-bottom: 1px solid #eee; background: #ffca28;
+  box-shadow: var(--shadow-in);
+}
+
+/* Botões Gerais */
+.btn-primary, .btn-secondary, .btn-primario {
+  flex: 1; border: none; border-radius: 10px; padding: 14px;
+  font-weight: 700; font-size: 1rem; cursor: pointer; transition: 0.2s;
+}
+.btn-primary, .btn-primario {
+  background: linear-gradient(135deg, var(--success), #388e3c);
+  color: #fff; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.15);
+}
+.btn-primary:hover, .btn-primario:hover {
+  background: linear-gradient(135deg, #388e3c, #2e7d32);
+  transform: translateY(-2px); box-shadow: 0 6px 10px rgba(0, 0, 0, 0.25);
+}
+.btn-secondary { background: transparent; color: #555; border: 1px solid #ddd; }
+.btn-secondary:hover { background: #f1f1f1; border-color: #ccc; }
+
+/* Login Google */
+.btn-google {
+  border: 1px solid #ddd; background: #fff; border-radius: 8px;
+  width: 100%; font-weight: 600; display: flex; justify-content: center;
+  gap: 8px; padding: 10px; transition: 0.2s; cursor: pointer;
+}
+.btn-google:hover { background: #f8f8f8; }
+
+/* Botões de Fechar */
+.fechar-pedidos, .fechar-recompensas, .extras-close, .combo-close, .login-close, .promo-close, .dashboard-close {
+  background: var(--botao); border: none; border-radius: 50%;
+  width: 30px; height: 30px; font-size: 18px; font-weight: 700;
+  cursor: pointer; line-height: 30px; text-align: center; color: #222;
+  transition: 0.2s; pointer-events: auto;
+}
+.fechar-pedidos:hover, .fechar-recompensas:hover, .extras-close:hover,
+.combo-close:hover, .login-close:hover, .promo-close:hover, .dashboard-close:hover {
+  background: #ff7043; color: #fff; transform: scale(1.1);
+}
+
+/* Login Modal */
+#login-modal { z-index: 1000; }
+#login-modal .modal-content { max-width: 480px; border-radius: 14px; }
+#login-modal .login-close { position: absolute; top: 12px; right: 12px; z-index: 10; }
+
+/* Promo Modal */
+#promo-modal { z-index: 1100; background: rgba(0, 0, 0, 0.75); }
+#promo-modal .promo-content {
+  position: relative; padding: 0; max-width: 420px; border-radius: 14px;
+  background: #fff; overflow: hidden; box-shadow: 0 8px 40px rgba(0, 0, 0, 0.4); border: none;
+}
+#promo-modal-img {
+  width: 100%; height: auto; max-height: 60vh; object-fit: cover;
+  display: block; border: none;
+}
+#promo-modal .modal-head { position: absolute; top: 0; left: 0; right: 0; height: 100%; pointer-events: none; background: none; border: none; }
+#promo-modal .promo-close { position: absolute; top: 12px; right: 12px; background: #ffca28; width: 38px; height: 38px; z-index: 10; }
+#promo-modal .promo-nav {
+  position: absolute; top: 50%; transform: translateY(-50%);
+  pointer-events: all; background: #ffca28; border: none;
+  border-radius: 50%; width: 42px; height: 42px; font-size: 22px;
+  font-weight: 700; color: #000; box-shadow: 0 3px 6px rgba(0, 0, 0, 0.25);
+  display: flex; align-items: center; justify-content: center;
+  transition: 0.2s; z-index: 9;
+}
+#promo-modal .promo-nav.prev { left: 12px; }
+#promo-modal .promo-nav.next { right: 12px; }
+#promo-modal .promo-nav:hover { background: #ffb300; transform: translateY(-50%) scale(1.1); }
+.promo-info { text-align: center; padding: 16px 20px 20px; background: #fff; }
+#promo-modal-title { font-size: 1.25rem; font-weight: 700; margin-bottom: 6px; color: #222; }
+#promo-modal-price { font-size: 1rem; margin-bottom: 12px; color: #444; font-weight: 500; }
+#promo-modal-price del { color: #777; text-decoration: line-through; margin-right: 6px; }
+#promo-modal-price b { color: #2e7d32; font-weight: 700; font-size: 1.1rem; }
+#promo-modal-add {
+  background: #388e3c; color: #fff; border: none; border-radius: 8px;
+  padding: 12px 24px; font-size: 1rem; font-weight: 600; cursor: pointer;
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.2); transition: background 0.2s, transform 0.2s;
+}
+#promo-modal-add:hover { background: #2e7d32; transform: scale(1.04); }
+
+/* Extras / Combo */
+.extras-list label.extra-line {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 10px; margin-bottom: 8px; border: 1px solid #ffb300;
+  border-radius: 8px; background: #fff; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  cursor: pointer; transition: all 0.2s;
+}
+.extras-list label.extra-line:hover { background: #fff7e6; }
+.extras-list label.extra-line span b { color: var(--danger); margin-left: 5px; }
+.extras-list input[type="checkbox"] { margin-left: 10px; }
+#combo-body label, #combo-body div {
+  border: 1px solid #ffca28; border-radius: 10px; padding: 10px 14px;
+  background: #fff; display: flex; justify-content: space-between;
+  align-items: center; transition: 0.2s; font-weight: 600; cursor: pointer;
+}
+#combo-body label:hover { background: #fff9e6; transform: scale(1.02); }
+
+/* ======== PAINÉIS FLUTUANTES ======== */
+.meus-pedidos { position: fixed; bottom: 20px; right: 20px; z-index: 1500; }
+.minhas-recompensas { position: fixed; bottom: 80px; right: 20px; z-index: 1490; }
+
+.meus-pedidos-btn, .recompensas-btn {
+  background: linear-gradient(135deg, #ffca28, #ffb300); color: #222;
+  border: none; border-radius: 20px; font-weight: 700; font-size: 0.95rem;
+  padding: 12px 22px; box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+  cursor: pointer; transition: 0.2s;
+}
+.meus-pedidos-btn:hover, .recompensas-btn:hover {
+  transform: scale(1.05); box-shadow: 0 6px 15px rgba(0, 0, 0, 0.3);
+}
+
+.pedidos-panel, .recompensas-panel {
+  position: fixed; right: -100%; top: 0; width: min(95%, 440px); height: 100vh;
+  background: #f4f4f4; box-shadow: -4px 0 18px rgba(0, 0, 0, 0.3);
+  transition: right 0.4s; display: flex; flex-direction: column; z-index: 990;
+}
+.pedidos-panel.active, .recompensas-panel.active { right: 0; }
+
+.pedidos-header, .recompensas-header {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 16px 20px; background: #ffca28; font-weight: 700;
+  font-size: 1.2rem; color: #222; box-shadow: var(--shadow-in);
+}
+.pedidos-body, .recompensas-body { flex: 1; overflow: auto; padding: 16px; }
+
+/* =========================================================
+   🚀 ESTILIZAÇÃO DA ABA MEUS PEDIDOS (V3.8.6)
+   ========================================================= */
+
+/* Fundo do painel */
+.pedidos-panel {
+  background-color: #f9f9f9;
+}
+
+/* Lista de pedidos */
+#listaPedidos {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* Card de Pedido Individual */
+.pedido-card {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+  padding: 16px;
+  border: 1px solid #eee;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.pedido-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+/* Miniatura do Pedido */
+.pedido-thumb {
+  width: 100%;
+  height: 140px;
+  border-radius: 8px;
+  background-color: #f0f0f0;
+  background-position: center;
+  background-size: cover;
+  background-repeat: no-repeat;
+  border: 1px solid #e0e0e0;
+}
+
+/* Cabeçalho do Card (Data) */
+.pedido-card h4 {
+  margin: 0;
+  font-size: 0.9rem;
+  color: #666;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* Valor Total */
+.pedido-info {
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: #2e7d32; /* Verde dinheiro */
+  margin: 0;
+}
+
+/* Lista de Itens */
+.pedido-itens {
+  font-size: 0.9rem;
+  color: #444;
+  line-height: 1.5;
+  padding-left: 12px;
+  border-left: 3px solid #ffca28; /* Detalhe amarelo */
+  margin-bottom: 4px;
+}
+
+/* Botão Repetir Pedido */
+.repetir-btn {
+  background: linear-gradient(135deg, #ffca28, #ffb300); color: #222;
+  border: none; border-radius: 8px; padding: 12px; font-weight: 700;
+  font-size: 0.95rem; cursor: pointer; transition: all 0.2s ease;
+  width: 100%; text-align: center; display: flex; align-items: center;
+  justify-content: center; gap: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+.repetir-btn:hover {
+  background: linear-gradient(135deg, #ffb300, #ff8f00);
+  transform: scale(1.02);
+}
+/* Estado desabilitado (pedidos antigos) */
+.repetir-btn:disabled {
+  background: #e0e0e0;
+  color: #999;
+  cursor: not-allowed;
+  box-shadow: none;
+  transform: none;
+}
+
+/* ======== FOOTER ======== */
+.footer {
+  background: #ffca28; text-align: center; padding: 20px; font-size: 0.9rem; color: #222;
+}
+.footer a { color: #ff7043; text-decoration: none; transition: color 0.2s; }
+.footer a:hover { color: #ff5722; }
+.footer-links { display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; margin: 8px 0; }
+.footer-btn {
+  background: #ffb300; color: #222; padding: 6px 14px; border-radius: 6px; font-weight: 700; text-decoration: none; transition: 0.25s;
+}
+.footer-btn:hover { background: #ffca28; transform: scale(1.03); }
+.footer-copy { font-size: 0.8rem; color: #000; margin-top: 10px; }
+
+/* ======== COOKIE BANNER ======== */
+#cookie-banner {
+  position: fixed; left: 0; right: 0; bottom: 0; background: rgba(34, 34, 34, 0.95);
+  color: #fff; padding: 16px; display: flex; justify-content: space-between; align-items: center;
+  z-index: 2000; transform: translateY(100%); transition: transform 0.5s;
+}
+#cookie-banner.show { transform: translateY(0); }
+#cookie-banner p { margin: 0; font-size: 0.9rem; line-height: 1.4; margin-right: 16px; }
+#cookie-banner a { color: #ffca28; font-weight: 600; text-decoration: underline; }
+#cookie-banner button {
+  background: #4caf50; color: #fff; border: none; border-radius: 8px;
+  padding: 10px 16px; font-weight: 700; cursor: pointer; transition: background 0.2s; flex-shrink: 0;
+}
+#cookie-banner button:hover { background: #43a047; }
+
+@media (max-width: 600px) {
+  /* Ajustes Mobile */
+  #cookie-banner { flex-direction: column; text-align: center; gap: 12px; }
+  #cookie-banner p { margin-right: 0; }
+  #cookie-banner button { width: 100%; padding: 12px; }
+}
+
+/* =========================================================
+   📊 AJUSTES DE ESTILO PARA PAINEL DE RELATÓRIOS (ADMIN)
+   ========================================================= */
+
+/* 1. Estilo Básico do Painel */
+#admin-dashboard .modal-content {
+    max-width: 1100px !important;
+    width: 95% !important; 
+}
+#admin-dashboard .modal-head {
+    background: var(--botao); 
+    color: var(--txt);
+}
+#admin-dashboard .dashboard-body {
     padding: 20px;
-    border-radius: 18px;
-    width: 92%;
-    max-height: 86%;
-    overflow-y: auto;
 }
 
-/* ================================
-   BOTÕES
-   ================================= */
-.btn {
-    background: #ffca28;
-    border: none;
-    padding: 10px 15px;
-    border-radius: 10px;
-    font-weight: 600;
-    cursor: pointer;
+/* 2. Layout dos Cards de Metas (PC) */
+.dashboard-body > div:first-child {
+    display: flex; 
+    gap: 15px;     
+    flex-wrap: wrap; 
+    margin-bottom: 20px;
 }
 
-.btn.small {
-    padding: 6px 10px;
-    font-size: 14px;
-}
-
-/* NOVOS BOTÕES — “Não sei meu CEP” e “Digitar manualmente” */
-.btn-link {
-    border: none;
-    background: none;
-    cursor: pointer;
-    font-size: 14px;
-    margin: 4px 0;
-    text-align: left;
-}
-
-.btn-link.blue {
-    color: #2196f3;
-    font-weight: 600;
-}
-
-.btn-link.gray {
-    color: #555;
-}
-
-/* ================================
-   CAMPOS DE FORMULÁRIO
-   ================================= */
-input {
-    width: 100%;
-    padding: 10px 12px;
+/* 3. Estilo dos Cards Individuais (.cardBox) */
+.cardBox {
+    flex: 1; 
+    min-width: 200px; 
+    padding: 18px 22px;
+    background: #fff;
     border-radius: 12px;
-    border: 1px solid #ccc;
-    margin-bottom: 10px;
-    font-size: 16px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+    border: 1px solid #eee;
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #444;
 }
+#card-total { color: var(--success); }
+#card-pedidos { color: var(--botao); }
+#card-ticket { color: #1976D2; }
 
-/* Campo de endereço restaurado com scroll horizontal */
-#endereco-auto {
-    white-space: nowrap;
-    overflow-x: auto;
-    overflow-y: hidden;
-}
-
-/* Número e Complemento padronizados */
-#numero-input,
-#complemento-input {
-    width: 100%;
+/* 4. Estilos para Gráficos */
+#chart-pedidos, #chart-produtos {
+    margin-top: 20px;
+    padding: 10px;
+    background: #fff;
     border-radius: 12px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
 }
 
-/* CEP + botão lado a lado */
-.cep-row {
+/* 5. Ajuste Mobile (Corrigindo o problema do tamanho e fechamento) */
+@media (max-width: 600px) {
+    /* Faz o modal ocupar 90% da altura e 95% da largura, deixando margem para fechar ao clicar fora */
+    #admin-dashboard .modal-content {
+        width: 95% !important;
+        height: 90vh !important; 
+        margin: auto; 
+        border-radius: 16px; 
+    }
+    /* Cards empilham no celular */
+    .cardBox {
+        min-width: 100%;
+    }
+}
+
+
+/* ===== v5.3 Ajustes Número + Complemento ===== */
+.endereco-duplo {
     display: flex;
     gap: 8px;
+    margin-bottom: 8px;
+}
+#numero-input {
+    flex: 0 0 30%;
+    max-width: 120px;
+}
+#complemento-input {
+    flex: 1;
+    min-width: 0;
 }
 
-/* ================================
-   CARRINHO
-   ================================= */
-.cart-content {
-    max-height: 90vh;
-}
-
-#cart-items {
-    margin-bottom: 10px;
-}
-
-.line {
-    display: flex;
-    justify-content: space-between;
-    font-size: 17px;
-    padding: 5px 0;
-}
-
-.total {
-    font-size: 20px;
-    font-weight: 700;
-}
-
-/* Corrige espaçamento do texto “Frete grátis…” */
-.frete-info {
-    margin-top: 6px;
-    margin-bottom: 12px;
-    font-size: 14px;
+/* ===== Aviso Frete Grátis ===== */
+.frete-gratis-aviso {
+    margin: 6px 0 10px 0;
+    font-size: 0.85rem;
     color: #444;
-}
-/* ================================
-   MEUS PEDIDOS / RECOMPENSAS
-   ================================= */
-#orders-list,
-#rewards-list {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
+    background: #fff8d6;
+    padding: 8px 10px;
+    border-radius: 8px;
+    border-left: 4px solid #ffca28;
+    line-height: 1.3;
 }
 
-.order-card,
-.reward-card {
-    background: #fff;
-    padding: 14px;
-    border-radius: 15px;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.12);
+/* 🔥 Correção definitiva do campo de endereço com scroll horizontal */
+.input-endereco-longo {
+    width: 100% !important;
+    display: inline-block !important;
+    white-space: nowrap !important;
+    overflow-x: auto !important;
+    overflow-y: hidden !important;
+    text-overflow: initial !important;
+    -webkit-overflow-scrolling: touch !important;
+    scrollbar-width: none !important; /* Firefox remove barra */
 }
 
-/* ================================
-   PAINEL MEUS PEDIDOS — MINIATURAS
-   ================================= */
-.order-thumb {
-    width: 75px;
-    height: 75px;
-    border-radius: 10px;
-    object-fit: cover;
-    margin-right: 12px;
-}
-
-/* ================================
-   FOOTER
-   ================================= */
-#footer {
-    width: 100%;
-    text-align: center;
-    padding: 18px 0;
-    color: #444;
-    font-size: 14px;
-    margin-top: 25px;
-}
-
-/* ================================
-   SCROLLS
-   ================================= */
-::-webkit-scrollbar {
-    height: 6px;
-    width: 6px;
-}
-
-::-webkit-scrollbar-thumb {
-    background: #bdbdbd;
-    border-radius: 10px;
-}
-
-::-webkit-scrollbar-track {
-    background: #eee;
-}
-
-/* ================================
-   TOAST (extras.js)
-   ================================= */
-.toast-container {
-    position: fixed;
-    left: 50%;
-    transform: translateX(-50%);
-    bottom: 20px;
-    z-index: 2000;
-}
-
-.toast {
-    background: #323232;
-    color: #fff;
-    padding: 12px 20px;
-    border-radius: 12px;
-    margin-top: 10px;
-    font-size: 15px;
-    animation: fadeInOut 3.4s forwards;
-}
-
-@keyframes fadeInOut {
-    0% { opacity: 0; transform: translateY(20px); }
-    10% { opacity: 1; transform: translateY(0); }
-    90% { opacity: 1; }
-    100% { opacity: 0; transform: translateY(20px); }
-}
-
-/* ================================
-   MINI-CARRINHO (extras.js)
-   ================================= */
-#mini-cart-panel {
-    position: fixed;
-    right: 0;
-    top: 82px;
-    width: 250px;
-    height: auto;
-    background: #fff;
-    box-shadow: -3px 0 10px rgba(0,0,0,0.25);
-    padding: 12px;
-    border-radius: 15px 0 0 15px;
-    display: none;
-    z-index: 1000;
-}
-
-#mini-cart-panel.open {
-    display: block;
-}
-
-.mini-cart-item {
-    display: flex;
-    gap: 10px;
-    margin-bottom: 10px;
-}
-
-.mini-cart-item img {
-    width: 60px;
-    height: 60px;
-    border-radius: 10px;
-    object-fit: cover;
-}
-
-/* ================================
-   BOTÃO FINALIZAR
-   ================================= */
-.btn.confirm {
-    background: #66bb6a;
-    padding: 12px;
-    font-size: 18px;
-}
-
-.btn.confirm:hover {
-    background: #57a75b;
-}
-
-/* ================================
-   FECHAMENTO FORA DO MODAL
-   ================================= */
-.modal {
-    pointer-events: auto;
-}
-
-.modal-content {
-    pointer-events: auto;
-}
-
-/* ================================
-   BARRA DE PROGRESSO (futura v5.5)
-   ================================= */
-/* Ainda não implementada — apenas reserva */
-.progress-bar {
-    width: 100%;
-    height: 8px;
-    background: #e0e0e0;
-    border-radius: 10px;
-    margin-bottom: 10px;
-    overflow: hidden;
-}
-
-.progress-bar-fill {
-    height: 100%;
-    width: 0%;
-    background: #66bb6a;
-    transition: width 0.3s ease;
+.input-endereco-longo::-webkit-scrollbar {
+    display: none !important; /* Chrome/Safari remove barra */
 }
