@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>🍔 Da Família Lanches — DFL v5.5 Preview</title>
 
-  <!-- ⚠️ Mantido seu CSP original (essencial para performance e segurança) -->
   <meta http-equiv="Content-Security-Policy" content="
     default-src * data: blob: 'unsafe-inline' 'unsafe-eval';
     script-src * data: blob: 'unsafe-inline' 'unsafe-eval'
@@ -22,15 +21,12 @@
   ">
   <meta http-equiv="Cache-control" content="public, max-age=31536000, immutable">
 
-  <!-- Pré-carregamento essencial -->
   <link rel="preconnect" href="https://www.gstatic.com" crossorigin>
   <link rel="preload" as="image" href="logo.png">
 
-  <!-- CSS atualizado -->
   <link rel="stylesheet" href="style.css?v=5.5" />
   <noscript><link rel="stylesheet" href="style.css?v=5.5"/></noscript>
 
-  <!-- Firebase -->
   <script defer src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
   <script defer src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
   <script defer src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
@@ -38,10 +34,6 @@
 
 <body>
   <audio id="checkout-sound" src="click.wav" preload="auto" hidden></audio>
-
-  <!-- =============================== -->
-  <!--  HEADER                         -->
-  <!-- =============================== -->
 
   <header class="header" role="banner">
     <div class="header-content">
@@ -68,12 +60,7 @@
 
   <div class="main-content-wrapper">
 
-    <!-- BANNER HORÁRIO / STATUS -->
     <div id="status-banner" class="status-banner" role="status"></div>
-
-    <!-- =============================== -->
-    <!--   PROMOÇÕES & CARROSSEL         -->
-    <!-- =============================== -->
 
     <section class="promo-section" aria-labelledby="promo-title">
       <h2 id="promo-title">🔥 Promoções do Dia</h2>
@@ -87,8 +74,7 @@
         <button class="c-btn c-prev" type="button" aria-label="Anterior">‹</button>
 
         <div class="slides">
-          <!-- 🔥 Mantido exatamente como no seu HTML -->
-<img class="slide" src="promocoes/promo1.jpg" data-promo-id="1" width="300" height="200" alt="Promoção 1" loading="lazy"/>
+          <img class="slide" src="promocoes/promo1.jpg" data-promo-id="1" width="300" height="200" alt="Promoção 1" loading="lazy"/>
           <img class="slide" src="promocoes/promo2.jpg" data-promo-id="2" width="300" height="200" alt="Promoção 2" loading="lazy"/>
           <img class="slide" src="promocoes/promo3.jpg" data-promo-id="3" width="300" height="200" alt="Promoção 3" loading="lazy"/>
           <img class="slide" src="promocoes/promo4.jpg" data-promo-id="4" width="300" height="200" alt="Promoção 4" loading="lazy"/>
@@ -103,12 +89,7 @@
       </div>
     </section>
 
-    <!-- Backdrop global -->
     <div id="cart-backdrop"></div>
-
-    <!-- ==================================== -->
-    <!-- MINI-CART / CARRINHO LATERAL         -->
-    <!-- ==================================== -->
 
     <aside id="mini-cart" class="mini-cart" aria-hidden="true">
       <div class="mini-head">
@@ -120,7 +101,14 @@
 
       <div class="mini-foot">
 
-        <!-- ========== FRETE + ENDEREÇO ========= -->
+        <div id="progressWrapper" class="progress-wrapper">
+            <p id="progressText" class="progress-text">
+                Faltam <strong>R$ 80,00</strong> para Frete Grátis 🚀
+            </p>
+            <div class="progress-bar">
+                <div id="progressFill" class="progress-fill"></div>
+            </div>
+        </div>
         <div class="frete-container" aria-disabled="true">
 
           <h4 style="margin-top:10px;">🚚 Entrega</h4>
@@ -132,6 +120,10 @@
               Buscar
             </button>
           </div>
+          
+          <button id="btnNaoSeiCEP" class="link" type="button" style="display: block; text-align: right; margin-bottom: 8px;">
+            Não sei meu CEP 🤔
+          </button>
 
           <input id="endereco-auto" type="text" class="input-endereco-longo" placeholder="Rua e Bairro (Preenchido via CEP)" disabled>
 
@@ -152,9 +144,25 @@
           <hr style="border:0;border-top:1px solid #eee;margin:15px 0;">
         </div>
 
-        <!-- ================= -->
-        <!-- CAMPO CUPOM       -->
-        <!-- ================= -->
+        <div id="manualArea" class="frete-container" style="display:none;">
+            <h4>Endereço Manual</h4>
+            
+            <label for="manualEndereco">Endereço completo (Rua, Bairro, Cidade):</label>
+            <textarea id="manualEndereco" placeholder="Ex: Rua Netuno - Jardim Andrades (Patos de Minas/MG)" style="width: 100%; min-height: 70px; margin-bottom: 8px; padding: 8px; border: 1px solid #ccc; border-radius: 8px;"></textarea>
+
+            <label for="manualNumero">Número:</label>
+            <input type="text" id="manualNumero" placeholder="Ex: 123" style="width: 100%; margin-bottom: 8px; padding: 8px; border: 1px solid #ccc; border-radius: 8px;" />
+
+            <button id="btnConfirmarEndereco" class="btn-primary" type="button" style="width: 100%; margin-bottom: 8px;">
+                Confirmar endereço 🔍
+            </button>
+
+            <button id="btnVoltarCEP" class="btn-secondary" type="button" style="width: 100%;">
+                Voltar e Usar CEP
+            </button>
+        </div>
+
+
         <form id="coupon-form" class="coupon-form" novalidate>
           <input type="text" id="coupon-input" placeholder="Cupom de desconto" aria-label="Cupom de desconto"/>
           <button type="submit" id="coupon-apply-btn" class="btn-primary">OK</button>
@@ -168,10 +176,6 @@
         </div>
       </div>
     </aside>
-
-    <!-- ==================================== -->
-    <!-- 🍔 COMBOS                           -->
-    <!-- ==================================== -->
 
     <section class="menu-section">
       <h2>🧡 Combos</h2>
@@ -220,11 +224,7 @@
 
       </div>
     </section>
-<!-- ==================================== -->
-    <!-- 🍔 LANCHES TRADICIONAIS              -->
-    <!-- ==================================== -->
-
-    <section class="menu-section">
+<section class="menu-section">
       <h2>🍔 Nossos Lanches Tradicionais</h2>
 
       <div class="grid">
@@ -309,10 +309,6 @@
       </div>
     </section>
 
-    <!-- ==================================== -->
-    <!-- 🍔 ARTESANAIS                       -->
-    <!-- ==================================== -->
-
     <section class="menu-section">
       <h2>🍔 Lanches Artesanais</h2>
 
@@ -353,10 +349,6 @@
 
       </div>
     </section>
-
-    <!-- ==================================== -->
-    <!-- 🌭 HOT DOGS                         -->
-    <!-- ==================================== -->
 
     <section class="menu-section" id="hotdogs-section">
       <h2>🌭 DFD – Hot Dogs</h2>
@@ -431,10 +423,6 @@
 
       </div>
     </section>
-
-    <!-- ==================================== -->
-    <!-- 🥤 BEBIDAS                           -->
-    <!-- ==================================== -->
 
     <section class="menu-section" id="bebidas-section">
       <h2>🥤 Bebidas</h2>
@@ -523,11 +511,7 @@
 
       </div>
     </section>
-<!-- ==================================== -->
-    <!-- ⚙️ MODAL DE ADICIONAIS               -->
-    <!-- ==================================== -->
-
-    <div id="extras-modal" class="modal">
+<div id="extras-modal" class="modal">
       <div class="modal-content">
         <h2>Adicionais</h2>
         <p class="modal-item-name"></p>
@@ -545,10 +529,6 @@
       </div>
     </div>
 
-    <!-- ==================================== -->
-    <!-- ⚙️ MODAL LOGIN                       -->
-    <!-- ==================================== -->
-
     <div id="login-modal" class="modal">
       <div class="modal-content login-box">
         <h2>Entrar</h2>
@@ -563,10 +543,6 @@
         </p>
       </div>
     </div>
-
-    <!-- ==================================== -->
-    <!-- ⚙️ MODAL REGISTRO                    -->
-    <!-- ==================================== -->
 
     <div id="register-modal" class="modal">
       <div class="modal-content login-box">
@@ -585,10 +561,6 @@
       </div>
     </div>
 
-    <!-- ==================================== -->
-    <!-- 📦 PAINEL: MEUS PEDIDOS               -->
-    <!-- ==================================== -->
-
     <div id="orders-panel" class="side-panel">
       <div class="panel-header">
         <h2>📦 Meus Pedidos</h2>
@@ -596,13 +568,8 @@
       </div>
 
       <div class="orders-list">
-        <!-- Conteúdo preenchido automaticamente -->
-      </div>
+        </div>
     </div>
-
-    <!-- ==================================== -->
-    <!-- ⭐ PAINEL: MINHAS RECOMPENSAS         -->
-    <!-- ==================================== -->
 
     <div id="rewards-panel" class="side-panel">
       <div class="panel-header">
@@ -611,22 +578,13 @@
       </div>
 
       <div class="rewards-list">
-        <!-- Conteúdo preenchido automaticamente -->
-      </div>
+        </div>
     </div>
-
-    <!-- ==================================== -->
-    <!-- 🍪 COOKIE BANNER                      -->
-    <!-- ==================================== -->
 
     <div id="cookie-banner">
       <p>Usamos cookies para melhorar sua experiência 💛</p>
       <button id="cookie-accept">Aceitar</button>
     </div>
-
-    <!-- ==================================== -->
-    <!-- 📜 SCRIPTS DO SITE                    -->
-    <!-- ==================================== -->
 
     <script src="extras.js?v=5.5"></script>
     <script src="script.js?v=5.5"></script>
