@@ -1,7 +1,7 @@
 /* =========================================================  
-   🚀 DFL v5.3.5 — ESTABILIDADE MÁXIMA (FIX SINTAXE)
-   - FIX CRÍTICO: Simplificação da sintaxe de template string do objeto 'pedido' e strings do WhatsApp.
-   - Implementação COMPLETA e segura da Barra de Progresso, Endereço Manual e Frete Inteligente.
+   🚀 DFL v5.3.6 — ESTABILIDADE MÁXIMA (FIX SINTAXE V2)
+   - FIX CRÍTICO: Simplificação da construção de string do WhatsApp para evitar SyntaxError.
+   - Implementação COMPLETA e robusta da Barra de Progresso, Endereço Manual e Frete Inteligente.
    ========================================================= */  
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -541,7 +541,7 @@ document.addEventListener("DOMContentLoaded", () => {
             _cupomCache[key] = { ate: now + 30000, res }; return res;  
         } catch (err) { console.error("Erro ao validar cupom:", err); return { ...invalido, mensagem: "Erro ao processar cupom." }; }  
     }
-    
+
     // [NOVO] Função para controlar o estado dos campos de endereço
     const toggleAddressState = (isDisabled, isManual = false) => {
         const enderecoAuto = document.getElementById('endereco-auto');
@@ -1033,15 +1033,15 @@ document.addEventListener("DOMContentLoaded", () => {
             popupAdd("Pedido salvo ✅"); 
             try { sound.currentTime = 0; sound.play(); } catch (_) {}  
             
-            // CONSTRUÇÃO ROBUSTA DA MENSAGEM DO WHATSAPP (Evita template strings aninhadas complexas)
+            // CONSTRUÇÃO ROBUSTA DA MENSAGEM DO WHATSAPP (FIX SINTAXE)
             const summaryArray = [
                 "🍔 *Pedido DFL*", 
                 cart.map(i => `• ${i.nome} x${i.qtd}`).join("\n"), 
                 "", 
-                `Subtotal: *${money(subtotal)}*`, 
-                `Entrega: *${money(delivery)}*${cupomInfo.freeShipping ? " _(Frete Grátis)_" : ""}`,
-                `Desconto${couponApplied ? ` (${couponApplied})` : ""}: *-${money(discount)}*`,
-                `*Total: ${money(total)}*`, 
+                "Subtotal: *" + money(subtotal) + "*", 
+                "Entrega: *" + money(delivery) + (cupomInfo.freeShipping ? " _(Frete Grátis)_" : "") + "*", 
+                "Desconto" + (couponApplied ? ` (${couponApplied})` : "") + ": *-" + money(discount) + "*",
+                "*Total: " + money(total) + "*", 
                 "", 
                 `🏠 *Endereço:* ${addr}`
             ];
