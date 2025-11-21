@@ -1,7 +1,7 @@
 /* =========================================================  
-   🚀 DFL v5.3.3 — ESTÁVEL E FUNCIONAL (FINAL)
+   🚀 DFL v5.3.4 — ESTABILIDADE MÁXIMA E CORREÇÃO DE COMBO
    - Frete Manual, Barra de Progresso e Lógica 100% Integrada.
-   - Corrigido o erro fatal que bloqueava cliques e o timer.
+   - Timer e Status Isolados para garantir que não haja bloqueio de execução.
 ========================================================= */  
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -51,7 +51,7 @@ document.addEventListener("DOMContentLoaded", () => {
         { id: 1, nome: "Combo 2 Purizin + Fanta 1L", preco: 34.99, precoAntigo: 40.00, img: "promocoes/promo1.jpg" },  
         { id: 2, nome: "Combo 3 Padaná", preco: 37.99, precoAntigo: 45.00, img: "promocoes/promo2.jpg" },  
         { id: 3, nome: "Combo 2 Peleja", preco: 39.99, precoAntigo: 52.00, img: "promocoes/promo3.jpg" },  
-        // ... (Promo Data continua aqui) ...
+        // ... (Dados de promoção omitidos por brevidade) ...
     ];  
 
     /* ------------------ ELEMENTOS DOM (Mínimo Essencial) ------------------ */  
@@ -403,7 +403,7 @@ document.addEventListener("DOMContentLoaded", () => {
     let _comboCtx = null;  
     const openComboModal = safe((nomeCombo, precoBase) => {  
         addCommonItem(nomeCombo, precoBase);
-        popupAdd("Combo adicionado! (Modal de Opções de Bebida desativado)");
+        // REMOVIDO: popupAdd("Combo adicionado! (Modal de Opções de Bebida desativado)");
         return;
     });  
 
@@ -879,7 +879,7 @@ document.addEventListener("DOMContentLoaded", () => {
     el.pedidosBtn?.addEventListener("click", () => { if (!currentUser) { alert("Faça login para ver seus pedidos."); Overlays.open(el.loginModal); return; } Overlays.open(el.pedidosPanel); carregarPedidos(currentUser.uid); });  
 
     async function carregarPedidos(userId) {  
-        const pedidosLista = document.querySelector(".orders-list"); // Seletor do HTML
+        const pedidosLista = document.querySelector(".orders-list"); 
         if (!pedidosLista) return; pedidosLista.innerHTML = `<p class="empty-orders">Carregando pedidos...</p>`;  
         try { const q = db.collection("Pedidos").where("userId", "==", userId).orderBy("data", "desc"); const snapshot = await q.get();  
             if (snapshot.empty) { pedidosLista.innerHTML = `<p class="empty-orders">Nenhum pedido encontrado 😢</p>`; return; }  
@@ -931,13 +931,39 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // ... (Funções Auxiliares de Recompensas) ...
 
-    console.log("%c🔥 DFL v5.3.3 — ESTÁVEL E FINALIZADO", "background:#007bff;color:#fff;padding:5px;border-radius:5px;");  
+    /* ADMIN */  
+    const ADMINS = [ "alefejohsefe@gmail.com", "kalebhstanley650@gmail.com", "contato@dafamilialanches.com.br" ];  
+    function isAdmin(user) { return user && user.email && ADMINS.includes(user.email.toLowerCase()); }  
+
+    // Removidas funções Admin de inicialização.
+
+    console.log("%c🔥 DFL v5.3.4 — ESTÁVEL E FINALIZADO", "background:#007bff;color:#fff;padding:5px;border-radius:5px;");  
     inicializarFirebase();  
 
 }); // FIM DO DOMContentLoaded
 
 /* FECHAR MODAIS GLOBAL */  
-document.addEventListener('DOMContentLoaded', () => {  
-    document.querySelectorAll('.modal').forEach(m => m.addEventListener('click', e => { if (e.target.classList.contains('modal')) { m.classList.remove('show'); document.getElementById('cart-backdrop').classList.remove('active'); } }));  
-    document.getElementById('cart-backdrop')?.addEventListener('click', () => { document.querySelectorAll('.active').forEach(e => e.classList.remove('active')); });  
-});
+window.onload = function() {
+    // Liga botões estáticos de painéis
+    document.getElementById('reports-btn')?.addEventListener("click", () => { alert("Recurso de Relatórios Desativado."); });
+    document.querySelector('.meus-pedidos-btn')?.addEventListener("click", () => { if (!currentUser) { alert("Faça login!"); Overlays.open(el.loginModal); return; } Overlays.open(el.pedidosPanel); carregarPedidos(currentUser.uid); });
+    document.querySelector('.recompensas-btn')?.addEventListener("click", () => { if (!currentUser) { alert("Faça login!"); Overlays.open(el.loginModal); return; } Overlays.open(el.recompensasPanel); carregarRecompensas(currentUser.uid); });
+    
+    // Inicializa Banners/Status/Timer de forma segura (para o bug do banner/contador)
+    const atualizarStatus = safe(() => {  
+        const agora = new Date(); const h = agora.getHours(); const aberto = h >= 18 && h < 23;   
+        const statusBanner = document.getElementById("status-banner");
+        if (statusBanner) { statusBanner.textContent = aberto ? "🟢 Aberto — Faça seu pedido!" : "🔴 Fechado — Voltamos às 18h!"; statusBanner.className = `status-banner ${aberto ? "open" : "closed"}`; }
+    });
+    
+    const atualizarTimer = safe(() => {  
+        const agora = new Date(); const fim = new Date(); fim.setHours(23, 59, 59, 999); const diff = fim - agora;  
+        const promoTimer = document.getElementById("promo-timer"); if (!promoTimer) return;  
+        if (diff <= 0) return (promoTimer.textContent = "00:00:00");  
+        const h = String(Math.floor(diff / 3600000)).padStart(2, "0"); const m = String(Math.floor((diff % 3600000) / 60000)).padStart(2, "0"); const s = String(Math.floor((diff % 60000) / 1000)).padStart(2, "0");  
+        promoTimer.textContent = `${h}:${m}:${s}`;  
+    });
+    
+    atualizarStatus(); setInterval(atualizarStatus, 60000); 
+    atualizarTimer(); setInterval(atualizarTimer, 1000); 
+};
