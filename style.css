@@ -1,7 +1,7 @@
 /* ===========================================================
-   🎨 Da Família Lanches – CSS Principal (v5.0)
-   - Ajuste de Estilos para Campos ViaCEP Ativados.
-   - NOVO: Estilos para Admin Dashboard (PC/Mobile) - Otimizado para Usabilidade
+   🎨 Da Família Lanches – CSS Principal (v5.3.6)
+   - Mantida Estética v5.0
+   - Adicionado Estilo da Barra de Progresso e Links de Ação
    =========================================================== */
 
 /* ======== ELEMENTOS BÁSICOS ======== */
@@ -206,6 +206,59 @@ section h2 { font-size: 1.3rem; text-align: center; margin-bottom: 15px; color: 
 .mini-list { max-height: 60vh; overflow: auto; padding: 10px 14px; }
 .mini-foot { padding: 10px 14px; border-top: 1px solid #eee; }
 
+/* ======== NOVO: ESTILOS DA BARRA DE PROGRESSO ======== */
+.progress-wrapper {
+    background: #fff8d6;
+    padding: 12px;
+    border-radius: var(--rad);
+    margin-top: 15px;
+    margin-bottom: 10px;
+    border: 1px solid var(--acento); /* Cor de acento */
+}
+
+.progress-text {
+    font-size: 0.95rem;
+    margin-bottom: 8px;
+    font-weight: 600;
+    color: #444;
+    text-align: center;
+}
+
+.progress-bar {
+    width: 100%;
+    height: 12px;
+    background: #ffe79b; 
+    border-radius: 999px;
+    overflow: hidden;
+}
+
+.progress-fill {
+    width: 0%;
+    height: 100%;
+    background: var(--success); /* Cor de sucesso para o progresso */
+    transition: width 0.4s ease;
+}
+
+/* ======== NOVO: LINKS DE AÇÃO DE FRETE MANUAL ======== */
+.link-acao {
+    color: #007bff; 
+    text-decoration: underline;
+    background: none;
+    border: none;
+    padding: 0;
+    margin: 0;
+    font-weight: 600;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: color 0.2s;
+    display: block; 
+    text-align: right;
+    margin-top: 8px;
+}
+.link-acao:hover {
+    color: #0056b3;
+}
+
 /* Frete Visual: Estilo para quando a busca do CEP estiver Ativa/Livre */
 .frete-container {
   margin-top: 15px; padding: 12px; border: 1px solid #ddd;
@@ -276,16 +329,13 @@ section h2 { font-size: 1.3rem; text-align: center; margin-bottom: 15px; color: 
 .btn-calcular-frete:hover { background: #ffc107; transform: scale(1.02); }
 
 
-/* CORREÇÃO CRÍTICA (Antiga Regra de 366-369) */
-/* Regra para desabilitar o container inteiro (JÁ EXISTIA NO INDEX.HTML) */
+/* Regra para desabilitar o container inteiro */
 .frete-container[aria-disabled="true"] {
-  /* REMOVIDO: pointer-events: none; <--- ISSO BLOQUEAVA O CEP */ 
-  opacity: 1; /* Garante visibilidade total */
+  opacity: 1; 
 }
 
-/* NOVO: Aplica o estilo de desabilitado SÓ nos inputs de endereço travados */
+/* Aplica o estilo de desabilitado SÓ nos inputs de endereço travados */
 .frete-container[aria-disabled="true"] input[type="text"]:not(#cep-input) {
-  /* Mantém os inputs de endereço preenchidos travados e desabilitados visualmente */
   background-color: var(--bg2) !important; 
   color: #888 !important;
   cursor: not-allowed !important;
@@ -456,7 +506,7 @@ section h2 { font-size: 1.3rem; text-align: center; margin-bottom: 15px; color: 
 .pedidos-body, .recompensas-body { flex: 1; overflow: auto; padding: 16px; }
 
 /* =========================================================
-   🚀 ESTILIZAÇÃO DA ABA MEUS PEDIDOS (V3.8.6)
+   ESTILIZAÇÃO DA ABA MEUS PEDIDOS (V3.8.6)
    ========================================================= */
 
 /* Fundo do painel */
@@ -587,17 +637,14 @@ section h2 { font-size: 1.3rem; text-align: center; margin-bottom: 15px; color: 
 
 /* =========================================================
    📊 AJUSTES DE ESTILO PARA PAINEL DE RELATÓRIOS (ADMIN)
-   - CORREÇÃO VISUAL PARA MOBILE E FECHAMENTO
    ========================================================= */
 
 /* 1. Estilo Básico do Painel */
 #admin-dashboard .modal-content {
-    /* Garante mais espaço no PC */
     max-width: 1100px !important;
     width: 95% !important; 
 }
 #admin-dashboard .modal-head {
-    /* Cores do DFL */
     background: var(--botao); 
     color: var(--txt);
 }
@@ -607,8 +654,8 @@ section h2 { font-size: 1.3rem; text-align: center; margin-bottom: 15px; color: 
 
 /* 2. Layout dos Cards de Metas (PC) */
 .dashboard-body > div:first-child {
-    display: flex; /* Habilita o layout flexível */
-    gap: 15px;     /* Espaçamento entre os cards */
+    display: flex; 
+    gap: 15px;     
     flex-wrap: wrap; 
     margin-bottom: 20px;
 }
@@ -639,23 +686,21 @@ section h2 { font-size: 1.3rem; text-align: center; margin-bottom: 15px; color: 
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
 }
 
-/* 5. Ajuste Mobile (Corrigindo o problema do tamanho e fechamento) */
+/* 5. Ajuste Mobile */
 @media (max-width: 600px) {
-    /* Faz o modal ocupar 90% da altura e 95% da largura, deixando margem para fechar ao clicar fora */
     #admin-dashboard .modal-content {
         width: 95% !important;
-        height: 90vh !important; /* Deixa 10% de margem vertical */
-        margin: auto; /* Centraliza o modal na tela */
-        border-radius: 16px; /* Mantém as bordas arredondadas */
+        height: 90vh !important; 
+        margin: auto; 
+        border-radius: 16px; 
     }
-    /* Cards empilham no celular */
     .cardBox {
         min-width: 100%;
     }
 }
 
 
-/* ===== v5.3 Ajustes Número + Complemento ===== */
+/* ===== v5.3 Ajustes Número + Complemento (Mantido do Original) ===== */
 .endereco-duplo {
     display: flex;
     gap: 8px;
@@ -670,7 +715,7 @@ section h2 { font-size: 1.3rem; text-align: center; margin-bottom: 15px; color: 
     min-width: 0;
 }
 
-/* ===== Aviso Frete Grátis ===== */
+/* ===== Aviso Frete Grátis (Mantido do Original) ===== */
 .frete-gratis-aviso {
     margin: 6px 0 10px 0;
     font-size: 0.85rem;
@@ -682,7 +727,7 @@ section h2 { font-size: 1.3rem; text-align: center; margin-bottom: 15px; color: 
     line-height: 1.3;
 }
 
-/* 🔥 Correção definitiva do campo de endereço com scroll horizontal */
+/* 🔥 Correção definitiva do campo de endereço com scroll horizontal (Mantido do Original) */
 .input-endereco-longo {
     width: 100% !important;
     display: inline-block !important;
@@ -691,9 +736,9 @@ section h2 { font-size: 1.3rem; text-align: center; margin-bottom: 15px; color: 
     overflow-y: hidden !important;
     text-overflow: initial !important;
     -webkit-overflow-scrolling: touch !important;
-    scrollbar-width: none !important; /* Firefox remove barra */
+    scrollbar-width: none !important; 
 }
 
 .input-endereco-longo::-webkit-scrollbar {
-    display: none !important; /* Chrome/Safari remove barra */
+    display: none !important; 
 }
