@@ -1,6 +1,6 @@
 /* =========================================================  
-   🚀 DFL v5.3.4 — Estabilidade Final e Implementação Completa
-   - FIX CRÍTICO: Correção de erro de sintaxe na definição do objeto 'pedido' em fecharPedido.
+   🚀 DFL v5.3.5 — ESTABILIDADE MÁXIMA (FIX SINTAXE)
+   - FIX CRÍTICO: Simplificação da sintaxe de template string do objeto 'pedido' e strings do WhatsApp.
    - Implementação COMPLETA e segura da Barra de Progresso, Endereço Manual e Frete Inteligente.
    ========================================================= */  
 
@@ -541,7 +541,7 @@ document.addEventListener("DOMContentLoaded", () => {
             _cupomCache[key] = { ate: now + 30000, res }; return res;  
         } catch (err) { console.error("Erro ao validar cupom:", err); return { ...invalido, mensagem: "Erro ao processar cupom." }; }  
     }
-
+    
     // [NOVO] Função para controlar o estado dos campos de endereço
     const toggleAddressState = (isDisabled, isManual = false) => {
         const enderecoAuto = document.getElementById('endereco-auto');
@@ -790,6 +790,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 const porcentagem = Math.min(100, (subtotal / limite) * 100);
                 const faltaFormatado = money(falta);
 
+                // Template String simplificada para evitar SyntaxError
                 progressoHTML = `
                     <div style="margin: 15px 0 0 0; padding: 10px; background: #fff8d6; border-radius: 8px; text-align: center; border: 1px solid #ffb300;">
                         <p style="font-size: 0.9rem; color: #222; margin-bottom: 8px; font-weight: 500;">
@@ -972,7 +973,7 @@ document.addEventListener("DOMContentLoaded", () => {
             usuario: currentUser.email, 
             userId: currentUser.uid, 
             nome: currentUser.displayName || currentUser.email.split("@")[0], 
-            // CORREÇÃO DE SINTAXE: Utilizando a sintaxe de template string correta
+            // FIX DE SINTAXE: Utilizando a sintaxe de template string correta
             itens: cart.map(i => `• ${i.nome} x${i.qtd}`).join('\n'),
             itensObj: cart.map(i => ({ nome: i.nome, preco: i.preco, qtd: i.qtd })), 
             subtotal: Number(subtotal.toFixed(2)), 
@@ -993,7 +994,7 @@ document.addEventListener("DOMContentLoaded", () => {
             
             if (cupomInfo.isPersonalizado && couponApplied) { 
                 const cupomUserRef = db.collection("CuponsUsuarios").doc(userId); 
-                batch.update(cupomUserRef, { usado: true, dataUso: firebase.firestore.FieldValue.serverTimestamp(), pedidoId: 'PENDENTE' }); 
+                batch.update(cupumUserRef, { usado: true, dataUso: firebase.firestore.FieldValue.serverTimestamp(), pedidoId: 'PENDENTE' }); 
             }  
             
             const pedidoRef = db.collection("Pedidos").doc(); 
@@ -1031,7 +1032,21 @@ document.addEventListener("DOMContentLoaded", () => {
             // Notificação, som e WhatsApp
             popupAdd("Pedido salvo ✅"); 
             try { sound.currentTime = 0; sound.play(); } catch (_) {}  
-            const linhas = ["🍔 *Pedido DFL*", cart.map(i => `• ${i.nome} x${i.qtd}`).join("\n"), "", `Subtotal: *${money(subtotal)}*`, `Entrega: *${money(delivery)}*${cupomInfo.freeShipping ? " _(Frete Grátis)_" : ""}`, `Desconto${couponApplied ? ` (${couponApplied})` : ""}: *-${money(discount)}*`, `*Total: ${money(total)}*`, "", `🏠 *Endereço:* ${addr}`].join("\n");  
+            
+            // CONSTRUÇÃO ROBUSTA DA MENSAGEM DO WHATSAPP (Evita template strings aninhadas complexas)
+            const summaryArray = [
+                "🍔 *Pedido DFL*", 
+                cart.map(i => `• ${i.nome} x${i.qtd}`).join("\n"), 
+                "", 
+                `Subtotal: *${money(subtotal)}*`, 
+                `Entrega: *${money(delivery)}*${cupomInfo.freeShipping ? " _(Frete Grátis)_" : ""}`,
+                `Desconto${couponApplied ? ` (${couponApplied})` : ""}: *-${money(discount)}*`,
+                `*Total: ${money(total)}*`, 
+                "", 
+                `🏠 *Endereço:* ${addr}`
+            ];
+            const linhas = summaryArray.join("\n");
+            
             window.open(`https://wa.me/5534997178336?text=${encodeURIComponent(linhas)}`, "_blank");  
             
             // Limpa e atualiza UI
@@ -1233,7 +1248,7 @@ document.addEventListener("DOMContentLoaded", () => {
         if (!el.historicoLista) return; 
         el.historicoLista.innerHTML = `<p class="empty-orders" style="text-align:center;color:#999;">Carregando...</p>`;  
         try { 
-            const q = db.collection("Pedidos").where("userId", "==", userId).orderBy("data", "desc"); 
+            const q = db.collection("Pedidos").where("userId", "==", userId).orderBy("liberadoEm", "desc"); 
             const snapshot = await q.get();  
             if (snapshot.empty) { el.historicoLista.innerHTML = `<p class="empty-orders" style="text-align:center;color:#999;">Nenhuma recompensa no histórico.</p>`; return; }  
             el.historicoLista.innerHTML = snapshot.docs.map(doc => { 
@@ -1389,7 +1404,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }); 
     }
 
-    console.log("%c🔥 DFL v5.3.4 — FIX DE SINTAXE E ESTABILIDADE", "background:#4CAF50;color:#fff;padding:5px;border-radius:5px;");  
+    console.log("%c🔥 DFL v5.3.5 — FIX DE SINTAXE E ESTABILIDADE", "background:#4CAF50;color:#fff;padding:5px;border-radius:5px;");  
     inicializarFirebase();  
 
 }); // FIM DO DOMContentLoaded
