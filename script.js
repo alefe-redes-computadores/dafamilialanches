@@ -1,7 +1,5 @@
 /* =========================================================  
-   🚀 DFL v5.3.6 — ESTABILIDADE MÁXIMA (FIX SINTAXE V2)
-   - FIX CRÍTICO: Simplificação da construção de string do WhatsApp para evitar SyntaxError.
-   - Implementação COMPLETA e robusta da Barra de Progresso, Endereço Manual e Frete Inteligente.
+   🚀 DFL v5.2.9 — Lógica Principal e Frete Dinâmico
    ========================================================= */  
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -81,7 +79,7 @@ document.addEventListener("DOMContentLoaded", () => {
         cNext: document.querySelector(".c-next"),  
         userBtn: document.getElementById("user-btn"),  
         statusBanner: document.getElementById("status-banner"),  
-        hoursBanner: document.querySelector(".hours-banner"),   
+        hoursBanner: document.querySelector(".hours-banner"),  
         reportsBtn: document.getElementById("reports-btn"),   
         promoModal: document.getElementById("promo-modal"),  
         promoImg: document.getElementById("promo-modal-img"),  
@@ -197,8 +195,6 @@ document.addEventListener("DOMContentLoaded", () => {
             const couponDiscountRow = document.getElementById("coupon-discount-row");  
             if (couponMsg) couponMsg.innerHTML = "";  
             if (couponDiscountRow) couponDiscountRow.style.display = "none";  
-            // [NOVO] Limpa a barra de progresso
-            document.getElementById("frete-progresso-container")?.innerHTML = '';
             return;  
         }  
 
@@ -542,79 +538,53 @@ document.addEventListener("DOMContentLoaded", () => {
         } catch (err) { console.error("Erro ao validar cupom:", err); return { ...invalido, mensagem: "Erro ao processar cupom." }; }  
     }
 
-    // [NOVO] Função para controlar o estado dos campos de endereço
-    const toggleAddressState = (isDisabled, isManual = false) => {
-        const enderecoAuto = document.getElementById('endereco-auto');
-        const numeroInput = document.getElementById('numero-input');
-        const complementoInput = document.getElementById('complemento-input');
-        const cepInput = document.getElementById('cep-input');
-        const retirarLocal = document.getElementById('retirar-local');
-
-        // Se for modo manual
-        if (isManual) {
-            if(enderecoAuto) enderecoAuto.disabled = false;
-            if(numeroInput) numeroInput.disabled = false;
-            if(complementoInput) complementoInput.disabled = false;
-            if(cepInput) cepInput.disabled = true;
-            if(enderecoAuto) enderecoAuto.placeholder = 'Digite Rua, Número, Bairro, Cidade/UF'; 
-        } 
-        // Se for modo via CEP
-        else {
-            if(cepInput) cepInput.disabled = false;
-            if(enderecoAuto) enderecoAuto.disabled = isDisabled; 
-            if(numeroInput) numeroInput.disabled = isDisabled;
-            if(complementoInput) complementoInput.disabled = isDisabled;
-        }
-
-        if(retirarLocal) retirarLocal.disabled = false; 
-    };
-
-    /* --- BUSCAR CEP VIA API / FALLBACK MANUAL --- */  
+    /* --- BUSCAR CEP VIA API --- */  
     async function buscarCEP(cep) {  
         const freteContainer = document.querySelector('.frete-container');  
         const enderecoAuto = document.getElementById('endereco-auto');  
         const numeroInput = document.getElementById('numero-input');  
         const complementoInput = document.getElementById('complemento-input');  
-        
-        const updateStatus = (msg, color) => { 
-            const titleElement = freteContainer ? freteContainer.querySelector('h4') : null;
-            if (titleElement) titleElement.innerHTML = `🚚 Entrega: <span style="color:${color}; font-size: 0.9em;">${msg}</span>`; 
+        const retirarLocal = document.getElementById('retirar-local');  
+
+        const toggleAddressState = (isDisabled) => {  
+            if(enderecoAuto) enderecoAuto.disabled = isDisabled;  
+            if(numeroInput) numeroInput.disabled = isDisabled;  
+            if(complementoInput) complementoInput.disabled = isDisabled;  
+            if(retirarLocal) retirarLocal.disabled = isDisabled;  
         };  
-        
-        // Função local para limpar e habilitar preenchimento manual (fallback)
+        const updateStatus = (msg, color) => { if (freteContainer) freteContainer.querySelector('h4').innerHTML = `🚚 Entrega: <span style="color:${color}">${msg}</span>`; };  
         const clearAndEnableManual = (msg) => {  
-            if (enderecoAuto) { enderecoAuto.value = ''; enderecoAuto.placeholder = msg; }
+            if (enderecoAuto) enderecoAuto.value = msg;  
             if (numeroInput) numeroInput.value = '';  
             if (complementoInput) complementoInput.value = '';  
-            toggleAddressState(false, true); // Habilita manual
-            updateStatus('Preenchimento Manual', '#d32f2f');  
+            toggleAddressState(false);  
+            if (enderecoAuto) enderecoAuto.disabled = false;  
+            updateStatus('Erro/Manual', 'var(--danger)');  
             renderMiniCart();  
         };  
 
-        toggleAddressState(true, false); // Desabilita em modo CEP (aguardando busca)
-        updateStatus('Buscando endereço...', '#ffb300');  
+        toggleAddressState(true);  
+        updateStatus('Buscando endereço...', 'var(--botao)');  
         document.getElementById('cep-input').disabled = false;   
 
         try {  
             const response = await fetch(`https://viacep.com.br/ws/${cep}/json/`);  
             const data = await response.json();  
-            if (data.erro || !response.ok) { clearAndEnableManual('CEP não encontrado. Digite a rua e bairro.'); }  
+            if (data.erro || !response.ok) { clearAndEnableManual('CEP não encontrado. Preencha manualmente.'); }  
             else {  
                 const localidadeCompleta = `${data.localidade || 'Cidade'}/${data.uf || 'UF'}`;  
                 const enderecoString = `${data.logradouro || 'Rua'} - ${data.bairro || 'Bairro'} (${localidadeCompleta})`;  
-                
                 enderecoAuto.value = enderecoString;  
-                toggleAddressState(false, false); // Habilita Número/Comp
-                
-                if (enderecoAuto) enderecoAuto.disabled = true; // Mantém o ViaCEP bloqueado para edição direta
+                toggleAddressState(false);  
+                if (enderecoAuto) enderecoAuto.disabled = true;  
                 if (numeroInput) numeroInput.focus();   
-                updateStatus('Endereço encontrado!', '#4caf50');  
+                updateStatus('Endereço encontrado!', 'var(--success)');  
                 renderMiniCart();   
             }  
         } catch (error) {  
             console.error("ViaCEP Error:", error);  
             popupAdd("Erro ao consultar CEP.");  
-            clearAndEnableManual('Erro na consulta. Digite a rua e bairro.');  
+            clearAndEnableManual('Erro na consulta. Preencha manualmente.');  
         }  
     }
 
@@ -624,34 +594,9 @@ document.addEventListener("DOMContentLoaded", () => {
         if (cep.length === 8) buscarCEP(cep);  
         else popupAdd("CEP deve ter 8 dígitos.");  
     }));
-    
-    // [NOVO] Habilitar preenchimento Manual Listener
-    document.getElementById('manual-address-btn')?.addEventListener('click', safe((e) => {
-        e.preventDefault();
-        const enderecoAuto = document.getElementById('endereco-auto');
-        const numeroInput = document.getElementById('numero-input');
-        const complementoInput = document.getElementById('complemento-input');
-        const cepInput = document.getElementById('cep-input');
-
-        // Limpa os campos
-        if (enderecoAuto) { enderecoAuto.value = ''; enderecoAuto.placeholder = 'Digite Rua e Bairro (Ex: Rua A, Bairro X)'; }
-        if (numeroInput) numeroInput.value = '';
-        if (complementoInput) complementoInput.value = '';
-        if (cepInput) cepInput.value = '';
-        
-        // Habilita a edição manual dos campos
-        toggleAddressState(false, true); 
-        
-        if (enderecoAuto) enderecoAuto.focus();
-        
-        renderMiniCart(); // Recalcula totais/frete se necessário
-        popupAdd("Preenchimento manual habilitado.");
-    }));
-
 
     // ============================================================
     // 🚀 FUNÇÃO CRÍTICA: CÁLCULO DE FRETE DINÂMICO (FIREBASE)
-    // [AJUSTADO PARA ENDEREÇO MANUAL]
     // ============================================================
     async function getDynamicDeliveryFee(enderecoCompleto) {
         if (!enderecoCompleto || typeof enderecoCompleto !== "string") {
@@ -661,32 +606,17 @@ document.addEventListener("DOMContentLoaded", () => {
 
         let bairroExtraido = "";
         try {
-            // [AJUSTE] Extração de Bairro: Lida com formatos ViaCEP ("Rua - Bairro (Cidade)") E formatos manuais ("Rua, Bairro...")
-            
-            // 1. Tenta formato ViaCEP com parênteses
-            const matchViaCep = enderecoCompleto.match(/\((.*?)\)$/);
-            if (matchViaCep) {
-                 // Formato ViaCEP encontrado
-                const partePrincipal = enderecoCompleto.split("(")[0].trim();
-                const partes = partePrincipal.split(" - ");
-                bairroExtraido = partes[partes.length - 1].trim();
-            } else {
-                // 2. Tenta extrair o último segmento após vírgula ou hífen (para entrada manual)
-                const partes = enderecoCompleto.split(/,|-/).map(p => p.trim());
-                // Assume que o bairro ou a informação mais relevante está na penúltima ou última parte
-                const parteBairro = partes.length >= 2 ? partes[partes.length - 2] : partes[partes.length - 1];
-                
-                // Tenta extrair a palavra Bairro se existir
-                const matchBairroKeyword = parteBairro.match(/bairro\s+(.*)/i);
-                bairroExtraido = matchBairroKeyword ? matchBairroKeyword[1].trim() : parteBairro.trim();
-            }
-
+            // Tenta extrair o bairro
+            const partePrincipal = enderecoCompleto.split("(")[0].trim();
+            const partes = partePrincipal.split(" - ");
+            if (partes.length >= 2) bairroExtraido = partes[partes.length - 1].trim();
+            else bairroExtraido = partePrincipal.trim();
         } catch (_) {
-            console.warn("FW: Falha ao extrair bairro na entrada manual.");
+            console.warn("FW: Falha ao extrair bairro.");
             return DELIVERY_FEE_DEFAULT;
         }
-        
-        // [AJUSTE] Normalização: minúsculas, remove acentos e espaços extras (APLICADO EM TODAS AS ENTRADAS)
+
+        // Normalização: minúsculas, remove acentos e espaços extras
         const bairroClean = bairroExtraido.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim();
         console.log("FW: Bairro extraído:", bairroExtraido, "| Normalizado:", bairroClean);
 
@@ -721,7 +651,7 @@ document.addEventListener("DOMContentLoaded", () => {
             return cacheAtual[bairroClean];
         }
 
-        // BUSCA 2: Match por PALAVRA-CHAVE (para bairros compostos ou nomes incompletos)
+        // BUSCA 2: Match por PALAVRA-CHAVE (para bairros compostos)
         const palavras = bairroClean.split(" ");
         for (const palavra of palavras) {
             if (palavra.length < 4) continue; // Ignora palavras curtas
@@ -733,7 +663,6 @@ document.addEventListener("DOMContentLoaded", () => {
             }
         }
 
-        // BUSCA 3: Fallback (Frete Padrão)
         console.warn(`FW: Bairro "${bairroExtraido}" não mapeado. Fallback R$ ${DELIVERY_FEE_DEFAULT}`);
         return DELIVERY_FEE_DEFAULT;
     }
@@ -747,17 +676,13 @@ document.addEventListener("DOMContentLoaded", () => {
         const isRetirarLocal = document.getElementById('retirar-local')?.checked;  
         const cepValue = cepInput ? cepInput.value.trim().replace(/\D/g, '') : '';  
         let deliveryFee = DELIVERY_FEE_DEFAULT;   
-        
-        const enderecoValue = enderecoAuto ? enderecoAuto.value.trim() : '';
-        // Endereço válido se: tiver CEP completo E valor OU se estiver em modo manual
-        const isEnderecoValido = (cepValue.length === 8 && enderecoValue) || (enderecoAuto && !enderecoAuto.disabled); 
 
         if (isRetirarLocal || subtotal >= LIMITE_PARA_FRETE_GRATIS_POR_VALOR) {  
             // Frete grátis por Retirada ou Valor
             deliveryFee = 0;  
-        } else if (isEnderecoValido) {  
-            // Frete dinâmico via CEP/Endereço (funciona com ViaCEP e Manual)
-            try { deliveryFee = await getDynamicDeliveryFee(enderecoValue); }  
+        } else if (cepInput && cepValue.length === 8 && enderecoAuto && enderecoAuto.value) {  
+            // Frete dinâmico via CEP/Endereço
+            try { deliveryFee = await getDynamicDeliveryFee(enderecoAuto.value.trim()); }  
             catch(e) { console.error("Erro frete dinâmico:", e); deliveryFee = DELIVERY_FEE_DEFAULT; }  
         }  
 
@@ -767,7 +692,6 @@ document.addEventListener("DOMContentLoaded", () => {
     }  
 
     // Atualiza o resumo do carrinho (subtotal, frete, total)
-    // [AJUSTADO COM BARRA DE PROGRESSO DINÂMICA]
     async function enhanceMiniCartUI() {  
         if (!el.miniFoot) return;  
         const couponMsg = document.getElementById("coupon-message");  
@@ -778,45 +702,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
         const { subtotal, delivery, discount, total, cupomInfo } = await calcTotals();
         const deliveryLabel = delivery === 0 ? "Grátis 🎉" : money(delivery);  
-        
-        // 1. LÓGICA DA BARRA DE PROGRESSO DO FRETE GRÁTIS
-        const progressoContainer = document.getElementById("frete-progresso-container");
-        const limite = LIMITE_PARA_FRETE_GRATIS_POR_VALOR;
-        let progressoHTML = '';
 
-        if (progressoContainer) {
-            if (subtotal < limite) {
-                const falta = limite - subtotal;
-                const porcentagem = Math.min(100, (subtotal / limite) * 100);
-                const faltaFormatado = money(falta);
-
-                // Template String simplificada para evitar SyntaxError
-                progressoHTML = `
-                    <div style="margin: 15px 0 0 0; padding: 10px; background: #fff8d6; border-radius: 8px; text-align: center; border: 1px solid #ffb300;">
-                        <p style="font-size: 0.9rem; color: #222; margin-bottom: 8px; font-weight: 500;">
-                            🎯 Faltam **${faltaFormatado}** para obter Frete Grátis!
-                        </p>
-                        <div style="background: #e9ecef; border-radius: 10px; height: 18px; overflow: hidden; margin-bottom: 5px; position:relative;">
-                            <div style="height: 100%; width: ${porcentagem}%; background: linear-gradient(90deg, #ffc833, #ffb300); transition: width 0.5s ease-in-out;">
-                            </div>
-                            <span style="position: absolute; top: 0; width: 100%; text-align: center; line-height: 18px; font-size: 0.75rem; color: #111; font-weight: bold;">${Math.floor(porcentagem)}%</span>
-                        </div>
-                    </div>
-                `;
-            } else {
-                progressoHTML = `
-                    <div style="margin: 15px 0 0 0; padding: 12px; background: #4CAF50; border-radius: 8px; text-align: center; color: white;">
-                        <p style="font-size: 1rem; font-weight: bold; margin: 0;">
-                            🎉 Parabéns! Você obteve Frete Grátis!
-                        </p>
-                    </div>
-                `;
-            }
-            progressoContainer.innerHTML = progressoHTML;
-        }
-        // FIM DA LÓGICA DA BARRA DE PROGESSO
-
-        // 2. Atualiza UI de Cupom
+        // Atualiza mensagem de cupom
         if (couponMsg) {  
             couponMsg.textContent = cupomInfo.mensagem;  
             couponMsg.className = `coupon-message ${cupomInfo.valido ? 'success' : 'error'}`;  
@@ -826,12 +713,13 @@ document.addEventListener("DOMContentLoaded", () => {
                 if (couponInput && document.activeElement !== couponInput) couponInput.value = "";  
             }  
         }  
+        // Atualiza linha de desconto
         if (couponDiscountRow && cartDiscount) {  
             if (discount > 0 || cupomInfo.label) { cartDiscount.textContent = `- ${money(discount)} ${couponApplied ? `(${couponApplied})` : ""}`; couponDiscountRow.style.display = "flex"; }  
             else couponDiscountRow.style.display = "none";  
         }  
 
-        // 3. Cria e insere o resumo e botões
+        // Cria e insere o resumo e botões
         const summaryDiv = document.createElement('div');  
         summaryDiv.className = 'cart-summary-generated';  
         summaryDiv.innerHTML = `  
@@ -847,7 +735,6 @@ document.addEventListener("DOMContentLoaded", () => {
         document.getElementById('retirar-local')?.addEventListener('change', renderMiniCart);  
         document.getElementById('numero-input')?.addEventListener('input', renderMiniCart);  
         document.getElementById('complemento-input')?.addEventListener('input', renderMiniCart);  
-        document.getElementById('endereco-auto')?.addEventListener('input', renderMiniCart); // Adicionado para modo manual
         
         // Liga botões
         summaryDiv.querySelector("#finish-order")?.addEventListener("click", fecharPedido);  
@@ -894,33 +781,12 @@ document.addEventListener("DOMContentLoaded", () => {
         const agora = new Date(); const h = agora.getHours();  
         const aberto = h >= 18 && h < 23;   
         if (el.statusBanner) { el.statusBanner.textContent = aberto ? "🟢 Aberto — Faça seu pedido!" : "🔴 Fechado — Voltamos às 18h!"; el.statusBanner.className = `status-banner ${aberto ? "open" : "closed"}`; }  
-        
         if (el.hoursBanner) {  
-            const elMsg = el.hoursBanner.querySelector("#hours-message"); 
-            const elTimer = el.hoursBanner.querySelector("#timer");  
-            if (elMsg && elTimer) { 
-                if (aberto) { 
-                    const fim = new Date(agora); 
-                    fim.setHours(23, 30, 0); 
-                    let diff = (fim - agora) / 1000; 
-                    if (diff < 0) diff = 0; 
-                    const restH = Math.floor(diff / 3600); 
-                    const restM = Math.floor((diff % 3600) / 60); 
-                    elMsg.innerHTML = `⏰ Hoje atendemos até <b>23h30</b> — Faltam`; 
-                    elTimer.textContent = `${restH}h ${restM}min`; 
-                }  
-                else { 
-                    const inicio = new Date(agora); 
-                    if (h >= 23) inicio.setDate(inicio.getDate() + 1); 
-                    inicio.setHours(18, 0, 0); 
-                    let diff = (inicio - agora) / 1000; 
-                    const faltamH = Math.floor(diff / 3600); 
-                    const faltamM = Math.floor((diff % 3600) / 60); 
-                    elMsg.innerHTML = `🔒 Fechado — Abrimos em`; 
-                    elTimer.textContent = `${faltamH}h ${faltamM}min`; 
-                }  
-            }
-        }
+            const elMsg = el.hoursBanner.querySelector("#hours-message"); const elTimer = el.hoursBanner.querySelector("#timer");  
+            if (!elMsg || !elTimer) return;  
+            if (aberto) { const fim = new Date(agora); fim.setHours(23, 30, 0); let diff = (fim - agora) / 1000; if (diff < 0) diff = 0; const restH = Math.floor(diff / 3600); const restM = Math.floor((diff % 3600) / 60); elMsg.innerHTML = `⏰ Hoje atendemos até <b>23h30</b> — Faltam`; elTimer.textContent = `${restH}h ${restM}min`; }  
+            else { const inicio = new Date(agora); if (h >= 23) inicio.setDate(inicio.getDate() + 1); inicio.setHours(18, 0, 0); let diff = (inicio - agora) / 1000; const faltamH = Math.floor(diff / 3600); const faltamM = Math.floor((diff % 3600) / 60); elMsg.innerHTML = `🔒 Fechado — Abrimos em`; elTimer.textContent = `${faltamH}h ${faltamM}min`; }  
+        }  
     });  
     atualizarStatus(); setInterval(atualizarStatus, 60000); // Atualiza a cada 1 minuto
 
@@ -938,7 +804,6 @@ document.addEventListener("DOMContentLoaded", () => {
         if (!cart.length) return alert("Carrinho vazio!");  
         if (!currentUser) { alert("Faça login para enviar o pedido!"); Overlays.open(el.loginModal); return; }  
         
-        // 1. Coleta e Normaliza Dados do Endereço
         const cepInput = document.getElementById('cep-input'); 
         const autoRuaBairro = document.getElementById("endereco-auto"); 
         const autoNumero = document.getElementById("numero-input"); 
@@ -951,19 +816,13 @@ document.addEventListener("DOMContentLoaded", () => {
         const cepValue = cepInput ? cepInput.value.trim().replace(/\D/g, '') : '';  
 
         let finalAddressString = "";  
-        
-        if (isRetirarLocal) {
-            finalAddressString = "CLIENTE IRÁ RETIRAR NO LOCAL";
-        } else if (ruaBairroValue && numeroValue) { 
-            // Constrói a String de Endereço Final
+        if (ruaBairroValue && numeroValue) { 
             finalAddressString = `${ruaBairroValue}, N° ${numeroValue}`; 
             if (compValue) finalAddressString += `, Comp: ${compValue}`; 
             if (cepValue.length === 8) finalAddressString += ` | CEP: ${cepValue}`; 
-        } else {
-            // Validação de Falha
-            alert("Preencha o endereço completo (Rua/Bairro e Número) ou marque 'Retirar no Local'."); 
-            return; 
-        }
+        }  
+        if (isRetirarLocal) finalAddressString = "CLIENTE IRÁ RETIRAR NO LOCAL";  
+        else if (!finalAddressString) { alert("Preencha o CEP, endereço e número, ou marque 'Retirar no Local'."); return; }  
 
         const addr = finalAddressString;  
         const { subtotal, delivery, discount, total, cupomInfo } = await calcTotals();  
@@ -973,8 +832,7 @@ document.addEventListener("DOMContentLoaded", () => {
             usuario: currentUser.email, 
             userId: currentUser.uid, 
             nome: currentUser.displayName || currentUser.email.split("@")[0], 
-            // FIX DE SINTAXE: Utilizando a sintaxe de template string correta
-            itens: cart.map(i => `• ${i.nome} x${i.qtd}`).join('\n'),
+            itens: cart.map((i) => `• ${i.nome} x${i.qtd}`).join("\n"), 
             itensObj: cart.map(i => ({ nome: i.nome, preco: i.preco, qtd: i.qtd })), 
             subtotal: Number(subtotal.toFixed(2)), 
             entrega: Number(delivery.toFixed(2)), 
@@ -994,7 +852,7 @@ document.addEventListener("DOMContentLoaded", () => {
             
             if (cupomInfo.isPersonalizado && couponApplied) { 
                 const cupomUserRef = db.collection("CuponsUsuarios").doc(userId); 
-                batch.update(cupumUserRef, { usado: true, dataUso: firebase.firestore.FieldValue.serverTimestamp(), pedidoId: 'PENDENTE' }); 
+                batch.update(cupomUserRef, { usado: true, dataUso: firebase.firestore.FieldValue.serverTimestamp(), pedidoId: 'PENDENTE' }); 
             }  
             
             const pedidoRef = db.collection("Pedidos").doc(); 
@@ -1032,21 +890,7 @@ document.addEventListener("DOMContentLoaded", () => {
             // Notificação, som e WhatsApp
             popupAdd("Pedido salvo ✅"); 
             try { sound.currentTime = 0; sound.play(); } catch (_) {}  
-            
-            // CONSTRUÇÃO ROBUSTA DA MENSAGEM DO WHATSAPP (FIX SINTAXE)
-            const summaryArray = [
-                "🍔 *Pedido DFL*", 
-                cart.map(i => `• ${i.nome} x${i.qtd}`).join("\n"), 
-                "", 
-                "Subtotal: *" + money(subtotal) + "*", 
-                "Entrega: *" + money(delivery) + (cupomInfo.freeShipping ? " _(Frete Grátis)_" : "") + "*", 
-                "Desconto" + (couponApplied ? ` (${couponApplied})` : "") + ": *-" + money(discount) + "*",
-                "*Total: " + money(total) + "*", 
-                "", 
-                `🏠 *Endereço:* ${addr}`
-            ];
-            const linhas = summaryArray.join("\n");
-            
+            const linhas = ["🍔 *Pedido DFL*", cart.map((i) => `• ${i.nome} x${i.qtd}`).join("\n"), "", `Subtotal: *${money(subtotal)}*`, `Entrega: *${money(delivery)}*${cupomInfo.freeShipping ? " _(Frete Grátis)_" : ""}`, `Desconto${couponApplied ? ` (${couponApplied})` : ""}: *-${money(discount)}*`, `*Total: ${money(total)}*`, "", `🏠 *Endereço:* ${addr}`].join("\n");  
             window.open(`https://wa.me/5534997178336?text=${encodeURIComponent(linhas)}`, "_blank");  
             
             // Limpa e atualiza UI
@@ -1248,7 +1092,7 @@ document.addEventListener("DOMContentLoaded", () => {
         if (!el.historicoLista) return; 
         el.historicoLista.innerHTML = `<p class="empty-orders" style="text-align:center;color:#999;">Carregando...</p>`;  
         try { 
-            const q = db.collection("Pedidos").where("userId", "==", userId).orderBy("liberadoEm", "desc"); 
+            const q = db.collection("Usuarios").doc(userId).collection("RecompensasRecebidas").orderBy("liberadoEm", "desc"); 
             const snapshot = await q.get();  
             if (snapshot.empty) { el.historicoLista.innerHTML = `<p class="empty-orders" style="text-align:center;color:#999;">Nenhuma recompensa no histórico.</p>`; return; }  
             el.historicoLista.innerHTML = snapshot.docs.map(doc => { 
@@ -1404,7 +1248,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }); 
     }
 
-    console.log("%c🔥 DFL v5.3.5 — FIX DE SINTAXE E ESTABILIDADE", "background:#4CAF50;color:#fff;padding:5px;border-radius:5px;");  
+    console.log("%c🔥 DFL v5.2.9 — FRETE DINÂMICO CORRIGIDO", "background:#4CAF50;color:#fff;padding:5px;border-radius:5px;");  
     inicializarFirebase();  
 
 }); // FIM DO DOMContentLoaded
