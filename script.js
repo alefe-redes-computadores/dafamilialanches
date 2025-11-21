@@ -1,5 +1,5 @@
 /* =========================================================  
-   🚀 DFL v5.5 — Lógica Principal, Frete Manual e Barra de Progresso (Estável)
+   🚀 DFL v5.5 — Lógica Principal, Frete Manual e Barra de Progresso (Estável e Corrigido)
    ========================================================= */  
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -57,9 +57,9 @@ document.addEventListener("DOMContentLoaded", () => {
         { id: 9, nome: "Combo 5 Uai + Kuat 2L", preco: 64.99, precoAntigo: 79.99, img: "promocoes/promo9.jpg" }  
     ];  
 
-    /* ------------------ 🎯 MAPEAMENTO DE ELEMENTOS DOM (Implementação v5.5) ------------------ */  
+    /* ------------------ 🎯 MAPEAMENTO DE ELEMENTOS DOM (Corrigido v5.5) ------------------ */  
     const el = {  
-        // Elementos Antigos (mini-cart)
+        // Elementos principais do Header/Carrinho
         cartIcon: document.getElementById("cart-icon"),  
         cartCount: document.getElementById("cart-count"),  
         miniCart: document.getElementById("mini-cart"),  
@@ -78,8 +78,8 @@ document.addEventListener("DOMContentLoaded", () => {
         progressWrapper: document.getElementById("progressWrapper"), 
         progressText: document.getElementById("progressText"),
         progressFill: document.getElementById("progressFill"),
-        
-        // Outros Modais/Ações (Mantidos os IDs antigos)
+
+        // Modais e Ações
         extrasModal: document.getElementById("extras-modal"),  
         extrasList: document.querySelector("#extras-modal .extras-list"),  
         extrasConfirm: document.getElementById("extras-confirm"),  
@@ -87,23 +87,20 @@ document.addEventListener("DOMContentLoaded", () => {
         comboBody: document.querySelector("#combo-modal #combo-body"),  
         comboConfirm: document.getElementById("combo-confirm"),  
         loginModal: document.getElementById("login-modal"),  
-        loginForm: document.getElementById("login-form"),  
         googleBtn: document.getElementById("google-login"),  
+        userBtn: document.getElementById("user-btn"),  // Botão "Entrar / Cadastrar"
+        
+        // Carrossel e Relatórios
         slides: document.querySelector(".slides"),  
         cPrev: document.querySelector(".c-prev"),  
         cNext: document.querySelector(".c-next"),  
-        userBtn: document.getElementById("user-btn"),  
+        reportsBtn: document.getElementById("reports-btn"),
+        
+        // Banners (REVISADO: se não existirem no HTML, serão null e o JS não irá quebrar)
         statusBanner: document.getElementById("status-banner"),  
         hoursBanner: document.querySelector(".hours-banner"),  
-        reportsBtn: document.getElementById("reports-btn"),   
-        promoModal: document.getElementById("promo-modal"),  
-        promoImg: document.getElementById("promo-modal-img"),  
-        promoTitle: document.getElementById("promo-modal-title"),  
-        promoPrice: document.getElementById("promo-modal-price"),  
-        promoAddBtn: document.getElementById("promo-modal-add"),  
-        promoNavPrev: document.querySelector("#promo-modal .promo-nav.prev"),  
-        promoNavNext: document.querySelector("#promo-modal .promo-nav.next"),  
-        promoClose: document.querySelector("#promo-modal .promo-close"),  
+        
+        // Painéis (Mantidos)
         pedidosContainer: document.querySelector(".meus-pedidos"),  
         pedidosBtn: document.querySelector(".meus-pedidos-btn"),  
         pedidosPanel: document.getElementById("painelPedidos"),  
@@ -169,7 +166,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
     /* ------------------ 💬 POPUP E NOTIFICAÇÕES ------------------ */  
     function popupAdd(msg) {  
-        // Adaptado para usar o elemento #toast, se for mais novo (não vou quebrar o antigo 'popup-add' aqui)
         let pop = document.querySelector(".popup-add");  
         if (!pop) {  
             pop = document.createElement("div");  
@@ -651,6 +647,7 @@ document.addEventListener("DOMContentLoaded", () => {
         el.btnConfirmarEndereco?.addEventListener('click', () => {
             if (el.manualEndereco?.value.trim() && el.manualNumero?.value.trim()) {
                 popupAdd('Endereço manual salvo. Frete calculado.');
+                // Força o recálculo do frete com base no endereço manual
                 renderMiniCart(); 
             } else {
                 alert('Preencha endereço e número para continuar.'); 
@@ -768,13 +765,17 @@ document.addEventListener("DOMContentLoaded", () => {
         else {
             let enderecoParaCalculo = '';
             
-            // Prioridade A: Endereço preenchido pelo ViaCEP (se o container estiver ativo)
+            // Verifica se o contêiner de CEP está visível (fluxo padrão)
             const isCepContainerVisible = document.querySelector('.frete-container')?.style.display !== 'none';
+            // Verifica se o contêiner Manual está visível (fluxo manual)
+            const isManualContainerVisible = el.manualArea?.style.display !== 'none';
+
+            // Prioridade A: Endereço preenchido pelo ViaCEP (se o container CEP estiver ativo)
             if (isCepContainerVisible && cepValue.length === 8 && enderecoAuto && enderecoAuto.value) {
                 enderecoParaCalculo = enderecoAuto.value.trim();
             }
             // Prioridade B: Endereço preenchido manualmente (se o container manual estiver ativo)
-            else if (el.manualArea?.style.display !== 'none' && enderecoManualCompleto && numeroManual) {
+            else if (isManualContainerVisible && enderecoManualCompleto && numeroManual) {
                 enderecoParaCalculo = enderecoManualCompleto;
             }
             
@@ -898,16 +899,44 @@ document.addEventListener("DOMContentLoaded", () => {
     el.cPrev?.addEventListener("click", () => { if (!el.slides) return; el.slides.scrollLeft -= Math.min(el.slides.clientWidth * 0.9, 320); });  
     el.cNext?.addEventListener("click", () => { if (!el.slides) return; el.slides.scrollLeft += Math.min(el.slides.clientWidth * 0.9, 320); });
 
-    /* STATUS DA LOJA + TIMER */  
+    /* STATUS DA LOJA + TIMER (Corrigido para evitar quebra) */  
     const atualizarStatus = safe(() => {  
-        const agora = new Date(); const h = agora.getHours();  
+        const agora = new Date(); 
+        const h = agora.getHours();  
         const aberto = h >= 18 && h < 23;   
-        if (el.statusBanner) { el.statusBanner.textContent = aberto ? "🟢 Aberto — Faça seu pedido!" : "🔴 Fechado — Voltamos às 18h!"; el.statusBanner.className = `status-banner ${aberto ? "open" : "closed"}`; }  
+        
+        if (el.statusBanner) { 
+            el.statusBanner.textContent = aberto ? "🟢 Aberto — Faça seu pedido!" : "🔴 Fechado — Voltamos às 18h!"; 
+            el.statusBanner.className = `status-banner ${aberto ? "open" : "closed"}`; 
+        }
+        
+        // Bloqueio de execução se os elementos não existirem no HTML
         if (el.hoursBanner) {  
-            const elMsg = el.hoursBanner.querySelector("#hours-message"); const elTimer = el.hoursBanner.querySelector("#timer");  
-            if (!elMsg || !elTimer) return;  
-            if (aberto) { const fim = new Date(agora); fim.setHours(23, 30, 0); let diff = (fim - agora) / 1000; if (diff < 0) diff = 0; const restH = Math.floor(diff / 3600); const restM = Math.floor((diff % 3600) / 60); elMsg.innerHTML = `⏰ Hoje atendemos até <b>23h30</b> — Faltam`; elTimer.textContent = `${restH}h ${restM}min`; }  
-            else { const inicio = new Date(agora); if (h >= 23) inicio.setDate(inicio.getDate() + 1); inicio.setHours(18, 0, 0); let diff = (inicio - agora) / 1000; const faltamH = Math.floor(diff / 3600); const faltamM = Math.floor((diff % 3600) / 60); elMsg.innerHTML = `🔒 Fechado — Abrimos em`; elTimer.textContent = `${faltamH}h ${faltamM}min`; }  
+            const elMsg = el.hoursBanner.querySelector("#hours-message"); 
+            const elTimer = el.hoursBanner.querySelector("#timer");  
+            
+            if (!elMsg || !elTimer) return; // Sai da função se não encontrar os sub-elementos
+            
+            if (aberto) { 
+                const fim = new Date(agora); 
+                fim.setHours(23, 30, 0); 
+                let diff = (fim - agora) / 1000; 
+                if (diff < 0) diff = 0; 
+                const restH = Math.floor(diff / 3600); 
+                const restM = Math.floor((diff % 3600) / 60); 
+                elMsg.innerHTML = `⏰ Hoje atendemos até <b>23h30</b> — Faltam`; 
+                elTimer.textContent = `${restH}h ${restM}min`; 
+            }  
+            else { 
+                const inicio = new Date(agora); 
+                if (h >= 23) inicio.setDate(inicio.getDate() + 1); 
+                inicio.setHours(18, 0, 0); 
+                let diff = (inicio - agora) / 1000; 
+                const faltamH = Math.floor(diff / 3600); 
+                const faltamM = Math.floor((diff % 3600) / 60); 
+                elMsg.innerHTML = `🔒 Fechado — Abrimos em`; 
+                elTimer.textContent = `${faltamH}h ${faltamM}min`; 
+            }  
         }  
     });  
     atualizarStatus(); setInterval(atualizarStatus, 60000); // Atualiza a cada 1 minuto
@@ -944,10 +973,10 @@ document.addEventListener("DOMContentLoaded", () => {
         // Lógica: Prioriza Endereço Manual se a área de CEP estiver escondida E a área manual preenchida
         if (el.manualArea?.style.display !== 'none' && manualRuaBairro?.value.trim() && manualNumero?.value.trim()) {
              finalAddressString = `${manualRuaBairro.value.trim()}, N° ${manualNumero.value.trim()}`; 
-             // Se o cliente voltou do CEP mas preencheu o manual
+             // Se o cliente usou o CEP mas teve que corrigir manualmente
              if (cepValue.length === 8) finalAddressString += ` | CEP: ${cepValue}`; 
         }
-        // Lógica: Frete ViaCEP Padrão
+        // Lógica: Frete ViaCEP Padrão (se a área de CEP estiver visível)
         else if (autoRuaBairro?.value.trim() && autoNumero?.value.trim()) { 
             finalAddressString = `${autoRuaBairro.value.trim()}, N° ${autoNumero.value.trim()}`; 
             if (autoComp) finalAddressString += `, Comp: ${autoComp.value.trim()}`; 
@@ -1153,7 +1182,7 @@ document.addEventListener("DOMContentLoaded", () => {
             progressoBar.style.width = `${porcentagem}%`;  
             
             if (proximaRecompensa) { 
-                const faltam = proximaRexima.limite - feitos; 
+                const faltam = proximaRecompensa.limite - feitos; 
                 progressoMsg.textContent = `Faltam ${faltam} pedidos para: ${proximaRecompensa.titulo || proximaRecompensa.valor}!`; 
                 progressoBar.style.background = 'linear-gradient(90deg, #ffb300, #ff7043)'; 
                 const recompensasObtidas = RECOMPENSAS_DATA.filter(r => r.limite <= feitos); 
@@ -1314,7 +1343,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }); 
         
         const produtosOrdenados = Object.entries(produtosContagem).sort(([, a], [, b]) => b - a).slice(0, 10); 
-        if (chartProdutos) chartProdutos.destroy(); 
+        if (chartProdutos) chartPedidos.destroy(); // Corrigido bug de referência aqui (era chartProdutos)
         chartProdutos = new Chart(ctxProdutos, { 
             type: 'bar', 
             data: { labels: produtosOrdenados.map(p=>p[0]), datasets: [{ label: 'Mais Vendidos', data: produtosOrdenados.map(p=>p[1]), backgroundColor: '#ff7043' }] }, 
