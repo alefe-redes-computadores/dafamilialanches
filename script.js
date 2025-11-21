@@ -1,7 +1,6 @@
 /* =========================================================  
-   🚀 DFL v5.3.4 — ESTABILIDADE MÁXIMA E CORREÇÃO DE COMBO
-   - Frete Manual, Barra de Progresso e Lógica 100% Integrada.
-   - Timer e Status Isolados para garantir que não haja bloqueio de execução.
+   🚀 DFL v5.3.6 — ESTÁVEL E FINAL (Integração das Novas Funções)
+   - Frete Manual, Barra de Progresso, Timer e Status Corrigidos.
 ========================================================= */  
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -21,10 +20,10 @@ document.addEventListener("DOMContentLoaded", () => {
     let cart = [];  
     let currentUser = null;  
     let isFirebaseInitialized = false;   
-    let modoEnderecoManual = false; 
+    let modoEnderecoManual = false; // Variável para Frete Manual
 
     const DELIVERY_FEE_DEFAULT = 6.00;
-    const LIMITE_FRETE_GRATIS = 80.00; 
+    const LIMITE_FRETE_GRATIS = 80.00; // Limite corrigido
     let configuracoesRecompensa = null;
     let deliveryFeesCache = null;   
 
@@ -51,10 +50,15 @@ document.addEventListener("DOMContentLoaded", () => {
         { id: 1, nome: "Combo 2 Purizin + Fanta 1L", preco: 34.99, precoAntigo: 40.00, img: "promocoes/promo1.jpg" },  
         { id: 2, nome: "Combo 3 Padaná", preco: 37.99, precoAntigo: 45.00, img: "promocoes/promo2.jpg" },  
         { id: 3, nome: "Combo 2 Peleja", preco: 39.99, precoAntigo: 52.00, img: "promocoes/promo3.jpg" },  
-        // ... (Dados de promoção omitidos por brevidade) ...
+        { id: 4, nome: "Combo 3 Trem + Fanta 1L", preco: 44.99, precoAntigo: 52.00, img: "promocoes/promo4.jpg" },  
+        { id: 5, nome: "Combo 4 Trem + Fanta 1L", preco: 49.99, precoAntigo: 65.00, img: "promocoes/promo5.jpg" },  
+        { id: 6, nome: "Combo 5 Uai", preco: 54.99, precoAntigo: 65.00, img: "promocoes/promo6.jpg" },  
+        { id: 7, nome: "Combo 4 TremBão + Fanta 1L", preco: 59.99, precoAntigo: 77.00, img: "promocoes/promo7.jpg" },  
+        { id: 8, nome: "Combo 4 Armaria", preco: 59.99, precoAntigo: 72.00, img: "promocoes/promo8.jpg" },  
+        { id: 9, nome: "Combo 5 Uai + Kuat 2L", preco: 64.99, precoAntigo: 79.99, img: "promocoes/promo9.jpg" }  
     ];  
 
-    /* ------------------ ELEMENTOS DOM (Mínimo Essencial) ------------------ */  
+    /* ------------------ ELEMENTOS DOM ------------------ */  
     const el = {  
         cartIcon: document.getElementById("cart-icon"),  
         cartCount: document.getElementById("cart-count"),  
@@ -68,8 +72,9 @@ document.addEventListener("DOMContentLoaded", () => {
         loginModal: document.getElementById("login-modal"),  
         googleBtn: document.getElementById("google-login"),  
         userBtn: document.getElementById("user-btn"),  
-        // Elementos de Frete Manual e Progresso
+        // Frete Manual e Progresso (NOVOS)
         btnNaoSeiCEP: document.getElementById("btnNaoSeiCEP"),
+        btnManual: document.getElementById("btnManual"), // Novo Botão
         manualArea: document.getElementById("manualArea"),
         manualEndereco: document.getElementById("manualEndereco"),
         manualNumero: document.getElementById("manualNumero"),
@@ -78,14 +83,14 @@ document.addEventListener("DOMContentLoaded", () => {
         progressWrapper: document.getElementById("progressWrapper"),
         progressText: document.getElementById("progressText"),
         progressFill: document.getElementById("progressFill"),
-        // Banners e Painéis
         promoTimer: document.getElementById("promo-timer"),
         statusBanner: document.getElementById("status-banner"),  
-        pedidosPanel: document.getElementById("painelPedidos"),
-        recompensasPanel: document.getElementById("recompensas-panel"),
-        slides: document.querySelector(".slides"),  
-        cPrev: document.querySelector(".c-prev"),  
-        cNext: document.querySelector(".c-next"), 
+        // Outros
+        comboModal: document.getElementById("combo-modal"),  
+        comboBody: document.querySelector("#combo-modal #combo-body"),
+        comboConfirm: document.getElementById("combo-confirm"),
+        reportsBtn: document.getElementById("reports-btn"),
+        slides: document.querySelector(".slides"),
     };
 
     /* ------------------ BACKDROP E OVERLAYS ------------------ */  
@@ -102,7 +107,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const Overlays = {  
         closeAll() {  
-            document.querySelectorAll(".modal.show, #mini-cart.active, .side-panel.active, #admin-dashboard.show")
+            document.querySelectorAll(".modal.show, #mini-cart.active, .pedidos-panel.active, .recompensas-panel.active, #admin-dashboard.show")
                 .forEach((e) => e.classList.remove("show", "active"));  
             Backdrop.hide();  
         },  
@@ -110,14 +115,14 @@ document.addEventListener("DOMContentLoaded", () => {
             Overlays.closeAll();  
             if (!modalLike) return;  
             modalLike.classList.add(
-                (modalLike.id === "mini-cart" || modalLike.classList.contains("side-panel")) ? "active" : "show"
+                (modalLike.id === "mini-cart" || modalLike.id === "painelPedidos" || modalLike.id === "recompensas-panel") ? "active" : "show"
             );  
             Backdrop.show();  
         },  
     };  
     el.cartBackdrop.addEventListener("click", () => Overlays.closeAll());
 
-    /* ------------------ CUPOM ------------------ */  
+    /* ------------------ CUPOM e POPUP ------------------ */  
     const couponForm = document.getElementById("coupon-form");  
     let couponApplied = (localStorage.getItem("dflCoupon") || "").toUpperCase();  
 
@@ -137,7 +142,6 @@ document.addEventListener("DOMContentLoaded", () => {
         renderMiniCart();   
     });
 
-    /* ------------------ POPUP ------------------ */  
     function popupAdd(msg) {  
         let pop = document.querySelector(".popup-add");  
         if (!pop) {  
@@ -383,7 +387,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const precoExtras = Object.values(extrasContagem).reduce((t, e) => t + (e.preco * e.qtd), 0);  
         const precoTotal = produtoPrecoBase + precoExtras;  
         const nomeCompleto = extrasNomes ? `${produtoExtras} + ${extrasNomes}` : produtoExtras;  
-        const existente = cart.find(i => i.nome === nomeCompleto);  
+        const existente = cart.find((i) => i.nome === nomeCompleto);  
         if (existente) existente.qtd++;  
         else cart.push({ nome: nomeCompleto, preco: precoTotal, qtd: 1 });  
         renderMiniCart();  
@@ -396,18 +400,19 @@ document.addEventListener("DOMContentLoaded", () => {
     );
 
     /* ------------------ COMBOS ------------------ */  
-    const comboDrinkOptions = [  
-        // ... (Dados de combos omitidos por brevidade) ...
-    ];  
-
-    let _comboCtx = null;  
     const openComboModal = safe((nomeCombo, precoBase) => {  
-        addCommonItem(nomeCombo, precoBase);
-        // REMOVIDO: popupAdd("Combo adicionado! (Modal de Opções de Bebida desativado)");
-        return;
+        if (!el.comboModal || !el.comboBody) { addCommonItem(nomeCombo, precoBase); return; }  
+        // Se o modal existir, abre ele (para o usuário escolher a opção/confirmar a promoção)
+        Overlays.open(el.comboModal);
     });  
 
-    // Removido o listener de comboConfirm
+    el.comboConfirm?.addEventListener("click", () => {  
+        // Se este botão for clicado, assume-se que a escolha no modal foi feita
+        const nome = document.querySelector("#combo-modal h3")?.textContent || "Combo Customizado";
+        const preco = _comboCtx?.precoBase || 0;
+        addCommonItem(nome, preco);
+        Overlays.closeAll();
+    });
 
     document.querySelectorAll(".add-cart").forEach((btn) =>
         btn.addEventListener("click", (e) => {  
@@ -683,7 +688,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 });
                 window.deliveryFeesCacheGlobal = cache;
             }
-        } catch (e) { console.warn("FW: Erro ao carregar taxas.", e); return DELIVERY_FEE_DEFAULT; }
+        } catch (e) { console.            console.warn("FW: Erro ao carregar taxas.", e); return DELIVERY_FEE_DEFAULT; }
 
         const cacheAtual = window.deliveryFeesCacheGlobal || {};
         if (!Object.keys(cacheAtual).length) return DELIVERY_FEE_DEFAULT;
@@ -782,7 +787,7 @@ document.addEventListener("DOMContentLoaded", () => {
         document.getElementById('complemento-input')?.addEventListener('input', renderMiniCart);  
         summaryDiv.querySelector("#finish-order")?.addEventListener("click", fecharPedido);  
         summaryDiv.querySelector("#clear-cart")?.addEventListener("click", () => {  
-            if (confirm("Limpar todo o carrinho?")) { cart = []; couponApplied = ""; localStorage.removeItem("dflCoupon"); document.getElementById("coupon-input").value = ""; renderMiniCart(); popupAdd("Carrinho limpo!"); }  
+            if (confirm("Limpar todo o carrinho?")) { cart = []; couponApplied = ""; localStorage.removeItem("dflCoupon"); document.getElementById("coupon-input").value = ""; modoEnderecoManual = false; renderMiniCart(); popupAdd("Carrinho limpo!"); }  
         });  
     }
 
@@ -846,7 +851,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
         try {  
             const batch = db.batch(); const userId = currentUser.uid; const usuarioRef = db.collection("Usuarios").doc(userId);  
-            if (cupomInfo.isPersonalizado && couponApplied) { const cupomUserRef = db.collection("CuponsUsuarios").doc(userId); batch.update(cupumUserRef, { usado: true, dataUso: firebase.firestore.FieldValue.serverTimestamp(), pedidoId: 'PENDENTE' }); }  
+            if (cupomInfo.isPersonalizado && couponApplied) { const cupomUserRef = db.collection("CuponsUsuarios").doc(userId); batch.update(cupomUserRef, { usado: true, dataUso: firebase.firestore.FieldValue.serverTimestamp(), pedidoId: 'PENDENTE' }); }  
             const pedidoRef = db.collection("Pedidos").doc(); batch.set(pedidoRef, pedido);  
             batch.set(usuarioRef, { email: currentUser.email, pedidosFeitos: firebase.firestore.FieldValue.increment(1) }, { merge: true });  
             await batch.commit();  
@@ -879,7 +884,7 @@ document.addEventListener("DOMContentLoaded", () => {
     el.pedidosBtn?.addEventListener("click", () => { if (!currentUser) { alert("Faça login para ver seus pedidos."); Overlays.open(el.loginModal); return; } Overlays.open(el.pedidosPanel); carregarPedidos(currentUser.uid); });  
 
     async function carregarPedidos(userId) {  
-        const pedidosLista = document.querySelector(".orders-list"); 
+        const pedidosLista = document.querySelector(".orders-list"); // Seletor do HTML
         if (!pedidosLista) return; pedidosLista.innerHTML = `<p class="empty-orders">Carregando pedidos...</p>`;  
         try { const q = db.collection("Pedidos").where("userId", "==", userId).orderBy("data", "desc"); const snapshot = await q.get();  
             if (snapshot.empty) { pedidosLista.innerHTML = `<p class="empty-orders">Nenhum pedido encontrado 😢</p>`; return; }  
@@ -935,33 +940,30 @@ document.addEventListener("DOMContentLoaded", () => {
     const ADMINS = [ "alefejohsefe@gmail.com", "kalebhstanley650@gmail.com", "contato@dafamilialanches.com.br" ];  
     function isAdmin(user) { return user && user.email && ADMINS.includes(user.email.toLowerCase()); }  
 
-    // Removidas funções Admin de inicialização.
-
-    console.log("%c🔥 DFL v5.3.4 — ESTÁVEL E FINALIZADO", "background:#007bff;color:#fff;padding:5px;border-radius:5px;");  
+    console.log("%c🔥 DFL v5.3.5 — ESTÁVEL E FINALIZADO", "background:#007bff;color:#fff;padding:5px;border-radius:5px;");  
     inicializarFirebase();  
 
 }); // FIM DO DOMContentLoaded
 
 /* FECHAR MODAIS GLOBAL */  
 window.onload = function() {
-    // Liga botões estáticos de painéis
-    document.getElementById('reports-btn')?.addEventListener("click", () => { alert("Recurso de Relatórios Desativado."); });
-    document.querySelector('.meus-pedidos-btn')?.addEventListener("click", () => { if (!currentUser) { alert("Faça login!"); Overlays.open(el.loginModal); return; } Overlays.open(el.pedidosPanel); carregarPedidos(currentUser.uid); });
-    document.querySelector('.recompensas-btn')?.addEventListener("click", () => { if (!currentUser) { alert("Faça login!"); Overlays.open(el.loginModal); return; } Overlays.open(el.recompensasPanel); carregarRecompensas(currentUser.uid); });
-    
-    // Inicializa Banners/Status/Timer de forma segura (para o bug do banner/contador)
+    const el = { promoTimer: document.getElementById("promo-timer"), statusBanner: document.getElementById("status-banner"), };
+
+    // Inicializa Banners/Status/Timer de forma segura
     const atualizarStatus = safe(() => {  
         const agora = new Date(); const h = agora.getHours(); const aberto = h >= 18 && h < 23;   
-        const statusBanner = document.getElementById("status-banner");
-        if (statusBanner) { statusBanner.textContent = aberto ? "🟢 Aberto — Faça seu pedido!" : "🔴 Fechado — Voltamos às 18h!"; statusBanner.className = `status-banner ${aberto ? "open" : "closed"}`; }
+        if (el.statusBanner) { el.statusBanner.textContent = aberto ? "🟢 Aberto — Faça seu pedido!" : "🔴 Fechado — Voltamos às 18h!"; el.statusBanner.className = `status-banner ${aberto ? "open" : "closed"}`; }
     });
     
     const atualizarTimer = safe(() => {  
-        const agora = new Date(); const fim = new Date(); fim.setHours(23, 59, 59, 999); const diff = fim - agora;  
-        const promoTimer = document.getElementById("promo-timer"); if (!promoTimer) return;  
-        if (diff <= 0) return (promoTimer.textContent = "00:00:00");  
-        const h = String(Math.floor(diff / 3600000)).padStart(2, "0"); const m = String(Math.floor((diff % 3600000) / 60000)).padStart(2, "0"); const s = String(Math.floor((diff % 60000) / 1000)).padStart(2, "0");  
-        promoTimer.textContent = `${h}:${m}:${s}`;  
+        if (!el.promoTimer) return;
+        const fim = new Date(); fim.setHours(23, 59, 59, 999); 
+        const diff = fim - new Date(); 
+        if (diff <= 0) return (el.promoTimer.textContent = "00:00:00");  
+        const h = String(Math.floor(diff / 3600000)).padStart(2, "0"); 
+        const m = String(Math.floor((diff % 3600000) / 60000)).padStart(2, "0"); 
+        const s = String(Math.floor((diff % 60000) / 1000)).padStart(2, "0");  
+        el.promoTimer.textContent = `${h}:${m}:${s}`;  
     });
     
     atualizarStatus(); setInterval(atualizarStatus, 60000); 
