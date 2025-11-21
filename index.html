@@ -1,423 +1,523 @@
 <!DOCTYPE html>
-<html lang="pt-br">
+<html lang="pt-BR">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Da Família Lanches – DFL v5.5 Preview</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Da Família Lanches</title>
 
-    <!-- FONTS & ICONS -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
-    <link rel="stylesheet" href="style.css" />
+    <!-- FONTES / ICONES -->
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="extras.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;700;900&display=swap" rel="stylesheet">
 
-    <!-- META -->
-    <meta name="theme-color" content="#ffca28" />
-    <meta name="description" content="DFL – Delivery de Hambúrgueres e Hot Dogs. Rápido, gostoso e pertinho de você." />
+    <!-- FAVICON -->
+    <link rel="icon" href="/public/img/logo-dfl.png" type="image/png">
 
-    <!-- FIREBASE -->
-    <script type="module">
-        // Firebase carregado no final do HTML dentro do script.js
-    </script>
 </head>
-
 <body>
-    <header class="header">
-        <img src="public/img/logo-dfl.png" alt="DFL" class="logo" />
-        <button id="openCart" class="cart-btn">
-            <img src="public/img/cart.svg" alt="Carrinho" />
-            <span id="cartCount" class="cart-count">0</span>
-        </button>
+
+    <!-- ======================================== -->
+    <!-- 🔥 HEADER -->
+    <!-- ======================================== -->
+    <header class="top-header">
+        <div class="logo-area">
+            <img src="/public/img/logo-dfl.png" alt="Logo DFL" class="logo-img">
+            <h1 class="site-title">Da Família Lanches</h1>
+        </div>
+
+        <div class="user-area">
+            <button id="openCartBtn" class="icon-btn">
+                <img src="/public/icons/cart.svg" class="icon-24">
+            </button>
+
+            <button id="openProfileBtn" class="icon-btn">
+                <img src="/public/icons/user.svg" class="icon-24">
+            </button>
+        </div>
     </header>
 
-    <!-- CARROSSEL -->
-    <section class="carousel">
-        <div class="carousel-wrapper">
-            <img src="public/img/banner1.png" class="carousel-item active" />
-            <img src="public/img/banner2.png" class="carousel-item" />
-            <img src="public/img/banner3.png" class="carousel-item" />
+
+    <!-- ======================================== -->
+    <!-- 🟦 BANNER / FECHADO -->
+    <!-- ======================================== -->
+    <div id="statusContainer" class="status-container">
+        <div class="status-badge" id="statusBadge">Carregando...</div>
+    </div>
+
+
+    <!-- ======================================== -->
+    <!-- 🟦 BARRA DE PROGRESSO – FRETE GRÁTIS -->
+    <!-- ======================================== -->
+    <div class="delivery-progress-wrapper">
+        <p id="deliveryProgressText" class="delivery-progress-text">
+            Falta <strong>R$ 80,00</strong> para você ganhar <b>FRETE GRÁTIS</b> 🏁✨
+        </p>
+
+        <div class="delivery-progress-bar">
+            <div id="deliveryProgressFill" class="delivery-progress-fill"></div>
+        </div>
+    </div>
+
+
+    <!-- ======================================== -->
+    <!-- 🟦 BUSCA DE ENDEREÇO / CE P -->
+    <!-- ======================================== -->
+    <section class="cep-section">
+
+        <label class="cep-label">CEP para entrega:</label>
+
+        <div class="cep-input-wrapper">
+            <input maxlength="9" id="cepInput" class="input-field"
+                   placeholder="Digite seu CEP (ex: 38701-002)">
+            <button id="buscarCepBtn" class="btn-primary">Buscar</button>
         </div>
 
-        <div class="carousel-indicators">
-            <span class="indicator active"></span>
-            <span class="indicator"></span>
-            <span class="indicator"></span>
-        </div>
+        <!-- 🔵 Não sei meu CEP -->
+        <p id="naoSeiCepBtn" class="inline-helper">
+            ❓ Não sei meu CEP
+        </p>
+
+        <!-- 🔵 Inserir endereço manualmente -->
+        <p id="enderecoManualBtn" class="inline-helper">
+            ✏️ Inserir endereço manualmente
+        </p>
+
     </section>
 
-    <main class="main-content">
-        <h2 class="section-title">🍔 Cardápio</h2>
 
-        <!-- LISTA DE PRODUTOS INÍCIO -->
-<!-- LISTA DE PRODUTOS -->
-        <section id="produtos" class="produtos-grid">
+    <!-- ======================================== -->
+    <!-- 🟦 CAMPOS DE ENDEREÇO -->
+    <!-- ======================================== -->
+    <section id="enderecoFields" class="endereco-section hidden">
 
-            <!-- HAMBÚRGUERES TRADICIONAIS -->
-            <h3 class="categoria-titulo">🍔 Hambúrgueres Tradicionais</h3>
+        <label class="endereco-label">Endereço completo:</label>
 
-            <div class="produto">
-                <img src="public/img/burger-bao.png" alt="Bão" />
-                <h4>Bão</h4>
-                <p>Pão, carne 80g, queijo, alface, tomate e molho especial.</p>
-                <span class="produto-preco">R$ 10,00</span>
-                <button class="addCart" data-id="bao">Adicionar</button>
-            </div>
+        <!-- 🔧 Campo corrigido: largura, scroll horizontal, texto não quebra -->
+        <input id="enderecoInput"
+               class="input-field endereco-scroll"
+               placeholder="Rua + Bairro + Cidade"
+               autocomplete="off">
 
-            <div class="produto">
-                <img src="public/img/burger-uai.png" alt="Uai" />
-                <h4>Uai</h4>
-                <p>Pão, carne 100g, queijo prato, alface e molho da casa.</p>
-                <span class="produto-preco">R$ 12,00</span>
-                <button class="addCart" data-id="uai">Adicionar</button>
-            </div>
+        <div class="flex-row gap-10">
+            <input id="numeroInput"
+                   class="input-field small-field"
+                   placeholder="Nº">
 
-            <div class="produto">
-                <img src="public/img/burger-trem.png" alt="Trem" />
-                <h4>Trem</h4>
-                <p>Bitela carne 120g, queijo, bacon crocante e maionese artesanal.</p>
-                <span class="produto-preco">R$ 14,00</span>
-                <button class="addCart" data-id="trem">Adicionar</button>
-            </div>
-
-            <div class="produto">
-                <img src="public/img/burger-cadim.png" alt="Cadim" />
-                <h4>Cadim</h4>
-                <p>Pão brioche, carne 80g, queijo cheddar e molho barbecue.</p>
-                <span class="produto-preco">R$ 11,00</span>
-                <button class="addCart" data-id="cadim">Adicionar</button>
-            </div>
-
-            <div class="produto">
-                <img src="public/img/burger-armaria.png" alt="Armaria" />
-                <h4>Armaria</h4>
-                <p>Pão artesanal, carne 100g, queijo duplo e bacon premium.</p>
-                <span class="produto-preco">R$ 16,00</span>
-                <button class="addCart" data-id="armaria">Adicionar</button>
-            </div>
-
-            <div class="produto">
-                <img src="public/img/burger-bitela.png" alt="Bitela" />
-                <h4>Bitela</h4>
-                <p>Carne 160g, cheddar, bacon e molho smoky.</p>
-                <span class="produto-preco">R$ 19,00</span>
-                <button class="addCart" data-id="bitela">Adicionar</button>
-            </div>
-
-            <div class="produto">
-                <img src="public/img/burger-apruma.png" alt="Apruma" />
-                <h4>Apruma</h4>
-                <p>Pão australiano, carne 160g, queijo, cebola caramelizada.</p>
-                <span class="produto-preco">R$ 22,00</span>
-                <button class="addCart" data-id="apruma">Adicionar</button>
-            </div>
-
-            <!-- ARTESANAIS -->
-            <h3 class="categoria-titulo">🔥 Artesanais</h3>
-
-            <div class="produto">
-                <img src="public/img/burger-peleja.png" alt="Peleja" />
-                <h4>Peleja</h4>
-                <p>Carne 180g, queijo minas, rúcula, tomate e maionese artesanal.</p>
-                <span class="produto-preco">R$ 26,00</span>
-                <button class="addCart" data-id="peleja">Adicionar</button>
-            </div>
-
-            <div class="produto">
-                <img src="public/img/burger-tudibom.png" alt="Tudibom" />
-                <h4>Tudibom</h4>
-                <p>Carne 180g, cheddar duplo, bacon e molho especial defumado.</p>
-                <span class="produto-preco">R$ 29,00</span>
-                <button class="addCart" data-id="tudibom">Adicionar</button>
-            </div>
-
-            <div class="produto">
-                <img src="public/img/burger-custoso.png" alt="Custoso" />
-                <h4>Custoso</h4>
-                <p>Pão brioche premium, carne 200g, queijo e creme de cheddar.</p>
-                <span class="produto-preco">R$ 33,00</span>
-                <button class="addCart" data-id="custoso">Adicionar</button>
-            </div>
-
-            <!-- HOT DOGS -->
-            <h3 class="categoria-titulo">🌭 Hot Dogs</h3>
-
-            <div class="produto">
-                <img src="public/img/hotdog-nigucim.png" alt="Nigucim" />
-                <h4>Nigucim</h4>
-                <p>1 salsicha, vinagrete, milho e batata palha.</p>
-                <span class="produto-preco">R$ 10,00</span>
-                <button class="addCart" data-id="nigucim">Adicionar</button>
-            </div>
-
-            <div class="produto">
-                <img src="public/img/hotdog-simprao.png" alt="Simprão" />
-                <h4>Simprão</h4>
-                <p>1 salsicha, sem vinagrete.</p>
-                <span class="produto-preco">R$ 9,00</span>
-                <button class="addCart" data-id="simprao">Adicionar</button>
-            </div>
-
-            <div class="produto">
-                <img src="public/img/hotdog-nimin.png" alt="Nimin" />
-                <h4>Nimin</h4>
-                <p>2 salsichas, bacon e vinagrete.</p>
-                <span class="produto-preco">R$ 14,00</span>
-                <button class="addCart" data-id="nimin">Adicionar</button>
-            </div>
-
-            <div class="produto">
-                <img src="public/img/hotdog-padana.png" alt="Padaná" />
-                <h4>Padaná</h4>
-                <p>Salsicha, queijo prato, milho e purê cremoso.</p>
-                <span class="produto-preco">R$ 13,00</span>
-                <button class="addCart" data-id="padana">Adicionar</button>
-            </div>
-
-            <div class="produto">
-                <img src="public/img/hotdog-purizin.png" alt="Purizin" />
-                <h4>Purizin</h4>
-                <p>Salsicha, purê cremoso e vinagrete.</p>
-                <span class="produto-preco">R$ 12,00</span>
-                <button class="addCart" data-id="purizin">Adicionar</button>
-            </div>
-
-            <div class="produto">
-                <img src="public/img/hotdog-trembao.png" alt="Trembão" />
-                <h4>Trembão</h4>
-                <p>Salsicha, purê especial, milho e bacon crocante.</p>
-                <span class="produto-preco">R$ 15,00</span>
-                <button class="addCart" data-id="trembao">Adicionar</button>
-            </div>
-
-            <!-- COMBOS -->
-            <h3 class="categoria-titulo">🥤 Combos</h3>
-
-            <div class="produto">
-                <img src="public/img/combo-familia-tradicional.png" alt="Combo Família Tradicional" />
-                <h4>Combo Família Tradicional</h4>
-                <p>4 hambúrgueres tradicionais + Kuat 2L.</p>
-                <span class="produto-preco">R$ 59,99</span>
-                <button class="addCart" data-id="combo-familia">Adicionar</button>
-            </div>
-
-            <div class="produto">
-                <img src="public/img/combo-casal-trem.png" alt="Combo Casal Trem" />
-                <h4>Combo Casal Trem</h4>
-                <p>2 Trem + Fanta 1L.</p>
-                <span class="produto-preco">R$ 34,99</span>
-                <button class="addCart" data-id="combo-trem">Adicionar</button>
-            </div>
-
-            <div class="produto">
-                <img src="public/img/combo-familia-artesanal.png" alt="Combo Família Artesanal" />
-                <h4>Combo Família Artesanal</h4>
-                <p>3 Artesanais + Coca 2L.</p>
-                <span class="produto-preco">R$ 79,99</span>
-                <button class="addCart" data-id="combo-artesanal">Adicionar</button>
-            </div>
-
-            <div class="produto">
-                <img src="public/img/combo-casal-artesanal.png" alt="Combo Casal Artesanal" />
-                <h4>Combo Casal Artesanal</h4>
-                <p>2 Peleja + Coca 1L.</p>
-                <span class="produto-preco">R$ 54,99</span>
-                <button class="addCart" data-id="combo-casal-artesanal">Adicionar</button>
-            </div>
-
-        </section>
-</main>
-
-    <!-- =======================
-         CARRINHO LATERAL (SIDEBAR)
-    ======================== -->
-    <aside id="cartSidebar" class="cart-sidebar">
-
-        <div class="cart-header">
-            <h3>🛒 Seu Carrinho</h3>
-            <button id="closeCart" class="close-cart">×</button>
+            <input id="complementoInput"
+                   class="input-field medium-field"
+                   placeholder="Complemento (Opcional)">
         </div>
 
-        <!-- LISTA DOS ITENS -->
-        <div id="cartItems" class="cart-items"></div>
-
-        <!-- =======================
-             BARRA DE PROGRESSO – DFL v5.5 Preview
-        ======================== -->
-        <div id="progressWrapper" class="progress-wrapper" style="display:none;">
-            <p id="progressText" class="progress-text">
-                Faltam <strong>R$ 80,00</strong> para ganhar frete grátis 😍🚚✨
-            </p>
-
-            <div class="progress-bar">
-                <div id="progressFill" class="progress-fill"></div>
-            </div>
-        </div>
-
-        <!-- =======================
-             RESUMO DO PEDIDO
-        ======================== -->
-        <div class="cart-summary">
-
-            <div class="summary-row">
-                <span>Subtotal</span>
-                <span id="subtotalValue">R$ 0,00</span>
-            </div>
-
-            <div class="summary-row">
-                <span>Frete</span>
-                <span id="deliveryFee">R$ 0,00</span>
-            </div>
-
-            <div class="summary-row total-row">
-                <strong>Total</strong>
-                <strong id="totalValue">R$ 0,00</strong>
-            </div>
-        </div>
-
-        <!-- =======================
-             CAMPO DE CEP + BOTÃO "NÃO SEI MEU CEP"
-        ======================== -->
-        <div id="cepArea" class="cep-area">
-            <label for="cepInput">CEP:</label>
-            <input type="text" id="cepInput" placeholder="Digite seu CEP" maxlength="9" />
-
-            <!-- BOTÃO ALTERNATIVO -->
-            <button id="btnNaoSeiCEP" class="nao-sei-cep">
-                Não sei meu CEP 🤔
-            </button>
-        </div>
-
-        <!-- =======================
-             ÁREA DE ENDEREÇO MANUAL (OCULTA)
-        ======================== -->
-        <div id="manualArea" class="manual-area" style="display:none;">
-
-            <label for="manualEndereco">Endereço completo:</label>
-            <textarea id="manualEndereco" placeholder="Ex: Rua Netuno - Jardim Andrades (Patos de Minas/MG)"></textarea>
-
-            <label for="manualNumero">Número:</label>
-            <input type="text" id="manualNumero" placeholder="Ex: 123" />
-
-            <button id="btnConfirmarEndereco" class="confirmar-endereco">
-                Confirmar endereço 🔍
-            </button>
-
-            <button id="btnVoltarCEP" class="voltar-cep">
-                Voltar ao CEP
-            </button>
-        </div>
-
-        <!-- BOTÃO FINALIZAR PEDIDO -->
-        <button id="finalizarPedido" class="finalizar-btn">
-            Finalizar Pedido
+        <button id="confirmarEnderecoBtn" class="btn-secondary">
+            Confirmar Endereço
         </button>
-    </aside>
 
-    <!-- =======================
-         PAINEL DE MEUS PEDIDOS
-    ======================== -->
-    <section id="meusPedidosPanel" class="panel">
-        <div class="panel-header">
-            <h3>📦 Meus Pedidos</h3>
-            <button class="close-panel" data-panel="meusPedidosPanel">×</button>
-        </div>
-
-        <div id="meusPedidosContent" class="panel-content">
-            <!-- Carregado via Firestore -->
-        </div>
     </section>
 
-    <!-- =======================
-         PAINEL DE RECOMPENSAS
-    ======================== -->
-    <section id="recompensasPanel" class="panel">
-        <div class="panel-header">
-            <h3>🏆 Minhas Recompensas</h3>
-            <button class="close-panel" data-panel="recompensasPanel">×</button>
+
+    <!-- ======================================== -->
+    <!-- 🟦 LISTA DE PRODUTOS -->
+    <!-- ======================================== -->
+    <main class="products-container">
+    <!-- ======================================== -->
+        <!-- 🟦 PRODUTOS TRADICIONAIS -->
+        <!-- ======================================== -->
+        
+        <h2 class="category-title">🍔 Hambúrgueres Tradicionais</h2>
+
+        <div class="product-card">
+            <img src="/public/img/burger1.png" class="product-img">
+            <div class="product-info">
+                <h3 class="product-name">Bão</h3>
+                <p class="product-desc">Pão, hambúrguer artesanal 80g, queijo, alface, tomate e molho especial.</p>
+                <span class="product-price">R$ 12,00</span>
+            </div>
+            <button class="add-btn" data-id="bao">Adicionar</button>
         </div>
 
-        <div id="recompensasContent" class="panel-content">
-            <!-- Carregado via Firestore -->
+        <div class="product-card">
+            <img src="/public/img/burger2.png" class="product-img">
+            <div class="product-info">
+                <h3 class="product-name">Uai</h3>
+                <p class="product-desc">Pão, 2 hambúrgueres 80g, queijo duplo e molho da casa.</p>
+                <span class="product-price">R$ 18,00</span>
+            </div>
+            <button class="add-btn" data-id="uai">Adicionar</button>
         </div>
-    </section>
-<!-- =======================
-         MODAL DE ADICIONAIS
-    ======================== -->
-    <div id="modalAdicionais" class="modal">
-        <div class="modal-content">
-            <button class="close-modal" data-target="modalAdicionais">×</button>
 
-            <h3>Adicionais</h3>
-            <div id="listaAdicionais" class="lista-adicionais">
-                <!-- JS carrega adicionais -->
+        <div class="product-card">
+            <img src="/public/img/burger3.png" class="product-img">
+            <div class="product-info">
+                <h3 class="product-name">Trem</h3>
+                <p class="product-desc">Pão brioche, hambúrguer 150g, cheddar cremoso e cebola caramelizada.</p>
+                <span class="product-price">R$ 22,00</span>
+            </div>
+            <button class="add-btn" data-id="trem">Adicionar</button>
+        </div>
+
+        <div class="product-card">
+            <img src="/public/img/burger4.png" class="product-img">
+            <div class="product-info">
+                <h3 class="product-name">Cadim</h3>
+                <p class="product-desc">Pão australiano, hambúrguer 150g, queijo prato, bacon e maionese temperada.</p>
+                <span class="product-price">R$ 24,00</span>
+            </div>
+            <button class="add-btn" data-id="cadim">Adicionar</button>
+        </div>
+
+        <div class="product-card">
+            <img src="/public/img/burger5.png" class="product-img">
+            <div class="product-info">
+                <h3 class="product-name">Armaria</h3>
+                <p class="product-desc">Pão brioche, hambúrguer 180g, bacon extra crocante, cheddar duplo e molho especial.</p>
+                <span class="product-price">R$ 29,00</span>
+            </div>
+            <button class="add-btn" data-id="armaria">Adicionar</button>
+        </div>
+
+        <div class="product-card">
+            <img src="/public/img/burger6.png" class="product-img">
+            <div class="product-info">
+                <h3 class="product-name">Bitela</h3>
+                <p class="product-desc">Pão artesanal, 2 hambúrgueres 150g, queijo prato duplo e molho da casa.</p>
+                <span class="product-price">R$ 34,00</span>
+            </div>
+            <button class="add-btn" data-id="bitela">Adicionar</button>
+        </div>
+
+        <div class="product-card">
+            <img src="/public/img/burger7.png" class="product-img">
+            <div class="product-info">
+                <h3 class="product-name">Apruma</h3>
+                <p class="product-desc">Pão brioche, 2 hambúrgueres 180g, cheddar duplo, cebola caramelizada e bacon.</p>
+                <span class="product-price">R$ 39,00</span>
+            </div>
+            <button class="add-btn" data-id="apruma">Adicionar</button>
+        </div>
+
+
+        <!-- ======================================== -->
+        <!-- 🟦 HAMBÚRGUERES ARTESANAIS -->
+        <!-- ======================================== -->
+
+        <h2 class="category-title">🔥 Hambúrgueres Artesanais</h2>
+
+        <div class="product-card">
+            <img src="/public/img/art1.png" class="product-img">
+            <div class="product-info">
+                <h3 class="product-name">Peleja</h3>
+                <p class="product-desc">Pão brioche, blend 200g, queijo prato, bacon premium e maionese da casa.</p>
+                <span class="product-price">R$ 28,00</span>
+            </div>
+            <button class="add-btn" data-id="peleja">Adicionar</button>
+        </div>
+
+        <div class="product-card">
+            <img src="/public/img/art2.png" class="product-img">
+            <div class="product-info">
+                <h3 class="product-name">Tudibom</h3>
+                <p class="product-desc">Pão australiano, blend 220g, cheddar cremoso, cebola crispy, bacon e molho especial.</p>
+                <span class="product-price">R$ 33,00</span>
+            </div>
+            <button class="add-btn" data-id="tudibom">Adicionar</button>
+        </div>
+
+        <div class="product-card">
+            <img src="/public/img/art3.png" class="product-img">
+            <div class="product-info">
+                <h3 class="product-name">Custoso</h3>
+                <p class="product-desc">Pão brioche, 2 blends 180g, cheddar duplo, bacon extra, molho especial premium.</p>
+                <span class="product-price">R$ 42,00</span>
+            </div>
+            <button class="add-btn" data-id="custoso">Adicionar</button>
+        </div>
+
+
+        <!-- ======================================== -->
+        <!-- 🟦 HOT DOGS -->
+        <!-- ======================================== -->
+
+        <h2 class="category-title">🌭 Hot Dogs</h2>
+
+        <div class="product-card">
+            <img src="/public/img/dog1.png" class="product-img">
+            <div class="product-info">
+                <h3 class="product-name">Nigucim</h3>
+                <p class="product-desc">Pão, 1 salsicha, batata palha, milho e maionese da casa.</p>
+                <span class="product-price">R$ 10,00</span>
+            </div>
+            <button class="add-btn" data-id="nigucim">Adicionar</button>
+        </div>
+
+        <div class="product-card">
+            <img src="/public/img/dog2.png" class="product-img">
+            <div class="product-info">
+                <h3 class="product-name">Simprão</h3>
+                <p class="product-desc">Pão, 1 salsicha, sem vinagrete, batata palha e maionese.</p>
+                <span class="product-price">R$ 12,00</span>
+            </div>
+            <button class="add-btn" data-id="simprão">Adicionar</button>
+        </div>
+
+        <div class="product-card">
+            <img src="/public/img/dog3.png" class="product-img">
+            <div class="product-info">
+                <h3 class="product-name">Nimin</h3>
+                <p class="product-desc">Pão, 2 salsichas, bacon crocante, vinagrete e batata palha.</p>
+                <span class="product-price">R$ 16,00</span>
+            </div>
+            <button class="add-btn" data-id="nimin">Adicionar</button>
+        </div>
+        <div class="product-card">
+            <img src="/public/img/dog4.png" class="product-img">
+            <div class="product-info">
+                <h3 class="product-name">Padaná</h3>
+                <p class="product-desc">Pão, salsicha especial, molho da casa, batata palha e milho verde.</p>
+                <span class="product-price">R$ 14,00</span>
+            </div>
+            <button class="add-btn" data-id="padana">Adicionar</button>
+        </div>
+
+        <div class="product-card">
+            <img src="/public/img/dog5.png" class="product-img">
+            <div class="product-info">
+                <h3 class="product-name">Purizin</h3>
+                <p class="product-desc">Pão, salsicha, purê cremoso, milho, batata palha e molho especial.</p>
+                <span class="product-price">R$ 16,00</span>
+            </div>
+            <button class="add-btn" data-id="purizin">Adicionar</button>
+        </div>
+
+        <div class="product-card">
+            <img src="/public/img/dog6.png" class="product-img">
+            <div class="product-info">
+                <h3 class="product-name">Trembão</h3>
+                <p class="product-desc">Pão, 2 salsichas, purê cremoso, bacon, vinagrete e molho especial.</p>
+                <span class="product-price">R$ 22,00</span>
+            </div>
+            <button class="add-btn" data-id="trembao">Adicionar</button>
+        </div>
+
+
+        <!-- ======================================== -->
+        <!-- 🟦 COMBOS -->
+        <!-- ======================================== -->
+
+        <h2 class="category-title">🎁 Combos</h2>
+
+        <div class="product-card">
+            <img src="/public/img/combo1.png" class="product-img">
+            <div class="product-info">
+                <h3 class="product-name">Combo Família Tradicional</h3>
+                <p class="product-desc">4 Hambúrgueres Tradicionais + Kuat 2L</p>
+                <span class="product-price">R$ 59,99</span>
+            </div>
+            <button class="add-btn" data-id="combo-familia-tradicional">Adicionar</button>
+        </div>
+
+        <div class="product-card">
+            <img src="/public/img/combo2.png" class="product-img">
+            <div class="product-info">
+                <h3 class="product-name">Combo Casal Trem</h3>
+                <p class="product-desc">2 Trem + 1 Fanta 1L</p>
+                <span class="product-price">R$ 34,99</span>
+            </div>
+            <button class="add-btn" data-id="combo-casal-trem">Adicionar</button>
+        </div>
+
+        <div class="product-card">
+            <img src="/public/img/combo3.png" class="product-img">
+            <div class="product-info">
+                <h3 class="product-name">Combo Família Artesanal</h3>
+                <p class="product-desc">3 Artesanais + Coca 2L</p>
+                <span class="product-price">R$ 79,99</span>
+            </div>
+            <button class="add-btn" data-id="combo-familia-artesanal">Adicionar</button>
+        </div>
+
+        <div class="product-card">
+            <img src="/public/img/combo4.png" class="product-img">
+            <div class="product-info">
+                <h3 class="product-name">Combo Casal Artesanal</h3>
+                <p class="product-desc">2 Peleja + Coca 1L</p>
+                <span class="product-price">R$ 54,99</span>
+            </div>
+            <button class="add-btn" data-id="combo-casal-artesanal">Adicionar</button>
+        </div>
+
+
+        <!-- ======================================== -->
+        <!-- 🟦 BEBIDAS -->
+        <!-- ======================================== -->
+
+        <h2 class="category-title">🥤 Bebidas</h2>
+
+        <div class="product-card">
+            <img src="/public/img/drink1.png" class="product-img">
+            <div class="product-info">
+                <h3 class="product-name">Coca-Cola 2L</h3>
+                <p class="product-desc">Coca-Cola geladinha pra acompanhar!</p>
+                <span class="product-price">R$ 12,00</span>
+            </div>
+            <button class="add-btn" data-id="coca2l">Adicionar</button>
+        </div>
+
+        <div class="product-card">
+            <img src="/public/img/drink2.png" class="product-img">
+            <div class="product-info">
+                <h3 class="product-name">Fanta Laranja 1L</h3>
+                <p class="product-desc">Fanta 1 Litro – perfeita para os combos.</p>
+                <span class="product-price">R$ 9,00</span>
+            </div>
+            <button class="add-btn" data-id="fanta1l">Adicionar</button>
+        </div>
+
+
+        <!-- ======================================== -->
+        <!-- 🟦 MODAL DE ADICIONAIS -->
+        <!-- ======================================== -->
+
+        <div id="adicionalModal" class="modal hidden">
+            <div class="modal-content">
+
+                <div class="modal-header">
+                    <h3>Adicionais</h3>
+                    <button id="closeAdicionalModal" class="close-btn">×</button>
+                </div>
+
+                <div class="modal-body" id="adicionalList"></div>
+
+                <button id="confirmarAdicionaisBtn" class="btn-primary full-btn">
+                    Confirmar
+                </button>
+            </div>
+        </div>
+
+
+        <!-- ======================================== -->
+        <!-- 🟦 MINI CARRINHO (PAINEL LATERAL) -->
+        <!-- ======================================== -->
+
+        <aside id="cartPanel" class="cart-panel hidden">
+
+            <div class="cart-header">
+                <h3>Seu Carrinho</h3>
+                <button id="closeCartBtn" class="close-btn">×</button>
             </div>
 
-            <button id="confirmarAdicionais" class="confirmar-adicionais">
-                Adicionar ao Pedido
-            </button>
+            <div id="cartItems" class="cart-items"></div>
+
+            <div class="cart-summary">
+
+                <div class="summary-row">
+                    <span>Subtotal:</span>
+                    <strong id="subtotalValue">R$ 0,00</strong>
+                </div>
+
+                <div class="summary-row">
+                    <span>Frete:</span>
+                    <strong id="deliveryValue">R$ 0,00</strong>
+                </div>
+
+                <div class="summary-row total">
+                    <span>Total:</span>
+                    <strong id="totalValue">R$ 0,00</strong>
+                </div>
+
+                <button id="finishOrderBtn" class="btn-primary full-btn">
+                    Finalizar Pedido
+                </button>
+
+            </div>
+        </aside>
+
+
+        <!-- ======================================== -->
+        <!-- 🟦 MODAL FINALIZAR PEDIDO -->
+        <!-- ======================================== -->
+
+        <div id="finishModal" class="modal hidden">
+            <div class="modal-content finish-content">
+
+                <div class="modal-header">
+                    <h3>Finalizar Pedido</h3>
+                    <button id="closeFinishModal" class="close-btn">×</button>
+                </div>
+
+                <div class="modal-body finish-body">
+                    <p id="finishEndereco"></p>
+                    <p id="finishResumo"></p>
+                </div>
+
+                <button id="confirmarPedidoBtn" class="btn-primary full-btn">
+                    Confirmar Pedido
+                </button>
+
+            </div>
         </div>
-    </div>
+        <!-- ======================================== -->
+        <!-- 🟦 PAINEL DE PERFIL -->
+        <!-- ======================================== -->
 
-    <!-- =======================
-         MODAL DE LOGIN
-    ======================== -->
-    <div id="loginModal" class="modal">
-        <div class="modal-content login-content">
-            <button class="close-modal" data-target="loginModal">×</button>
+        <aside id="profilePanel" class="side-panel hidden">
+            <div class="panel-header">
+                <h3>Meu Perfil</h3>
+                <button id="closeProfileBtn" class="close-btn">×</button>
+            </div>
 
-            <h3>Faça Login</h3>
+            <div class="panel-body">
+                <img id="profilePhoto" class="profile-photo" src="/public/icons/user.svg">
 
-            <button id="googleLoginBtn" class="google-btn">
-                <img src="public/img/google-icon.svg" /> Entrar com Google
-            </button>
+                <h4 id="profileName">Visitante</h4>
+                <p id="profileEmail" class="profile-email">Entre para salvar seus pedidos</p>
 
-            <div class="divider">ou</div>
+                <button id="googleLoginBtn" class="btn-primary full-btn">Entrar com Google</button>
+                <button id="logoutBtn" class="btn-secondary full-btn hidden">Sair</button>
+            </div>
+        </aside>
 
-            <input type="email" id="emailLogin" placeholder="Seu e-mail" />
-            <input type="password" id="senhaLogin" placeholder="Sua senha" />
 
-            <button id="emailLoginBtn" class="email-btn">
-                Entrar com E-mail
-            </button>
+        <!-- ======================================== -->
+        <!-- 🟦 PAINEL MEUS PEDIDOS -->
+        <!-- ======================================== -->
 
-            <button id="createAccountBtn" class="criar-conta-btn">
-                Criar Conta
-            </button>
-        </div>
-    </div>
+        <aside id="ordersPanel" class="side-panel hidden">
+            <div class="panel-header">
+                <h3>📦 Meus Pedidos</h3>
+                <button id="closeOrdersBtn" class="close-btn">×</button>
+            </div>
 
-    <!-- =======================
-         MODAL DE CRIAR CONTA
-    ======================== -->
-    <div id="criarContaModal" class="modal">
-        <div class="modal-content login-content">
-            <button class="close-modal" data-target="criarContaModal">×</button>
+            <div class="panel-body" id="ordersList">
+                <!-- Os pedidos do Firestore são inseridos aqui -->
+            </div>
+        </aside>
 
-            <h3>Criar Conta</h3>
 
-            <input type="text" id="novoNome" placeholder="Nome completo" />
-            <input type="email" id="novoEmail" placeholder="E-mail" />
-            <input type="password" id="novaSenha" placeholder="Senha" />
+        <!-- ======================================== -->
+        <!-- 🟦 PAINEL RECOMPENSAS -->
+        <!-- ======================================== -->
 
-            <button id="criarContaBtn" class="criar-conta-btn">
-                Criar Conta
-            </button>
-        </div>
-    </div>
+        <aside id="rewardsPanel" class="side-panel hidden">
+            <div class="panel-header">
+                <h3>🎉 Minhas Recompensas</h3>
+                <button id="closeRewardsBtn" class="close-btn">×</button>
+            </div>
 
-    <!-- =======================
-         TOAST NOTIFICAÇÕES
-    ======================== -->
-    <div id="toast" class="toast"></div>
+            <div class="panel-body" id="rewardsList">
+                <!-- Recompensas dinâmicas vêm do Firestore -->
+            </div>
+        </aside>
 
-    <!-- =======================
-         FIREBASE SDK
-    ======================== -->
-    <script type="module" src="https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js"></script>
-    <script type="module" src="https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js"></script>
-    <script type="module" src="https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js"></script>
 
-    <!-- =======================
-         SCRIPTS DO SISTEMA
-    ======================== -->
+    </main> <!-- FECHA PRODUCTS -->
+
+
+    <!-- ======================================== -->
+    <!-- 🟦 SCRIPTS -->
+    <!-- ======================================== -->
+
     <script src="extras.js"></script>
     <script src="script.js"></script>
 
