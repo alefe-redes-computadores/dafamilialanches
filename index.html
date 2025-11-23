@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>🍔 Da Família Lanches — DFL v5.5.7</title>
+  <title>🍔 Da Família Lanches — DFL v5.6.0</title>
 
   <meta http-equiv="Content-Security-Policy" content="
     default-src * data: blob: 'unsafe-inline' 'unsafe-eval';
@@ -18,13 +18,13 @@
   <link rel="preconnect" href="https://www.gstatic.com" crossorigin>
   <link rel="preload" as="image" href="logo.png">
   
-  <link rel="stylesheet" href="style.css?v=5.5.0" />
-  <noscript><link rel="stylesheet" href="style.css?v=5.5.0"/></noscript>
+  <link rel="stylesheet" href="style.css?v=5.6.0" />
+  <noscript><link rel="stylesheet" href="style.css?v=5.6.0"/></noscript>
 
   <script defer src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
   <script defer src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
   <script defer src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
-</head>
+  </head>
 <body>
   <audio id="checkout-sound" src="click.wav" preload="auto" hidden></audio>
 
@@ -52,23 +52,21 @@
     <section id="busca-produtos" style="padding: 15px 10px 0; margin-bottom: 10px;">
         <div class="busca-wrapper">
             <input type="text" id="campoBusca" placeholder="🔎 O que você está procurando? (Ex: TremBão, Peleja)" />
-            <div id="resultadoBusca" style="margin-top: 15px;">
-                </div>
+            <div id="resultadoBusca" style="margin-top: 15px;"></div>
         </div>
     </section>
+
     <section id="secao-promocoes" class="menu-section secao-promocoes">
-        <h2 class="titulo-secao">
-            ⚡ Promoções Relâmpago
-        </h2>
+        <h2 class="titulo-secao">⚡ Promoções Relâmpago</h2>
         
         <div class="container-promocoes grid">
-            <div class="card promo-card" data-name="Combo 2 Purizin + Fanta 1L" data-price="34.99">
+            <div class="card promo-card" data-name="Combo 2 Purizin + 1 Fanta 1L" data-price="34.99">
                 <img src="promocoes/promo1.jpg" alt="2 Purizin + 1 Fanta 1L" width="120" height="120" loading="lazy">
                 <div class="card-info">
                     <h3 class="titulo-produto-promo">Dupla Purizin + Fanta</h3>
                     <div class="desc-promo-wrapper">
                         <p class="desc-produto-promo-destaque">2 Hot Dogs "Purizin" com Purê Cremoso e 1 Fanta Laranja Geladinha!</p>
-                        <p class="desc-produto-promo-completa">Pão, Molho, Purê de batata cremoso, 1 Salsicha, Batata Palha, Ketchup e Maionese.</p>
+                        <p class="desc-produto-promo-completa">Ingredientes: Pão, Molho, Purê de batata cremoso, 1 Salsicha, Batata Palha, Ketchup e Maionese.</p>
                     </div>
                     <div class="precos-promo">
                         <span class="preco-antigo">De R$ 40,00</span>
@@ -84,7 +82,7 @@
                     <h3 class="titulo-produto-promo">Trio Padaná - Desconto Fiel</h3>
                     <div class="desc-promo-wrapper">
                         <p class="desc-produto-promo-destaque">3 Hot Dogs "Padaná" completos para dividir com a galera!</p>
-                        <p class="desc-produto-promo-completa">Pão, Molho, 2 Salsichas, Milho, Batata Palha, Bacon, Vinagrete, Mussarela, Ketchup e Maionese.</p>
+                        <p class="desc-produto-promo-completa">Ingredientes: Pão, Molho, 2 Salsichas, Milho, Batata Palha, Bacon, Vinagrete, Mussarela, Ketchup e Maionese.</p>
                     </div>
                     <div class="precos-promo">
                         <span class="preco-antigo">De R$ 45,00</span>
@@ -100,7 +98,7 @@
                     <h3 class="titulo-produto-promo">Super Combo Peleja Artesanal</h3>
                     <div class="desc-promo-wrapper">
                         <p class="desc-produto-promo-destaque">2 Burgers Artesanais "Peleja" para quem busca sabor inigualável!</p>
-                        <p class="desc-produto-promo-completa">Pão, 1 hambúrguer artesanal, 1 filé frango, Bacon, Milho, Batata Palha, Alface, Tomate, Presunto e Mussarela.</p>
+                        <p class="desc-produto-promo-completa">Ingredientes: Pão, 1 hambúrguer artesanal, 1 filé frango, Bacon, Milho, Batata Palha, Alface, Tomate, Presunto e Mussarela.</p>
                     </div>
                     <div class="precos-promo">
                         <span class="preco-antigo">De R$ 52,00</span>
@@ -110,13 +108,13 @@
                 <div class="actions"><button class="add-cart" type="button">Adicionar</button></div>
             </div>
             
-            <div class="card promo-card" data-name="Combo 3 Trem + Fanta 1L" data-price="44.99">
+            <div class="card promo-card" data-name="Combo 3 Trem + 1 Fanta 1L" data-price="44.99">
                 <img src="promocoes/promo4.jpg" alt="3 Trem + 1 Fanta 1L" width="120" height="120" loading="lazy">
                 <div class="card-info">
                     <h3 class="titulo-produto-promo">Trio Trem Completo + Refri</h3>
                     <div class="desc-promo-wrapper">
                         <p class="desc-produto-promo-destaque">3 Burgers "Trem" com bacon, queijo e batata palha + Fanta 1L!</p>
-                        <p class="desc-produto-promo-completa">Pão, hambúrguer, Salsicha, Bacon, Milho, Alface, Tomate, Presunto e Mussarela.</p>
+                        <p class="desc-produto-promo-completa">Ingredientes: Pão, hambúrguer, Salsicha, Bacon, Milho, Alface, Tomate, Presunto e Mussarela.</p>
                     </div>
                     <div class="precos-promo">
                         <span class="preco-antigo">De R$ 51,00</span>
@@ -126,13 +124,13 @@
                 <div class="actions"><button class="add-cart" type="button">Adicionar</button></div>
             </div>
             
-            <div class="card promo-card" data-name="Combo 4 Trem + Fanta 1L" data-price="49.99">
+            <div class="card promo-card" data-name="Combo 4 Trem + 1 Fanta 1L" data-price="49.99">
                 <img src="promocoes/promo5.jpg" alt="4 Trem + 1 Fanta 1L" width="120" height="120" loading="lazy">
                 <div class="card-info">
                     <h3 class="titulo-produto-promo">Quadra Trem – O Clássico da Família</h3>
                     <div class="desc-promo-wrapper">
                         <p class="desc-produto-promo-destaque">4 Burgers "Trem" saborosos com aquele refri para acompanhar!</p>
-                        <p class="desc-produto-promo-completa">Pão, hambúrguer, Salsicha, Bacon, Milho, Alface, Tomate, Presunto e Mussarela.</p>
+                        <p class="desc-produto-promo-completa">Ingredientes: Pão, hambúrguer, Salsicha, Bacon, Milho, Alface, Tomate, Presunto e Mussarela.</p>
                     </div>
                     <div class="precos-promo">
                         <span class="preco-antigo">De R$ 65,00</span>
@@ -148,7 +146,7 @@
                     <h3 class="titulo-produto-promo">Super Promo 5 UAI - Pra Galera!</h3>
                     <div class="desc-promo-wrapper">
                         <p class="desc-produto-promo-destaque">5 Burgers "Uai" recheados, a pedida certa para reunir a família!</p>
-                        <p class="desc-produto-promo-completa">Pão, hambúrguer, Milho, Bacon, Alface, Tomate, Presunto e Mussarela.</p>
+                        <p class="desc-produto-promo-completa">Ingredientes: Pão, hambúrguer, Milho, Bacon, Alface, Tomate, Presunto e Mussarela.</p>
                     </div>
                     <div class="precos-promo">
                         <span class="preco-antigo">De R$ 65,00</span>
@@ -158,13 +156,13 @@
                 <div class="actions"><button class="add-cart" type="button">Adicionar</button></div>
             </div>
             
-            <div class="card promo-card" data-name="Combo 4 TremBão + Fanta 1L" data-price="59.99">
+            <div class="card promo-card" data-name="Combo 4 TremBão + 1 Fanta 1L" data-price="59.99">
                 <img src="promocoes/promo7.jpg" alt="4 TremBão + 1 Fanta 1L" width="120" height="120" loading="lazy">
                 <div class="card-info">
                     <h3 class="titulo-produto-promo">4 TremBão + Fanta Gelada</h3>
                     <div class="desc-promo-wrapper">
                         <p class="desc-produto-promo-destaque">4 Hot Dogs "TremBão" no precinho + Fanta 1L! O maior hot dog da casa.</p>
-                        <p class="desc-produto-promo-completa">Pão, Molho, Purê de batata cremoso, 2 Salsichas, Bacon Crocante, Mussarela, Batata Palha, Vinagrete, Ketchup e Maionese.</p>
+                        <p class="desc-produto-promo-completa">Ingredientes: Pão, Molho, Purê de batata cremoso, 2 Salsichas, Bacon Crocante, Mussarela, Batata Palha, Vinagrete, Ketchup e Maionese.</p>
                     </div>
                     <div class="precos-promo">
                         <span class="preco-antigo">De R$ 77,00</span>
@@ -180,7 +178,7 @@
                     <h3 class="titulo-produto-promo">Oferta 4 Armaria - A Favorita</h3>
                     <div class="desc-promo-wrapper">
                         <p class="desc-produto-promo-destaque">4 Burgers "Armaria", a queridinha dos clientes, em um combo imperdível!</p>
-                        <p class="desc-produto-promo-completa">Pão, 1 hambúrguer, 1 filé frango, bacon, milho, batata palha, alface, tomate, salsicha, presunto e mussarela.</p>
+                        <p class="desc-produto-promo-completa">Ingredientes: Pão, 1 hambúrguer, 1 filé frango, bacon, milho, batata palha, alface, tomate, salsicha, presunto e mussarela.</p>
                     </div>
                     <div class="precos-promo">
                         <span class="preco-antigo">De R$ 72,00</span>
@@ -190,13 +188,13 @@
                 <div class="actions"><button class="add-cart" type="button">Adicionar</button></div>
             </div>
 
-            <div class="card promo-card" data-name="Combo 5 Uai + Kuat 2L" data-price="64.99">
+            <div class="card promo-card" data-name="Combo 5 Uai + 1 Kuat de Brinde" data-price="64.99">
                 <img src="promocoes/promo9.jpg" alt="5 Uai + 1 Kuat de Brinde" width="120" height="120" loading="lazy">
                 <div class="card-info">
                     <h3 class="titulo-produto-promo">5 UAI + Kuat de Brinde!</h3>
                     <div class="desc-promo-wrapper">
                         <p class="desc-produto-promo-destaque">Compre 5 Burgers "Uai" e leve 1 Kuat 2L por nossa conta!</p>
-                        <p class="desc-produto-promo-completa">Pão, hambúrguer, Milho, Bacon, Alface, Tomate, Presunto e Mussarela.</p>
+                        <p class="desc-produto-promo-completa">Ingredientes: Pão, hambúrguer, Milho, Bacon, Alface, Tomate, Presunto e Mussarela.</p>
                     </div>
                     <div class="precos-promo">
                         <span class="preco-antigo">De R$ 75,00</span>
@@ -208,6 +206,7 @@
 
         </div>
     </section>
+
     <div id="cart-backdrop"></div>
 
     <aside id="mini-cart" class="mini-cart" aria-hidden="true">
@@ -600,7 +599,7 @@
         <a href="https://www.instagram.com/dafamilialanches" target="_blank" class="footer-btn" rel="noopener">📸 Instagram</a>
         <a href="https://www.ifood.com.br/delivery/patos-de-minas/dafamilialanches" target="_blank" class="footer-btn" rel="noopener">🍔 iFood</a>
       </div>
-      <div class="footer-copy">© 2025 Da Família Lanches — Todos os direitos reservados 🍔 • <b>v5.5.0</b></div>
+      <div class="footer-copy">© 2025 Da Família Lanches — Todos os direitos reservados 🍔 • <b>v5.6.0</b></div>
     </footer>
   </div>
 
@@ -654,6 +653,6 @@
     <button id="cookie-accept" type="button">Aceitar</button>
   </div>
 
-  <script defer src="script.js?v=5.5.7"></script>
+  <script defer src="script.js?v=5.6.0"></script>
 </body>
 </html>
