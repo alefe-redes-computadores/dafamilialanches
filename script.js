@@ -1,11 +1,12 @@
 /* =========================================================  
-   🌟 DFL v5.5.7 — INTEGRAÇÃO COMPLETA E CORREÇÃO DE INICIALIZAÇÃO
-   - Código do extras.js integrado para eliminar risco de falhas de contexto/carregamento.
-   - Lógica principal do site reestruturada para máxima compatibilidade.
+   🌟 DFL v5.6.0 — HYBRID STABLE VERSION
+   - Base: Script Original v5.3.6 (Estável)
+   - Integrado: Lógica do extras.js (Para evitar conflitos)
+   - Novo: Busca Fuzzy + Grade de Promoções (Substitui Carrossel)
 ========================================================= */
 
 // ====================================================================
-// 🧠 PARTE 0: LÓGICA DE BUSCA E FERRAMENTAS GERAIS (MOVE PARA TOPO)
+// 1. FUNÇÕES AUXILIARES (BUSCA + EXTRAS)
 // ====================================================================
 
 // Função para mapear todos os produtos do cardápio em um formato simples para a busca
@@ -53,70 +54,69 @@ function levenshteinDistance(s1, s2) {
     return track[s2.length][s1.length];
 }
 
-// ====================================================================
-// 🍔 FUNÇÕES DO EXTRAS.JS (INTEGRADO)
-// ====================================================================
+// --- FUNÇÕES DO EXTRAS.JS (INTEGRADAS) ---
 
-const THUMB_MAP = [
-    { key: 'casal', img: 'imagens/combo1.png' },
-    { key: 'família', img: 'imagens/combo3.png' },
-    { key: 'familia', img: 'imagens/combo3.png' },
-    { key: 'artesanal', img: 'imagens/combo4.png' },
-    { key: 'purizin', img: 'imagens/purizin.png' },
-    { key: 'padaná', img: 'imagens/padana.png' },
-    { key: 'padana', img: 'imagens/padana.png' },
-    { key: 'nigucim', img: 'imagens/nigucim.png' },
-    { key: 'nimin', img: 'imagens/nimin.png' },
-    { key: 'trembão', img: 'imagens/trembao.png' },
-    { key: 'trembao', img: 'imagens/trembao.png' },
-    { key: 'bão', img: 'imagens/bao.png' },
-    { key: 'bao', img: 'imagens/bao.png' },
-    { key: 'trem', img: 'imagens/trem.png' },
-    { key: 'uai', img: 'imagens/uai.png' },
-    { key: 'cadim', img: 'imagens/cadim.png' },
-    { key: 'bitela', img: 'imagens/bitela.png' },
-    { key: 'armaria', img: 'imagens/armaria.png' },
-    { key: 'apruma', img: 'imagens/apruma.png' },
-    { key: 'peleja', img: 'imagens/peleja.png' },
-    { key: 'custoso', img: 'imagens/custoso.png' },
-    { key: 'tudibom', img: 'imagens/tudibom.png' },
-    { key: 'simprão', img: 'imagens/simprao.png' },
-    { key: 'simprao', img: 'imagens/simprao.png' }
-];
-
-function fixThumbnail(cardElement) {
-    const thumbDiv = cardElement.querySelector('.pedido-thumb');
-    if (!thumbDiv) return;
-    
-    const text = (cardElement.innerText || '').toLowerCase();
-    const found = THUMB_MAP.find(t => text.includes(t.key));
-    
-    if (found) {
-       thumbDiv.style.backgroundImage = `url('${found.img}')`;
-    } 
-    else {
-       // Se não encontrou, usa um ícone genérico seguro.
-       thumbDiv.style.backgroundImage = `url('imagens/burger.png')`; 
-    }
-}
-
-function watchOrders() {
-    const list = document.getElementById('listaPedidos');
-    if (!list) return;
-    
-    const mo = new MutationObserver((mutations) => {
-        mutations.forEach(mutation => {
-            mutation.addedNodes.forEach(node => {
-                if (node.nodeType === 1 && node.classList.contains('pedido-card')) {
-                    fixThumbnail(node);
-                }
-            });
-        });
-        Array.from(list.children).forEach(fixThumbnail);
-    });
-    
-    mo.observe(list, { childList: true, subtree: true });
-    Array.from(list.children).forEach(fixThumbnail);
+function injectExtrasStyles() {
+    if (document.getElementById('dfl-extras-js-style')) return;
+    const st = document.createElement('style');
+    st.id = 'dfl-extras-js-style';
+    st.textContent = `
+      /* --- BASE DO TOAST (Comum a todos) --- */
+      .popup-add, .dfl-toast {
+        position: fixed !important;
+        top: 20px !important; 
+        bottom: auto !important;
+        left: 50% !important;
+        transform: translateX(-50%) translateY(-150%) !important; /* Começa escondido */
+        background: #222 !important; 
+        color: #fff !important;
+        font-family: 'Segoe UI', Roboto, sans-serif !important;
+        font-weight: 700 !important;
+        font-size: 0.95rem !important;
+        white-space: nowrap !important;
+        padding: 12px 24px !important; 
+        border-radius: 50px !important; 
+        box-shadow: 0 8px 25px rgba(0,0,0,0.3) !important;
+        z-index: 2147483647 !important;
+        opacity: 0 !important;
+        transition: all 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55) !important;
+        pointer-events: none !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        gap: 10px !important;
+      }
+      /* Estado Visível */
+      .popup-add.show, .dfl-toast.show {
+        opacity: 1 !important;
+        transform: translateX(-50%) translateY(0) !important;
+      }
+      /* --- MODO ESPECIAL: CENTRO --- */
+      .popup-add.dfl-center, .dfl-toast.dfl-center {
+        top: 50% !important;
+        background: rgba(0, 0, 0, 0.9) !important;
+        backdrop-filter: blur(5px) !important;
+        padding: 25px 35px !important;
+        font-size: 1.1rem !important;
+        border: 1px solid rgba(255,255,255,0.15) !important;
+        transform: translate(-50%, -50%) scale(0.5) !important; 
+      }
+      .popup-add.dfl-center.show, .dfl-toast.dfl-center.show {
+        transform: translate(-50%, -50%) scale(1) !important; 
+      }
+      /* --- CORREÇÃO DAS MINIATURAS --- */
+      .pedido-card .pedido-thumb {
+        width: 100% !important;
+        height: 110px !important;
+        background-size: cover !important;
+        background-position: center center !important;
+        border-radius: 8px !important;
+        margin-bottom: 10px !important;
+        background-color: transparent !important;
+        box-shadow: inset 0 0 0 1px rgba(0,0,0,0.05);
+      }
+    `;
+    document.head.appendChild(st);
 }
 
 function stylizePopup(el) {
@@ -146,79 +146,46 @@ function stylizePopup(el) {
     }
 }
 
-function injectExtrasStyles() {
-    if (document.getElementById('dfl-extras-js-style')) return;
-    const st = document.createElement('style');
-    st.id = 'dfl-extras-js-style';
-    st.textContent = `
-      /* --- BASE DO TOAST (Comum a todos) --- */
-      .popup-add, .dfl-toast {
-        position: fixed !important;
-        top: 20px !important; 
-        bottom: auto !important;
-        left: 50% !important;
-        transform: translateX(-50%) translateY(-150%) !important; /* Começa escondido */
-        
-        background: #222 !important; 
-        color: #fff !important;
-        font-family: 'Segoe UI', Roboto, sans-serif !important;
-        font-weight: 700 !important;
-        font-size: 0.95rem !important;
-        white-space: nowrap !important;
-        
-        padding: 12px 24px !important; 
-        border-radius: 50px !important; 
-        box-shadow: 0 8px 25px rgba(0,0,0,0.3) !important;
-        
-        z-index: 2147483647 !important;
-        opacity: 0 !important;
-        
-        transition: all 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55) !important;
-        pointer-events: none !important;
-        
-        display: flex !important;
-        align-items: center !important;
-        justify-content: center !important;
-        gap: 10px !important;
-      }
+const THUMB_MAP = [
+    { key: 'casal', img: 'imagens/combo1.png' }, { key: 'família', img: 'imagens/combo3.png' }, { key: 'familia', img: 'imagens/combo3.png' },
+    { key: 'artesanal', img: 'imagens/combo4.png' }, { key: 'purizin', img: 'imagens/purizin.png' }, { key: 'padaná', img: 'imagens/padana.png' },
+    { key: 'padana', img: 'imagens/padana.png' }, { key: 'nigucim', img: 'imagens/nigucim.png' }, { key: 'nimin', img: 'imagens/nimin.png' },
+    { key: 'trembão', img: 'imagens/trembao.png' }, { key: 'trembao', img: 'imagens/trembao.png' }, { key: 'bão', img: 'imagens/bao.png' },
+    { key: 'bao', img: 'imagens/bao.png' }, { key: 'trem', img: 'imagens/trem.png' }, { key: 'uai', img: 'imagens/uai.png' },
+    { key: 'cadim', img: 'imagens/cadim.png' }, { key: 'bitela', img: 'imagens/bitela.png' }, { key: 'armaria', img: 'imagens/armaria.png' },
+    { key: 'apruma', img: 'imagens/apruma.png' }, { key: 'peleja', img: 'imagens/peleja.png' }, { key: 'custoso', img: 'imagens/custoso.png' },
+    { key: 'tudibom', img: 'imagens/tudibom.png' }, { key: 'simprão', img: 'imagens/simprao.png' }, { key: 'simprao', img: 'imagens/simprao.png' }
+];
 
-      /* Estado Visível */
-      .popup-add.show, .dfl-toast.show {
-        opacity: 1 !important;
-        transform: translateX(-50%) translateY(0) !important;
-      }
-
-      /* --- MODO ESPECIAL: CENTRO --- */
-      .popup-add.dfl-center, .dfl-toast.dfl-center {
-        top: 50% !important;
-        background: rgba(0, 0, 0, 0.9) !important;
-        backdrop-filter: blur(5px) !important;
-        padding: 25px 35px !important;
-        font-size: 1.1rem !important;
-        border: 1px solid rgba(255,255,255,0.15) !important;
-        transform: translate(-50%, -50%) scale(0.5) !important; 
-      }
-
-      .popup-add.dfl-center.show, .dfl-toast.dfl-center.show {
-        transform: translate(-50%, -50%) scale(1) !important; 
-      }
-
-      /* --- CORREÇÃO DAS MINIATURAS --- */
-      .pedido-card .pedido-thumb {
-        width: 100% !important;
-        height: 110px !important;
-        background-size: cover !important;
-        background-position: center center !important;
-        border-radius: 8px !important;
-        margin-bottom: 10px !important;
-        background-color: transparent !important;
-        box-shadow: inset 0 0 0 1px rgba(0,0,0,0.05);
-      }
-    `;
-    document.head.appendChild(st);
+function fixThumbnail(cardElement) {
+    const thumbDiv = cardElement.querySelector('.pedido-thumb');
+    if (!thumbDiv) return;
+    const text = (cardElement.innerText || '').toLowerCase();
+    const found = THUMB_MAP.find(t => text.includes(t.key));
+    if (found) { thumbDiv.style.backgroundImage = `url('${found.img}')`; } 
+    else { thumbDiv.style.backgroundImage = `url('imagens/burger.png')`; }
 }
-// ====================================================================
 
+function watchOrders() {
+    const list = document.getElementById('listaPedidos');
+    if (!list) return;
+    const mo = new MutationObserver((mutations) => {
+        mutations.forEach(mutation => {
+            mutation.addedNodes.forEach(node => {
+                if (node.nodeType === 1 && node.classList.contains('pedido-card')) {
+                    fixThumbnail(node);
+                }
+            });
+        });
+        Array.from(list.children).forEach(fixThumbnail);
+    });
+    mo.observe(list, { childList: true, subtree: true });
+    Array.from(list.children).forEach(fixThumbnail);
+}
+
+// ====================================================================
+// 2. INICIALIZAÇÃO PRINCIPAL
+// ====================================================================
 
 document.addEventListener("DOMContentLoaded", () => {
     // MÁSCARA AUTOMÁTICA DO CEP
@@ -231,18 +198,21 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-    /* ------------------ 🔍 LÓGICA DE BUSCA DE PRODUTOS ------------------ */
+    /* ------------------ 🔍 LÓGICA DE BUSCA DE PRODUTOS (V5.6) ------------------ */
     const campoBusca = document.getElementById("campoBusca");
     const resultadoBusca = document.getElementById("resultadoBusca");
     let todosProdutos = [];
 
+    // Captura a lista de produtos após um breve delay para garantir DOM
+    setTimeout(() => {
+        try { todosProdutos = getProductsMap(); } catch(e) { console.log("Busca não iniciada ainda"); }
+    }, 1000);
+
     // Ação ao digitar no campo de busca
     campoBusca?.addEventListener("input", (e) => {
         const query = e.target.value.trim().toLowerCase();
-        
-        if (todosProdutos.length === 0) return;
+        if (todosProdutos.length === 0) todosProdutos = getProductsMap();
 
-        // Exibe todos os produtos se a busca estiver vazia
         if (query.length === 0) {
             todosProdutos.forEach(p => p.element.style.display = 'block');
             document.querySelectorAll(".menu-section").forEach(s => s.style.display = 'block');
@@ -250,36 +220,24 @@ document.addEventListener("DOMContentLoaded", () => {
             return;
         }
         
-        // 1. FILTRAGEM (Busca Exata/Parcial)
         const queryClean = query.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
         const produtosEncontrados = todosProdutos.filter(p => p.searchName.includes(queryClean));
         
-        // 2. EXIBIÇÃO E ROLAGEM
         if (produtosEncontrados.length > 0) {
-            // Esconde todos os cards e seções
             todosProdutos.forEach(p => p.element.style.display = 'none');
             document.querySelectorAll(".menu-section").forEach(s => s.style.display = 'none');
             
-            // Exibe apenas os cards encontrados
             produtosEncontrados.forEach(p => {
                 p.element.style.display = 'block';
-                // Exibe a seção pai do card encontrado
                 p.element.closest(".menu-section").style.display = 'block';
             });
             
             resultadoBusca.innerHTML = `<div class="feedback-busca success">✅ ${produtosEncontrados.length} resultados encontrados.</div>`;
-            
-            // Rola a página para o primeiro resultado
-            setTimeout(() => {
-                produtosEncontrados[0].element.scrollIntoView({ behavior: 'smooth', block: 'start' });
-            }, 50);
+            setTimeout(() => { produtosEncontrados[0].element.scrollIntoView({ behavior: 'smooth', block: 'start' }); }, 50);
 
         } else {
-            // 3. FUZZY MATCHING (Você quis dizer...?)
             let sugestao = null;
             let menorDistancia = Infinity;
-            
-            // Busca a melhor correspondência (Levenshtein distance)
             for (const produto of todosProdutos) {
                 const dist = levenshteinDistance(queryClean, produto.searchName);
                 if (dist < menorDistancia && dist <= Math.max(2, Math.floor(produto.searchName.length * 0.3))) { 
@@ -288,40 +246,22 @@ document.addEventListener("DOMContentLoaded", () => {
                 }
             }
             
-            // Esconde todos os cards e seções
             todosProdutos.forEach(p => p.element.style.display = 'none');
             document.querySelectorAll(".menu-section").forEach(s => s.style.display = 'none');
             
             if (sugestao) {
-                // Sugere e insere link para buscar o produto sugerido
-                const linkSugestao = `<a href="javascript:void(0);" data-sugestao="${sugestao.name}">` +
-                                     `Você quis dizer: <b>${sugestao.name}</b>? Clique aqui para buscar.</a>`;
-
-                resultadoBusca.innerHTML = `
-                    <div class="feedback-busca sugestao">
-                        ${linkSugestao}
-                    </div>
-                `;
-                
-                // Adiciona evento de clique na sugestão
+                const linkSugestao = `<a href="javascript:void(0);" data-sugestao="${sugestao.name}">Você quis dizer: <b>${sugestao.name}</b>? Clique aqui.</a>`;
+                resultadoBusca.innerHTML = `<div class="feedback-busca sugestao">${linkSugestao}</div>`;
                 resultadoBusca.querySelector('a')?.addEventListener('click', (ev) => {
                     const termo = ev.target.dataset.sugestao;
-                    if (termo) campoBusca.value = termo; // Preenche o campo
-                    campoBusca.dispatchEvent(new Event('input')); // Dispara o evento de busca
+                    if (termo) { campoBusca.value = termo; campoBusca.dispatchEvent(new Event('input')); }
                 });
-
             } else {
-                // Mensagem de Erro
-                resultadoBusca.innerHTML = `
-                    <div class="feedback-busca erro">
-                        Nenhum produto encontrado com "<b>${query}</b>". 
-                        Tente digitar o nome completo ou uma busca diferente.
-                    </div>
-                `;
+                resultadoBusca.innerHTML = `<div class="feedback-busca erro">Nenhum produto encontrado com "<b>${query}</b>".</div>`;
             }
         }
     });
-    
+
     /* ------------------ ⚙️ BASE ------------------ */  
     const sound = new Audio("click.wav");   
     let cart = [];  
@@ -340,18 +280,8 @@ document.addEventListener("DOMContentLoaded", () => {
         if (level.includes('ouro')) return '🥇';  
         if (level.includes('platina')) return '💎';  
         if (level.includes('diamante')) return '👑';  
-        if (level.includes('safira')) return '💠';       
-        if (level.includes('rubi')) return '♦️';         
-        if (level.includes('esmeralda')) return '❇️';   
-        if (level.includes('elite')) return '⚔️';        
-        if (level.includes('supremo')) return '🚀';      
-        if (level.includes('lenda')) return '🦁';        
-        if (level.includes('mítico') || level.includes('mitico')) return '🦄';  
         return '👤';   
     }  
-
-    // PROMO_DATA NÃO É MAIS NECESSÁRIO, POIS OS DADOS ESTÃO NO HTML.
-    const PROMO_DATA = [];
 
     /* ------------------ 🎯 ELEMENTOS ------------------ */  
     const el = {  
@@ -385,14 +315,10 @@ document.addEventListener("DOMContentLoaded", () => {
         recompensasFecharBtn: document.querySelector(".fechar-recompensas"),  
         recompensasLista: document.getElementById("listaRecompensas"),  
         historicoLista: document.getElementById("historicoRecompensas"),
-        // NOVOS ELEMENTOS PARA ENDEREÇO MANUAL
         btnNaoSeiCEP: document.getElementById("btnNaoSeiCEP"),
         manualArea: document.getElementById("manualArea"),
-        manualEndereco: document.getElementById("manualEndereco"),
-        manualNumero: document.getElementById("manualNumero"),
         btnConfirmarEndereco: document.getElementById("btnConfirmarEndereco"),
         btnVoltarCEP: document.getElementById("btnVoltarCEP"),
-        // BARRA DE PROGRESSO
         progressWrapper: document.getElementById("progressWrapper"),
         progressText: document.getElementById("progressText"),
         progressFill: document.getElementById("progressFill")
@@ -458,7 +384,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }  
         pop.textContent = msg;  
         pop.classList.add("show");  
-        stylizePopup(pop); // Chama a função de estilo integrado
+        stylizePopup(pop); 
         setTimeout(() => pop.classList.remove("show"), 2000);  
     }
 
@@ -480,36 +406,28 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     /* ===========================================================
-       📊 BARRA DE PROGRESSO PARA FRETE GRÁTIS
+       📊 BARRA DE PROGRESSO
     =========================================================== */
     function atualizarBarraProgresso() {
         const subtotal = getCartSubtotal();
         const progressText = document.getElementById("progressText");
         const progressFill = document.getElementById("progressFill");
         const progressWrapper = document.getElementById("progressWrapper");
-        
         if (!progressText || !progressFill || !progressWrapper) return;
-
         const falta = LIMITE_FRETE_GRATIS - subtotal;
         const porcentagem = Math.min(100, (subtotal / LIMITE_FRETE_GRATIS) * 100);
-        
-        // Atualiza a barra visual
         progressFill.style.width = `${porcentagem}%`;
-
         if (subtotal >= LIMITE_FRETE_GRATIS) {
-            // ATINGIU FRETE GRÁTIS! 🎉
-            progressText.innerHTML = `🎉 <strong>Oba!</strong> Você ganhou <strong>Frete Grátis</strong> nessa compra!`;
+            progressText.innerHTML = `🎉 <strong>Oba!</strong> Você ganhou <strong>Frete Grátis</strong>!`;
             progressFill.style.background = "linear-gradient(90deg, #4caf50, #2e7d32)";
             progressWrapper.style.background = "#e8f5e9";
             progressWrapper.style.borderColor = "#4caf50";
         } else if (falta <= 20) {
-            // QUASE LÁ!
-            progressText.innerHTML = `🔥 <strong>Quase lá!</strong> Falta apenas <strong>${money(falta)}</strong> para Frete Grátis!`;
+            progressText.innerHTML = `🔥 <strong>Quase lá!</strong> Falta apenas <strong>${money(falta)}</strong>!`;
             progressFill.style.background = "linear-gradient(90deg, #ff9800, #f57c00)";
             progressWrapper.style.background = "#fff3e0";
             progressWrapper.style.borderColor = "#ff9800";
         } else {
-            // AINDA FALTA
             progressText.innerHTML = `Faltam <strong>${money(falta)}</strong> para Frete Grátis 🚀`;
             progressFill.style.background = "linear-gradient(90deg, #ffb300, #ff9800)";
             progressWrapper.style.background = "#fff8d6";
@@ -522,10 +440,7 @@ document.addEventListener("DOMContentLoaded", () => {
         if (!el.miniList) return;   
         const totalItens = cart.reduce((s, i) => s + i.qtd, 0);  
         if (el.cartCount) el.cartCount.textContent = totalItens;  
-
-        // ATUALIZA BARRA DE PROGRESSO
         atualizarBarraProgresso();
-
         if (!cart.length) {  
             el.miniList.innerHTML = '<p style="text-align:center;color:#999;padding:20px;">Carrinho vazio 🛒</p>';  
             if(el.miniFoot) el.miniFoot.querySelectorAll(".cart-summary-generated").forEach(e => e.remove());  
@@ -535,7 +450,6 @@ document.addEventListener("DOMContentLoaded", () => {
             if (couponDiscountRow) couponDiscountRow.style.display = "none";  
             return;  
         }  
-
         el.miniList.innerHTML = cart.map((item, idx) => `  
       <div class="cart-item" style="border-bottom:1px solid #eee;padding:10px 0;">  
         <div style="display:flex;justify-content:space-between;align-items:center;">  
@@ -616,14 +530,11 @@ document.addEventListener("DOMContentLoaded", () => {
                 el.userBtn.textContent = `Olá, ${user.displayName?.split(" ")[0] || user.email.split("@")[0]}`;  
                 if (el.pedidosContainer) el.pedidosContainer.style.display = 'block';  
                 if (el.recompensasContainer) el.recompensasContainer.style.display = 'block';  
-                
-                // INTEGRAÇÃO EXTRAS.JS: DETECTOR DE LOGIN
                 if (!sessionStorage.getItem('dfl_logged_in_msg')) {
                   sessionStorage.setItem('dfl_logged_in_msg', 'true');
                   const nome = user.displayName ? user.displayName.split(' ')[0] : 'Cliente';
                   popupAdd(`🎉 Login realizado! Olá, ${nome}.`);
                 }
-
             } else {  
                 el.userBtn.textContent = "Entrar / Cadastrar";  
                 if (el.pedidosContainer) el.pedidosContainer.style.display = 'none';  
@@ -686,20 +597,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
     /* ------------------ ➕ ADICIONAIS ------------------ */  
-    const adicionais = [  
-        { nome: "Cebola", preco: 0.99 },  
-        { nome: "Salada", preco: 1.99 },  
-        { nome: "Ovo", preco: 1.99 },  
-        { nome: "Bacon", preco: 2.99 },  
-        { nome: "Hambúrguer Tradicional 56g", preco: 2.99 },  
-        { nome: "Cheddar Cremoso", preco: 3.99 },  
-        { nome: "Filé de Frango", preco: 5.99 },  
-        { nome: "Hambúrguer Artesanal 120g", preco: 7.99 },  
-    ];  
-
-    let produtoExtras = null;  
-    let produtoPrecoBase = 0;  
-
     const openExtrasFor = safe((card) => {  
         if (!card || !el.extrasModal || !el.extrasList) return;  
         produtoExtras = card.dataset.name;  
@@ -716,7 +613,7 @@ document.addEventListener("DOMContentLoaded", () => {
         btn.addEventListener("click", (e) => openExtrasFor(e.currentTarget.closest(".card")))
     );  
     
-    // Adiciona evento aos cards de promoção também, se eles tiverem extras (que não é o caso, mas é seguro)
+    // Adiciona evento aos cards de promoção também
     document.querySelectorAll(".promo-card .extras-btn").forEach((btn) =>
         btn.addEventListener("click", (e) => openExtrasFor(e.currentTarget.closest(".card")))
     );
@@ -800,10 +697,7 @@ document.addEventListener("DOMContentLoaded", () => {
     );  
 
     function addCommonItem(nome, preco) {  
-        // Tenta abrir o modal de refri APENAS para combos do menu principal (Lanches Artesanais, Família, etc.)
         if (/^combo/i.test(nome) && !/^\s*Combo [0-9]/.test(nome)) { openComboModal(nome, preco); return; }  
-        
-        // Exceção: Combos de promoção já tem o refri no nome (Combo 2 Purizin + Fanta 1L), então adiciona direto.
         const found = cart.find((i) => i.nome === nome && i.preco === preco);  
         if (found) found.qtd++;  
         else cart.push({ nome, preco, qtd: 1 });  
@@ -829,23 +723,18 @@ document.addEventListener("DOMContentLoaded", () => {
     // Variável para controlar modo de endereço
     let modoEnderecoManual = false;
 
-    // Botão "Não sei meu CEP" → Redireciona para Correios
     document.getElementById("btnNaoSeiCEP")?.addEventListener("click", () => {
         window.open("https://buscacepinter.correios.com.br/app/endereco/index.php", "_blank");
     });
     document.getElementById("btnManual")?.addEventListener("click", mostrarModoManual);
 
-    // Botão "Preencher Manualmente" → Mostra área manual
     function mostrarModoManual() {
         modoEnderecoManual = true;
-        
         const freteContainer = document.querySelector('.frete-container');
         const manualArea = document.getElementById('manualArea');
-        
         if (freteContainer) freteContainer.style.display = 'none';
         if (manualArea) manualArea.style.display = 'block';
         
-        // Limpa campos do CEP
         const cepInput = document.getElementById('cep-input');
         const enderecoAuto = document.getElementById('endereco-auto');
         const numeroInput = document.getElementById('numero-input');
@@ -857,56 +746,36 @@ document.addEventListener("DOMContentLoaded", () => {
         if (complementoInput) complementoInput.value = '';
     }
 
-    // Botão "Voltar e Usar CEP" → Volta ao modo CEP
     document.getElementById("btnVoltarCEP")?.addEventListener("click", () => {
         modoEnderecoManual = false;
-        
         const freteContainer = document.querySelector('.frete-container');
         const manualArea = document.getElementById('manualArea');
-        
         if (freteContainer) freteContainer.style.display = 'block';
         if (manualArea) manualArea.style.display = 'none';
         
-        // Limpa campos manuais
         const manualEndereco = document.getElementById('manualEndereco');
         const manualNumero = document.getElementById('manualNumero');
-        
         if (manualEndereco) manualEndereco.value = '';
         if (manualNumero) manualNumero.value = '';
-        
         renderMiniCart();
     });
 
-    // Botão "Confirmar Endereço Manual" → Valida e calcula frete
     document.getElementById("btnConfirmarEndereco")?.addEventListener("click", async () => {
         const manualEndereco = document.getElementById('manualEndereco');
         const manualNumero = document.getElementById('manualNumero');
-        
         const endereco = manualEndereco?.value?.trim() || '';
         const numero = manualNumero?.value?.trim() || '';
         
-        if (!endereco) {
-            popupAdd("Preencha o endereço completo!");
-            return;
-        }
+        if (!endereco) { popupAdd("Preencha o endereço completo!"); return; }
+        if (!numero) { popupAdd("Preencha o número!"); return; }
         
-        if (!numero) {
-            popupAdd("Preencha o número!");
-            return;
-        }
-        
-        // Mostra feedback
         popupAdd("Verificando endereço...");
-        
-        // Calcula frete com a mesma lógica do CEP
         const taxaCalculada = await getDynamicDeliveryFee(endereco);
-        
         if (taxaCalculada === DELIVERY_FEE_DEFAULT) {
             popupAdd(`Bairro não mapeado. Taxa padrão: ${money(DELIVERY_FEE_DEFAULT)}`);
         } else {
             popupAdd(`Taxa de entrega: ${money(taxaCalculada)} ✅`);
         }
-        
         renderMiniCart();
     });
 
@@ -1191,6 +1060,74 @@ document.addEventListener("DOMContentLoaded", () => {
             return configuracoesRecompensa;  
         } catch (e) { console.error("Erro recompensas:", e); return []; }  
     }
+
+    /* ===========================================================
+       ⏳ TIMER DA PROMOÇÃO (AGORA INJETADO NA NOVA SEÇÃO)
+       =========================================================== */
+    
+    // Função que calcula e formata o tempo restante
+    const getFormattedTime = (diff) => {
+        if (diff <= 0) return "00:00:00";
+        const h = String(Math.floor(diff / 3600000)).padStart(2, "0");
+        const m = String(Math.floor((diff % 3600000) / 60000)).padStart(2, "0");
+        const s = String(Math.floor((diff % 60000) / 1000)).padStart(2, "0");
+        return `${h}:${m}:${s}`;
+    };
+
+    const atualizarTimer = safe(() => {
+        const agora = new Date();
+        const fim = new Date();
+        // Zera o tempo todo dia à meia-noite (23:59:59.999)
+        fim.setHours(23, 59, 59, 999);
+        const diff = fim - agora;
+        
+        const elSecaoPromo = document.getElementById("secao-promocoes");
+        if (!elSecaoPromo) return;
+
+        // Se o contador ainda não foi criado, cria e insere
+        let elTimerWrapper = elSecaoPromo.querySelector(".contador-promo-wrapper");
+        
+        if (!elTimerWrapper) {
+            const elTitulo = elSecaoPromo.querySelector(".titulo-secao");
+            if (!elTitulo) return;
+            
+            elTimerWrapper = document.createElement("div");
+            elTimerWrapper.className = "contador-promo-wrapper";
+            elTimerWrapper.innerHTML = `
+                <span class="tempo-restante-label">⏳ Tempo restante:</span>
+                <span class="tempo-restante-valor" id="promo-timer-valor">${getFormattedTime(diff)}</span>
+            `;
+            const elSlogan = document.createElement("p");
+            elSlogan.className = "slogan-promo";
+            elSlogan.textContent = "Aproveite antes que o cronômetro zere à meia-noite!";
+
+            // Insere o contador e o slogan após o título <h2>
+            elTitulo.after(elSlogan);
+            elTitulo.after(elTimerWrapper);
+        } else {
+            // Se já existe, apenas atualiza o valor
+            const elValor = elTimerWrapper.querySelector("#promo-timer-valor");
+            if (elValor) elValor.textContent = getFormattedTime(diff);
+        }
+    });
+
+    // Inicia e repete o timer
+    atualizarTimer();
+    setInterval(atualizarTimer, 1000);
+
+    /* STATUS (Mantido) */  
+    const atualizarStatus = safe(() => {  
+        const agora = new Date(); const h = agora.getHours();  
+        const aberto = h >= 18 && h < 23;   
+        if (el.statusBanner) { el.statusBanner.textContent = aberto ? "🟢 Aberto — Faça seu pedido!" : "🔴 Fechado — Voltamos às 18h!"; el.statusBanner.className = `status-banner ${aberto ? "open" : "closed"}`; }  
+        if (el.hoursBanner) {  
+            const elMsg = el.hoursBanner.querySelector("#hours-message"); const elTimer = el.hoursBanner.querySelector("#timer");  
+            if (!elMsg || !elTimer) return;  
+            if (aberto) { const fim = new Date(agora); fim.setHours(23, 30, 0); let diff = (fim - agora) / 1000; if (diff < 0) diff = 0; const restH = Math.floor(diff / 3600); const restM = Math.floor((diff % 3600) / 60); elMsg.innerHTML = `⏰ Hoje atendemos até <b>23h30</b> — Faltam`; elTimer.textContent = `${restH}h ${restM}min`; }  
+            else { const inicio = new Date(agora); if (h >= 23) inicio.setDate(inicio.getDate() + 1); inicio.setHours(18, 0, 0); let diff = (inicio - agora) / 1000; const faltamH = Math.floor(diff / 3600); const faltamM = Math.floor((diff % 3600) / 60); elMsg.innerHTML = `🔒 Fechado — Abrimos em`; elTimer.textContent = `${faltamH}h ${faltamM}min`; }  
+        }  
+    });  
+    atualizarStatus(); setInterval(atualizarStatus, 60000);  
     
     /* FECHAR PEDIDO (MANTIDO) */  
     async function fecharPedido() {  
@@ -1275,7 +1212,6 @@ document.addEventListener("DOMContentLoaded", () => {
         try { const q = db.collection("Pedidos").where("userId", "==", userId).orderBy("data", "desc"); const snapshot = await q.get();  
             if (snapshot.empty) { el.pedidosLista.innerHTML = `<p class="empty-orders">Nenhum pedido encontrado 😢</p>`; return; }  
             exibirPedidos(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));  
-            watchOrders(); // Garante que o observador está ativo
         } catch (err) { console.error("Erro pedidos:", err); el.pedidosLista.innerHTML = `<p class="empty-orders" style="color:red;">Erro ao buscar pedidos.</p>`; }  
     }  
 
@@ -1373,28 +1309,21 @@ document.addEventListener("DOMContentLoaded", () => {
     const cookieBanner = document.getElementById("cookie-banner"); const cookieAcceptBtn = document.getElementById("cookie-accept");  
     if (cookieBanner && cookieAcceptBtn) { if (localStorage.getItem("dfl-cookies-accepted") === "true") cookieBanner.style.display = "none"; else cookieBanner.classList.add("show"); cookieAcceptBtn.addEventListener("click", () => { localStorage.setItem("dfl-cookies-accepted", "true"); cookieBanner.classList.remove("show"); }); }
 
-    console.log("%c🚀 DFL v5.5.7 — Estabilidade Restaurada (Integração Total)", "background:#4CAF50;color:#fff;padding:5px;border-radius:5px;");  
+    console.log("%c🚀 DFL v5.6.0 — HÍBRIDO ESTÁVEL", "background:#4CAF50;color:#fff;padding:5px;border-radius:5px;");  
     
-    // **AQUISIÇÃO DE DADOS PARA BUSCA (ATRASADA)**
-    setTimeout(() => {
-        try {
-            todosProdutos = getProductsMap();
-            console.log(`Busca: Mapeados ${todosProdutos.length} produtos.`);
-        } catch(e) {
-            console.error("Erro ao mapear produtos para busca:", e);
-        }
-    }, 1000); // 1 segundo de atraso para o DOM carregar completamente
+    // INICIALIZAÇÕES INTEGRADAS (Do extras.js e Base)
+    inicializarFirebase(); 
+    injectExtrasStyles(); // Injeta os estilos de popups
+    watchOrders(); // Inicia o observador de thumbnails de pedidos
 
-
-    // **EXECUÇÃO DE INICIALIZAÇÃO**
-    inicializarFirebase();
-    injectExtrasStyles(); // Injeta estilos globais (do extras.js)
-    watchOrders(); // Inicia o observador de pedidos (do extras.js)
-
-    // **TIMER/STATUS (CHAMADAS MANTIDAS NO FINAL DO BLOCO)**
-    atualizarTimer();
-    setInterval(atualizarTimer, 1000);
-    atualizarStatus(); 
-    setInterval(atualizarStatus, 60000); 
+    // INICIALIZAÇÕES PRINCIPAIS (Do script.js antigo)
+    // Não chamamos atualizarTimer aqui porque ele é chamado dentro da função (e o setInterval também)
+    // Idem para atualizarStatus
 
 }); // FIM DO DOMContentLoaded
+
+/* FECHAR MODAIS GLOBAL */  
+document.addEventListener('DOMContentLoaded', () => {  
+    document.querySelectorAll('.modal').forEach(m => m.addEventListener('click', e => { if (e.target.classList.contains('modal')) { m.classList.remove('show'); document.getElementById('cart-backdrop').classList.remove('active'); } }));  
+    document.getElementById('cart-backdrop')?.addEventListener('click', () => { document.querySelectorAll('.active').forEach(e => e.classList.remove('active')); });  
+});
