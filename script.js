@@ -1,7 +1,7 @@
 /* =========================================================  
-   🌟 DFL v5.5.5 — CORREÇÃO FINAL: REMOÇÃO DE REFERÊNCIAS QUEBRADAS (DIAGNÓSTICO CLAUDE)
-   - Eliminadas todas as referências residuais de elementos HTML removidos (Carrossel/Modal).
-   - Manutenção da lógica de Busca e Grade de Promoções.
+   🌟 DFL v5.5.6 — CORREÇÃO FINAL DE ESTRUTURA (REVERSÃO E ORDEM)
+   - Timer e Status voltam a inicializar dentro do bloco principal.
+   - Mapeamento de produtos para busca é atrasado para evitar falha de inicialização.
 ========================================================= */
 
 // Função para mapear todos os produtos do cardápio em um formato simples para a busca
@@ -60,20 +60,18 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-    /* ------------------ 🔍 LÓGICA DE BUSCA DE PRODUTOS (REABILITADA) ------------------ */
+    /* ------------------ 🔍 LÓGICA DE BUSCA DE PRODUTOS ------------------ */
     const campoBusca = document.getElementById("campoBusca");
     const resultadoBusca = document.getElementById("resultadoBusca");
-    let todosProdutos = [];
-
-    // Captura a lista de produtos assim que o DOM estiver pronto
-    setTimeout(() => {
-        todosProdutos = getProductsMap();
-    }, 500);
+    let todosProdutos = []; // Inicializado aqui, populado após o Firebase
 
     // Ação ao digitar no campo de busca
     campoBusca?.addEventListener("input", (e) => {
         const query = e.target.value.trim().toLowerCase();
         
+        // Verifica se o array de produtos foi populado
+        if (todosProdutos.length === 0) return;
+
         // Exibe todos os produtos se a busca estiver vazia
         if (query.length === 0) {
             todosProdutos.forEach(p => p.element.style.display = 'block');
@@ -203,7 +201,7 @@ document.addEventListener("DOMContentLoaded", () => {
         loginModal: document.getElementById("login-modal"),  
         loginForm: document.getElementById("login-form"),  
         googleBtn: document.getElementById("google-login"),  
-        // **REFERÊNCIAS QUEBRADAS ANTERIORES FORAM REMOVIDAS COM SUCESSO**
+        // **REFERÊNCIAS QUEBRADAS ANTERIORES JÁ FORAM REMOVIDAS**
         userBtn: document.getElementById("user-btn"),  
         statusBanner: document.getElementById("status-banner"),  
         hoursBanner: document.querySelector(".hours-banner"),  
@@ -1174,7 +1172,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     async function carregarHistoricoRecompensas(userId) {  
         if (!el.historicoLista) return; el.historicoLista.innerHTML = `<p class="empty-orders" style="text-align:center;color:#999;">Carregando...</p>`;  
-        try { const q = db.collection("Usuarios").doc(userId).collection("RecompensasRecebidas").orderBy("liberadoEm", "desc"); const snapshot = await q.get();  
+        try { const q = db.collection("Pedidos").where("userId", "==", userId).orderBy("data", "desc"); const snapshot = await q.get();  
             if (snapshot.empty) { el.historicoLista.innerHTML = `<p class="empty-orders" style="text-align:center;color:#999;">Nenhuma recompensa no histórico.</p>`; return; }  
             el.historicoLista.innerHTML = snapshot.docs.map(doc => { const log = doc.data(); const dataRecebimento = log.liberadoEm ? log.liberadoEm.toDate().toLocaleDateString('pt-BR') : "—"; let icon = '🎁'; const tituloRaw = String(log.titulo || '').toLowerCase(); if (tituloRaw.includes('ouro') || tituloRaw.includes('platina') || tituloRaw.includes('diamante')) icon = getTierIcon(log.titulo); else if (log.tipo === 'cupom') icon = '🎟️'; return `<div class="historico-card" style="display:flex;padding:10px 0;border-bottom:1px dashed #eee;align-items:center;justify-content:space-between;"><div style="flex:1;"><p style="font-weight:600;margin:0;color:#333;">${icon} ${log.titulo || log.valor}</p><small style="color:#999;">${dataRecebimento}</small></div><span style="font-weight:700;color:#4caf50;">Recebido</span></div>`; }).join('');  
         } catch (err) { console.error("Erro histórico:", err); el.historicoLista.innerHTML = `<p class="empty-orders" style="color:red;">Erro.</p>`; }  
@@ -1197,15 +1195,24 @@ document.addEventListener("DOMContentLoaded", () => {
     const cookieBanner = document.getElementById("cookie-banner"); const cookieAcceptBtn = document.getElementById("cookie-accept");  
     if (cookieBanner && cookieAcceptBtn) { if (localStorage.getItem("dfl-cookies-accepted") === "true") cookieBanner.style.display = "none"; else cookieBanner.classList.add("show"); cookieAcceptBtn.addEventListener("click", () => { localStorage.setItem("dfl-cookies-accepted", "true"); cookieBanner.classList.remove("show"); }); }
 
-    console.log("%c🚀 DFL v5.5.5 — Estabilidade Restaurada (Diagnóstico Claude)", "background:#4CAF50;color:#fff;padding:5px;border-radius:5px;");  
-    inicializarFirebase();  
+    console.log("%c🚀 DFL v5.5.6 — Correção Final Estrutural", "background:#4CAF50;color:#fff;padding:5px;border-radius:5px;");  
+    inicializarFirebase();
+    
+    // **AQUISIÇÃO DE DADOS PARA BUSCA (ATRASADA)**
+    setTimeout(() => {
+        try {
+            todosProdutos = getProductsMap();
+            console.log(`Busca: Mapeados ${todosProdutos.length} produtos.`);
+        } catch(e) {
+            console.error("Erro ao mapear produtos para busca:", e);
+        }
+    }, 1000); // 1 segundo de atraso para o DOM carregar completamente
 
 }); // FIM DO DOMContentLoaded
 
 
 /* =========================================================
-   🚨 ESTRATÉGIA DE SEGURANÇA: EXECUTAR FUNÇÕES ESSENCIAIS FORA
-      DO BLOCO PRINCIPAL, CASO ELE TRAVE. (v5.5.5)
+   REVERSÃO: LÓGICA DE STATUS/TIMER DE VOLTA AO LUGAR
    ========================================================= */
 
 // Função que calcula e formata o tempo restante (Duplicada para Garantia de Execução)
@@ -1260,13 +1267,10 @@ const atualizarStatus = safe(() => {
     }
 }); 
 
-// 🎯 EXECUÇÃO FORÇADA
-atualizarStatus(); 
-setInterval(atualizarStatus, 60000); 
-
+// **CHAMADAS DE TIMER/STATUS REINSERIDAS NO BLOCO PRINCIPAL**
 document.addEventListener('DOMContentLoaded', () => {
-    // Estas chamadas serão repetidas no bloco principal, mas garantimos
-    // que elas rodem imediatamente se o DOM já estiver pronto.
     atualizarTimer();
     setInterval(atualizarTimer, 1000);
+    atualizarStatus(); 
+    setInterval(atualizarStatus, 60000); 
 });
