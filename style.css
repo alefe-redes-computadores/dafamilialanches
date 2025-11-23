@@ -859,3 +859,74 @@ section h2 { font-size: 1.3rem; text-align: center; margin-bottom: 15px; color: 
 .promo-card .actions button {
     width: 100%;
 }
+/* =========================================================
+   ⚡ AJUSTES FINAIS: GRADE E SCROLL DE PROMOÇÃO (v5.8)
+   ========================================================= */
+
+/* 1. Ajuste da Grade (Layout melhor no celular) */
+.container-promocoes {
+    display: grid;
+    /* Cria colunas que se ajustam: Mínimo 260px, Máximo 1 fração do espaço */
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); 
+    gap: 20px; /* Espaço entre os cards */
+    padding: 10px;
+    justify-content: center;
+}
+
+/* 2. Card da Promoção */
+.promo-card {
+    border: 1px solid #eee; /* Borda mais suave */
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08); /* Sombra elegante */
+    height: 100%; /* Garante que todos tenham mesma altura na linha */
+    display: flex;
+    flex-direction: column;
+    background: #fff;
+}
+
+.promo-card .card-info {
+    flex: 1; /* Empurra o botão para o final */
+    display: flex;
+    flex-direction: column;
+}
+
+/* 3. Descrição com SCROLL (Para ler tudo) */
+.desc-produto-promo-completa {
+    display: block; /* Remove o line-clamp antigo */
+    max-height: 80px; /* Altura fixa para a área de texto */
+    overflow-y: auto; /* Habilita a rolagem vertical */
+    
+    font-size: 0.85rem;
+    line-height: 1.4;
+    color: #666;
+    
+    background: #f9f9f9; /* Fundo leve para indicar área de texto */
+    padding: 8px;
+    border-radius: 6px;
+    margin-top: 8px;
+    border: 1px solid #f0f0f0;
+}
+
+/* Estiliza a barra de rolagem para ficar bonitinha */
+.desc-produto-promo-completa::-webkit-scrollbar {
+    width: 4px;
+}
+.desc-produto-promo-completa::-webkit-scrollbar-track {
+    background: #eee;
+}
+.desc-produto-promo-completa::-webkit-scrollbar-thumb {
+    background: #ccc;
+    border-radius: 4px;
+}
+
+/* Títulos e Preços */
+.titulo-produto-promo {
+    font-size: 1.1rem;
+    line-height: 1.3;
+    min-height: 2.6em; /* Garante alinhamento dos títulos */
+}
+
+.precos-promo {
+    margin-top: auto; /* Empurra preço para baixo da info */
+    padding-top: 10px;
+}
+
