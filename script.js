@@ -1,9 +1,53 @@
 /* =========================================================  
-   🚀 DFL v5.3.0 — BARRA DE PROGRESSO + ENDEREÇO MANUAL
-   - Barra de progresso frete grátis
-   - Link "Não sei meu CEP" → Correios
-   - Endereço manual com mesma lógica de extração
-========================================================= */  
+   🌟 DFL v5.5.0 — CAMPO DE BUSCA + PROMOÇÕES EM GRADE
+   - Função para mapear produtos para busca (Busca Exata/Fuzzy)
+   - Timer de Promoção adaptado para o novo layout
+========================================================= */
+
+// Função para mapear todos os produtos do cardápio em um formato simples para a busca
+function getProductsMap() {
+    const allProducts = [];
+    
+    // Mapeia Combos, Lanches, Hot Dogs e Bebidas (do seu HTML)
+    document.querySelectorAll(".menu-section .card[data-name]").forEach(card => {
+        const name = card.dataset.name;
+        const price = parseFloat(card.dataset.price);
+        const sectionEl = card.closest('.menu-section');
+        const section = sectionEl ? sectionEl.querySelector('h2').textContent.trim().replace(/[^a-zA-Z\s]/g, '') : 'Menu';
+        
+        allProducts.push({
+            name: name,
+            searchName: name.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, ""),
+            price: price,
+            section: section,
+            element: card
+        });
+    });
+    
+    return allProducts;
+}
+
+// Implementação básica de Distância de Levenshtein (Fuzzy Matching)
+function levenshteinDistance(s1, s2) {
+    s1 = s1.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+    s2 = s2.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+    const track = Array(s2.length + 1).fill(null).map(() =>
+        Array(s1.length + 1).fill(null));
+    for (let i = 0; i <= s1.length; i += 1) {
+        track[0][i] = i;
+    }
+    for (let j = 1; j <= s2.length; j += 1) {
+        for (let i = 1; i <= s1.length; i += 1) {
+            const indicator = s1[i - 1] === s2[j - 1] ? 0 : 1;
+            track[j][i] = Math.min(
+                track[j][i - 1] + 1, // exclusão
+                track[j - 1][i] + 1, // inserção
+                track[j - 1][i - 1] + indicator // substituição
+            );
+        }
+    }
+    return track[s2.length][s1.length];
+}
 
 document.addEventListener("DOMContentLoaded", () => {
     // MÁSCARA AUTOMÁTICA DO CEP
@@ -16,6 +60,101 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
+    /* ------------------ 🔍 LÓGICA DE BUSCA DE PRODUTOS (V5.5) ------------------ */
+    const campoBusca = document.getElementById("campoBusca");
+    const resultadoBusca = document.getElementById("resultadoBusca");
+    let todosProdutos = [];
+
+    // Captura a lista de produtos assim que o DOM estiver pronto
+    setTimeout(() => {
+        todosProdutos = getProductsMap();
+    }, 500);
+
+    // Ação ao digitar no campo de busca
+    campoBusca?.addEventListener("input", (e) => {
+        const query = e.target.value.trim().toLowerCase();
+        
+        // Exibe todos os produtos se a busca estiver vazia
+        if (query.length === 0) {
+            todosProdutos.forEach(p => p.element.style.display = 'block');
+            document.querySelectorAll(".menu-section").forEach(s => s.style.display = 'block');
+            resultadoBusca.innerHTML = '';
+            return;
+        }
+        
+        // 1. FILTRAGEM (Busca Exata/Parcial)
+        const queryClean = query.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+        const produtosEncontrados = todosProdutos.filter(p => p.searchName.includes(queryClean));
+        
+        // 2. EXIBIÇÃO E ROLAGEM
+        if (produtosEncontrados.length > 0) {
+            // Esconde todos os cards e seções
+            todosProdutos.forEach(p => p.element.style.display = 'none');
+            document.querySelectorAll(".menu-section").forEach(s => s.style.display = 'none');
+            
+            // Exibe apenas os cards encontrados
+            produtosEncontrados.forEach(p => {
+                p.element.style.display = 'block';
+                // Exibe a seção pai do card encontrado
+                p.element.closest(".menu-section").style.display = 'block';
+            });
+            
+            resultadoBusca.innerHTML = `<div class="feedback-busca success">✅ ${produtosEncontrados.length} resultados encontrados.</div>`;
+            
+            // Rola a página para o primeiro resultado
+            setTimeout(() => {
+                produtosEncontrados[0].element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }, 50);
+
+        } else {
+            // 3. FUZZY MATCHING (Você quis dizer...?)
+            let sugestao = null;
+            let menorDistancia = Infinity;
+            
+            // Busca a melhor correspondência (Levenshtein distance)
+            for (const produto of todosProdutos) {
+                // Tolerância de até 3 erros (dist <= 3) e o produto precisa ser minimamente parecido
+                const dist = levenshteinDistance(queryClean, produto.searchName);
+                if (dist < menorDistancia && dist <= Math.max(2, Math.floor(produto.searchName.length * 0.3))) { 
+                    menorDistancia = dist;
+                    sugestao = produto;
+                }
+            }
+            
+            // Esconde todos os cards e seções
+            todosProdutos.forEach(p => p.element.style.display = 'none');
+            document.querySelectorAll(".menu-section").forEach(s => s.style.display = 'none');
+            
+            if (sugestao) {
+                // Sugere e insere link para buscar o produto sugerido
+                const linkSugestao = `<a href="javascript:void(0);" data-sugestao="${sugestao.name}">` +
+                                     `Você quis dizer: <b>${sugestao.name}</b>? Clique aqui para buscar.</a>`;
+
+                resultadoBusca.innerHTML = `
+                    <div class="feedback-busca sugestao">
+                        ${linkSugestao}
+                    </div>
+                `;
+                
+                // Adiciona evento de clique na sugestão
+                resultadoBusca.querySelector('a')?.addEventListener('click', (ev) => {
+                    const termo = ev.target.dataset.sugestao;
+                    if (termo) campoBusca.value = termo; // Preenche o campo
+                    campoBusca.dispatchEvent(new Event('input')); // Dispara o evento de busca
+                });
+
+            } else {
+                // Mensagem de Erro
+                resultadoBusca.innerHTML = `
+                    <div class="feedback-busca erro">
+                        Nenhum produto encontrado com "<b>${query}</b>". 
+                        Tente digitar o nome completo ou uma busca diferente.
+                    </div>
+                `;
+            }
+        }
+    });
+    
     /* ------------------ ⚙️ BASE ------------------ */  
     const sound = new Audio("click.wav");   
     let cart = [];  
@@ -44,18 +183,9 @@ document.addEventListener("DOMContentLoaded", () => {
         return '👤';   
     }  
 
-    const PROMO_DATA = [  
-        null,   
-        { id: 1, nome: "Combo 2 Purizin + Fanta 1L", preco: 34.99, precoAntigo: 40.00, img: "promocoes/promo1.jpg" },  
-        { id: 2, nome: "Combo 3 Padaná", preco: 37.99, precoAntigo: 45.00, img: "promocoes/promo2.jpg" },  
-        { id: 3, nome: "Combo 2 Peleja", preco: 39.99, precoAntigo: 52.00, img: "promocoes/promo3.jpg" },  
-        { id: 4, nome: "Combo 3 Trem + Fanta 1L", preco: 44.99, precoAntigo: 52.00, img: "promocoes/promo4.jpg" },  
-        { id: 5, nome: "Combo 4 Trem + Fanta 1L", preco: 49.99, precoAntigo: 65.00, img: "promocoes/promo5.jpg" },  
-        { id: 6, nome: "Combo 5 Uai", preco: 54.99, precoAntigo: 65.00, img: "promocoes/promo6.jpg" },  
-        { id: 7, nome: "Combo 4 TremBão + Fanta 1L", preco: 59.99, precoAntigo: 77.00, img: "promocoes/promo7.jpg" },  
-        { id: 8, nome: "Combo 4 Armaria", preco: 59.99, precoAntigo: 72.00, img: "promocoes/promo8.jpg" },  
-        { id: 9, nome: "Combo 5 Uai + Kuat 2L", preco: 64.99, precoAntigo: 79.99, img: "promocoes/promo9.jpg" }  
-    ];  
+    // PROMO_DATA NÃO É MAIS NECESSÁRIO, POIS OS DADOS ESTÃO NO HTML.
+    // MANTIDO VAZIO PARA COMPATIBILIDADE com funções antigas de cupom, etc.
+    const PROMO_DATA = [];
 
     /* ------------------ 🎯 ELEMENTOS ------------------ */  
     const el = {  
@@ -74,21 +204,12 @@ document.addEventListener("DOMContentLoaded", () => {
         loginModal: document.getElementById("login-modal"),  
         loginForm: document.getElementById("login-form"),  
         googleBtn: document.getElementById("google-login"),  
-        slides: document.querySelector(".slides"),  
-        cPrev: document.querySelector(".c-prev"),  
-        cNext: document.querySelector(".c-next"),  
+        // Slides e Botões do Carrossel REMOVIDOS
+        // Modais de Promoção REMOVIDOS
         userBtn: document.getElementById("user-btn"),  
         statusBanner: document.getElementById("status-banner"),  
         hoursBanner: document.querySelector(".hours-banner"),  
         reportsBtn: document.getElementById("reports-btn"),   
-        promoModal: document.getElementById("promo-modal"),  
-        promoImg: document.getElementById("promo-modal-img"),  
-        promoTitle: document.getElementById("promo-modal-title"),  
-        promoPrice: document.getElementById("promo-modal-price"),  
-        promoAddBtn: document.getElementById("promo-modal-add"),  
-        promoNavPrev: document.querySelector("#promo-modal .promo-nav.prev"),  
-        promoNavNext: document.querySelector("#promo-modal .promo-nav.next"),  
-        promoClose: document.querySelector("#promo-modal .promo-close"),  
         pedidosContainer: document.querySelector(".meus-pedidos"),  
         pedidosBtn: document.querySelector(".meus-pedidos-btn"),  
         pedidosPanel: document.getElementById("painelPedidos"),  
@@ -141,7 +262,7 @@ document.addEventListener("DOMContentLoaded", () => {
             Backdrop.show();  
         },  
     };  
-    el.cartBackdrop.addEventListener("click", () => Overlays.closeAll());
+    el.cartBackdrop.addEventListener("click", ()lays.closeAll());
 
     /* ------------------ 🎟️ CUPOM FORM ------------------ */  
     const couponForm = document.getElementById("coupon-form");  
@@ -193,11 +314,8 @@ document.addEventListener("DOMContentLoaded", () => {
         }, 6000);  
     }
 
-// CONTINUA NA PARTE 2...
-// PARTE 2/6 - BARRA DE PROGRESSO + MINI-CARRINHO + FIREBASE
-
     /* ===========================================================
-       📊 BARRA DE PROGRESSO PARA FRETE GRÁTIS (NOVA FUNÇÃO!)
+       📊 BARRA DE PROGRESSO PARA FRETE GRÁTIS
     =========================================================== */
     function atualizarBarraProgresso() {
         const subtotal = getCartSubtotal();
@@ -344,7 +462,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 if (el.reportsBtn) el.reportsBtn.style.display = "none";  
                 document.getElementById("admin-dashboard")?.remove();  
             }  
-        });  
+        });
     }
 
     /* ------------------ ⚙️ LOGIN ------------------ */  
@@ -393,8 +511,6 @@ document.addEventListener("DOMContentLoaded", () => {
     el.userBtn?.addEventListener("click", () => Overlays.open(el.loginModal));  
     el.cartIcon?.addEventListener("click", () => { renderMiniCart(); Overlays.open(el.miniCart); });
 
-// CONTINUA NA PARTE 3...
-// PARTE 3/6 - ADICIONAIS + COMBOS + CEP + ENDEREÇO MANUAL (NOVA FUNÇÃO!)
 
     /* ------------------ ➕ ADICIONAIS ------------------ */  
     const adicionais = [  
@@ -426,6 +542,11 @@ document.addEventListener("DOMContentLoaded", () => {
     document.querySelectorAll(".extras-btn").forEach((btn) =>
         btn.addEventListener("click", (e) => openExtrasFor(e.currentTarget.closest(".card")))
     );  
+    
+    // Adiciona evento aos cards de promoção também, se eles tiverem extras (que não é o caso, mas é seguro)
+    document.querySelectorAll(".promo-card .extras-btn").forEach((btn) =>
+        btn.addEventListener("click", (e) => openExtrasFor(e.currentTarget.closest(".card")))
+    );
 
     el.extrasConfirm?.addEventListener("click", () => {  
         if (!produtoExtras) return Overlays.closeAll();  
@@ -506,7 +627,10 @@ document.addEventListener("DOMContentLoaded", () => {
     );  
 
     function addCommonItem(nome, preco) {  
+        // Tenta abrir o modal de refri APENAS para combos do menu principal (Lanches Artesanais, Família, etc.)
         if (/^combo/i.test(nome) && !/^\s*Combo [0-9]/.test(nome)) { openComboModal(nome, preco); return; }  
+        
+        // Exceção: Combos de promoção já tem o refri no nome (Combo 2 Purizin + Fanta 1L), então adiciona direto.
         const found = cart.find((i) => i.nome === nome && i.preco === preco);  
         if (found) found.qtd++;  
         else cart.push({ nome, preco, qtd: 1 });  
@@ -526,7 +650,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const getCartSubtotal = () => cart.reduce((s, i) => s + (Number(i.preco) || 0) * (Number(i.qtd) || 0), 0);
 
     /* ===========================================================
-       🏠 LINK "NÃO SEI MEU CEP" + ENDEREÇO MANUAL (NOVAS FUNÇÕES!)
+       🏠 ENDEREÇO MANUAL
     =========================================================== */
 
     // Variável para controlar modo de endereço
@@ -539,7 +663,6 @@ document.addEventListener("DOMContentLoaded", () => {
     document.getElementById("btnManual")?.addEventListener("click", mostrarModoManual);
 
     // Botão "Preencher Manualmente" → Mostra área manual
-    // (Se não existir no HTML, vamos criar dinamicamente)
     function mostrarModoManual() {
         modoEnderecoManual = true;
         
@@ -615,9 +738,6 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
  
-
-// CONTINUA NA PARTE 4...
-// PARTE 4/6 - CUPOM + CEP + FRETE DINÂMICO + CALC TOTALS
 
     /* VALIDAÇÃO DE CUPOM */  
     const _cupomCache = {};  
@@ -815,7 +935,7 @@ document.addEventListener("DOMContentLoaded", () => {
         let deliveryFee = DELIVERY_FEE_DEFAULT;   
         let enderecoParaCalculo = "";
 
-        // Verifica se está no  ou CEP
+        // Verifica se está no modo manual ou CEP
         if (modoEnderecoManual) {
             const manualEndereco = document.getElementById('manualEndereco');
             enderecoParaCalculo = manualEndereco?.value?.trim() || "";
@@ -841,9 +961,6 @@ document.addEventListener("DOMContentLoaded", () => {
         const total = Math.max(0, subtotal + delivery - d.discount);  
         return { subtotal, delivery, discount: d.discount, discountLabel: d.label, total, cupomInfo: d };  
     }
-
-// CONTINUA NA PARTE 5...
-// PARTE 5/6 - ENHANCE UI + RECOMPENSAS + FECHAR PEDIDO + CARROSSEL
 
     async function enhanceMiniCartUI() {  
         if (!el.miniFoot) return;  
@@ -885,7 +1002,7 @@ document.addEventListener("DOMContentLoaded", () => {
         document.getElementById('complemento-input')?.addEventListener('input', renderMiniCart);  
         summaryDiv.querySelector("#finish-order")?.addEventListener("click", fecharPedido);  
         summaryDiv.querySelector("#clear-cart")?.addEventListener("click", () => {  
-            if (confirm("Limpar todo o carrinho?")) { cart = []; couponApplied = ""; localStorage.removeItem("dflCoupon"); document.getElementById("coupon-input").value = ""; renderMiniCart(); popupAdd("Carrinho limpo!"); }  
+            if (confirm("Limpar todo o carrinho?")) { cart = []; couponApplied = ""; localStorage.removeItem("dflCoupon"); document.getElementById("coupon-input").value = ""; modoEnderecoManual = false; renderMiniCart(); popupAdd("Carrinho limpo!"); }  
         });  
     }
 
@@ -902,26 +1019,61 @@ document.addEventListener("DOMContentLoaded", () => {
         } catch (e) { console.error("Erro recompensas:", e); return []; }  
     }
 
-    /* CARROSSEL */  
-    let currentPromoId = 1;  
-    function showPromoModal(promoId) {  
-        if (!el.promoModal || !PROMO_DATA[promoId]) return;  
-        currentPromoId = Number(promoId);  
-        const promo = PROMO_DATA[currentPromoId];  
-        if (el.promoImg) el.promoImg.src = promo.img;  
-        if (el.promoTitle) el.promoTitle.textContent = promo.nome;  
-        if (el.promoPrice) el.promoPrice.innerHTML = `<span class="old-price">De ${money(promo.precoAntigo)}</span> por <b>${money(promo.preco)}</b>`;  
-        Overlays.open(el.promoModal);  
-    }  
-    document.querySelectorAll(".slide[data-promo-id]").forEach((img) => img.addEventListener("click", () => { const id = parseInt(img.dataset.promoId, 10); if (id) showPromoModal(id); }));  
-    el.promoAddBtn?.addEventListener("click", () => { const promo = PROMO_DATA[currentPromoId]; if (!promo) return; addCommonItem(promo.nome, promo.preco); Overlays.closeAll(); });  
-    el.promoNavPrev?.addEventListener("click", () => { let newId = currentPromoId - 1; if (newId < 1) newId = 9; showPromoModal(newId); });  
-    el.promoNavNext?.addEventListener("click", () => { let newId = currentPromoId + 1; if (newId > 9) newId = 1; showPromoModal(newId); });  
-    el.promoClose?.addEventListener("click", () => Overlays.closeAll());  
-    el.cPrev?.addEventListener("click", () => { if (!el.slides) return; el.slides.scrollLeft -= Math.min(el.slides.clientWidth * 0.9, 320); });  
-    el.cNext?.addEventListener("click", () => { if (!el.slides) return; el.slides.scrollLeft += Math.min(el.slides.clientWidth * 0.9, 320); });
+    /* ===========================================================
+       ⏳ TIMER DA PROMOÇÃO (AGORA INJETADO NA NOVA SEÇÃO)
+       =========================================================== */
+    
+    // Função que calcula e formata o tempo restante
+    const getFormattedTime = (diff) => {
+        if (diff <= 0) return "00:00:00";
+        const h = String(Math.floor(diff / 3600000)).padStart(2, "0");
+        const m = String(Math.floor((diff % 3600000) / 60000)).padStart(2, "0");
+        const s = String(Math.floor((diff % 60000) / 1000)).padStart(2, "0");
+        return `${h}:${m}:${s}`;
+    };
 
-    /* STATUS + TIMER */  
+    const atualizarTimer = safe(() => {
+        const agora = new Date();
+        const fim = new Date();
+        // Zera o tempo todo dia à meia-noite (23:59:59.999)
+        fim.setHours(23, 59, 59, 999);
+        const diff = fim - agora;
+        
+        const elSecaoPromo = document.getElementById("secao-promocoes");
+        if (!elSecaoPromo) return;
+
+        // Se o contador ainda não foi criado, cria e insere
+        let elTimerWrapper = elSecaoPromo.querySelector(".contador-promo-wrapper");
+        
+        if (!elTimerWrapper) {
+            const elTitulo = elSecaoPromo.querySelector(".titulo-secao");
+            if (!elTitulo) return;
+            
+            elTimerWrapper = document.createElement("div");
+            elTimerWrapper.className = "contador-promo-wrapper";
+            elTimerWrapper.innerHTML = `
+                <span class="tempo-restante-label">⏳ Tempo restante:</span>
+                <span class="tempo-restante-valor" id="promo-timer-valor">${getFormattedTime(diff)}</span>
+            `;
+            const elSlogan = document.createElement("p");
+            elSlogan.className = "slogan-promo";
+            elSlogan.textContent = "Aproveite antes que o cronômetro zere à meia-noite!";
+
+            // Insere o contador e o slogan após o título <h2>
+            elTitulo.after(elSlogan);
+            elTitulo.after(elTimerWrapper);
+        } else {
+            // Se já existe, apenas atualiza o valor
+            const elValor = elTimerWrapper.querySelector("#promo-timer-valor");
+            if (elValor) elValor.textContent = getFormattedTime(diff);
+        }
+    });
+
+    // Inicia e repete o timer
+    atualizarTimer();
+    setInterval(atualizarTimer, 1000);
+
+    /* STATUS (Mantido) */  
     const atualizarStatus = safe(() => {  
         const agora = new Date(); const h = agora.getHours();  
         const aberto = h >= 18 && h < 23;   
@@ -934,17 +1086,10 @@ document.addEventListener("DOMContentLoaded", () => {
         }  
     });  
     atualizarStatus(); setInterval(atualizarStatus, 60000);  
+    
+    // REMOVIDO: Antigo atualizarTimer que usava #promo-timer
 
-    const atualizarTimer = safe(() => {  
-        const agora = new Date(); const fim = new Date(); fim.setHours(23, 59, 59, 999); const diff = fim - agora;  
-        const elTimer = document.getElementById("promo-timer"); if (!elTimer) return;  
-        if (diff <= 0) return (elTimer.textContent = "00:00:00");  
-        const h = String(Math.floor(diff / 3600000)).padStart(2, "0"); const m = String(Math.floor((diff % 3600000) / 60000)).padStart(2, "0"); const s = String(Math.floor((diff % 60000) / 1000)).padStart(2, "0");  
-        elTimer.textContent = `${h}:${m}:${s}`;  
-    });  
-    atualizarTimer(); setInterval(atualizarTimer, 1000);
-
-    /* FECHAR PEDIDO (ATUALIZADO PARA MODO MANUAL!) */  
+    /* FECHAR PEDIDO (MANTIDO) */  
     async function fecharPedido() {  
         if (!cart.length) return alert("Carrinho vazio!");  
         if (!currentUser) { alert("Faça login para enviar o pedido!"); Overlays.open(el.loginModal); return; }  
@@ -1018,9 +1163,6 @@ document.addEventListener("DOMContentLoaded", () => {
     }  
     renderMiniCart();
 
-// CONTINUA NA PARTE 6...
-// PARTE 6/6 - MEUS PEDIDOS + RECOMPENSAS + ADMIN + COOKIES + FIM
-
     /* MEUS PEDIDOS */  
     el.pedidosBtn?.addEventListener("click", () => { if (!currentUser) { alert("Faça login para ver seus pedidos."); Overlays.open(el.loginModal); return; } Overlays.open(el.pedidosPanel); carregarPedidos(currentUser.uid); });  
     el.pedidosFecharBtn?.addEventListener("click", () => Overlays.closeAll());  
@@ -1062,7 +1204,6 @@ document.addEventListener("DOMContentLoaded", () => {
         const contadorValor = document.getElementById('contador-valor'); const progressoBar = document.getElementById('progresso-bar'); const progressoMsg = document.getElementById('progresso-mensagem');  
         if (!contadorValor || !progressoBar || !progressoMsg || !el.recompensasLista) return;  
         contadorValor.textContent = '...'; progressoBar.style.width = '0%'; progressoMsg.textContent = 'Carregando metas...';  
-        el.recompensasLista.innerHTML = ''; if(el.historicoLista) el.historicoLista.innerHTML = `<p class="empty-orders" style="text-align:center;color:#999;">Carregando...</p>`;  
         const RECOMPENSAS_DATA = await carregarConfiguracoesDeRecompensas();  
         if (RECOMPENSAS_DATA.length === 0) { progressoMsg.textContent = 'Erro ao carregar metas.'; el.recompensasLista.innerHTML = `<p class="empty-orders" style="text-align:center;color:red;">Sistema offline.</p>`; return; }  
         const metaPrimeiroNivel = RECOMPENSAS_DATA[0]?.limite || 1;  
@@ -1122,13 +1263,13 @@ document.addEventListener("DOMContentLoaded", () => {
     function createDashboard() { if (document.getElementById("admin-dashboard")) return; const div = document.createElement("div"); div.id = "admin-dashboard"; div.className = "modal"; div.innerHTML = `<div class="modal-content" style="max-width:1000px;width:95%;height:85vh;overflow:auto;background:#fff;border-radius:12px;"><div class="modal-head" style="display:flex;justify-content:space-between;align-items:center;padding:10px 14px;"><h3>📊 Relatórios</h3><button class="dashboard-close">✖</button></div><div class="dashboard-body" style="padding:12px;"><div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:12px;"><div id="card-total" class="cardBox">Total: —</div><div id="card-pedidos" class="cardBox">Pedidos: —</div><div id="card-ticket" class="cardBox">Ticket Médio: —</div></div><div style="margin-bottom:10px;"><label>Período: </label><select id="filter-period"><option value="7">7 dias</option><option value="30">30 dias</option><option value="all">Todos</option></select></div><canvas id="chart-pedidos" style="width:100%;height:240px;"></canvas><canvas id="chart-produtos" style="width:100%;height:240px;margin-top:16px;"></canvas><div style="margin-top:12px;"><button id="export-csv" style="background:#4caf50;color:#fff;border:none;border-radius:8px;padding:10px;">Exportar CSV</button></div></div></div>`; document.body.appendChild(div); div.querySelector(".dashboard-close").addEventListener("click", () => Overlays.closeAll()); }  
     function createAdminFab() { if (el.reportsBtn) { el.reportsBtn.style.display = "block"; el.reportsBtn.addEventListener("click", () => { createDashboard(); ensureChartJS(() => carregarRelatorios("7")); Overlays.open(document.getElementById("admin-dashboard")); }); } }  
     function gerarResumoECharts(pedidos) { if (!window.Chart) return; const ctxPedidos = document.getElementById('chart-pedidos')?.getContext('2d'); const ctxProdutos = document.getElementById('chart-produtos')?.getContext('2d'); if (!ctxPedidos || !ctxProdutos) return; const pedidosPorDia = {}; const produtosContagem = {}; pedidos.forEach(p => { const dia = (p.data?.toDate?.() || new Date(p.data)).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' }); pedidosPorDia[dia] = (pedidosPorDia[dia] || 0) + 1; (Array.isArray(p.itens) ? p.itens : []).forEach(itemStr => { const nome = itemStr.split(' x')[0]; if (nome) produtosContagem[nome] = (produtosContagem[nome] || 0) + 1; }); }); const labelsPedidos = Object.keys(pedidosPorDia).reverse(); const dataPedidos = Object.values(pedidosPorDia).reverse(); if (chartPedidos) chartPedidos.destroy(); chartPedidos = new Chart(ctxPedidos, { type: 'line', data: { labels: labelsPedidos, datasets: [{ label: 'Pedidos', data: dataPedidos, borderColor: '#ffb300', tension: 0.1 }] }, options: { scales: { x: { ticks: { maxRotation: 45, minRotation: 45 } } } } }); const produtosOrdenados = Object.entries(produtosContagem).sort(([, a], [, b]) => b - a).slice(0, 10); if (chartProdutos) chartProdutos.destroy(); chartProdutos = new Chart(ctxProdutos, { type: 'bar', data: { labels: produtosOrdenados.map(p=>p[0]), datasets: [{ label: 'Mais Vendidos', data: produtosOrdenados.map(p=>p[1]), backgroundColor: '#ff7043' }] }, options: { indexAxis: 'y' } }); }  
-    function carregarRelatorios(periodo = "7") { const start = new Date(); if (periodo !== "all") start.setDate(start.getDate() - Number(periodo)); else start.setTime(0); db.collection("Pedidos").orderBy("data", "desc").get().then(snap => { const pedidos = snap.docs.map(d => { const dataObjeto = d.data(); const rawDate = dataObjeto.data; let processedDate; if (rawDate && typeof rawDate.toDate === 'function') processedDate = rawDate.toDate(); else if (rawDate) processedDate = new Date(rawDate); else processedDate = new Date(); return { ...dataObjeto, id: d.id, data: processedDate }; }); const filtrados = pedidos.filter(p => p.data >= start); gerarResumoECharts(filtrados); document.getElementById("card-total").textContent = `Total: ${money(filtrados.reduce((s, p) => s + (Number(p.total) || 0), 0))}`; document.getElementById("card-pedidos").textContent = `Pedidos: ${filtrados.length}`; document.getElementById("card-ticket").textContent = `Ticket Médio: ${money(filtrados.length ? filtrados.reduce((s, p) => s + (Number(p.total) || 0), 0)/filtrados.length : 0)}`; document.getElementById("export-csv").onclick = () => { const csv = "Data;Nome;Total\n" + filtrados.map(p => `${p.data.toLocaleString()};${p.nome};${p.total}`).join("\n"); const blob = new Blob([`\uFEFF${csv}`], { type: 'text/csv;charset=utf-8;' }); const link = document.createElement('a'); link.href = URL.createObjectURL(blob); link.download = "pedidos.csv"; link.click(); }; }); const sel = document.getElementById("filter-period"); if(sel && !sel._bound) { sel.addEventListener("change", e => carregarRelatorios(e.target.value)); sel._bound = true; } }
+    function carregarRelatorios(periodo = "7") { const start = new Date(); if (periodo !== "all") start.setDate(start.getDate() - Number(periodo)); else start.setTime(0); db.collection("Pedidos").orderBy("data", "desc").get().then(snap => { const pedidos = snap.docs.map(d => { const dataObjeto = d.data(); const rawDate = dataObjeto.data; let processedDate; if (rawDate && typeof rawDate.toDate === 'function') processedDate = rawDate.toDate(); else if (rawDate) processedDate = new Date(rawDate); else processedDate = new Date(); return { ...dataObjeto, id: d.id, data: processedDate }; }); const filtrados = pedidos.filter(p => p.data >= start); gerarResumoECharts(filtrados); document.getElementById("card-total").textContent = `Total: ${money(filtrados.reduce((s, p) => s + (Number(p.total) || 0), 0))}`; document.getElementById("card-pedidos").textContent = `Pedidos: ${filtrados.length}`; document.getElementById("card-ticket").textContent = `Ticket Médio: ${money(filtrados.length ? filtrados.reduce((s, p) => s + (Number(p.total) || 0), 0)/filtrados.length : 0)}`; document.getElementById("export-csv").onclick = () => { const csv = "Data;Nome;Total\n" + filtrados.map(p => `${p.data.toLocaleString()};${p.nome};${p.total}`).join("\n"); const blob = new Blob([`\uFEFF${csv}`], { type: 'text/csv;charset=utf-8;' }); const link = document.createElement('a'); link.href = URL.createObjectURL(blob); link.download = "pedidos.csv"; link.click(); }; }; }); const sel = document.getElementById("filter-period"); if(sel && !sel._bound) { sel.addEventListener("change", e => carregarRelatorios(e.target.value)); sel._bound = true; } }
 
     /* COOKIES */  
     const cookieBanner = document.getElementById("cookie-banner"); const cookieAcceptBtn = document.getElementById("cookie-accept");  
     if (cookieBanner && cookieAcceptBtn) { if (localStorage.getItem("dfl-cookies-accepted") === "true") cookieBanner.style.display = "none"; else cookieBanner.classList.add("show"); cookieAcceptBtn.addEventListener("click", () => { localStorage.setItem("dfl-cookies-accepted", "true"); cookieBanner.classList.remove("show"); }); }
 
-    console.log("%c🔥 DFL v5.5 — BARRA PROGRESSO + ENDEREÇO MANUAL", "background:#4CAF50;color:#fff;padding:5px;border-radius:5px;");  
+    console.log("%c🚀 DFL v5.5.0 — Busca + Grade Promoções", "background:#4CAF50;color:#fff;padding:5px;border-radius:5px;");  
     inicializarFirebase();  
 
 }); // FIM DO DOMContentLoaded
@@ -1138,7 +1279,3 @@ document.addEventListener('DOMContentLoaded', () => {
     document.querySelectorAll('.modal').forEach(m => m.addEventListener('click', e => { if (e.target.classList.contains('modal')) { m.classList.remove('show'); document.getElementById('cart-backdrop').classList.remove('active'); } }));  
     document.getElementById('cart-backdrop')?.addEventListener('click', () => { document.querySelectorAll('.active').forEach(e => e.classList.remove('active')); });  
 });
-
-// ============================================================
-// FIM DO CÓDIGO v5.5 — COLE AS 6 PARTES EM SEQUÊNCIA!
-// ============================================================
