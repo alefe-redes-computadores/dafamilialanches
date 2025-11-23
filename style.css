@@ -1,7 +1,8 @@
 /* ===========================================================
-   🎨 Da Família Lanches – CSS Principal (v5.5.0)
-   - Removido Carrossel e Modal de Promoções
-   - Adicionado Estilo da Busca e Nova Grade de Promoções
+   🎨 Da Família Lanches – CSS Principal (v5.6.0)
+   - Mantida Estética v5.3.6
+   - Adicionado Estilo da Barra de Progresso e Links de Ação
+   - Adicionados Estilos de Busca e Nova Grade de Promoções
    =========================================================== */
 
 /* ======== ELEMENTOS BÁSICOS ======== */
@@ -107,9 +108,6 @@ body {
   border: 0 !important;
   overflow: hidden !important;
 }
-
-/* ======== PROMO / CARROSSEL (ESTILOS REMOVIDOS) ======== */
-/* .promo-section, .carousel, .slides, .c-btn, .slide não existem mais no HTML */
 
 /* ======== SEÇÕES / GRID ======== */
 section { margin: 25px auto; width: 95%; max-width: 1000px; }
@@ -380,14 +378,14 @@ section h2 { font-size: 1.3rem; text-align: center; margin-bottom: 15px; color: 
 .btn-google:hover { background: #f8f8f8; }
 
 /* Botões de Fechar */
-.fechar-pedidos, .fechar-recompensas, .extras-close, .combo-close, .login-close, .dashboard-close {
+.fechar-pedidos, .fechar-recompensas, .extras-close, .combo-close, .login-close, .promo-close, .dashboard-close {
   background: var(--botao); border: none; border-radius: 50%;
   width: 30px; height: 30px; font-size: 18px; font-weight: 700;
   cursor: pointer; line-height: 30px; text-align: center; color: #222;
   transition: 0.2s; pointer-events: auto;
 }
 .fechar-pedidos:hover, .fechar-recompensas:hover, .extras-close:hover,
-.combo-close:hover, .login-close:hover, .dashboard-close:hover {
+.combo-close:hover, .login-close:hover, .promo-close:hover, .dashboard-close:hover {
   background: #ff7043; color: #fff; transform: scale(1.1);
 }
 
@@ -395,9 +393,6 @@ section h2 { font-size: 1.3rem; text-align: center; margin-bottom: 15px; color: 
 #login-modal { z-index: 1000; }
 #login-modal .modal-content { max-width: 480px; border-radius: 14px; }
 #login-modal .login-close { position: absolute; top: 12px; right: 12px; z-index: 10; }
-
-/* Promo Modal (Antigo, removido no HTML) */
-
 
 /* Extras / Combo */
 .extras-list label.extra-line {
@@ -683,7 +678,7 @@ section h2 { font-size: 1.3rem; text-align: center; margin-bottom: 15px; color: 
 }
 
 /* =========================================================
-   🔍 NOVO: ESTILOS DO CAMPO DE BUSCA (V5.5.0)
+   🔍 NOVO: ESTILOS DO CAMPO DE BUSCA (V5.6.0)
    ========================================================= */
 
 #campoBusca {
@@ -733,7 +728,7 @@ section h2 { font-size: 1.3rem; text-align: center; margin-bottom: 15px; color: 
 
 
 /* =========================================================
-   ⚡ NOVO: ESTILOS DA SEÇÃO DE PROMOÇÕES RELÂMPAGO (V5.5.0)
+   ⚡ NOVO: ESTILOS DA SEÇÃO DE PROMOÇÕES RELÂMPAGO (V5.6.0)
    ========================================================= */
 
 /* Estilos de título da seção de promoções (diferente dos outros) */
