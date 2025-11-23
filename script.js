@@ -1,7 +1,7 @@
 /* =========================================================  
-   🌟 DFL v5.5.0 — CAMPO DE BUSCA + PROMOÇÕES EM GRADE
-   - Função para mapear produtos para busca (Busca Exata/Fuzzy)
-   - Timer de Promoção adaptado para o novo layout
+   🌟 DFL v5.5.1 — CORREÇÃO DE ERRO DE REFERÊNCIA E ESTABILIDADE
+   - Inclui as melhorias de busca e grade de promoções.
+   - Revisa as referências do objeto 'el' para maior segurança.
 ========================================================= */
 
 // Função para mapear todos os produtos do cardápio em um formato simples para a busca
@@ -204,8 +204,7 @@ document.addEventListener("DOMContentLoaded", () => {
         loginModal: document.getElementById("login-modal"),  
         loginForm: document.getElementById("login-form"),  
         googleBtn: document.getElementById("google-login"),  
-        // Slides e Botões do Carrossel REMOVIDOS
-        // Modais de Promoção REMOVIDOS
+        // Slides e Botões do Carrossel e Modais de Promoção foram removidos no HTML
         userBtn: document.getElementById("user-btn"),  
         statusBanner: document.getElementById("status-banner"),  
         hoursBanner: document.querySelector(".hours-banner"),  
@@ -262,7 +261,7 @@ document.addEventListener("DOMContentLoaded", () => {
             Backdrop.show();  
         },  
     };  
-    el.cartBackdrop.addEventListener("click", ()lays.closeAll());
+    el.cartBackdrop.addEventListener("click", () => Overlays.closeAll());
 
     /* ------------------ 🎟️ CUPOM FORM ------------------ */  
     const couponForm = document.getElementById("coupon-form");  
@@ -1269,7 +1268,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const cookieBanner = document.getElementById("cookie-banner"); const cookieAcceptBtn = document.getElementById("cookie-accept");  
     if (cookieBanner && cookieAcceptBtn) { if (localStorage.getItem("dfl-cookies-accepted") === "true") cookieBanner.style.display = "none"; else cookieBanner.classList.add("show"); cookieAcceptBtn.addEventListener("click", () => { localStorage.setItem("dfl-cookies-accepted", "true"); cookieBanner.classList.remove("show"); }); }
 
-    console.log("%c🚀 DFL v5.5.0 — Busca + Grade Promoções", "background:#4CAF50;color:#fff;padding:5px;border-radius:5px;");  
+    console.log("%c🚀 DFL v5.5.1 — Busca + Grade Promoções (Estável)", "background:#4CAF50;color:#fff;padding:5px;border-radius:5px;");  
     inicializarFirebase();  
 
 }); // FIM DO DOMContentLoaded
