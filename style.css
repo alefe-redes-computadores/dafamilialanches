@@ -1,7 +1,7 @@
 /* ===========================================================
-   🎨 Da Família Lanches – CSS Principal (v5.3.6)
-   - Mantida Estética v5.0
-   - Adicionado Estilo da Barra de Progresso e Links de Ação
+   🎨 Da Família Lanches – CSS Principal (v5.5.0)
+   - Removido Carrossel e Modal de Promoções
+   - Adicionado Estilo da Busca e Nova Grade de Promoções
    =========================================================== */
 
 /* ======== ELEMENTOS BÁSICOS ======== */
@@ -108,37 +108,8 @@ body {
   overflow: hidden !important;
 }
 
-/* ======== PROMO / CARROSSEL ======== */
-.promo-section { text-align: center; padding: 20px 10px; }
-.promo-section h2 { color: #ff5722; margin-bottom: 8px; }
-.promo-sub { color: #444; margin-bottom: 10px; font-size: 0.95rem; }
-.countdown-ticker {
-  background: #fff; display: inline-block; padding: 6px 12px;
-  border-radius: 10px; margin: 8px 0 15px; font-weight: 600;
-  box-shadow: var(--shadow-1);
-}
-.carousel { position: relative; max-width: 900px; margin: 0 auto; }
-.slides { display: flex; gap: 8px; overflow-x: auto; scroll-behavior: smooth; padding: 4px; }
-.slides::-webkit-scrollbar { height: 8px; }
-.slides::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 10px; }
-.slides::-webkit-scrollbar-thumb { background: #ddd; border-radius: 10px; }
-.slide {
-  display: block; border-radius: 12px; flex: 0 0 auto;
-  min-width: 250px; max-width: 250px; height: 180px; object-fit: cover;
-  box-shadow: var(--shadow-2); cursor: zoom-in;
-  transition: transform 0.2s, box-shadow 0.2s; background: #fff;
-}
-.slide:hover { transform: scale(1.05); box-shadow: var(--shadow-3); }
-.c-btn {
-  position: absolute; top: 50%; transform: translateY(-50%);
-  background: #ffca28; color: #000; border: none; border-radius: 50%;
-  width: 40px; height: 40px; font-size: 24px; font-weight: 700; opacity: 0.9;
-  display: flex; align-items: center; justify-content: center; cursor: pointer;
-  box-shadow: var(--shadow-2); transition: all 0.2s;
-}
-.c-btn:hover { opacity: 1; background: #ffb300; transform: translateY(-50%) scale(1.05); }
-.c-prev { left: 10px; }
-.c-next { right: 10px; }
+/* ======== PROMO / CARROSSEL (ESTILOS REMOVIDOS) ======== */
+/* .promo-section, .carousel, .slides, .c-btn, .slide não existem mais no HTML */
 
 /* ======== SEÇÕES / GRID ======== */
 section { margin: 25px auto; width: 95%; max-width: 1000px; }
@@ -409,14 +380,14 @@ section h2 { font-size: 1.3rem; text-align: center; margin-bottom: 15px; color: 
 .btn-google:hover { background: #f8f8f8; }
 
 /* Botões de Fechar */
-.fechar-pedidos, .fechar-recompensas, .extras-close, .combo-close, .login-close, .promo-close, .dashboard-close {
+.fechar-pedidos, .fechar-recompensas, .extras-close, .combo-close, .login-close, .dashboard-close {
   background: var(--botao); border: none; border-radius: 50%;
   width: 30px; height: 30px; font-size: 18px; font-weight: 700;
   cursor: pointer; line-height: 30px; text-align: center; color: #222;
   transition: 0.2s; pointer-events: auto;
 }
 .fechar-pedidos:hover, .fechar-recompensas:hover, .extras-close:hover,
-.combo-close:hover, .login-close:hover, .promo-close:hover, .dashboard-close:hover {
+.combo-close:hover, .login-close:hover, .dashboard-close:hover {
   background: #ff7043; color: #fff; transform: scale(1.1);
 }
 
@@ -425,40 +396,8 @@ section h2 { font-size: 1.3rem; text-align: center; margin-bottom: 15px; color: 
 #login-modal .modal-content { max-width: 480px; border-radius: 14px; }
 #login-modal .login-close { position: absolute; top: 12px; right: 12px; z-index: 10; }
 
-/* Promo Modal */
-#promo-modal { z-index: 1100; background: rgba(0, 0, 0, 0.75); }
-#promo-modal .promo-content {
-  position: relative; padding: 0; max-width: 420px; border-radius: 14px;
-  background: #fff; overflow: hidden; box-shadow: 0 8px 40px rgba(0, 0, 0, 0.4); border: none;
-}
-#promo-modal-img {
-  width: 100%; height: auto; max-height: 60vh; object-fit: cover;
-  display: block; border: none;
-}
-#promo-modal .modal-head { position: absolute; top: 0; left: 0; right: 0; height: 100%; pointer-events: none; background: none; border: none; }
-#promo-modal .promo-close { position: absolute; top: 12px; right: 12px; background: #ffca28; width: 38px; height: 38px; z-index: 10; }
-#promo-modal .promo-nav {
-  position: absolute; top: 50%; transform: translateY(-50%);
-  pointer-events: all; background: #ffca28; border: none;
-  border-radius: 50%; width: 42px; height: 42px; font-size: 22px;
-  font-weight: 700; color: #000; box-shadow: 0 3px 6px rgba(0, 0, 0, 0.25);
-  display: flex; align-items: center; justify-content: center;
-  transition: 0.2s; z-index: 9;
-}
-#promo-modal .promo-nav.prev { left: 12px; }
-#promo-modal .promo-nav.next { right: 12px; }
-#promo-modal .promo-nav:hover { background: #ffb300; transform: translateY(-50%) scale(1.1); }
-.promo-info { text-align: center; padding: 16px 20px 20px; background: #fff; }
-#promo-modal-title { font-size: 1.25rem; font-weight: 700; margin-bottom: 6px; color: #222; }
-#promo-modal-price { font-size: 1rem; margin-bottom: 12px; color: #444; font-weight: 500; }
-#promo-modal-price del { color: #777; text-decoration: line-through; margin-right: 6px; }
-#promo-modal-price b { color: #2e7d32; font-weight: 700; font-size: 1.1rem; }
-#promo-modal-add {
-  background: #388e3c; color: #fff; border: none; border-radius: 8px;
-  padding: 12px 24px; font-size: 1rem; font-weight: 600; cursor: pointer;
-  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.2); transition: background 0.2s, transform 0.2s;
-}
-#promo-modal-add:hover { background: #2e7d32; transform: scale(1.04); }
+/* Promo Modal (Antigo, removido no HTML) */
+
 
 /* Extras / Combo */
 .extras-list label.extra-line {
@@ -741,4 +680,187 @@ section h2 { font-size: 1.3rem; text-align: center; margin-bottom: 15px; color: 
 
 .input-endereco-longo::-webkit-scrollbar {
     display: none !important; 
+}
+
+/* =========================================================
+   🔍 NOVO: ESTILOS DO CAMPO DE BUSCA (V5.5.0)
+   ========================================================= */
+
+#campoBusca {
+    width: 100%;
+    padding: 12px 15px;
+    border: 2px solid var(--botao); /* Borda amarela */
+    border-radius: 10px;
+    font-size: 1rem;
+    box-sizing: border-box;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.08) inset;
+    transition: all 0.2s;
+}
+
+#campoBusca:focus {
+    outline: none;
+    border-color: #ff7043; /* Laranja de destaque */
+    box-shadow: 0 0 0 3px rgba(255, 179, 0, 0.3);
+}
+
+/* Estilo para a mensagem de feedback de busca */
+.feedback-busca {
+    padding: 12px;
+    border-radius: 8px;
+    font-size: 0.95rem;
+    font-weight: 600;
+    margin-top: 15px;
+}
+
+.feedback-busca.erro {
+    background: #ffebee;
+    border: 1px solid var(--danger);
+    color: var(--danger);
+}
+
+.feedback-busca.sugestao {
+    background: #e3f2fd;
+    border: 1px solid #1976D2;
+    color: #1976D2;
+}
+
+.feedback-busca.sugestao a {
+    color: #0d47a1;
+    text-decoration: underline;
+    cursor: pointer;
+    font-weight: 700;
+}
+
+
+/* =========================================================
+   ⚡ NOVO: ESTILOS DA SEÇÃO DE PROMOÇÕES RELÂMPAGO (V5.5.0)
+   ========================================================= */
+
+/* Estilos de título da seção de promoções (diferente dos outros) */
+#secao-promocoes .titulo-secao {
+    color: var(--danger); /* Vermelho para dar a sensação de urgência */
+    font-size: 1.6rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 5px; /* Ajusta margem para o contador */
+}
+
+/* Novo Wrapper para o Contador (fora do carrossel) */
+.contador-promo-wrapper {
+    display: flex; /* Flex para centralizar e alinhar */
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(90deg, #ff5722, #e64a19); /* Cor de FOGO */
+    color: #fff;
+    padding: 8px 20px;
+    border-radius: 20px;
+    font-weight: 700;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    margin: 0 auto 15px; /* Centraliza e adiciona margem inferior */
+    max-width: fit-content;
+    font-size: 0.95rem;
+}
+
+.tempo-restante-label {
+    margin-right: 5px;
+    color: #ffd1d1;
+    font-weight: 600;
+}
+
+.tempo-restante-valor {
+    font-size: 1.1em;
+}
+
+.slogan-promo {
+    color: #555;
+    font-size: 0.9rem;
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+/* Estilo do Card de Promoção (Usa o .card original, mas customiza) */
+.promo-card {
+    position: relative;
+    padding: 0; /* Remove padding do card principal para a imagem */
+    text-align: left;
+    overflow: hidden;
+    border: 2px solid #ff7043; /* Borda de destaque */
+}
+
+.promo-card img {
+    height: 180px; /* Altura padrão para as imagens */
+    border-radius: 12px 12px 0 0; /* Apenas no topo */
+    margin-bottom: 0;
+}
+
+.promo-card .card-info {
+    padding: 12px 14px 0;
+}
+
+.titulo-produto-promo {
+    font-size: 1.2rem;
+    color: var(--danger); /* Vermelho no título para chamar a atenção */
+    margin: 0 0 5px;
+    font-weight: 800;
+}
+
+.desc-promo-wrapper {
+    margin-bottom: 10px;
+}
+
+.desc-produto-promo-destaque {
+    font-size: 0.95rem;
+    color: #4a4a4a;
+    font-weight: 600;
+    margin-bottom: 5px;
+}
+
+/* Esconde ingredientes longos no card da promoção (opcional) */
+.desc-produto-promo-completa {
+    font-size: 0.8em;
+    color: #777;
+    max-height: 2.4em; /* Limite de 2 linhas */
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+}
+
+/* Container de Preços */
+.precos-promo {
+    display: flex;
+    flex-direction: column; /* Preço antigo em cima do novo */
+    margin: 8px 0 10px;
+}
+
+/* Preço Antigo Riscado */
+.preco-antigo {
+    text-decoration: line-through;
+    color: #999;
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+
+/* Preço Novo em Destaque */
+.preco-novo {
+    color: var(--success); /* Verde em destaque */
+    font-size: 1.5rem;
+    font-weight: 800;
+}
+.preco-novo b {
+    font-weight: 900;
+}
+
+/* Ajusta o botão "Adicionar" para a parte de baixo do card */
+.promo-card .actions {
+    margin-top: 0;
+    padding: 10px 14px 14px;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.promo-card .actions button {
+    width: 100%;
 }
