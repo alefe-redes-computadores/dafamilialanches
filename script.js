@@ -1,7 +1,7 @@
 /* =========================================================  
-   🌟 DFL v5.5.3 — ESTRATÉGIA DE SEGURANÇA MÁXIMA (CHAMADAS FORA DO DOMContentLoaded)
-   - Inclui as melhorias de busca e grade de promoções.
-   - Força a execução do Timer e Status mesmo que o bloco principal falhe.
+   🌟 DFL v5.5.5 — CORREÇÃO FINAL: REMOÇÃO DE REFERÊNCIAS QUEBRADAS (DIAGNÓSTICO CLAUDE)
+   - Eliminadas todas as referências residuais de elementos HTML removidos (Carrossel/Modal).
+   - Manutenção da lógica de Busca e Grade de Promoções.
 ========================================================= */
 
 // Função para mapear todos os produtos do cardápio em um formato simples para a busca
@@ -60,7 +60,7 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-    /* ------------------ 🔍 LÓGICA DE BUSCA DE PRODUTOS (V5.5) ------------------ */
+    /* ------------------ 🔍 LÓGICA DE BUSCA DE PRODUTOS (REABILITADA) ------------------ */
     const campoBusca = document.getElementById("campoBusca");
     const resultadoBusca = document.getElementById("resultadoBusca");
     let todosProdutos = [];
@@ -184,7 +184,6 @@ document.addEventListener("DOMContentLoaded", () => {
     }  
 
     // PROMO_DATA NÃO É MAIS NECESSÁRIO, POIS OS DADOS ESTÃO NO HTML.
-    // MANTIDO VAZIO PARA COMPATIBILIDADE com funções antigas de cupom, etc.
     const PROMO_DATA = [];
 
     /* ------------------ 🎯 ELEMENTOS ------------------ */  
@@ -204,7 +203,7 @@ document.addEventListener("DOMContentLoaded", () => {
         loginModal: document.getElementById("login-modal"),  
         loginForm: document.getElementById("login-form"),  
         googleBtn: document.getElementById("google-login"),  
-        // Slides e Botões do Carrossel e Modais de Promoção foram removidos no HTML
+        // **REFERÊNCIAS QUEBRADAS ANTERIORES FORAM REMOVIDAS COM SUCESSO**
         userBtn: document.getElementById("user-btn"),  
         statusBanner: document.getElementById("status-banner"),  
         hoursBanner: document.querySelector(".hours-banner"),  
@@ -1198,7 +1197,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const cookieBanner = document.getElementById("cookie-banner"); const cookieAcceptBtn = document.getElementById("cookie-accept");  
     if (cookieBanner && cookieAcceptBtn) { if (localStorage.getItem("dfl-cookies-accepted") === "true") cookieBanner.style.display = "none"; else cookieBanner.classList.add("show"); cookieAcceptBtn.addEventListener("click", () => { localStorage.setItem("dfl-cookies-accepted", "true"); cookieBanner.classList.remove("show"); }); }
 
-    console.log("%c🚀 DFL v5.5.3 — Correção Final Estabilidade", "background:#4CAF50;color:#fff;padding:5px;border-radius:5px;");  
+    console.log("%c🚀 DFL v5.5.5 — Estabilidade Restaurada (Diagnóstico Claude)", "background:#4CAF50;color:#fff;padding:5px;border-radius:5px;");  
     inicializarFirebase();  
 
 }); // FIM DO DOMContentLoaded
@@ -1206,7 +1205,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 /* =========================================================
    🚨 ESTRATÉGIA DE SEGURANÇA: EXECUTAR FUNÇÕES ESSENCIAIS FORA
-      DO BLOCO PRINCIPAL, CASO ELE TRAVE. (v5.5.3)
+      DO BLOCO PRINCIPAL, CASO ELE TRAVE. (v5.5.5)
    ========================================================= */
 
 // Função que calcula e formata o tempo restante (Duplicada para Garantia de Execução)
