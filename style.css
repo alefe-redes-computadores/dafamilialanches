@@ -1,11 +1,196 @@
 /* ===========================================================
-   🎨 DFL v5.5.3 — CORREÇÃO DE LAYOUT DE PROMOÇÕES
-   - Cards organizados em grade
-   - Banners removidos
-   - Layout responsivo
+   🎨 Da Família Lanches – CSS COMPLETO v5.5.3
+   Correção total de layout, cores e estrutura
 =========================================================== */
 
-/* ======== SEÇÃO DE PROMOÇÕES ======== */
+/* ======== ROOT E BASE ======== */
+:root {
+  --preto: #000;
+  --bg1: #f8f9fa;
+  --bg2: #e9ecef;
+  --acento: #ffca28;
+  --botao: #ffb300;
+  --danger: #d32f2f;
+  --success: #4caf50;
+  --txt: #222;
+  --rad-sm: 8px;
+  --rad: 10px;
+  --rad-lg: 12px;
+  --shadow-1: 0 2px 5px rgba(0, 0, 0, 0.15);
+  --shadow-2: 0 3px 10px rgba(0, 0, 0, 0.2);
+  --shadow-3: 0 5px 15px rgba(0, 0, 0, 0.3);
+  --shadow-in: inset 0 1px 0 rgba(255, 255, 255, 0.25);
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html, body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  color: var(--txt);
+  font-family: "Inter", "Poppins", system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+  background: linear-gradient(180deg, var(--bg1) 0%, var(--bg2) 100%);
+  background-attachment: fixed;
+  scroll-behavior: smooth;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
+}
+
+/* ======== HEADER & TOPO ======== */
+.header {
+  position: fixed;
+  inset-inline: 0;
+  top: 0;
+  z-index: 900;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: var(--acento);
+  padding: 10px 16px;
+  box-shadow: var(--shadow-1);
+}
+
+.header-content { 
+  display: flex; 
+  align-items: center; 
+  gap: 12px; 
+}
+
+.logo { 
+  width: 52px; 
+  height: 52px; 
+  border-radius: 8px;
+}
+
+.header-info h1 { 
+  margin: 0; 
+  font-size: 1.2rem; 
+  color: #000;
+}
+
+.tagline { 
+  margin: 0; 
+  font-size: 0.85rem; 
+  color: #d84315; 
+  font-weight: 600;
+}
+
+.header-actions { 
+  display: flex; 
+  align-items: center; 
+  gap: 10px; 
+}
+
+.main-content-wrapper { 
+  padding-top: 72px; 
+  min-height: 100vh;
+}
+
+/* ======== BOTÕES ======== */
+.user-button {
+  background: linear-gradient(135deg, #fff, #f7f7f7);
+  border: 1px solid #ddd;
+  border-radius: var(--rad);
+  padding: 8px 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: 0.2s;
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.6);
+}
+.user-button:hover { 
+  background: #fafafa; 
+  transform: scale(1.02);
+}
+
+#cart-icon, .cart-button {
+  background: var(--botao);
+  border: none;
+  border-radius: var(--rad);
+  padding: 8px 12px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: 0.2s;
+  box-shadow: var(--shadow-1);
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 1rem;
+}
+#cart-icon:hover, .cart-button:hover { 
+  background: #ffc107;
+  transform: scale(1.05);
+}
+
+#cart-count {
+  background: var(--danger);
+  color: #fff;
+  border-radius: 50%;
+  width: 22px;
+  height: 22px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+/* ======== BANNERS ======== */
+.status-banner {
+  text-align: center;
+  padding: 12px 8px;
+  color: #fff;
+  font-weight: 600;
+  font-size: 1rem;
+  letter-spacing: 0.2px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+  width: 100vw;
+  margin-left: calc(50% - 50vw);
+}
+
+.status-banner.open { 
+  background: var(--success); 
+}
+.status-banner.closed { 
+  background: var(--danger); 
+}
+
+/* ======== BUSCA ======== */
+.search-container {
+  max-width: 1000px;
+  margin: 20px auto;
+  padding: 0 15px;
+}
+
+.search-container input {
+  width: 100%;
+  padding: 15px 20px;
+  border: 2px solid #ffb300;
+  border-radius: 12px;
+  font-size: 1rem;
+  box-shadow: 0 3px 8px rgba(0,0,0,0.1);
+  transition: all 0.3s;
+}
+
+.search-container input:focus {
+  outline: none;
+  border-color: #ff9800;
+  box-shadow: 0 4px 12px rgba(255, 152, 0, 0.3);
+}
+
+#resultadoBusca {
+  margin-top: 10px;
+}
+
+/* ======== PROMOÇÕES ======== */
 .promo-section {
   text-align: center;
   padding: 30px 10px;
@@ -17,6 +202,7 @@
   color: #ff5722;
   margin-bottom: 8px;
   font-size: 1.5rem;
+  font-weight: 800;
 }
 
 .promo-sub {
@@ -43,12 +229,85 @@
   50% { transform: scale(1.05); }
 }
 
-/* ======== CARROSSEL REMOVIDO - AGORA É GRADE ======== */
+/* ======== CARROSSEL (SE USADO) ======== */
 .carousel {
-  display: none !important; /* Remove o carrossel antigo */
+  position: relative;
+  max-width: 900px;
+  margin: 0 auto;
 }
 
-/* ======== GRID DE PROMOÇÕES (NOVO SISTEMA) ======== */
+.slides {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  scroll-behavior: smooth;
+  padding: 4px;
+}
+
+.slides::-webkit-scrollbar {
+  height: 8px;
+}
+
+.slides::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 10px;
+}
+
+.slides::-webkit-scrollbar-thumb {
+  background: #ddd;
+  border-radius: 10px;
+}
+
+.slide {
+  display: block;
+  border-radius: 12px;
+  flex: 0 0 auto;
+  min-width: 250px;
+  max-width: 250px;
+  height: 180px;
+  object-fit: cover;
+  box-shadow: var(--shadow-2);
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+  background: #fff;
+}
+
+.slide:hover {
+  transform: scale(1.05);
+  box-shadow: var(--shadow-3);
+}
+
+.c-btn {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background: #ffca28;
+  color: #000;
+  border: none;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  font-size: 24px;
+  font-weight: 700;
+  opacity: 0.9;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: var(--shadow-2);
+  transition: all 0.2s;
+}
+
+.c-btn:hover {
+  opacity: 1;
+  background: #ffb300;
+  transform: translateY(-50%) scale(1.05);
+}
+
+.c-prev { left: 10px; }
+.c-next { right: 10px; }
+
+/* ======== GRID DE PROMOÇÕES ======== */
 #promocoes-area {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
@@ -58,7 +317,6 @@
   margin: 0 auto;
 }
 
-/* ======== CARD DE PROMOÇÃO ======== */
 .promo-card {
   background: #fff;
   border-radius: 16px;
@@ -77,7 +335,6 @@
   border-color: #ffb300;
 }
 
-/* ======== IMAGEM DA PROMOÇÃO ======== */
 .promo-card-image {
   width: 100%;
   height: 200px;
@@ -86,7 +343,6 @@
   border-bottom: 3px solid #ffb300;
 }
 
-/* ======== CONTEÚDO DO CARD ======== */
 .promo-card-content {
   padding: 16px;
   display: flex;
@@ -104,6 +360,7 @@
   display: flex;
   align-items: center;
   gap: 8px;
+  flex-wrap: wrap;
 }
 
 .promo-badge {
@@ -125,7 +382,6 @@
   flex: 1;
 }
 
-/* ======== PREÇOS ======== */
 .promo-card-price {
   display: flex;
   flex-direction: column;
@@ -153,7 +409,6 @@
   color: #666;
 }
 
-/* ======== BOTÃO DE ADICIONAR ======== */
 .promo-card-button {
   background: linear-gradient(135deg, #4caf50, #43a047);
   color: #fff;
@@ -177,11 +432,6 @@
   box-shadow: 0 5px 12px rgba(76, 175, 80, 0.4);
 }
 
-.promo-card-button:active {
-  transform: scale(0.98);
-}
-
-/* ======== INGREDIENTES (OPCIONAL) ======== */
 .promo-card-ingredients {
   font-size: 0.8rem;
   color: #777;
@@ -191,45 +441,823 @@
   line-height: 1.4;
   margin-top: 4px;
 }
-
-/* ======== RESPONSIVE ======== */
-@media (max-width: 768px) {
-  #promocoes-area {
-    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-    gap: 15px;
-    padding: 8px;
-  }
-  
-  .promo-card-image {
-    height: 180px;
-  }
-  
-  .promo-card-title {
-    font-size: 1rem;
-  }
-  
-  .promo-price-new {
-    font-size: 1.3rem;
-  }
+/* ======== SEÇÕES / GRID DE PRODUTOS ======== */
+section {
+  margin: 25px auto;
+  width: 95%;
+  max-width: 1000px;
 }
 
-@media (max-width: 480px) {
-  #promocoes-area {
-    grid-template-columns: 1fr;
-    gap: 12px;
-  }
-  
-  .promo-section h2 {
-    font-size: 1.3rem;
-  }
-  
-  .countdown-ticker {
-    font-size: 0.9rem;
-    padding: 8px 16px;
-  }
+section h2 {
+  font-size: 1.3rem;
+  text-align: center;
+  margin-bottom: 15px;
+  color: #ff7043;
+  font-weight: 700;
 }
 
-/* ======== ANIMAÇÃO DE ENTRADA ======== */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 14px;
+}
+
+.card {
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+  padding: 14px;
+  text-align: center;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.12);
+}
+
+.card img {
+  width: 100%;
+  border-radius: 12px;
+  margin-bottom: 8px;
+  height: 220px;
+  object-fit: cover;
+  background: #fff;
+}
+
+.card h3 {
+  margin: 0 0 6px;
+  font-weight: 700;
+  font-size: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.card p {
+  font-size: 0.9rem;
+  color: #555;
+}
+
+.price {
+  font-weight: 600;
+  color: var(--success);
+  margin: 8px 0;
+}
+
+.price del {
+  color: #b71c1c;
+  font-size: 0.95rem;
+  margin-right: 6px;
+}
+
+.price b {
+  color: #2e7d32;
+  font-weight: 700;
+  font-size: 1.05rem;
+}
+
+/* ======== BADGES ======== */
+.badge {
+  display: inline-block;
+  font-size: 0.72rem;
+  font-weight: 700;
+  line-height: 1;
+  padding: 3px 8px;
+  border-radius: 999px;
+  color: #000;
+  background: linear-gradient(135deg, #f8e08b, #eac13f);
+  border: 1px solid #d4af37;
+  white-space: nowrap;
+}
+
+.badge.economia {
+  background: linear-gradient(135deg, #ffd480, #ffb74d);
+  border-color: #e09000;
+}
+
+.badge-small {
+  display: inline-block;
+  font-size: 0.68rem;
+  font-weight: 600;
+  line-height: 1.2;
+  padding: 2px 7px;
+  border-radius: 6px;
+  color: #000;
+  background: linear-gradient(135deg, #ffd54f, #ffca28);
+  border: 1px solid #d4af37;
+  white-space: nowrap;
+  margin-left: 4px;
+}
+
+.badge-small.pure {
+  background: linear-gradient(135deg, #a5d6a7, #81c784);
+  border-color: #66bb6a;
+  color: #1b5e20;
+}
+
+/* ======== AÇÕES NOS CARDS ======== */
+.actions {
+  margin-top: 10px;
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.actions button {
+  border: none;
+  border-radius: 10px;
+  padding: 12px;
+  font-weight: 700;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.actions .add-cart {
+  background: linear-gradient(135deg, #4caf50, #43a047);
+  color: #fff;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.actions .add-cart:hover {
+  background: linear-gradient(135deg, #43a047, #388e3c);
+  transform: scale(1.03);
+}
+
+.actions .extras-btn {
+  background: linear-gradient(135deg, #ffb300, #ffca28);
+  color: #222;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+}
+
+.actions .extras-btn:hover {
+  background: linear-gradient(135deg, #ffca28, #ffd54f);
+  transform: scale(1.03);
+}
+
+/* ======== BACKDROP ======== */
+#cart-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.25s ease;
+  z-index: 980;
+}
+
+#cart-backdrop.active {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* ======== MINI-CART ======== */
+.mini-cart {
+  position: fixed;
+  right: 0;
+  top: 0;
+  width: min(92vw, 380px);
+  height: 100dvh;
+  background: #fff;
+  box-shadow: -4px 0 20px rgba(0, 0, 0, 0.25);
+  transform: translateX(100%);
+  transition: transform 0.25s;
+  z-index: 990;
+  display: none;
+  flex-direction: column;
+}
+
+.mini-cart.active {
+  display: flex;
+  transform: translateX(0);
+}
+
+.mini-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 14px;
+  border-bottom: 1px solid #eee;
+  background: var(--acento);
+}
+
+.mini-head h3 {
+  margin: 0;
+  font-size: 1.1rem;
+}
+
+.mini-list {
+  flex: 1;
+  overflow-y: auto;
+  padding: 10px 14px;
+}
+
+.mini-foot {
+  padding: 10px 14px;
+  border-top: 1px solid #eee;
+  max-height: 60vh;
+  overflow-y: auto;
+}
+
+/* ======== CAMPOS DE ENDEREÇO ======== */
+.frete-container {
+  margin-top: 15px;
+  padding: 12px;
+  border: 1px solid #ddd;
+  border-radius: 10px;
+  background: #fff;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.frete-container h4 {
+  margin: 0 0 10px 0;
+  font-size: 1rem;
+  color: #222;
+}
+
+.frete-cep-group {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.frete-cep-group input[type="text"] {
+  flex: 1;
+  padding: 8px 10px;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  font-size: 0.9rem;
+}
+
+.btn-calcular-frete {
+  background: var(--botao);
+  color: #222;
+  border: none;
+  border-radius: 8px;
+  padding: 8px 12px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: 0.2s;
+  box-shadow: var(--shadow-1);
+}
+
+.btn-calcular-frete:hover {
+  background: #ffc107;
+  transform: scale(1.02);
+}
+
+.input-endereco-longo {
+  width: 100% !important;
+  display: block !important;
+  white-space: nowrap !important;
+  overflow-x: auto !important;
+  overflow-y: hidden !important;
+  padding: 8px 10px;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  font-size: 0.9rem;
+  margin-bottom: 8px;
+}
+
+.input-endereco-longo::-webkit-scrollbar {
+  display: none !important;
+}
+
+.endereco-duplo {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+#numero-input {
+  flex: 0 0 30%;
+  max-width: 120px;
+  padding: 8px 10px;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  font-size: 0.9rem;
+}
+
+#complemento-input {
+  flex: 1;
+  min-width: 0;
+  padding: 8px 10px;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  font-size: 0.9rem;
+}
+
+.mini-foot input:disabled,
+.mini-foot textarea:disabled {
+  background-color: var(--bg2) !important;
+  color: #888 !important;
+  cursor: not-allowed !important;
+}
+
+.frete-gratis-aviso {
+  margin: 6px 0 10px 0;
+  font-size: 0.85rem;
+  color: #444;
+  background: #fff8d6;
+  padding: 8px 10px;
+  border-radius: 8px;
+  border-left: 4px solid #ffca28;
+  line-height: 1.3;
+}
+
+/* ======== BARRA DE PROGRESSO ======== */
+.progress-wrapper {
+  background: #fff8d6;
+  padding: 12px;
+  border-radius: var(--rad);
+  margin-top: 15px;
+  margin-bottom: 10px;
+  border: 1px solid var(--acento);
+}
+
+.progress-text {
+  font-size: 0.95rem;
+  margin-bottom: 8px;
+  font-weight: 600;
+  color: #444;
+  text-align: center;
+}
+
+.progress-bar {
+  width: 100%;
+  height: 12px;
+  background: #ffe79b;
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.progress-fill {
+  width: 0%;
+  height: 100%;
+  background: var(--success);
+  transition: width 0.4s ease;
+}
+
+/* ======== CUPONS ======== */
+.coupon-form {
+  display: flex;
+  gap: 8px;
+  margin-top: 12px;
+  margin-bottom: 10px;
+}
+
+.coupon-form input[type="text"] {
+  flex: 1;
+  padding: 10px 12px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  box-shadow: inset 0 1px 2px rgba(0,0,0,0.05);
+}
+
+.coupon-form button {
+  background-color: #4caf50;
+  color: #fff;
+  font-weight: 700;
+  border: none;
+  border-radius: 8px;
+  padding: 10px 14px;
+  cursor: pointer;
+  transition: background-color .2s ease;
+}
+
+.coupon-form button:hover {
+  background-color: #43a047;
+}
+
+.coupon-message {
+  margin-top: 6px;
+  font-size: 0.9rem;
+  color: #333;
+}
+
+.summary-row {
+  display: flex;
+  justify-content: space-between;
+  margin: 8px 0;
+  font-size: 0.95rem;
+}
+
+/* ======== CARRINHO VAZIO ======== */
+.cart-empty-msg {
+  padding: 18px 14px;
+  text-align: center;
+  border: 2px dashed #ffca28;
+  border-radius: 12px;
+  background: #fffdf3;
+  font-weight: 600;
+  color: #444;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.6);
+  line-height: 1.4;
+}
+
+.cart-empty-msg div:first-child {
+  font-size: 1.05rem;
+  margin-bottom: 6px;
+  color: #222;
+}
+
+.cart-empty-msg div:last-child {
+  font-size: 0.95rem;
+  color: #6b6b6b;
+}
+/* ======== MODAIS GERAIS ======== */
+.modal {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.25s;
+  z-index: 999;
+  background: rgba(0, 0, 0, 0.5);
+}
+
+.modal.show {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.modal-content {
+  background: #fff;
+  border-radius: 16px;
+  max-height: 85vh;
+  max-width: 520px;
+  width: 90%;
+  overflow-y: auto;
+  box-shadow: 0 8px 40px rgba(0, 0, 0, 0.3);
+  position: relative;
+}
+
+.modal-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 16px;
+  border-bottom: 1px solid #eee;
+  background: #ffca28;
+  box-shadow: var(--shadow-in);
+}
+
+.modal-head h2,
+.modal-head h3 {
+  margin: 0;
+  font-size: 1.2rem;
+}
+
+/* ======== BOTÕES ======== */
+.btn-primary,
+.btn-secondary,
+.btn-primario,
+.confirm-btn {
+  border: none;
+  border-radius: 10px;
+  padding: 14px;
+  font-weight: 700;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: 0.2s;
+  width: 100%;
+}
+
+.btn-primary,
+.btn-primario,
+.confirm-btn {
+  background: linear-gradient(135deg, var(--success), #388e3c);
+  color: #fff;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.15);
+}
+
+.btn-primary:hover,
+.btn-primario:hover,
+.confirm-btn:hover {
+  background: linear-gradient(135deg, #388e3c, #2e7d32);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 10px rgba(0, 0, 0, 0.25);
+}
+
+.btn-secondary {
+  background: transparent;
+  color: #555;
+  border: 1px solid #ddd;
+}
+
+.btn-secondary:hover {
+  background: #f1f1f1;
+  border-color: #ccc;
+}
+
+/* ======== LOGIN ======== */
+.login-box {
+  padding: 20px;
+}
+
+.login-box input {
+  width: 100%;
+  padding: 12px;
+  margin-bottom: 12px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  font-size: 1rem;
+}
+
+.google-btn {
+  border: 1px solid #ddd;
+  background: #fff;
+  border-radius: 8px;
+  width: 100%;
+  font-weight: 600;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  padding: 10px;
+  transition: 0.2s;
+  cursor: pointer;
+  margin-bottom: 10px;
+}
+
+.google-btn:hover {
+  background: #f8f8f8;
+}
+
+.register-text {
+  text-align: center;
+  margin-top: 15px;
+  font-size: 0.9rem;
+  color: #666;
+}
+
+.link {
+  color: #1976d2;
+  cursor: pointer;
+  text-decoration: underline;
+  background: none;
+  border: none;
+  font-size: inherit;
+  padding: 0;
+}
+
+.link:hover {
+  color: #1565c0;
+}
+
+/* ======== BOTÕES DE FECHAR ======== */
+.fechar-pedidos,
+.fechar-recompensas,
+.extras-close,
+.combo-close,
+.login-close,
+.promo-close,
+.dashboard-close,
+.close-panel {
+  background: var(--botao);
+  border: none;
+  border-radius: 50%;
+  width: 30px;
+  height: 30px;
+  font-size: 18px;
+  font-weight: 700;
+  cursor: pointer;
+  line-height: 30px;
+  text-align: center;
+  color: #222;
+  transition: 0.2s;
+  pointer-events: auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.fechar-pedidos:hover,
+.fechar-recompensas:hover,
+.extras-close:hover,
+.combo-close:hover,
+.login-close:hover,
+.promo-close:hover,
+.dashboard-close:hover,
+.close-panel:hover {
+  background: #ff7043;
+  color: #fff;
+  transform: scale(1.1);
+}
+
+/* ======== PAINÉIS LATERAIS ======== */
+.side-panel {
+  position: fixed;
+  right: -100%;
+  top: 0;
+  width: min(95%, 440px);
+  height: 100vh;
+  background: #f4f4f4;
+  box-shadow: -4px 0 18px rgba(0, 0, 0, 0.3);
+  transition: right 0.4s;
+  display: flex;
+  flex-direction: column;
+  z-index: 990;
+}
+
+.side-panel.active {
+  right: 0;
+}
+
+.panel-header {
+  background: var(--acento);
+  padding: 15px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+.panel-header h2 {
+  margin: 0;
+  font-size: 1.2rem;
+}
+
+.orders-list,
+.rewards-list {
+  flex: 1;
+  overflow-y: auto;
+  padding: 15px;
+}
+
+.empty-orders,
+.empty-rewards {
+  text-align: center;
+  color: #999;
+  padding: 40px 20px;
+  font-size: 1rem;
+}
+
+/* ======== FOOTER ======== */
+.footer {
+  background: #ffca28;
+  text-align: center;
+  padding: 20px;
+  font-size: 0.9rem;
+  color: #222;
+  margin-top: 40px;
+}
+
+.footer a {
+  color: #ff7043;
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+.footer a:hover {
+  color: #ff5722;
+}
+
+.footer-links {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin: 8px 0;
+}
+
+.footer-btn {
+  background: #ffb300;
+  color: #222;
+  padding: 6px 14px;
+  border-radius: 6px;
+  font-weight: 700;
+  text-decoration: none;
+  transition: 0.25s;
+  display: inline-block;
+}
+
+.footer-btn:hover {
+  background: #ffca28;
+  transform: scale(1.03);
+}
+
+.footer-copy {
+  font-size: 0.8rem;
+  color: #000;
+  margin-top: 10px;
+}
+
+/* ======== COOKIE BANNER ======== */
+#cookie-banner {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: -100px;
+  background: rgba(34, 34, 34, 0.95);
+  color: #fff;
+  padding: 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  z-index: 2000;
+  transition: bottom 0.5s;
+}
+
+#cookie-banner.show {
+  bottom: 0;
+}
+
+#cookie-banner p {
+  margin: 0;
+  font-size: 0.9rem;
+  line-height: 1.4;
+  margin-right: 16px;
+}
+
+#cookie-banner a {
+  color: #ffca28;
+  font-weight: 600;
+  text-decoration: underline;
+}
+
+#cookie-banner button {
+  background: #4caf50;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 10px 16px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.2s;
+  flex-shrink: 0;
+}
+
+#cookie-banner button:hover {
+  background: #43a047;
+}
+
+/* ======== BOTÕES FLUTUANTES ======== */
+.meus-pedidos,
+.minhas-recompensas {
+  position: fixed;
+  right: 20px;
+  z-index: 1500;
+}
+
+.meus-pedidos {
+  bottom: 20px;
+}
+
+.minhas-recompensas {
+  bottom: 80px;
+}
+
+.meus-pedidos-btn,
+.recompensas-btn {
+  background: linear-gradient(135deg, #ffca28, #ffb300);
+  color: #222;
+  border: none;
+  border-radius: 20px;
+  font-weight: 700;
+  font-size: 0.95rem;
+  padding: 12px 22px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.meus-pedidos-btn:hover,
+.recompensas-btn:hover {
+  transform: scale(1.05);
+  box-shadow: 0 6px 15px rgba(0,0,0,0.3);
+}
+
+/* ======== POPUP ======== */
+.popup-add {
+  position: fixed;
+  top: 100px;
+  right: 20px;
+  background: #4CAF50;
+  color: #fff;
+  padding: 12px 20px;
+  border-radius: 8px;
+  font-weight: 600;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+  z-index: 10000;
+  opacity: 0;
+  transition: opacity 0.3s;
+  pointer-events: none;
+}
+
+.popup-add.show {
+  opacity: 1;
+}
+
+/* ======== ANIMAÇÕES ======== */
 @keyframes slideUp {
   from {
     opacity: 0;
@@ -241,18 +1269,162 @@
   }
 }
 
-.promo-card {
-  animation: slideUp 0.4s ease-out backwards;
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 
-.promo-card:nth-child(1) { animation-delay: 0.1s; }
-.promo-card:nth-child(2) { animation-delay: 0.2s; }
-.promo-card:nth-child(3) { animation-delay: 0.3s; }
-.promo-card:nth-child(4) { animation-delay: 0.4s; }
-.promo-card:nth-child(5) { animation-delay: 0.5s; }
-.promo-card:nth-child(6) { animation-delay: 0.6s; }
+/* ======== RESPONSIVE ======== */
+@media (max-width: 768px) {
+  .header {
+    padding: 8px 12px;
+  }
+  
+  .logo {
+    width: 45px;
+    height: 45px;
+  }
+  
+  .header-info h1 {
+    font-size: 1.1rem;
+  }
+  
+  .tagline {
+    font-size: 0.8rem;
+  }
+  
+  .grid {
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 12px;
+  }
+  
+  #promocoes-area {
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 15px;
+  }
+  
+  .promo-card-image {
+    height: 180px;
+  }
+}
 
-/* ======== LOADING STATE ======== */
+@media (max-width: 480px) {
+  .main-content-wrapper {
+    padding-top: 68px;
+  }
+  
+  .header-info h1 {
+    font-size: 1rem;
+  }
+  
+  .grid {
+    grid-template-columns: 1fr;
+  }
+  
+  #promocoes-area {
+    grid-template-columns: 1fr;
+  }
+  
+  #cookie-banner {
+    flex-direction: column;
+    text-align: center;
+    gap: 12px;
+  }
+  
+  #cookie-banner p {
+    margin-right: 0;
+  }
+  
+  #cookie-banner button {
+    width: 100%;
+    padding: 12px;
+  }
+}
+
+@media (max-width: 600px) {
+  .countdown-ticker {
+    font-size: 0.9rem;
+    padding: 8px 16px;
+  }
+}
+/* ======== EXTRAS / ADICIONAIS ======== */
+.extras-list {
+  padding: 16px 20px;
+  display: grid;
+  gap: 10px;
+}
+
+.extra-line {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px;
+  border: 1px solid #ffb300;
+  border-radius: 8px;
+  background: #fff;
+  margin-bottom: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.extra-line:hover {
+  background: #fff7e6;
+  transform: scale(1.02);
+}
+
+.extra-line span {
+  font-weight: 600;
+}
+
+.extra-line span b {
+  color: var(--danger);
+  margin-left: 5px;
+}
+
+.extra-line input[type="checkbox"] {
+  margin-left: 10px;
+  cursor: pointer;
+}
+
+.modal-foot {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+  padding: 16px 20px;
+  border-top: 1px solid #eee;
+}
+
+/* ======== COMBOS MODAL ======== */
+#combo-body {
+  padding: 16px 20px;
+  display: grid;
+  gap: 10px;
+}
+
+#combo-body label {
+  border: 1px solid #ffca28;
+  border-radius: 10px;
+  padding: 10px 14px;
+  background: #fff;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  transition: 0.2s;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+#combo-body label:hover {
+  background: #fff9e6;
+  transform: scale(1.02);
+}
+
+#combo-body input[type="radio"] {
+  margin-left: 10px;
+  cursor: pointer;
+}
+
+/* ======== LOADING STATES ======== */
 .promocoes-loading {
   text-align: center;
   padding: 40px;
@@ -270,184 +1442,197 @@
   40% { content: '..'; }
   60%, 100% { content: '...'; }
 }
-/* ===========================================================
-   🔥 DFL v5.5.3 — SISTEMA DE PROMOÇÕES DINÂMICAS
-   - Cards organizados em grade
-   - Dados estruturados de promoções
-   - Adicionar ao carrinho funcional
-=========================================================== */
 
-// DADOS DAS PROMOÇÕES
-const PROMOCOES = [
-  {
-    id: 'promo-1',
-    nome: 'Dupla Purizin + Fanta',
-    preco: 34.99,
-    precoAntigo: 40.00,
-    descricao: '2 Hot Dogs "Purizin" com Purê Cremoso e 1 Fanta Laranja Geladinha!',
-    ingredientes: 'Pão, Molho, Purê de batata cremoso, 1 Salsicha, Batata Palha, Ketchup e Maionese.',
-    imagem: 'promocoes/promo1.jpg',
-    economia: 5.01
-  },
-  {
-    id: 'promo-2',
-    nome: 'Combo 3 Padaná',
-    preco: 37.99,
-    precoAntigo: 45.00,
-    descricao: '3 Hot Dogs Padaná completos!',
-    ingredientes: 'Pão, Molho, 2 Salsichas, Batata Palha, Bacon, Vinagrete, Mussarela.',
-    imagem: 'promocoes/promo2.jpg',
-    economia: 7.01
-  },
-  {
-    id: 'promo-3',
-    nome: 'Bora Artesanar o Bolso',
-    preco: 39.99,
-    precoAntigo: 52.00,
-    descricao: '2 Burgers "Peleja" Artesanais',
-    ingredientes: 'Pão, Alface, Tomate, Milho, Bacon, Filé de Frango, Hambúrguer Artesanal 120g, Presunto e Mussarela.',
-    imagem: 'promocoes/promo3.jpg',
-    economia: 12.01
-  },
-  {
-    id: 'promo-4',
-    nome: '3 Hambúrguer "Trem" + 1 Fanta Laranja 1L',
-    preco: 44.99,
-    precoAntigo: 50.00,
-    descricao: 'Combo completo com 3 hambúrgueres e refrigerante!',
-    ingredientes: 'Pão, alface, tomate, milho, bacon, salsicha, presunto e mussarela.',
-    imagem: 'promocoes/promo4.jpg',
-    economia: 5.01
-  },
-  {
-    id: 'promo-5',
-    nome: 'Trem que Mata a Fome',
-    preco: 49.99,
-    precoAntigo: 65.00,
-    descricao: '4 Hambúrgueres Trem + Fanta 2L',
-    ingredientes: 'Pão, alface, tomate, milho, bacon, hambúrguer, presunto e mussarela.',
-    imagem: 'promocoes/promo5.jpg',
-    economia: 15.01
-  }
-];
-
-// FUNÇÃO PARA RENDERIZAR PROMOÇÕES
-function renderizarPromocoes() {
-  const container = document.getElementById('promocoes-area');
-  
-  if (!container) {
-    console.warn('Container de promoções não encontrado');
-    return;
-  }
-
-  // Mostra loading
-  container.innerHTML = '<div class="promocoes-loading">Carregando promoções</div>';
-
-  // Simula delay de carregamento
-  setTimeout(() => {
-    container.innerHTML = PROMOCOES.map(promo => `
-      <div class="promo-card" data-promo-id="${promo.id}">
-        <img 
-          src="${promo.imagem}" 
-          alt="${promo.nome}" 
-          class="promo-card-image"
-          loading="lazy"
-          onerror="this.src='imagens/placeholder.png'"
-        />
-        
-        <div class="promo-card-content">
-          <h3 class="promo-card-title">
-            ${promo.nome}
-            <span class="promo-badge">💸 -R$ ${promo.economia.toFixed(2)}</span>
-          </h3>
-          
-          <p class="promo-card-description">${promo.descricao}</p>
-          
-          <div class="promo-card-price">
-            <span class="promo-price-old">De R$ ${promo.precoAntigo.toFixed(2)}</span>
-            <span class="promo-price-new">
-              <small>por</small>
-              R$ ${promo.preco.toFixed(2)}
-            </span>
-          </div>
-          
-          <small class="promo-card-ingredients">
-            📝 ${promo.ingredientes}
-          </small>
-          
-          <button 
-            class="promo-card-button" 
-            type="button"
-            data-nome="${promo.nome}"
-            data-preco="${promo.preco}"
-          >
-            🛒 Adicionar
-          </button>
-        </div>
-      </div>
-    `).join('');
-
-    // Adiciona event listeners aos botões
-    adicionarEventListenersPromocoes();
-  }, 300);
+/* ======== SCROLL SUAVE ======== */
+html {
+  scroll-behavior: smooth;
 }
 
-// EVENT LISTENERS PARA BOTÕES DE PROMOÇÃO
-function adicionarEventListenersPromocoes() {
-  document.querySelectorAll('.promo-card-button').forEach(btn => {
-    btn.addEventListener('click', (e) => {
-      e.stopPropagation();
-      
-      const nome = btn.dataset.nome;
-      const preco = parseFloat(btn.dataset.preco);
-      
-      // Função global de adicionar ao carrinho (do script principal)
-      if (typeof addCommonItem === 'function') {
-        addCommonItem(nome, preco);
-      } else {
-        // Fallback: adiciona diretamente ao cart
-        const existente = cart.find(i => i.nome === nome && i.preco === preco);
-        if (existente) {
-          existente.qtd++;
-        } else {
-          cart.push({ nome, preco, qtd: 1 });
-        }
-        
-        if (typeof renderMiniCart === 'function') renderMiniCart();
-        if (typeof popupAdd === 'function') popupAdd(`${nome} adicionado!`);
-      }
-      
-      // Feedback visual
-      btn.textContent = '✅ Adicionado!';
-      btn.style.background = 'linear-gradient(135deg, #4caf50, #2e7d32)';
-      
-      setTimeout(() => {
-        btn.innerHTML = '🛒 Adicionar';
-        btn.style.background = '';
-      }, 1500);
-    });
-  });
-
-  // Click no card inteiro também adiciona
-  document.querySelectorAll('.promo-card').forEach(card => {
-    card.addEventListener('click', (e) => {
-      // Só ativa se não clicou no botão
-      if (!e.target.classList.contains('promo-card-button')) {
-        const btn = card.querySelector('.promo-card-button');
-        if (btn) btn.click();
-      }
-    });
-  });
+/* ======== SCROLLBAR CUSTOMIZADA ======== */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
 }
 
-// INICIALIZAÇÃO
-document.addEventListener('DOMContentLoaded', () => {
-  // Renderiza promoções assim que o DOM carregar
-  renderizarPromocoes();
-  
-  console.log('🔥 Sistema de Promoções v5.5.3 carregado!');
-});
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 10px;
+}
 
-// Exporta para uso global (opcional)
-window.PROMOCOES = PROMOCOES;
-window.renderizarPromocoes = renderizarPromocoes;
+::-webkit-scrollbar-thumb {
+  background: #ffb300;
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #ff9800;
+}
+
+/* ======== LINKS GERAIS ======== */
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+/* ======== INPUTS E FORMS ======== */
+input[type="text"],
+input[type="email"],
+input[type="password"],
+textarea {
+  font-family: inherit;
+  font-size: 1rem;
+}
+
+input:focus,
+textarea:focus {
+  outline: none;
+  border-color: var(--botao);
+}
+
+/* ======== BOTÕES GERAIS ======== */
+button {
+  font-family: inherit;
+}
+
+button:focus {
+  outline: 2px solid var(--botao);
+  outline-offset: 2px;
+}
+
+/* ======== ACESSIBILIDADE ======== */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
+
+/* ======== ESTADOS DE CARREGAMENTO ======== */
+[aria-busy="true"] {
+  cursor: wait;
+  opacity: 0.6;
+}
+
+/* ======== ANIMAÇÕES DE ENTRADA ======== */
+.card,
+.promo-card {
+  animation: slideUp 0.4s ease-out backwards;
+}
+
+.card:nth-child(1),
+.promo-card:nth-child(1) { animation-delay: 0.05s; }
+.card:nth-child(2),
+.promo-card:nth-child(2) { animation-delay: 0.1s; }
+.card:nth-child(3),
+.promo-card:nth-child(3) { animation-delay: 0.15s; }
+.card:nth-child(4),
+.promo-card:nth-child(4) { animation-delay: 0.2s; }
+.card:nth-child(5),
+.promo-card:nth-child(5) { animation-delay: 0.25s; }
+.card:nth-child(6),
+.promo-card:nth-child(6) { animation-delay: 0.3s; }
+
+/* ======== ESTADOS DISABLED ======== */
+button:disabled,
+input:disabled {
+  opacity: 0.6;
+  cursor: not-allowed !important;
+}
+
+/* ======== SOMBRAS E ELEVAÇÕES ======== */
+.elevation-1 {
+  box-shadow: var(--shadow-1);
+}
+
+.elevation-2 {
+  box-shadow: var(--shadow-2);
+}
+
+.elevation-3 {
+  box-shadow: var(--shadow-3);
+}
+
+/* ======== UTILIDADES ======== */
+.text-center {
+  text-align: center;
+}
+
+.mt-1 { margin-top: 8px; }
+.mt-2 { margin-top: 16px; }
+.mt-3 { margin-top: 24px; }
+
+.mb-1 { margin-bottom: 8px; }
+.mb-2 { margin-bottom: 16px; }
+.mb-3 { margin-bottom: 24px; }
+
+.p-1 { padding: 8px; }
+.p-2 { padding: 16px; }
+.p-3 { padding: 24px; }
+
+/* ======== DARK MODE PREP (FUTURO) ======== */
+@media (prefers-color-scheme: dark) {
+  /* Preparado para modo escuro futuro */
+}
+
+/* ======== PRINT STYLES ======== */
+@media print {
+  .header,
+  .footer,
+  .mini-cart,
+  .meus-pedidos,
+  .minhas-recompensas,
+  #cookie-banner {
+    display: none !important;
+  }
+  
+  body {
+    background: #fff;
+  }
+  
+  .card,
+  .promo-card {
+    break-inside: avoid;
+  }
+}
+
+/* ======== HOVER EFFECTS PARA TOUCH DEVICES ======== */
+@media (hover: none) {
+  .card:hover,
+  .promo-card:hover {
+    transform: none;
+  }
+  
+  button:hover {
+    transform: none;
+  }
+}
+
+/* ======== SEGURANÇA E PERFORMANCE ======== */
+* {
+  -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+}
+
+img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
+
+/* ======== FIM DO CSS ======== */
+
+/* 
+  🎨 DFL v5.5.3 - CSS COMPLETO
+  ✅ Layout corrigido
+  ✅ Cores aplicadas
+  ✅ Promoções em grade
+  ✅ Responsivo
+  ✅ Animações suaves
+  ✅ Acessibilidade
+  
+  Desenvolvido com ❤️ para Da Família Lanches
+*/
