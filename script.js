@@ -1,8 +1,12 @@
 /* =========================================================  
-   🌟 DFL v5.5.6 — CORREÇÃO FINAL DE ESTRUTURA (REVERSÃO E ORDEM)
-   - Timer e Status voltam a inicializar dentro do bloco principal.
-   - Mapeamento de produtos para busca é atrasado para evitar falha de inicialização.
+   🌟 DFL v5.5.7 — INTEGRAÇÃO COMPLETA E CORREÇÃO DE INICIALIZAÇÃO
+   - Código do extras.js integrado para eliminar risco de falhas de contexto/carregamento.
+   - Lógica principal do site reestruturada para máxima compatibilidade.
 ========================================================= */
+
+// ====================================================================
+// 🧠 PARTE 0: LÓGICA DE BUSCA E FERRAMENTAS GERAIS (MOVE PARA TOPO)
+// ====================================================================
 
 // Função para mapear todos os produtos do cardápio em um formato simples para a busca
 function getProductsMap() {
@@ -49,6 +53,173 @@ function levenshteinDistance(s1, s2) {
     return track[s2.length][s1.length];
 }
 
+// ====================================================================
+// 🍔 FUNÇÕES DO EXTRAS.JS (INTEGRADO)
+// ====================================================================
+
+const THUMB_MAP = [
+    { key: 'casal', img: 'imagens/combo1.png' },
+    { key: 'família', img: 'imagens/combo3.png' },
+    { key: 'familia', img: 'imagens/combo3.png' },
+    { key: 'artesanal', img: 'imagens/combo4.png' },
+    { key: 'purizin', img: 'imagens/purizin.png' },
+    { key: 'padaná', img: 'imagens/padana.png' },
+    { key: 'padana', img: 'imagens/padana.png' },
+    { key: 'nigucim', img: 'imagens/nigucim.png' },
+    { key: 'nimin', img: 'imagens/nimin.png' },
+    { key: 'trembão', img: 'imagens/trembao.png' },
+    { key: 'trembao', img: 'imagens/trembao.png' },
+    { key: 'bão', img: 'imagens/bao.png' },
+    { key: 'bao', img: 'imagens/bao.png' },
+    { key: 'trem', img: 'imagens/trem.png' },
+    { key: 'uai', img: 'imagens/uai.png' },
+    { key: 'cadim', img: 'imagens/cadim.png' },
+    { key: 'bitela', img: 'imagens/bitela.png' },
+    { key: 'armaria', img: 'imagens/armaria.png' },
+    { key: 'apruma', img: 'imagens/apruma.png' },
+    { key: 'peleja', img: 'imagens/peleja.png' },
+    { key: 'custoso', img: 'imagens/custoso.png' },
+    { key: 'tudibom', img: 'imagens/tudibom.png' },
+    { key: 'simprão', img: 'imagens/simprao.png' },
+    { key: 'simprao', img: 'imagens/simprao.png' }
+];
+
+function fixThumbnail(cardElement) {
+    const thumbDiv = cardElement.querySelector('.pedido-thumb');
+    if (!thumbDiv) return;
+    
+    const text = (cardElement.innerText || '').toLowerCase();
+    const found = THUMB_MAP.find(t => text.includes(t.key));
+    
+    if (found) {
+       thumbDiv.style.backgroundImage = `url('${found.img}')`;
+    } 
+    else {
+       // Se não encontrou, usa um ícone genérico seguro.
+       thumbDiv.style.backgroundImage = `url('imagens/burger.png')`; 
+    }
+}
+
+function watchOrders() {
+    const list = document.getElementById('listaPedidos');
+    if (!list) return;
+    
+    const mo = new MutationObserver((mutations) => {
+        mutations.forEach(mutation => {
+            mutation.addedNodes.forEach(node => {
+                if (node.nodeType === 1 && node.classList.contains('pedido-card')) {
+                    fixThumbnail(node);
+                }
+            });
+        });
+        Array.from(list.children).forEach(fixThumbnail);
+    });
+    
+    mo.observe(list, { childList: true, subtree: true });
+    Array.from(list.children).forEach(fixThumbnail);
+}
+
+function stylizePopup(el) {
+    const msg = el.textContent || "";
+    if (el.dataset.processed === msg) return;
+    
+    const isSpecial = /Login|Sucesso|Parabéns|Pedido|Finaliz/i.test(msg);
+    const isError = /Erro|Inválido|Falha/i.test(msg);
+    
+    let icon = '🍔';
+    if (msg.includes('Login')) icon = '🎉';
+    else if (msg.includes('Pedido')) icon = '📦';
+    else if (msg.includes('adicionado')) icon = '🛒';
+    else if (msg.includes('removido')) icon = '🗑️';
+    else if (msg.includes('Cupom')) icon = '🎟️';
+    else if (isError) icon = '⚠️';
+
+    if (isSpecial) {
+      el.classList.add('dfl-center');
+    } else {
+      el.classList.remove('dfl-center');
+    }
+
+    if (!msg.includes(icon)) {
+        el.innerHTML = `<span style="margin-right:8px; font-size:1.2em">${icon}</span> ${msg}`;
+        el.dataset.processed = el.textContent; 
+    }
+}
+
+function injectExtrasStyles() {
+    if (document.getElementById('dfl-extras-js-style')) return;
+    const st = document.createElement('style');
+    st.id = 'dfl-extras-js-style';
+    st.textContent = `
+      /* --- BASE DO TOAST (Comum a todos) --- */
+      .popup-add, .dfl-toast {
+        position: fixed !important;
+        top: 20px !important; 
+        bottom: auto !important;
+        left: 50% !important;
+        transform: translateX(-50%) translateY(-150%) !important; /* Começa escondido */
+        
+        background: #222 !important; 
+        color: #fff !important;
+        font-family: 'Segoe UI', Roboto, sans-serif !important;
+        font-weight: 700 !important;
+        font-size: 0.95rem !important;
+        white-space: nowrap !important;
+        
+        padding: 12px 24px !important; 
+        border-radius: 50px !important; 
+        box-shadow: 0 8px 25px rgba(0,0,0,0.3) !important;
+        
+        z-index: 2147483647 !important;
+        opacity: 0 !important;
+        
+        transition: all 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55) !important;
+        pointer-events: none !important;
+        
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        gap: 10px !important;
+      }
+
+      /* Estado Visível */
+      .popup-add.show, .dfl-toast.show {
+        opacity: 1 !important;
+        transform: translateX(-50%) translateY(0) !important;
+      }
+
+      /* --- MODO ESPECIAL: CENTRO --- */
+      .popup-add.dfl-center, .dfl-toast.dfl-center {
+        top: 50% !important;
+        background: rgba(0, 0, 0, 0.9) !important;
+        backdrop-filter: blur(5px) !important;
+        padding: 25px 35px !important;
+        font-size: 1.1rem !important;
+        border: 1px solid rgba(255,255,255,0.15) !important;
+        transform: translate(-50%, -50%) scale(0.5) !important; 
+      }
+
+      .popup-add.dfl-center.show, .dfl-toast.dfl-center.show {
+        transform: translate(-50%, -50%) scale(1) !important; 
+      }
+
+      /* --- CORREÇÃO DAS MINIATURAS --- */
+      .pedido-card .pedido-thumb {
+        width: 100% !important;
+        height: 110px !important;
+        background-size: cover !important;
+        background-position: center center !important;
+        border-radius: 8px !important;
+        margin-bottom: 10px !important;
+        background-color: transparent !important;
+        box-shadow: inset 0 0 0 1px rgba(0,0,0,0.05);
+      }
+    `;
+    document.head.appendChild(st);
+}
+// ====================================================================
+
+
 document.addEventListener("DOMContentLoaded", () => {
     // MÁSCARA AUTOMÁTICA DO CEP
     const cepInputMask = document.getElementById("cep-input");
@@ -63,13 +234,12 @@ document.addEventListener("DOMContentLoaded", () => {
     /* ------------------ 🔍 LÓGICA DE BUSCA DE PRODUTOS ------------------ */
     const campoBusca = document.getElementById("campoBusca");
     const resultadoBusca = document.getElementById("resultadoBusca");
-    let todosProdutos = []; // Inicializado aqui, populado após o Firebase
+    let todosProdutos = [];
 
     // Ação ao digitar no campo de busca
     campoBusca?.addEventListener("input", (e) => {
         const query = e.target.value.trim().toLowerCase();
         
-        // Verifica se o array de produtos foi populado
         if (todosProdutos.length === 0) return;
 
         // Exibe todos os produtos se a busca estiver vazia
@@ -111,7 +281,6 @@ document.addEventListener("DOMContentLoaded", () => {
             
             // Busca a melhor correspondência (Levenshtein distance)
             for (const produto of todosProdutos) {
-                // Tolerância de até 3 erros (dist <= 3) e o produto precisa ser minimamente parecido
                 const dist = levenshteinDistance(queryClean, produto.searchName);
                 if (dist < menorDistancia && dist <= Math.max(2, Math.floor(produto.searchName.length * 0.3))) { 
                     menorDistancia = dist;
@@ -201,7 +370,6 @@ document.addEventListener("DOMContentLoaded", () => {
         loginModal: document.getElementById("login-modal"),  
         loginForm: document.getElementById("login-form"),  
         googleBtn: document.getElementById("google-login"),  
-        // **REFERÊNCIAS QUEBRADAS ANTERIORES JÁ FORAM REMOVIDAS**
         userBtn: document.getElementById("user-btn"),  
         statusBanner: document.getElementById("status-banner"),  
         hoursBanner: document.querySelector(".hours-banner"),  
@@ -280,7 +448,7 @@ document.addEventListener("DOMContentLoaded", () => {
         renderMiniCart();   
     });
 
-    /* ------------------ 💬 POPUP ------------------ */  
+    /* ------------------ 💬 POPUP (INTEGRADO) ------------------ */  
     function popupAdd(msg) {  
         let pop = document.querySelector(".popup-add");  
         if (!pop) {  
@@ -290,6 +458,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }  
         pop.textContent = msg;  
         pop.classList.add("show");  
+        stylizePopup(pop); // Chama a função de estilo integrado
         setTimeout(() => pop.classList.remove("show"), 2000);  
     }
 
@@ -447,6 +616,14 @@ document.addEventListener("DOMContentLoaded", () => {
                 el.userBtn.textContent = `Olá, ${user.displayName?.split(" ")[0] || user.email.split("@")[0]}`;  
                 if (el.pedidosContainer) el.pedidosContainer.style.display = 'block';  
                 if (el.recompensasContainer) el.recompensasContainer.style.display = 'block';  
+                
+                // INTEGRAÇÃO EXTRAS.JS: DETECTOR DE LOGIN
+                if (!sessionStorage.getItem('dfl_logged_in_msg')) {
+                  sessionStorage.setItem('dfl_logged_in_msg', 'true');
+                  const nome = user.displayName ? user.displayName.split(' ')[0] : 'Cliente';
+                  popupAdd(`🎉 Login realizado! Olá, ${nome}.`);
+                }
+
             } else {  
                 el.userBtn.textContent = "Entrar / Cadastrar";  
                 if (el.pedidosContainer) el.pedidosContainer.style.display = 'none';  
@@ -1098,6 +1275,7 @@ document.addEventListener("DOMContentLoaded", () => {
         try { const q = db.collection("Pedidos").where("userId", "==", userId).orderBy("data", "desc"); const snapshot = await q.get();  
             if (snapshot.empty) { el.pedidosLista.innerHTML = `<p class="empty-orders">Nenhum pedido encontrado 😢</p>`; return; }  
             exibirPedidos(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));  
+            watchOrders(); // Garante que o observador está ativo
         } catch (err) { console.error("Erro pedidos:", err); el.pedidosLista.innerHTML = `<p class="empty-orders" style="color:red;">Erro ao buscar pedidos.</p>`; }  
     }  
 
@@ -1172,7 +1350,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     async function carregarHistoricoRecompensas(userId) {  
         if (!el.historicoLista) return; el.historicoLista.innerHTML = `<p class="empty-orders" style="text-align:center;color:#999;">Carregando...</p>`;  
-        try { const q = db.collection("Pedidos").where("userId", "==", userId).orderBy("data", "desc"); const snapshot = await q.get();  
+        try { const q = db.collection("Usuarios").doc(userId).collection("RecompensasRecebidas").orderBy("liberadoEm", "desc"); const snapshot = await q.get();  
             if (snapshot.empty) { el.historicoLista.innerHTML = `<p class="empty-orders" style="text-align:center;color:#999;">Nenhuma recompensa no histórico.</p>`; return; }  
             el.historicoLista.innerHTML = snapshot.docs.map(doc => { const log = doc.data(); const dataRecebimento = log.liberadoEm ? log.liberadoEm.toDate().toLocaleDateString('pt-BR') : "—"; let icon = '🎁'; const tituloRaw = String(log.titulo || '').toLowerCase(); if (tituloRaw.includes('ouro') || tituloRaw.includes('platina') || tituloRaw.includes('diamante')) icon = getTierIcon(log.titulo); else if (log.tipo === 'cupom') icon = '🎟️'; return `<div class="historico-card" style="display:flex;padding:10px 0;border-bottom:1px dashed #eee;align-items:center;justify-content:space-between;"><div style="flex:1;"><p style="font-weight:600;margin:0;color:#333;">${icon} ${log.titulo || log.valor}</p><small style="color:#999;">${dataRecebimento}</small></div><span style="font-weight:700;color:#4caf50;">Recebido</span></div>`; }).join('');  
         } catch (err) { console.error("Erro histórico:", err); el.historicoLista.innerHTML = `<p class="empty-orders" style="color:red;">Erro.</p>`; }  
@@ -1195,8 +1373,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const cookieBanner = document.getElementById("cookie-banner"); const cookieAcceptBtn = document.getElementById("cookie-accept");  
     if (cookieBanner && cookieAcceptBtn) { if (localStorage.getItem("dfl-cookies-accepted") === "true") cookieBanner.style.display = "none"; else cookieBanner.classList.add("show"); cookieAcceptBtn.addEventListener("click", () => { localStorage.setItem("dfl-cookies-accepted", "true"); cookieBanner.classList.remove("show"); }); }
 
-    console.log("%c🚀 DFL v5.5.6 — Correção Final Estrutural", "background:#4CAF50;color:#fff;padding:5px;border-radius:5px;");  
-    inicializarFirebase();
+    console.log("%c🚀 DFL v5.5.7 — Estabilidade Restaurada (Integração Total)", "background:#4CAF50;color:#fff;padding:5px;border-radius:5px;");  
     
     // **AQUISIÇÃO DE DADOS PARA BUSCA (ATRASADA)**
     setTimeout(() => {
@@ -1208,69 +1385,16 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }, 1000); // 1 segundo de atraso para o DOM carregar completamente
 
-}); // FIM DO DOMContentLoaded
 
+    // **EXECUÇÃO DE INICIALIZAÇÃO**
+    inicializarFirebase();
+    injectExtrasStyles(); // Injeta estilos globais (do extras.js)
+    watchOrders(); // Inicia o observador de pedidos (do extras.js)
 
-/* =========================================================
-   REVERSÃO: LÓGICA DE STATUS/TIMER DE VOLTA AO LUGAR
-   ========================================================= */
-
-// Função que calcula e formata o tempo restante (Duplicada para Garantia de Execução)
-const getFormattedTime = (diff) => {
-    if (diff <= 0) return "00:00:00";
-    const h = String(Math.floor(diff / 3600000)).padStart(2, "0");
-    const m = String(Math.floor((diff % 3600000) / 60000)).padStart(2, "0");
-    const s = String(Math.floor((diff % 60000) / 1000)).padStart(2, "0");
-    return `${h}:${m}:${s}`;
-};
-
-const atualizarTimer = safe(() => {
-    const agora = new Date();
-    const fim = new Date();
-    fim.setHours(23, 59, 59, 999);
-    const diff = fim - agora;
-    
-    const elSecaoPromo = document.getElementById("secao-promocoes");
-    if (!elSecaoPromo) return;
-
-    let elTimerWrapper = elSecaoPromo.querySelector(".contador-promo-wrapper");
-    
-    if (!elTimerWrapper) {
-        const elTitulo = elSecaoPromo.querySelector(".titulo-secao");
-        if (!elTitulo) return;
-        
-        elTimerWrapper = document.createElement("div");
-        elTimerWrapper.className = "contador-promo-wrapper";
-        elTimerWrapper.innerHTML = `
-            <span class="tempo-restante-label">⏳ Tempo restante:</span>
-            <span class="tempo-restante-valor" id="promo-timer-valor">${getFormattedTime(diff)}</span>
-        `;
-        const elSlogan = document.createElement("p");
-        elSlogan.className = "slogan-promo";
-        elSlogan.textContent = "Aproveite antes que o cronômetro zere à meia-noite!";
-
-        elTitulo.after(elSlogan);
-        elTitulo.after(elTimerWrapper);
-    } else {
-        const elValor = elTimerWrapper.querySelector("#promo-timer-valor");
-        if (elValor) elValor.textContent = getFormattedTime(diff);
-    }
-});
-
-const atualizarStatus = safe(() => {  
-    const agora = new Date(); const h = agora.getHours();  
-    const aberto = h >= 18 && h < 23;   
-    const elStatus = document.getElementById("status-banner");
-    if (elStatus) { 
-        elStatus.textContent = aberto ? "🟢 Aberto — Faça seu pedido!" : "🔴 Fechado — Voltamos às 18h!"; 
-        elStatus.className = `status-banner ${aberto ? "open" : "closed"}`; 
-    }
-}); 
-
-// **CHAMADAS DE TIMER/STATUS REINSERIDAS NO BLOCO PRINCIPAL**
-document.addEventListener('DOMContentLoaded', () => {
+    // **TIMER/STATUS (CHAMADAS MANTIDAS NO FINAL DO BLOCO)**
     atualizarTimer();
     setInterval(atualizarTimer, 1000);
     atualizarStatus(); 
     setInterval(atualizarStatus, 60000); 
-});
+
+}); // FIM DO DOMContentLoaded
