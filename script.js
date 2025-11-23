@@ -1,19 +1,17 @@
 /* =========================================================  
-   🌟 DFL v5.8.0 — VERSÃO DE PRODUÇÃO (ESTÁVEL)
-   - Baseada na estrutura da v5.7 (Diagnóstico) que funcionou.
-   - Busca de Produtos: ATIVA.
-   - Grade de Promoções: ATIVA.
-   - Integração Extras: ATIVA.
+   🌟 DFL v5.8.1 — VERSÃO INTEGRAL (REVISADA)
+   - Contém TODAS as funções do sistema antigo.
+   - Integração Extras.js + Busca + Grade Promoções.
+   - Recuperação de listeners de clique.
 ========================================================= */
 
 // ====================================================================
-// 🧠 PARTE 0: FUNÇÕES AUXILIARES (BUSCA + EXTRAS)
+// 1. FUNÇÕES GLOBAIS E AUXILIARES
 // ====================================================================
 
-// Função para mapear todos os produtos do cardápio para a busca
+// Mapa de Produtos para a Busca
 function getProductsMap() {
     const allProducts = [];
-    // Mapeia Combos, Lanches, Hot Dogs e Bebidas
     document.querySelectorAll(".menu-section .card[data-name]").forEach(card => {
         const name = card.dataset.name;
         const price = parseFloat(card.dataset.price);
@@ -31,7 +29,7 @@ function getProductsMap() {
     return allProducts;
 }
 
-// Algoritmo de Fuzzy Matching (Busca aproximada)
+// Fuzzy Matching (Correção de erros de digitação)
 function levenshteinDistance(s1, s2) {
     s1 = s1.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
     s2 = s2.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
@@ -47,8 +45,7 @@ function levenshteinDistance(s1, s2) {
     return track[s2.length][s1.length];
 }
 
-// --- INTEGRAÇÃO EXTRAS.JS (Estilos e Thumbnails) ---
-
+// Injeção de CSS do antigo Extras.js
 function injectExtrasStyles() {
     if (document.getElementById('dfl-extras-js-style')) return;
     const st = document.createElement('style');
@@ -83,6 +80,7 @@ function injectExtrasStyles() {
     document.head.appendChild(st);
 }
 
+// Estilização de Popups (Emojis e Posição)
 function stylizePopup(el) {
     const msg = el.textContent || "";
     if (el.dataset.processed === msg) return;
@@ -105,6 +103,7 @@ function stylizePopup(el) {
     }
 }
 
+// Mapa de Imagens para Histórico de Pedidos
 const THUMB_MAP = [
     { key: 'casal', img: 'imagens/combo1.png' }, { key: 'família', img: 'imagens/combo3.png' }, { key: 'familia', img: 'imagens/combo3.png' },
     { key: 'artesanal', img: 'imagens/combo4.png' }, { key: 'purizin', img: 'imagens/purizin.png' }, { key: 'padaná', img: 'imagens/padana.png' },
@@ -138,11 +137,11 @@ function watchOrders() {
 }
 
 // ====================================================================
-// 2. INICIALIZAÇÃO PRINCIPAL
+// 2. INICIALIZAÇÃO PRINCIPAL (DOMContentLoaded)
 // ====================================================================
 document.addEventListener("DOMContentLoaded", () => {
     
-    // --- MÁSCARA CEP ---
+    // --- MÁSCARA DO CEP ---
     const cepInputMask = document.getElementById("cep-input");
     if (cepInputMask) {
         cepInputMask.addEventListener("input", function(e) {
@@ -152,12 +151,12 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-    // --- BUSCA DE PRODUTOS ---
+    // --- LÓGICA DE BUSCA (Nova) ---
     const campoBusca = document.getElementById("campoBusca");
     const resultadoBusca = document.getElementById("resultadoBusca");
     let todosProdutos = [];
 
-    // Pequeno delay para garantir que o DOM esteja pronto antes de mapear
+    // Delay para garantir que o DOM esteja estável
     setTimeout(() => { try { todosProdutos = getProductsMap(); } catch(e){} }, 1000);
 
     campoBusca?.addEventListener("input", (e) => {
@@ -213,7 +212,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     });
 
-    // --- VARIÁVEIS BASE ---
+    // --- VARIÁVEIS DO SISTEMA ---
     const sound = new Audio("click.wav");   
     let cart = [];  
     let currentUser = null;  
@@ -224,7 +223,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const money = (n) => `R$ ${Number(n || 0).toFixed(2).replace(".", ",")}`;  
     const safe = (fn) => (...a) => { try { fn(...a); } catch (e) { console.error(e); } };  
 
-    // --- OBJETO ELEMENTOS (LIMPO) ---
+    // --- ELEMENTOS DO DOM (EL) ---
     const el = {
         cartIcon: document.getElementById("cart-icon"),
         cartCount: document.getElementById("cart-count"),
@@ -254,7 +253,6 @@ document.addEventListener("DOMContentLoaded", () => {
         comboBody: document.querySelector("#combo-modal #combo-body"),
         comboConfirm: document.getElementById("combo-confirm"),
         reportsBtn: document.getElementById("reports-btn"),
-        // Frete e Endereço
         btnNaoSeiCEP: document.getElementById("btnNaoSeiCEP"),
         btnManual: document.getElementById("btnManual"),
         btnConfirmarEndereco: document.getElementById("btnConfirmarEndereco"),
@@ -264,7 +262,7 @@ document.addEventListener("DOMContentLoaded", () => {
         progressFill: document.getElementById("progressFill")
     };
 
-    // --- FIREBASE CONFIG ---
+    // --- CONFIGURAÇÃO FIREBASE ---
     const firebaseConfig = {
         apiKey: "AIzaSyATQBcbYuzKpKlSwNlbpRiAM1XyHqhGeak",
         authDomain: "da-familia-lanches.firebaseapp.com",
@@ -294,11 +292,12 @@ document.addEventListener("DOMContentLoaded", () => {
                 if(document.querySelector(".meus-pedidos")) document.querySelector(".meus-pedidos").style.display = 'block';
                 if(document.querySelector(".minhas-recompensas")) document.querySelector(".minhas-recompensas").style.display = 'block';
                 
+                // Popup de boas-vindas (do antigo extras.js)
                 if (!sessionStorage.getItem('dfl_logged_in_msg')) {
                     sessionStorage.setItem('dfl_logged_in_msg', 'true');
                     popupAdd(`🎉 Login realizado! Olá, ${user.displayName?.split(' ')[0] || 'Cliente'}.`);
                 }
-                // Admin check
+                // Admin Check
                 if(isAdmin(user) && el.reportsBtn) createAdminFab();
             } else {
                 if(el.userBtn) el.userBtn.textContent = "Entrar / Cadastrar";
@@ -309,7 +308,7 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-    // --- STATUS BANNER ---
+    // --- STATUS E TIMER ---
     const atualizarStatus = safe(() => {  
         const agora = new Date(); const h = agora.getHours();  
         const aberto = h >= 18 && h < 23;   
@@ -319,7 +318,6 @@ document.addEventListener("DOMContentLoaded", () => {
         }  
     });
     
-    // --- TIMER (ADAPTADO) ---
     const getFormattedTime = (diff) => {
         if (diff <= 0) return "00:00:00";
         const h = String(Math.floor(diff / 3600000)).padStart(2, "0");
@@ -333,23 +331,18 @@ document.addEventListener("DOMContentLoaded", () => {
         const fim = new Date();
         fim.setHours(23, 59, 59, 999);
         const diff = fim - agora;
-        
         const elSecaoPromo = document.getElementById("secao-promocoes");
         if (!elSecaoPromo) return;
-
         let elTimerWrapper = elSecaoPromo.querySelector(".contador-promo-wrapper");
         if (!elTimerWrapper) {
             const elTitulo = elSecaoPromo.querySelector(".titulo-secao");
             if (!elTitulo) return;
-            
             elTimerWrapper = document.createElement("div");
             elTimerWrapper.className = "contador-promo-wrapper";
             elTimerWrapper.innerHTML = `<span class="tempo-restante-label">⏳ Tempo restante:</span><span class="tempo-restante-valor" id="promo-timer-valor">${getFormattedTime(diff)}</span>`;
-            
             const elSlogan = document.createElement("p");
             elSlogan.className = "slogan-promo";
             elSlogan.textContent = "Aproveite antes que o cronômetro zere à meia-noite!";
-
             elTitulo.after(elSlogan);
             elTitulo.after(elTimerWrapper);
         } else {
@@ -358,18 +351,22 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     });
 
-    // --- AÇÕES GERAIS / MODAIS ---
+    // --- LISTENERS DE INTERAÇÃO (CLIQUES) ---
+    // Carrinho
     el.cartIcon?.addEventListener("click", () => { 
         renderMiniCart(); 
         if(el.miniCart) { el.miniCart.classList.add("active"); if(el.cartBackdrop) el.cartBackdrop.classList.add("active"); } 
     });
+    // Fechar tudo
     document.getElementById("cart-backdrop")?.addEventListener("click", () => { 
         document.querySelectorAll(".active").forEach(e => e.classList.remove("active")); 
         document.querySelectorAll(".show").forEach(e => e.classList.remove("show")); 
     });
+    // Botão Login
     el.userBtn?.addEventListener("click", () => { 
         if(el.loginModal) { el.loginModal.classList.add("show"); if(el.cartBackdrop) el.cartBackdrop.classList.add("active"); }
     });
+    // Botões de Fechar Modais
     document.querySelectorAll(".login-close, .fechar-pedidos, .fechar-recompensas, .extras-close, .combo-close, .dashboard-close").forEach(b => 
         b.addEventListener("click", () => { 
             document.querySelectorAll(".show").forEach(e => e.classList.remove("show")); 
@@ -377,7 +374,7 @@ document.addEventListener("DOMContentLoaded", () => {
         })
     );
 
-    /* ------------------ ➕ ADICIONAIS ------------------ */  
+    // --- ADICIONAIS (EXTRAS) ---
     const adicionais = [  
         { nome: "Cebola", preco: 0.99 }, { nome: "Salada", preco: 1.99 }, { nome: "Ovo", preco: 1.99 },  
         { nome: "Bacon", preco: 2.99 }, { nome: "Hambúrguer Tradicional 56g", preco: 2.99 },  
@@ -399,7 +396,9 @@ document.addEventListener("DOMContentLoaded", () => {
         if(el.cartBackdrop) el.cartBackdrop.classList.add("active");
     });  
 
+    // Adiciona listener para todos os botões de "Adicionais"
     document.querySelectorAll(".extras-btn").forEach((btn) => btn.addEventListener("click", (e) => openExtrasFor(e.currentTarget.closest(".card"))));  
+    // Garante que os botões nas promoções também funcionem
     document.querySelectorAll(".promo-card .extras-btn").forEach((btn) => btn.addEventListener("click", (e) => openExtrasFor(e.currentTarget.closest(".card"))));
 
     el.extrasConfirm?.addEventListener("click", () => {  
@@ -421,7 +420,7 @@ document.addEventListener("DOMContentLoaded", () => {
         document.querySelectorAll(".active").forEach(e => e.classList.remove("active")); 
     });
 
-    /* ------------------ 🥤 COMBOS ------------------ */  
+    // --- COMBOS ---
     const comboDrinkOptions = {  
         casal: [ { rotulo: "Fanta 1L (padrão)", delta: 0.01 }, { rotulo: "Coca-Cola 1L", delta: 3.0 }, { rotulo: "Coca-Cola 1L Zero", delta: 3.0 } ],  
         familia: [ { rotulo: "Kuat Guaraná 2L (padrão)", delta: 0.01 }, { rotulo: "Coca-Cola 2L", delta: 5.0 } ]
@@ -459,6 +458,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const found = cart.find((i) => i.nome === nome && i.preco === preco); if (found) found.qtd++; else cart.push({ nome, preco, qtd: 1 });  
         renderMiniCart(); popupAdd(`${nome} adicionado!`);  
     }  
+    // Listeners para botões "Adicionar" normais
     document.querySelectorAll(".add-cart").forEach((btn) => btn.addEventListener("click", (e) => { const card = e.currentTarget.closest(".card"); if (!card) return; addCommonItem(card.dataset.name, parseFloat(card.dataset.price)); }));
 
     // --- CARRINHO E FRETE ---
@@ -475,6 +475,11 @@ document.addEventListener("DOMContentLoaded", () => {
         modoEnderecoManual = false;
         const fc = document.querySelector('.frete-container'); const ma = document.getElementById('manualArea');
         if (fc) fc.style.display = 'block'; if (ma) ma.style.display = 'none';
+        const manualEndereco = document.getElementById('manualEndereco');
+        const manualNumero = document.getElementById('manualNumero');
+        if (manualEndereco) manualEndereco.value = '';
+        if (manualNumero) manualNumero.value = '';
+        renderMiniCart();
     });
     document.getElementById("btnConfirmarEndereco")?.addEventListener("click", async () => {
         const endereco = document.getElementById('manualEndereco')?.value?.trim() || '';
