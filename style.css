@@ -1,9 +1,10 @@
 /* ===========================================================
-   🎨 Da Família Lanches – CSS COMPLETO v6.0
-   Parte 1 — Root, Base, Header, Botões, Banner e Busca
-=========================================================== */
+   🎨 Da Família Lanches – CSS Principal (v6.0)
+   - Barra de Pesquisa Adicionada
+   - Cards de Promoção "Premium" (Visual Imagem 2)
+   =========================================================== */
 
-/* ======== ROOT E BASE ======== */
+/* ======== ELEMENTOS BÁSICOS ======== */
 :root {
   --preto: #000;
   --bg1: #f8f9fa;
@@ -22,14 +23,10 @@
   --shadow-in: inset 0 1px 0 rgba(255, 255, 255, 0.25);
 }
 
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
-
 html, body {
   height: 100%;
+  margin: 0;
+  padding: 0;
 }
 
 body {
@@ -38,17 +35,15 @@ body {
   background: linear-gradient(180deg, var(--bg1) 0%, var(--bg2) 100%);
   background-attachment: fixed;
   scroll-behavior: smooth;
-  overflow-x: hidden;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* ======== HEADER ======== */
+/* ======== HEADER & LAYOUT ======== */
 .header {
   position: fixed;
+  inset-inline: 0;
   top: 0;
-  left: 0;
-  right: 0;
   z-index: 900;
   display: flex;
   justify-content: space-between;
@@ -58,41 +53,41 @@ body {
   box-shadow: var(--shadow-1);
 }
 
-.header-content {
-  display: flex;
-  align-items: center;
-  gap: 12px;
+.header-content { display: flex; align-items: center; gap: 12px; }
+.logo { width: 52px; height: 52px; }
+.header-info h1 { margin: 0; font-size: 1.2rem; }
+.tagline { margin: 0; font-size: 0.85rem; color: #d84315; }
+.header-actions { display: flex; align-items: center; gap: 10px; }
+.main-content-wrapper { padding-top: 72px; }
+
+/* ======== BARRA DE PESQUISA (NOVO v6.0) ======== */
+.search-container {
+    margin: 15px auto;
+    width: 95%;
+    max-width: 1000px;
+}
+#search-input {
+    width: 100%;
+    padding: 12px 16px;
+    border-radius: 12px;
+    border: 1px solid #ccc;
+    font-size: 1rem;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+    background: #fff;
+    transition: box-shadow 0.2s;
+    box-sizing: border-box;
+}
+#search-input:focus {
+    outline: none;
+    border-color: var(--botao);
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+}
+#search-input::placeholder {
+    color: #888;
+    font-style: italic;
 }
 
-.logo {
-  width: 52px;
-  height: 52px;
-  border-radius: 8px;
-}
-
-.header-info h1 {
-  font-size: 1.2rem;
-  color: #000;
-}
-
-.tagline {
-  font-size: 0.85rem;
-  color: #d84315;
-  font-weight: 600;
-}
-
-.header-actions {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.main-content-wrapper {
-  padding-top: 72px;
-  min-height: 100vh;
-}
-
-/* ======== BOTÕES DO TOPO ======== */
+/* ======== BOTÕES TOPO ======== */
 .user-button {
   background: linear-gradient(135deg, #fff, #f7f7f7);
   border: 1px solid #ddd;
@@ -101,15 +96,11 @@ body {
   font-weight: 600;
   cursor: pointer;
   transition: 0.2s;
-  box-shadow: 0 1px 0 rgba(255,255,255,0.6);
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.6);
 }
-.user-button:hover {
-  background: #fafafa;
-  transform: scale(1.02);
-}
+.user-button:hover { background: #fafafa; }
 
-#cart-icon,
-.cart-button {
+#cart-icon, .cart-button {
   background: var(--botao);
   border: none;
   border-radius: var(--rad);
@@ -118,1499 +109,330 @@ body {
   cursor: pointer;
   transition: 0.2s;
   box-shadow: var(--shadow-1);
-  display: flex;
-  align-items: center;
-  gap: 6px;
 }
-
-#cart-icon:hover,
-.cart-button:hover {
-  background: #ffc107;
-  transform: scale(1.05);
-}
-
-#cart-count {
-  background: var(--danger);
-  color: #fff;
-  border-radius: 50%;
-  width: 22px;
-  height: 22px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 0.75rem;
-  font-weight: 700;
-}
+#cart-icon:hover, .cart-button:hover { background: #ffc107; }
 
 /* ======== BANNERS ======== */
 .status-banner {
   text-align: center;
   padding: 12px 8px;
   color: #fff;
-  font-weight: 700;
+  font-weight: 600;
   font-size: 1rem;
+  letter-spacing: 0.2px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
   width: 100vw;
   margin-left: calc(50% - 50vw);
-  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
 }
+.status-banner.open { background: var(--success); }
+.status-banner.closed { background: var(--danger); }
 
-.status-banner.open {
-  background: var(--success);
-}
-
-.status-banner.closed {
-  background: var(--danger);
-}
-
-/* ======== BUSCA ======== */
-.search-container {
-  max-width: 1000px;
-  margin: 20px auto;
-  padding: 0 15px;
-}
-
-.search-container input {
-  width: 100%;
-  padding: 15px 20px;
-  border: 2px solid #ffb300;
-  border-radius: 12px;
-  font-size: 1rem;
-  box-shadow: 0 3px 8px rgba(0,0,0,0.1);
-  transition: all 0.3s;
-}
-
-.search-container input:focus {
-  border-color: #ff9800;
-  box-shadow: 0 4px 12px rgba(255,152,0,0.3);
-}
-
-#resultadoBusca {
-  margin-top: 10px;
-}
-/* ===========================================================
-   🎨 Da Família Lanches – CSS v6.0
-   Parte 2 — Promoções, Cards, Grid e Ajustes
-=========================================================== */
-
-/* ======== SEÇÃO DE PROMOÇÕES ======== */
-.promo-section {
-  text-align: center;
-  padding: 30px 10px;
-  max-width: 1000px;
-  margin: 0 auto;
-}
-
-.promo-section h2 {
-  color: #ff5722;
-  margin-bottom: 8px;
-  font-size: 1.5rem;
-  font-weight: 800;
-}
-
-.promo-sub {
-  color: #444;
-  margin-bottom: 15px;
-  font-size: 0.95rem;
-}
-
-/* ======== CONTADOR ======== */
+/* ======== PROMOÇÃO / GRADE (v6.0) ======== */
+.promo-section { text-align: center; padding: 20px 10px; }
+.promo-section h2 { color: #ff5722; margin-bottom: 8px; }
+.promo-sub { color: #444; margin-bottom: 10px; font-size: 0.95rem; }
 .countdown-ticker {
-  background: #ff5722;
-  color: #fff;
-  display: inline-block;
-  padding: 10px 20px;
-  border-radius: 25px;
-  margin: 10px 0 25px;
-  font-weight: 700;
-  font-size: 1rem;
-  box-shadow: 0 4px 10px rgba(255,87,34,0.4);
-  animation: pulse 2s infinite;
+  background: #ffe0b2; color: #e65100; display: inline-block; padding: 6px 12px;
+  border-radius: 10px; margin: 8px 0 15px; font-weight: 600;
+  border: 1px solid #ffb74d; box-shadow: var(--shadow-1);
 }
 
-@keyframes pulse {
-  0%,100% { transform: scale(1); }
-  50% { transform: scale(1.05); }
-}
+/* Grid Global e Grid Promoções */
+section { margin: 25px auto; width: 95%; max-width: 1000px; }
+section h2 { font-size: 1.3rem; text-align: center; margin-bottom: 15px; color: #ff7043; }
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 14px; }
 
-/* ======== CARROSSEL (DESATIVADO / REMOVIDO) ======== */
-.carousel,
-.slides,
-.c-btn,
-.c-prev,
-.c-next {
-  display: none !important;
-}
-
-/* ======== GRID DE PROMOÇÕES ======== */
+/* Estilo para o container de promoções que agora é uma grid */
 #promocoes-area {
-  display: grid !important;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)) !important;
-  gap: 20px !important;
-  padding: 10px !important;
-  max-width: 1000px !important;
-  margin: 0 auto !important;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(165px, 1fr));
+    gap: 15px;
+    padding: 0 5px;
 }
 
-/* ======== CARD DE PROMOÇÃO ======== */
-.promo-card {
-  background: #fff;
-  border-radius: 16px;
-  overflow: hidden;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-  transition: transform .3s, box-shadow .3s;
-  display: flex;
-  flex-direction: column;
-  cursor: pointer;
-  border: 2px solid transparent;
+/* ==== CARD BONITO (Estilo Imagem 2) ==== */
+.promo-card-styled {
+    display: flex; flex-direction: column;
+    background: #fff; border-radius: 16px; overflow: hidden;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1); border: 1px solid #eee;
+    height: 100%; position: relative; transition: transform 0.2s;
+}
+.promo-card-styled:hover { transform: translateY(-3px); }
+
+.promo-card-styled img {
+    width: 100%; height: 150px; object-fit: cover;
+    border-bottom: 4px solid #ffca28;
 }
 
-.promo-card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 8px 20px rgba(0,0,0,0.15);
-  border-color: #ffb300;
+.promo-body { 
+    padding: 12px; display: flex; flex-direction: column; flex: 1; 
+    text-align: center;
 }
 
-.promo-card-image {
-  width: 100%;
-  height: 200px;
-  object-fit: cover;
-  background: linear-gradient(135deg, #ffca28, #ff9800);
-  border-bottom: 3px solid #ffb300;
+.promo-title { 
+    color: #d84315; font-size: 1rem; font-weight: 800; 
+    margin: 0 0 6px 0; line-height: 1.3;
+    text-transform: uppercase; letter-spacing: 0.5px;
 }
 
-.promo-card-content {
-  padding: 16px;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  flex: 1;
+.promo-desc { 
+    font-size: 0.8rem; color: #555; margin-bottom: 10px; 
+    line-height: 1.4; flex: 1;
+    display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;
 }
 
-.promo-card-title {
-  font-size: 1.1rem;
-  font-weight: 700;
-  color: #d32f2f;
-  line-height: 1.3;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  align-items: center;
+.promo-prices { margin-bottom: 10px; }
+.promo-old { text-decoration: line-through; color: #999; font-size: 0.85rem; display: block; }
+.promo-new { color: #2e7d32; font-weight: 800; font-size: 1.4rem; }
+
+.btn-add-green {
+    background: linear-gradient(180deg, #66bb6a 0%, #43a047 100%);
+    color: white; border: none; 
+    padding: 10px; border-radius: 8px; font-weight: 700; 
+    font-size: 1rem; width: 100%; cursor: pointer;
+    box-shadow: 0 4px 0 #2e7d32; 
+    transition: transform 0.1s, box-shadow 0.1s;
+    text-transform: uppercase;
 }
+.btn-add-green:active { transform: translateY(4px); box-shadow: 0 0 0 #2e7d32; }
 
-.promo-badge {
-  background: linear-gradient(135deg, #ffd54f, #ffb300);
-  color: #000;
-  font-size: 0.7rem;
-  padding: 3px 8px;
-  border-radius: 12px;
-  font-weight: 700;
-  border: 1px solid #ff9800;
-  white-space: nowrap;
-}
-
-.promo-card-description {
-  font-size: .9rem;
-  color: #555;
-  line-height: 1.4;
-  flex: 1;
-}
-
-.promo-card-ingredients {
-  font-size: .78rem;
-  color: #777;
-  background: #f5f5f5;
-  padding: 8px 10px;
-  border-radius: 8px;
-  line-height: 1.4;
-  margin-top: 4px;
-}
-
-.promo-card-price {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
-.promo-price-old {
-  font-size: .85rem;
-  color: #999;
-  text-decoration: line-through;
-}
-
-.promo-price-new {
-  font-size: 1.4rem;
-  font-weight: 800;
-  color: #2e7d32;
-  display: flex;
-  align-items: baseline;
-  gap: 4px;
-}
-
-.promo-price-new small {
-  font-size: .7rem;
-  color: #666;
-}
-
-/* ======== BOTÃO DE ADICIONAR ======== */
-.promo-card-button {
-  background: linear-gradient(135deg, #4caf50, #43a047);
-  color: #fff;
-  border: none;
-  border-radius: 10px;
-  padding: 12px 16px;
-  font-size: 1rem;
-  font-weight: 700;
-  cursor: pointer;
-  transition: 0.2s;
-  margin-top: auto;
-  box-shadow: 0 3px 8px rgba(76,175,80,0.3);
-}
-
-.promo-card-button:hover {
-  background: linear-gradient(135deg, #43a047, #388e3c);
-  transform: scale(1.03);
-}
-
-/* ======== RESPONSIVE DO GRID ======== */
-@media (max-width: 768px) {
-  #promocoes-area {
-    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)) !important;
-    gap: 15px !important;
-  }
-
-  .promo-card-image {
-    height: 180px;
-  }
-}
-
-@media (max-width: 480px) {
-  #promocoes-area {
-    grid-template-columns: 1fr !important;
-    gap: 12px !important;
-  }
-}
-/* ===========================================================
-   🎨 Da Família Lanches – CSS v6.0
-   Parte 3 — Cards de Produtos, Badges, Grades e Botões
-=========================================================== */
-
-/* ======== SEÇÕES / GRID DE PRODUTOS ======== */
-section {
-  margin: 25px auto;
-  width: 95%;
-  max-width: 1000px;
-}
-
-section h2 {
-  font-size: 1.3rem;
-  text-align: center;
-  margin-bottom: 15px;
-  color: #ff7043;
-  font-weight: 700;
-}
-
-.grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-  gap: 14px;
-}
-
-/* ======== CARD ======== */
+/* ==== CARD PADRÃO (Lanches) ==== */
 .card {
-  background: #fff;
-  border-radius: 16px;
-  padding: 14px;
-  text-align: center;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.08);
-  transition: transform .2s, box-shadow .2s;
-  animation: slideUp .4s ease-out backwards;
+  background: #fff; border-radius: 16px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+  padding: 14px; text-align: center;
+  transition: transform 0.2s, box-shadow 0.2s;
 }
+.card:hover { transform: translateY(-3px); box-shadow: 0 4px 10px rgba(0, 0, 0, 0.12); }
+.card img { width: 100%; border-radius: 12px; margin-bottom: 8px; height: 180px; object-fit: cover; background: #fff; }
+.card h3 { margin: 0 0 6px; font-weight: 700; font-size: 1rem; display: flex; align-items: center; justify-content: center; gap: 6px; flex-wrap: wrap; }
+.card p { font-size: 0.9rem; color: #555; }
+.price { font-weight: 600; color: var(--success); margin: 8px 0; }
+.price b { color: #2e7d32; font-weight: 700; font-size: 1.05rem; }
 
-.card:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 4px 10px rgba(0,0,0,0.12);
-}
-
-.card img {
-  width: 100%;
-  height: 220px;
-  object-fit: cover;
-  border-radius: 12px;
-  margin-bottom: 8px;
-  background: #fff;
-}
-
-.card h3 {
-  font-size: 1rem;
-  font-weight: 700;
-  margin-bottom: 6px;
-  display: flex;
-  justify-content: center;
-  flex-wrap: wrap;
-  gap: 6px;
-}
-
-.card p {
-  font-size: .9rem;
-  color: #555;
-  line-height: 1.3;
-}
-
-/* ======== BADGES ======== */
+/* Badges */
 .badge {
-  display: inline-block;
-  font-size: .72rem;
-  font-weight: 700;
-  padding: 3px 8px;
-  border-radius: 999px;
+  display: inline-block; font-size: 0.72rem; font-weight: 700; line-height: 1;
+  padding: 3px 8px; border-radius: 999px; color: #000;
   background: linear-gradient(135deg, #f8e08b, #eac13f);
-  border: 1px solid #d4af37;
-  color: #000;
+  border: 1px solid #d4af37; white-space: nowrap;
 }
-
-.badge.economia {
-  background: linear-gradient(135deg, #ffd480, #ffb74d);
-  border-color: #e09000;
-}
-
+.badge.economia { background: linear-gradient(135deg, #ffd480, #ffb74d); border-color: #e09000; }
+.badge-icon { display: inline-block; vertical-align: middle; margin-right: 4px; font-size: 0.8rem; line-height: 1; }
 .badge-small {
-  font-size: .68rem;
-  font-weight: 600;
-  padding: 2px 7px;
-  border-radius: 6px;
+  display: inline-block; font-size: 0.68rem; font-weight: 600; line-height: 1.2;
+  padding: 2px 7px; border-radius: 6px; color: #000;
   background: linear-gradient(135deg, #ffd54f, #ffca28);
-  border: 1px solid #d4af37;
-  color: #000;
-  margin-left: 4px;
+  border: 1px solid #d4af37; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  white-space: nowrap; margin-left: 4px;
 }
+.badge-small.pure { background: linear-gradient(135deg, #a5d6a7, #81c784); border-color: #66bb6a; color: #1b5e20; }
 
-.badge-small.pure {
-  background: linear-gradient(135deg, #a5d6a7, #81c784);
-  border-color: #66bb6a;
-  color: #1b5e20;
-}
+/* Actions */
+.actions { margin-top: 10px; display: flex; justify-content: center; gap: 8px; flex-wrap: wrap; }
+.actions button { border: none; border-radius: 10px; padding: 14px; font-weight: 700; font-size: 1rem; cursor: pointer; transition: 0.2s; }
+.actions .add-cart { background: linear-gradient(135deg, #4caf50, #43a047); color: #fff; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); }
+.actions .add-cart:hover { background: linear-gradient(135deg, #43a047, #388e3c); transform: scale(1.03); }
+.actions .extras-btn { background: linear-gradient(135deg, #ffb300, #ffca28); color: #222; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15); }
+.actions .extras-btn:hover { background: linear-gradient(135deg, #ffca28, #ffd54f); transform: scale(1.03); }
 
-/* ======== PREÇOS ======== */
-.price {
-  margin: 8px 0;
-  font-weight: 600;
-  color: #2e7d32;
-}
-
-.price del {
-  color: #b71c1c;
-  font-size: .95rem;
-  margin-right: 6px;
-}
-
-.price b {
-  color: #2e7d32;
-  font-weight: 700;
-  font-size: 1.05rem;
-}
-
-/* ======== BOTÕES DOS CARDS ======== */
-.actions {
-  margin-top: 10px;
-  display: flex;
-  justify-content: center;
-  gap: 8px;
-  flex-wrap: wrap;
-}
-
-.actions button {
-  padding: 12px;
-  border-radius: 10px;
-  border: none;
-  cursor: pointer;
-  font-size: .95rem;
-  font-weight: 700;
-  transition: .2s;
-}
-
-/* Botão “Adicionar ao carrinho” */
-.actions .add-cart {
-  background: linear-gradient(135deg, #4caf50, #43a047);
-  color: #fff;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-}
-
-.actions .add-cart:hover {
-  background: linear-gradient(135deg, #43a047, #388e3c);
-  transform: scale(1.03);
-}
-
-/* Botão “Extras / Adicionais” */
-.actions .extras-btn {
-  background: linear-gradient(135deg, #ffb300, #ffca28);
-  color: #222;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.15);
-}
-
-.actions .extras-btn:hover {
-  background: linear-gradient(135deg, #ffca28, #ffd54f);
-  transform: scale(1.03);
-}
-
-/* ======== ANIMAÇÃO GLOBAL DOS CARDS ======== */
-.card:nth-child(1) { animation-delay: .05s; }
-.card:nth-child(2) { animation-delay: .1s; }
-.card:nth-child(3) { animation-delay: .15s; }
-.card:nth-child(4) { animation-delay: .2s; }
-.card:nth-child(5) { animation-delay: .25s; }
-.card:nth-child(6) { animation-delay: .3s; }
-/* ===========================================================
-   🎨 Da Família Lanches – CSS v6.0
-   Parte 4 — Mini-Carrinho, Backdrop, Endereço, Frete, CEP
-=========================================================== */
-
-/* ======== BACKDROP DO CARRINHO ======== */
+/* ======== MINI-CART / MODAIS ======== */
 #cart-backdrop {
-  position: fixed;
-  inset: 0;
-  background: rgba(0, 0, 0, .45);
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity .25s;
-  z-index: 980;
+  position: fixed; inset: 0; background: rgba(0, 0, 0, 0.45);
+  opacity: 0; pointer-events: none; transition: opacity 0.25s ease; z-index: 980;
 }
+#cart-backdrop.active { opacity: 1; pointer-events: auto; }
 
-#cart-backdrop.active {
-  opacity: 1;
-  pointer-events: auto;
-}
-
-/* ======== MINI-CART ======== */
 .mini-cart {
-  position: fixed;
-  right: 0;
-  top: 0;
-  width: min(92vw, 380px);
-  height: 100dvh;
-  background: #fff;
-  box-shadow: -4px 0 20px rgba(0,0,0,.25);
-  transform: translateX(100%);
-  transition: transform .25s;
-  z-index: 990;
-  display: none;
+  position: fixed; right: 0; top: 0; width: min(92vw, 380px); height: 100dvh;
+  background: #fff; box-shadow: -4px 0 20px rgba(0, 0, 0, 0.25);
+  transform: translateX(100%); transition: transform 0.25s; z-index: 990; display: flex;
   flex-direction: column;
 }
-
-.mini-cart.active {
-  display: flex;
-  transform: translateX(0);
-}
+.mini-cart.active { transform: translateX(0); }
 
 .mini-head {
-  padding: 10px 14px;
-  background: var(--acento);
-  border-bottom: 1px solid #eee;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 10px 14px; border-bottom: 1px solid #eee;
+}
+.mini-list { max-height: 60vh; overflow: auto; padding: 10px 14px; }
+.mini-foot { padding: 10px 14px; border-top: 1px solid #eee; }
+
+/* ======== BARRA DE PROGRESSO ======== */
+.progress-wrapper {
+    background: #fff8d6;
+    padding: 12px;
+    border-radius: var(--rad);
+    margin-top: 15px;
+    margin-bottom: 10px;
+    border: 1px solid var(--acento);
+}
+.progress-text {
+    font-size: 0.95rem;
+    margin-bottom: 8px;
+    font-weight: 600;
+    color: #444;
+    text-align: center;
+}
+.progress-bar {
+    width: 100%;
+    height: 12px;
+    background: #ffe79b; 
+    border-radius: 999px;
+    overflow: hidden;
+}
+.progress-fill {
+    width: 0%;
+    height: 100%;
+    background: var(--success);
+    transition: width 0.4s ease;
 }
 
-.mini-head h3 {
-  margin: 0;
-  color: #000;
-  font-size: 1.1rem;
+/* ======== ENDEREÇO MANUAL ======== */
+.link-acao {
+    color: #007bff; 
+    text-decoration: underline;
+    background: none;
+    border: none;
+    padding: 0;
+    margin: 0;
+    font-weight: 600;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: color 0.2s;
+    display: block; 
+    text-align: right;
+    margin-top: 8px;
 }
-
-/* ======== LISTA DO CARRINHO ======== */
-.mini-list {
-  flex: 1;
-  overflow-y: auto;
-  padding: 12px 14px;
-}
-
-.mini-item {
-  display: flex;
-  justify-content: space-between;
-  margin-bottom: 14px;
-  padding-bottom: 8px;
-  border-bottom: 1px solid #eee;
-}
-
-.mini-item-name {
-  font-weight: 600;
-  font-size: .95rem;
-  color: #333;
-}
-
-.mini-item-price {
-  font-weight: 700;
-  color: #2e7d32;
-}
-
-/* ======== FOOTER DO MINI-CART ======== */
-.mini-foot {
-  padding: 12px 14px;
-  border-top: 1px solid #eee;
-  background: #fff;
-}
-
-.mini-foot .summary-row {
-  display: flex;
-  justify-content: space-between;
-  margin: 8px 0;
-  font-size: .95rem;
-}
-
-.mini-foot .btn-primary {
-  margin-top: 10px;
-}
-
-/* ======== CAMPOS DE ENDEREÇO ======== */
+.link-acao:hover { color: #0056b3; }
 .frete-container {
-  margin-top: 15px;
-  padding: 12px;
-  border: 1px solid #ddd;
-  border-radius: 10px;
-  background: #fff;
-  box-shadow: 0 1px 3px rgba(0,0,0,.1);
+  margin-top: 15px; padding: 12px; border: 1px solid #ddd;
+  border-radius: 10px; background: #fff; 
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
-
-.frete-container h4 {
-  margin: 0 0 10px;
-  font-size: 1rem;
-  color: #222;
-}
-
-/* CEP + botão */
-.frete-cep-group {
-  display: flex;
-  gap: 8px;
-  margin-bottom: 8px;
-}
-
-.frete-cep-group input[type="text"] {
-  flex: 1;
+.frete-container h4 { margin: 0 0 10px 0; font-size: 1rem; color: #222; }
+.frete-cep-group { display: flex; gap: 8px; margin-bottom: 8px; }
+.frete-container input[type="text"] {
   padding: 8px 10px;
   border-radius: 8px;
   border: 1px solid #ccc;
-  font-size: .9rem;
+  font-size: 0.9rem;
+  box-sizing: border-box;
 }
-
-.btn-calcular-frete {
-  background: var(--botao);
-  color: #222;
-  padding: 8px 12px;
-  border: none;
+.frete-cep-group input[type="text"] { flex: 1; }
+.input-endereco-longo {
+  margin-bottom: 8px;
+  white-space: nowrap;
+  overflow-x: auto;
+  overflow-y: hidden;
+  text-overflow: initial;
+  display: block;
+  width: 100%;
+}
+.endereco-duplo { display: flex; gap: 8px; margin-bottom: 8px; }
+.endereco-duplo input[type="text"] {
+  padding: 8px 10px;
   border-radius: 8px;
-  font-weight: 700;
-  cursor: pointer;
-  transition: .2s;
+  border: 1px solid #ccc;
+  font-size: 0.9rem;
+}
+#numero-input { flex: 0 0 30%; max-width: 120px; }
+#complemento-input { flex: 1; min-width: 0; }
+.btn-calcular-frete {
+  background: var(--botao); color: #222; border: none; border-radius: 8px;
+  padding: 8px 12px; font-weight: 700; cursor: pointer; transition: 0.2s;
   box-shadow: var(--shadow-1);
 }
+.btn-calcular-frete:hover { background: #ffc107; transform: scale(1.02); }
 
-.btn-calcular-frete:hover {
-  background: #ffc107;
-  transform: scale(1.02);
-}
-
-/* Campo grande com endereço longo */
-.input-endereco-longo {
-  width: 100% !important;
-  display: block !important;
-  white-space: nowrap !important;
-  overflow-x: auto !important;
-  overflow-y: hidden !important;
-  padding: 8px 10px;
-  border-radius: 8px;
-  border: 1px solid #ccc;
-  font-size: .9rem;
-  margin-bottom: 8px;
-}
-
-.input-endereco-longo::-webkit-scrollbar { display: none !important; }
-
-/* Número + Complemento */
-.endereco-duplo {
-  display: flex;
-  gap: 8px;
-  margin-bottom: 8px;
-}
-
-#numero-input {
-  flex: 0 0 30%;
-  max-width: 120px;
-  padding: 8px 10px;
-  border: 1px solid #ccc;
-  border-radius: 8px;
-  font-size: .9rem;
-}
-
-#complemento-input {
-  flex: 1;
-  padding: 8px 10px;
-  border: 1px solid #ccc;
-  border-radius: 8px;
-  font-size: .9rem;
-}
-
-/* Desabilitado após finalizar CEP */
-.mini-foot input:disabled,
-.mini-foot textarea:disabled {
-  background-color: var(--bg2);
-  color: #888;
-  cursor: not-allowed;
-}
-
-/* Aviso de frete grátis */
-.frete-gratis-aviso {
-  margin: 6px 0 10px;
-  font-size: .85rem;
-  color: #444;
-  background: #fff8d6;
-  padding: 8px 10px;
-  border-radius: 8px;
-  border-left: 4px solid #ffca28;
-  line-height: 1.3;
-}
-
-/* ======== BARRA DE PROGRESSO (frete grátis) ======== */
-.progress-wrapper {
-  margin-top: 15px;
-  padding: 12px;
-  background: #fff8d6;
-  border: 1px solid var(--acento);
-  border-radius: var(--rad);
-}
-
-.progress-text {
-  text-align: center;
-  font-size: .95rem;
-  font-weight: 600;
-  color: #444;
-  margin-bottom: 8px;
-}
-
-.progress-bar {
-  width: 100%;
-  height: 12px;
-  background: #ffe79b;
-  border-radius: 999px;
-  overflow: hidden;
-}
-
-.progress-fill {
-  width: 0%;
-  height: 100%;
-  background: var(--success);
-  transition: width .4s;
-}
-/* ===========================================================
-   🎨 Da Família Lanches – CSS v6.0
-   Parte 5 — Cupons, Resumo Final, Carrinho Vazio
-=========================================================== */
-
-/* ======== FORMULÁRIO DE CUPONS ======== */
-.coupon-form {
-  margin-top: 12px;
-  margin-bottom: 10px;
-  display: flex;
-  gap: 8px;
-}
-
-.coupon-form input[type="text"] {
-  flex: 1;
-  padding: 10px 12px;
-  border-radius: 8px;
-  border: 1px solid #ccc;
-  font-size: .95rem;
-  box-shadow: inset 0 1px 2px rgba(0,0,0,0.05);
-}
-
-.coupon-form button {
-  background: #4caf50;
-  color: #fff;
-  font-weight: 700;
-  border: none;
-  border-radius: 8px;
-  padding: 10px 14px;
-  cursor: pointer;
-  transition: background-color .2s ease;
-}
-
-.coupon-form button:hover {
-  background: #43a047;
-}
-
-/* ======== MENSAGEM DE CUPOM ======== */
-.coupon-message {
-  margin-top: 6px;
-  font-size: .9rem;
-  color: #333;
-  font-weight: 600;
-  line-height: 1.3;
-}
-
-/* ======== RESUMO DO PEDIDO (TOTAL, FRETE, ETC) ======== */
-.summary-row {
-  display: flex;
-  justify-content: space-between;
-  margin: 8px 0;
-  font-size: .95rem;
-  font-weight: 600;
-}
-
-.summary-row span {
-  color: #333;
-}
-
-.summary-row b {
-  color: #2e7d32;
-  font-weight: 800;
-}
-
-/* ======== CARRINHO VAZIO ======== */
-.cart-empty-msg {
-  text-align: center;
-  padding: 18px 14px;
-  background: #fffdf3;
-  border-radius: 12px;
-  border: 2px dashed #ffca28;
-  font-weight: 600;
-  line-height: 1.4;
-  color: #444;
-  margin-top: 10px;
-  box-shadow: inset 0 1px 0 rgba(255,255,255,0.6);
-}
-
-.cart-empty-msg div:first-child {
-  font-size: 1.05rem;
-  color: #222;
-  margin-bottom: 6px;
-}
-
-.cart-empty-msg div:last-child {
-  font-size: .95rem;
-  color: #6b6b6b;
-}
-
-/* ======== BOTÃO PRINCIPAL DO FINALIZAR ======== */
-.btn-primary,
-.confirm-btn {
-  width: 100%;
-  padding: 14px;
-  border: none;
-  border-radius: 10px;
-  background: linear-gradient(135deg, #4caf50, #388e3c);
-  font-size: 1rem;
-  font-weight: 700;
-  color: #fff;
-  cursor: pointer;
-  margin-top: 10px;
-  transition: .2s;
-  box-shadow: 0 4px 6px rgba(0,0,0,.15);
-}
-
-.btn-primary:hover,
-.confirm-btn:hover {
-  background: linear-gradient(135deg, #388e3c, #2e7d32);
-  transform: translateY(-2px);
-  box-shadow: 0 6px 10px rgba(0,0,0,.25);
-}
-/* ===========================================================
-   🎨 Da Família Lanches – CSS v6.0
-   Parte 6 — Modais (Login, Extras, Combos, Painéis Laterais)
-=========================================================== */
-
-/* ======== MODAL BASE ======== */
+/* ======== MODAIS E BOTÕES GERAIS ======== */
 .modal {
-  position: fixed;
-  inset: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity .25s ease;
-  background: rgba(0,0,0,0.5);
-  z-index: 999;
+  position: fixed; inset: 0; display: flex; align-items: center;
+  justify-content: center; opacity: 0; pointer-events: none;
+  transition: opacity 0.25s; z-index: 999; background: rgba(0, 0, 0, 0.5);
 }
-
-.modal.show {
-  opacity: 1;
-  pointer-events: auto;
-}
-
+.modal.show { opacity: 1; pointer-events: auto; }
 .modal-content {
-  background: #fff;
-  border-radius: 16px;
-  max-width: 520px;
-  width: 92%;
-  max-height: 85vh;
-  overflow-y: auto;
-  box-shadow: 0 8px 40px rgba(0,0,0,0.3);
-  animation: slideUp .35s ease backwards;
+  background: #fff; border-radius: 16px; max-height: 85vh;
+  max-width: 520px; width: 90%; overflow-y: auto;
+  box-shadow: 0 8px 40px rgba(0, 0, 0, 0.3); position: relative;
 }
-
-/* ======== CABEÇALHO DO MODAL ======== */
 .modal-head {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 12px 16px;
-  border-bottom: 1px solid #eee;
-  background: #ffca28;
-  box-shadow: inset 0 1px 0 rgba(255,255,255,.35);
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 12px 16px; border-bottom: 1px solid #eee; background: #ffca28;
+  box-shadow: var(--shadow-in);
+}
+.btn-primary, .btn-secondary, .btn-primario {
+  flex: 1; border: none; border-radius: 10px; padding: 14px;
+  font-weight: 700; font-size: 1rem; cursor: pointer; transition: 0.2s;
+}
+.btn-primary, .btn-primario {
+  background: linear-gradient(135deg, var(--success), #388e3c);
+  color: #fff; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.15);
+}
+.btn-primary:hover, .btn-primario:hover {
+  background: linear-gradient(135deg, #388e3c, #2e7d32);
+  transform: translateY(-2px); box-shadow: 0 6px 10px rgba(0, 0, 0, 0.25);
+}
+.btn-secondary { background: transparent; color: #555; border: 1px solid #ddd; }
+.btn-secondary:hover { background: #f1f1f1; border-color: #ccc; }
+.btn-google {
+  border: 1px solid #ddd; background: #fff; border-radius: 8px;
+  width: 100%; font-weight: 600; display: flex; justify-content: center;
+  gap: 8px; padding: 10px; transition: 0.2s; cursor: pointer;
+}
+.btn-google:hover { background: #f8f8f8; }
+.fechar-pedidos, .fechar-recompensas, .extras-close, .combo-close, .login-close, .promo-close, .dashboard-close {
+  background: var(--botao); border: none; border-radius: 50%;
+  width: 30px; height: 30px; font-size: 18px; font-weight: 700;
+  cursor: pointer; line-height: 30px; text-align: center; color: #222;
+  transition: 0.2s; pointer-events: auto;
+}
+.fechar-pedidos:hover, .fechar-recompensas:hover, .extras-close:hover,
+.combo-close:hover, .login-close:hover, .promo-close:hover, .dashboard-close:hover {
+  background: #ff7043; color: #fff; transform: scale(1.1);
 }
 
-.modal-head h2,
-.modal-head h3 {
-  margin: 0;
-  font-size: 1.25rem;
-  font-weight: 800;
+/* ======== PAINÉIS FLUTUANTES ======== */
+.meus-pedidos { position: fixed; bottom: 20px; right: 20px; z-index: 1500; }
+.minhas-recompensas { position: fixed; bottom: 80px; right: 20px; z-index: 1490; }
+.meus-pedidos-btn, .recompensas-btn {
+  background: linear-gradient(135deg, #ffca28, #ffb300); color: #222;
+  border: none; border-radius: 20px; font-weight: 700; font-size: 0.95rem;
+  padding: 12px 22px; box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+  cursor: pointer; transition: 0.2s;
 }
-
-/* ======== BOTÃO FECHAR ======== */
-.extras-close,
-.combo-close,
-.login-close,
-.promo-close,
-.dashboard-close,
-.close-panel {
-  background: #ffb300;
-  border: none;
-  border-radius: 50%;
-  width: 32px;
-  height: 32px;
-  font-size: 18px;
-  font-weight: 700;
-  cursor: pointer;
-  line-height: 32px;
-  color: #222;
-  transition: .2s;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+.meus-pedidos-btn:hover, .recompensas-btn:hover { transform: scale(1.05); box-shadow: 0 6px 15px rgba(0, 0, 0, 0.3); }
+.pedidos-panel, .recompensas-panel {
+  position: fixed; right: -100%; top: 0; width: min(95%, 440px); height: 100vh;
+  background: #f4f4f4; box-shadow: -4px 0 18px rgba(0, 0, 0, 0.3);
+  transition: right 0.4s; display: flex; flex-direction: column; z-index: 990;
 }
-
-.extras-close:hover,
-.combo-close:hover,
-.login-close:hover,
-.promo-close:hover,
-.dashboard-close:hover,
-.close-panel:hover {
-  background: #ff7043;
-  color: #fff;
-  transform: scale(1.12);
+.pedidos-panel.active, .recompensas-panel.active { right: 0; }
+.pedidos-header, .recompensas-header {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 16px 20px; background: #ffca28; font-weight: 700;
+  font-size: 1.2rem; color: #222; box-shadow: var(--shadow-in);
 }
-
-/* ===========================================================
-   🔥 MODAL DE EXTRAS
-=========================================================== */
-
-.extras-list {
-  padding: 20px;
-  display: grid;
-  gap: 12px;
-}
-
-.extra-line {
-  padding: 12px;
-  background: #fff;
-  border: 1px solid #ffb300;
-  border-radius: 10px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  font-weight: 600;
-  cursor: pointer;
-  transition: .2s;
-}
-
-.extra-line:hover {
-  background: #fff7e6;
-  transform: scale(1.02);
-}
-
-.extra-line span b {
-  color: #d32f2f;
-  margin-left: 5px;
-}
-
-.extra-line input[type="checkbox"] {
-  cursor: pointer;
-  transform: scale(1.15);
-}
-
-/* RODAPÉ DO MODAL DE EXTRAS */
-.modal-foot {
-  display: flex;
-  justify-content: flex-end;
-  gap: 10px;
-  padding: 14px 20px;
-  border-top: 1px solid #eee;
-}
-
-/* ===========================================================
-   🔥 MODAL DE COMBOS (Escolha do refrigerante)
-=========================================================== */
-
-#combo-body {
-  padding: 20px;
-  display: grid;
-  gap: 12px;
-}
-
-#combo-body label {
-  padding: 10px 14px;
-  background: #fff;
-  border: 1px solid #ffca28;
-  border-radius: 10px;
-  font-weight: 600;
-  display: flex;
-  justify-content: space-between;
-  cursor: pointer;
-  transition: .2s;
-}
-
-#combo-body label:hover {
-  background: #fff9e6;
-  transform: scale(1.02);
-}
-
-#combo-body input[type="radio"] {
-  cursor: pointer;
-  transform: scale(1.15);
-}
-
-/* ===========================================================
-   🔥 LOGIN / REGISTRO
-=========================================================== */
-
-.login-box {
-  padding: 22px;
-}
-
-.login-box input {
-  width: 100%;
-  padding: 12px;
-  margin-bottom: 12px;
-  border: 1px solid #ccc;
-  border-radius: 8px;
-  font-size: 1rem;
-}
-
-.google-btn {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 8px;
-  padding: 10px;
-  width: 100%;
-  background: #fff;
-  border: 1px solid #ddd;
-  border-radius: 8px;
-  cursor: pointer;
-  font-weight: 600;
-  transition: .2s;
-  margin-bottom: 10px;
-}
-
-.google-btn:hover {
-  background: #f7f7f7;
-}
-
-.register-text {
-  text-align: center;
-  margin-top: 16px;
-  font-size: .9rem;
-  color: #666;
-}
-
-.link {
-  color: #1976d2;
-  cursor: pointer;
-  text-decoration: underline;
-  font-weight: 600;
-}
-
-.link:hover {
-  color: #0d47a1;
-}
-
-/* ===========================================================
-   🔥 PAINÉIS LATERAIS (Meus Pedidos / Minhas Recompensas)
-=========================================================== */
-
-.side-panel {
-  position: fixed;
-  right: -100%;
-  top: 0;
-  height: 100vh;
-  width: min(95%, 430px);
-  background: #f4f4f4;
-  box-shadow: -4px 0 18px rgba(0,0,0,.3);
-  transition: right .35s ease;
-  display: flex;
-  flex-direction: column;
-  z-index: 990;
-}
-
-.side-panel.active {
-  right: 0;
-}
-
-.panel-header {
-  padding: 16px;
-  background: #ffca28;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  box-shadow: inset 0 1px 0 rgba(255,255,255,.35);
-}
-
-.panel-header h2 {
-  margin: 0;
-  font-size: 1.25rem;
-  font-weight: 800;
-}
-
-.orders-list,
-.rewards-list {
-  flex: 1;
-  overflow-y: auto;
-  padding: 14px 18px;
-}
-
-.empty-orders,
-.empty-rewards {
-  padding: 40px 20px;
-  text-align: center;
-  font-size: 1rem;
-  color: #999;
-}
-/* ===========================================================
-   🎨 Da Família Lanches – CSS v6.0
-   Parte 7 — Footer / Botões Flutuantes / Popup / Utilitários
-=========================================================== */
-
-/* ================================
-      🔻  FOOTER (Rodapé)
-================================ */
-
-.footer {
-  background: #ffca28;
-  text-align: center;
-  padding: 22px 16px;
-  margin-top: 40px;
-  font-size: 0.9rem;
-  color: #222;
-  box-shadow: inset 0 1px 0 rgba(255,255,255,0.35);
-}
-
-.footer a {
-  color: #ff7043;
-  text-decoration: none;
-  font-weight: 700;
-  transition: 0.2s;
-}
-
-.footer a:hover {
-  color: #ff5722;
-}
-
-.footer-links {
-  display: flex;
-  justify-content: center;
-  flex-wrap: wrap;
-  gap: 10px;
-  margin: 10px 0;
-}
-
-.footer-btn {
-  background: #ffb300;
-  padding: 8px 16px;
-  border-radius: 8px;
-  font-weight: 700;
-  color: #222;
-  transition: .25s;
-}
-
-.footer-btn:hover {
-  background: #ffca28;
-  transform: scale(1.05);
-}
-
-.footer-copy {
-  margin-top: 12px;
-  font-size: 0.82rem;
-  color: #000;
-}
-
-/* ================================
-   🔻  BOTÕES FLUTUANTES
-   (Meus Pedidos e Minhas Recompensas)
-================================ */
-
-.meus-pedidos,
-.minhas-recompensas {
-  position: fixed;
-  right: 20px;
-  z-index: 1500;
-}
-
-.meus-pedidos {
-  bottom: 20px;
-}
-
-.minhas-recompensas {
-  bottom: 80px;
-}
-
-.meus-pedidos-btn,
-.recompensas-btn {
-  background: linear-gradient(135deg, #ffca28, #ffb300);
-  border: none;
-  border-radius: 20px;
-  padding: 12px 22px;
-  font-weight: 800;
-  font-size: .95rem;
-  cursor: pointer;
-  color: #222;
-  box-shadow: 0 4px 10px rgba(0,0,0,.22);
-  transition: .25s;
-}
-
-.meus-pedidos-btn:hover,
-.recompensas-btn:hover {
-  transform: scale(1.07);
-  box-shadow: 0 6px 15px rgba(0,0,0,.32);
-}
-
-/* ================================
-   🔻 POPUP "Item Adicionado"
-================================ */
-
-.popup-add {
-  position: fixed;
-  top: 100px;
-  right: 20px;
-  background: #4CAF50;
-  color: #fff;
-  padding: 12px 20px;
-  border-radius: 8px;
-  font-weight: 700;
-  box-shadow: 0 4px 10px rgba(0,0,0,.25);
-  z-index: 9999;
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity .3s ease;
-}
-
-.popup-add.show {
-  opacity: 1;
-}
-
-/* ================================
-   🔻 ANIMAÇÕES GERAIS
-================================ */
-
-@keyframes slideUp {
-  from { 
-    opacity: 0; 
-    transform: translateY(18px); 
-  }
-  to { 
-    opacity: 1; 
-    transform: translateY(0); 
-  }
-}
-
-@keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
-}
-
-.card,
-.promo-card {
-  animation: slideUp .40s ease backwards;
-}
-
-.card:nth-child(1),
-.promo-card:nth-child(1) { animation-delay: .05s; }
-.card:nth-child(2),
-.promo-card:nth-child(2) { animation-delay: .10s; }
-.card:nth-child(3),
-.promo-card:nth-child(3) { animation-delay: .15s; }
-.card:nth-child(4),
-.promo-card:nth-child(4) { animation-delay: .20s; }
-
-/* ================================
-   🔻 SCROLLBAR PERSONALIZADA
-================================ */
-
-::-webkit-scrollbar {
-  width: 10px;
-  height: 10px;
-}
-
-::-webkit-scrollbar-track {
-  background: #f1f1f1;
-  border-radius: 10px;
-}
-
-::-webkit-scrollbar-thumb {
-  background: #ffb300;
-  border-radius: 10px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: #ff9800;
-}
-
-/* ================================
-   🔻 CLASSES UTILITÁRIAS
-================================ */
-
-.text-center { text-align: center; }
-
-.mt-1 { margin-top: 8px; }
-.mt-2 { margin-top: 16px; }
-.mt-3 { margin-top: 24px; }
-
-.mb-1 { margin-bottom: 8px; }
-.mb-2 { margin-bottom: 16px; }
-.mb-3 { margin-bottom: 24px; }
-
-.p-1 { padding: 8px; }
-.p-2 { padding: 16px; }
-.p-3 { padding: 24px; }
-
-.elevation-1 { box-shadow: 0 2px 5px rgba(0,0,0,0.15); }
-.elevation-2 { box-shadow: 0 3px 10px rgba(0,0,0,0.20); }
-.elevation-3 { box-shadow: 0 5px 15px rgba(0,0,0,0.30); }
-
-/* ================================
-   🔻 ACESSIBILIDADE
-================================ */
-
-.sr-only {
-  position: absolute;
-  width: 1px; height: 1px;
-  padding: 0; margin: -1px;
-  overflow: hidden;
-  clip: rect(0,0,0,0);
-  white-space: nowrap;
-  border: 0;
-}
-
-button:focus {
-  outline: 2px solid var(--botao);
-  outline-offset: 2px;
-}
-
-/* ================================
-   🔻 CARREGAMENTO / ESTADOS
-================================ */
-
-[aria-busy="true"] {
-  cursor: wait;
-  opacity: 0.6;
-}
-
-/* ================================
-   🔻 TOUCH DEVICES (Remove Hover Excessivo)
-================================ */
-
-@media (hover: none) {
-  .promo-card:hover,
-  .card:hover {
-    transform: none;
-  }
-  
-  button:hover {
-    transform: none;
-  }
-}
-/* ===========================================================
-   🎨 Da Família Lanches – CSS v6.0
-   Parte 8 — Cookie Banner / Print / Dark Mode / Segurança
-=========================================================== */
-
-/* ================================
-      🔻  COOKIE BANNER (LGPD)
-================================ */
-
+.pedidos-body, .recompensas-body { flex: 1; overflow: auto; padding: 16px; }
+
+/* ======== FOOTER ======== */
+.footer { background: #ffca28; text-align: center; padding: 20px; font-size: 0.9rem; color: #222; }
+.footer a { color: #ff7043; text-decoration: none; transition: color 0.2s; }
+.footer a:hover { color: #ff5722; }
+.footer-links { display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; margin: 8px 0; }
+.footer-btn { background: #ffb300; color: #222; padding: 6px 14px; border-radius: 6px; font-weight: 700; text-decoration: none; transition: 0.25s; }
+.footer-btn:hover { background: #ffca28; transform: scale(1.03); }
+
+/* ======== COOKIE BANNER ======== */
 #cookie-banner {
-  position: fixed;
-  left: 0;
-  right: 0;
-  bottom: -120px;
-  background: rgba(34, 34, 34, 0.95);
-  color: #fff;
-  padding: 18px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 16px;
-  z-index: 2000;
-  transition: bottom 0.5s ease;
-  border-top: 3px solid #ffca28;
+  position: fixed; left: 0; right: 0; bottom: 0; background: rgba(34, 34, 34, 0.95);
+  color: #fff; padding: 16px; display: flex; justify-content: space-between; align-items: center;
+  z-index: 2000; transform: translateY(100%); transition: transform 0.5s;
 }
-
-#cookie-banner.show {
-  bottom: 0;
-}
-
-#cookie-banner p {
-  margin: 0;
-  font-size: 0.92rem;
-  line-height: 1.4;
-}
-
-#cookie-banner a {
-  color: #ffca28;
-  font-weight: 700;
-  text-decoration: underline;
-}
-
+#cookie-banner.show { transform: translateY(0); }
 #cookie-banner button {
-  background: #4caf50;
-  border: none;
-  color: #fff;
-  padding: 10px 18px;
-  border-radius: 10px;
-  cursor: pointer;
-  font-weight: 800;
-  transition: .2s;
+  background: #4caf50; color: #fff; border: none; border-radius: 8px;
+  padding: 10px 16px; font-weight: 700; cursor: pointer; transition: background 0.2s; flex-shrink: 0;
 }
-
-#cookie-banner button:hover {
-  background: #43a047;
-  transform: scale(1.05);
-}
-
-@media (max-width: 520px) {
-  #cookie-banner {
-    flex-direction: column;
-    text-align: center;
-  }
-  
-  #cookie-banner button {
-    width: 100%;
-  }
-}
-
-/* ================================
-      🔻  IMPRESSÃO (PRINT MODE)
-================================ */
-
-@media print {
-  .header,
-  .footer,
-  .mini-cart,
-  .meus-pedidos,
-  .minhas-recompensas,
-  #cookie-banner,
-  .progress-wrapper,
-  .promo-card-button,
-  .actions,
-  .btn-primary,
-  .btn-secondary,
-  button {
-    display: none !important;
-  }
-
-  body {
-    background: #fff !important;
-    color: #000 !important;
-  }
-
-  .card,
-  .promo-card {
-    break-inside: avoid;
-    page-break-inside: avoid;
-    border: 1px solid #ddd;
-  }
-
-  img {
-    max-width: 100%;
-  }
-}
-
-/* ================================
-      🔻  MODO ESCURO (PREP)
-      — Apenas preparado para futuro update
-================================ */
-
-@media (prefers-color-scheme: dark) {
-  /* Base */
-  body {
-    background: #121212;
-    color: #e0e0e0;
-  }
-
-  .header {
-    background: #e2b10c;
-  }
-
-  .promo-card,
-  .card,
-  .modal-content {
-    background: #1d1d1d;
-    color: #eee;
-  }
-
-  input,
-  textarea {
-    background: #2a2a2a;
-    border-color: #555;
-    color: #fff;
-  }
-}
-
-/* ================================
-      🔻  SEGURANÇA & PERFORMANCE
-================================ */
-
-/* Remove highlight feio em mobile */
-* {
-  -webkit-tap-highlight-color: transparent;
-}
-
-/* Evita bugs de imagens estouradas */
-img {
-  max-width: 100%;
-  height: auto;
-  display: block;
-}
-
-/* Botões acessíveis */
-button {
-  font-family: inherit;
-}
-button:focus-visible {
-  outline: 3px solid #ffca28;
-  outline-offset: 3px;
-}
-
-/* inputs com UX aprimorado */
-input,
-textarea {
-  transition: border-color .2s;
-}
-
-input:focus,
-textarea:focus {
-  border-color: #ffb300;
-}
-
-/* ================================
-      🔥 FINALIZAÇÃO DO CSS v6.0
-================================ */
-
-/* Evita hover travado em touch */
-@media (hover: none) {
-  .promo-card:hover,
-  .card:hover,
-  button:hover {
-    transform: none !important;
-  }
-}
-
-/* Fim do CSS */
-/* Desenvolvido com ❤️ para Da Família Lanches */
+#cookie-banner button:hover { background: #43a047; }
