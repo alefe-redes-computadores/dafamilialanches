@@ -1636,3 +1636,44 @@ img {
   
   Desenvolvido com ❤️ para Da Família Lanches
 */
+/* ===========================================================
+   🔥 REMOVER CARROSSEL E FORÇAR GRADE DE PROMOÇÕES
+   Adicione este código AO FINAL do seu style.css
+=========================================================== */
+
+/* ESCONDE O CARROSSEL COMPLETAMENTE */
+.carousel,
+.slides,
+.c-btn,
+.c-prev,
+.c-next {
+  display: none !important;
+}
+
+/* FORÇA O GRID DE PROMOÇÕES */
+#promocoes-area,
+.promo-section .grid {
+  display: grid !important;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)) !important;
+  gap: 20px !important;
+  padding: 10px !important;
+  max-width: 1000px !important;
+  margin: 0 auto !important;
+}
+
+/* RESPONSIVE PARA MOBILE */
+@media (max-width: 768px) {
+  #promocoes-area,
+  .promo-section .grid {
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)) !important;
+    gap: 15px !important;
+  }
+}
+
+@media (max-width: 480px) {
+  #promocoes-area,
+  .promo-section .grid {
+    grid-template-columns: 1fr !important;
+    gap: 12px !important;
+  }
+}
