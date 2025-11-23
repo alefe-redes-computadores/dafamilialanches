@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>🍔 Da Família Lanches — DFL v5.5.3</title>
+  <title>🍔 Da Família Lanches — DFL v5.5.4</title>
 
   <meta http-equiv="Content-Security-Policy" content="
     default-src * data: blob: 'unsafe-inline' 'unsafe-eval';
@@ -17,7 +17,7 @@
   <link rel="preconnect" href="https://www.gstatic.com" crossorigin>
   <link rel="preload" as="image" href="logo.png">
   
-  <link rel="stylesheet" href="style.css?v=5.53" />
+  <link rel="stylesheet" href="style.css?v=5.54" />
 
   <script defer src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
   <script defer src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
@@ -54,75 +54,127 @@
       <div id="resultadoBusca" style="margin-top:10px;"></div>
     </div>
 
-    <!-- PROMOÇÕES (SEM CARROSSEL - GRADE DE CARDS) -->
+    <!-- PROMOÇÕES - 9 CARDS -->
     <section class="promo-section">
       <h2>🔥 Promoções do Dia</h2>
       <p class="promo-sub">Aproveite antes que acabe!</p>
       <div class="countdown-ticker">⏳ Tempo restante: <span id="promo-timer">23:59:59</span></div>
 
-      <!-- GRADE DE PROMOÇÕES -->
+      <!-- GRADE COM 9 PROMOÇÕES -->
       <div id="promocoes-area" class="grid">
         
-        <!-- PROMOÇÃO 1 -->
-        <div class="card" data-name="3 Hambúrguer Trem + 1 Fanta Laranja 1L" data-price="44.99">
-          <img src="promocoes/promo4.jpg" alt="3 Hambúrguer Trem + Fanta" width="280" height="200" loading="lazy">
-          <h3>3 Hambúrguer "Trem" + 1 Fanta Laranja 1L 
-            <span class="badge economia">💸 Economia de R$ 5,01</span>
-          </h3>
-          <p class="price">De R$ 50,00 por <b>R$ 44,99</b></p>
-          <p>3 Hambúrgueres Trem completos + Refrigerante 1L</p>
-          <div class="actions">
-            <button class="add-cart" type="button">Adicionar</button>
-          </div>
-        </div>
-
-        <!-- PROMOÇÃO 2 -->
-        <div class="card" data-name="Trem que Mata a Fome" data-price="49.99">
-          <img src="promocoes/promo5.jpg" alt="4 Hambúrgueres + Fanta" width="280" height="200" loading="lazy">
-          <h3>Trem que Mata a Fome 
-            <span class="badge economia">💸 Economia de R$ 15,01</span>
-          </h3>
-          <p class="price">De R$ 65,00 por <b>R$ 49,99</b></p>
-          <p>4 Hambúrgueres Trem + Fanta 2L</p>
-          <div class="actions">
-            <button class="add-cart" type="button">Adicionar</button>
-          </div>
-        </div>
-
-        <!-- PROMOÇÃO 3 -->
-        <div class="card" data-name="Dupla Purizin + Fanta" data-price="34.99">
+        <!-- PROMO 1 - 2 Purizin + Fanta -->
+        <div class="card" data-name="Promo 1 — 2 Purizin + 1 Fanta 1L" data-price="34.99">
           <img src="promocoes/promo1.jpg" alt="2 Purizin + Fanta" width="280" height="200" loading="lazy">
-          <h3>Dupla Purizin + Fanta 
+          <h3>Promo 1 — 2 Purizin + 1 Fanta 1L
             <span class="badge economia">💸 Economia de R$ 5,01</span>
           </h3>
           <p class="price">De R$ 40,00 por <b>R$ 34,99</b></p>
-          <p>2 Hot Dogs Purizin com Purê + 1 Fanta Laranja</p>
+          <p>2 Hot Dogs "Purizin" com purê cremoso + 1 Fanta 1L geladinha!</p>
           <div class="actions">
             <button class="add-cart" type="button">Adicionar</button>
           </div>
         </div>
 
-        <!-- PROMOÇÃO 4 -->
-        <div class="card" data-name="Combo 3 Padaná" data-price="37.99">
-          <img src="promocoes/promo2.jpg" alt="3 Hot Dogs Padaná" width="280" height="200" loading="lazy">
-          <h3>Combo 3 Padaná 
+        <!-- PROMO 2 - 3 Hot Dog Padaná -->
+        <div class="card" data-name="Promo 2 — 3 Hot Dog Padaná" data-price="37.99">
+          <img src="promocoes/promo2.jpg" alt="3 Hot Dog Padaná" width="280" height="200" loading="lazy">
+          <h3>Promo 2 — 3 Hot Dog Padaná
             <span class="badge economia">💸 Economia de R$ 7,01</span>
           </h3>
           <p class="price">De R$ 45,00 por <b>R$ 37,99</b></p>
-          <p>3 Hot Dogs Padaná completos</p>
+          <p>3 Padaná completos, perfeitos pra dividir com a galera!</p>
           <div class="actions">
             <button class="add-cart" type="button">Adicionar</button>
           </div>
         </div>
 
-        <!-- PROMOÇÃO 5 -->
-        <div class="card" data-name="Bora Artesanar o Bolso" data-price="39.99">
+        <!-- PROMO 3 - 2 Burgers Peleja -->
+        <div class="card" data-name="Promo 3 — 2 Burgers Peleja" data-price="39.99">
           <img src="promocoes/promo3.jpg" alt="2 Burgers Peleja" width="280" height="200" loading="lazy">
-          <h3>Bora Artesanar o Bolso 
+          <h3>Promo 3 — 2 Burgers Peleja
             <span class="badge economia">💸 Economia de R$ 12,01</span>
           </h3>
           <p class="price">De R$ 52,00 por <b>R$ 39,99</b></p>
-          <p>2 Burgers Artesanais Peleja</p>
+          <p>Bora artesanar o bolso! Dois Burgers artesanais "Peleja" no precinho!</p>
+          <div class="actions">
+            <button class="add-cart" type="button">Adicionar</button>
+          </div>
+        </div>
+
+        <!-- PROMO 4 - 3 Trem + Fanta 1L -->
+        <div class="card" data-name="Promo 4 — 3 Trem + 1 Fanta 1L" data-price="44.99">
+          <img src="promocoes/promo4.jpg" alt="3 Trem + Fanta" width="280" height="200" loading="lazy">
+          <h3>Promo 4 — 3 Trem + 1 Fanta 1L
+            <span class="badge economia">💸 Economia de R$ 6,01</span>
+          </h3>
+          <p class="price">De R$ 51,00 por <b>R$ 44,99</b></p>
+          <p>3 Burgers Trem com bacon, queijo e batata palha + 1 Fanta 1L.</p>
+          <div class="actions">
+            <button class="add-cart" type="button">Adicionar</button>
+          </div>
+        </div>
+
+        <!-- PROMO 5 - 4 Trem + Fanta 1L -->
+        <div class="card" data-name="Promo 5 — 4 Trem + 1 Fanta 1L" data-price="49.99">
+          <img src="promocoes/promo5.jpg" alt="4 Trem + Fanta" width="280" height="200" loading="lazy">
+          <h3>Promo 5 — 4 Trem + 1 Fanta 1L
+            <span class="badge economia">💸 Economia de R$ 15,01</span>
+          </h3>
+          <p class="price">De R$ 65,00 por <b>R$ 49,99</b></p>
+          <p>O clássico da família! 4 Burgers Trem + Fanta 1L.</p>
+          <div class="actions">
+            <button class="add-cart" type="button">Adicionar</button>
+          </div>
+        </div>
+
+        <!-- PROMO 6 - 5 Burgers Uai -->
+        <div class="card" data-name="Promo 6 — 5 Burgers Uai" data-price="54.00">
+          <img src="promocoes/promo6.jpg" alt="5 Burgers Uai" width="280" height="200" loading="lazy">
+          <h3>Promo 6 — 5 Burgers Uai
+            <span class="badge economia">💸 Economia de R$ 11,00</span>
+          </h3>
+          <p class="price">De R$ 65,00 por <b>R$ 54,00</b></p>
+          <p>Pra família toda! 5 Burgers UAI recheados no precinho.</p>
+          <div class="actions">
+            <button class="add-cart" type="button">Adicionar</button>
+          </div>
+        </div>
+
+        <!-- PROMO 7 - 4 TremBão + Fanta 1L -->
+        <div class="card" data-name="Promo 7 — 4 TremBão + 1 Fanta 1L" data-price="59.99">
+          <img src="promocoes/promo7.jpg" alt="4 TremBão + Fanta" width="280" height="200" loading="lazy">
+          <h3>Promo 7 — 4 TremBão + 1 Fanta 1L
+            <span class="badge economia">💸 Economia de R$ 17,01</span>
+          </h3>
+          <p class="price">De R$ 77,00 por <b>R$ 59,99</b></p>
+          <p>O maior hot dog da casa! 4 TremBão com purê cremoso + Fanta 1L.</p>
+          <div class="actions">
+            <button class="add-cart" type="button">Adicionar</button>
+          </div>
+        </div>
+
+        <!-- PROMO 8 - 4 Armaria -->
+        <div class="card" data-name="Promo 8 — 4 Armaria" data-price="59.99">
+          <img src="promocoes/promo8.jpg" alt="4 Armaria" width="280" height="200" loading="lazy">
+          <h3>Promo 8 — 4 Armaria
+            <span class="badge economia">💸 Economia de R$ 12,01</span>
+          </h3>
+          <p class="price">De R$ 72,00 por <b>R$ 59,99</b></p>
+          <p>A queridinha da galera! 4 Armaria no super desconto.</p>
+          <div class="actions">
+            <button class="add-cart" type="button">Adicionar</button>
+          </div>
+        </div>
+
+        <!-- PROMO 9 - 5 Uai + Kuat 2L (BRINDE) -->
+        <div class="card" data-name="Promo 9 — 5 Uai + 1 Kuat 2L (Brinde)" data-price="64.99">
+          <img src="promocoes/promo9.jpg" alt="5 Uai + Kuat 2L" width="280" height="200" loading="lazy">
+          <h3>Promo 9 — 5 Uai + 1 Kuat 2L (Brinde)
+            <span class="badge economia">💸 Economia de R$ 10,01</span>
+          </h3>
+          <p class="price">De R$ 75,00 por <b>R$ 64,99</b></p>
+          <p>Compre 5 Burgers Uai e leve 1 Kuat 2L por nossa conta! 🥤</p>
           <div class="actions">
             <button class="add-cart" type="button">Adicionar</button>
           </div>
@@ -260,8 +312,7 @@
         </div>
       </div>
     </section>
-
-    <!-- LANCHES TRADICIONAIS -->
+<!-- LANCHES TRADICIONAIS -->
     <section class="menu-section">
       <h2>🍔 Nossos Lanches Tradicionais</h2>
       <div class="grid">
@@ -343,7 +394,8 @@
         </div>
       </div>
     </section>
-<!-- LANCHES ARTESANAIS -->
+
+    <!-- LANCHES ARTESANAIS -->
     <section class="menu-section">
       <h2>🍔 Lanches Artesanais</h2>
       <div class="grid">
@@ -575,7 +627,7 @@
         <a href="https://www.instagram.com/dafamilialanches" target="_blank" class="footer-btn" rel="noopener">📸 Instagram</a>
         <a href="https://www.ifood.com.br/delivery/patos-de-minas-mg/da-familia-lanches" target="_blank" class="footer-btn" rel="noopener">🍔 iFood</a>
       </div>
-      <div class="footer-copy">© 2025 Da Família Lanches — Todos os direitos reservados 🍔 • <b>v5.5.3</b></div>
+      <div class="footer-copy">© 2025 Da Família Lanches — Todos os direitos reservados 🍔 • <b>v5.5.4</b></div>
     </footer>
   </div>
 <!-- BOTÕES FLUTUANTES -->
@@ -627,7 +679,7 @@
 
     // Inicialização básica
     document.addEventListener('DOMContentLoaded', () => {
-      console.log('✅ DFL v5.5.3 carregado!');
+      console.log('✅ DFL v5.5.4 com 9 Promoções carregado!');
 
       // Botão manual de endereço
       const btnManual = document.getElementById('btnManual');
@@ -710,6 +762,6 @@
     });
   </script>
   
-  <script defer src="script.js?v=5.53"></script>
+  <script defer src="script.js?v=5.54"></script>
 </body>
 </html>
