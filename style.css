@@ -1,6 +1,6 @@
 /* ===========================================================
-   🎨 Da Família Lanches – CSS COMPLETO v5.5.3
-   Correção total de layout, cores e estrutura
+   🎨 Da Família Lanches – CSS COMPLETO v6.0
+   Parte 1 — Root, Base, Header, Botões, Banner e Busca
 =========================================================== */
 
 /* ======== ROOT E BASE ======== */
@@ -30,8 +30,6 @@
 
 html, body {
   height: 100%;
-  margin: 0;
-  padding: 0;
 }
 
 body {
@@ -40,16 +38,17 @@ body {
   background: linear-gradient(180deg, var(--bg1) 0%, var(--bg2) 100%);
   background-attachment: fixed;
   scroll-behavior: smooth;
+  overflow-x: hidden;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  overflow-x: hidden;
 }
 
-/* ======== HEADER & TOPO ======== */
+/* ======== HEADER ======== */
 .header {
   position: fixed;
-  inset-inline: 0;
   top: 0;
+  left: 0;
+  right: 0;
   z-index: 900;
   display: flex;
   justify-content: space-between;
@@ -59,43 +58,41 @@ body {
   box-shadow: var(--shadow-1);
 }
 
-.header-content { 
-  display: flex; 
-  align-items: center; 
-  gap: 12px; 
+.header-content {
+  display: flex;
+  align-items: center;
+  gap: 12px;
 }
 
-.logo { 
-  width: 52px; 
-  height: 52px; 
+.logo {
+  width: 52px;
+  height: 52px;
   border-radius: 8px;
 }
 
-.header-info h1 { 
-  margin: 0; 
-  font-size: 1.2rem; 
+.header-info h1 {
+  font-size: 1.2rem;
   color: #000;
 }
 
-.tagline { 
-  margin: 0; 
-  font-size: 0.85rem; 
-  color: #d84315; 
+.tagline {
+  font-size: 0.85rem;
+  color: #d84315;
   font-weight: 600;
 }
 
-.header-actions { 
-  display: flex; 
-  align-items: center; 
-  gap: 10px; 
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
 
-.main-content-wrapper { 
-  padding-top: 72px; 
+.main-content-wrapper {
+  padding-top: 72px;
   min-height: 100vh;
 }
 
-/* ======== BOTÕES ======== */
+/* ======== BOTÕES DO TOPO ======== */
 .user-button {
   background: linear-gradient(135deg, #fff, #f7f7f7);
   border: 1px solid #ddd;
@@ -104,14 +101,15 @@ body {
   font-weight: 600;
   cursor: pointer;
   transition: 0.2s;
-  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.6);
+  box-shadow: 0 1px 0 rgba(255,255,255,0.6);
 }
-.user-button:hover { 
-  background: #fafafa; 
+.user-button:hover {
+  background: #fafafa;
   transform: scale(1.02);
 }
 
-#cart-icon, .cart-button {
+#cart-icon,
+.cart-button {
   background: var(--botao);
   border: none;
   border-radius: var(--rad);
@@ -122,10 +120,11 @@ body {
   box-shadow: var(--shadow-1);
   display: flex;
   align-items: center;
-  gap: 5px;
-  font-size: 1rem;
+  gap: 6px;
 }
-#cart-icon:hover, .cart-button:hover { 
+
+#cart-icon:hover,
+.cart-button:hover {
   background: #ffc107;
   transform: scale(1.05);
 }
@@ -148,19 +147,19 @@ body {
   text-align: center;
   padding: 12px 8px;
   color: #fff;
-  font-weight: 600;
+  font-weight: 700;
   font-size: 1rem;
-  letter-spacing: 0.2px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
   width: 100vw;
   margin-left: calc(50% - 50vw);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
 }
 
-.status-banner.open { 
-  background: var(--success); 
+.status-banner.open {
+  background: var(--success);
 }
-.status-banner.closed { 
-  background: var(--danger); 
+
+.status-banner.closed {
+  background: var(--danger);
 }
 
 /* ======== BUSCA ======== */
@@ -181,16 +180,19 @@ body {
 }
 
 .search-container input:focus {
-  outline: none;
   border-color: #ff9800;
-  box-shadow: 0 4px 12px rgba(255, 152, 0, 0.3);
+  box-shadow: 0 4px 12px rgba(255,152,0,0.3);
 }
 
 #resultadoBusca {
   margin-top: 10px;
 }
+/* ===========================================================
+   🎨 Da Família Lanches – CSS v6.0
+   Parte 2 — Promoções, Cards, Grid e Ajustes
+=========================================================== */
 
-/* ======== PROMOÇÕES ======== */
+/* ======== SEÇÃO DE PROMOÇÕES ======== */
 .promo-section {
   text-align: center;
   padding: 30px 10px;
@@ -211,6 +213,7 @@ body {
   font-size: 0.95rem;
 }
 
+/* ======== CONTADOR ======== */
 .countdown-ticker {
   background: #ff5722;
   color: #fff;
@@ -220,109 +223,41 @@ body {
   margin: 10px 0 25px;
   font-weight: 700;
   font-size: 1rem;
-  box-shadow: 0 4px 10px rgba(255, 87, 34, 0.4);
+  box-shadow: 0 4px 10px rgba(255,87,34,0.4);
   animation: pulse 2s infinite;
 }
 
 @keyframes pulse {
-  0%, 100% { transform: scale(1); }
+  0%,100% { transform: scale(1); }
   50% { transform: scale(1.05); }
 }
 
-/* ======== CARROSSEL (SE USADO) ======== */
-.carousel {
-  position: relative;
-  max-width: 900px;
-  margin: 0 auto;
+/* ======== CARROSSEL (DESATIVADO / REMOVIDO) ======== */
+.carousel,
+.slides,
+.c-btn,
+.c-prev,
+.c-next {
+  display: none !important;
 }
-
-.slides {
-  display: flex;
-  gap: 8px;
-  overflow-x: auto;
-  scroll-behavior: smooth;
-  padding: 4px;
-}
-
-.slides::-webkit-scrollbar {
-  height: 8px;
-}
-
-.slides::-webkit-scrollbar-track {
-  background: #f1f1f1;
-  border-radius: 10px;
-}
-
-.slides::-webkit-scrollbar-thumb {
-  background: #ddd;
-  border-radius: 10px;
-}
-
-.slide {
-  display: block;
-  border-radius: 12px;
-  flex: 0 0 auto;
-  min-width: 250px;
-  max-width: 250px;
-  height: 180px;
-  object-fit: cover;
-  box-shadow: var(--shadow-2);
-  cursor: pointer;
-  transition: transform 0.2s, box-shadow 0.2s;
-  background: #fff;
-}
-
-.slide:hover {
-  transform: scale(1.05);
-  box-shadow: var(--shadow-3);
-}
-
-.c-btn {
-  position: absolute;
-  top: 50%;
-  transform: translateY(-50%);
-  background: #ffca28;
-  color: #000;
-  border: none;
-  border-radius: 50%;
-  width: 40px;
-  height: 40px;
-  font-size: 24px;
-  font-weight: 700;
-  opacity: 0.9;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  box-shadow: var(--shadow-2);
-  transition: all 0.2s;
-}
-
-.c-btn:hover {
-  opacity: 1;
-  background: #ffb300;
-  transform: translateY(-50%) scale(1.05);
-}
-
-.c-prev { left: 10px; }
-.c-next { right: 10px; }
 
 /* ======== GRID DE PROMOÇÕES ======== */
 #promocoes-area {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: 20px;
-  padding: 10px;
-  max-width: 1000px;
-  margin: 0 auto;
+  display: grid !important;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)) !important;
+  gap: 20px !important;
+  padding: 10px !important;
+  max-width: 1000px !important;
+  margin: 0 auto !important;
 }
 
+/* ======== CARD DE PROMOÇÃO ======== */
 .promo-card {
   background: #fff;
   border-radius: 16px;
   overflow: hidden;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-  transition: transform 0.3s, box-shadow 0.3s;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  transition: transform .3s, box-shadow .3s;
   display: flex;
   flex-direction: column;
   cursor: pointer;
@@ -331,7 +266,7 @@ body {
 
 .promo-card:hover {
   transform: translateY(-5px);
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 8px 20px rgba(0,0,0,0.15);
   border-color: #ffb300;
 }
 
@@ -355,12 +290,11 @@ body {
   font-size: 1.1rem;
   font-weight: 700;
   color: #d32f2f;
-  margin: 0;
   line-height: 1.3;
   display: flex;
-  align-items: center;
-  gap: 8px;
   flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
 }
 
 .promo-badge {
@@ -375,22 +309,30 @@ body {
 }
 
 .promo-card-description {
-  font-size: 0.9rem;
+  font-size: .9rem;
   color: #555;
   line-height: 1.4;
-  margin: 0;
   flex: 1;
+}
+
+.promo-card-ingredients {
+  font-size: .78rem;
+  color: #777;
+  background: #f5f5f5;
+  padding: 8px 10px;
+  border-radius: 8px;
+  line-height: 1.4;
+  margin-top: 4px;
 }
 
 .promo-card-price {
   display: flex;
   flex-direction: column;
   gap: 4px;
-  margin: 8px 0;
 }
 
 .promo-price-old {
-  font-size: 0.85rem;
+  font-size: .85rem;
   color: #999;
   text-decoration: line-through;
 }
@@ -405,42 +347,53 @@ body {
 }
 
 .promo-price-new small {
-  font-size: 0.7rem;
+  font-size: .7rem;
   color: #666;
 }
 
+/* ======== BOTÃO DE ADICIONAR ======== */
 .promo-card-button {
   background: linear-gradient(135deg, #4caf50, #43a047);
   color: #fff;
   border: none;
   border-radius: 10px;
   padding: 12px 16px;
-  font-weight: 700;
   font-size: 1rem;
+  font-weight: 700;
   cursor: pointer;
-  transition: all 0.2s;
-  box-shadow: 0 3px 8px rgba(76, 175, 80, 0.3);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
+  transition: 0.2s;
+  margin-top: auto;
+  box-shadow: 0 3px 8px rgba(76,175,80,0.3);
 }
 
 .promo-card-button:hover {
   background: linear-gradient(135deg, #43a047, #388e3c);
   transform: scale(1.03);
-  box-shadow: 0 5px 12px rgba(76, 175, 80, 0.4);
 }
 
-.promo-card-ingredients {
-  font-size: 0.8rem;
-  color: #777;
-  background: #f5f5f5;
-  padding: 8px 10px;
-  border-radius: 8px;
-  line-height: 1.4;
-  margin-top: 4px;
+/* ======== RESPONSIVE DO GRID ======== */
+@media (max-width: 768px) {
+  #promocoes-area {
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)) !important;
+    gap: 15px !important;
+  }
+
+  .promo-card-image {
+    height: 180px;
+  }
 }
+
+@media (max-width: 480px) {
+  #promocoes-area {
+    grid-template-columns: 1fr !important;
+    gap: 12px !important;
+  }
+}
+/* ===========================================================
+   🎨 Da Família Lanches – CSS v6.0
+   Parte 3 — Cards de Produtos, Badges, Grades e Botões
+=========================================================== */
+
 /* ======== SEÇÕES / GRID DE PRODUTOS ======== */
 section {
   margin: 25px auto;
@@ -462,75 +415,57 @@ section h2 {
   gap: 14px;
 }
 
+/* ======== CARD ======== */
 .card {
   background: #fff;
   border-radius: 16px;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
   padding: 14px;
   text-align: center;
-  transition: transform 0.2s, box-shadow 0.2s;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+  transition: transform .2s, box-shadow .2s;
+  animation: slideUp .4s ease-out backwards;
 }
 
 .card:hover {
   transform: translateY(-3px);
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.12);
+  box-shadow: 0 4px 10px rgba(0,0,0,0.12);
 }
 
 .card img {
   width: 100%;
-  border-radius: 12px;
-  margin-bottom: 8px;
   height: 220px;
   object-fit: cover;
+  border-radius: 12px;
+  margin-bottom: 8px;
   background: #fff;
 }
 
 .card h3 {
-  margin: 0 0 6px;
-  font-weight: 700;
   font-size: 1rem;
+  font-weight: 700;
+  margin-bottom: 6px;
   display: flex;
-  align-items: center;
   justify-content: center;
-  gap: 6px;
   flex-wrap: wrap;
+  gap: 6px;
 }
 
 .card p {
-  font-size: 0.9rem;
+  font-size: .9rem;
   color: #555;
-}
-
-.price {
-  font-weight: 600;
-  color: var(--success);
-  margin: 8px 0;
-}
-
-.price del {
-  color: #b71c1c;
-  font-size: 0.95rem;
-  margin-right: 6px;
-}
-
-.price b {
-  color: #2e7d32;
-  font-weight: 700;
-  font-size: 1.05rem;
+  line-height: 1.3;
 }
 
 /* ======== BADGES ======== */
 .badge {
   display: inline-block;
-  font-size: 0.72rem;
+  font-size: .72rem;
   font-weight: 700;
-  line-height: 1;
   padding: 3px 8px;
   border-radius: 999px;
-  color: #000;
   background: linear-gradient(135deg, #f8e08b, #eac13f);
   border: 1px solid #d4af37;
-  white-space: nowrap;
+  color: #000;
 }
 
 .badge.economia {
@@ -539,16 +474,13 @@ section h2 {
 }
 
 .badge-small {
-  display: inline-block;
-  font-size: 0.68rem;
+  font-size: .68rem;
   font-weight: 600;
-  line-height: 1.2;
   padding: 2px 7px;
   border-radius: 6px;
-  color: #000;
   background: linear-gradient(135deg, #ffd54f, #ffca28);
   border: 1px solid #d4af37;
-  white-space: nowrap;
+  color: #000;
   margin-left: 4px;
 }
 
@@ -558,7 +490,26 @@ section h2 {
   color: #1b5e20;
 }
 
-/* ======== AÇÕES NOS CARDS ======== */
+/* ======== PREÇOS ======== */
+.price {
+  margin: 8px 0;
+  font-weight: 600;
+  color: #2e7d32;
+}
+
+.price del {
+  color: #b71c1c;
+  font-size: .95rem;
+  margin-right: 6px;
+}
+
+.price b {
+  color: #2e7d32;
+  font-weight: 700;
+  font-size: 1.05rem;
+}
+
+/* ======== BOTÕES DOS CARDS ======== */
 .actions {
   margin-top: 10px;
   display: flex;
@@ -568,19 +519,20 @@ section h2 {
 }
 
 .actions button {
-  border: none;
-  border-radius: 10px;
   padding: 12px;
-  font-weight: 700;
-  font-size: 0.95rem;
+  border-radius: 10px;
+  border: none;
   cursor: pointer;
-  transition: 0.2s;
+  font-size: .95rem;
+  font-weight: 700;
+  transition: .2s;
 }
 
+/* Botão “Adicionar ao carrinho” */
 .actions .add-cart {
   background: linear-gradient(135deg, #4caf50, #43a047);
   color: #fff;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
 }
 
 .actions .add-cart:hover {
@@ -588,10 +540,11 @@ section h2 {
   transform: scale(1.03);
 }
 
+/* Botão “Extras / Adicionais” */
 .actions .extras-btn {
   background: linear-gradient(135deg, #ffb300, #ffca28);
   color: #222;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 2px 4px rgba(0,0,0,0.15);
 }
 
 .actions .extras-btn:hover {
@@ -599,14 +552,26 @@ section h2 {
   transform: scale(1.03);
 }
 
-/* ======== BACKDROP ======== */
+/* ======== ANIMAÇÃO GLOBAL DOS CARDS ======== */
+.card:nth-child(1) { animation-delay: .05s; }
+.card:nth-child(2) { animation-delay: .1s; }
+.card:nth-child(3) { animation-delay: .15s; }
+.card:nth-child(4) { animation-delay: .2s; }
+.card:nth-child(5) { animation-delay: .25s; }
+.card:nth-child(6) { animation-delay: .3s; }
+/* ===========================================================
+   🎨 Da Família Lanches – CSS v6.0
+   Parte 4 — Mini-Carrinho, Backdrop, Endereço, Frete, CEP
+=========================================================== */
+
+/* ======== BACKDROP DO CARRINHO ======== */
 #cart-backdrop {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.45);
+  background: rgba(0, 0, 0, .45);
   opacity: 0;
   pointer-events: none;
-  transition: opacity 0.25s ease;
+  transition: opacity .25s;
   z-index: 980;
 }
 
@@ -623,9 +588,9 @@ section h2 {
   width: min(92vw, 380px);
   height: 100dvh;
   background: #fff;
-  box-shadow: -4px 0 20px rgba(0, 0, 0, 0.25);
+  box-shadow: -4px 0 20px rgba(0,0,0,.25);
   transform: translateX(100%);
-  transition: transform 0.25s;
+  transition: transform .25s;
   z-index: 990;
   display: none;
   flex-direction: column;
@@ -637,30 +602,62 @@ section h2 {
 }
 
 .mini-head {
+  padding: 10px 14px;
+  background: var(--acento);
+  border-bottom: 1px solid #eee;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 10px 14px;
-  border-bottom: 1px solid #eee;
-  background: var(--acento);
 }
 
 .mini-head h3 {
   margin: 0;
+  color: #000;
   font-size: 1.1rem;
 }
 
+/* ======== LISTA DO CARRINHO ======== */
 .mini-list {
   flex: 1;
   overflow-y: auto;
-  padding: 10px 14px;
+  padding: 12px 14px;
 }
 
+.mini-item {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 14px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #eee;
+}
+
+.mini-item-name {
+  font-weight: 600;
+  font-size: .95rem;
+  color: #333;
+}
+
+.mini-item-price {
+  font-weight: 700;
+  color: #2e7d32;
+}
+
+/* ======== FOOTER DO MINI-CART ======== */
 .mini-foot {
-  padding: 10px 14px;
+  padding: 12px 14px;
   border-top: 1px solid #eee;
-  max-height: 60vh;
-  overflow-y: auto;
+  background: #fff;
+}
+
+.mini-foot .summary-row {
+  display: flex;
+  justify-content: space-between;
+  margin: 8px 0;
+  font-size: .95rem;
+}
+
+.mini-foot .btn-primary {
+  margin-top: 10px;
 }
 
 /* ======== CAMPOS DE ENDEREÇO ======== */
@@ -670,15 +667,16 @@ section h2 {
   border: 1px solid #ddd;
   border-radius: 10px;
   background: #fff;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 1px 3px rgba(0,0,0,.1);
 }
 
 .frete-container h4 {
-  margin: 0 0 10px 0;
+  margin: 0 0 10px;
   font-size: 1rem;
   color: #222;
 }
 
+/* CEP + botão */
 .frete-cep-group {
   display: flex;
   gap: 8px;
@@ -690,18 +688,18 @@ section h2 {
   padding: 8px 10px;
   border-radius: 8px;
   border: 1px solid #ccc;
-  font-size: 0.9rem;
+  font-size: .9rem;
 }
 
 .btn-calcular-frete {
   background: var(--botao);
   color: #222;
+  padding: 8px 12px;
   border: none;
   border-radius: 8px;
-  padding: 8px 12px;
   font-weight: 700;
   cursor: pointer;
-  transition: 0.2s;
+  transition: .2s;
   box-shadow: var(--shadow-1);
 }
 
@@ -710,6 +708,7 @@ section h2 {
   transform: scale(1.02);
 }
 
+/* Campo grande com endereço longo */
 .input-endereco-longo {
   width: 100% !important;
   display: block !important;
@@ -719,14 +718,13 @@ section h2 {
   padding: 8px 10px;
   border-radius: 8px;
   border: 1px solid #ccc;
-  font-size: 0.9rem;
+  font-size: .9rem;
   margin-bottom: 8px;
 }
 
-.input-endereco-longo::-webkit-scrollbar {
-  display: none !important;
-}
+.input-endereco-longo::-webkit-scrollbar { display: none !important; }
 
+/* Número + Complemento */
 .endereco-duplo {
   display: flex;
   gap: 8px;
@@ -737,30 +735,31 @@ section h2 {
   flex: 0 0 30%;
   max-width: 120px;
   padding: 8px 10px;
-  border-radius: 8px;
   border: 1px solid #ccc;
-  font-size: 0.9rem;
+  border-radius: 8px;
+  font-size: .9rem;
 }
 
 #complemento-input {
   flex: 1;
-  min-width: 0;
   padding: 8px 10px;
-  border-radius: 8px;
   border: 1px solid #ccc;
-  font-size: 0.9rem;
+  border-radius: 8px;
+  font-size: .9rem;
 }
 
+/* Desabilitado após finalizar CEP */
 .mini-foot input:disabled,
 .mini-foot textarea:disabled {
-  background-color: var(--bg2) !important;
-  color: #888 !important;
-  cursor: not-allowed !important;
+  background-color: var(--bg2);
+  color: #888;
+  cursor: not-allowed;
 }
 
+/* Aviso de frete grátis */
 .frete-gratis-aviso {
-  margin: 6px 0 10px 0;
-  font-size: 0.85rem;
+  margin: 6px 0 10px;
+  font-size: .85rem;
   color: #444;
   background: #fff8d6;
   padding: 8px 10px;
@@ -769,22 +768,21 @@ section h2 {
   line-height: 1.3;
 }
 
-/* ======== BARRA DE PROGRESSO ======== */
+/* ======== BARRA DE PROGRESSO (frete grátis) ======== */
 .progress-wrapper {
-  background: #fff8d6;
-  padding: 12px;
-  border-radius: var(--rad);
   margin-top: 15px;
-  margin-bottom: 10px;
+  padding: 12px;
+  background: #fff8d6;
   border: 1px solid var(--acento);
+  border-radius: var(--rad);
 }
 
 .progress-text {
-  font-size: 0.95rem;
-  margin-bottom: 8px;
+  text-align: center;
+  font-size: .95rem;
   font-weight: 600;
   color: #444;
-  text-align: center;
+  margin-bottom: 8px;
 }
 
 .progress-bar {
@@ -799,28 +797,32 @@ section h2 {
   width: 0%;
   height: 100%;
   background: var(--success);
-  transition: width 0.4s ease;
+  transition: width .4s;
 }
+/* ===========================================================
+   🎨 Da Família Lanches – CSS v6.0
+   Parte 5 — Cupons, Resumo Final, Carrinho Vazio
+=========================================================== */
 
-/* ======== CUPONS ======== */
+/* ======== FORMULÁRIO DE CUPONS ======== */
 .coupon-form {
-  display: flex;
-  gap: 8px;
   margin-top: 12px;
   margin-bottom: 10px;
+  display: flex;
+  gap: 8px;
 }
 
 .coupon-form input[type="text"] {
   flex: 1;
   padding: 10px 12px;
-  border: 1px solid #ccc;
   border-radius: 8px;
-  font-size: 0.95rem;
+  border: 1px solid #ccc;
+  font-size: .95rem;
   box-shadow: inset 0 1px 2px rgba(0,0,0,0.05);
 }
 
 .coupon-form button {
-  background-color: #4caf50;
+  background: #4caf50;
   color: #fff;
   font-weight: 700;
   border: none;
@@ -831,46 +833,90 @@ section h2 {
 }
 
 .coupon-form button:hover {
-  background-color: #43a047;
+  background: #43a047;
 }
 
+/* ======== MENSAGEM DE CUPOM ======== */
 .coupon-message {
   margin-top: 6px;
-  font-size: 0.9rem;
+  font-size: .9rem;
   color: #333;
+  font-weight: 600;
+  line-height: 1.3;
 }
 
+/* ======== RESUMO DO PEDIDO (TOTAL, FRETE, ETC) ======== */
 .summary-row {
   display: flex;
   justify-content: space-between;
   margin: 8px 0;
-  font-size: 0.95rem;
+  font-size: .95rem;
+  font-weight: 600;
+}
+
+.summary-row span {
+  color: #333;
+}
+
+.summary-row b {
+  color: #2e7d32;
+  font-weight: 800;
 }
 
 /* ======== CARRINHO VAZIO ======== */
 .cart-empty-msg {
-  padding: 18px 14px;
   text-align: center;
-  border: 2px dashed #ffca28;
-  border-radius: 12px;
+  padding: 18px 14px;
   background: #fffdf3;
+  border-radius: 12px;
+  border: 2px dashed #ffca28;
   font-weight: 600;
-  color: #444;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.6);
   line-height: 1.4;
+  color: #444;
+  margin-top: 10px;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.6);
 }
 
 .cart-empty-msg div:first-child {
   font-size: 1.05rem;
-  margin-bottom: 6px;
   color: #222;
+  margin-bottom: 6px;
 }
 
 .cart-empty-msg div:last-child {
-  font-size: 0.95rem;
+  font-size: .95rem;
   color: #6b6b6b;
 }
-/* ======== MODAIS GERAIS ======== */
+
+/* ======== BOTÃO PRINCIPAL DO FINALIZAR ======== */
+.btn-primary,
+.confirm-btn {
+  width: 100%;
+  padding: 14px;
+  border: none;
+  border-radius: 10px;
+  background: linear-gradient(135deg, #4caf50, #388e3c);
+  font-size: 1rem;
+  font-weight: 700;
+  color: #fff;
+  cursor: pointer;
+  margin-top: 10px;
+  transition: .2s;
+  box-shadow: 0 4px 6px rgba(0,0,0,.15);
+}
+
+.btn-primary:hover,
+.confirm-btn:hover {
+  background: linear-gradient(135deg, #388e3c, #2e7d32);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 10px rgba(0,0,0,.25);
+}
+/* ===========================================================
+   🎨 Da Família Lanches – CSS v6.0
+   Parte 6 — Modais (Login, Extras, Combos, Painéis Laterais)
+=========================================================== */
+
+/* ======== MODAL BASE ======== */
 .modal {
   position: fixed;
   inset: 0;
@@ -879,9 +925,9 @@ section h2 {
   justify-content: center;
   opacity: 0;
   pointer-events: none;
-  transition: opacity 0.25s;
+  transition: opacity .25s ease;
+  background: rgba(0,0,0,0.5);
   z-index: 999;
-  background: rgba(0, 0, 0, 0.5);
 }
 
 .modal.show {
@@ -892,14 +938,15 @@ section h2 {
 .modal-content {
   background: #fff;
   border-radius: 16px;
-  max-height: 85vh;
   max-width: 520px;
-  width: 90%;
+  width: 92%;
+  max-height: 85vh;
   overflow-y: auto;
-  box-shadow: 0 8px 40px rgba(0, 0, 0, 0.3);
-  position: relative;
+  box-shadow: 0 8px 40px rgba(0,0,0,0.3);
+  animation: slideUp .35s ease backwards;
 }
 
+/* ======== CABEÇALHO DO MODAL ======== */
 .modal-head {
   display: flex;
   justify-content: space-between;
@@ -907,60 +954,135 @@ section h2 {
   padding: 12px 16px;
   border-bottom: 1px solid #eee;
   background: #ffca28;
-  box-shadow: var(--shadow-in);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.35);
 }
 
 .modal-head h2,
 .modal-head h3 {
   margin: 0;
-  font-size: 1.2rem;
+  font-size: 1.25rem;
+  font-weight: 800;
 }
 
-/* ======== BOTÕES ======== */
-.btn-primary,
-.btn-secondary,
-.btn-primario,
-.confirm-btn {
+/* ======== BOTÃO FECHAR ======== */
+.extras-close,
+.combo-close,
+.login-close,
+.promo-close,
+.dashboard-close,
+.close-panel {
+  background: #ffb300;
   border: none;
-  border-radius: 10px;
-  padding: 14px;
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  font-size: 18px;
   font-weight: 700;
-  font-size: 1rem;
   cursor: pointer;
-  transition: 0.2s;
-  width: 100%;
+  line-height: 32px;
+  color: #222;
+  transition: .2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-.btn-primary,
-.btn-primario,
-.confirm-btn {
-  background: linear-gradient(135deg, var(--success), #388e3c);
+.extras-close:hover,
+.combo-close:hover,
+.login-close:hover,
+.promo-close:hover,
+.dashboard-close:hover,
+.close-panel:hover {
+  background: #ff7043;
   color: #fff;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.15);
+  transform: scale(1.12);
 }
 
-.btn-primary:hover,
-.btn-primario:hover,
-.confirm-btn:hover {
-  background: linear-gradient(135deg, #388e3c, #2e7d32);
-  transform: translateY(-2px);
-  box-shadow: 0 6px 10px rgba(0, 0, 0, 0.25);
-}
+/* ===========================================================
+   🔥 MODAL DE EXTRAS
+=========================================================== */
 
-.btn-secondary {
-  background: transparent;
-  color: #555;
-  border: 1px solid #ddd;
-}
-
-.btn-secondary:hover {
-  background: #f1f1f1;
-  border-color: #ccc;
-}
-
-/* ======== LOGIN ======== */
-.login-box {
+.extras-list {
   padding: 20px;
+  display: grid;
+  gap: 12px;
+}
+
+.extra-line {
+  padding: 12px;
+  background: #fff;
+  border: 1px solid #ffb300;
+  border-radius: 10px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-weight: 600;
+  cursor: pointer;
+  transition: .2s;
+}
+
+.extra-line:hover {
+  background: #fff7e6;
+  transform: scale(1.02);
+}
+
+.extra-line span b {
+  color: #d32f2f;
+  margin-left: 5px;
+}
+
+.extra-line input[type="checkbox"] {
+  cursor: pointer;
+  transform: scale(1.15);
+}
+
+/* RODAPÉ DO MODAL DE EXTRAS */
+.modal-foot {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  padding: 14px 20px;
+  border-top: 1px solid #eee;
+}
+
+/* ===========================================================
+   🔥 MODAL DE COMBOS (Escolha do refrigerante)
+=========================================================== */
+
+#combo-body {
+  padding: 20px;
+  display: grid;
+  gap: 12px;
+}
+
+#combo-body label {
+  padding: 10px 14px;
+  background: #fff;
+  border: 1px solid #ffca28;
+  border-radius: 10px;
+  font-weight: 600;
+  display: flex;
+  justify-content: space-between;
+  cursor: pointer;
+  transition: .2s;
+}
+
+#combo-body label:hover {
+  background: #fff9e6;
+  transform: scale(1.02);
+}
+
+#combo-body input[type="radio"] {
+  cursor: pointer;
+  transform: scale(1.15);
+}
+
+/* ===========================================================
+   🔥 LOGIN / REGISTRO
+=========================================================== */
+
+.login-box {
+  padding: 22px;
 }
 
 .login-box input {
@@ -973,29 +1095,29 @@ section h2 {
 }
 
 .google-btn {
-  border: 1px solid #ddd;
-  background: #fff;
-  border-radius: 8px;
-  width: 100%;
-  font-weight: 600;
   display: flex;
   justify-content: center;
   align-items: center;
   gap: 8px;
   padding: 10px;
-  transition: 0.2s;
+  width: 100%;
+  background: #fff;
+  border: 1px solid #ddd;
+  border-radius: 8px;
   cursor: pointer;
+  font-weight: 600;
+  transition: .2s;
   margin-bottom: 10px;
 }
 
 .google-btn:hover {
-  background: #f8f8f8;
+  background: #f7f7f7;
 }
 
 .register-text {
   text-align: center;
-  margin-top: 15px;
-  font-size: 0.9rem;
+  margin-top: 16px;
+  font-size: .9rem;
   color: #666;
 }
 
@@ -1003,66 +1125,26 @@ section h2 {
   color: #1976d2;
   cursor: pointer;
   text-decoration: underline;
-  background: none;
-  border: none;
-  font-size: inherit;
-  padding: 0;
+  font-weight: 600;
 }
 
 .link:hover {
-  color: #1565c0;
+  color: #0d47a1;
 }
 
-/* ======== BOTÕES DE FECHAR ======== */
-.fechar-pedidos,
-.fechar-recompensas,
-.extras-close,
-.combo-close,
-.login-close,
-.promo-close,
-.dashboard-close,
-.close-panel {
-  background: var(--botao);
-  border: none;
-  border-radius: 50%;
-  width: 30px;
-  height: 30px;
-  font-size: 18px;
-  font-weight: 700;
-  cursor: pointer;
-  line-height: 30px;
-  text-align: center;
-  color: #222;
-  transition: 0.2s;
-  pointer-events: auto;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
+/* ===========================================================
+   🔥 PAINÉIS LATERAIS (Meus Pedidos / Minhas Recompensas)
+=========================================================== */
 
-.fechar-pedidos:hover,
-.fechar-recompensas:hover,
-.extras-close:hover,
-.combo-close:hover,
-.login-close:hover,
-.promo-close:hover,
-.dashboard-close:hover,
-.close-panel:hover {
-  background: #ff7043;
-  color: #fff;
-  transform: scale(1.1);
-}
-
-/* ======== PAINÉIS LATERAIS ======== */
 .side-panel {
   position: fixed;
   right: -100%;
   top: 0;
-  width: min(95%, 440px);
   height: 100vh;
+  width: min(95%, 430px);
   background: #f4f4f4;
-  box-shadow: -4px 0 18px rgba(0, 0, 0, 0.3);
-  transition: right 0.4s;
+  box-shadow: -4px 0 18px rgba(0,0,0,.3);
+  transition: right .35s ease;
   display: flex;
   flex-direction: column;
   z-index: 990;
@@ -1073,48 +1155,58 @@ section h2 {
 }
 
 .panel-header {
-  background: var(--acento);
-  padding: 15px;
+  padding: 16px;
+  background: #ffca28;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.35);
 }
 
 .panel-header h2 {
   margin: 0;
-  font-size: 1.2rem;
+  font-size: 1.25rem;
+  font-weight: 800;
 }
 
 .orders-list,
 .rewards-list {
   flex: 1;
   overflow-y: auto;
-  padding: 15px;
+  padding: 14px 18px;
 }
 
 .empty-orders,
 .empty-rewards {
-  text-align: center;
-  color: #999;
   padding: 40px 20px;
+  text-align: center;
   font-size: 1rem;
+  color: #999;
 }
+/* ===========================================================
+   🎨 Da Família Lanches – CSS v6.0
+   Parte 7 — Footer / Botões Flutuantes / Popup / Utilitários
+=========================================================== */
 
-/* ======== FOOTER ======== */
+/* ================================
+      🔻  FOOTER (Rodapé)
+================================ */
+
 .footer {
   background: #ffca28;
   text-align: center;
-  padding: 20px;
+  padding: 22px 16px;
+  margin-top: 40px;
   font-size: 0.9rem;
   color: #222;
-  margin-top: 40px;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.35);
 }
 
 .footer a {
   color: #ff7043;
   text-decoration: none;
-  transition: color 0.2s;
+  font-weight: 700;
+  transition: 0.2s;
 }
 
 .footer a:hover {
@@ -1124,83 +1216,36 @@ section h2 {
 .footer-links {
   display: flex;
   justify-content: center;
-  gap: 10px;
   flex-wrap: wrap;
-  margin: 8px 0;
+  gap: 10px;
+  margin: 10px 0;
 }
 
 .footer-btn {
   background: #ffb300;
-  color: #222;
-  padding: 6px 14px;
-  border-radius: 6px;
+  padding: 8px 16px;
+  border-radius: 8px;
   font-weight: 700;
-  text-decoration: none;
-  transition: 0.25s;
-  display: inline-block;
+  color: #222;
+  transition: .25s;
 }
 
 .footer-btn:hover {
   background: #ffca28;
-  transform: scale(1.03);
+  transform: scale(1.05);
 }
 
 .footer-copy {
-  font-size: 0.8rem;
+  margin-top: 12px;
+  font-size: 0.82rem;
   color: #000;
-  margin-top: 10px;
 }
 
-/* ======== COOKIE BANNER ======== */
-#cookie-banner {
-  position: fixed;
-  left: 0;
-  right: 0;
-  bottom: -100px;
-  background: rgba(34, 34, 34, 0.95);
-  color: #fff;
-  padding: 16px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  z-index: 2000;
-  transition: bottom 0.5s;
-}
+/* ================================
+   🔻  BOTÕES FLUTUANTES
+   (Meus Pedidos e Minhas Recompensas)
+================================ */
 
-#cookie-banner.show {
-  bottom: 0;
-}
-
-#cookie-banner p {
-  margin: 0;
-  font-size: 0.9rem;
-  line-height: 1.4;
-  margin-right: 16px;
-}
-
-#cookie-banner a {
-  color: #ffca28;
-  font-weight: 600;
-  text-decoration: underline;
-}
-
-#cookie-banner button {
-  background: #4caf50;
-  color: #fff;
-  border: none;
-  border-radius: 8px;
-  padding: 10px 16px;
-  font-weight: 700;
-  cursor: pointer;
-  transition: background 0.2s;
-  flex-shrink: 0;
-}
-
-#cookie-banner button:hover {
-  background: #43a047;
-}
-
-/* ======== BOTÕES FLUTUANTES ======== */
 .meus-pedidos,
 .minhas-recompensas {
   position: fixed;
@@ -1219,24 +1264,27 @@ section h2 {
 .meus-pedidos-btn,
 .recompensas-btn {
   background: linear-gradient(135deg, #ffca28, #ffb300);
-  color: #222;
   border: none;
   border-radius: 20px;
-  font-weight: 700;
-  font-size: 0.95rem;
   padding: 12px 22px;
-  box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+  font-weight: 800;
+  font-size: .95rem;
   cursor: pointer;
-  transition: 0.2s;
+  color: #222;
+  box-shadow: 0 4px 10px rgba(0,0,0,.22);
+  transition: .25s;
 }
 
 .meus-pedidos-btn:hover,
 .recompensas-btn:hover {
-  transform: scale(1.05);
-  box-shadow: 0 6px 15px rgba(0,0,0,0.3);
+  transform: scale(1.07);
+  box-shadow: 0 6px 15px rgba(0,0,0,.32);
 }
 
-/* ======== POPUP ======== */
+/* ================================
+   🔻 POPUP "Item Adicionado"
+================================ */
+
 .popup-add {
   position: fixed;
   top: 100px;
@@ -1245,27 +1293,30 @@ section h2 {
   color: #fff;
   padding: 12px 20px;
   border-radius: 8px;
-  font-weight: 600;
-  box-shadow: 0 4px 10px rgba(0,0,0,0.3);
-  z-index: 10000;
+  font-weight: 700;
+  box-shadow: 0 4px 10px rgba(0,0,0,.25);
+  z-index: 9999;
   opacity: 0;
-  transition: opacity 0.3s;
   pointer-events: none;
+  transition: opacity .3s ease;
 }
 
 .popup-add.show {
   opacity: 1;
 }
 
-/* ======== ANIMAÇÕES ======== */
+/* ================================
+   🔻 ANIMAÇÕES GERAIS
+================================ */
+
 @keyframes slideUp {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
+  from { 
+    opacity: 0; 
+    transform: translateY(18px); 
   }
-  to {
-    opacity: 1;
-    transform: translateY(0);
+  to { 
+    opacity: 1; 
+    transform: translateY(0); 
   }
 }
 
@@ -1274,181 +1325,24 @@ section h2 {
   to { opacity: 1; }
 }
 
-/* ======== RESPONSIVE ======== */
-@media (max-width: 768px) {
-  .header {
-    padding: 8px 12px;
-  }
-  
-  .logo {
-    width: 45px;
-    height: 45px;
-  }
-  
-  .header-info h1 {
-    font-size: 1.1rem;
-  }
-  
-  .tagline {
-    font-size: 0.8rem;
-  }
-  
-  .grid {
-    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
-    gap: 12px;
-  }
-  
-  #promocoes-area {
-    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-    gap: 15px;
-  }
-  
-  .promo-card-image {
-    height: 180px;
-  }
+.card,
+.promo-card {
+  animation: slideUp .40s ease backwards;
 }
 
-@media (max-width: 480px) {
-  .main-content-wrapper {
-    padding-top: 68px;
-  }
-  
-  .header-info h1 {
-    font-size: 1rem;
-  }
-  
-  .grid {
-    grid-template-columns: 1fr;
-  }
-  
-  #promocoes-area {
-    grid-template-columns: 1fr;
-  }
-  
-  #cookie-banner {
-    flex-direction: column;
-    text-align: center;
-    gap: 12px;
-  }
-  
-  #cookie-banner p {
-    margin-right: 0;
-  }
-  
-  #cookie-banner button {
-    width: 100%;
-    padding: 12px;
-  }
-}
+.card:nth-child(1),
+.promo-card:nth-child(1) { animation-delay: .05s; }
+.card:nth-child(2),
+.promo-card:nth-child(2) { animation-delay: .10s; }
+.card:nth-child(3),
+.promo-card:nth-child(3) { animation-delay: .15s; }
+.card:nth-child(4),
+.promo-card:nth-child(4) { animation-delay: .20s; }
 
-@media (max-width: 600px) {
-  .countdown-ticker {
-    font-size: 0.9rem;
-    padding: 8px 16px;
-  }
-}
-/* ======== EXTRAS / ADICIONAIS ======== */
-.extras-list {
-  padding: 16px 20px;
-  display: grid;
-  gap: 10px;
-}
+/* ================================
+   🔻 SCROLLBAR PERSONALIZADA
+================================ */
 
-.extra-line {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 12px;
-  border: 1px solid #ffb300;
-  border-radius: 8px;
-  background: #fff;
-  margin-bottom: 8px;
-  cursor: pointer;
-  transition: all 0.2s;
-}
-
-.extra-line:hover {
-  background: #fff7e6;
-  transform: scale(1.02);
-}
-
-.extra-line span {
-  font-weight: 600;
-}
-
-.extra-line span b {
-  color: var(--danger);
-  margin-left: 5px;
-}
-
-.extra-line input[type="checkbox"] {
-  margin-left: 10px;
-  cursor: pointer;
-}
-
-.modal-foot {
-  display: flex;
-  gap: 10px;
-  justify-content: flex-end;
-  padding: 16px 20px;
-  border-top: 1px solid #eee;
-}
-
-/* ======== COMBOS MODAL ======== */
-#combo-body {
-  padding: 16px 20px;
-  display: grid;
-  gap: 10px;
-}
-
-#combo-body label {
-  border: 1px solid #ffca28;
-  border-radius: 10px;
-  padding: 10px 14px;
-  background: #fff;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  transition: 0.2s;
-  font-weight: 600;
-  cursor: pointer;
-}
-
-#combo-body label:hover {
-  background: #fff9e6;
-  transform: scale(1.02);
-}
-
-#combo-body input[type="radio"] {
-  margin-left: 10px;
-  cursor: pointer;
-}
-
-/* ======== LOADING STATES ======== */
-.promocoes-loading {
-  text-align: center;
-  padding: 40px;
-  color: #999;
-  font-size: 1.1rem;
-}
-
-.promocoes-loading::after {
-  content: '...';
-  animation: dots 1.5s infinite;
-}
-
-@keyframes dots {
-  0%, 20% { content: '.'; }
-  40% { content: '..'; }
-  60%, 100% { content: '...'; }
-}
-
-/* ======== SCROLL SUAVE ======== */
-html {
-  scroll-behavior: smooth;
-}
-
-/* ======== SCROLLBAR CUSTOMIZADA ======== */
 ::-webkit-scrollbar {
   width: 10px;
   height: 10px;
@@ -1468,99 +1362,11 @@ html {
   background: #ff9800;
 }
 
-/* ======== LINKS GERAIS ======== */
-a {
-  color: inherit;
-  text-decoration: none;
-}
+/* ================================
+   🔻 CLASSES UTILITÁRIAS
+================================ */
 
-/* ======== INPUTS E FORMS ======== */
-input[type="text"],
-input[type="email"],
-input[type="password"],
-textarea {
-  font-family: inherit;
-  font-size: 1rem;
-}
-
-input:focus,
-textarea:focus {
-  outline: none;
-  border-color: var(--botao);
-}
-
-/* ======== BOTÕES GERAIS ======== */
-button {
-  font-family: inherit;
-}
-
-button:focus {
-  outline: 2px solid var(--botao);
-  outline-offset: 2px;
-}
-
-/* ======== ACESSIBILIDADE ======== */
-.sr-only {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  padding: 0;
-  margin: -1px;
-  overflow: hidden;
-  clip: rect(0, 0, 0, 0);
-  white-space: nowrap;
-  border-width: 0;
-}
-
-/* ======== ESTADOS DE CARREGAMENTO ======== */
-[aria-busy="true"] {
-  cursor: wait;
-  opacity: 0.6;
-}
-
-/* ======== ANIMAÇÕES DE ENTRADA ======== */
-.card,
-.promo-card {
-  animation: slideUp 0.4s ease-out backwards;
-}
-
-.card:nth-child(1),
-.promo-card:nth-child(1) { animation-delay: 0.05s; }
-.card:nth-child(2),
-.promo-card:nth-child(2) { animation-delay: 0.1s; }
-.card:nth-child(3),
-.promo-card:nth-child(3) { animation-delay: 0.15s; }
-.card:nth-child(4),
-.promo-card:nth-child(4) { animation-delay: 0.2s; }
-.card:nth-child(5),
-.promo-card:nth-child(5) { animation-delay: 0.25s; }
-.card:nth-child(6),
-.promo-card:nth-child(6) { animation-delay: 0.3s; }
-
-/* ======== ESTADOS DISABLED ======== */
-button:disabled,
-input:disabled {
-  opacity: 0.6;
-  cursor: not-allowed !important;
-}
-
-/* ======== SOMBRAS E ELEVAÇÕES ======== */
-.elevation-1 {
-  box-shadow: var(--shadow-1);
-}
-
-.elevation-2 {
-  box-shadow: var(--shadow-2);
-}
-
-.elevation-3 {
-  box-shadow: var(--shadow-3);
-}
-
-/* ======== UTILIDADES ======== */
-.text-center {
-  text-align: center;
-}
+.text-center { text-align: center; }
 
 .mt-1 { margin-top: 8px; }
 .mt-2 { margin-top: 16px; }
@@ -1574,36 +1380,45 @@ input:disabled {
 .p-2 { padding: 16px; }
 .p-3 { padding: 24px; }
 
-/* ======== DARK MODE PREP (FUTURO) ======== */
-@media (prefers-color-scheme: dark) {
-  /* Preparado para modo escuro futuro */
+.elevation-1 { box-shadow: 0 2px 5px rgba(0,0,0,0.15); }
+.elevation-2 { box-shadow: 0 3px 10px rgba(0,0,0,0.20); }
+.elevation-3 { box-shadow: 0 5px 15px rgba(0,0,0,0.30); }
+
+/* ================================
+   🔻 ACESSIBILIDADE
+================================ */
+
+.sr-only {
+  position: absolute;
+  width: 1px; height: 1px;
+  padding: 0; margin: -1px;
+  overflow: hidden;
+  clip: rect(0,0,0,0);
+  white-space: nowrap;
+  border: 0;
 }
 
-/* ======== PRINT STYLES ======== */
-@media print {
-  .header,
-  .footer,
-  .mini-cart,
-  .meus-pedidos,
-  .minhas-recompensas,
-  #cookie-banner {
-    display: none !important;
-  }
-  
-  body {
-    background: #fff;
-  }
-  
-  .card,
-  .promo-card {
-    break-inside: avoid;
-  }
+button:focus {
+  outline: 2px solid var(--botao);
+  outline-offset: 2px;
 }
 
-/* ======== HOVER EFFECTS PARA TOUCH DEVICES ======== */
+/* ================================
+   🔻 CARREGAMENTO / ESTADOS
+================================ */
+
+[aria-busy="true"] {
+  cursor: wait;
+  opacity: 0.6;
+}
+
+/* ================================
+   🔻 TOUCH DEVICES (Remove Hover Excessivo)
+================================ */
+
 @media (hover: none) {
-  .card:hover,
-  .promo-card:hover {
+  .promo-card:hover,
+  .card:hover {
     transform: none;
   }
   
@@ -1611,69 +1426,191 @@ input:disabled {
     transform: none;
   }
 }
+/* ===========================================================
+   🎨 Da Família Lanches – CSS v6.0
+   Parte 8 — Cookie Banner / Print / Dark Mode / Segurança
+=========================================================== */
 
-/* ======== SEGURANÇA E PERFORMANCE ======== */
-* {
-  -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+/* ================================
+      🔻  COOKIE BANNER (LGPD)
+================================ */
+
+#cookie-banner {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: -120px;
+  background: rgba(34, 34, 34, 0.95);
+  color: #fff;
+  padding: 18px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  z-index: 2000;
+  transition: bottom 0.5s ease;
+  border-top: 3px solid #ffca28;
 }
 
+#cookie-banner.show {
+  bottom: 0;
+}
+
+#cookie-banner p {
+  margin: 0;
+  font-size: 0.92rem;
+  line-height: 1.4;
+}
+
+#cookie-banner a {
+  color: #ffca28;
+  font-weight: 700;
+  text-decoration: underline;
+}
+
+#cookie-banner button {
+  background: #4caf50;
+  border: none;
+  color: #fff;
+  padding: 10px 18px;
+  border-radius: 10px;
+  cursor: pointer;
+  font-weight: 800;
+  transition: .2s;
+}
+
+#cookie-banner button:hover {
+  background: #43a047;
+  transform: scale(1.05);
+}
+
+@media (max-width: 520px) {
+  #cookie-banner {
+    flex-direction: column;
+    text-align: center;
+  }
+  
+  #cookie-banner button {
+    width: 100%;
+  }
+}
+
+/* ================================
+      🔻  IMPRESSÃO (PRINT MODE)
+================================ */
+
+@media print {
+  .header,
+  .footer,
+  .mini-cart,
+  .meus-pedidos,
+  .minhas-recompensas,
+  #cookie-banner,
+  .progress-wrapper,
+  .promo-card-button,
+  .actions,
+  .btn-primary,
+  .btn-secondary,
+  button {
+    display: none !important;
+  }
+
+  body {
+    background: #fff !important;
+    color: #000 !important;
+  }
+
+  .card,
+  .promo-card {
+    break-inside: avoid;
+    page-break-inside: avoid;
+    border: 1px solid #ddd;
+  }
+
+  img {
+    max-width: 100%;
+  }
+}
+
+/* ================================
+      🔻  MODO ESCURO (PREP)
+      — Apenas preparado para futuro update
+================================ */
+
+@media (prefers-color-scheme: dark) {
+  /* Base */
+  body {
+    background: #121212;
+    color: #e0e0e0;
+  }
+
+  .header {
+    background: #e2b10c;
+  }
+
+  .promo-card,
+  .card,
+  .modal-content {
+    background: #1d1d1d;
+    color: #eee;
+  }
+
+  input,
+  textarea {
+    background: #2a2a2a;
+    border-color: #555;
+    color: #fff;
+  }
+}
+
+/* ================================
+      🔻  SEGURANÇA & PERFORMANCE
+================================ */
+
+/* Remove highlight feio em mobile */
+* {
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Evita bugs de imagens estouradas */
 img {
   max-width: 100%;
   height: auto;
   display: block;
 }
 
-/* ======== FIM DO CSS ======== */
-
-/* 
-  🎨 DFL v5.5.3 - CSS COMPLETO
-  ✅ Layout corrigido
-  ✅ Cores aplicadas
-  ✅ Promoções em grade
-  ✅ Responsivo
-  ✅ Animações suaves
-  ✅ Acessibilidade
-  
-  Desenvolvido com ❤️ para Da Família Lanches
-*/
-/* ===========================================================
-   🔥 REMOVER CARROSSEL E FORÇAR GRADE DE PROMOÇÕES
-   Adicione este código AO FINAL do seu style.css
-=========================================================== */
-
-/* ESCONDE O CARROSSEL COMPLETAMENTE */
-.carousel,
-.slides,
-.c-btn,
-.c-prev,
-.c-next {
-  display: none !important;
+/* Botões acessíveis */
+button {
+  font-family: inherit;
+}
+button:focus-visible {
+  outline: 3px solid #ffca28;
+  outline-offset: 3px;
 }
 
-/* FORÇA O GRID DE PROMOÇÕES */
-#promocoes-area,
-.promo-section .grid {
-  display: grid !important;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)) !important;
-  gap: 20px !important;
-  padding: 10px !important;
-  max-width: 1000px !important;
-  margin: 0 auto !important;
+/* inputs com UX aprimorado */
+input,
+textarea {
+  transition: border-color .2s;
 }
 
-/* RESPONSIVE PARA MOBILE */
-@media (max-width: 768px) {
-  #promocoes-area,
-  .promo-section .grid {
-    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)) !important;
-    gap: 15px !important;
+input:focus,
+textarea:focus {
+  border-color: #ffb300;
+}
+
+/* ================================
+      🔥 FINALIZAÇÃO DO CSS v6.0
+================================ */
+
+/* Evita hover travado em touch */
+@media (hover: none) {
+  .promo-card:hover,
+  .card:hover,
+  button:hover {
+    transform: none !important;
   }
 }
 
-@media (max-width: 480px) {
-  #promocoes-area,
-  .promo-section .grid {
-    grid-template-columns: 1fr !important;
-    gap: 12px !important;
-  }
-}
+/* Fim do CSS */
+/* Desenvolvido com ❤️ para Da Família Lanches */
