@@ -1,7 +1,7 @@
 /* =========================================================  
-   🌟 DFL v5.5.1 — CORREÇÃO DE ERRO DE REFERÊNCIA E ESTABILIDADE
+   🌟 DFL v5.5.2 — CORREÇÃO CRÍTICA DE DOMContentLoaded
+   - Removido o segundo bloco DOMContentLoaded no final do arquivo.
    - Inclui as melhorias de busca e grade de promoções.
-   - Revisa as referências do objeto 'el' para maior segurança.
 ========================================================= */
 
 // Função para mapear todos os produtos do cardápio em um formato simples para a busca
@@ -1268,13 +1268,9 @@ document.addEventListener("DOMContentLoaded", () => {
     const cookieBanner = document.getElementById("cookie-banner"); const cookieAcceptBtn = document.getElementById("cookie-accept");  
     if (cookieBanner && cookieAcceptBtn) { if (localStorage.getItem("dfl-cookies-accepted") === "true") cookieBanner.style.display = "none"; else cookieBanner.classList.add("show"); cookieAcceptBtn.addEventListener("click", () => { localStorage.setItem("dfl-cookies-accepted", "true"); cookieBanner.classList.remove("show"); }); }
 
-    console.log("%c🚀 DFL v5.5.1 — Busca + Grade Promoções (Estável)", "background:#4CAF50;color:#fff;padding:5px;border-radius:5px;");  
+    console.log("%c🚀 DFL v5.5.2 — Correção Crítica Estabilidade", "background:#4CAF50;color:#fff;padding:5px;border-radius:5px;");  
     inicializarFirebase();  
 
 }); // FIM DO DOMContentLoaded
 
-/* FECHAR MODAIS GLOBAL */  
-document.addEventListener('DOMContentLoaded', () => {  
-    document.querySelectorAll('.modal').forEach(m => m.addEventListener('click', e => { if (e.target.classList.contains('modal')) { m.classList.remove('show'); document.getElementById('cart-backdrop').classList.remove('active'); } }));  
-    document.getElementById('cart-backdrop')?.addEventListener('click', () => { document.querySelectorAll('.active').forEach(e => e.classList.remove('active')); });  
-});
+/* O BLOCO DE FECHAR MODAIS GLOBAL (DUPLICADO) FOI REMOVIDO DAQUI */
