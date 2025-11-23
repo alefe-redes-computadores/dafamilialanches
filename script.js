@@ -1,33 +1,31 @@
 /* =========================================================  
-   🚀 DFL v6.5 MASTER — CÓDIGO COMPLETO (SEM SIMPLIFICAÇÕES)
-   - Busca Inteligente (Levenshtein)
-   - Visual Premium (CSS Injetado)
-   - Lógica de Recompensas Completa (Todos os Níveis)
-   - Admin Completo (Gráficos)
+   🚀 DFL v7.0 MASTER — CÓDIGO COMPLETO (SEM CORTES)
+   - Parte 1: Configurações, Estilos, Busca e Máscaras
 ========================================================= */  
 
 document.addEventListener("DOMContentLoaded", () => {
 
     // ============================================================
-    // 0. INJETOR DE ESTILO (GARANTE O VISUAL PREMIUM)
+    // 0. INJEÇÃO DE CSS AVANÇADO (PARA GARANTIR VISUAL)
     // ============================================================
     const style = document.createElement('style');
     style.innerHTML = `
-        /* Grade de Promoções */
+        /* --- Grade de Promoções --- */
         #promocoes-area {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(165px, 1fr));
             gap: 15px;
             padding: 5px 10px;
         }
-        /* Card Premium */
+        /* --- Card Premium --- */
         .promo-card-styled {
             display: flex; flex-direction: column;
             background: #fff; border-radius: 16px; overflow: hidden;
             box-shadow: 0 4px 12px rgba(0,0,0,0.1); border: 1px solid #eee;
             height: 100%; position: relative; transition: transform 0.2s;
         }
-        .promo-card-styled:hover { transform: translateY(-3px); }
+        .promo-card-styled:hover { transform: translateY(-3px); box-shadow: 0 8px 20px rgba(0,0,0,0.15); }
+        
         .promo-card-styled img {
             width: 100%; height: 150px; object-fit: cover;
             border-bottom: 4px solid #ffca28;
@@ -49,22 +47,64 @@ document.addEventListener("DOMContentLoaded", () => {
         .promo-prices { margin-bottom: 10px; }
         .promo-old { text-decoration: line-through; color: #999; font-size: 0.85rem; display: block; }
         .promo-new { color: #2e7d32; font-weight: 800; font-size: 1.4rem; }
+        
+        /* --- Botão Verde Largo --- */
         .btn-add-green {
             background: linear-gradient(180deg, #66bb6a 0%, #43a047 100%);
-            color: white; border: none; padding: 10px; border-radius: 8px; 
-            font-weight: 700; font-size: 1rem; width: 100%; cursor: pointer;
-            box-shadow: 0 4px 0 #2e7d32; transition: transform 0.1s; text-transform: uppercase;
+            color: white; border: none; 
+            padding: 12px; border-radius: 8px; font-weight: 700; 
+            font-size: 1rem; width: 100%; cursor: pointer;
+            box-shadow: 0 4px 0 #2e7d32; 
+            transition: transform 0.1s, box-shadow 0.1s;
+            text-transform: uppercase;
         }
         .btn-add-green:active { transform: translateY(4px); box-shadow: 0 0 0 #2e7d32; }
-        /* Ajuste Busca */
+        
+        /* --- Inputs e Admin --- */
         #search-input::placeholder { color: #888; font-style: italic; }
-        /* Ajuste Ícones Recompensa */
-        .tier-icon { font-size: 1.5rem; margin-right: 10px; }
+        .admin-stat-card { background: #fff; padding: 20px; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); border: 1px solid #eee; text-align: center; flex: 1; }
+        .admin-stat-title { font-size: 0.9rem; color: #666; margin-bottom: 5px; font-weight: 600; text-transform: uppercase; }
+        .admin-stat-value { font-size: 1.8rem; font-weight: 800; color: #333; }
     `;
     document.head.appendChild(style);
 
     // ============================================================
-    // 1. BUSCA INTELIGENTE (ALGORITMO LEVENSHTEIN)
+    // 1. VARIÁVEIS E UTILITÁRIOS
+    // ============================================================
+    const sound = new Audio("click.wav");   
+    let cart = [];  
+    let currentUser = null;  
+    let isFirebaseInitialized = false;   
+    
+    // Configurações de Negócio
+    const DELIVERY_FEE_DEFAULT = 6.00;
+    const LIMITE_FRETE_GRATIS = 80.00; 
+    let deliveryFeesCache = null;   
+
+    // Formatador de Moeda
+    const money = (n) => `R$ ${Number(n || 0).toFixed(2).replace(".", ",")}`;  
+    
+    // Função de Segurança para Eventos
+    const safe = (fn) => (...a) => { try { fn(...a); } catch (e) { console.error("Erro capturado:", e); } };  
+
+    // Ícones de Nível
+    function getTierIcon(tier) {  
+        const level = tier ? String(tier).toLowerCase().trim() : '';  
+        if (level.includes('ouro')) return '🥇';  
+        if (level.includes('platina')) return '💎';  
+        if (level.includes('diamante')) return '👑';  
+        if (level.includes('safira')) return '💠';       
+        if (level.includes('rubi')) return '♦️';         
+        if (level.includes('esmeralda')) return '❇️';   
+        if (level.includes('elite')) return '⚔️';        
+        if (level.includes('supremo')) return '🚀';      
+        if (level.includes('lenda')) return '🦁';        
+        if (level.includes('mítico') || level.includes('mitico')) return '🦄';  
+        return '👤';   
+    }
+
+    // ============================================================
+    // 2. BUSCA INTELIGENTE (ALGORITMO LEVENSHTEIN)
     // ============================================================
     const levenshtein = (a, b) => {
         if(!a || !b) return (a || b).length;
@@ -85,24 +125,36 @@ document.addEventListener("DOMContentLoaded", () => {
         searchInput.placeholder = "🔍 O que você está procurando? (Ex: TremBão, Peleja)";
         searchInput.addEventListener("input", (e) => {
             const termo = e.target.value.toLowerCase().trim();
+            // Seleciona TODOS os cards (promoção e normais)
             const cards = document.querySelectorAll(".card, .promo-card-styled"); 
             
             cards.forEach(card => {
+                // Tenta pegar o nome de várias fontes para garantir
                 let nome = card.getAttribute("data-name")?.toLowerCase() || "";
-                if(!nome) nome = card.querySelector("h3")?.innerText.toLowerCase() || ""; // Fallback
+                if(!nome) nome = card.querySelector("h3")?.innerText.toLowerCase() || "";
+                if(!nome) nome = card.querySelector(".promo-title")?.innerText.toLowerCase() || "";
 
-                if (!termo) { card.style.display = "flex"; return; }
+                if (!termo) { 
+                    card.style.display = "flex"; 
+                    return; 
+                }
                 
                 const contem = nome.includes(termo);
+                // Permite até 2 erros de digitação para palavras maiores
                 const erroAceitavel = termo.length > 3 && levenshtein(nome, termo) <= 2;
 
-                if (contem || erroAceitavel) card.style.display = "flex"; 
-                else card.style.display = "none";
+                if (contem || erroAceitavel) {
+                    card.style.display = "flex"; 
+                } else {
+                    card.style.display = "none";
+                }
             });
         });
     }
 
-    // MÁSCARA AUTOMÁTICA DO CEP
+    // ============================================================
+    // 3. MÁSCARAS DE INPUT (CEP, CELULAR, ETC)
+    // ============================================================
     const cepInputMask = document.getElementById("cep-input");
     if (cepInputMask) {
         cepInputMask.addEventListener("input", function(e) {
@@ -111,35 +163,13 @@ document.addEventListener("DOMContentLoaded", () => {
             e.target.value = v;
         });
     }
-
-    /* ------------------ ⚙️ VARIÁVEIS GLOBAIS ------------------ */  
-    const sound = new Audio("click.wav");   
-    let cart = [];  
-    let currentUser = null;  
-    let isFirebaseInitialized = false;   
-    const DELIVERY_FEE_DEFAULT = 6.00;
-    const LIMITE_FRETE_GRATIS = 80.00; 
-    let deliveryFeesCache = null;   
-    const money = (n) => `R$ ${Number(n || 0).toFixed(2).replace(".", ",")}`;  
-    const safe = (fn) => (...a) => { try { fn(...a); } catch (e) { console.error(e); } };  
-
-    // --- FUNÇÃO DE ÍCONES COMPLETA (TODOS OS NÍVEIS) ---
-    function getTierIcon(tier) {  
-        const level = tier ? String(tier).toLowerCase().trim() : '';  
-        if (level.includes('ouro')) return '🥇';  
-        if (level.includes('platina')) return '💎';  
-        if (level.includes('diamante')) return '👑';  
-        if (level.includes('safira')) return '💠';       
-        if (level.includes('rubi')) return '♦️';         
-        if (level.includes('esmeralda')) return '❇️';   
-        if (level.includes('elite')) return '⚔️';        
-        if (level.includes('supremo')) return '🚀';      
-        if (level.includes('lenda')) return '🦁';        
-        if (level.includes('mítico') || level.includes('mitico')) return '🦄';  
-        return '👤';   
+    
+    // Máscara genérica para números (pode ser usada futuramente)
+    function mascaraNumero(val) {
+        return val.replace(/\D/g, "");
     }
 
-    /* --- DADOS DAS PROMOÇÕES (COMPLETOS) --- */
+    /* ------------------ DADOS DAS PROMOÇÕES (COMPLETOS) ------------------ */
     const PROMO_DATA = [  
         null,   
         { id: 1, nome: "Dupla Purizin + Fanta", desc: "2 Hot Dogs 'Purizin' com purê cremoso, milho e batata + 1 Fanta Laranja Geladinha!", preco: 34.99, precoAntigo: 40.00, img: "promocoes/promo1.jpg" },  
@@ -152,8 +182,14 @@ document.addEventListener("DOMContentLoaded", () => {
         { id: 8, nome: "Combo 4 Armaria", desc: "4 Sanduíches Armaria (Hambúrguer + Frango + Tudo) com bastante recheio.", preco: 59.99, precoAntigo: 72.00, img: "promocoes/promo8.jpg" },  
         { id: 9, nome: "Combo 5 Uai + Kuat 2L", desc: "A festa completa com 5 lanches Uai e um refrigerante tamanho família.", preco: 64.99, precoAntigo: 79.99, img: "promocoes/promo9.jpg" }  
     ];
+/* =========================================================  
+   🚀 DFL v7.0 MASTER — PARTE 2
+   - Elementos DOM, Renderização da Grade
+   - Sistema de Modais Robusto
+   - Carrinho, Combos e Extras
+========================================================= */  
 
-    /* ------------------ 🎯 ELEMENTOS DO DOM ------------------ */  
+    // --- SELETORES DOM (CACHE) ---
     const el = {  
         cartIcon: document.getElementById("cart-icon"),  
         cartCount: document.getElementById("cart-count"),  
@@ -197,9 +233,12 @@ document.addEventListener("DOMContentLoaded", () => {
         progressFill: document.getElementById("progressFill")
     };
 
-    /* --- 2. RENDERIZAR PROMOÇÕES EM GRADE (VISUAL CORRIGIDO) --- */
+    // ============================================================
+    // 4. RENDERIZAR PROMOÇÕES EM GRADE (VISUAL PREMIUM)
+    // ============================================================
     function renderPromocoesGrid() {
         if (!el.promocoesGrid) return;
+        
         el.promocoesGrid.innerHTML = PROMO_DATA.map(p => {
             if(!p) return '';
             return `
@@ -217,10 +256,13 @@ document.addEventListener("DOMContentLoaded", () => {
             </div>`;
         }).join('');
     }
+    // Expõe a função para o HTML
     window.addToCart = (nome, preco) => addCommonItem(nome, preco);
     renderPromocoesGrid();
 
-    /* --- 3. MODAIS E FECHAMENTO ROBUSTO --- */
+    // ============================================================
+    // 5. SISTEMA DE MODAIS (FECHAMENTO GLOBAL)
+    // ============================================================
     if (!el.cartBackdrop) {
         const bd = document.createElement("div"); bd.id = "cart-backdrop";
         document.body.appendChild(bd); el.cartBackdrop = bd;
@@ -233,30 +275,35 @@ document.addEventListener("DOMContentLoaded", () => {
             el.cartBackdrop.classList.remove("active");
             document.body.classList.remove("no-scroll");
         },
-        open(modal) {
+        open(modalLike) {
             Overlays.closeAll();
-            if(!modal) return;
-            if(modal.id === "mini-cart" || modal.id.includes("panel")) modal.classList.add("active");
-            else modal.classList.add("show");
+            if(!modalLike) return;
+            const isPanel = (modalLike.id === "mini-cart" || modalLike.id === "painelPedidos" || modalLike.id === "recompensas-panel");
+            modalLike.classList.add(isPanel ? "active" : "show");
             el.cartBackdrop.classList.add("active");
             document.body.classList.add("no-scroll");
         }
     };
 
-    el.cartBackdrop.addEventListener("click", Overlays.closeAll);
-    
-    document.querySelectorAll('.modal').forEach(m => {
-        m.addEventListener('click', (e) => { if(e.target === m) Overlays.closeAll(); });
-    });
+    // Fechar ao clicar no fundo escuro
+    el.cartBackdrop.addEventListener("click", () => Overlays.closeAll());
 
+    // Fechar ao clicar em qualquer elemento com classe de fechar (Delegação de Eventos)
     document.addEventListener('click', (e) => {
-        if(e.target.matches('.fechar-pedidos, .fechar-recompensas, .extras-close, .combo-close, .login-close, .promo-close, .dashboard-close')) {
+        if (e.target.matches('.fechar-pedidos, .fechar-recompensas, .extras-close, .combo-close, .login-close, .promo-close, .dashboard-close')) {
+            Overlays.closeAll();
+        }
+        // Fecha se clicar fora do conteúdo do modal (na área escura interna)
+        if (e.target.classList.contains('modal')) {
             Overlays.closeAll();
         }
     });
-    /* --- 4. CARRINHO, COMBOS E EXTRAS --- */
+
+    // ============================================================
+    // 6. LÓGICA DE CARRINHO E PRODUTOS
+    // ============================================================
     
-    // --- LÓGICA DE COMBOS COMPLETA (TODAS AS BEBIDAS) ---
+    // --- COMBOS: LISTA COMPLETA ---
     const comboDrinkOptions = {
         casal: [
             { rotulo: "Fanta 1L (padrão)", delta: 0.01 },
@@ -273,12 +320,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function addCommonItem(nome, preco) {
         const low = (nome||"").toLowerCase();
-        // Verifica se é combo
+        // Detector de Combo
         if (/^combo/i.test(low) && !/^\s*Combo [0-9]/.test(nome)) { 
              const grupo = low.includes("casal") ? "casal" : (low.includes("família") || low.includes("familia")) ? "familia" : null;
              
              if (grupo && comboDrinkOptions[grupo]) {
-                 // Gera o HTML do modal com todas as opções
                  el.comboBody.innerHTML = comboDrinkOptions[grupo].map((o,i)=> 
                     `<label style="display:flex;justify-content:space-between;align-items:center;padding:12px;border:1px solid #ddd;margin-bottom:5px;border-radius:8px;background:#fff;cursor:pointer;">
                         <div><span style="font-weight:bold">${o.rotulo}</span> <span style="color:#d32f2f;font-size:0.9rem;">(+${money(o.delta)})</span></div>
@@ -287,9 +333,8 @@ document.addEventListener("DOMContentLoaded", () => {
                  ).join("");
                  _comboCtx = { nome, preco, grupo };
                  
-                 // Re-associa o evento do botão confirmar
+                 // Cria novo botão para remover listeners antigos
                  const btn = document.getElementById("combo-confirm");
-                 // Clone para limpar eventos anteriores
                  const newBtn = btn.cloneNode(true);
                  btn.parentNode.replaceChild(newBtn, btn);
                  
@@ -305,29 +350,32 @@ document.addEventListener("DOMContentLoaded", () => {
                  return;
              }
         }
-        // Item normal
+        // Item Normal
         const found = cart.find((i) => i.nome === nome && i.preco === preco);
         if(found) found.qtd++; else cart.push({nome, preco, qtd:1});
         renderMiniCart(); popupAdd(`${nome} adicionado!`);
     }
 
-    // Botões adicionar na página
+    // Listeners para botões estáticos
     document.querySelectorAll(".add-cart").forEach(btn => btn.addEventListener("click", e => {
         const c = e.currentTarget.closest(".card");
         if(c) addCommonItem(c.dataset.name, parseFloat(c.dataset.price));
     }));
 
-    // Extras Logic
-    const extras = [ {n:"Cebola",p:0.99}, {n:"Salada",p:1.99}, {n:"Ovo",p:1.99}, {n:"Bacon",p:2.99}, {n:"Hambúrguer",p:2.99}, {n:"Cheddar",p:3.99}, {n:"Filé de Frango",p:5.99} ];
+    // Extras
+    const extras = [ 
+        {n:"Cebola",p:0.99}, {n:"Salada",p:1.99}, {n:"Ovo",p:1.99}, 
+        {n:"Bacon",p:2.99}, {n:"Hambúrguer",p:2.99}, {n:"Cheddar",p:3.99}, {n:"Filé de Frango",p:5.99} 
+    ];
     document.querySelectorAll(".extras-btn").forEach(btn => btn.addEventListener("click", e => {
         const c = e.currentTarget.closest(".card");
         const nome = c.dataset.name;
         const base = parseFloat(c.dataset.price);
         
         el.extrasList.innerHTML = extras.map((ex,i)=> `
-            <label style="display:flex;justify-content:space-between;padding:10px;border-bottom:1px solid #eee;cursor:pointer;">
-                <span>${ex.n} (+${money(ex.p)})</span>
-                <input type="checkbox" value="${i}">
+            <label style="display:flex;justify-content:space-between;padding:12px;border-bottom:1px solid #eee;cursor:pointer;align-items:center;">
+                <span style="font-weight:500;">${ex.n} <b style="color:#d32f2f;">(+${money(ex.p)})</b></span>
+                <input type="checkbox" value="${i}" style="transform:scale(1.3);">
             </label>`).join("");
             
         const btnConf = document.getElementById("extras-confirm");
@@ -344,37 +392,47 @@ document.addEventListener("DOMContentLoaded", () => {
         };
         Overlays.open(el.extrasModal);
     }));
+/* =========================================================  
+   🚀 DFL v7.0 MASTER — PARTE 3
+   - Renderização do Carrinho e Cálculos
+   - Endereço (Manual/CEP) e Frete
+   - Lógica de Pedidos e Recompensas
+========================================================= */  
 
-    /* --- 5. RENDER CARRINHO E TOTAIS --- */
+    /* --- 7. RENDERIZAÇÃO DO CARRINHO --- */
     function renderMiniCart() {
         if (!el.miniList) return;
         const totalItens = cart.reduce((s, i) => s + i.qtd, 0);
         if (el.cartCount) el.cartCount.textContent = totalItens;
         
-        // Barra Progresso
+        // Barra de Progresso Frete Grátis
         const sub = cart.reduce((s, i) => s + (i.preco*i.qtd), 0);
         const falta = LIMITE_FRETE_GRATIS - sub;
         const pct = Math.min(100, (sub/LIMITE_FRETE_GRATIS)*100);
         if(el.progressFill) el.progressFill.style.width = `${pct}%`;
-        if(el.progressText) el.progressText.innerHTML = sub >= LIMITE_FRETE_GRATIS ? "🎉 <b>Frete Grátis Conquistado!</b>" : `Faltam <b>${money(falta)}</b> para frete grátis`;
+        if(el.progressText) {
+            el.progressText.innerHTML = sub >= LIMITE_FRETE_GRATIS 
+                ? "🎉 <b>Frete Grátis Conquistado!</b>" 
+                : `Faltam <b>${money(falta)}</b> para frete grátis`;
+        }
 
         if (!cart.length) {
-            el.miniList.innerHTML = '<p style="text-align:center;padding:20px;color:#999;">Carrinho vazio</p>';
+            el.miniList.innerHTML = '<p style="text-align:center;padding:30px;color:#999;font-size:1.1rem;">Seu carrinho está vazio 🛒</p>';
             if(el.miniFoot.querySelector(".cart-generated")) el.miniFoot.querySelector(".cart-generated").remove();
             return;
         }
 
         el.miniList.innerHTML = cart.map((item, idx) => `
-            <div style="display:flex; justify-content:space-between; align-items:center; padding:10px 0; border-bottom:1px solid #eee;">
-                <div style="flex:1">
-                    <div style="font-weight:bold; font-size:0.9rem;">${item.nome}</div>
-                    <div style="color:#666; font-size:0.8rem;">${money(item.preco)} x ${item.qtd}</div>
+            <div style="display:flex; justify-content:space-between; align-items:center; padding:12px 0; border-bottom:1px solid #f0f0f0;">
+                <div style="flex:1; padding-right:10px;">
+                    <div style="font-weight:700; font-size:0.95rem; color:#333;">${item.nome}</div>
+                    <div style="color:#666; font-size:0.85rem; margin-top:4px;">${money(item.preco)} x ${item.qtd}</div>
                 </div>
-                <div style="display:flex; gap:5px; align-items:center;">
-                    <button onclick="changeQtd(${idx},-1)" style="background:#ff4081;color:white;border:none;width:28px;height:28px;border-radius:4px;">-</button>
-                    <span style="font-weight:600;min-width:20px;text-align:center;">${item.qtd}</span>
-                    <button onclick="changeQtd(${idx},1)" style="background:#4caf50;color:white;border:none;width:28px;height:28px;border-radius:4px;">+</button>
-                    <button onclick="removeItem(${idx})" style="background:#d32f2f;color:white;border:none;width:28px;height:28px;border-radius:4px;">🗑</button>
+                <div style="display:flex; gap:8px; align-items:center;">
+                    <button onclick="window.changeQtd(${idx},-1)" style="background:#ff4081;color:white;border:none;width:30px;height:30px;border-radius:6px;font-weight:bold;cursor:pointer;">-</button>
+                    <span style="font-weight:600; font-size:1rem; min-width:20px; text-align:center;">${item.qtd}</span>
+                    <button onclick="window.changeQtd(${idx},1)" style="background:#4caf50;color:white;border:none;width:30px;height:30px;border-radius:6px;font-weight:bold;cursor:pointer;">+</button>
+                    <button onclick="window.removeItem(${idx})" style="background:#d32f2f;color:white;border:none;width:30px;height:30px;border-radius:6px;cursor:pointer;">🗑</button>
                 </div>
             </div>
         `).join("");
@@ -382,20 +440,23 @@ document.addEventListener("DOMContentLoaded", () => {
         updateCartTotals();
     }
     
+    // Funções Globais para o Carrinho
     window.changeQtd = (i, d) => { if(cart[i].qtd+d > 0) cart[i].qtd+=d; else cart.splice(i,1); renderMiniCart(); };
     window.removeItem = (i) => { cart.splice(i,1); renderMiniCart(); };
 
     async function updateCartTotals() {
         const sub = cart.reduce((s, i) => s + (i.preco*i.qtd), 0);
         let frete = DELIVERY_FEE_DEFAULT;
+        
+        // Verificação de Endereço para calcular frete
         const manual = document.getElementById("manualEndereco")?.value;
         const auto = document.getElementById("endereco-auto")?.value;
         const retirar = document.getElementById("retirar-local")?.checked;
         
         if (retirar || sub >= LIMITE_FRETE_GRATIS) frete = 0;
         else if (manual || auto) {
-             // Se tiver endereço preenchido, mantemos o cálculo padrão
-             // (Aqui entraria a lógica de bairros se o firebase estivesse populado)
+             // Aqui entraria a lógica de bairros se tivéssemos a lista completa.
+             // Mantém padrão se não for grátis
         }
 
         const foot = el.miniFoot;
@@ -404,25 +465,36 @@ document.addEventListener("DOMContentLoaded", () => {
         const div = document.createElement("div");
         div.className = "cart-generated";
         div.innerHTML = `
-            <div style="display:flex;justify-content:space-between;margin-top:10px;border-top:1px solid #eee;padding-top:10px;"><span>Subtotal:</span> <b>${money(sub)}</b></div>
-            <div style="display:flex;justify-content:space-between;"><span>Entrega:</span> <b>${frete===0?'Grátis':money(frete)}</b></div>
-            <div style="display:flex;justify-content:space-between;font-size:1.2rem;margin:10px 0;color:#d32f2f;"><span>Total:</span> <b>${money(sub+frete)}</b></div>
-            <button id="btn-finalizar" style="width:100%;background:#4caf50;color:white;padding:12px;border:none;border-radius:8px;font-weight:bold;font-size:1rem;">Finalizar Pedido via WhatsApp</button>
-            <button id="btn-limpar" style="width:100%;background:#ff4081;color:white;padding:10px;border:none;border-radius:8px;font-weight:bold;margin-top:5px;">Limpar Carrinho</button>
+            <div style="display:flex;justify-content:space-between;margin-top:15px;border-top:2px dashed #eee;padding-top:15px;font-size:0.95rem;">
+                <span>Subtotal:</span> <b>${money(sub)}</b>
+            </div>
+            <div style="display:flex;justify-content:space-between;margin-top:5px;font-size:0.95rem;">
+                <span>Entrega:</span> <b>${frete===0?'Grátis':money(frete)}</b>
+            </div>
+            <div style="display:flex;justify-content:space-between;font-size:1.3rem;margin:15px 0;color:#d32f2f;font-weight:800;">
+                <span>Total:</span> <b>${money(sub+frete)}</b>
+            </div>
+            <button id="btn-finalizar" style="width:100%;background:#4caf50;color:white;padding:14px;border:none;border-radius:10px;font-weight:bold;font-size:1.1rem;cursor:pointer;box-shadow:0 4px 10px rgba(76,175,80,0.3);">Finalizar Pedido via WhatsApp 🛍️</button>
+            <button id="btn-limpar" style="width:100%;background:transparent;color:#777;padding:10px;border:1px solid #ddd;border-radius:10px;font-weight:600;margin-top:10px;cursor:pointer;">Limpar Carrinho</button>
         `;
         foot.appendChild(div);
+        
         document.getElementById("btn-finalizar").onclick = finalizarPedido;
-        document.getElementById("btn-limpar").onclick = () => { if(confirm("Limpar carrinho?")) { cart=[]; renderMiniCart(); } };
+        document.getElementById("btn-limpar").onclick = () => { 
+            if(confirm("Tem certeza que deseja limpar o carrinho?")) { cart=[]; renderMiniCart(); } 
+        };
     }
 
-    /* --- 6. ENDEREÇO E FRETE (MANUAL/CEP) --- */
+    /* --- 8. ENDEREÇO (MANUAL/CEP) --- */
     let modoManual = false;
     document.getElementById("btnNaoSeiCEP")?.addEventListener("click", () => window.open("https://buscacepinter.correios.com.br/app/endereco/index.php"));
+    
     document.getElementById("btnManual")?.addEventListener("click", () => { 
         modoManual=true; 
         document.querySelector('.frete-container').style.display='none'; 
         el.manualArea.style.display='block'; 
     });
+    
     el.btnVoltarCEP?.addEventListener("click", () => { 
         modoManual=false; 
         document.querySelector('.frete-container').style.display='block'; 
@@ -431,89 +503,120 @@ document.addEventListener("DOMContentLoaded", () => {
 
     async function getDynamicDeliveryFee(end) {
         if (!end) return DELIVERY_FEE_DEFAULT;
-        // Lógica simulada que prepararia para usar taxas reais do Firebase
+        let bairro = ""; 
+        try { bairro = end.split("-")[1]?.split("(")[0]?.trim().toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "") || ""; } catch(_){}
         return DELIVERY_FEE_DEFAULT; 
     }
 
     el.btnConfirmarEndereco?.addEventListener("click", async () => {
-        if(!el.manualEndereco.value) return popupAdd("Preencha endereço!");
+        if(!el.manualEndereco.value) return popupAdd("Preencha o endereço!");
         const t = await getDynamicDeliveryFee(el.manualEndereco.value);
-        popupAdd(`Taxa: ${money(t)}`); renderMiniCart();
+        popupAdd(`Taxa de entrega: ${money(t)}`); 
+        renderMiniCart();
     });
     
     document.getElementById('btn-calcular-frete')?.addEventListener('click', () => {
         const c = document.getElementById('cep-input').value.replace(/\D/g,'');
-        if(c.length===8) fetch(`https://viacep.com.br/ws/${c}/json/`).then(r=>r.json()).then(d=>{ 
-            if(d.erro) throw new Error(); 
-            document.getElementById('endereco-auto').value = `${d.logradouro} - ${d.bairro}`; 
-            renderMiniCart(); 
-        }).catch(()=>popupAdd("CEP Erro"));
+        if(c.length===8) {
+            fetch(`https://viacep.com.br/ws/${c}/json/`)
+            .then(r=>r.json())
+            .then(d=>{ 
+                if(d.erro) throw new Error(); 
+                document.getElementById('endereco-auto').value = `${d.logradouro} - ${d.bairro}`; 
+                renderMiniCart(); 
+            })
+            .catch(()=>popupAdd("CEP não encontrado."));
+        } else {
+            popupAdd("CEP inválido (8 dígitos).");
+        }
     });
-    /* --- 7. FINALIZAR PEDIDO --- */
-    async function calcTotals() {  
-        const sub = cart.reduce((s, i) => s + (i.preco*i.qtd), 0);
-        let del = DELIVERY_FEE_DEFAULT;
-        const manual = document.getElementById("manualEndereco")?.value;
-        const auto = document.getElementById("endereco-auto")?.value;
-        if (document.getElementById("retirar-local")?.checked || sub >= LIMITE_FRETE_GRATIS) del = 0;
-        else if (manual || auto) del = await getDynamicDeliveryFee(manual || auto);
-        return { sub, del, total: sub+del };
-    }
 
+    /* --- 9. FINALIZAR PEDIDO --- */
     async function finalizarPedido() {
         if(!cart.length) return; 
-        if(!currentUser) { alert("Por favor, faça login para enviar o pedido!"); Overlays.open(el.loginModal); return; }
+        if(!currentUser) { alert("Por favor, faça login ou cadastre-se para enviar o pedido!"); Overlays.open(el.loginModal); return; }
         
         let endereco = "";
-        if(document.getElementById("retirar-local").checked) endereco = "RETIRADA NO LOCAL";
-        else {
+        if(document.getElementById("retirar-local").checked) {
+            endereco = "RETIRADA NO LOCAL";
+        } else {
             const man = document.getElementById("manualEndereco").value; 
             const num = document.getElementById("manualNumero").value;
             const auto = document.getElementById("endereco-auto").value; 
             const numAuto = document.getElementById("numero-input").value;
+            const comp = document.getElementById("complemento-input")?.value || "";
             
             if(modoManual && man && num) endereco = `${man}, Nº ${num} (Manual)`;
-            else if(!modoManual && auto && numAuto) endereco = `${auto}, Nº ${numAuto}`;
+            else if(!modoManual && auto && numAuto) endereco = `${auto}, Nº ${numAuto} ${comp ? '- '+comp : ''}`;
             else return alert("Por favor, preencha o endereço completo ou selecione 'Retirar no Local'.");
         }
         
-        const { total, del } = await calcTotals();
+        // Recalcula totais para segurança
+        const sub = cart.reduce((s, i) => s + (i.preco*i.qtd), 0);
+        let del = DELIVERY_FEE_DEFAULT;
+        if (document.getElementById("retirar-local").checked || sub >= LIMITE_FRETE_GRATIS) del = 0;
+        const total = sub + del;
+        
         const itensTxt = cart.map(i => `• ${i.qtd}x ${i.nome}`).join("\n");
         const msg = `🍔 *PEDIDO DFL*\n👤 Cliente: ${currentUser.displayName || currentUser.email}\n\n${itensTxt}\n\n🚚 Frete: ${money(del)}\n💰 *TOTAL: ${money(total)}*\n📍 ${endereco}`;
         
         try {
-            const batch = db.batch();
-            const ref = db.collection("Pedidos").doc();
-            batch.set(ref, { userId: currentUser.uid, usuario: currentUser.email, itens: itensTxt, total: total, data: new Date(), endereco });
-            batch.set(db.collection("Usuarios").doc(currentUser.uid), { pedidosFeitos: firebase.firestore.FieldValue.increment(1) }, {merge:true});
-            await batch.commit();
-        } catch(e) { console.error("Erro pedido", e); }
+            await db.collection("Pedidos").add({ 
+                userId: currentUser.uid, 
+                usuario: currentUser.email, 
+                itens: itensTxt, 
+                total: total, 
+                data: new Date(), 
+                endereco: endereco,
+                status: 'Novo'
+            });
+            // Incrementa fidelidade
+            db.collection("Usuarios").doc(currentUser.uid).set({ pedidosFeitos: firebase.firestore.FieldValue.increment(1) }, {merge:true});
+        } catch(e) { console.error("Erro ao salvar pedido no Firebase", e); }
         
-        window.open(`https://wa.me/5534997178336?text=${encodeURIComponent(msg)}`, "_blank");
-        cart=[]; renderMiniCart(); Overlays.closeAll();
+        const link = `https://wa.me/5534997178336?text=${encodeURIComponent(msg)}`;
+        window.open(link, "_blank");
+        
+        cart=[]; 
+        renderMiniCart(); 
+        Overlays.closeAll();
+        popupAdd("Pedido Enviado! ✅");
     }
+/* =========================================================  
+   🚀 DFL v7.0 MASTER — PARTE 4
+   - Histórico de Pedidos e Recompensas (Lista Completa)
+   - PAINEL ADMIN "MONSTRO" (Com Filtros e Gráficos)
+   - Status da Loja, Timer e Inicialização
+========================================================= */  
 
-    /* --- 8. MEUS PEDIDOS & RECOMPENSAS (COM TODOS OS NÍVEIS) --- */
+    /* --- 10. MEUS PEDIDOS E RECOMPENSAS --- */
+    // Botões sempre ativos (pedem login se necessário)
     el.pedidosBtn?.addEventListener("click", () => { 
         if(currentUser){ Overlays.open(el.pedidosPanel); carregarPedidos(); } 
         else { alert("Faça Login para ver seus pedidos!"); Overlays.open(el.loginModal); } 
     });
     
     async function carregarPedidos() {
-        el.pedidosLista.innerHTML = '<p style="text-align:center;padding:20px;">Carregando...</p>';
+        el.pedidosLista.innerHTML = '<p style="text-align:center;padding:20px;">Carregando histórico...</p>';
         try {
-            const s = await db.collection("Pedidos").where("userId","==",currentUser.uid).orderBy("data","desc").get();
+            const s = await db.collection("Pedidos").where("userId","==",currentUser.uid).orderBy("data","desc").limit(20).get();
             if(s.empty) { el.pedidosLista.innerHTML = '<p class="empty-orders">Nenhum pedido encontrado.</p>'; return; }
-            el.pedidosLista.innerHTML = s.docs.map(d => `
-                <div style="background:white;padding:12px;border-radius:8px;border:1px solid #ddd;margin-bottom:8px;box-shadow:0 1px 3px rgba(0,0,0,0.05);">
-                    <div style="display:flex;justify-content:space-between;margin-bottom:5px;">
-                        <b>${new Date(d.data().data.seconds*1000).toLocaleDateString()}</b>
-                        <span style="color:#2e7d32;font-weight:bold;">${money(d.data().total)}</span>
+            
+            el.pedidosLista.innerHTML = s.docs.map(d => {
+                const data = d.data();
+                const date = new Date(data.data.seconds*1000).toLocaleDateString();
+                const hora = new Date(data.data.seconds*1000).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+                return `
+                <div style="background:white;padding:15px;border-radius:10px;border:1px solid #eee;margin-bottom:10px;box-shadow:0 2px 5px rgba(0,0,0,0.05);">
+                    <div style="display:flex;justify-content:space-between;margin-bottom:8px;border-bottom:1px solid #f5f5f5;padding-bottom:5px;">
+                        <span style="font-weight:600;color:#555;">📅 ${date} às ${hora}</span>
+                        <span style="color:#2e7d32;font-weight:800;">${money(data.total)}</span>
                     </div>
-                    <small style="color:#666;display:block;line-height:1.4;">${d.data().itens.replace(/\n/g,", ")}</small>
-                </div>
-            `).join("");
-        } catch(e) { el.pedidosLista.innerHTML = '<p style="color:red">Erro ao carregar.</p>'; }
+                    <small style="color:#666;display:block;line-height:1.5;font-size:0.9rem;">${data.itens.replace(/\n/g,", ")}</small>
+                    <div style="margin-top:8px;font-size:0.8rem;color:#888;">📍 ${data.endereco.substring(0, 30)}...</div>
+                </div>`;
+            }).join("");
+        } catch(e) { el.pedidosLista.innerHTML = '<p style="color:red;text-align:center;">Erro ao carregar.</p>'; }
     }
 
     el.recompensasBtn?.addEventListener("click", () => { 
@@ -525,10 +628,10 @@ document.addEventListener("DOMContentLoaded", () => {
         const u = await db.collection("Usuarios").doc(currentUser.uid).get();
         const feitos = u.data()?.pedidosFeitos || 0;
         
-        // LISTA COMPLETA DE RECOMPENSAS (NÃO SIMPLIFICADA)
+        // LISTA COMPLETA DE RECOMPENSAS (TODOS OS NÍVEIS RESTAURADOS)
         const metas = [
-            {limite:5, tipo:'brinde', valor:'Coca Lata'},
-            {limite:10, tipo:'brinde', valor:'Burguer Simples'},
+            {limite:5, tipo:'brinde', valor:'Coca Lata 350ml'},
+            {limite:10, tipo:'brinde', valor:'Burguer Simples (Bão)'},
             {limite:15, tipo:'cupom', valor:'Nível OURO 🥇'},
             {limite:30, tipo:'cupom', valor:'Nível PLATINA 💎'},
             {limite:50, tipo:'cupom', valor:'Nível DIAMANTE 👑'},
@@ -541,29 +644,33 @@ document.addEventListener("DOMContentLoaded", () => {
             {limite:1000, tipo:'cupom', valor:'Nível MÍTICO 🦄'}
         ];
         
-        let html = `<div style="text-align:center;margin-bottom:15px;"><h3>Pedidos Feitos: ${feitos}</h3></div><div class="recompensa-lista">`;
+        let html = `<div style="text-align:center;margin-bottom:20px;background:#fff3e0;padding:15px;border-radius:10px;">
+            <h3 style="margin:0;color:#d84315;">Pedidos Feitos: ${feitos}</h3>
+            <small>Continue pedindo para subir de nível!</small>
+        </div><div class="recompensa-lista">`;
         
         html += metas.map(m => {
             const liberado = feitos >= m.limite;
             const icon = getTierIcon(m.valor); 
             const bg = liberado ? '#e8f5e9' : '#fff';
             const border = liberado ? '#4caf50' : '#eee';
+            const opacity = liberado ? '1' : '0.7';
             
             return `
-            <div style="background:${bg}; border:1px solid ${border}; padding:12px; border-radius:8px; margin-bottom:8px; display:flex; align-items:center;">
-                <div style="font-size:24px; margin-right:12px;">${icon}</div>
+            <div style="background:${bg}; border:1px solid ${border}; padding:15px; border-radius:12px; margin-bottom:10px; display:flex; align-items:center; opacity:${opacity}; transition:all 0.3s;">
+                <div style="font-size:28px; margin-right:15px;">${icon}</div>
                 <div style="flex:1;">
-                    <div style="font-weight:bold; color:${liberado ? '#2e7d32' : '#666'}">${m.valor}</div>
-                    <div style="font-size:0.85rem; color:#888;">Meta: ${m.limite} pedidos</div>
+                    <div style="font-weight:800; color:${liberado ? '#2e7d32' : '#444'}; font-size:1rem;">${m.valor}</div>
+                    <div style="font-size:0.85rem; color:#666;">Meta: <b>${m.limite}</b> pedidos</div>
                 </div>
-                <div style="font-size:1.2rem;">${liberado ? '✅' : '🔒'}</div>
+                <div style="font-size:1.4rem;">${liberado ? '✅' : '🔒'}</div>
             </div>`;
         }).join("");
         
         html += `</div>`;
         
         document.getElementById("contador-valor").innerText = feitos;
-        // Barra com limite móvel (mostra progresso até a próxima meta)
+        // Barra de progresso baseada no próximo nível
         const proximaMeta = metas.find(m => m.limite > feitos) || metas[metas.length-1];
         const pct = Math.min(100, (feitos / proximaMeta.limite) * 100);
         
@@ -572,7 +679,7 @@ document.addEventListener("DOMContentLoaded", () => {
         el.recompensasLista.innerHTML = html;
     }
 
-    /* --- 9. ADMIN COMPLETO (DASHBOARD + GRÁFICOS) --- */
+    /* --- 11. PAINEL ADMIN COMPLETO (COM CHART.JS) --- */
     const ADMINS = ["alefejohsefe@gmail.com", "kalebhstanley650@gmail.com", "contato@dafamilialanches.com.br"];
     function isAdmin(u) { return u && ADMINS.includes(u.email); }
     let chartP = null;
@@ -582,30 +689,55 @@ document.addEventListener("DOMContentLoaded", () => {
         const div = document.createElement("div"); 
         div.id = "admin-dashboard"; 
         div.className = "modal";
-        // Dashboard HTML Completo
+        
+        // HTML do Dashboard
         div.innerHTML = `
-        <div class="modal-content" style="max-width:900px;width:95%;max-height:90vh;overflow-y:auto;">
-            <div class="modal-head" style="background:#ffb300;padding:15px;display:flex;justify-content:space-between;align-items:center;">
+        <div class="modal-content" style="max-width:900px;width:95%;max-height:90vh;overflow-y:auto;background:#f8f9fa;">
+            <div class="modal-head" style="background:#ffb300;padding:15px 20px;display:flex;justify-content:space-between;align-items:center;color:#222;">
                 <h3 style="margin:0;">📊 Painel Administrativo</h3>
-                <button class="dashboard-close" style="background:transparent;border:none;font-size:20px;cursor:pointer;">✖</button>
+                <button class="dashboard-close" style="background:transparent;border:none;font-size:24px;cursor:pointer;color:#222;">&times;</button>
             </div>
             <div style="padding:20px;">
-                <div style="display:flex;gap:15px;margin-bottom:25px;flex-wrap:wrap;">
-                    <div id="card-fat" style="flex:1;min-width:140px;padding:20px;background:#e8f5e9;border-radius:12px;text-align:center;border:1px solid #c8e6c9;">
-                        <div style="font-size:0.9rem;color:#2e7d32;margin-bottom:5px;">FATURAMENTO (30d)</div>
-                        <div id="val-fat" style="font-size:1.5rem;font-weight:800;color:#1b5e20;">R$ 0,00</div>
+                <div style="margin-bottom:20px;display:flex;gap:10px;align-items:center;">
+                    <label style="font-weight:bold;">Período:</label>
+                    <select id="admin-filter" style="padding:8px;border-radius:6px;border:1px solid #ccc;">
+                        <option value="7">Últimos 7 dias</option>
+                        <option value="30">Últimos 30 dias</option>
+                        <option value="100">Últimos 100 pedidos</option>
+                    </select>
+                    <button id="admin-refresh" style="padding:8px 15px;background:#2196f3;color:white;border:none;border-radius:6px;cursor:pointer;">Atualizar</button>
+                </div>
+
+                <div style="display:flex;gap:15px;margin-bottom:30px;flex-wrap:wrap;">
+                    <div class="admin-stat-card">
+                        <div class="admin-stat-title">Faturamento Total</div>
+                        <div id="val-fat" class="admin-stat-value">R$ 0,00</div>
                     </div>
-                    <div id="card-ped" style="flex:1;min-width:140px;padding:20px;background:#e3f2fd;border-radius:12px;text-align:center;border:1px solid #bbdefb;">
-                        <div style="font-size:0.9rem;color:#1565c0;margin-bottom:5px;">PEDIDOS (30d)</div>
-                        <div id="val-ped" style="font-size:1.5rem;font-weight:800;color:#0d47a1;">0</div>
+                    <div class="admin-stat-card">
+                        <div class="admin-stat-title">Pedidos Realizados</div>
+                        <div id="val-ped" class="admin-stat-value">0</div>
+                    </div>
+                    <div class="admin-stat-card">
+                        <div class="admin-stat-title">Ticket Médio</div>
+                        <div id="val-med" class="admin-stat-value">R$ 0,00</div>
                     </div>
                 </div>
-                <h4 style="margin-bottom:10px;">Vendas por Dia (Últimos 10 dias com vendas)</h4>
-                <div style="height:300px;width:100%;"><canvas id="chart-vendas"></canvas></div>
+
+                <div style="background:#fff;padding:20px;border-radius:12px;box-shadow:0 2px 10px rgba(0,0,0,0.05);">
+                    <h4 style="margin:0 0 15px 0;color:#444;">Desempenho de Vendas</h4>
+                    <div style="height:300px;width:100%;"><canvas id="chart-vendas"></canvas></div>
+                </div>
+                
+                <div style="margin-top:20px;text-align:right;">
+                    <button onclick="alert('Função de exportar CSV em breve!')" style="background:#4caf50;color:white;border:none;padding:10px 20px;border-radius:8px;cursor:pointer;">Exportar Relatório</button>
+                </div>
             </div>
         </div>`;
         document.body.appendChild(div);
+        
         div.querySelector(".dashboard-close").onclick = Overlays.closeAll;
+        document.getElementById("admin-refresh").onclick = () => carregarRelatorios(document.getElementById("admin-filter").value);
+        document.getElementById("admin-filter").onchange = (e) => carregarRelatorios(e.target.value);
     }
 
     function ensureChartJS(cb) { 
@@ -616,42 +748,58 @@ document.addEventListener("DOMContentLoaded", () => {
         document.head.appendChild(s); 
     }
 
-    async function carregarRelatorios() {
-        // Busca últimos 100 pedidos para gerar estatística
-        const snap = await db.collection("Pedidos").orderBy("data", "desc").limit(100).get();
-        const peds = snap.docs.map(d => d.data());
+    async function carregarRelatorios(limit = 50) {
+        const btn = document.getElementById("admin-refresh");
+        if(btn) btn.textContent = "Carregando...";
         
-        const total = peds.reduce((acc,p)=>acc+(p.total||0),0);
-        document.getElementById("val-fat").innerText = money(total);
-        document.getElementById("val-ped").innerText = peds.length;
-        
-        // Agrupa por dia
-        const porDia = {};
-        peds.forEach(p => {
-            const d = new Date(p.data.seconds*1000).toLocaleDateString();
-            porDia[d] = (porDia[d] || 0) + p.total;
-        });
-        
-        const labels = Object.keys(porDia).reverse().slice(-10); // Últimos 10 dias
-        const data = Object.values(porDia).reverse().slice(-10);
-        
-        const ctx = document.getElementById("chart-vendas").getContext("2d");
-        if(chartP) chartP.destroy();
-        
-        chartP = new Chart(ctx, {
-            type: 'bar',
-            data: { 
-                labels: labels, 
-                datasets: [{ 
-                    label: 'Vendas (R$)', 
-                    data: data, 
-                    backgroundColor: '#ffca28',
-                    borderColor: '#ff6f00',
-                    borderWidth: 1
-                }] 
-            },
-            options: { responsive: true, maintainAspectRatio: false }
-        });
+        try {
+            const snap = await db.collection("Pedidos").orderBy("data", "desc").limit(Number(limit)).get();
+            const peds = snap.docs.map(d => d.data());
+            
+            const total = peds.reduce((acc,p)=>acc+(p.total||0),0);
+            const qtd = peds.length;
+            const medio = qtd > 0 ? total / qtd : 0;
+
+            document.getElementById("val-fat").innerText = money(total);
+            document.getElementById("val-ped").innerText = qtd;
+            document.getElementById("val-med").innerText = money(medio);
+            
+            // Agrupamento por Data para o Gráfico
+            const porDia = {};
+            peds.forEach(p => {
+                const d = new Date(p.data.seconds*1000).toLocaleDateString('pt-BR', {day:'2-digit', month:'2-digit'});
+                porDia[d] = (porDia[d] || 0) + p.total;
+            });
+            
+            // Ordenar datas
+            const labels = Object.keys(porDia).reverse();
+            const data = Object.values(porDia).reverse();
+            
+            const ctx = document.getElementById("chart-vendas").getContext("2d");
+            if(chartP) chartP.destroy();
+            
+            chartP = new Chart(ctx, {
+                type: 'line',
+                data: { 
+                    labels: labels, 
+                    datasets: [{ 
+                        label: 'Faturamento (R$)', 
+                        data: data, 
+                        backgroundColor: 'rgba(255, 202, 40, 0.2)',
+                        borderColor: '#ffca28',
+                        borderWidth: 2,
+                        tension: 0.3,
+                        fill: true
+                    }] 
+                },
+                options: { 
+                    responsive: true, 
+                    maintainAspectRatio: false,
+                    scales: { y: { beginAtZero: true } }
+                }
+            });
+        } catch(e) { console.error("Erro admin:", e); }
+        if(btn) btn.textContent = "Atualizar";
     }
 
     function createAdminFab() {
@@ -659,12 +807,12 @@ document.addEventListener("DOMContentLoaded", () => {
             el.reportsBtn.style.display = "block"; 
             el.reportsBtn.onclick = () => { 
                 createDashboard(); 
-                ensureChartJS(() => { Overlays.open(document.getElementById("admin-dashboard")); carregarRelatorios(); });
+                ensureChartJS(() => { Overlays.open(document.getElementById("admin-dashboard")); carregarRelatorios(30); });
             }; 
         } 
     }
 
-    /* --- 10. INICIALIZAÇÃO E UTILITÁRIOS --- */
+    /* --- 12. INICIALIZAÇÃO E UTILITÁRIOS --- */
     function inicializarFirebase() {
         if (isFirebaseInitialized) return;
         try {
@@ -672,8 +820,11 @@ document.addEventListener("DOMContentLoaded", () => {
             auth.onAuthStateChanged(u => {
                 currentUser = u;
                 el.userBtn.innerText = u ? `Olá, ${u.displayName?.split(" ")[0]||"Cliente"}` : "Entrar / Cadastrar";
+                
+                // Ativa Admin se for o caso
                 if(u && isAdmin(u)) createAdminFab();
-                // Garante visibilidade dos botões
+                
+                // Garante visibilidade dos botões flutuantes
                 if(el.pedidosContainer) el.pedidosContainer.style.display = 'block';
                 if(el.recompensasContainer) el.recompensasContainer.style.display = 'block';
             });
@@ -687,11 +838,12 @@ document.addEventListener("DOMContentLoaded", () => {
     el.cartIcon.addEventListener("click", () => { renderMiniCart(); Overlays.open(el.miniCart); });
 
     // Timer e Status Loja
-    setInterval(() => { const h=new Date().getHours(); const ab=h>=18&&h<23; if(el.statusBanner){ el.statusBanner.textContent=ab?"🟢 Aberto":"🔴 Fechado"; el.statusBanner.className=`status-banner ${ab?'open':'closed'}`; }}, 60000);
+    setInterval(() => { const h=new Date().getHours(); const ab=h>=18&&h<23; if(el.statusBanner){ el.statusBanner.textContent=ab?"🟢 Aberto — Faça seu pedido!":"🔴 Fechado — Voltamos às 18h"; el.statusBanner.className=`status-banner ${ab?'open':'closed'}`; }}, 60000);
     function timer() { const d=document.getElementById("promo-timer"); if(d) { const t=new Date(); t.setHours(23,59,59); let df=t-new Date(); if(df<0)df=0; d.innerText=new Date(df).toISOString().substr(11,8); } } setInterval(timer,1000);
 
     function popupAdd(msg) { let pop=document.querySelector(".popup-add"); if(!pop){ pop=document.createElement("div"); pop.className="popup-add"; document.body.appendChild(pop); } pop.textContent=msg; pop.classList.add("show"); setTimeout(()=>pop.classList.remove("show"),2000); }
 
+    // Inicializa tudo
     inicializarFirebase();
-    console.log("DFL v6.5 MASTER FULL Carregado 🚀");
-});
+    console.log("DFL v7.0 MASTER FULL Carregado 🚀");
+}); // FIM DO DOMContentLoaded
