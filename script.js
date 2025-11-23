@@ -1,7 +1,7 @@
 /* =========================================================  
-   🌟 DFL v5.5.2 — CORREÇÃO CRÍTICA DE DOMContentLoaded
-   - Removido o segundo bloco DOMContentLoaded no final do arquivo.
+   🌟 DFL v5.5.3 — ESTRATÉGIA DE SEGURANÇA MÁXIMA (CHAMADAS FORA DO DOMContentLoaded)
    - Inclui as melhorias de busca e grade de promoções.
+   - Força a execução do Timer e Status mesmo que o bloco principal falhe.
 ========================================================= */
 
 // Função para mapear todos os produtos do cardápio em um formato simples para a busca
@@ -1017,77 +1017,7 @@ document.addEventListener("DOMContentLoaded", () => {
             return configuracoesRecompensa;  
         } catch (e) { console.error("Erro recompensas:", e); return []; }  
     }
-
-    /* ===========================================================
-       ⏳ TIMER DA PROMOÇÃO (AGORA INJETADO NA NOVA SEÇÃO)
-       =========================================================== */
     
-    // Função que calcula e formata o tempo restante
-    const getFormattedTime = (diff) => {
-        if (diff <= 0) return "00:00:00";
-        const h = String(Math.floor(diff / 3600000)).padStart(2, "0");
-        const m = String(Math.floor((diff % 3600000) / 60000)).padStart(2, "0");
-        const s = String(Math.floor((diff % 60000) / 1000)).padStart(2, "0");
-        return `${h}:${m}:${s}`;
-    };
-
-    const atualizarTimer = safe(() => {
-        const agora = new Date();
-        const fim = new Date();
-        // Zera o tempo todo dia à meia-noite (23:59:59.999)
-        fim.setHours(23, 59, 59, 999);
-        const diff = fim - agora;
-        
-        const elSecaoPromo = document.getElementById("secao-promocoes");
-        if (!elSecaoPromo) return;
-
-        // Se o contador ainda não foi criado, cria e insere
-        let elTimerWrapper = elSecaoPromo.querySelector(".contador-promo-wrapper");
-        
-        if (!elTimerWrapper) {
-            const elTitulo = elSecaoPromo.querySelector(".titulo-secao");
-            if (!elTitulo) return;
-            
-            elTimerWrapper = document.createElement("div");
-            elTimerWrapper.className = "contador-promo-wrapper";
-            elTimerWrapper.innerHTML = `
-                <span class="tempo-restante-label">⏳ Tempo restante:</span>
-                <span class="tempo-restante-valor" id="promo-timer-valor">${getFormattedTime(diff)}</span>
-            `;
-            const elSlogan = document.createElement("p");
-            elSlogan.className = "slogan-promo";
-            elSlogan.textContent = "Aproveite antes que o cronômetro zere à meia-noite!";
-
-            // Insere o contador e o slogan após o título <h2>
-            elTitulo.after(elSlogan);
-            elTitulo.after(elTimerWrapper);
-        } else {
-            // Se já existe, apenas atualiza o valor
-            const elValor = elTimerWrapper.querySelector("#promo-timer-valor");
-            if (elValor) elValor.textContent = getFormattedTime(diff);
-        }
-    });
-
-    // Inicia e repete o timer
-    atualizarTimer();
-    setInterval(atualizarTimer, 1000);
-
-    /* STATUS (Mantido) */  
-    const atualizarStatus = safe(() => {  
-        const agora = new Date(); const h = agora.getHours();  
-        const aberto = h >= 18 && h < 23;   
-        if (el.statusBanner) { el.statusBanner.textContent = aberto ? "🟢 Aberto — Faça seu pedido!" : "🔴 Fechado — Voltamos às 18h!"; el.statusBanner.className = `status-banner ${aberto ? "open" : "closed"}`; }  
-        if (el.hoursBanner) {  
-            const elMsg = el.hoursBanner.querySelector("#hours-message"); const elTimer = el.hoursBanner.querySelector("#timer");  
-            if (!elMsg || !elTimer) return;  
-            if (aberto) { const fim = new Date(agora); fim.setHours(23, 30, 0); let diff = (fim - agora) / 1000; if (diff < 0) diff = 0; const restH = Math.floor(diff / 3600); const restM = Math.floor((diff % 3600) / 60); elMsg.innerHTML = `⏰ Hoje atendemos até <b>23h30</b> — Faltam`; elTimer.textContent = `${restH}h ${restM}min`; }  
-            else { const inicio = new Date(agora); if (h >= 23) inicio.setDate(inicio.getDate() + 1); inicio.setHours(18, 0, 0); let diff = (inicio - agora) / 1000; const faltamH = Math.floor(diff / 3600); const faltamM = Math.floor((diff % 3600) / 60); elMsg.innerHTML = `🔒 Fechado — Abrimos em`; elTimer.textContent = `${faltamH}h ${faltamM}min`; }  
-        }  
-    });  
-    atualizarStatus(); setInterval(atualizarStatus, 60000);  
-    
-    // REMOVIDO: Antigo atualizarTimer que usava #promo-timer
-
     /* FECHAR PEDIDO (MANTIDO) */  
     async function fecharPedido() {  
         if (!cart.length) return alert("Carrinho vazio!");  
@@ -1268,9 +1198,76 @@ document.addEventListener("DOMContentLoaded", () => {
     const cookieBanner = document.getElementById("cookie-banner"); const cookieAcceptBtn = document.getElementById("cookie-accept");  
     if (cookieBanner && cookieAcceptBtn) { if (localStorage.getItem("dfl-cookies-accepted") === "true") cookieBanner.style.display = "none"; else cookieBanner.classList.add("show"); cookieAcceptBtn.addEventListener("click", () => { localStorage.setItem("dfl-cookies-accepted", "true"); cookieBanner.classList.remove("show"); }); }
 
-    console.log("%c🚀 DFL v5.5.2 — Correção Crítica Estabilidade", "background:#4CAF50;color:#fff;padding:5px;border-radius:5px;");  
+    console.log("%c🚀 DFL v5.5.3 — Correção Final Estabilidade", "background:#4CAF50;color:#fff;padding:5px;border-radius:5px;");  
     inicializarFirebase();  
 
 }); // FIM DO DOMContentLoaded
 
-/* O BLOCO DE FECHAR MODAIS GLOBAL (DUPLICADO) FOI REMOVIDO DAQUI */
+
+/* =========================================================
+   🚨 ESTRATÉGIA DE SEGURANÇA: EXECUTAR FUNÇÕES ESSENCIAIS FORA
+      DO BLOCO PRINCIPAL, CASO ELE TRAVE. (v5.5.3)
+   ========================================================= */
+
+// Função que calcula e formata o tempo restante (Duplicada para Garantia de Execução)
+const getFormattedTime = (diff) => {
+    if (diff <= 0) return "00:00:00";
+    const h = String(Math.floor(diff / 3600000)).padStart(2, "0");
+    const m = String(Math.floor((diff % 3600000) / 60000)).padStart(2, "0");
+    const s = String(Math.floor((diff % 60000) / 1000)).padStart(2, "0");
+    return `${h}:${m}:${s}`;
+};
+
+const atualizarTimer = safe(() => {
+    const agora = new Date();
+    const fim = new Date();
+    fim.setHours(23, 59, 59, 999);
+    const diff = fim - agora;
+    
+    const elSecaoPromo = document.getElementById("secao-promocoes");
+    if (!elSecaoPromo) return;
+
+    let elTimerWrapper = elSecaoPromo.querySelector(".contador-promo-wrapper");
+    
+    if (!elTimerWrapper) {
+        const elTitulo = elSecaoPromo.querySelector(".titulo-secao");
+        if (!elTitulo) return;
+        
+        elTimerWrapper = document.createElement("div");
+        elTimerWrapper.className = "contador-promo-wrapper";
+        elTimerWrapper.innerHTML = `
+            <span class="tempo-restante-label">⏳ Tempo restante:</span>
+            <span class="tempo-restante-valor" id="promo-timer-valor">${getFormattedTime(diff)}</span>
+        `;
+        const elSlogan = document.createElement("p");
+        elSlogan.className = "slogan-promo";
+        elSlogan.textContent = "Aproveite antes que o cronômetro zere à meia-noite!";
+
+        elTitulo.after(elSlogan);
+        elTitulo.after(elTimerWrapper);
+    } else {
+        const elValor = elTimerWrapper.querySelector("#promo-timer-valor");
+        if (elValor) elValor.textContent = getFormattedTime(diff);
+    }
+});
+
+const atualizarStatus = safe(() => {  
+    const agora = new Date(); const h = agora.getHours();  
+    const aberto = h >= 18 && h < 23;   
+    const elStatus = document.getElementById("status-banner");
+    if (elStatus) { 
+        elStatus.textContent = aberto ? "🟢 Aberto — Faça seu pedido!" : "🔴 Fechado — Voltamos às 18h!"; 
+        elStatus.className = `status-banner ${aberto ? "open" : "closed"}`; 
+    }
+}); 
+
+// 🎯 EXECUÇÃO FORÇADA
+atualizarStatus(); 
+setInterval(atualizarStatus, 60000); 
+
+document.addEventListener('DOMContentLoaded', () => {
+    // Estas chamadas serão repetidas no bloco principal, mas garantimos
+    // que elas rodem imediatamente se o DOM já estiver pronto.
+    atualizarTimer();
+    setInterval(atualizarTimer, 1000);
+});
