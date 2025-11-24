@@ -1,171 +1,150 @@
 /* ===========================================================
-   🎨 DFL CSS v6.0 (INTEGRAL)
-   - Base: v5.6
-   - Addons: Search, Promo Grid, Progress Bar
+   🎨 DFL CSS v9.1 (VISUAL RESTAURADO + ALINHAMENTO)
    =========================================================== */
 
-/* ======== VARIÁVEIS E BASE ======== */
 :root {
-  --preto: #000;
-  --bg1: #f8f9fa;
-  --bg2: #e9ecef;
+  --bg-body: #f4f4f4;
+  --card-bg: #ffffff;
   --acento: #ffca28; /* Amarelo DFL */
   --botao: #ffb300;
-  --danger: #d32f2f;
   --success: #4caf50;
-  --txt: #222;
-  --rad: 10px;
-  --shadow-1: 0 2px 5px rgba(0, 0, 0, 0.15);
+  --danger: #d32f2f;
+  --txt: #333;
+  --shadow: 0 4px 12px rgba(0,0,0,0.1);
 }
 
-html, body { margin: 0; padding: 0; font-family: "Poppins", sans-serif; background: #f4f4f4; color: var(--txt); scroll-behavior: smooth; }
-body { padding-bottom: 80px; }
+body { margin: 0; padding: 0; font-family: 'Poppins', sans-serif; background: var(--bg-body); color: var(--txt); padding-bottom: 80px; }
+* { box-sizing: border-box; }
 
-/* ======== HEADER ======== */
-.header {
-  position: fixed; top: 0; left: 0; right: 0; z-index: 900;
-  background: var(--acento); padding: 10px 15px;
-  box-shadow: var(--shadow-1); display: flex; justify-content: space-between; align-items: center;
-}
+/* --- HEADER --- */
+.header { position: fixed; top: 0; left: 0; right: 0; background: var(--acento); padding: 10px 15px; z-index: 1000; box-shadow: 0 2px 5px rgba(0,0,0,0.15); display: flex; justify-content: space-between; align-items: center; }
 .header-content { display: flex; align-items: center; gap: 10px; }
-.logo { width: 52px; height: 52px; border-radius: 50%; }
-.header-info h1 { margin: 0; font-size: 1.1rem; font-weight: 700; }
-.tagline { margin: 0; font-size: 0.8rem; color: #d84315; }
+.logo { width: 48px; height: 48px; border-radius: 50%; }
+.header-info h1 { margin: 0; font-size: 1rem; font-weight: 700; }
+.tagline { margin: 0; font-size: 0.75rem; }
 .header-actions { display: flex; gap: 8px; }
-.user-button, .cart-button {
-  background: #fff; border: none; border-radius: 20px; padding: 8px 12px;
-  font-weight: 600; font-size: 0.85rem; cursor: pointer; box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-}
-.cart-button { background: #222; color: #ffca28; font-weight: 700; }
+.user-button, .cart-button { border: none; background: #fff; padding: 8px 12px; border-radius: 20px; font-weight: 600; font-size: 0.8rem; cursor: pointer; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+.cart-button { background: #222; color: var(--acento); }
 
 .main-content-wrapper { margin-top: 75px; padding: 10px; max-width: 1100px; margin-left: auto; margin-right: auto; }
 
-/* ======== BANNER STATUS ======== */
-.status-banner {
-  text-align: center; padding: 10px; margin-bottom: 15px; border-radius: 8px;
-  font-weight: bold; color: #fff; font-size: 0.95rem;
-}
-.status-banner.open { background: var(--success); }
-.status-banner.closed { background: var(--danger); }
+/* --- BUSCA & STATUS --- */
+.status-banner { text-align: center; padding: 8px; border-radius: 8px; color: #fff; font-weight: bold; margin-bottom: 15px; font-size: 0.9rem; }
+.status-banner.open { background: var(--success); } .status-banner.closed { background: var(--danger); }
+.search-container input { transition: border 0.3s; }
+.search-container input:focus { border-color: var(--botao) !important; box-shadow: 0 0 0 3px rgba(255, 202, 40, 0.3); }
 
-/* ======== BARRA DE BUSCA (v6.0) ======== */
-#search-input:focus { border-color: var(--botao); box-shadow: 0 0 0 2px rgba(255, 179, 0, 0.2); }
-
-/* ======== SEÇÕES E GRID ======== */
+/* --- GRID & CARDS (CORREÇÃO DE ALINHAMENTO) --- */
 section { margin-bottom: 30px; }
-section h2 { font-size: 1.3rem; color: #d84315; margin-bottom: 15px; border-left: 4px solid var(--acento); padding-left: 10px; }
-
+section h2 { font-size: 1.2rem; color: #d84315; border-left: 4px solid var(--acento); padding-left: 10px; margin-bottom: 15px; }
 .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 15px; }
 
-/* CARDS PADRÃO + PROMO STYLED */
+/* O segredo do alinhamento está aqui: */
 .card, .promo-card-styled {
-  background: #fff; border-radius: 12px; overflow: hidden;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.08); display: flex; flex-direction: column;
-  transition: transform 0.2s;
+    background: var(--card-bg);
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: var(--shadow);
+    display: flex;
+    flex-direction: column; /* Pilha vertical */
+    height: 100%; /* Força altura total da linha do grid */
+    transition: transform 0.2s;
 }
-.card:hover, .promo-card-styled:hover { transform: translateY(-3px); box-shadow: 0 5px 15px rgba(0,0,0,0.15); }
+.card:hover, .promo-card-styled:hover { transform: translateY(-3px); }
 
-/* Imagens */
-.card img, .promo-card-styled img { 
-    width: 100%; 
-    height: 140px; 
-    object-fit: cover; 
-    background: #eee; 
+.card img, .promo-card-styled img {
+    width: 100%;
+    height: 140px;
+    object-fit: cover;
+    background: #eee;
+    border-bottom: 3px solid var(--acento);
 }
 
-/* Conteúdo do Card */
-.card-content, .promo-body { padding: 12px; display: flex; flex-direction: column; flex: 1; }
-.card h3, .promo-title { margin: 0 0 5px; font-size: 0.95rem; color: #333; font-weight: 700; }
-.card p, .promo-ingredientes { font-size: 0.8rem; color: #666; margin-bottom: 8px; }
+.card-content, .promo-body {
+    padding: 12px;
+    display: flex;
+    flex-direction: column;
+    flex: 1; /* Ocupa todo o espaço restante */
+}
 
-/* Preços */
-.price, .promo-prices { margin: 5px 0; }
-.price, .promo-new { font-size: 1.1rem; color: var(--success); font-weight: 700; }
-.promo-old { text-decoration: line-through; color: #999; font-size: 0.85rem; margin-right: 5px; }
+.card h3, .promo-title { font-size: 0.95rem; margin: 0 0 5px 0; color: #333; font-weight: 700; }
+.card p, .promo-desc, .promo-ingredientes { font-size: 0.75rem; color: #666; margin-bottom: 10px; line-height: 1.3; }
 
-/* Botões e Ações */
-.actions, .promo-body { margin-top: auto; display: flex; gap: 5px; }
+/* Empurra o preço e botão para o final do card */
+.price, .promo-prices { margin-top: auto; margin-bottom: 8px; } 
+.price b, .promo-new { font-size: 1.1rem; color: var(--success); font-weight: 800; }
+.promo-old { text-decoration: line-through; color: #999; font-size: 0.8rem; margin-right: 5px; }
+
+.actions, .add-cart, .btn-add-green { width: 100%; }
 .add-cart, .btn-add-green {
-  background: var(--success); color: #fff; border: none; border-radius: 6px;
-  padding: 10px; width: 100%; font-weight: 700; cursor: pointer; text-transform: uppercase; font-size: 0.85rem;
+    background: linear-gradient(180deg, #4caf50, #388e3c);
+    color: #fff; border: none; padding: 10px; border-radius: 8px;
+    font-weight: 700; cursor: pointer; font-size: 0.9rem; text-transform: uppercase;
 }
-.extras-btn {
-  background: var(--acento); color: #000; border: none; border-radius: 6px;
-  padding: 10px; font-weight: 600; cursor: pointer; font-size: 0.85rem;
+.extras-btn { background: var(--acento); border: none; padding: 10px; border-radius: 8px; font-weight: 600; width: 100%; margin-left: 5px; cursor: pointer; }
+.actions { display: flex; gap: 5px; }
+
+/* --- MODAIS (VISUAL RESTAURADO v5.6) --- */
+.modal { position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 2000; display: none; align-items: center; justify-content: center; backdrop-filter: blur(2px); }
+.modal.show { display: flex; animation: fadeIn 0.2s ease-out; }
+.modal-content {
+    background: #fff;
+    width: 90%; max-width: 400px;
+    border-radius: 16px; /* Borda mais redonda */
+    overflow: hidden;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-/* ======== MINI CART ======== */
-#cart-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 998; display: none; }
-#cart-backdrop.active { display: block; }
-
-.mini-cart {
-  position: fixed; top: 0; right: -100%; width: 90%; max-width: 400px; height: 100vh;
-  background: #fff; z-index: 999; transition: right 0.3s ease;
-  display: flex; flex-direction: column; box-shadow: -5px 0 15px rgba(0,0,0,0.2);
+/* Cabeçalho Amarelo Bonito */
+.modal-head {
+    background: var(--acento);
+    padding: 15px 20px;
+    display: flex; justify-content: space-between; align-items: center;
+    font-weight: 700; font-size: 1.1rem; color: #222;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
 }
-.mini-cart.active { right: 0; }
+.modal-head button { background: rgba(255,255,255,0.3); border: none; width: 30px; height: 30px; border-radius: 50%; font-weight: bold; cursor: pointer; }
 
-.mini-head { padding: 15px; background: #eee; display: flex; justify-content: space-between; align-items: center; font-weight: bold; }
-.mini-list { flex: 1; overflow-y: auto; padding: 15px; }
-.mini-foot { padding: 15px; background: #f9f9f9; border-top: 1px solid #ddd; }
+/* Login & Conteúdo */
+.login-box { padding: 0; }
+.btn-google {
+    display: flex; align-items: center; justify-content: center; gap: 10px;
+    background: #fff; border: 1px solid #ddd; padding: 12px;
+    border-radius: 8px; width: 100%; font-weight: 600; color: #555;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05); margin-top: 10px;
+}
+.btn-primario, .btn-primary {
+    background: var(--success); color: #fff; border: none;
+    padding: 12px; border-radius: 8px; font-weight: 700; width: 100%; cursor: pointer;
+}
 
-/* ======== BARRA DE PROGRESSO (v6.0) ======== */
+/* --- MINI CART & PAINÉIS --- */
+.mini-cart, .pedidos-panel, .recompensas-panel {
+    position: fixed; top: 0; right: -100%; width: 85%; max-width: 400px; height: 100vh;
+    background: #fff; z-index: 2100; transition: right 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    display: flex; flex-direction: column; box-shadow: -5px 0 15px rgba(0,0,0,0.2);
+}
+.mini-cart.active, .pedidos-panel.active, .recompensas-panel.active { right: 0; }
+.mini-head, .pedidos-header, .recompensas-header {
+    background: var(--bg-body); padding: 15px; display: flex; justify-content: space-between; align-items: center; font-weight: bold; border-bottom: 1px solid #eee;
+}
+.mini-list, .pedidos-body, .recompensas-body { flex: 1; overflow-y: auto; padding: 15px; }
+.mini-foot { padding: 15px; border-top: 1px solid #eee; background: #fafafa; }
+
+/* Barra de Progresso */
 .progress-wrapper { background: #fff; padding: 10px; border: 1px solid #eee; border-radius: 8px; margin-bottom: 10px; text-align: center; }
-.progress-text { font-size: 0.85rem; margin-bottom: 5px; color: #555; }
-.progress-bar, .progress-bar-bg { height: 10px; background: #e0e0e0; border-radius: 5px; overflow: hidden; }
-.progress-fill { height: 100%; background: var(--success); width: 0%; transition: width 0.3s; }
+.progress-bar-bg { background: #e0e0e0; height: 8px; border-radius: 4px; overflow: hidden; margin-top: 5px; }
+.progress-fill { background: var(--success); height: 100%; width: 0%; transition: width 0.5s; }
 
-/* ======== FRETE & CUPOM ======== */
-.frete-container { margin-top: 10px; border: 1px solid #eee; padding: 10px; border-radius: 8px; background: #fff; }
-.frete-cep-group { display: flex; gap: 5px; margin-bottom: 5px; }
-#cep-input { flex: 1; padding: 8px; border: 1px solid #ccc; border-radius: 4px; }
-.btn-calcular-frete { background: #333; color: #fff; border: none; padding: 0 12px; border-radius: 4px; cursor: pointer; }
-.link-acao { background: none; border: none; color: #007bff; text-decoration: underline; font-size: 0.8rem; cursor: pointer; }
-.input-endereco-longo, #manualEndereco { width: 100%; box-sizing: border-box; padding: 8px; border: 1px solid #ddd; border-radius: 4px; margin: 5px 0; background: #f9f9f9; }
-.endereco-duplo { display: flex; gap: 5px; }
-.endereco-duplo input, #manualNumero { width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box; }
+/* Combo Modal */
+.combo-option-line { display: flex; justify-content: space-between; padding: 12px; border: 1px solid #eee; border-radius: 8px; margin-bottom: 8px; align-items: center; cursor: pointer; }
+.combo-option-line:hover { border-color: var(--acento); background: #fffcf5; }
 
-.coupon-form { display: flex; gap: 5px; margin-top: 10px; }
-.coupon-form input { flex: 1; padding: 10px; border: 1px solid #ccc; border-radius: 6px; text-transform: uppercase; }
-.coupon-form button { background: #333; color: #fff; border: none; padding: 0 15px; border-radius: 6px; cursor: pointer; }
-.coupon-message { font-size: 0.8rem; margin-top: 5px; }
-.coupon-message.success { color: var(--success); } .coupon-message.error { color: var(--danger); }
+/* Animações */
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+@keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
 
-/* ======== MODAIS ======== */
-.modal { position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 2000; display: none; justify-content: center; align-items: center; }
-.modal.show { display: flex; }
-.modal-content { background: #fff; width: 90%; max-width: 420px; border-radius: 12px; padding: 0; overflow: hidden; max-height: 90vh; overflow-y: auto; }
-.modal-head { padding: 15px; background: var(--acento); display: flex; justify-content: space-between; font-weight: bold; }
-.btn-primary { background: var(--success); color: #fff; border: none; padding: 12px; border-radius: 8px; font-weight: bold; cursor: pointer; }
-.btn-secondary { background: #ccc; color: #333; border: none; padding: 10px; border-radius: 8px; cursor: pointer; }
-.btn-google { background: #fff; border: 1px solid #ddd; width: 100%; padding: 10px; border-radius: 8px; font-weight: bold; cursor: pointer; }
-
-/* ======== PAINÉIS FLUTUANTES ======== */
-.meus-pedidos, .minhas-recompensas { position: fixed; bottom: 20px; right: 20px; z-index: 1500; }
-.minhas-recompensas { bottom: 80px; }
-.meus-pedidos-btn, .recompensas-btn {
-  background: var(--botao); color: #000; border: none; border-radius: 50px; padding: 12px 20px;
-  font-weight: bold; box-shadow: 0 4px 10px rgba(0,0,0,0.2); cursor: pointer;
-}
-.pedidos-panel, .recompensas-panel {
-  position: fixed; top: 0; right: -100%; width: 100%; max-width: 450px; height: 100vh;
-  background: #f9f9f9; z-index: 1600; transition: right 0.3s; display: flex; flex-direction: column;
-}
-.pedidos-panel.active, .recompensas-panel.active { right: 0; }
-.pedidos-header, .recompensas-header { padding: 15px; background: var(--acento); font-weight: bold; display: flex; justify-content: space-between; }
-.pedidos-body, .recompensas-body { padding: 15px; overflow-y: auto; flex: 1; }
-
-/* ======== FOOTER & POPUP ======== */
-.footer { text-align: center; padding: 20px; background: #e0e0e0; margin-top: 30px; font-size: 0.85rem; color: #555; }
-.footer-links a { margin: 0 10px; color: #333; text-decoration: none; font-weight: bold; }
-
-.popup-add {
-  position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
-  background: #333; color: #fff; padding: 10px 25px; border-radius: 25px;
-  opacity: 0; pointer-events: none; transition: opacity 0.3s; z-index: 3000;
-}
+.footer { text-align: center; padding: 20px; background: #ddd; margin-top: 40px; font-size: 0.8rem; color: #666; }
+.popup-add { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: #333; color: #fff; padding: 10px 20px; border-radius: 30px; z-index: 3000; opacity: 0; pointer-events: none; transition: opacity 0.3s; }
 .popup-add.show { opacity: 1; }
-
-/* Admin */
-#admin-dashboard .modal-content { max-width: 800px; }
-.admin-stat-card { background: #fff; padding: 15px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); flex: 1; text-align: center; border: 1px solid #eee; }
