@@ -1,192 +1,196 @@
-/* =========================================================
-   🚀 DFL v10.0 FINAL — BASE v5.6 + UPGRADES v6.0
-   - Dados atualizados conforme prints
-   - Busca Inteligente e Grade de Promoções
-   - Firebase, Login, Carrinho, Frete e Admin MANTIDOS
-   ========================================================= */
+/* ==========================================================================
+   🚀 DFL v12.0 — SCRIPT INTEGRAL (SEM CORTES)
+   PARTE 1/4
+   ========================================================================== */
 
 document.addEventListener("DOMContentLoaded", () => {
 
-    // MÁSCARA AUTOMÁTICA DO CEP
-    const cepInputMask = document.getElementById("cep-input");
-    if (cepInputMask) {
-        cepInputMask.addEventListener("input", function(e) {
-            let v = e.target.value.replace(/\D/g, "");
-            if (v.length > 5) v = v.slice(0, 5) + "-" + v.slice(5, 8);
-            e.target.value = v;
+    /* --- 1. CONFIGURAÇÃO FIREBASE --- */
+    const firebaseConfig = {
+        apiKey: "AIzaSyATQBcbYuzKpKlSwNlbpRiAM1XyHqhGeak",
+        authDomain: "da-familia-lanches.firebaseapp.com",
+        projectId: "da-familia-lanches",
+        storageBucket: "da-familia-lanches.appspot.com",
+        messagingSenderId: "106857147317",
+        appId: "1:106857147317:web:769c98aed26bb8fc9e87fc"
+    };
+
+    let db, auth;
+    let currentUser = null;
+    let isFirebaseInitialized = false;
+
+    function inicializarFirebase() {
+        if (isFirebaseInitialized) return;
+        try {
+            if (typeof firebase === 'undefined') {
+                console.error("Firebase SDK não carregado.");
+                return;
+            }
+            if (!firebase.apps.length) {
+                firebase.initializeApp(firebaseConfig);
+            } else {
+                firebase.app();
+            }
+            
+            db = firebase.firestore();
+            auth = firebase.auth();
+            
+            // Habilita persistência para manter login ao recarregar
+            db.enablePersistence().catch(err => {
+                if (err.code == 'failed-precondition') {
+                    console.log("Persistência: Múltiplas abas abertas.");
+                } else if (err.code == 'unimplemented') {
+                    console.log("Persistência não suportada.");
+                }
+            });
+
+            isFirebaseInitialized = true;
+            setupAuthListener();
+            console.log("🔥 Firebase Conectado (Modo Completo)");
+        } catch (e) {
+            console.error("Erro Crítico Firebase:", e);
+        }
+    }
+
+    function setupAuthListener() {
+        auth.onAuthStateChanged((user) => {
+            currentUser = user;
+            const btnUser = document.getElementById("user-btn");
+            
+            if (user) {
+                const nome = user.displayName ? user.displayName.split(' ')[0] : 'Cliente';
+                if(btnUser) btnUser.textContent = `Olá, ${nome}`;
+                
+                // Verifica Admin
+                if(isAdmin(user)) createAdminFab();
+                
+                // Carrega dados iniciais
+                carregarRecompensas(user.uid);
+            } else {
+                if(btnUser) btnUser.textContent = "Entrar / Cadastrar";
+                // Esconde botão admin se deslogar
+                const btnAdm = document.getElementById("reports-btn");
+                if(btnAdm) btnAdm.style.display = 'none';
+            }
         });
     }
 
-    /* ------------------ ⚙️ VARIÁVEIS E DADOS ------------------ */  
-    const sound = new Audio("click.wav");   
-    let cart = [];  
-    let currentUser = null;  
-    let isFirebaseInitialized = false;   
+    // Tenta iniciar imediatamente
+    try { inicializarFirebase(); } catch(e){}
 
+
+    /* --- 2. VARIÁVEIS GLOBAIS E HELPERS --- */
+    const sound = new Audio("click.wav");
+    let cart = [];
+    let couponApplied = (localStorage.getItem("dflCoupon") || "").toUpperCase();
+    
     const DELIVERY_FEE_DEFAULT = 6.00;
-    const LIMITE_FRETE_GRATIS = 80.00; 
-    let deliveryFeesCache = null;   
+    const LIMITE_FRETE_GRATIS = 80.00;
+    let deliveryFeesCache = null; // Cache para taxas de bairro
 
-    const money = (n) => `R$ ${Number(n || 0).toFixed(2).replace(".", ",")}`;  
-    const safe = (fn) => (...a) => { try { fn(...a); } catch (e) { console.error(e); } };  
-    const getEl = (id) => document.getElementById(id);
+    // Formatador de Moeda
+    const money = (n) => `R$ ${Number(n || 0).toFixed(2).replace(".", ",")}`;
+    
+    // Função Segura (Evita crash)
+    const safe = (fn) => (...a) => { 
+        try { fn(...a); } catch (e) { console.error("Erro DFL:", e); } 
+    };
 
-    function getTierIcon(tier) {  
-        const level = tier ? String(tier).toLowerCase().trim() : '';  
-        if (level.includes('ouro')) return '🥇';  
-        if (level.includes('platina')) return '💎';  
-        if (level.includes('diamante')) return '👑';  
-        if (level.includes('safira')) return '💠';       
-        if (level.includes('rubi')) return '♦️';         
-        if (level.includes('esmeralda')) return '❇️';   
-        if (level.includes('elite')) return '⚔️';        
-        if (level.includes('supremo')) return '🚀';      
-        if (level.includes('lenda')) return '🦁';        
-        if (level.includes('mítico') || level.includes('mitico')) return '🦄';
+    // Ícones de Fidelidade (Lista Completa)
+    function getTierIcon(tier) {
+        const level = tier ? String(tier).toLowerCase().trim() : '';
+        if (level.includes('ouro')) return '🥇';
+        if (level.includes('platina')) return '💎';
+        if (level.includes('diamante')) return '👑';
+        if (level.includes('rubi')) return '♦️';
+        if (level.includes('esmeralda')) return '❇️';
+        if (level.includes('lenda')) return '🦁';
+        if (level.includes('mítico')) return '🦄';
         if (level.includes('brinde')) return '🎁';
-        if (level.includes('coca')) return '🥤';  
-        return '👤';   
-    }  
+        if (level.includes('coca')) return '🥤';
+        return '👤';
+    }
 
-    /* --- DADOS ATUALIZADOS (CONFORME SEUS PRINTS) --- */
+    // Algoritmo de Busca (Levenshtein)
+    const levenshtein = (a, b) => {
+        if (a.length === 0) return b.length;
+        if (b.length === 0) return a.length;
+        const matrix = [];
+        for (let i = 0; i <= b.length; i++) matrix[i] = [i];
+        for (let j = 0; j <= a.length; j++) matrix[0][j] = j;
+        for (let i = 1; i <= b.length; i++) {
+            for (let j = 1; j <= a.length; j++) {
+                if (b.charAt(i - 1) == a.charAt(j - 1)) {
+                    matrix[i][j] = matrix[i - 1][j - 1];
+                } else {
+                    matrix[i][j] = Math.min(
+                        matrix[i - 1][j - 1] + 1,
+                        matrix[i][j - 1] + 1,
+                        matrix[i - 1][j] + 1
+                    );
+                }
+            }
+        }
+        return matrix[b.length][a.length];
+    };
+
+
+    /* --- 3. DADOS DOS PRODUTOS (ATUALIZADO COM SEUS PRINTS) --- */
     const PROMO_DATA = [
         null,
         { 
             id: 1, nome: "Promo 1 — 2 Purizin + 1 Fanta 1L", 
-            desc: "2 Hot Dogs 'Purizin' com purê cremoso + 1 Fanta 1L geladinha!", 
-            ingredientes: "Pão, molho, purê de batata cremoso, 1 salsicha, milho, batata palha, ketchup e maionese.",
+            desc: "2 Hot Dogs 'Purizin' com purê cremoso, milho e batata + 1 Fanta Laranja Geladinha!", 
             preco: 34.99, precoAntigo: 40.00, img: "promocoes/promo1.jpg" 
         },
         { 
             id: 2, nome: "Promo 2 — 3 Hot Dog Padaná", 
-            desc: "3 Padaná completos, perfeitos pra dividir com a galera!", 
-            ingredientes: "Pão, molho, 2 salsichas, milho, batata palha, bacon, vinagrete, mussarela, ketchup e maionese.",
+            desc: "3 Hot Dogs 'Padaná' completos (2 salsichas, bacon, vinagrete) para dividir com a galera!", 
             preco: 37.99, precoAntigo: 45.00, img: "promocoes/promo2.jpg" 
         },
         { 
             id: 3, nome: "Promo 3 — 2 Burgers Peleja", 
-            desc: "Bora artesanar o bolso! Dois Burgers artesanais 'Peleja' no precinho!", 
-            ingredientes: "Pão, hambúrguer artesanal, filé de frango, bacon, milho, batata palha, presunto, mussarela, alface e tomate.",
+            desc: "2 Burgers Artesanais 'Peleja' (120g) com filé de frango e bacon. Sabor inigualável!", 
             preco: 39.99, precoAntigo: 52.00, img: "promocoes/promo3.jpg" 
         },
         { 
             id: 4, nome: "Promo 4 — 3 Trem + 1 Fanta 1L", 
-            desc: "3 Burgers Trem com bacon, queijo e batata palha + 1 Fanta 1L.", 
-            ingredientes: "Pão, hambúrguer, salsicha, bacon, milho, alface, tomate, presunto e mussarela.",
+            desc: "3 Burgers 'Trem' tradicionais com bacon, milho, queijo e batata palha + Fanta 1L!", 
             preco: 44.99, precoAntigo: 51.00, img: "promocoes/promo4.jpg" 
         },
         { 
             id: 5, nome: "Promo 5 — 4 Trem + 1 Fanta 1L", 
-            desc: "O clássico da família! 4 Burgers Trem + Fanta 1L.", 
-            ingredientes: "Pão, hambúrguer, salsicha, bacon, milho, alface, tomate, presunto e mussarela.",
+            desc: "O clássico da família: 4 sanduíches Trem deliciosos e refri para acompanhar.", 
             preco: 49.99, precoAntigo: 65.00, img: "promocoes/promo5.jpg" 
         },
         { 
             id: 6, nome: "Promo 6 — 5 Burgers Uai", 
-            desc: "Pra família toda! 5 Burgers UAI recheados no precinho.", 
-            ingredientes: "Pão, hambúrguer, milho, bacon, alface, tomate, presunto e mussarela.",
+            desc: "5 Lanches Uai (X-Bacon Salada) para matar a fome de todo mundo.", 
             preco: 54.00, precoAntigo: 65.00, img: "promocoes/promo6.jpg" 
         },
         { 
             id: 7, nome: "Promo 7 — 4 TremBão + 1 Fanta 1L", 
-            desc: "O maior hot dog da casa! 4 TremBão com purê cremoso + Fanta 1L.", 
-            ingredientes: "Pão, molho, purê cremoso, 2 salsichas, bacon crocante, mussarela, batata palha, vinagrete, ketchup e maionese.",
+            desc: "4 Dogões 'TremBão' com tudo dentro (purê, bacon, 2 salsichas) + Refri.", 
             preco: 59.99, precoAntigo: 77.00, img: "promocoes/promo7.jpg" 
         },
         { 
             id: 8, nome: "Promo 8 — 4 Armaria", 
-            desc: "A queridinha da galera! 4 Armaria no super desconto.", 
-            ingredientes: "Pão, hambúrguer, filé de frango, bacon, milho, batata palha, alface, tomate, salsicha, presunto e mussarela.",
+            desc: "4 Sanduíches Armaria (Hambúrguer + Frango + Tudo) com bastante recheio.", 
             preco: 59.99, precoAntigo: 72.00, img: "promocoes/promo8.jpg" 
         },
         { 
             id: 9, nome: "Promo 9 — 5 Uai + 1 Kuat 2L (Brinde)", 
-            desc: "Compre 5 Burgers Uai e leve 1 Kuat 2L por nossa conta! 🍹", 
-            ingredientes: "Pão, hambúrguer, milho, bacon, alface, tomate, presunto e mussarela.",
+            desc: "A festa completa com 5 lanches Uai e um refrigerante tamanho família.", 
             preco: 64.99, precoAntigo: 75.00, img: "promocoes/promo9.jpg" 
         }
     ];
 
-    /* ------------------ 🎯 ELEMENTOS (MANTIDO DA v5.6) ------------------ */  
-    const el = {  
-        cartIcon: document.getElementById("cart-icon"),  
-        cartCount: document.getElementById("cart-count"),  
-        miniCart: document.getElementById("mini-cart"),  
-        miniList: document.querySelector(".mini-list"),  
-        miniFoot: document.querySelector(".mini-foot"),  
-        cartBackdrop: document.getElementById("cart-backdrop"),  
-        extrasModal: document.getElementById("extras-modal"),  
-        extrasList: document.querySelector("#extras-modal .extras-list"),  
-        extrasConfirm: document.getElementById("extras-confirm"),  
-        comboModal: document.getElementById("combo-modal"),  
-        comboBody: document.querySelector("#combo-modal #combo-body"),  
-        comboConfirm: document.getElementById("combo-confirm"),  
-        loginModal: document.getElementById("login-modal"),  
-        loginForm: document.getElementById("login-form"),  
-        googleBtn: document.getElementById("google-login"),  
-        userBtn: document.getElementById("user-btn"),  
-        statusBanner: document.getElementById("status-banner"),  
-        reportsBtn: document.getElementById("reports-btn"),   
-        pedidosContainer: document.querySelector(".meus-pedidos"),  
-        pedidosBtn: document.querySelector(".meus-pedidos-btn"),  
-        pedidosPanel: document.getElementById("painelPedidos"),  
-        pedidosFecharBtn: document.querySelector(".fechar-pedidos"),  
-        pedidosLista: document.getElementById("listaPedidos"),  
-        recompensasContainer: document.querySelector(".minhas-recompensas"),  
-        recompensasBtn: document.querySelector(".recompensas-btn"),  
-        recompensasPanel: document.getElementById("recompensas-panel"),  
-        recompensasFecharBtn: document.querySelector(".fechar-recompensas"),  
-        recompensasLista: document.getElementById("listaRecompensas"),  
-        historicoLista: document.getElementById("historicoRecompensas"),
-        
-        // NOVOS ELEMENTOS (v6.0)
-        promocoesGrid: document.getElementById("promocoes-area"),
-        searchInput: document.getElementById("search-input"),
-        btnNaoSeiCEP: document.getElementById("btnNaoSeiCEP"),
-        manualArea: document.getElementById("manualArea"),
-        manualEndereco: document.getElementById("manualEndereco"),
-        manualNumero: document.getElementById("manualNumero"),
-        btnConfirmarEndereco: document.getElementById("btnConfirmarEndereco"),
-        btnVoltarCEP: document.getElementById("btnVoltarCEP"),
-        progressWrapper: document.getElementById("progressWrapper"),
-        progressText: document.getElementById("progressText"),
-        progressFill: document.getElementById("progressFill")
-    };
-
-    /* ------------------ 🌫️ BACKDROP & OVERLAYS (MANTIDO) ------------------ */  
-    if (!el.cartBackdrop) {  
-        const bd = document.createElement("div");  
-        bd.id = "cart-backdrop";  
-        document.body.appendChild(bd);  
-        el.cartBackdrop = bd;  
-    }  
-    const Backdrop = {  
-        show() { el.cartBackdrop.classList.add("active"); document.body.classList.add("no-scroll"); },  
-        hide() { el.cartBackdrop.classList.remove("active"); document.body.classList.remove("no-scroll"); },  
-    };
-
-    const Overlays = {  
-        closeAll() {  
-            document.querySelectorAll(".modal.show, #mini-cart.active, .pedidos-panel.active, .recompensas-panel.active, #admin-dashboard.show")
-                .forEach((e) => e.classList.remove("show", "active"));  
-            Backdrop.hide();  
-        },  
-        open(modalLike) {  
-            Overlays.closeAll();  
-            if (!modalLike) return;  
-            modalLike.classList.add(
-                (modalLike.id === "mini-cart" || modalLike.id === "painelPedidos" || modalLike.id === "recompensas-panel") ? "active" : "show"
-            );  
-            Backdrop.show();  
-        },  
-    };  
-    el.cartBackdrop.addEventListener("click", () => Overlays.closeAll());
-
-    /* ------------------ 🖼️ GRADE DE PROMOÇÕES (NOVO v6.0) ------------------ */
+    /* --- 4. RENDERIZAÇÃO DA GRADE DE PROMOÇÕES --- */
     function renderPromocoesGrid() {
-        if (!el.promocoesGrid) return;
+        const container = document.getElementById("promocoes-area");
+        if (!container) return;
         
-        el.promocoesGrid.innerHTML = PROMO_DATA.map(p => {
+        container.innerHTML = PROMO_DATA.map(p => {
             if(!p) return ''; 
             
             return `
@@ -194,9 +198,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 <img src="${p.img}" alt="${p.nome}" onerror="this.src='logo.png'">
                 <div class="card-content promo-body">
                     <h3 class="promo-title">${p.nome}</h3>
-                    <div class="promo-ingredientes" style="font-size:0.75rem; color:#666; margin-bottom:5px; line-height:1.3;">
-                        ${p.desc}
-                    </div>
+                    <p class="promo-desc">${p.desc}</p>
                     <div class="promo-prices">
                         <span class="promo-old">De ${money(p.precoAntigo)}</span>
                         <span class="promo-new">Por ${money(p.preco)}</span>
@@ -208,16 +210,10 @@ document.addEventListener("DOMContentLoaded", () => {
     }
     renderPromocoesGrid();
 
-    /* ------------------ 🔍 BUSCA INTELIGENTE (NOVO v6.0) ------------------ */
-    const levenshtein = (a, b) => {
-        if(!a.length) return b.length; if(!b.length) return a.length;
-        const m = []; for(let i=0;i<=b.length;i++) m[i]=[i]; for(let j=0;j<=a.length;j++) m[0][j]=j;
-        for(let i=1;i<=b.length;i++) for(let j=1;j<=a.length;j++) m[i][j] = b.charAt(i-1)==a.charAt(j-1)?m[i-1][j-1]:Math.min(m[i-1][j-1]+1,Math.min(m[i][j-1]+1,m[i-1][j]+1));
-        return m[b.length][a.length];
-    };
-
-    if (el.searchInput) {
-        el.searchInput.addEventListener("input", (e) => {
+    /* --- 5. BUSCA INTELIGENTE --- */
+    const searchInput = document.getElementById("search-input");
+    if (searchInput) {
+        searchInput.addEventListener("input", (e) => {
             const term = e.target.value.toLowerCase().trim();
             const cards = document.querySelectorAll(".card, .promo-card-styled");
             
@@ -236,108 +232,40 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-    /* ------------------ 🔥 FIREBASE SETUP (MANTIDO) ------------------ */  
-    const firebaseConfig = {  
-        apiKey: "AIzaSyATQBcbYuzKpKlSwNlbpRiAM1XyHqhGeak",  
-        authDomain: "da-familia-lanches.firebaseapp.com",  
-        projectId: "da-familia-lanches",  
-        storageBucket: "da-familia-lanches.appspot.com",  
-        messagingSenderId: "106857147317",  
-        appId: "1:106857147317:web:769c98aed26bb8fc9e87fc",  
-    };  
+    /* --- 6. CONTROLE DE MODAIS (SISTEMA ORIGINAL) --- */
+    const cartBackdrop = document.getElementById("cart-backdrop");
+    
+    const Overlays = {
+        closeAll() {
+            document.querySelectorAll(".modal.show, #mini-cart.active, .pedidos-panel.active, .recompensas-panel.active, #admin-dashboard.show")
+                .forEach((e) => e.classList.remove("show", "active"));
+            if(cartBackdrop) {
+                cartBackdrop.style.opacity = "0";
+                setTimeout(() => cartBackdrop.style.display = "none", 300);
+            }
+            document.body.classList.remove("no-scroll");
+        },
+        open(modalLike) {
+            Overlays.closeAll();
+            if (!modalLike) return;
+            
+            if(cartBackdrop) {
+                cartBackdrop.style.display = "block";
+                setTimeout(() => cartBackdrop.style.opacity = "1", 10);
+            }
+            
+            modalLike.classList.add(
+                (modalLike.id === "mini-cart" || modalLike.id === "painelPedidos" || modalLike.id === "recompensas-panel") ? "active" : "show"
+            );
+            document.body.classList.add("no-scroll");
+        },
+    };
 
-    let auth, db;   
+    if(cartBackdrop) cartBackdrop.addEventListener("click", () => Overlays.closeAll());
 
-    function inicializarFirebase() {  
-        if (isFirebaseInitialized) return;  
-        try {  
-            if (!window.firebase) throw new Error("Biblioteca principal do Firebase não carregou.");  
-            if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);  
-            auth = firebase.auth();  
-            db = firebase.firestore();  
-            isFirebaseInitialized = true;
-            // Ativa persistência para não deslogar
-            db.enablePersistence().catch(()=>{});
-            setupAuthListener();   
-        } catch (error) {  
-            console.error("ERRO FATAL AO INICIAR FIREBASE:", error);  
-        }  
-    }  
-
-    function setupAuthListener() {  
-        auth.onAuthStateChanged(user => {  
-            currentUser = user;   
-            if (user) {  
-                el.userBtn.textContent = `Olá, ${user.displayName?.split(" ")[0] || user.email.split("@")[0]}`;  
-                if (el.pedidosContainer) el.pedidosContainer.style.display = 'block';  
-                if (el.recompensasContainer) el.recompensasContainer.style.display = 'block';  
-            } else {  
-                el.userBtn.textContent = "Entrar / Cadastrar";  
-                if (el.pedidosContainer) el.pedidosContainer.style.display = 'none';  
-                if (el.recompensasContainer) el.recompensasContainer.style.display = 'none';  
-            }  
-            if (user && isAdmin(user)) {  
-                if (el.reportsBtn) createAdminFab();  
-            } else {  
-                if (el.reportsBtn) el.reportsBtn.style.display = "none";  
-                document.getElementById("admin-dashboard")?.remove();  
-            }  
-        });  
-    }
-    /* --- 🎟️ CUPOM FORM --- */  
-    const couponForm = document.getElementById("coupon-form");  
-    let couponApplied = (localStorage.getItem("dflCoupon") || "").toUpperCase();  
-
-    couponForm?.addEventListener("submit", (e) => {  
-        e.preventDefault();  
-        const input = document.getElementById("coupon-input");  
-        const val = (input?.value || "").trim().toUpperCase();  
-        if (!val) {  
-            couponApplied = "";  
-            localStorage.removeItem("dflCoupon");  
-            popupAdd("Cupom removido.");  
-            renderMiniCart();  
-            return;  
-        }  
-        couponApplied = val;  
-        localStorage.setItem("dflCoupon", couponApplied);  
-        renderMiniCart();   
-    });
-
-    /* --- 💬 POPUP --- */  
-    function popupAdd(msg) {  
-        let pop = document.querySelector(".popup-add");  
-        if (!pop) {  
-            pop = document.createElement("div");  
-            pop.className = "popup-add";  
-            document.body.appendChild(pop);  
-        }  
-        pop.textContent = msg;  
-        pop.classList.add("show");  
-        setTimeout(() => pop.classList.remove("show"), 2000);  
-    }
-
-    function mostrarPopupRecompensa(msg) {  
-        let pop = document.getElementById("conquista-popup");  
-        if (!pop) {  
-            pop = document.createElement("div");  
-            pop.id = "conquista-popup";  
-            pop.style.cssText = `position:fixed;bottom:120px;left:50%;transform:translateX(-50%) scale(0);background:#4CAF50;color:white;padding:15px 25px;border-radius:12px;font-weight:bold;text-align:center;box-shadow:0 4px 15px rgba(0,0,0,0.3);z-index:10001;opacity:0;transition:transform 0.4s cubic-bezier(0.175,0.885,0.32,1.275),opacity 0.4s;`;  
-            document.body.appendChild(pop);  
-        }  
-        pop.textContent = msg;  
-        pop.style.opacity = '1';  
-        pop.style.transform = 'translateX(-50%) scale(1)';  
-        setTimeout(() => {  
-            pop.style.transform = 'translateX(-50%) scale(0)';  
-            pop.style.opacity = '0';  
-        }, 6000);  
-    }
-
-    /* --- 🛒 LÓGICA DO CARRINHO E CLIQUES --- */
-    // Listener global para funcionar nos cards dinâmicos
+    /* --- 7. EVENTOS DE CLIQUE GLOBAL (DELEGAÇÃO) --- */
     document.body.addEventListener('click', function(e) {
-        // Adicionar Item
+        // Adicionar ao Carrinho
         if (e.target.matches('.add-cart, .btn-add-green')) {
             const card = e.target.closest('.card, .promo-card-styled');
             if (card) {
@@ -350,236 +278,194 @@ document.addEventListener("DOMContentLoaded", () => {
         if (e.target.matches('.extras-close, .combo-close, .login-close, .fechar-pedidos, .fechar-recompensas')) {
             Overlays.closeAll();
         }
+        // Abrir Extras
+        if (e.target.matches('.extras-btn')) {
+            const card = e.target.closest('.card');
+            openExtrasFor(card);
+        }
     });
 
-    el.cartIcon?.addEventListener("click", () => { inicializarFirebase(); renderMiniCart(); Overlays.open(el.miniCart); });
-
-    function addCommonItem(nome, preco) {  
-        const low = (nome||"").toLowerCase();
-        if (/^combo/i.test(low) && !/^\s*Combo [0-9]/.test(low)) { 
-             openComboModal(nome, preco); 
-             return; 
-        }  
-        const found = cart.find((i) => i.nome === nome && i.preco === preco);  
-        if (found) found.qtd++;  
-        else cart.push({ nome, preco, qtd: 1 });  
-        renderMiniCart();  
-        popupAdd(`${nome} adicionado!`);  
+    // Botão Carrinho
+    const cartIcon = document.getElementById("cart-icon");
+    if(cartIcon) {
+        cartIcon.addEventListener("click", () => {
+            inicializarFirebase();
+            renderMiniCart();
+            Overlays.open(document.getElementById("mini-cart"));
+        });
     }
 
-    function renderMiniCart() {  
-        if (!el.miniList) return;   
-        const totalItens = cart.reduce((s, i) => s + i.qtd, 0);  
-        if (el.cartCount) el.cartCount.textContent = totalItens;  
-
-        // BARRA DE PROGRESSO
-        const subtotal = cart.reduce((acc, item) => acc + (item.preco * item.qtd), 0);
-        if (el.progressFill) {
-            const pct = Math.min(100, (subtotal / LIMITE_FRETE_GRATIS) * 100);
-            el.progressFill.style.width = `${pct}%`;
-            el.progressText.innerHTML = subtotal >= LIMITE_FRETE_GRATIS ? 
-                "🎉 <strong>Oba!</strong> Frete Grátis garantido!" : 
-                `Faltam <strong>${money(LIMITE_FRETE_GRATIS - subtotal)}</strong> para Frete Grátis 🚀`;
-        }
-
-        if (!cart.length) {  
-            el.miniList.innerHTML = '<p style="text-align:center;color:#999;padding:20px;">Carrinho vazio 🛒</p>';  
-            if(el.miniFoot) el.miniFoot.querySelectorAll(".cart-summary-generated").forEach(e => e.remove());  
-            return;  
-        }  
-
-        el.miniList.innerHTML = cart.map((item, idx) => `  
-          <div class="cart-item" style="border-bottom:1px solid #eee;padding:10px 0;">  
-            <div style="display:flex;justify-content:space-between;align-items:center;">  
-              <div style="flex:1;">  
-                <p style="font-weight:600;margin-bottom:4px;">${item.nome}</p>  
-                <p style="color:#666;font-size:0.85rem;">${money(item.preco)} × ${item.qtd}</p>  
-              </div>  
-              <div style="display:flex;gap:8px;align-items:center;">  
-                <button type="button" class="cart-minus" onclick="window.updateQtd(${idx}, -1)" style="background:#ff4081;color:#fff;border:none;border-radius:5px;width:28px;height:28px;cursor:pointer;">−</button>  
-                <span style="font-weight:600;min-width:20px;text-align:center;">${item.qtd}</span>  
-                <button type="button" class="cart-plus" onclick="window.updateQtd(${idx}, 1)" style="background:#4caf50;color:#fff;border:none;border-radius:5px;width:28px;height:28px;cursor:pointer;">+</button>  
-              </div>  
-            </div>  
-          </div>  
-        `).join("");
-        
-        enhanceMiniCartUI();
-    }  
-
-    window.updateQtd = (i, d) => {
-        if(cart[i]) {
-            cart[i].qtd += d;
-            if(cart[i].qtd <= 0) cart.splice(i, 1);
-            renderMiniCart();
-        }
-    };
-
-    /* --- LOGIN --- */  
-    el.loginForm?.addEventListener("submit", (e) => {  
-        e.preventDefault();  
-        inicializarFirebase();
-        const email = document.getElementById("login-email")?.value?.trim();  
-        const senha = document.getElementById("login-senha")?.value?.trim();  
-        auth.signInWithEmailAndPassword(email, senha)
-            .then((cred) => { currentUser = cred.user; popupAdd("Logado!"); Overlays.closeAll(); })
-            .catch((err) => alert("Erro: " + err.message));  
-    });  
-
-    el.googleBtn?.addEventListener("click", () => {  
-        inicializarFirebase();
-        const provider = new firebase.auth.GoogleAuthProvider();  
-        auth.signInWithPopup(provider)
-            .then((res) => { currentUser = res.user; popupAdd("Logado!"); Overlays.closeAll(); })
-            .catch((err) => alert("Erro: ".concat(err.message)));  
-    });  
-    el.userBtn?.addEventListener("click", () => Overlays.open(el.loginModal));  
-
-    /* --- EXTRAS E COMBOS (MANTIDO) --- */  
-    const adicionais = [  
-        { nome: "Cebola", preco: 0.99 }, { nome: "Salada", preco: 1.99 }, { nome: "Ovo", preco: 1.99 }, { nome: "Bacon", preco: 2.99 },  
-        { nome: "Hambúrguer Tradicional", preco: 2.99 }, { nome: "Cheddar Cremoso", preco: 3.99 }, { nome: "Filé de Frango", preco: 5.99 }, { nome: "Burger Artesanal", preco: 7.99 }  
-    ];  
-    let produtoExtras = null; let produtoPrecoBase = 0;  
-
-    document.querySelectorAll(".extras-btn").forEach((btn) =>
-        btn.addEventListener("click", (e) => {
-            const card = e.currentTarget.closest(".card");
-            produtoExtras = card.dataset.name;
-            produtoPrecoBase = parseFloat(card.dataset.price) || 0;
-            el.extrasList.innerHTML = adicionais.map((a, i) => `  
-              <label class="extra-line" style="display:flex;justify-content:space-between;align-items:center;padding:10px;border:1px solid #ddd;border-radius:8px;margin-bottom:8px;">  
-                <span>${a.nome} — <b>${money(a.preco)}</b></span>  
-                <input type="checkbox" value="${i}">  
-              </label>`).join("");
-            Overlays.open(el.extrasModal);
-        })
-    );  
-
-    el.extrasConfirm?.addEventListener("click", () => {  
-        if (!produtoExtras) return Overlays.closeAll();  
-        const checks = [...document.querySelectorAll("#extras-modal .extras-list input:checked")];  
-        let precoTotal = produtoPrecoBase;
-        let nomes = [];
-        checks.forEach(c => {  
-            const ad = adicionais[+c.value];  
-            precoTotal += ad.preco;
-            nomes.push(ad.nome);
-        });  
-        const nomeFinal = nomes.length ? `${produtoExtras} + ${nomes.join(", ")}` : produtoExtras;
-        
-        const found = cart.find(i => i.nome === nomeFinal);
-        if(found) found.qtd++;
-        else cart.push({ nome: nomeFinal, preco: precoTotal, qtd: 1 });
-        
-        renderMiniCart(); popupAdd("Adicionado!"); Overlays.closeAll();  
-    });  
-
-    // COMBOS
+    /* --- 8. LÓGICA DE COMBOS (COM COCA ZERO 1L) --- */
     const comboDrinkOptions = {
-    casal: [ 
-        { rotulo: "Fanta 1L", delta: 0.01 },
-        { rotulo: "Coca 1L", delta: 3.0 },
-        { rotulo: "Coca-Cola 1L Zero", delta: 3.0 } 
-    ],
-    familia: [ 
-        { rotulo: "Kuat 2L", delta: 0.01 }, 
-        { rotulo: "Coca 2L", delta: 5.0 } 
-    ]
-};
+        casal: [ 
+            { rotulo: "Fanta 1L (padrão)", delta: 0.01 },
+            { rotulo: "Coca-Cola 1L", delta: 3.0 },
+            { rotulo: "Coca-Cola 1L Zero", delta: 3.0 } 
+        ],
+        familia: [ 
+            { rotulo: "Kuat 2L (padrão)", delta: 0.01 }, 
+            { rotulo: "Coca-Cola 2L", delta: 5.0 },
+            { rotulo: "Coca-Cola 2L Zero", delta: 5.0 }
+        ]
+    };
+    let _comboCtx = null;
 
-    let _comboCtx = null;  
-    
+    function addCommonItem(nome, preco) {
+        const low = (nome||"").toLowerCase();
+        if (/^combo/i.test(low) && !/^\s*Combo [0-9]/.test(low)) {
+             openComboModal(nome, preco);
+             return;
+        }
+        
+        // Adição Direta
+        const found = cart.find(i => i.nome === nome && i.preco === preco);
+        if (found) found.qtd++;
+        else cart.push({ nome, preco, qtd: 1 });
+        
+        renderMiniCart();
+        popupAdd(`${nome} adicionado!`);
+    }
+
     function openComboModal(nome, preco) {
         const low = nome.toLowerCase();
         const grupo = low.includes("casal") ? "casal" : "familia";
-        if(!comboDrinkOptions[grupo]) return addCommonItem(nome, preco); // Fallback
         
-        el.comboBody.innerHTML = comboDrinkOptions[grupo].map((o, i) => `  
-          <label class="combo-option-line" style="display:flex;justify-content:space-between;padding:10px;border:1px solid #ddd;margin-bottom:8px;">  
-            <span>${o.rotulo}</span><span>+ ${money(o.delta)}</span>  
-            <input type="radio" name="combo-drink" value="${i}" ${i===0?'checked':''}>  
-          </label>`).join("");
+        // Se não achar o grupo, adiciona direto
+        if (!comboDrinkOptions[grupo]) {
+            cart.push({ nome, preco, qtd: 1 });
+            renderMiniCart();
+            return;
+        }
+
+        const comboBody = document.getElementById("combo-body");
+        comboBody.innerHTML = comboDrinkOptions[grupo].map((o, i) => `
+          <div class="combo-option-line" onclick="document.getElementById('radio-${i}').checked=true">
+            <span>${o.rotulo}</span>
+            <span style="font-weight:700; color:#d32f2f;">+ ${money(o.delta)}</span>
+            <input type="radio" id="radio-${i}" name="combo-drink" value="${i}" ${i===0?'checked':''}>
+          </div>
+        `).join("");
+        
         _comboCtx = { nome, preco, grupo };
-        Overlays.open(el.comboModal);
+        Overlays.open(document.getElementById("combo-modal"));
     }
 
-    el.comboConfirm?.addEventListener("click", () => {
+    // Confirmar Combo
+    document.getElementById("combo-confirm")?.addEventListener("click", () => {
         const sel = document.querySelector('input[name="combo-drink"]:checked');
         if(!sel) return;
+        
         const opt = comboDrinkOptions[_comboCtx.grupo][+sel.value];
         const finalName = `${_comboCtx.nome} + ${opt.rotulo}`;
         const finalPrice = Number(_comboCtx.preco) + opt.delta;
         
-        const found = cart.find(i => i.nome === finalName);
-        if(found) found.qtd++;
-        else cart.push({ nome: finalName, preco: finalPrice, qtd: 1 });
+        cart.push({ nome: finalName, preco: finalPrice, qtd: 1 });
+        renderMiniCart(); 
+        popupAdd("Combo Adicionado!"); 
+        Overlays.closeAll();
+    });
+
+    /* --- 9. ADICIONAIS (EXTRAS) --- */
+    const adicionais = [
+        { nome: "Cebola", preco: 0.99 }, { nome: "Salada", preco: 1.99 },
+        { nome: "Ovo", preco: 1.99 }, { nome: "Bacon", preco: 2.99 },
+        { nome: "Hambúrguer Tradicional", preco: 2.99 }, { nome: "Cheddar Cremoso", preco: 3.99 },
+        { nome: "Filé de Frango", preco: 5.99 }, { nome: "Burger Artesanal", preco: 7.99 }
+    ];
+    let produtoExtras = null; let produtoPrecoBase = 0;
+
+    function openExtrasFor(card) {
+        if(!card) return;
+        produtoExtras = card.dataset.name;
+        produtoPrecoBase = parseFloat(card.dataset.price);
         
-        renderMiniCart(); popupAdd("Combo Adicionado!"); Overlays.closeAll();
-    });
-
-    /* --- 🏠 FRETE MANUAL E DINÂMICO (MANTIDO) --- */
-    let modoEnderecoManual = false;
-    getEl("btnNaoSeiCEP")?.addEventListener("click", () => window.open("https://buscacepinter.correios.com.br/app/endereco/index.php", "_blank"));
-    getEl("btnManual")?.addEventListener("click", () => {
-        modoEnderecoManual = true;
-        getEl("manualArea").style.display = 'block';
-        document.querySelector('.frete-container').style.display = 'none';
-    });
-    getEl("btnVoltarCEP")?.addEventListener("click", () => {
-        modoEnderecoManual = false;
-        getEl("manualArea").style.display = 'none';
-        document.querySelector('.frete-container').style.display = 'block';
-    });
-
-    getEl("btnConfirmarEndereco")?.addEventListener("click", async () => {
-        const end = getEl("manualEndereco").value;
-        if(!end) return popupAdd("Preencha o endereço!");
-        popupAdd("Verificando...");
-        const taxa = await getDynamicDeliveryFee(end);
-        popupAdd(`Taxa: ${money(taxa)}`);
-        renderMiniCart();
-    });
-
-    async function getDynamicDeliveryFee(endereco) {
-        if (getEl('retirar-local')?.checked) return 0;
-        // Lógica simples de bairro (pode ser expandida com Firebase)
-        let bairro = endereco.split("-")[1] || endereco;
-        bairro = bairro.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim();
+        const list = document.querySelector(".extras-list");
+        list.innerHTML = adicionais.map((a, i) => `
+          <div class="extra-line">
+            <span>${a.nome} — <b>${money(a.preco)}</b></span>
+            <input type="checkbox" value="${i}">
+          </div>
+        `).join("");
         
-        try {
-            if(!deliveryFeesCache && db) {
-                const snap = await db.collection("TaxasDeEntrega").doc("bairros").collection("lista").doc("tabela").get();
-                if(snap.exists) deliveryFeesCache = snap.data().data;
-            }
-            if(deliveryFeesCache) {
-                const found = deliveryFeesCache.find(b => bairro.includes(b.nome.toLowerCase()));
-                if(found) return Number(found.taxa);
-            }
-        } catch(e) {}
-        return DELIVERY_FEE_DEFAULT;
+        Overlays.open(document.getElementById("extras-modal"));
     }
 
-    document.getElementById('btn-calcular-frete')?.addEventListener('click', async () => {
-        const cep = document.getElementById('cep-input').value.replace(/\D/g, '');
-        if(cep.length !== 8) return popupAdd("CEP inválido");
-        try {
-            const res = await fetch(`https://viacep.com.br/ws/${cep}/json/`);
-            const data = await res.json();
-            if(data.erro) return popupAdd("CEP não encontrado");
-            getEl("endereco-auto").value = `${data.logradouro} - ${data.bairro}`;
-            renderMiniCart();
-        } catch(e) { popupAdd("Erro ao buscar CEP"); }
+    document.getElementById("extras-confirm")?.addEventListener("click", () => {
+        const checks = document.querySelectorAll("#extras-modal input:checked");
+        let total = produtoPrecoBase;
+        let nomes = [];
+        
+        checks.forEach(c => {
+            const ad = adicionais[+c.value];
+            total += ad.preco;
+            nomes.push(ad.nome);
+        });
+        
+        const nomeFinal = nomes.length ? `${produtoExtras} + ${nomes.join(", ")}` : produtoExtras;
+        cart.push({ nome: nomeFinal, preco: total, qtd: 1 });
+        
+        renderMiniCart(); popupAdd("Adicionado!"); Overlays.closeAll();
     });
-    /* --- 💰 CÁLCULO E FINALIZAÇÃO --- */
+
+    /* --- 10. RENDERIZAÇÃO DO CARRINHO --- */
+    function renderMiniCart() {
+        const list = document.querySelector(".mini-list");
+        const count = document.getElementById("cart-count");
+        if(count) count.textContent = cart.reduce((a,b)=>a+b.qtd,0);
+        
+        if (!list) return;
+
+        if (cart.length === 0) {
+            list.innerHTML = '<p style="text-align:center; padding:30px; color:#999;">Seu carrinho está vazio 🛒</p>';
+        } else {
+            list.innerHTML = cart.map((item, i) => `
+                <div class="cart-item" style="padding:10px; border-bottom:1px solid #eee; display:flex; justify-content:space-between; align-items:center;">
+                    <div style="flex:1;">
+                        <b style="font-size:0.95rem;">${item.nome}</b><br>
+                        <small style="color:#666;">${money(item.preco)} x ${item.qtd}</small>
+                    </div>
+                    <div style="display:flex; gap:5px;">
+                        <button onclick="window.updCart(${i}, -1)" style="padding:5px 10px; border:1px solid #ddd; background:#fff; border-radius:5px;">-</button>
+                        <button onclick="window.updCart(${i}, 1)" style="padding:5px 10px; border:1px solid #ddd; background:#fff; border-radius:5px;">+</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+        
+        updateTotals();
+    }
+
+    window.updCart = (i, d) => {
+        cart[i].qtd += d;
+        if (cart[i].qtd <= 0) cart.splice(i, 1);
+        renderMiniCart();
+    };
+
+    /* --- 11. CÁLCULO DE TOTAIS, FRETE E CUPOM --- */
+    let modoEnderecoManual = false;
+    
+    // Alternância de Modos de Endereço
+    document.getElementById("btnManual")?.addEventListener("click", () => {
+        modoEnderecoManual = true;
+        document.getElementById("manualArea").style.display = 'block';
+        document.querySelector(".frete-container").style.display = 'none';
+    });
+    
+    document.getElementById("btnVoltarCEP")?.addEventListener("click", () => {
+        modoEnderecoManual = false;
+        document.getElementById("manualArea").style.display = 'none';
+        document.querySelector(".frete-container").style.display = 'block';
+    });
+
+    // Validação de Cupom (Firestore)
     const _cupomCache = {};
-    async function validarCupomFirestore(codigo, subtotal) {
+    async function validarCupom(codigo, subtotal) {
         if(!isFirebaseInitialized) return {valido:false, discount:0};
         const code = codigo.toUpperCase();
         if(!code) return {valido:false, discount:0};
         
-        // Cache simples
-        const key = `${code}-${Math.floor(subtotal/10)}`;
+        // Cache simples para não ler o banco toda hora
+        const key = `${code}-${Math.floor(subtotal)}`;
         if(_cupomCache[key]) return _cupomCache[key];
 
         try {
@@ -598,57 +484,97 @@ document.addEventListener("DOMContentLoaded", () => {
         return { valido: false, discount: 0, msg: "Cupom inválido" };
     }
 
-    async function calcTotals() {
+    async function updateTotals() {
         const subtotal = cart.reduce((acc, i) => acc + (i.preco * i.qtd), 0);
-        const cupomData = await validarCupomFirestore(couponApplied, subtotal);
         
+        // Barra de Progresso
+        const fill = document.getElementById("progressFill");
+        const txt = document.getElementById("progressText");
+        if (fill) {
+            const pct = Math.min(100, (subtotal / LIMITE_FRETE_GRATIS) * 100);
+            fill.style.width = `${pct}%`;
+            txt.innerHTML = subtotal >= LIMITE_FRETE_GRATIS ? 
+                "🎉 <strong>Frete Grátis!</strong>" : 
+                `Faltam <b>${money(LIMITE_FRETE_GRATIS - subtotal)}</b> para o Frete Grátis`;
+        }
+
+        // Cupom
+        const couponInput = document.getElementById("coupon-input");
+        const cupomData = await validarCupom(couponApplied || couponInput?.value, subtotal);
+        const msgDiv = document.getElementById("coupon-message");
+        if(msgDiv) {
+            msgDiv.textContent = cupomData.msg || "";
+            msgDiv.style.color = cupomData.valido ? "green" : "red";
+        }
+
+        // Frete Dinâmico
         let deliveryFee = DELIVERY_FEE_DEFAULT;
         let endereco = "";
-        if (modoEnderecoManual) endereco = getEl("manualEndereco")?.value;
-        else endereco = getEl("endereco-auto")?.value;
+        
+        if (modoEnderecoManual) endereco = document.getElementById("manualEndereco")?.value;
+        else endereco = document.getElementById("endereco-auto")?.value;
 
         if(endereco) deliveryFee = await getDynamicDeliveryFee(endereco);
-        if(subtotal >= LIMITE_FRETE_GRATIS || cupomData.freeShipping || getEl('retirar-local')?.checked) deliveryFee = 0;
+        
+        // Regras de Isenção
+        if(subtotal >= LIMITE_FRETE_GRATIS || cupomData.freeShipping || document.getElementById('retirar-local')?.checked) {
+            deliveryFee = 0;
+        }
 
         const total = Math.max(0, subtotal + deliveryFee - cupomData.discount);
-        return { subtotal, deliveryFee, discount: cupomData.discount, total, msg: cupomData.msg };
+        
+        renderFooter(subtotal, deliveryFee, cupomData.discount, total);
     }
 
-    async function enhanceMiniCartUI() {
-        const { subtotal, deliveryFee, discount, total, msg } = await calcTotals();
+    async function getDynamicDeliveryFee(endereco) {
+        if (document.getElementById('retirar-local')?.checked) return 0;
+        let bairro = endereco.split("-")[1] || endereco;
+        bairro = bairro.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim();
         
-        if(getEl("coupon-message")) getEl("coupon-message").textContent = msg || "";
-        
+        try {
+            if(!deliveryFeesCache && db) {
+                const snap = await db.collection("TaxasDeEntrega").doc("bairros").collection("lista").doc("tabela").get();
+                if(snap.exists) deliveryFeesCache = snap.data().data;
+            }
+            if(deliveryFeesCache) {
+                const found = deliveryFeesCache.find(b => bairro.includes(b.nome.toLowerCase()));
+                if(found) return Number(found.taxa);
+            }
+        } catch(e) {}
+        return DELIVERY_FEE_DEFAULT;
+    }
+
+    function renderFooter(sub, del, disc, tot) {
         const foot = document.querySelector(".mini-foot");
         let sum = foot.querySelector(".cart-summary-generated");
-        if(!sum) { sum = document.createElement("div"); sum.className = "cart-summary-generated"; foot.appendChild(sum); }
+        if(!sum) { sum = document.createElement("div"); sum.className="cart-summary-generated"; foot.appendChild(sum); }
         
         sum.innerHTML = `
-            <div style="padding:10px; background:#f9f9f9; margin-top:10px; border-radius:8px;">
-                <div style="display:flex; justify-content:space-between;"><span>Subtotal:</span> <b>${money(subtotal)}</b></div>
-                <div style="display:flex; justify-content:space-between;"><span>Entrega:</span> <b>${deliveryFee===0?'Grátis':money(deliveryFee)}</b></div>
-                ${discount > 0 ? `<div style="display:flex; justify-content:space-between; color:green;"><span>Desconto:</span> <b>-${money(discount)}</b></div>` : ''}
-                <div style="display:flex; justify-content:space-between; font-size:1.2rem; margin-top:5px; color:#d32f2f;"><span>Total:</span> <b>${money(total)}</b></div>
+            <div style="background:#f9f9f9; padding:15px; border-radius:10px; margin-top:15px;">
+                <div style="display:flex; justify-content:space-between;"><span>Subtotal:</span> <b>${money(sub)}</b></div>
+                <div style="display:flex; justify-content:space-between;"><span>Entrega:</span> <b>${del===0?'Grátis':money(del)}</b></div>
+                ${disc > 0 ? `<div style="display:flex; justify-content:space-between; color:green;"><span>Desconto:</span> <b>-${money(disc)}</b></div>` : ''}
+                <div style="display:flex; justify-content:space-between; font-size:1.2rem; margin-top:8px; color:#d32f2f; border-top:1px solid #eee; padding-top:5px;">
+                    <span>Total:</span> <b>${money(tot)}</b>
+                </div>
             </div>
-            <button id="btn-finish" style="width:100%; background:#4caf50; color:white; padding:15px; border:none; border-radius:8px; font-weight:bold; margin-top:10px;">FINALIZAR PEDIDO</button>
-            <button id="btn-clear" style="width:100%; background:#ff4081; color:white; padding:10px; border:none; border-radius:8px; margin-top:5px;">Limpar Carrinho</button>
+            <button id="btn-finish" style="width:100%; background:#4caf50; color:white; padding:15px; border:none; border-radius:10px; font-weight:bold; margin-top:10px; font-size:1rem; cursor:pointer;">FINALIZAR PEDIDO</button>
+            <button id="btn-clear" style="width:100%; background:#ffebee; color:#d32f2f; padding:12px; border:none; border-radius:10px; font-weight:bold; margin-top:5px; cursor:pointer;">Limpar Carrinho</button>
         `;
         
-        sum.querySelector("#btn-finish").onclick = () => fecharPedido(total, deliveryFee, discount);
-        sum.querySelector("#btn-clear").onclick = () => { cart = []; renderMiniCart(); };
-        
-        // Listeners para recalcular se mudar opção
-        getEl('retirar-local')?.addEventListener('change', renderMiniCart);
+        document.getElementById("btn-finish").onclick = () => fecharPedido(tot, del, disc);
+        document.getElementById("btn-clear").onclick = () => { cart = []; renderMiniCart(); };
     }
 
+    /* --- 12. FINALIZAÇÃO DO PEDIDO --- */
     async function fecharPedido(total, delivery, discount) {
         if(cart.length === 0) return alert("Carrinho vazio!");
-        if(!currentUser) { alert("Faça Login!"); Overlays.open(el.loginModal); return; }
+        if(!currentUser) { alert("Faça Login para continuar!"); Overlays.open(document.getElementById("login-modal")); return; }
 
         let end = "";
-        if(getEl('retirar-local')?.checked) end = "RETIRADA NO LOCAL";
-        else if(modoEnderecoManual) end = `${getEl("manualEndereco").value}, ${getEl("manualNumero").value} (Manual)`;
-        else end = `${getEl("endereco-auto").value}, ${getEl("numero-input").value}`;
+        if(document.getElementById('retirar-local')?.checked) end = "RETIRADA NO LOCAL";
+        else if(modoEnderecoManual) end = `${document.getElementById("manualEndereco").value}, ${document.getElementById("manualNumero").value} (Manual)`;
+        else end = `${document.getElementById("endereco-auto").value}, ${document.getElementById("numero-input").value}`;
 
         if(end.length < 5) return alert("Endereço inválido.");
 
@@ -668,95 +594,173 @@ document.addEventListener("DOMContentLoaded", () => {
             batch.update(db.collection("Usuarios").doc(currentUser.uid), { pedidosFeitos: firebase.firestore.FieldValue.increment(1) });
             await batch.commit();
 
-            const msg = `🍔 *Pedido DFL*\nCliente: ${pedido.cliente}\n\n${pedido.itens}\n\n📍 ${end}\n💰 *Total: ${money(total)}*`;
+            const msg = `🍔 *Pedido DFL*\nCliente: ${pedido.cliente}\n\n${pedido.itens}\n\n📍 Endereço: ${end}\n💰 *Total: ${money(total)}*`;
             window.open(`https://wa.me/5534997178336?text=${encodeURIComponent(msg)}`, '_blank');
             
             cart = []; renderMiniCart(); Overlays.closeAll();
         } catch(e) {
             console.error(e);
-            alert("Erro ao salvar. Tente novamente.");
+            // Fallback se o Firebase falhar
+            const msg = `🍔 *Pedido DFL (Offline)*\n${pedido.itens}\n\n📍 ${end}\n💰 Total: ${money(total)}`;
+            window.open(`https://wa.me/5534997178336?text=${encodeURIComponent(msg)}`, '_blank');
         }
     }
 
-    /* --- 📊 ÁREA DO USUÁRIO & ADMIN (MANTIDO) --- */
-    getEl("pedidosBtn")?.addEventListener("click", () => {
-        if(!currentUser) { Overlays.open(el.loginModal); return; }
-        Overlays.open(el.pedidosPanel);
-        getEl("listaPedidos").innerHTML = "Carregando...";
+    /* --- 13. LOGIN (GOOGLE + EMAIL) --- */
+    document.getElementById("google-login")?.addEventListener("click", () => {
+        inicializarFirebase();
+        const provider = new firebase.auth.GoogleAuthProvider();
+        auth.signInWithPopup(provider).then(r=>{currentUser=r.user; Overlays.closeAll(); popupAdd("Logado!");}).catch(e=>alert(e.message));
+    });
+
+    document.getElementById("login-form")?.addEventListener("submit", (e) => {
+        e.preventDefault();
+        inicializarFirebase();
+        const em = document.getElementById("login-email").value;
+        const pw = document.getElementById("login-senha").value;
+        auth.signInWithEmailAndPassword(em, pw).then(r=>{currentUser=r.user; Overlays.closeAll(); popupAdd("Logado!");}).catch(e=>alert(e.message));
+    });
+
+    document.getElementById("user-btn")?.addEventListener("click", () => Overlays.open(document.getElementById("login-modal")));
+
+    /* --- 14. ÁREA DE USUÁRIO (HISTÓRICO E RECOMPENSAS) --- */
+    document.querySelector(".meus-pedidos-btn")?.addEventListener("click", () => {
+        if(!currentUser) { Overlays.open(document.getElementById("login-modal")); return; }
+        Overlays.open(document.getElementById("painelPedidos"));
+        
+        const div = document.getElementById("listaPedidos");
+        div.innerHTML = "Carregando...";
+        
         db.collection("Pedidos").where("uid", "==", currentUser.uid).orderBy("data", "desc").limit(10).get()
             .then(snap => {
-                getEl("listaPedidos").innerHTML = snap.docs.map(d => {
+                if(snap.empty) { div.innerHTML = "Nenhum pedido encontrado."; return; }
+                div.innerHTML = snap.docs.map(d => {
                     const p = d.data();
-                    return `<div class="pedido-card" style="padding:10px; border:1px solid #eee; margin-bottom:10px;"><b>${new Date(p.data).toLocaleDateString()}</b> - ${money(p.total)}<br><small>${p.itens.replace(/\n/g, ", ")}</small></div>`;
+                    return `<div class="pedido-card" style="padding:12px; border:1px solid #eee; margin-bottom:10px; background:#fff; border-radius:8px;">
+                        <b>Data:</b> ${new Date(p.data).toLocaleDateString()}<br>
+                        <b>Itens:</b><br> ${p.itens.replace(/\n/g, "<br>")}<br>
+                        <b style="color:green">Total: ${money(p.total)}</b>
+                    </div>`;
                 }).join('');
             });
     });
 
-    getEl("recompensasBtn")?.addEventListener("click", async () => {
-        if(!currentUser) { Overlays.open(el.loginModal); return; }
-        Overlays.open(el.recompensasPanel);
+    document.querySelector(".recompensas-btn")?.addEventListener("click", async () => {
+        if(!currentUser) { Overlays.open(document.getElementById("login-modal")); return; }
+        Overlays.open(document.getElementById("recompensas-panel"));
+        
         const u = await db.collection("Usuarios").doc(currentUser.uid).get();
         const feitos = u.data()?.pedidosFeitos || 0;
-        getEl("contador-valor").textContent = feitos;
+        document.getElementById("contador-valor").textContent = feitos;
         
+        // Barra de Progresso Fidelidade
+        const meta = 5; // Exemplo: ganha a cada 5
+        const pct = Math.min(100, (feitos / meta) * 100);
+        document.getElementById("progresso-bar").style.width = `${pct}%`;
+        document.getElementById("progresso-mensagem").textContent = feitos >= meta ? "Recompensa disponível!" : `Faltam ${meta - feitos} para o prêmio!`;
+
         const metas = [{l:5, v:"Coca Lata"}, {l:10, v:"Burguer Simples"}, {l:15, v:"Nível OURO"}];
-        getEl("listaRecompensas").innerHTML = metas.map(m => `
-            <div class="recompensa-item ${feitos>=m.l?'conquistado':''}" style="padding:10px; border:1px solid #eee; margin-bottom:5px; display:flex; align-items:center; ${feitos>=m.l?'background:#e8f5e9':''}">
+        document.getElementById("listaRecompensas").innerHTML = metas.map(m => `
+            <div class="recompensa-item" style="padding:12px; border:1px solid #eee; margin-bottom:5px; display:flex; align-items:center; ${feitos>=m.l?'background:#e8f5e9; border-color:green':''}">
                 <span style="font-size:1.5rem; margin-right:10px;">${getTierIcon(m.v)}</span>
-                <div style="flex:1"><b>${m.v}</b><br><small>Meta: ${m.l}</small></div>
+                <div style="flex:1"><b>${m.v}</b><br><small>Meta: ${m.l} Pedidos</small></div>
                 <div>${feitos>=m.l?'✅':'🔒'}</div>
             </div>
         `).join('');
     });
 
-    // ADMIN DASHBOARD
+    /* --- 15. PAINEL ADMIN (INTEGRAL) --- */
     const ADMINS = ["alefejohsefe@gmail.com", "contato@dafamilialanches.com.br"];
     function isAdmin(u) { return u && ADMINS.includes(u.email); }
     
     function createAdminFab() {
-        const btn = getEl("reports-btn");
+        const btn = document.getElementById("reports-btn");
         if(btn) {
             btn.style.display = "block";
             btn.onclick = () => {
-                if(!getEl("admin-dashboard")) createDashboardHTML();
-                Overlays.open(getEl("admin-dashboard"));
+                if(!document.getElementById("admin-dashboard")) createDashboardHTML();
+                Overlays.open(document.getElementById("admin-dashboard"));
                 carregarDadosAdmin();
             };
         }
     }
 
     function createDashboardHTML() {
-        const d = document.createElement("div"); d.id = "admin-dashboard"; d.className = "modal";
-        d.innerHTML = `<div class="modal-content" style="max-width:800px;"><div class="modal-head"><h3>Admin</h3><button class="dashboard-close">✖</button></div><div style="padding:20px;"><canvas id="chart-vendas"></canvas><div id="adm-lista" style="margin-top:20px;"></div></div></div>`;
+        const d = document.createElement("div"); 
+        d.id = "admin-dashboard"; 
+        d.className = "modal";
+        d.innerHTML = `
+        <div class="modal-content" style="max-width:800px;">
+            <div class="modal-head"><h3>Painel Admin</h3><button class="dashboard-close">✖</button></div>
+            <div style="padding:20px;">
+                <div style="display:flex; gap:15px; margin-bottom:20px;">
+                    <div class="admin-stat-card" style="flex:1; padding:15px; border:1px solid #eee; border-radius:8px; text-align:center;">
+                        Vendas<br><b id="adm-vendas" style="font-size:1.5rem; color:green;">...</b>
+                    </div>
+                    <div class="admin-stat-card" style="flex:1; padding:15px; border:1px solid #eee; border-radius:8px; text-align:center;">
+                        Pedidos<br><b id="adm-peds" style="font-size:1.5rem; color:#ffb300;">...</b>
+                    </div>
+                </div>
+                <canvas id="chart-vendas" height="100"></canvas>
+                <div id="adm-lista" style="margin-top:20px; max-height:300px; overflow:auto;"></div>
+            </div>
+        </div>`;
         document.body.appendChild(d);
         d.querySelector(".dashboard-close").onclick = () => Overlays.closeAll();
     }
 
     async function carregarDadosAdmin() {
-        const s = await db.collection("Pedidos").orderBy("data", "desc").limit(20).get();
+        const s = await db.collection("Pedidos").orderBy("data", "desc").limit(50).get();
         const peds = s.docs.map(d => d.data());
-        const ctx = getEl("chart-vendas").getContext('2d');
-        new Chart(ctx, {
-            type: 'bar',
-            data: {
-                labels: peds.map(p => new Date(p.data).toLocaleDateString()),
-                datasets: [{ label: 'Vendas', data: peds.map(p => p.total), backgroundColor: '#ffb300' }]
-            }
-        });
-        getEl("adm-lista").innerHTML = peds.map(p => `<div>${p.cliente} - ${money(p.total)}</div>`).join('');
+        
+        document.getElementById("adm-vendas").textContent = money(peds.reduce((a,b)=>a+b.total,0));
+        document.getElementById("adm-peds").textContent = peds.length;
+        
+        // Gráfico Simples
+        if(window.Chart) {
+            const ctx = document.getElementById("chart-vendas").getContext('2d');
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: peds.slice(0,10).map(p => new Date(p.data).toLocaleDateString()).reverse(),
+                    datasets: [{ label: 'Vendas (R$)', data: peds.slice(0,10).map(p=>p.total).reverse(), backgroundColor: '#ffb300' }]
+                }
+            });
+        }
+        document.getElementById("adm-lista").innerHTML = peds.map(p => `<div style="border-bottom:1px solid #eee; padding:8px;">${p.cliente} - <b>${money(p.total)}</b></div>`).join('');
     }
 
-    // BANNER LOOP
+    /* --- 16. UTILITÁRIOS E POPUP --- */
+    function popupAdd(msg) {
+        let p = document.querySelector(".popup-add");
+        if(!p) { p=document.createElement("div"); p.className="popup-add"; document.body.appendChild(p); }
+        p.textContent = msg; p.classList.add("show"); setTimeout(()=>p.classList.remove("show"),2000);
+    }
+
+    // Banner de Status (Aberto/Fechado)
     setInterval(() => {
         const h = new Date().getHours();
         const aberto = h >= 18 && h < 23;
-        const b = getEl("status-banner");
+        const b = document.getElementById("status-banner");
         if(b) {
             b.textContent = aberto ? "🟢 ABERTO AGORA" : "🔴 FECHADO (Abre às 18h)";
             b.className = `status-banner ${aberto ? "open" : "closed"}`;
         }
     }, 60000);
 
-    console.log("🔥 DFL v10.0 COMPLETO CARREGADO");
+    // Botão Calcular Frete (ViaCEP)
+    document.getElementById("btn-calcular-frete")?.addEventListener("click", async () => {
+        const cep = document.getElementById("cep-input").value.replace(/\D/g, '');
+        if(cep.length !== 8) return popupAdd("CEP Inválido");
+        try {
+            const res = await fetch(`https://viacep.com.br/ws/${cep}/json/`);
+            const data = await res.json();
+            if(data.erro) return popupAdd("CEP não encontrado");
+            document.getElementById("endereco-auto").value = `${data.logradouro} - ${data.bairro}`;
+            renderMiniCart();
+        } catch(e) { popupAdd("Erro na busca"); }
+    });
 
-}); // FIM DO SCRIPT
+    console.log("🔥 DFL v12.0 MONSTRO CARREGADO");
+
+}); // FIM DO ARQUIVO
