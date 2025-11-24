@@ -1,83 +1,59 @@
 /* ===========================================================
-   🎨 DFL CSS v11.0 (VISUAL v5.6 RESTAURADO)
-   - Cabeçalhos Amarelos (#ffca28)
-   - Bordas Arredondadas
-   - Inputs Estilizados
+   🎨 DFL CSS v11.0 (VISUAL v5.6 FIEL)
    =========================================================== */
 
 :root {
   --bg-body: #f4f4f4;
   --card-bg: #ffffff;
-  --acento: #ffca28; /* Amarelo Marca */
+  --acento: #ffca28; /* O Amarelo da marca */
   --botao: #ffb300;
-  --success: #4caf50;
   --danger: #d32f2f;
+  --success: #4caf50;
   --txt: #333;
-  --shadow: 0 4px 15px rgba(0,0,0,0.15);
   --radius: 12px;
 }
 
 body { margin: 0; padding: 0; font-family: 'Poppins', sans-serif; background: var(--bg-body); color: var(--txt); padding-bottom: 80px; }
 * { box-sizing: border-box; }
 
-/* --- HEADER --- */
-.header { position: fixed; top: 0; left: 0; right: 0; background: var(--acento); padding: 12px 15px; z-index: 1000; box-shadow: 0 2px 10px rgba(0,0,0,0.1); display: flex; justify-content: space-between; align-items: center; }
+/* HEADER */
+.header { position: fixed; top: 0; left: 0; right: 0; background: var(--acento); padding: 12px 15px; z-index: 1000; box-shadow: 0 2px 5px rgba(0,0,0,0.15); display: flex; justify-content: space-between; align-items: center; }
 .header-content { display: flex; align-items: center; gap: 10px; }
 .logo { width: 50px; height: 50px; border-radius: 50%; border: 2px solid #fff; }
 .header-info h1 { margin: 0; font-size: 1.1rem; font-weight: 800; color: #222; }
 .tagline { margin: 0; font-size: 0.75rem; color: #d84315; font-weight: 600; }
-.header-actions { display: flex; gap: 10px; }
-.user-button { background: #fff; border: none; border-radius: 20px; padding: 8px 14px; font-weight: 700; font-size: 0.85rem; cursor: pointer; box-shadow: 0 2px 5px rgba(0,0,0,0.1); color: #333; }
-.cart-button { background: #222; color: var(--acento); border: none; border-radius: 20px; padding: 8px 14px; font-weight: 700; cursor: pointer; box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
+.header-actions { display: flex; gap: 8px; }
+.user-button { background: #fff; border: none; border-radius: 20px; padding: 8px 12px; font-weight: 700; font-size: 0.85rem; cursor: pointer; box-shadow: 0 2px 5px rgba(0,0,0,0.1); color: #333; }
+.cart-button { background: #222; color: var(--acento); border: none; border-radius: 20px; padding: 8px 12px; font-weight: 700; cursor: pointer; box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
 
 .main-content-wrapper { margin-top: 85px; padding: 10px; max-width: 1100px; margin-left: auto; margin-right: auto; }
 
-/* --- BUSCA & STATUS --- */
-.status-banner { text-align: center; padding: 10px; border-radius: var(--radius); color: #fff; font-weight: bold; margin-bottom: 20px; font-size: 0.95rem; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+/* BANNER & BUSCA */
+.status-banner { text-align: center; padding: 10px; border-radius: var(--radius); color: #fff; font-weight: bold; margin-bottom: 15px; font-size: 0.95rem; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
 .status-banner.open { background: var(--success); } .status-banner.closed { background: var(--danger); }
+.search-container input { transition: all 0.3s; background: #fff; border: 2px solid #eee !important; }
+.search-container input:focus { border-color: var(--botao) !important; box-shadow: 0 4px 12px rgba(255, 202, 40, 0.3); }
 
-.search-container input { 
-    transition: all 0.3s; 
-    background: #fff;
-    border: 2px solid #eee !important;
-}
-.search-container input:focus { 
-    border-color: var(--botao) !important; 
-    box-shadow: 0 4px 12px rgba(255, 202, 40, 0.3); 
-}
-
-/* --- GRID & CARDS (Visual v5.6) --- */
+/* GRID CARDS */
 section h2 { font-size: 1.3rem; color: #d84315; border-left: 5px solid var(--acento); padding-left: 12px; margin-bottom: 20px; font-weight: 800; }
 .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(165px, 1fr)); gap: 15px; }
 
 .card, .promo-card-styled {
-    background: var(--card-bg);
-    border-radius: 16px; /* Mais arredondado */
-    overflow: hidden;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.08);
-    display: flex; flex-direction: column; height: 100%;
-    transition: transform 0.2s; border: 1px solid #f0f0f0;
+    background: var(--card-bg); border-radius: 16px; overflow: hidden; box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+    display: flex; flex-direction: column; height: 100%; transition: transform 0.2s; border: 1px solid #f0f0f0;
 }
 .card:hover, .promo-card-styled:hover { transform: translateY(-4px); box-shadow: 0 8px 20px rgba(0,0,0,0.15); }
-
-.card img, .promo-card-styled img {
-    width: 100%; height: 150px; object-fit: cover;
-    border-bottom: 4px solid var(--acento);
-}
-
+.card img, .promo-card-styled img { width: 100%; height: 150px; object-fit: cover; border-bottom: 4px solid var(--acento); }
 .card-content, .promo-body { padding: 15px; display: flex; flex-direction: column; flex: 1; }
 .card h3, .promo-title { font-size: 1rem; margin: 0 0 8px 0; color: #333; font-weight: 800; line-height: 1.3; }
 .card p, .promo-desc, .promo-ingredientes { font-size: 0.8rem; color: #666; margin-bottom: 12px; line-height: 1.4; }
-
-/* Preços e Botões */
 .price, .promo-prices { margin-top: auto; margin-bottom: 12px; } 
 .price b, .promo-new { font-size: 1.2rem; color: var(--success); font-weight: 800; }
 .promo-old { text-decoration: line-through; color: #999; font-size: 0.85rem; margin-right: 8px; }
 
 .add-cart, .btn-add-green {
-    background: linear-gradient(180deg, #4caf50, #388e3c);
-    color: #fff; border: none; padding: 12px; border-radius: 10px;
-    font-weight: 800; cursor: pointer; font-size: 0.95rem; text-transform: uppercase;
+    background: linear-gradient(180deg, #4caf50, #388e3c); color: #fff; border: none; padding: 12px;
+    border-radius: 10px; font-weight: 800; cursor: pointer; font-size: 0.95rem; text-transform: uppercase;
     width: 100%; box-shadow: 0 4px 0 #2e7d32; transition: transform 0.1s;
 }
 .add-cart:active, .btn-add-green:active { transform: translateY(4px); box-shadow: none; }
@@ -85,111 +61,45 @@ section h2 { font-size: 1.3rem; color: #d84315; border-left: 5px solid var(--ace
 .extras-btn:active { transform: translateY(4px); box-shadow: none; }
 .actions { display: flex; width: 100%; }
 
-/* --- MODAIS (ESTILO v5.6 RESTAURADO) --- */
+/* MODAIS (Visual v5.6 Restaurado) */
 .modal { position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 2000; display: none; align-items: center; justify-content: center; backdrop-filter: blur(3px); }
 .modal.show { display: flex; animation: zoomIn 0.2s ease-out; }
-.modal-content {
-    background: #fff; width: 90%; max-width: 420px;
-    border-radius: 20px; /* Bem arredondado */
-    overflow: hidden;
-    box-shadow: 0 15px 40px rgba(0,0,0,0.4);
-    position: relative;
-}
+.modal-content { background: #fff; width: 90%; max-width: 420px; border-radius: 20px; overflow: hidden; box-shadow: 0 15px 40px rgba(0,0,0,0.4); }
+.modal-head { background: var(--acento); padding: 18px 20px; display: flex; justify-content: space-between; align-items: center; color: #222; font-weight: 800; font-size: 1.1rem; }
+.modal-head button { background: rgba(0,0,0,0.1); border: none; width: 32px; height: 32px; border-radius: 50%; font-weight: bold; cursor: pointer; color: #222; }
+.login-box { padding: 0; }
 
-/* Cabeçalho Amarelo (Login, Combos, Extras) */
-.modal-head {
-    background: var(--acento); /* Amarelo */
-    padding: 18px 20px;
-    display: flex; justify-content: space-between; align-items: center;
-    color: #222; border-bottom: 1px solid rgba(0,0,0,0.05);
-}
-.modal-head h3 { margin: 0; font-size: 1.2rem; font-weight: 800; }
-.modal-head button { 
-    background: rgba(0,0,0,0.1); border: none; width: 32px; height: 32px; 
-    border-radius: 50%; font-weight: bold; cursor: pointer; color: #222; 
-}
+.btn-google { display: flex; align-items: center; justify-content: center; gap: 12px; background: #fff; border: 1px solid #ddd; padding: 14px; border-radius: 10px; width: 100%; font-weight: 700; color: #555; font-size: 1rem; margin-top: 15px; cursor: pointer; }
+.btn-primary { background: var(--success); color: #fff; border: none; padding: 12px; border-radius: 8px; font-weight: 700; width: 100%; cursor: pointer; }
+.btn-secondary { background: #eee; color: #333; border: none; padding: 12px; border-radius: 8px; font-weight: 700; width: 100%; cursor: pointer; }
 
-.login-box { padding: 0; } /* O padding vai no conteudo interno */
-
-/* --- MINI CART (LATERAL) --- */
-.mini-cart {
-    position: fixed; top: 0; right: -100%; width: 90%; max-width: 400px; height: 100vh;
-    background: #fff; z-index: 2100; transition: right 0.35s cubic-bezier(0.25, 1, 0.5, 1);
-    display: flex; flex-direction: column; box-shadow: -5px 0 25px rgba(0,0,0,0.3);
-}
+/* MINI CART */
+.mini-cart { position: fixed; top: 0; right: -100%; width: 90%; max-width: 400px; height: 100vh; background: #fff; z-index: 2100; transition: right 0.35s cubic-bezier(0.25, 1, 0.5, 1); display: flex; flex-direction: column; box-shadow: -5px 0 25px rgba(0,0,0,0.3); }
 .mini-cart.active { right: 0; }
-
-.mini-head { 
-    padding: 20px; background: #fff; display: flex; justify-content: space-between; align-items: center; 
-    border-bottom: 1px solid #eee; 
-}
-.mini-head h3 { margin: 0; font-size: 1.3rem; font-weight: 800; color: #333; }
-
+.mini-head { padding: 20px; background: #fff; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #eee; font-weight: 800; font-size: 1.2rem; }
 .mini-list { flex: 1; overflow-y: auto; padding: 15px; background: #fafafa; }
 .mini-foot { padding: 20px; background: #fff; border-top: 1px solid #eee; box-shadow: 0 -5px 20px rgba(0,0,0,0.05); }
 
-/* Barra de Progresso Frete (Estilo v5.6 Amarelo) */
-.progress-wrapper {
-    background: #fff8e1; /* Fundo amarelo claro */
-    padding: 15px; border-radius: 12px; margin-bottom: 15px; 
-    border: 1px solid #ffe082; text-align: center;
-}
-.progress-text { font-size: 0.9rem; margin-bottom: 8px; color: #555; font-weight: 600; }
-.progress-bar-bg { height: 10px; background: #ffe082; border-radius: 5px; overflow: hidden; }
+.progress-wrapper { background: #fff8d6; padding: 10px; border-radius: 10px; margin-bottom: 10px; text-align: center; border: 1px solid #ffca28; }
+.progress-bar-bg { height: 10px; background: #ffe082; border-radius: 5px; overflow: hidden; margin-top: 5px; }
 .progress-fill { height: 100%; background: var(--success); width: 0%; transition: width 0.5s; }
+.frete-gratis-aviso { background: #fff3cd; color: #856404; padding: 10px; border-radius: 8px; font-size: 0.85rem; margin: 10px 0; border-left: 4px solid #ffeeba; }
 
-/* Aviso Amarelo (Mimo da DFL) */
-.frete-gratis-aviso {
-    background: #fff8e1; border-left: 4px solid var(--acento);
-    padding: 10px 15px; font-size: 0.85rem; color: #555;
-    margin: 10px 0; border-radius: 4px; line-height: 1.4;
-}
-
-/* Inputs do Carrinho */
-.frete-container input[type="text"] {
-    padding: 12px; border: 1px solid #ddd; border-radius: 8px;
-    font-size: 0.95rem; outline: none; transition: border 0.2s;
-}
+.frete-container input[type="text"] { padding: 12px; border: 1px solid #ddd; border-radius: 8px; font-size: 0.95rem; outline: none; transition: border 0.2s; }
 .frete-container input[type="text"]:focus { border-color: var(--botao); }
-.btn-calcular-frete {
-    background: #333; color: #fff; border: none; padding: 0 15px;
-    border-radius: 8px; font-weight: 700; cursor: pointer;
-}
+.btn-calcular-frete { background: #333; color: #fff; border: none; padding: 0 15px; border-radius: 8px; font-weight: 700; cursor: pointer; }
 
-/* Botões Finais */
-#btn-finish { 
-    background: var(--success); color: #fff; padding: 15px; border-radius: 10px;
-    font-weight: 800; font-size: 1.1rem; width: 100%; border: none; cursor: pointer;
-    box-shadow: 0 4px 10px rgba(76, 175, 80, 0.3); margin-top: 10px;
-}
-#btn-clear {
-    background: #ffebee; color: var(--danger); padding: 10px; border-radius: 8px;
-    font-weight: 700; width: 100%; border: none; cursor: pointer; margin-top: 10px;
-}
-
-/* --- COMBOS & EXTRAS --- */
-.combo-option-line, .extra-line {
-    display: flex; justify-content: space-between; padding: 14px; 
-    border: 1px solid #eee; border-radius: 10px; margin-bottom: 10px; 
-    align-items: center; cursor: pointer; font-weight: 500;
-}
+.combo-option-line, .extra-line { display: flex; justify-content: space-between; padding: 14px; border: 1px solid #eee; border-radius: 10px; margin-bottom: 10px; align-items: center; cursor: pointer; font-weight: 500; }
 .combo-option-line:hover { border-color: var(--acento); background: #fffde7; }
 
-/* --- LOGIN GOOGLE --- */
-.btn-google {
-    display: flex; align-items: center; justify-content: center; gap: 12px;
-    background: #fff; border: 1px solid #ddd; padding: 14px;
-    border-radius: 10px; width: 100%; font-weight: 700; color: #555;
-    font-size: 1rem; margin-top: 15px; cursor: pointer;
-}
+.meus-pedidos-btn, .recompensas-btn { position: fixed; bottom: 20px; right: 20px; background: var(--botao); border: none; padding: 12px 20px; border-radius: 50px; font-weight: bold; box-shadow: 0 4px 10px rgba(0,0,0,0.2); cursor: pointer; z-index: 1500; }
+.minhas-recompensas { bottom: 80px; }
+.pedidos-panel, .recompensas-panel { position: fixed; right: 0; top: 0; width: 100%; max-width: 450px; height: 100vh; background: #f9f9f9; z-index: 1600; transition: right 0.3s; display: flex; flex-direction: column; }
+.pedidos-panel.active, .recompensas-panel.active { right: 0; }
+.pedidos-header, .recompensas-header { padding: 15px; background: var(--acento); font-weight: 700; display: flex; justify-content: space-between; font-size: 1.1rem; }
+.pedidos-body, .recompensas-body { padding: 15px; overflow-y: auto; flex: 1; }
 
-/* Animação */
-@keyframes zoomIn { from { opacity: 0; transform: scale(0.9); } to { opacity: 1; transform: scale(1); } }
-
-.popup-add {
-    position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%);
-    background: #222; color: #fff; padding: 12px 30px; border-radius: 50px;
-    font-weight: 700; box-shadow: 0 5px 20px rgba(0,0,0,0.3); z-index: 3000;
-    opacity: 0; pointer-events: none; transition: all 0.3s;
-}
+.popup-add { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); background: #222; color: #fff; padding: 12px 30px; border-radius: 50px; font-weight: 700; box-shadow: 0 5px 20px rgba(0,0,0,0.3); z-index: 3000; opacity: 0; pointer-events: none; transition: all 0.3s; }
 .popup-add.show { opacity: 1; bottom: 40px; }
+@keyframes zoomIn { from { opacity: 0; transform: scale(0.9); } to { opacity: 1; transform: scale(1); } }
+.footer { text-align: center; padding: 20px; background: #ddd; margin-top: 40px; font-size: 0.8rem; color: #666; }
