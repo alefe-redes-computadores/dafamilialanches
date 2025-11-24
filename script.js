@@ -476,10 +476,18 @@ document.addEventListener("DOMContentLoaded", () => {
     });  
 
     // COMBOS
-    const comboDrinkOptions = {  
-        casal: [ { rotulo: "Fanta 1L", delta: 0.01 }, { rotulo: "Coca 1L", delta: 3.0 } ],  
-        familia: [ { rotulo: "Kuat 2L", delta: 0.01 }, { rotulo: "Coca 2L", delta: 5.0 } ]
-    };  
+    const comboDrinkOptions = {
+    casal: [ 
+        { rotulo: "Fanta 1L", delta: 0.01 },
+        { rotulo: "Coca 1L", delta: 3.0 },
+        { rotulo: "Coca-Cola 1L Zero", delta: 3.0 } 
+    ],
+    familia: [ 
+        { rotulo: "Kuat 2L", delta: 0.01 }, 
+        { rotulo: "Coca 2L", delta: 5.0 } 
+    ]
+};
+
     let _comboCtx = null;  
     
     function openComboModal(nome, preco) {
