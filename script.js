@@ -309,20 +309,38 @@ document.addEventListener("DOMContentLoaded", () => {
         hide() { el.cartBackdrop.classList.remove("active"); document.body.classList.remove("no-scroll"); },  
     };
 
-    const Overlays = {  
-        closeAll() {  
-            document.querySelectorAll(".modal.show, #mini-cart.active, .pedidos-panel.active, .recompensas-panel.active, #admin-dashboard.show")
-                .forEach((e) => e.classList.remove("show", "active"));  
-            Backdrop.hide();  
-        },  
-        open(modalLike) {  
-            Overlays.closeAll();  
-            if (!modalLike) return;  
-            modalLike.classList.add(
-                (modalLike.id === "mini-cart" || modalLike.id === "painelPedidos" || modalLike.id === "recompensas-panel") ? "active" : "show"
-            );  
-            Backdrop.show();  
-        },  
+    const Overlays = {
+    closeAll() {
+        // remove flag de carrinho aberto
+        document.body.classList.remove("cart-open");
+
+        document
+            .querySelectorAll(
+                ".modal.show, #mini-cart.active, .pedidos-panel.active, .recompensas-panel.active, #admin-dashboard.show"
+            )
+            .forEach((e) => e.classList.remove("show", "active"));
+
+        Backdrop.hide();
+    },
+    open(modalLike) {
+        Overlays.closeAll();
+        if (!modalLike) return;
+
+        const isSidePanel =
+            modalLike.id === "mini-cart" ||
+            modalLike.id === "painelPedidos" ||
+            modalLike.id === "recompensas-panel";
+
+        modalLike.classList.add(isSidePanel ? "active" : "show");
+
+        // se for o mini-carrinho, marca o body como "carrinho aberto"
+        if (modalLike.id === "mini-cart") {
+            document.body.classList.add("cart-open");
+        }
+
+        Backdrop.show();
+    },
+};
     };  
     
     el.cartBackdrop.addEventListener("click", () => Overlays.closeAll());
@@ -1283,4 +1301,4 @@ document.addEventListener('DOMContentLoaded', () => {
 // ============================================================
 // ✅ FIM DO CÓDIGO v6.0 CORRIGIDO
 // Cole as 8 partes em sequência no seu script.js
-// ============================================================
+// ============================================================q
