@@ -5,7 +5,782 @@
 :root {
   --bg-body: #f4f4f4;
   --card-bg: #ffffff;
+  --acento: #ffca28; /* ===========================================================
+   🎨 DFL CSS v14.0 — RECONSTRUÇÃO OFICIAL v6.0
+   - Visual original 100% restaurado
+   - Mini-cart com scroll real e sem sobreposição
+   - Painéis ocultados quando carrinho abre
+   - Z-index unificado e sem conflitos
+   =========================================================== */
+
+:root {
+  --bg-body: #f4f4f4;
+  --card-bg: #ffffff;
   --acento: #ffca28; /* Amarelo DFL */
+  --botao: #ffb300;
+  --success: #4caf50;
+  --danger: #d32f2f;
+  --txt: #333;
+  --radius: 12px;
+}
+
+/* BASE ------------------------------------------------------*/
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  font-family: 'Poppins', sans-serif;
+  background: var(--bg-body);
+  color: var(--txt);
+  padding-bottom: 80px;
+  overflow-x: hidden;
+}
+
+img {
+  user-select: none;
+  pointer-events: none;
+}
+
+/* HEADER ------------------------------------------------------*/
+.header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  background: var(--acento);
+  padding: 12px 15px;
+  z-index: 1000;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.15);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.header-content {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.logo {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  border: 2px solid #fff;
+}
+
+.header-info h1 {
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: #222;
+}
+
+.tagline {
+  margin: 0;
+  font-size: 0.75rem;
+  color: #d84315;
+  font-weight: 600;
+}
+
+.header-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.user-button {
+  background: #fff;
+  border: none;
+  border-radius: 20px;
+  padding: 8px 14px;
+  font-weight: 700;
+  font-size: 0.85rem;
+  cursor: pointer;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+  color: #333;
+}
+
+.cart-button {
+  background: #222;
+  color: var(--acento);
+  border: none;
+  border-radius: 20px;
+  padding: 8px 14px;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+}
+
+/* LAYOUT GERAL -----------------------------------------------*/
+.main-content-wrapper {
+  margin-top: 85px;
+  padding: 10px;
+  max-width: 1100px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* STATUS E BUSCA ----------------------------------------------*/
+.status-banner {
+  text-align: center;
+  padding: 10px;
+  border-radius: var(--radius);
+  color: #fff;
+  font-weight: bold;
+  margin-bottom: 20px;
+  font-size: 0.95rem;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+.status-banner.open { background: var(--success); }
+.status-banner.closed { background: var(--danger); }
+
+.search-container input {
+  width: 100%;
+  padding: 14px 16px;
+  border-radius: 12px;
+  border: 2px solid #eee !important;
+  background: #fff;
+  outline: none;
+  font-size: 0.95rem;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+  transition: .2s;
+}
+.search-container input:focus {
+  border-color: var(--botao) !important;
+  box-shadow: 0 4px 12px rgba(255,202,40,0.3);
+}
+
+/* SEÇÃO DE PROMOÇÕES ------------------------------------------*/
+.promo-section h2 {
+  font-size: 1.3rem;
+  color: #d84315;
+  border-left: 5px solid var(--acento);
+  padding-left: 12px;
+  margin-bottom: 5px;
+  font-weight: 800;
+}
+
+.promo-sub {
+  margin-top: 0;
+  margin-bottom: 10px;
+  color: #444;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.countdown-ticker {
+  font-size: 0.9rem;
+  background: #fff8d6;
+  border: 1px solid #ffe082;
+  padding: 8px 12px;
+  border-radius: 10px;
+  margin-bottom: 15px;
+  display: inline-block;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(165px, 1fr));
+  gap: 15px;
+}
+
+/* CARDS GERAIS ------------------------------------------------*/
+.card,
+.promo-card-styled {
+  background: var(--card-bg);
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  transition: transform 0.2s;
+  border: 1px solid #f0f0f0;
+}
+
+.card:hover,
+.promo-card-styled:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+}
+
+.card img,
+.promo-card-styled img {
+  width: 100%;
+  height: 150px;
+  object-fit: cover;
+  border-bottom: 4px solid var(--acento);
+}
+
+.card-content,
+.promo-body {
+  padding: 15px;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+.card h3,
+.promo-title {
+  font-size: 1rem;
+  margin: 0 0 8px 0;
+  color: #333;
+  font-weight: 800;
+}
+
+.card p,
+.promo-desc,
+.promo-ingredientes {
+  font-size: 0.8rem;
+  color: #666;
+  margin-bottom: 12px;
+  line-height: 1.4;
+}
+
+.price,
+.promo-prices {
+  margin-top: auto;
+  margin-bottom: 12px;
+}
+
+.price b,
+.promo-new {
+  font-size: 1.2rem;
+  color: var(--success);
+  font-weight: 800;
+}
+
+.promo-old {
+  text-decoration: line-through;
+  color: #999;
+  font-size: 0.85rem;
+  margin-right: 8px;
+}
+
+/* BOTÕES ------------------------------------------------------*/
+.add-cart,
+.btn-add-green {
+  background: linear-gradient(180deg, #4caf50, #388e3c);
+  color: #fff;
+  border: none;
+  padding: 12px;
+  border-radius: 10px;
+  font-weight: 800;
+  cursor: pointer;
+  font-size: 0.95rem;
+  text-transform: uppercase;
+  width: 100%;
+  box-shadow: 0 4px 0 #2e7d32;
+  transition: transform 0.1s;
+}
+
+.add-cart:active,
+.btn-add-green:active {
+  transform: translateY(4px);
+  box-shadow: none;
+}
+
+.extras-btn {
+  background: var(--acento);
+  border: none;
+  padding: 12px;
+  border-radius: 10px;
+  font-weight: 700;
+  color: #333;
+  margin-left: 8px;
+  cursor: pointer;
+  box-shadow: 0 4px 0 #e0a800;
+}
+
+.extras-btn:active {
+  transform: translateY(4px);
+  box-shadow: none;
+}
+
+.actions {
+  display: flex;
+  width: 100%;
+}
+/* ===========================================================
+   🎨 DFL CSS v14.0 — RECONSTRUÇÃO OFICIAL v6.0
+   - Visual original 100% restaurado
+   - Mini-cart com scroll real e sem sobreposição
+   - Painéis ocultados quando carrinho abre
+   - Z-index unificado e sem conflitos
+   =========================================================== */
+
+:root {
+  --bg-body: #f4f4f4;
+  --card-bg: #ffffff;
+  --acento: #ffca28; /* Amarelo DFL */
+  --botao: #ffb300;
+  --success: #4caf50;
+  --danger: #d32f2f;
+  --txt: #333;
+  --radius: 12px;
+}
+
+/* BASE ------------------------------------------------------*/
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  font-family: 'Poppins', sans-serif;
+  background: var(--bg-body);
+  color: var(--txt);
+  padding-bottom: 80px;
+  overflow-x: hidden;
+}
+
+img {
+  user-select: none;
+  pointer-events: none;
+}
+
+/* HEADER ------------------------------------------------------*/
+.header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  background: var(--acento);
+  padding: 12px 15px;
+  z-index: 1000;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.15);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.header-content {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.logo {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  border: 2px solid #fff;
+}
+
+.header-info h1 {
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: #222;
+}
+
+.tagline {
+  margin: 0;
+  font-size: 0.75rem;
+  color: #d84315;
+  font-weight: 600;
+}
+
+.header-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.user-button {
+  background: #fff;
+  border: none;
+  border-radius: 20px;
+  padding: 8px 14px;
+  font-weight: 700;
+  font-size: 0.85rem;
+  cursor: pointer;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+  color: #333;
+}
+
+.cart-button {
+  background: #222;
+  color: var(--acento);
+  border: none;
+  border-radius: 20px;
+  padding: 8px 14px;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+}
+
+/* LAYOUT GERAL -----------------------------------------------*/
+.main-content-wrapper {
+  margin-top: 85px;
+  padding: 10px;
+  max-width: 1100px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* STATUS E BUSCA ----------------------------------------------*/
+.status-banner {
+  text-align: center;
+  padding: 10px;
+  border-radius: var(--radius);
+  color: #fff;
+  font-weight: bold;
+  margin-bottom: 20px;
+  font-size: 0.95rem;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+.status-banner.open { background: var(--success); }
+.status-banner.closed { background: var(--danger); }
+
+.search-container input {
+  width: 100%;
+  padding: 14px 16px;
+  border-radius: 12px;
+  border: 2px solid #eee !important;
+  background: #fff;
+  outline: none;
+  font-size: 0.95rem;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+  transition: .2s;
+}
+.search-container input:focus {
+  border-color: var(--botao) !important;
+  box-shadow: 0 4px 12px rgba(255,202,40,0.3);
+}
+
+/* SEÇÃO DE PROMOÇÕES ------------------------------------------*/
+.promo-section h2 {
+  font-size: 1.3rem;
+  color: #d84315;
+  border-left: 5px solid var(--acento);
+  padding-left: 12px;
+  margin-bottom: 5px;
+  font-weight: 800;
+}
+
+.promo-sub {
+  margin-top: 0;
+  margin-bottom: 10px;
+  color: #444;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.countdown-ticker {
+  font-size: 0.9rem;
+  background: #fff8d6;
+  border: 1px solid #ffe082;
+  padding: 8px 12px;
+  border-radius: 10px;
+  margin-bottom: 15px;
+  display: inline-block;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(165px, 1fr));
+  gap: 15px;
+}
+
+/* CARDS GERAIS ------------------------------------------------*/
+.card,
+.promo-card-styled {
+  background: var(--card-bg);
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  transition: transform 0.2s;
+  border: 1px solid #f0f0f0;
+}
+
+.card:hover,
+.promo-card-styled:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+}
+
+.card img,
+.promo-card-styled img {
+  width: 100%;
+  height: 150px;
+  object-fit: cover;
+  border-bottom: 4px solid var(--acento);
+}
+
+.card-content,
+.promo-body {
+  padding: 15px;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+.card h3,
+.promo-title {
+  font-size: 1rem;
+  margin: 0 0 8px 0;
+  color: #333;
+  font-weight: 800;
+}
+
+.card p,
+.promo-desc,
+.promo-ingredientes {
+  font-size: 0.8rem;
+  color: #666;
+  margin-bottom: 12px;
+  line-height: 1.4;
+}
+
+.price,
+.promo-prices {
+  margin-top: auto;
+  margin-bottom: 12px;
+}
+
+.price b,
+.promo-new {
+  font-size: 1.2rem;
+  color: var(--success);
+  font-weight: 800;
+}
+
+.promo-old {
+  text-decoration: line-through;
+  color: #999;
+  font-size: 0.85rem;
+  margin-right: 8px;
+}
+
+/* BOTÕES ------------------------------------------------------*/
+.add-cart,
+.btn-add-green {
+  background: linear-gradient(180deg, #4caf50, #388e3c);
+  color: #fff;
+  border: none;
+  padding: 12px;
+  border-radius: 10px;
+  font-weight: 800;
+  cursor: pointer;
+  font-size: 0.95rem;
+  text-transform: uppercase;
+  width: 100%;
+  box-shadow: 0 4px 0 #2e7d32;
+  transition: transform 0.1s;
+}
+
+.add-cart:active,
+.btn-add-green:active {
+  transform: translateY(4px);
+  box-shadow: none;
+}
+
+.extras-btn {
+  background: var(--acento);
+  border: none;
+  padding: 12px;
+  border-radius: 10px;
+  font-weight: 700;
+  color: #333;
+  margin-left: 8px;
+  cursor: pointer;
+  box-shadow: 0 4px 0 #e0a800;
+}
+
+.extras-btn:active {
+  transform: translateY(4px);
+  box-shadow: none;
+}
+
+.actions {
+  display: flex;
+  width: 100%;
+}
+/* ===========================================================
+   🔻 FINAL DO CSS — RODAPÉ, COOKIES, RESPONSIVIDADE
+   =========================================================== */
+
+/* RODAPÉ ------------------------------------------------------*/
+.footer {
+  text-align: center;
+  padding: 20px;
+  background: #ddd;
+  margin-top: 40px;
+  font-size: 0.8rem;
+  color: #666;
+}
+
+.footer-links {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin: 10px 0;
+}
+
+.footer-btn {
+  background: var(--botao);
+  color: #fff;
+  padding: 8px 14px;
+  border-radius: 20px;
+  font-weight: 700;
+  text-decoration: none;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+}
+
+.footer-copy {
+  margin-top: 10px;
+  font-size: 0.75rem;
+  color: #444;
+}
+
+/* COOKIE BANNER ------------------------------------------------*/
+#cookie-banner {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: #222;
+  color: #fff;
+  padding: 15px;
+  font-size: 0.9rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  z-index: 5000;
+}
+
+#cookie-banner a {
+  color: #ffca28;
+  text-decoration: underline;
+}
+
+#cookie-banner button {
+  background: var(--acento);
+  border: none;
+  padding: 8px 14px;
+  border-radius: 8px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+/* SCROLL PERSONALIZADO ------------------------------------------*/
+::-webkit-scrollbar {
+  width: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #ccc;
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+/* ===========================================================
+   📱 RESPONSIVIDADE — MOBILE FIRST
+   =========================================================== */
+
+@media (max-width: 480px) {
+
+  .header {
+    padding: 10px;
+  }
+
+  .header-info h1 {
+    font-size: 1rem;
+  }
+
+  .tagline {
+    font-size: 0.7rem;
+  }
+
+  .grid {
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 12px;
+  }
+
+  .card img,
+  .promo-card-styled img {
+    height: 135px;
+  }
+
+  .mini-cart {
+    width: 100%;
+    max-width: none;
+  }
+
+  .mini-foot {
+    max-height: 52vh;
+  }
+
+  .pedidos-panel,
+  .recompensas-panel {
+    max-width: 100%;
+  }
+}
+
+/* ===========================================================
+   🧱 FIXES DE Z-INDEX (CONFLITOS RESOLVIDOS)
+   =========================================================== */
+
+.modal { z-index: 3000; }
+.mini-cart { z-index: 3500; }
+.popup-add { z-index: 4000; }
+#cookie-banner { z-index: 5000; }
+
+.pedidos-panel,
+.recompensas-panel {
+  z-index: 2600;
+}
+
+.meus-pedidos-btn,
+.recompensas-btn {
+  z-index: 2500;
+}
+
+/* ===========================================================
+   ✔️ FIX OFICIAL — NADA SOBREPOR O CARRINHO
+   =========================================================== */
+
+body.cart-open {
+  overflow: hidden; /* evita scroll atrás */
+}
+
+body.cart-open .meus-pedidos-btn,
+body.cart-open .recompensas-btn {
+  display: none !important;
+}
+
+body.cart-open .pedidos-panel,
+body.cart-open .recompensas-panel {
+  right: -100% !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+
+/* ===========================================================
+   ✔️ FIX OFICIAL — SAFARI / ANDROID SCROLL BUG
+   =========================================================== */
+
+.mini-cart,
+.mini-list,
+.mini-foot,
+.pedidos-panel,
+.recompensas-panel {
+  -webkit-overflow-scrolling: touch;
+}
+
+/* ===========================================================
+   FIM DO ARQUIVO — DFL v14.0 (v6.0)
+   =========================================================== */ Amarelo DFL */
   --botao: #ffb300;
   --success: #4caf50;
   --danger: #d32f2f;
