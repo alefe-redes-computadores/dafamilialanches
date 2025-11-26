@@ -1,8 +1,8 @@
-
 /* ===========================================================
-   🎨 Da Família Lanches – CSS v6.1 CORRIGIDO
-   - Carrinho com scroll funcional
-   - Botões laterais visíveis
+   🎨 Da Família Lanches – CSS v6.2 FINAL CORRIGIDO
+   - Carrinho compacto e funcional
+   - Barra de progresso reduzida
+   - Botões laterais únicos
    =========================================================== */
 
 :root {
@@ -39,7 +39,6 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* ======== HEADER ======== */
 .header {
   position: fixed;
   inset-inline: 0;
@@ -98,7 +97,6 @@ body {
 .status-banner.open { background: var(--success); }
 .status-banner.closed { background: var(--danger); }
 
-/* ======== BUSCA ======== */
 .search-container {
   max-width: 800px;
   margin: 20px auto;
@@ -122,7 +120,6 @@ body {
   transform: scale(1.02);
 }
 
-/* ======== PROMOÇÕES ======== */
 .promo-section { 
   text-align: center; 
   padding: 20px 10px;
@@ -272,7 +269,7 @@ section h2 { font-size: 1.3rem; text-align: center; margin-bottom: 15px; color: 
   transform: scale(1.03); 
 }
 
-/* ======== 🛒 MINI-CART CORRIGIDO ======== */
+/* ======== 🛒 CARRINHO COMPACTO E FUNCIONAL ======== */
 #cart-backdrop {
   position: fixed; 
   inset: 0; 
@@ -288,8 +285,8 @@ section h2 { font-size: 1.3rem; text-align: center; margin-bottom: 15px; color: 
   position: fixed; 
   right: 0; 
   top: 0; 
-  width: min(92vw, 400px); 
-  height: 100vh; /* CORRIGIDO: 100vh ao invés de 100dvh */
+  width: min(92vw, 380px); 
+  height: 100vh;
   background: #fff; 
   box-shadow: -4px 0 20px rgba(0, 0, 0, 0.25);
   transform: translateX(100%); 
@@ -297,7 +294,7 @@ section h2 { font-size: 1.3rem; text-align: center; margin-bottom: 15px; color: 
   z-index: 990; 
   display: none;
   flex-direction: column;
-  overflow: hidden; /* CRÍTICO */
+  overflow: hidden;
 }
 .mini-cart.active { display: flex; transform: translateX(0); }
 
@@ -305,50 +302,68 @@ section h2 { font-size: 1.3rem; text-align: center; margin-bottom: 15px; color: 
   display: flex; 
   justify-content: space-between; 
   align-items: center;
-  padding: 12px 16px;
+  padding: 10px 12px;
   border-bottom: 1px solid #eee;
-  flex-shrink: 0; /* CRÍTICO */
+  flex-shrink: 0;
   background: #fff;
+}
+
+.mini-head h3 {
+  font-size: 1rem;
+  margin: 0;
 }
 
 .mini-list { 
-  flex: 1; /* CORRIGIDO: Ocupa espaço disponível */
+  flex: 1;
   overflow-y: auto; 
   overflow-x: hidden;
-  padding: 10px 14px;
-  min-height: 0; /* CRÍTICO para scroll funcionar */
+  padding: 8px 12px;
+  min-height: 0;
+  font-size: 0.85rem; /* FONTE REDUZIDA */
+}
+
+.cart-item {
+  border-bottom: 1px solid #eee;
+  padding: 8px 0; /* PADDING REDUZIDO */
+}
+
+.cart-item p {
+  margin: 0 0 3px 0; /* MARGENS REDUZIDAS */
+  font-size: 0.85rem;
 }
 
 .mini-foot { 
-  padding: 10px 14px; 
+  padding: 8px 12px; /* PADDING REDUZIDO */
   border-top: 1px solid #eee;
-  flex-shrink: 0; /* CRÍTICO */
+  flex-shrink: 0;
   background: #fff;
-  max-height: 60vh; /* Limita altura do rodapé */
-  overflow-y: auto; /* Permite scroll no rodapé se necessário */
+  max-height: 55vh;
+  overflow-y: auto;
+  font-size: 0.85rem; /* FONTE REDUZIDA */
 }
 
-/* ======== BARRA DE PROGRESSO ======== */
+/* ======== BARRA DE PROGRESSO COMPACTA ======== */
 .progress-wrapper {
     background: #fff8d6;
-    padding: 12px;
+    padding: 6px 10px; /* REDUZIDO */
     border-radius: var(--rad);
-    margin-top: 10px;
-    margin-bottom: 10px;
+    margin-top: 0;
+    margin-bottom: 8px;
     border: 1px solid var(--acento);
 }
 
 .progress-text {
-    font-size: 0.9rem;
-    margin-bottom: 8px;
+    font-size: 0.8rem; /* FONTE MENOR */
+    margin-bottom: 4px; /* REDUZIDO */
     font-weight: 600;
     color: #444;
     text-align: center;
+    line-height: 1.2;
 }
 
 .progress-bar {
     width: 100%;
-    height: 12px;
+    height: 8px; /* ALTURA REDUZIDA */
     background: #ffe79b; 
     border-radius: 999px;
     overflow: hidden;
@@ -370,45 +385,46 @@ section h2 { font-size: 1.3rem; text-align: center; margin-bottom: 15px; color: 
     margin: 0;
     font-weight: 600;
     cursor: pointer;
-    font-size: 0.85rem;
+    font-size: 0.8rem; /* FONTE REDUZIDA */
     transition: color 0.2s;
     display: block; 
     text-align: right;
-    margin-top: 6px;
+    margin-top: 4px;
 }
 .link-acao:hover { color: #0056b3; }
 
 .frete-container {
-  margin-top: 10px;
-  padding: 10px;
+  margin-top: 8px;
+  padding: 8px;
   border: 1px solid #ddd;
   border-radius: 10px;
   background: #fff;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 .frete-container h4 { 
-  margin: 0 0 8px 0;
-  font-size: 0.95rem;
+  margin: 0 0 6px 0;
+  font-size: 0.9rem;
   color: #222;
 }
 .frete-cep-group { 
   display: flex;
-  gap: 6px;
-  margin-bottom: 6px;
+  gap: 4px;
+  margin-bottom: 4px;
 }
 
-.frete-container input[type="text"] {
-  padding: 8px 10px;
+.frete-container input[type="text"],
+.frete-container textarea {
+  padding: 6px 8px; /* PADDING REDUZIDO */
   border-radius: 8px;
   border: 1px solid #ccc;
-  font-size: 0.85rem;
+  font-size: 0.8rem; /* FONTE REDUZIDA */
   box-sizing: border-box;
 }
 
 .frete-cep-group input[type="text"] { flex: 1; }
 
 .input-endereco-longo {
-  margin-bottom: 6px;
+  margin-bottom: 4px;
   white-space: nowrap;
   overflow-x: auto;
   overflow-y: hidden;
@@ -421,25 +437,16 @@ section h2 { font-size: 1.3rem; text-align: center; margin-bottom: 15px; color: 
 
 .endereco-duplo {
     display: flex;
-    gap: 6px;
-    margin-bottom: 6px;
+    gap: 4px;
+    margin-bottom: 4px;
 }
 #numero-input {
     flex: 0 0 30%;
-    max-width: 100px;
+    max-width: 90px;
 }
 #complemento-input {
     flex: 1;
     min-width: 0;
-}
-
-.mini-foot input[type="text"]:not(#coupon-input),
-.mini-foot input[type="number"],
-.mini-foot textarea {
-  transition: all 0.2s;
-  background-color: #fff;
-  color: var(--txt);
-  box-sizing: border-box;
 }
 
 .mini-foot input:disabled,
@@ -454,50 +461,34 @@ section h2 { font-size: 1.3rem; text-align: center; margin-bottom: 15px; color: 
   color: #222;
   border: none;
   border-radius: 8px;
-  padding: 8px 10px;
+  padding: 6px 10px; /* PADDING REDUZIDO */
   font-weight: 700;
   cursor: pointer;
   transition: 0.2s;
   box-shadow: var(--shadow-1);
-  font-size: 0.85rem;
+  font-size: 0.8rem; /* FONTE REDUZIDA */
 }
 .btn-calcular-frete:hover { 
   background: #ffc107;
   transform: scale(1.02);
 }
 
-.frete-container[aria-disabled="true"] { opacity: 1; }
-
-.frete-container[aria-disabled="true"] input[type="text"]:not(#cep-input) {
-  background-color: var(--bg2) !important;
-  color: #888 !important;
-  cursor: not-allowed !important;
-  pointer-events: none;
-}
-
 .frete-gratis-aviso {
-    margin: 4px 0 8px 0;
-    font-size: 0.8rem;
-    color: #444;
-    background: #fff8d6;
-    padding: 6px 8px;
-    border-radius: 8px;
-    border-left: 3px solid #ffca28;
-    line-height: 1.3;
+    display: none; /* REMOVIDO - JÁ TEM A BARRA */
 }
 
 .coupon-form { 
   display: flex;
-  gap: 6px;
-  margin-top: 10px;
-  margin-bottom: 8px;
+  gap: 4px;
+  margin-top: 8px;
+  margin-bottom: 6px;
 }
 .coupon-form input[type="text"] {
   flex: 1;
-  padding: 8px 10px;
+  padding: 6px 8px; /* PADDING REDUZIDO */
   border: 1px solid #ccc;
   border-radius: 8px;
-  font-size: 0.85rem;
+  font-size: 0.8rem; /* FONTE REDUZIDA */
   box-shadow: inset 0 1px 2px rgba(0,0,0,0.05);
 }
 .coupon-form button {
@@ -506,29 +497,25 @@ section h2 { font-size: 1.3rem; text-align: center; margin-bottom: 15px; color: 
   font-weight: 700;
   border: none;
   border-radius: 8px;
-  padding: 8px 12px;
+  padding: 6px 10px; /* PADDING REDUZIDO */
   cursor: pointer;
   transition: background-color .2s ease;
-  font-size: 0.85rem;
+  font-size: 0.8rem; /* FONTE REDUZIDA */
 }
 .coupon-form button:hover { background-color: #43a047; }
-.coupon-message { margin-top: 4px; font-size: 0.85rem; color: #333; }
+.coupon-message { margin-top: 3px; font-size: 0.8rem; color: #333; }
 
-.cart-empty-msg {
-  padding: 18px 14px;
-  text-align: center;
-  border: 2px dashed #ffca28;
-  border-radius: 12px;
-  background: #fffdf3;
-  font-weight: 600;
-  color: #444;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.6);
-  line-height: 1.4;
+.summary-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 4px 0;
+  font-size: 0.85rem;
 }
 
 /* CONTINUA PARTE 2... */
 /* ===========================================================
-   PARTE 2/2 - MODAIS + PAINÉIS + BOTÕES LATERAIS + FOOTER
+   PARTE 2/2 - MODAIS + BOTÕES LATERAIS + FOOTER
    =========================================================== */
 
 .modal {
@@ -565,14 +552,14 @@ section h2 { font-size: 1.3rem; text-align: center; margin-bottom: 15px; color: 
 }
 
 .btn-primary, .btn-secondary, .btn-primario {
-  flex: 1; 
   border: none; 
   border-radius: 10px; 
-  padding: 12px;
+  padding: 10px 14px; /* PADDING REDUZIDO */
   font-weight: 700; 
-  font-size: 0.95rem; 
+  font-size: 0.9rem; /* FONTE REDUZIDA */
   cursor: pointer; 
   transition: 0.2s;
+  width: 100%;
 }
 .btn-primary, .btn-primario {
   background: linear-gradient(135deg, var(--success), #388e3c);
@@ -657,12 +644,8 @@ section h2 { font-size: 1.3rem; text-align: center; margin-bottom: 15px; color: 
   transition: all 0.2s;
 }
 .extras-list label.extra-line:hover { background: #fff7e6; }
-.extras-list label.extra-line span b { 
-  color: var(--danger); 
-  margin-left: 5px; 
-}
 .extras-list input[type="checkbox"] { margin-left: 10px; }
-#combo-body label, #combo-body div {
+#combo-body label {
   border: 1px solid #ffca28; 
   border-radius: 10px; 
   padding: 10px 14px;
@@ -679,35 +662,37 @@ section h2 { font-size: 1.3rem; text-align: center; margin-bottom: 15px; color: 
   transform: scale(1.02); 
 }
 
-/* ======== 🔧 BOTÕES LATERAIS CORRIGIDOS ======== */
-.meus-pedidos { 
-  position: fixed; 
-  bottom: 20px; 
-  right: 20px; 
-  z-index: 1500;
-  display: block !important; /* CRÍTICO */
-}
-.minhas-recompensas { 
-  position: fixed; 
-  bottom: 80px; 
-  right: 20px; 
-  z-index: 1490;
-  display: block !important; /* CRÍTICO */
+/* ======== BOTÕES LATERAIS - ESCONDE OS DO HTML ======== */
+.meus-pedidos, .minhas-recompensas {
+  display: none !important; /* ESCONDE OS BOTÕES DO HTML */
 }
 
+/* Os botões serão criados pelo JavaScript */
 .meus-pedidos-btn, .recompensas-btn {
+  position: fixed;
   background: linear-gradient(135deg, #ffca28, #ffb300); 
   color: #222;
   border: none; 
   border-radius: 20px; 
   font-weight: 700; 
-  font-size: 0.9rem;
-  padding: 10px 18px; 
+  font-size: 0.85rem;
+  padding: 10px 16px; 
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
   cursor: pointer; 
   transition: 0.2s;
-  display: block !important; /* CRÍTICO */
+  z-index: 1500;
 }
+
+.meus-pedidos-btn {
+  bottom: 20px;
+  right: 20px;
+}
+
+.recompensas-btn {
+  bottom: 70px;
+  right: 20px;
+}
+
 .meus-pedidos-btn:hover, .recompensas-btn:hover {
   transform: scale(1.05); 
   box-shadow: 0 6px 15px rgba(0, 0, 0, 0.3);
@@ -838,7 +823,6 @@ section h2 { font-size: 1.3rem; text-align: center; margin-bottom: 15px; color: 
   transform: none;
 }
 
-/* ======== FOOTER ======== */
 .footer {
   background: #ffca28; 
   text-align: center; 
@@ -878,7 +862,6 @@ section h2 { font-size: 1.3rem; text-align: center; margin-bottom: 15px; color: 
   margin-top: 10px; 
 }
 
-/* ======== COOKIE BANNER ======== */
 #cookie-banner {
   position: fixed; 
   left: 0; 
@@ -933,7 +916,6 @@ section h2 { font-size: 1.3rem; text-align: center; margin-bottom: 15px; color: 
   }
 }
 
-/* ======== ADMIN DASHBOARD ======== */
 #admin-dashboard .modal-content {
     max-width: 1100px !important;
     width: 95% !important; 
@@ -996,115 +978,24 @@ section h2 { font-size: 1.3rem; text-align: center; margin-bottom: 15px; color: 
         font-size: 0.95rem;
         padding: 12px 16px;
     }
-}
-/* ===========================================================
-   🔧 FIX 1 — MINI-CART CORRIGIDO (altura + scroll)
-=========================================================== */
-
-.mini-cart {
-    overflow: hidden !important;
-    display: flex !important;
-    flex-direction: column !important;
-}
-
-.mini-list {
-    flex: 1 1 auto !important;
-    overflow-y: auto !important;
-    min-height: 0 !important;
-    padding-bottom: 20px !important;
+    
+    .meus-pedidos-btn {
+        font-size: 0.8rem;
+        padding: 8px 14px;
+    }
+    
+    .recompensas-btn {
+        font-size: 0.8rem;
+        padding: 8px 14px;
+    }
 }
 
-.mini-foot {
-    flex-shrink: 0 !important;
-    overflow: visible !important;
-    max-height: none !important;
-    padding-bottom: 20px !important;
-}
-/* ===========================================================
-   🔧 FIX 2 — SOBREPOSIÇÃO DE PAINÉIS E MINI-CARRINHO
-=========================================================== */
-
-#painelPedidos,
-#recompensas-panel {
-    z-index: 950 !important; /* abaixo do mini-cart */
+/* Ajuste para label checkbox */
+.mini-foot label {
+  font-size: 0.85rem;
+  margin-bottom: 6px;
 }
 
-.mini-cart {
-    z-index: 990 !important; /* acima dos painéis */
-}
-
-#cart-backdrop {
-    z-index: 980 !important; /* entre eles */
-}
-/* ===========================================================
-   🔧 FIX DEFINITIVO — MINI CART COM SCROLL REAL
-=========================================================== */
-
-.mini-cart {
-    display: flex !important;
-    flex-direction: column !important;
-    height: 100vh !important;
-    overflow: hidden !important;
-}
-
-/* A área que DEVE rolar */
-.mini-list {
-    flex: 1 1 auto !important;
-    overflow-y: auto !important;
-    overflow-x: hidden !important;
-    min-height: 0 !important;
-    padding-bottom: 20px !important;
-}
-
-/* Rodapé fixado corretamente */
-.mini-foot {
-    flex-shrink: 0 !important;
-    background: #fff !important;
-    border-top: 1px solid #eee !important;
-    padding: 12px 16px !important;
-    overflow: visible !important;
-    max-height: none !important;
-}
-/* FIX — esconder recompensas e pedidos quando carrinho estiver aberto */
-#mini-cart[aria-hidden="false"] ~ .minhas-recompensas,
-#mini-cart[aria-hidden="false"] ~ .meus-pedidos {
-    display: none !important;
-}
-.recompensas-panel,
-.pedidos-panel {
-    z-index: 900 !important;
-}
-
-#mini-cart {
-    z-index: 999 !important;
-}
-/* ===========================================================
-   FIX ABSOLUTO – Scroll interno do mini-carrinho
-=========================================================== */
-
-/* Container principal do mini-cart */
-#mini-cart {
-    display: flex !important;
-    flex-direction: column !important;
-    height: 100vh !important;
-    overflow: hidden !important;
-}
-
-/* Área interna onde ficam os itens */
-#mini-cart .mini-list,
-#mini-cart .mini-cart-body,
-#mini-cart .mini-cart-content {
-    flex: 1 1 auto !important;
-    overflow-y: auto !important;
-    overflow-x: hidden !important;
-    min-height: 0 !important;
-    padding-bottom: 20px !important;
-}
-
-/* Rodapé fixo */
-#mini-cart .mini-foot {
-    flex-shrink: 0 !important;
-    background: #fff !important;
-    padding: 16px !important;
-    border-top: 1px solid #eee !important;
+.mini-foot hr {
+  margin: 10px 0;
 }
