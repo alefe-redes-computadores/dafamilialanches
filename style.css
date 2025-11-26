@@ -1160,3 +1160,43 @@ body.cart-open .meus-pedidos,
 body.cart-open .minhas-recompensas {
     display: none !important;
 }
+
+/* ===========================================================
+   FIX – esconder botões laterais quando o carrinho estiver aberto
+=========================================================== */
+
+body.cart-open .meus-pedidos,
+body.cart-open .minhas-recompensas {
+    display: none !important;
+}
+/* ===========================================================
+   FIX – Layout do mini-carrinho (lista + rodapé)
+=========================================================== */
+
+.mini-cart {
+    height: 100vh !important;
+    display: flex !important;
+    flex-direction: column !important;
+    overflow: hidden !important;
+}
+
+.mini-cart.active {
+    display: flex !important;
+}
+
+/* área que deve rolar (onde ficam os itens) */
+.mini-list {
+    flex: 1 1 auto !important;
+    min-height: 0 !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    padding: 10px 14px !important;
+}
+
+/* rodapé fixo, sem ocupar altura demais */
+.mini-foot {
+    flex-shrink: 0 !important;
+    max-height: none !important;
+    overflow: visible !important;
+    background: #fff !important;
+}
