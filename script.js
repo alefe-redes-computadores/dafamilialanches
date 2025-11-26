@@ -565,8 +565,21 @@ document.addEventListener("DOMContentLoaded", () => {
     });  
 
     el.userBtn?.addEventListener("click", () => Overlays.open(el.loginModal));  
-    el.cartIcon?.addEventListener("click", () => { renderMiniCart(); Overlays.open(el.miniCart); });
+    el.cartIcon?.addEventListener("click", () => {
 
+    // Fecha automaticamente painéis que estavam vazando sobre o carrinho
+    const pedidos = document.getElementById("painelPedidos");
+    const recompensas = document.getElementById("recompensas-panel");
+
+        if (pedidos) pedidos.classList.remove("active", "show");
+    if (recompensas) recompensas.classList.remove("active", "show");
+
+    // Re-renderiza o carrinho
+    renderMiniCart();
+
+    // Agora abre o carrinho corretamente
+    Overlays.open(el.miniCart);
+});
     const adicionais = [  
         { nome: "Cebola", preco: 0.99 },  
         { nome: "Salada", preco: 1.99 },  
