@@ -1064,3 +1064,16 @@ section h2 { font-size: 1.3rem; text-align: center; margin-bottom: 15px; color: 
     overflow: visible !important;
     max-height: none !important;
 }
+/* FIX — esconder recompensas e pedidos quando carrinho estiver aberto */
+#mini-cart[aria-hidden="false"] ~ .minhas-recompensas,
+#mini-cart[aria-hidden="false"] ~ .meus-pedidos {
+    display: none !important;
+}
+.recompensas-panel,
+.pedidos-panel {
+    z-index: 900 !important;
+}
+
+#mini-cart {
+    z-index: 999 !important;
+}
