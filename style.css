@@ -1107,3 +1107,56 @@ section h2 { font-size: 1.3rem; text-align: center; margin-bottom: 15px; color: 
     padding: 16px !important;
     border-top: 1px solid #eee !important;
 }
+/* ===========================================================
+   🛠️ FIX DEFINITIVO: CARRINHO E SOBREPOSIÇÃO (v10.1)
+   =========================================================== */
+
+/* 1. Força o Carrinho a ficar ACIMA de tudo (exceto modais de alerta) */
+.mini-cart {
+    z-index: 2000 !important; /* Maior que os botões flutuantes (1500) */
+}
+
+#cart-backdrop {
+    z-index: 1999 !important; /* Logo abaixo do carrinho */
+}
+
+/* 2. Estrutura Flexbox Rígida para Scroll Perfeito */
+.mini-cart {
+    display: flex !important;
+    flex-direction: column !important;
+    height: 100vh !important; /* Ocupa 100% da altura da tela */
+    overflow: hidden !important; /* Impede que o carrinho inteiro role */
+}
+
+/* Cabeçalho fixo */
+.mini-head {
+    flex: 0 0 auto !important; /* Não encolhe nem cresce */
+}
+
+/* Miolo (Lista de Itens) - AQUI QUE O SCROLL ACONTECE */
+.mini-list {
+    flex: 1 1 auto !important; /* Ocupa todo o espaço disponível */
+    overflow-y: auto !important; /* Scroll vertical automático */
+    overflow-x: hidden !important;
+    padding-bottom: 20px !important;
+    min-height: 0 !important; /* Fix para Firefox/Flexbox */
+}
+
+/* Rodapé fixo (Frete, Cupom, Botões) */
+.mini-foot {
+    flex: 0 0 auto !important; /* Não encolhe */
+    background: #fff !important;
+    border-top: 1px solid #eee !important;
+    max-height: 50vh !important; /* Limite de altura para telas pequenas */
+    overflow-y: auto !important; /* Scroll interno se o rodapé for gigante */
+    box-shadow: 0 -4px 10px rgba(0,0,0,0.05);
+}
+
+/* 3. Truque para esconder os botões flutuantes quando o backdrop está ativo */
+/* Como não dá para selecionar o elemento anterior via CSS puro em todos os navegadores,
+   vamos usar uma classe auxiliar no BODY que o JS vai adicionar. */
+
+body.cart-open .meus-pedidos,
+body.cart-open .minhas-recompensas {
+    display: none !important;
+}
