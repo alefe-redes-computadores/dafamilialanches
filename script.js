@@ -1,7 +1,5 @@
-
 /* =========================================================  
-   🚀 DFL v6.0 CORRIGIDO — PARTE 1/8
-   Cole TODAS as 8 partes em sequência no script.js
+   🚀 DFL v6.2 CORRIGIDO — SCRIPT COMPLETO
 ========================================================= */  
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -44,13 +42,13 @@ document.addEventListener("DOMContentLoaded", () => {
     }  
 
     /* ============================================================
-       🔥 DADOS DAS PROMOÇÕES
+       🔥 DADOS DAS PROMOÇÕES (NOMES LIMPOS)
     ============================================================ */
     const PROMO_DATA = [  
         null,   
         { 
             id: 1, 
-            nome: "Promo 1 — 2 Purizin + 1 Fanta 1L", 
+            nome: "2 Purizin + 1 Fanta 1L", 
             preco: 34.99, 
             precoAntigo: 40.00, 
             img: "promocoes/promo1.jpg",
@@ -58,7 +56,7 @@ document.addEventListener("DOMContentLoaded", () => {
         },  
         { 
             id: 2, 
-            nome: "Promo 2 — 3 Hot Dog Padaná", 
+            nome: "3 Hot Dog Padaná", 
             preco: 37.99, 
             precoAntigo: 45.00, 
             img: "promocoes/promo2.jpg",
@@ -66,7 +64,7 @@ document.addEventListener("DOMContentLoaded", () => {
         },  
         { 
             id: 3, 
-            nome: "Promo 3 — 2 Burgers Peleja", 
+            nome: "2 Burgers Peleja", 
             preco: 39.99, 
             precoAntigo: 52.00, 
             img: "promocoes/promo3.jpg",
@@ -74,7 +72,7 @@ document.addEventListener("DOMContentLoaded", () => {
         },  
         { 
             id: 4, 
-            nome: "Promo 4 — 3 Trem + 1 Fanta 1L", 
+            nome: "3 Trem + 1 Fanta 1L", 
             preco: 44.99, 
             precoAntigo: 51.00, 
             img: "promocoes/promo4.jpg",
@@ -82,7 +80,7 @@ document.addEventListener("DOMContentLoaded", () => {
         },  
         { 
             id: 5, 
-            nome: "Promo 5 — 4 Trem + 1 Fanta 1L", 
+            nome: "4 Trem + 1 Fanta 1L", 
             preco: 49.99, 
             precoAntigo: 65.00, 
             img: "promocoes/promo5.jpg",
@@ -90,7 +88,7 @@ document.addEventListener("DOMContentLoaded", () => {
         },  
         { 
             id: 6, 
-            nome: "Promo 6 — 5 Burgers Uai", 
+            nome: "5 Burgers Uai", 
             preco: 54.00, 
             precoAntigo: 65.00, 
             img: "promocoes/promo6.jpg",
@@ -98,7 +96,7 @@ document.addEventListener("DOMContentLoaded", () => {
         },  
         { 
             id: 7, 
-            nome: "Promo 7 — 4 TremBão + 1 Fanta 1L", 
+            nome: "4 TremBão + 1 Fanta 1L", 
             preco: 59.99, 
             precoAntigo: 77.00, 
             img: "promocoes/promo7.jpg",
@@ -106,7 +104,7 @@ document.addEventListener("DOMContentLoaded", () => {
         },  
         { 
             id: 8, 
-            nome: "Promo 8 — 4 Armaria", 
+            nome: "4 Armaria", 
             preco: 59.99, 
             precoAntigo: 72.00, 
             img: "promocoes/promo8.jpg",
@@ -114,7 +112,7 @@ document.addEventListener("DOMContentLoaded", () => {
         },  
         { 
             id: 9, 
-            nome: "Promo 9 — 5 Uai + 1 Kuat 2L (Brinde)", 
+            nome: "5 Uai + 1 Kuat 2L (Brinde)", 
             preco: 64.99, 
             precoAntigo: 75.00, 
             img: "promocoes/promo9.jpg",
@@ -251,11 +249,6 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-    // CONTINUA PARTE 2...
-/* =========================================================  
-   PARTE 2/8 - ELEMENTOS + BACKDROP + OVERLAYS
-========================================================= */  
-
     const el = {  
         cartIcon: document.getElementById("cart-icon"),  
         cartCount: document.getElementById("cart-count"),  
@@ -389,17 +382,12 @@ document.addEventListener("DOMContentLoaded", () => {
         progressFill.style.width = `${porcentagem}%`;
 
         if (subtotal >= LIMITE_FRETE_GRATIS) {
-            progressText.innerHTML = `🎉 <strong>Oba!</strong> Você ganhou <strong>Frete Grátis</strong> nessa compra!`;
+            progressText.innerHTML = `🎉 <strong>Frete Grátis!</strong>`;
             progressFill.style.background = "linear-gradient(90deg, #4caf50, #2e7d32)";
             progressWrapper.style.background = "#e8f5e9";
             progressWrapper.style.borderColor = "#4caf50";
-        } else if (falta <= 20) {
-            progressText.innerHTML = `🔥 <strong>Quase lá!</strong> Falta apenas <strong>${money(falta)}</strong> para Frete Grátis!`;
-            progressFill.style.background = "linear-gradient(90deg, #ff9800, #f57c00)";
-            progressWrapper.style.background = "#fff3e0";
-            progressWrapper.style.borderColor = "#ff9800";
         } else {
-            progressText.innerHTML = `Faltam <strong>${money(falta)}</strong> para Frete Grátis 🚀`;
+            progressText.innerHTML = `Faltam <strong>${money(falta)}</strong> p/ Frete Grátis`;
             progressFill.style.background = "linear-gradient(90deg, #ffb300, #ff9800)";
             progressWrapper.style.background = "#fff8d6";
             progressWrapper.style.borderColor = "#ffca28";
@@ -424,17 +412,17 @@ document.addEventListener("DOMContentLoaded", () => {
         }  
 
         el.miniList.innerHTML = cart.map((item, idx) => `  
-      <div class="cart-item" style="border-bottom:1px solid #eee;padding:10px 0;">  
+      <div class="cart-item" style="border-bottom:1px solid #eee;padding:8px 0;">  
         <div style="display:flex;justify-content:space-between;align-items:center;">  
           <div style="flex:1;">  
-            <p style="font-weight:600;margin-bottom:4px;">${item.nome}</p>  
+            <p style="font-weight:600;margin-bottom:2px;">${item.nome}</p>  
             <p style="color:#666;font-size:0.85rem;">${money(item.preco)} × ${item.qtd}</p>  
           </div>  
           <div style="display:flex;gap:8px;align-items:center;">  
-            <button type="button" class="cart-minus" data-idx="${idx}" style="background:#ff4081;color:#fff;border:none;border-radius:5px;width:28px;height:28px;cursor:pointer;">−</button>  
+            <button type="button" class="cart-minus" data-idx="${idx}" style="background:#ff4081;color:#fff;border:none;border-radius:5px;width:24px;height:24px;cursor:pointer;">−</button>  
             <span style="font-weight:600;min-width:20px;text-align:center;">${item.qtd}</span>  
-            <button type="button" class="cart-plus" data-idx="${idx}" style="background:#4caf50;color:#fff;border:none;border-radius:5px;width:28px;height:28px;cursor:pointer;">+</button>  
-            <button type="button" class="cart-remove" data-idx="${idx}" style="background:#d32f2f;color:#fff;border:none;border-radius:5px;width:28px;height:28px;cursor:pointer;">🗑</button>  
+            <button type="button" class="cart-plus" data-idx="${idx}" style="background:#4caf50;color:#fff;border:none;border-radius:5px;width:24px;height:24px;cursor:pointer;">+</button>  
+            <button type="button" class="cart-remove" data-idx="${idx}" style="background:#d32f2f;color:#fff;border:none;border-radius:5px;width:24px;height:24px;cursor:pointer;">🗑</button>  
           </div>  
         </div>  
       </div>  
@@ -469,12 +457,6 @@ document.addEventListener("DOMContentLoaded", () => {
         enhanceMiniCartUI();  
     };
 
-    // CONTINUA PARTE 3...
-    
-/* =========================================================  
-   PARTE 3/8 - FIREBASE + LOGIN
-========================================================= */  
-
     const firebaseConfig = {  
         apiKey: "AIzaSyATQBcbYuzKpKlSwNlbpRiAM1XyHqhGeak",  
         authDomain: "da-familia-lanches.firebaseapp.com",  
@@ -506,12 +488,13 @@ document.addEventListener("DOMContentLoaded", () => {
             currentUser = user;   
             if (user) {  
                 el.userBtn.textContent = `Olá, ${user.displayName?.split(" ")[0] || user.email.split("@")[0]}`;  
-                if (el.pedidosContainer) el.pedidosContainer.style.display = 'block';  
-                if (el.recompensasContainer) el.recompensasContainer.style.display = 'block';  
+                // ✅ CORREÇÃO CRÍTICA: Garante que os botões apareçam ao logar
+                if (el.pedidosBtn) el.pedidosBtn.style.display = 'block';
+                if (el.recompensasBtn) el.recompensasBtn.style.display = 'block';
             } else {  
                 el.userBtn.textContent = "Entrar / Cadastrar";  
-                if (el.pedidosContainer) el.pedidosContainer.style.display = 'none';  
-                if (el.recompensasContainer) el.recompensasContainer.style.display = 'none';  
+                if (el.pedidosBtn) el.pedidosBtn.style.display = 'none';
+                if (el.recompensasBtn) el.recompensasBtn.style.display = 'none';
             }  
             if (user && isAdmin(user)) {  
                 if (el.reportsBtn) createAdminFab();  
@@ -566,20 +549,14 @@ document.addEventListener("DOMContentLoaded", () => {
 
     el.userBtn?.addEventListener("click", () => Overlays.open(el.loginModal));  
     el.cartIcon?.addEventListener("click", () => {
-
-    // Fecha automaticamente painéis que estavam vazando sobre o carrinho
-    const pedidos = document.getElementById("painelPedidos");
-    const recompensas = document.getElementById("recompensas-panel");
-
+        const pedidos = document.getElementById("painelPedidos");
+        const recompensas = document.getElementById("recompensas-panel");
         if (pedidos) pedidos.classList.remove("active", "show");
-    if (recompensas) recompensas.classList.remove("active", "show");
-
-    // Re-renderiza o carrinho
-    renderMiniCart();
-
-    // Agora abre o carrinho corretamente
-    Overlays.open(el.miniCart);
-});
+        if (recompensas) recompensas.classList.remove("active", "show");
+        renderMiniCart();
+        Overlays.open(el.miniCart);
+    });
+    
     const adicionais = [  
         { nome: "Cebola", preco: 0.99 },  
         { nome: "Salada", preco: 1.99 },  
@@ -706,12 +683,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const getCartSubtotal = () => cart.reduce((s, i) => s + (Number(i.preco) || 0) * (Number(i.qtd) || 0), 0);
 
-    // CONTINUA PARTE 4...
-    
-/* =========================================================  
-   PARTE 4/8 - ENDEREÇO MANUAL + CEP + FRETE
-========================================================= */  
-
     let modoEnderecoManual = false;
 
     document.getElementById("btnNaoSeiCEP")?.addEventListener("click", () => {
@@ -722,18 +693,14 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function mostrarModoManual() {
         modoEnderecoManual = true;
-        
         const freteContainer = document.querySelector('.frete-container');
         const manualArea = document.getElementById('manualArea');
-        
         if (freteContainer) freteContainer.style.display = 'none';
         if (manualArea) manualArea.style.display = 'block';
-        
         const cepInput = document.getElementById('cep-input');
         const enderecoAuto = document.getElementById('endereco-auto');
         const numeroInput = document.getElementById('numero-input');
         const complementoInput = document.getElementById('complemento-input');
-        
         if (cepInput) cepInput.value = '';
         if (enderecoAuto) enderecoAuto.value = '';
         if (numeroInput) numeroInput.value = '';
@@ -742,49 +709,27 @@ document.addEventListener("DOMContentLoaded", () => {
 
     document.getElementById("btnVoltarCEP")?.addEventListener("click", () => {
         modoEnderecoManual = false;
-        
         const freteContainer = document.querySelector('.frete-container');
         const manualArea = document.getElementById('manualArea');
-        
         if (freteContainer) freteContainer.style.display = 'block';
         if (manualArea) manualArea.style.display = 'none';
-        
         const manualEndereco = document.getElementById('manualEndereco');
         const manualNumero = document.getElementById('manualNumero');
-        
         if (manualEndereco) manualEndereco.value = '';
         if (manualNumero) manualNumero.value = '';
-        
         renderMiniCart();
     });
 
     document.getElementById("btnConfirmarEndereco")?.addEventListener("click", async () => {
         const manualEndereco = document.getElementById('manualEndereco');
         const manualNumero = document.getElementById('manualNumero');
-        
         const endereco = manualEndereco?.value?.trim() || '';
         const numero = manualNumero?.value?.trim() || '';
-        
-        if (!endereco) {
-            popupAdd("Preencha o endereço completo!");
-            return;
-        }
-        
-        if (!numero) {
-            popupAdd("Preencha o número!");
-            return;
-        }
-        
+        if (!endereco) { popupAdd("Preencha o endereço completo!"); return; }
+        if (!numero) { popupAdd("Preencha o número!"); return; }
         popupAdd("Verificando endereço...");
-        
         const taxaCalculada = await getDynamicDeliveryFee(endereco);
-        
-        if (taxaCalculada === DELIVERY_FEE_DEFAULT) {
-            popupAdd(`Bairro não mapeado. Taxa padrão: ${money(DELIVERY_FEE_DEFAULT)}`);
-        } else {
-            popupAdd(`Taxa de entrega: ${money(taxaCalculada)} ✅`);
-        }
-        
+        if (taxaCalculada === DELIVERY_FEE_DEFAULT) { popupAdd(`Bairro não mapeado. Taxa padrão: ${money(DELIVERY_FEE_DEFAULT)}`); } else { popupAdd(`Taxa de entrega: ${money(taxaCalculada)} ✅`); }
         renderMiniCart();
     });
 
@@ -849,7 +794,6 @@ document.addEventListener("DOMContentLoaded", () => {
             console.warn("FW: Endereço vazio, usando fallback.");
             return DELIVERY_FEE_DEFAULT;
         }
-
         let bairroExtraido = "";
         try {
             const partePrincipal = enderecoCompleto.split("(")[0].trim();
@@ -860,16 +804,12 @@ document.addEventListener("DOMContentLoaded", () => {
             console.warn("FW: Falha ao extrair bairro.");
             return DELIVERY_FEE_DEFAULT;
         }
-
         const bairroClean = bairroExtraido.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim();
-
         try {
             if (!db) { console.warn("FW: db não disponível."); return DELIVERY_FEE_DEFAULT; }
-
             if (!window.deliveryFeesCacheGlobal) {
                 const snap = await db.collection("TaxasDeEntrega").doc("bairros").collection("lista").doc("tabela").get();
                 if (!snap.exists) { console.warn("FW: Documento 'tabela' não encontrado."); return DELIVERY_FEE_DEFAULT; }
-
                 const arr = snap.data()?.data || [];
                 const cache = {};
                 arr.forEach(item => {
@@ -881,24 +821,14 @@ document.addEventListener("DOMContentLoaded", () => {
                 window.deliveryFeesCacheGlobal = cache;
             }
         } catch (e) { console.warn("FW: Erro ao carregar taxas.", e); return DELIVERY_FEE_DEFAULT; }
-
         const cacheAtual = window.deliveryFeesCacheGlobal || {};
         if (!Object.keys(cacheAtual).length) return DELIVERY_FEE_DEFAULT;
-
-        if (cacheAtual[bairroClean] !== undefined) {
-            return cacheAtual[bairroClean];
-        }
-
+        if (cacheAtual[bairroClean] !== undefined) { return cacheAtual[bairroClean]; }
         const palavras = bairroClean.split(" ");
         for (const palavra of palavras) {
             if (palavra.length < 4) continue;
-            for (const key in cacheAtual) {
-                if (key.includes(palavra)) {
-                    return cacheAtual[key];
-                }
-            }
+            for (const key in cacheAtual) { if (key.includes(palavra)) return cacheAtual[key]; }
         }
-
         return DELIVERY_FEE_DEFAULT;
     }
 
@@ -962,12 +892,6 @@ document.addEventListener("DOMContentLoaded", () => {
         } catch (err) { console.error("Erro ao validar cupom:", err); return { ...invalido, mensagem: "Erro ao processar cupom." }; }  
     }
 
-    // CONTINUA PARTE 5...
-    
-/* =========================================================  
-   PARTE 5/8 - CALC TOTALS + ENHANCE UI
-========================================================= */  
-
     async function calcTotals() {  
         const subtotal = getCartSubtotal();  
         const d = await validarCupomFirestore(couponApplied, subtotal);   
@@ -1029,9 +953,9 @@ document.addEventListener("DOMContentLoaded", () => {
         const summaryDiv = document.createElement('div');  
         summaryDiv.className = 'cart-summary-generated';  
         summaryDiv.innerHTML = `  
-      <div class="summary-row" style="margin-top:10px;border-top:1px solid #eee;padding-top:10px;"><span>Subtotal</span><b>${money(subtotal)}</b></div>  
+      <div class="summary-row" style="margin-top:8px;border-top:1px solid #eee;padding-top:8px;"><span>Subtotal</span><b>${money(subtotal)}</b></div>  
       <div class="summary-row"><span>Entrega</span><b>${deliveryLabel}</b></div>  
-      <div class="summary-row" style="display:flex;justify-content:space-between;align-items:center;border-top:1px solid #eee;padding-top:10px;margin:10px 0;font-size:1.1rem;"><span><b>Total</b></span><span style="color:#e53935;font-weight:800;">${money(total)}</span></div>  
+      <div class="summary-row" style="display:flex;justify-content:space-between;align-items:center;border-top:1px solid #eee;padding-top:8px;margin:8px 0;font-size:1rem;"><span><b>Total</b></span><span style="color:#e53935;font-weight:800;">${money(total)}</span></div>  
       <button id="finish-order" type="button" style="width:100%;background:#4caf50;color:#fff;border:none;border-radius:10px;padding:12px;font-weight:700;cursor:pointer;margin-bottom:8px">Finalizar Pedido 🛍️</button>  
       <button id="clear-cart" type="button" style="width:100%;background:#ff4081;color:#fff;border:none;border-radius:10px;padding:10px;font-weight:700;cursor:pointer">Limpar Carrinho</button>`;  
 
@@ -1057,22 +981,6 @@ document.addEventListener("DOMContentLoaded", () => {
             return configuracoesRecompensa;  
         } catch (e) { console.error("Erro recompensas:", e); return []; }  
     }
-
-    const atualizarStatus = safe(() => {  
-        const agora = new Date(); const h = agora.getHours();  
-        const aberto = h >= 18 && h < 23;   
-        if (el.statusBanner) { el.statusBanner.textContent = aberto ? "🟢 Aberto — Faça seu pedido!" : "🔴 Fechado — Voltamos às 18h!"; el.statusBanner.className = `status-banner ${aberto ? "open" : "closed"}`; }  
-    });  
-    atualizarStatus(); setInterval(atualizarStatus, 60000);  
-
-    const atualizarTimer = safe(() => {  
-        const agora = new Date(); const fim = new Date(); fim.setHours(23, 59, 59, 999); const diff = fim - agora;  
-        const elTimer = document.getElementById("promo-timer"); if (!elTimer) return;  
-        if (diff <= 0) return (elTimer.textContent = "00:00:00");  
-        const h = String(Math.floor(diff / 3600000)).padStart(2, "0"); const m = String(Math.floor((diff % 3600000) / 60000)).padStart(2, "0"); const s = String(Math.floor((diff % 60000) / 1000)).padStart(2, "0");  
-        elTimer.textContent = `${h}:${m}:${s}`;  
-    });  
-    atualizarTimer(); setInterval(atualizarTimer, 1000);
 
     async function fecharPedido() {  
         if (!cart.length) return alert("Carrinho vazio!");  
@@ -1147,12 +1055,6 @@ document.addEventListener("DOMContentLoaded", () => {
     
     renderMiniCart();
 
-    // CONTINUA PARTE 6...
-    
-/* =========================================================  
-   PARTE 6/8 - MEUS PEDIDOS
-========================================================= */  
-
     el.pedidosBtn?.addEventListener("click", () => { if (!currentUser) { alert("Faça login para ver seus pedidos."); Overlays.open(el.loginModal); return; } Overlays.open(el.pedidosPanel); carregarPedidos(currentUser.uid); });  
     el.pedidosFecharBtn?.addEventListener("click", () => Overlays.closeAll());  
 
@@ -1186,12 +1088,6 @@ document.addEventListener("DOMContentLoaded", () => {
             popupAdd("Pedido adicionado ao carrinho!"); renderMiniCart(); Overlays.closeAll(); Overlays.open(el.miniCart);  
         } catch (err) { console.error("Erro repetir:", err); alert("Erro ao processar."); }  
     }
-
-    // CONTINUA PARTE 7...
-    
-/* =========================================================  
-   PARTE 7/8 - RECOMPENSAS
-========================================================= */  
 
     async function carregarRecompensas(userId) {  
         if (!isFirebaseInitialized) return;  
@@ -1250,12 +1146,6 @@ document.addEventListener("DOMContentLoaded", () => {
     el.recompensasBtn?.addEventListener("click", () => { if (!currentUser) { alert("Faça login!"); Overlays.open(el.loginModal); return; } Overlays.open(el.recompensasPanel); carregarRecompensas(currentUser.uid); });  
     el.recompensasFecharBtn?.addEventListener("click", () => Overlays.closeAll());
 
-    // CONTINUA PARTE 8...
-    
-/* =========================================================  
-   PARTE 8/8 (FINAL) - ADMIN + COOKIES + INICIALIZAÇÃO
-========================================================= */  
-
     const ADMINS = [ "alefejohsefe@gmail.com", "kalebhstanley650@gmail.com", "contato@dafamilialanches.com.br" ];  
     function isAdmin(user) { return user && user.email && ADMINS.includes(user.email.toLowerCase()); }  
     let chartPedidos = null; let chartProdutos = null;  
@@ -1279,8 +1169,4 @@ document.addEventListener('DOMContentLoaded', () => {
     document.querySelectorAll('.modal').forEach(m => m.addEventListener('click', e => { if (e.target.classList.contains('modal')) { m.classList.remove('show'); document.getElementById('cart-backdrop').classList.remove('active'); } }));  
     document.getElementById('cart-backdrop')?.addEventListener('click', () => { document.querySelectorAll('.active').forEach(e => e.classList.remove('active')); });  
 });
-
-// ============================================================
-// ✅ FIM DO CÓDIGO v6.0 CORRIGIDO
-// Cole as 8 partes em sequência no seu script.js
-// ============================================================
+}
