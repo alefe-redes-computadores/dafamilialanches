@@ -1,6 +1,7 @@
+
 /* =========================================================  
-   🚀 DFL v6.0 — BUSCA INTELIGENTE + PROMOÇÕES EM CARDS
-   PARTE 1/7: BASE + PROMOÇÕES + BUSCA
+   🚀 DFL v6.0 CORRIGIDO — PARTE 1/8
+   Cole TODAS as 8 partes em sequência no script.js
 ========================================================= */  
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -43,7 +44,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }  
 
     /* ============================================================
-       🔥 DADOS DAS PROMOÇÕES (AGORA SERÃO CARDS!)
+       🔥 DADOS DAS PROMOÇÕES
     ============================================================ */
     const PROMO_DATA = [  
         null,   
@@ -53,8 +54,7 @@ document.addEventListener("DOMContentLoaded", () => {
             preco: 34.99, 
             precoAntigo: 40.00, 
             img: "promocoes/promo1.jpg",
-            descricao: "2 Hot Dogs 'Purizin' com purê cremoso + 1 Fanta 1L geladinha!",
-            ingredientes: "Pão, molho, purê de batata cremoso, 1 salsicha, milho, batata palha, ketchup e maionese."
+            descricao: "2 Hot Dogs 'Purizin' com purê cremoso + 1 Fanta 1L geladinha!"
         },  
         { 
             id: 2, 
@@ -62,8 +62,7 @@ document.addEventListener("DOMContentLoaded", () => {
             preco: 37.99, 
             precoAntigo: 45.00, 
             img: "promocoes/promo2.jpg",
-            descricao: "3 Padaná completos, perfeitos pra dividir com a galera!",
-            ingredientes: "Pão, molho, 2 salsichas, milho, batata palha, bacon, vinagrete, mussarela, ketchup e maionese."
+            descricao: "3 Padaná completos, perfeitos pra dividir com a galera!"
         },  
         { 
             id: 3, 
@@ -71,8 +70,7 @@ document.addEventListener("DOMContentLoaded", () => {
             preco: 39.99, 
             precoAntigo: 52.00, 
             img: "promocoes/promo3.jpg",
-            descricao: "Bora artesanar o bolso! Dois Burgers artesanais 'Peleja' no precinho!",
-            ingredientes: "Pão, hambúrguer artesanal, filé de frango, bacon, milho, batata palha, presunto, mussarela, alface e tomate."
+            descricao: "Bora artesanar o bolso! Dois Burgers artesanais 'Peleja' no precinho!"
         },  
         { 
             id: 4, 
@@ -80,8 +78,7 @@ document.addEventListener("DOMContentLoaded", () => {
             preco: 44.99, 
             precoAntigo: 51.00, 
             img: "promocoes/promo4.jpg",
-            descricao: "3 Burgers Trem com bacon, queijo e batata palha + 1 Fanta 1L.",
-            ingredientes: "Pão, hambúrguer, salsicha, bacon, milho, alface, tomate, presunto e mussarela."
+            descricao: "3 Burgers Trem com bacon, queijo e batata palha + 1 Fanta 1L."
         },  
         { 
             id: 5, 
@@ -89,8 +86,7 @@ document.addEventListener("DOMContentLoaded", () => {
             preco: 49.99, 
             precoAntigo: 65.00, 
             img: "promocoes/promo5.jpg",
-            descricao: "O clássico da família! 4 Burgers Trem + Fanta 1L.",
-            ingredientes: "Pão, hambúrguer, salsicha, bacon, milho, alface, tomate, presunto e mussarela."
+            descricao: "O clássico da família! 4 Burgers Trem + Fanta 1L."
         },  
         { 
             id: 6, 
@@ -98,8 +94,7 @@ document.addEventListener("DOMContentLoaded", () => {
             preco: 54.00, 
             precoAntigo: 65.00, 
             img: "promocoes/promo6.jpg",
-            descricao: "Pra família toda! 5 Burgers UAI recheados no precinho!",
-            ingredientes: "Pão, hambúrguer, milho, bacon, alface, tomate, presunto e mussarela."
+            descricao: "Pra família toda! 5 Burgers UAI recheados no precinho!"
         },  
         { 
             id: 7, 
@@ -107,8 +102,7 @@ document.addEventListener("DOMContentLoaded", () => {
             preco: 59.99, 
             precoAntigo: 77.00, 
             img: "promocoes/promo7.jpg",
-            descricao: "O maior hot dog da casa! 4 TremBão com purê cremoso + Fanta 1L.",
-            ingredientes: "Pão, molho, purê de batata cremoso, 2 salsichas, bacon crocante, mussarela, batata palha, vinagrete, ketchup e maionese."
+            descricao: "O maior hot dog da casa! 4 TremBão com purê cremoso + Fanta 1L."
         },  
         { 
             id: 8, 
@@ -116,8 +110,7 @@ document.addEventListener("DOMContentLoaded", () => {
             preco: 59.99, 
             precoAntigo: 72.00, 
             img: "promocoes/promo8.jpg",
-            descricao: "A queridinha da galera! 4 Armaria no super desconto.",
-            ingredientes: "Pão, hambúrguer, filé de frango, bacon, milho, batata palha, alface, tomate, salsicha, presunto e mussarela."
+            descricao: "A queridinha da galera! 4 Armaria no super desconto."
         },  
         { 
             id: 9, 
@@ -125,8 +118,7 @@ document.addEventListener("DOMContentLoaded", () => {
             preco: 64.99, 
             precoAntigo: 75.00, 
             img: "promocoes/promo9.jpg",
-            descricao: "Compre 5 Burgers Uai e leve 1 Kuat 2L por nossa conta! 🎁",
-            ingredientes: "Pão, hambúrguer, milho, bacon, alface, tomate, presunto e mussarela."
+            descricao: "Compre 5 Burgers Uai e leve 1 Kuat 2L por nossa conta! 🎁"
         }
     ];
 
@@ -164,11 +156,10 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     /* ============================================================
-       🔍 BUSCA INTELIGENTE COM CORREÇÃO DE ERROS
+       🔍 BUSCA INTELIGENTE
     ============================================================ */
     const searchInput = document.getElementById('search-input');
     
-    // Base de dados de produtos para busca
     const PRODUTOS_BUSCA = [
         { nome: "Bão", aliases: ["bao", "bon"] },
         { nome: "Uai", aliases: ["uai", "way"] },
@@ -177,17 +168,15 @@ document.addEventListener("DOMContentLoaded", () => {
         { nome: "Armaria", aliases: ["armaria", "armário", "armario"] },
         { nome: "Bitela", aliases: ["bitela", "vitela"] },
         { nome: "Apruma", aliases: ["apruma", "apuma"] },
-        { nome: "Peleja", aliases: ["peleja", "peleja"] },
+        { nome: "Peleja", aliases: ["peleja"] },
         { nome: "Tudibom", aliases: ["tudibom", "tudo bom", "tudobom"] },
-        { nome: "Custoso", aliases: ["custoso", "custoso"] },
+        { nome: "Custoso", aliases: ["custoso"] },
         { nome: "Nigucim", aliases: ["nigucim", "ningucim"] },
         { nome: "Simprão", aliases: ["simprao", "simprão", "simples"] },
         { nome: "Nimin", aliases: ["nimin", "ninin"] },
         { nome: "Padaná", aliases: ["padana", "padaná"] },
         { nome: "Purizin", aliases: ["purizin", "purezin", "pure"] },
-        { nome: "Trembão", aliases: ["trembao", "trembão", "trembaum"] },
-        { nome: "Combo Casal", aliases: ["combo casal", "casal"] },
-        { nome: "Combo Família", aliases: ["combo familia", "familia", "family"] }
+        { nome: "Trembão", aliases: ["trembao", "trembão", "trembaum"] }
     ];
 
     function normalizar(texto) {
@@ -199,12 +188,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function distanciaLevenshtein(a, b) {
         const matrix = [];
-        for (let i = 0; i <= b.length; i++) {
-            matrix[i] = [i];
-        }
-        for (let j = 0; j <= a.length; j++) {
-            matrix[0][j] = j;
-        }
+        for (let i = 0; i <= b.length; i++) matrix[i] = [i];
+        for (let j = 0; j <= a.length; j++) matrix[0][j] = j;
         for (let i = 1; i <= b.length; i++) {
             for (let j = 1; j <= a.length; j++) {
                 if (b.charAt(i - 1) === a.charAt(j - 1)) {
@@ -221,68 +206,42 @@ document.addEventListener("DOMContentLoaded", () => {
         return matrix[b.length][a.length];
     }
 
-    function buscarProduto(query) {
-        const queryNorm = normalizar(query);
-        
-        // Busca exata
-        for (const produto of PRODUTOS_BUSCA) {
-            if (normalizar(produto.nome) === queryNorm) {
-                return { produto: produto.nome, confianca: 100 };
-            }
-            for (const alias of produto.aliases) {
-                if (normalizar(alias) === queryNorm) {
-                    return { produto: produto.nome, confianca: 100 };
-                }
-            }
-        }
-
-        // Busca aproximada
-        let melhorMatch = null;
-        let menorDistancia = Infinity;
-
-        for (const produto of PRODUTOS_BUSCA) {
-            const dist = distanciaLevenshtein(queryNorm, normalizar(produto.nome));
-            if (dist < menorDistancia && dist <= 3) {
-                menorDistancia = dist;
-                melhorMatch = produto.nome;
-            }
-            
-            for (const alias of produto.aliases) {
-                const distAlias = distanciaLevenshtein(queryNorm, normalizar(alias));
-                if (distAlias < menorDistancia && distAlias <= 3) {
-                    menorDistancia = distAlias;
-                    melhorMatch = produto.nome;
-                }
-            }
-        }
-
-        if (melhorMatch) {
-            return { produto: melhorMatch, confianca: Math.max(0, 100 - menorDistancia * 20) };
-        }
-
-        return null;
-    }
-
     function filtrarCards(query) {
         if (!query || query.length < 2) {
             document.querySelectorAll('.card').forEach(c => c.style.display = '');
             return;
         }
 
-        const resultado = buscarProduto(query);
+        const queryNorm = normalizar(query);
         
         document.querySelectorAll('.card').forEach(card => {
             const nome = card.dataset.name || card.querySelector('h3')?.textContent || '';
             const nomeNorm = normalizar(nome);
-            const queryNorm = normalizar(query);
 
+            let match = false;
+            
             if (nomeNorm.includes(queryNorm)) {
-                card.style.display = '';
-            } else if (resultado && normalizar(resultado.produto).includes(nomeNorm.split(' ')[0])) {
-                card.style.display = '';
+                match = true;
             } else {
-                card.style.display = 'none';
+                for (const produto of PRODUTOS_BUSCA) {
+                    const dist = distanciaLevenshtein(queryNorm, normalizar(produto.nome));
+                    if (dist <= 2 && nomeNorm.includes(normalizar(produto.nome))) {
+                        match = true;
+                        break;
+                    }
+                    for (const alias of produto.aliases) {
+                        if (normalizar(alias).includes(queryNorm) || queryNorm.includes(normalizar(alias))) {
+                            if (nomeNorm.includes(normalizar(produto.nome))) {
+                                match = true;
+                                break;
+                            }
+                        }
+                    }
+                    if (match) break;
+                }
             }
+
+            card.style.display = match ? '' : 'none';
         });
     }
 
@@ -292,13 +251,11 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-    // CONTINUA NA PARTE 2...
+    // CONTINUA PARTE 2...
 /* =========================================================  
-   🚀 DFL v6.0 — PARTE 2/7
-   ELEMENTOS + BACKDROP + MINI-CART + BARRA PROGRESSO
+   PARTE 2/8 - ELEMENTOS + BACKDROP + OVERLAYS
 ========================================================= */  
 
-    /* ------------------ 🎯 ELEMENTOS ------------------ */  
     const el = {  
         cartIcon: document.getElementById("cart-icon"),  
         cartCount: document.getElementById("cart-count"),  
@@ -340,19 +297,18 @@ document.addEventListener("DOMContentLoaded", () => {
         progressFill: document.getElementById("progressFill")
     };
 
-    /* ------------------ 🌫️ BACKDROP ------------------ */  
     if (!el.cartBackdrop) {  
         const bd = document.createElement("div");  
         bd.id = "cart-backdrop";  
         document.body.appendChild(bd);  
         el.cartBackdrop = bd;  
     }  
+    
     const Backdrop = {  
         show() { el.cartBackdrop.classList.add("active"); document.body.classList.add("no-scroll"); },  
         hide() { el.cartBackdrop.classList.remove("active"); document.body.classList.remove("no-scroll"); },  
     };
 
-    /* ------------------ 🧩 OVERLAYS ------------------ */  
     const Overlays = {  
         closeAll() {  
             document.querySelectorAll(".modal.show, #mini-cart.active, .pedidos-panel.active, .recompensas-panel.active, #admin-dashboard.show")
@@ -368,9 +324,9 @@ document.addEventListener("DOMContentLoaded", () => {
             Backdrop.show();  
         },  
     };  
+    
     el.cartBackdrop.addEventListener("click", () => Overlays.closeAll());
 
-    /* ------------------ 🎟️ CUPOM FORM ------------------ */  
     const couponForm = document.getElementById("coupon-form");  
     let couponApplied = (localStorage.getItem("dflCoupon") || "").toUpperCase();  
 
@@ -390,7 +346,6 @@ document.addEventListener("DOMContentLoaded", () => {
         renderMiniCart();   
     });
 
-    /* ------------------ 💬 POPUP ------------------ */  
     function popupAdd(msg) {  
         let pop = document.querySelector(".popup-add");  
         if (!pop) {  
@@ -420,9 +375,6 @@ document.addEventListener("DOMContentLoaded", () => {
         }, 6000);  
     }
 
-    /* ===========================================================
-       📊 BARRA DE PROGRESSO PARA FRETE GRÁTIS
-    =========================================================== */
     function atualizarBarraProgresso() {
         const subtotal = getCartSubtotal();
         const progressText = document.getElementById("progressText");
@@ -454,7 +406,6 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
-    /* ------------------ 🛒 MINI-CARRINHO ------------------ */  
     function renderMiniCart() {  
         if (!el.miniList) return;   
         const totalItens = cart.reduce((s, i) => s + i.qtd, 0);  
@@ -518,13 +469,12 @@ document.addEventListener("DOMContentLoaded", () => {
         enhanceMiniCartUI();  
     };
 
-    // CONTINUA NA PARTE 3...
+    // CONTINUA PARTE 3...
+    
 /* =========================================================  
-   🚀 DFL v6.0 — PARTE 3/7
-   FIREBASE + LOGIN + ADICIONAIS + COMBOS
+   PARTE 3/8 - FIREBASE + LOGIN
 ========================================================= */  
 
-    /* ------------------ 🔥 FIREBASE ------------------ */  
     const firebaseConfig = {  
         apiKey: "AIzaSyATQBcbYuzKpKlSwNlbpRiAM1XyHqhGeak",  
         authDomain: "da-familia-lanches.firebaseapp.com",  
@@ -572,7 +522,6 @@ document.addEventListener("DOMContentLoaded", () => {
         });  
     }
 
-    /* ------------------ ⚙️ LOGIN ------------------ */  
     const handleLoginSuccess = (user) => {  
         currentUser = user;  
         popupAdd("Login realizado com sucesso!");  
@@ -618,7 +567,6 @@ document.addEventListener("DOMContentLoaded", () => {
     el.userBtn?.addEventListener("click", () => Overlays.open(el.loginModal));  
     el.cartIcon?.addEventListener("click", () => { renderMiniCart(); Overlays.open(el.miniCart); });
 
-    /* ------------------ ➕ ADICIONAIS ------------------ */  
     const adicionais = [  
         { nome: "Cebola", preco: 0.99 },  
         { nome: "Salada", preco: 1.99 },  
@@ -638,7 +586,7 @@ document.addEventListener("DOMContentLoaded", () => {
         produtoExtras = card.dataset.name;  
         produtoPrecoBase = parseFloat(card.dataset.price) || 0;  
         el.extrasList.innerHTML = adicionais.map((a, i) => `  
-      <label class="extra-line" style="display:flex;justify-content:space-between;align-items:center;padding:12px;border:1px solid #ffb300;border-radius:8px;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.08);cursor:pointer;transition:all 0.2s;font-size:1rem;">  
+      <label class="extra-line">  
         <span style="font-weight:600;color:#222;">${a.nome} — <b style="color:#d32f2f;">${money(a.preco)}</b></span>  
         <input type="checkbox" value="${i}" style="margin-left:10px;">  
       </label>`).join("");  
@@ -678,7 +626,6 @@ document.addEventListener("DOMContentLoaded", () => {
         b.addEventListener("click", () => Overlays.closeAll())
     );
 
-    /* ------------------ 🥤 COMBOS ------------------ */  
     const comboDrinkOptions = {  
         casal: [  
             { rotulo: "Fanta 1L (padrão)", delta: 0.01 },  
@@ -699,7 +646,7 @@ document.addEventListener("DOMContentLoaded", () => {
         if (!grupo) { addCommonItem(nomeCombo, precoBase); return; }  
         const opts = comboDrinkOptions[grupo];  
         el.comboBody.innerHTML = opts.map((o, i) => `  
-      <label class="combo-option-line" style="display:flex;justify-content:space-between;align-items:center;padding:12px;border:1px solid #ffb300;border-radius:8px;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.08);cursor:pointer;font-size:1rem;">  
+      <label class="combo-option-line">  
         <span style="font-weight:600;color:#222;">${o.rotulo}</span>  
         <span style="font-weight:700;color:#d32f2f;">+ ${money(o.delta)}</span>  
         <input type="radio" name="combo-drink" value="${i}" ${i === 0 ? "checked" : ""} style="margin-left:10px;">  
@@ -744,18 +691,14 @@ document.addEventListener("DOMContentLoaded", () => {
         })
     );
 
-    /* ------------------ ⚙️ CÁLCULOS ------------------ */  
     const getCartSubtotal = () => cart.reduce((s, i) => s + (Number(i.preco) || 0) * (Number(i.qtd) || 0), 0);
 
-    // CONTINUA NA PARTE 4...
+    // CONTINUA PARTE 4...
+    
 /* =========================================================  
-   🚀 DFL v6.0 — PARTE 4/7
-   ENDEREÇO MANUAL + CEP + FRETE DINÂMICO + CUPOM
+   PARTE 4/8 - ENDEREÇO MANUAL + CEP + FRETE
 ========================================================= */  
 
-    /* ===========================================================
-       🏠 ENDEREÇO MANUAL + CEP
-    =========================================================== */
     let modoEnderecoManual = false;
 
     document.getElementById("btnNaoSeiCEP")?.addEventListener("click", () => {
@@ -888,9 +831,6 @@ document.addEventListener("DOMContentLoaded", () => {
         else popupAdd("CEP deve ter 8 dígitos.");  
     }));
 
-    /* ============================================================
-       🚀 FRETE DINÂMICO
-    ============================================================ */
     async function getDynamicDeliveryFee(enderecoCompleto) {
         if (!enderecoCompleto || typeof enderecoCompleto !== "string") {
             console.warn("FW: Endereço vazio, usando fallback.");
@@ -909,13 +849,11 @@ document.addEventListener("DOMContentLoaded", () => {
         }
 
         const bairroClean = bairroExtraido.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim();
-        console.log("FW: Bairro extraído:", bairroExtraido, "| Normalizado:", bairroClean);
 
         try {
             if (!db) { console.warn("FW: db não disponível."); return DELIVERY_FEE_DEFAULT; }
 
             if (!window.deliveryFeesCacheGlobal) {
-                console.log("FW: Carregando taxas do Firebase...");
                 const snap = await db.collection("TaxasDeEntrega").doc("bairros").collection("lista").doc("tabela").get();
                 if (!snap.exists) { console.warn("FW: Documento 'tabela' não encontrado."); return DELIVERY_FEE_DEFAULT; }
 
@@ -928,7 +866,6 @@ document.addEventListener("DOMContentLoaded", () => {
                     if (!isNaN(valor) && valor >= 0) cache[key] = valor;
                 });
                 window.deliveryFeesCacheGlobal = cache;
-                console.log("FW: Cache carregado:", Object.keys(cache).length, "bairros");
             }
         } catch (e) { console.warn("FW: Erro ao carregar taxas.", e); return DELIVERY_FEE_DEFAULT; }
 
@@ -936,7 +873,6 @@ document.addEventListener("DOMContentLoaded", () => {
         if (!Object.keys(cacheAtual).length) return DELIVERY_FEE_DEFAULT;
 
         if (cacheAtual[bairroClean] !== undefined) {
-            console.log(`FW: Match EXATO para "${bairroClean}". Taxa: R$ ${cacheAtual[bairroClean]}`);
             return cacheAtual[bairroClean];
         }
 
@@ -945,17 +881,14 @@ document.addEventListener("DOMContentLoaded", () => {
             if (palavra.length < 4) continue;
             for (const key in cacheAtual) {
                 if (key.includes(palavra)) {
-                    console.log(`FW: Match PALAVRA '${palavra}' em "${key}". Taxa: R$ ${cacheAtual[key]}`);
                     return cacheAtual[key];
                 }
             }
         }
 
-        console.warn(`FW: Bairro "${bairroExtraido}" não mapeado. Fallback R$ ${DELIVERY_FEE_DEFAULT}`);
         return DELIVERY_FEE_DEFAULT;
     }
 
-    /* VALIDAÇÃO DE CUPOM */  
     const _cupomCache = {};  
     function _cacheKey(codigo, subtotal) {  
         const faixa = Math.floor((subtotal || 0) / 5);  
@@ -999,12 +932,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
             if (!data.ativo) { const res = { ...invalido, mensagem: "Este cupom não está mais ativo." }; _cupomCache[key] = { ate: now + 30000, res }; return res; }  
             if (data.expiraEm) {  
-                let expiraDate = null
-/* =========================================================  
-   🚀 DFL v6.0 — PARTE 5/7
-   CALC TOTALS + ENHANCE UI + RECOMPENSAS
-========================================================= */  
-
                 let expiraDate = null;  
                 if (typeof data.expiraEm?.toDate === "function") expiraDate = data.expiraEm.toDate();  
                 else if (typeof data.expiraEm === "string") expiraDate = new Date(data.expiraEm);  
@@ -1021,6 +948,12 @@ document.addEventListener("DOMContentLoaded", () => {
             _cupomCache[key] = { ate: now + 30000, res }; return res;  
         } catch (err) { console.error("Erro ao validar cupom:", err); return { ...invalido, mensagem: "Erro ao processar cupom." }; }  
     }
+
+    // CONTINUA PARTE 5...
+    
+/* =========================================================  
+   PARTE 5/8 - CALC TOTALS + ENHANCE UI
+========================================================= */  
 
     async function calcTotals() {  
         const subtotal = getCartSubtotal();  
@@ -1112,7 +1045,6 @@ document.addEventListener("DOMContentLoaded", () => {
         } catch (e) { console.error("Erro recompensas:", e); return []; }  
     }
 
-    /* STATUS + TIMER */  
     const atualizarStatus = safe(() => {  
         const agora = new Date(); const h = agora.getHours();  
         const aberto = h >= 18 && h < 23;   
@@ -1129,7 +1061,6 @@ document.addEventListener("DOMContentLoaded", () => {
     });  
     atualizarTimer(); setInterval(atualizarTimer, 1000);
 
-    /* FECHAR PEDIDO */  
     async function fecharPedido() {  
         if (!cart.length) return alert("Carrinho vazio!");  
         if (!currentUser) { alert("Faça login para enviar o pedido!"); Overlays.open(el.loginModal); return; }  
@@ -1200,15 +1131,15 @@ document.addEventListener("DOMContentLoaded", () => {
             cart = []; couponApplied = ""; localStorage.removeItem("dflCoupon"); document.getElementById("coupon-input").value = ""; modoEnderecoManual = false; renderMiniCart(); Overlays.closeAll();  
         } catch (err) { console.error("Erro fechar pedido:", err); alert(`Erro: ${err.message}`); }  
     }  
+    
     renderMiniCart();
 
-    // CONTINUA NA PARTE 6...
+    // CONTINUA PARTE 6...
+    
 /* =========================================================  
-   🚀 DFL v6.0 — PARTE 6/7
-   MEUS PEDIDOS + RECOMPENSAS
+   PARTE 6/8 - MEUS PEDIDOS
 ========================================================= */  
 
-    /* MEUS PEDIDOS */  
     el.pedidosBtn?.addEventListener("click", () => { if (!currentUser) { alert("Faça login para ver seus pedidos."); Overlays.open(el.loginModal); return; } Overlays.open(el.pedidosPanel); carregarPedidos(currentUser.uid); });  
     el.pedidosFecharBtn?.addEventListener("click", () => Overlays.closeAll());  
 
@@ -1243,7 +1174,12 @@ document.addEventListener("DOMContentLoaded", () => {
         } catch (err) { console.error("Erro repetir:", err); alert("Erro ao processar."); }  
     }
 
-    /* RECOMPENSAS */  
+    // CONTINUA PARTE 7...
+    
+/* =========================================================  
+   PARTE 7/8 - RECOMPENSAS
+========================================================= */  
+
     async function carregarRecompensas(userId) {  
         if (!isFirebaseInitialized) return;  
         const contadorValor = document.getElementById('contador-valor'); const progressoBar = document.getElementById('progresso-bar'); const progressoMsg = document.getElementById('progresso-mensagem');  
@@ -1301,13 +1237,12 @@ document.addEventListener("DOMContentLoaded", () => {
     el.recompensasBtn?.addEventListener("click", () => { if (!currentUser) { alert("Faça login!"); Overlays.open(el.loginModal); return; } Overlays.open(el.recompensasPanel); carregarRecompensas(currentUser.uid); });  
     el.recompensasFecharBtn?.addEventListener("click", () => Overlays.closeAll());
 
-    // CONTINUA NA PARTE 7...
+    // CONTINUA PARTE 8...
+    
 /* =========================================================  
-   🚀 DFL v6.0 — PARTE 7/7 (FINAL)
-   ADMIN + COOKIES + INICIALIZAÇÃO
+   PARTE 8/8 (FINAL) - ADMIN + COOKIES + INICIALIZAÇÃO
 ========================================================= */  
 
-    /* ADMIN */  
     const ADMINS = [ "alefejohsefe@gmail.com", "kalebhstanley650@gmail.com", "contato@dafamilialanches.com.br" ];  
     function isAdmin(user) { return user && user.email && ADMINS.includes(user.email.toLowerCase()); }  
     let chartPedidos = null; let chartProdutos = null;  
@@ -1317,25 +1252,22 @@ document.addEventListener("DOMContentLoaded", () => {
     function gerarResumoECharts(pedidos) { if (!window.Chart) return; const ctxPedidos = document.getElementById('chart-pedidos')?.getContext('2d'); const ctxProdutos = document.getElementById('chart-produtos')?.getContext('2d'); if (!ctxPedidos || !ctxProdutos) return; const pedidosPorDia = {}; const produtosContagem = {}; pedidos.forEach(p => { const dia = (p.data?.toDate?.() || new Date(p.data)).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' }); pedidosPorDia[dia] = (pedidosPorDia[dia] || 0) + 1; (Array.isArray(p.itens) ? p.itens : []).forEach(itemStr => { const nome = itemStr.split(' x')[0]; if (nome) produtosContagem[nome] = (produtosContagem[nome] || 0) + 1; }); }); const labelsPedidos = Object.keys(pedidosPorDia).reverse(); const dataPedidos = Object.values(pedidosPorDia).reverse(); if (chartPedidos) chartPedidos.destroy(); chartPedidos = new Chart(ctxPedidos, { type: 'line', data: { labels: labelsPedidos, datasets: [{ label: 'Pedidos', data: dataPedidos, borderColor: '#ffb300', tension: 0.1 }] }, options: { scales: { x: { ticks: { maxRotation: 45, minRotation: 45 } } } } }); const produtosOrdenados = Object.entries(produtosContagem).sort(([, a], [, b]) => b - a).slice(0, 10); if (chartProdutos) chartProdutos.destroy(); chartProdutos = new Chart(ctxProdutos, { type: 'bar', data: { labels: produtosOrdenados.map(p=>p[0]), datasets: [{ label: 'Mais Vendidos', data: produtosOrdenados.map(p=>p[1]), backgroundColor: '#ff7043' }] }, options: { indexAxis: 'y' } }); }  
     function carregarRelatorios(periodo = "7") { const start = new Date(); if (periodo !== "all") start.setDate(start.getDate() - Number(periodo)); else start.setTime(0); db.collection("Pedidos").orderBy("data", "desc").get().then(snap => { const pedidos = snap.docs.map(d => { const dataObjeto = d.data(); const rawDate = dataObjeto.data; let processedDate; if (rawDate && typeof rawDate.toDate === 'function') processedDate = rawDate.toDate(); else if (rawDate) processedDate = new Date(rawDate); else processedDate = new Date(); return { ...dataObjeto, id: d.id, data: processedDate }; }); const filtrados = pedidos.filter(p => p.data >= start); gerarResumoECharts(filtrados); document.getElementById("card-total").textContent = `Total: ${money(filtrados.reduce((s, p) => s + (Number(p.total) || 0), 0))}`; document.getElementById("card-pedidos").textContent = `Pedidos: ${filtrados.length}`; document.getElementById("card-ticket").textContent = `Ticket Médio: ${money(filtrados.length ? filtrados.reduce((s, p) => s + (Number(p.total) || 0), 0)/filtrados.length : 0)}`; document.getElementById("export-csv").onclick = () => { const csv = "Data;Nome;Total\n" + filtrados.map(p => `${p.data.toLocaleString()};${p.nome};${p.total}`).join("\n"); const blob = new Blob([`\uFEFF${csv}`], { type: 'text/csv;charset=utf-8;' }); const link = document.createElement('a'); link.href = URL.createObjectURL(blob); link.download = "pedidos.csv"; link.click(); }; }); const sel = document.getElementById("filter-period"); if(sel && !sel._bound) { sel.addEventListener("change", e => carregarRelatorios(e.target.value)); sel._bound = true; } }
 
-    /* COOKIES */  
     const cookieBanner = document.getElementById("cookie-banner"); const cookieAcceptBtn = document.getElementById("cookie-accept");  
     if (cookieBanner && cookieAcceptBtn) { if (localStorage.getItem("dfl-cookies-accepted") === "true") cookieBanner.style.display = "none"; else cookieBanner.classList.add("show"); cookieAcceptBtn.addEventListener("click", () => { localStorage.setItem("dfl-cookies-accepted", "true"); cookieBanner.classList.remove("show"); }); }
 
-    /* INICIALIZAÇÃO */
-    console.log("%c🔥 DFL v6.0 — BUSCA INTELIGENTE + PROMOÇÕES EM CARDS", "background:#4CAF50;color:#fff;padding:5px;border-radius:5px;");  
+    console.log("%c🔥 DFL v6.0 — BUSCA + PROMOÇÕES EM CARDS", "background:#4CAF50;color:#fff;padding:5px;border-radius:5px;");  
     
     renderPromoCards();
     inicializarFirebase();  
 
-}); // FIM DO DOMContentLoaded
+}); 
 
-/* FECHAR MODAIS GLOBAL */  
 document.addEventListener('DOMContentLoaded', () => {  
     document.querySelectorAll('.modal').forEach(m => m.addEventListener('click', e => { if (e.target.classList.contains('modal')) { m.classList.remove('show'); document.getElementById('cart-backdrop').classList.remove('active'); } }));  
     document.getElementById('cart-backdrop')?.addEventListener('click', () => { document.querySelectorAll('.active').forEach(e => e.classList.remove('active')); });  
 });
 
 // ============================================================
-// FIM DO CÓDIGO v6.0 — ARQUIVOS ENVIADOS COM SUCESSO!
-// Cole script.js parte 1 até 7 em sequência no seu arquivo
+// ✅ FIM DO CÓDIGO v6.0 CORRIGIDO
+// Cole as 8 partes em sequência no seu script.js
 // ============================================================
