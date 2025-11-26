@@ -1077,3 +1077,33 @@ section h2 { font-size: 1.3rem; text-align: center; margin-bottom: 15px; color: 
 #mini-cart {
     z-index: 999 !important;
 }
+/* ===========================================================
+   FIX ABSOLUTO – Scroll interno do mini-carrinho
+=========================================================== */
+
+/* Container principal do mini-cart */
+#mini-cart {
+    display: flex !important;
+    flex-direction: column !important;
+    height: 100vh !important;
+    overflow: hidden !important;
+}
+
+/* Área interna onde ficam os itens */
+#mini-cart .mini-list,
+#mini-cart .mini-cart-body,
+#mini-cart .mini-cart-content {
+    flex: 1 1 auto !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    min-height: 0 !important;
+    padding-bottom: 20px !important;
+}
+
+/* Rodapé fixo */
+#mini-cart .mini-foot {
+    flex-shrink: 0 !important;
+    background: #fff !important;
+    padding: 16px !important;
+    border-top: 1px solid #eee !important;
+}
