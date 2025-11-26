@@ -1,8 +1,7 @@
 /* ===========================================================
    🎨 Da Família Lanches – CSS v6.2 FINAL CORRIGIDO
-   - Carrinho compacto e funcional
-   - Barra de progresso reduzida
-   - Botões laterais únicos
+   - Botões laterais visíveis
+   - Carrinho compacto
    =========================================================== */
 
 :root {
@@ -286,7 +285,7 @@ section h2 { font-size: 1.3rem; text-align: center; margin-bottom: 15px; color: 
   right: 0; 
   top: 0; 
   width: min(92vw, 380px); 
-  height: 100vh;
+  height: 100dvh;
   background: #fff; 
   box-shadow: -4px 0 20px rgba(0, 0, 0, 0.25);
   transform: translateX(100%); 
@@ -302,14 +301,14 @@ section h2 { font-size: 1.3rem; text-align: center; margin-bottom: 15px; color: 
   display: flex; 
   justify-content: space-between; 
   align-items: center;
-  padding: 10px 12px;
+  padding: 8px 12px; /* Compacto */
   border-bottom: 1px solid #eee;
   flex-shrink: 0;
   background: #fff;
 }
 
 .mini-head h3 {
-  font-size: 1rem;
+  font-size: 0.95rem; /* Fonte reduzida */
   margin: 0;
 }
 
@@ -319,42 +318,42 @@ section h2 { font-size: 1.3rem; text-align: center; margin-bottom: 15px; color: 
   overflow-x: hidden;
   padding: 8px 12px;
   min-height: 0;
-  font-size: 0.85rem; /* FONTE REDUZIDA */
+  font-size: 0.85rem; 
 }
 
 .cart-item {
   border-bottom: 1px solid #eee;
-  padding: 8px 0; /* PADDING REDUZIDO */
+  padding: 8px 0;
 }
 
 .cart-item p {
-  margin: 0 0 3px 0; /* MARGENS REDUZIDAS */
+  margin: 0 0 3px 0;
   font-size: 0.85rem;
 }
 
 .mini-foot { 
-  padding: 8px 12px; /* PADDING REDUZIDO */
+  padding: 8px 12px;
   border-top: 1px solid #eee;
   flex-shrink: 0;
   background: #fff;
   max-height: 55vh;
   overflow-y: auto;
-  font-size: 0.85rem; /* FONTE REDUZIDA */
+  font-size: 0.85rem;
 }
 
 /* ======== BARRA DE PROGRESSO COMPACTA ======== */
 .progress-wrapper {
     background: #fff8d6;
-    padding: 6px 10px; /* REDUZIDO */
+    padding: 6px 10px;
     border-radius: var(--rad);
     margin-top: 0;
-    margin-bottom: 8px;
+    margin-bottom: 6px;
     border: 1px solid var(--acento);
 }
 
 .progress-text {
-    font-size: 0.8rem; /* FONTE MENOR */
-    margin-bottom: 4px; /* REDUZIDO */
+    font-size: 0.75rem; /* Fonte reduzida */
+    margin-bottom: 4px;
     font-weight: 600;
     color: #444;
     text-align: center;
@@ -363,7 +362,7 @@ section h2 { font-size: 1.3rem; text-align: center; margin-bottom: 15px; color: 
 
 .progress-bar {
     width: 100%;
-    height: 8px; /* ALTURA REDUZIDA */
+    height: 6px; /* Altura reduzida de 8px para 6px */
     background: #ffe79b; 
     border-radius: 999px;
     overflow: hidden;
@@ -385,7 +384,7 @@ section h2 { font-size: 1.3rem; text-align: center; margin-bottom: 15px; color: 
     margin: 0;
     font-weight: 600;
     cursor: pointer;
-    font-size: 0.8rem; /* FONTE REDUZIDA */
+    font-size: 0.8rem;
     transition: color 0.2s;
     display: block; 
     text-align: right;
@@ -414,10 +413,10 @@ section h2 { font-size: 1.3rem; text-align: center; margin-bottom: 15px; color: 
 
 .frete-container input[type="text"],
 .frete-container textarea {
-  padding: 6px 8px; /* PADDING REDUZIDO */
+  padding: 6px 8px;
   border-radius: 8px;
   border: 1px solid #ccc;
-  font-size: 0.8rem; /* FONTE REDUZIDA */
+  font-size: 0.8rem;
   box-sizing: border-box;
 }
 
@@ -461,12 +460,12 @@ section h2 { font-size: 1.3rem; text-align: center; margin-bottom: 15px; color: 
   color: #222;
   border: none;
   border-radius: 8px;
-  padding: 6px 10px; /* PADDING REDUZIDO */
+  padding: 6px 10px;
   font-weight: 700;
   cursor: pointer;
   transition: 0.2s;
   box-shadow: var(--shadow-1);
-  font-size: 0.8rem; /* FONTE REDUZIDA */
+  font-size: 0.8rem;
 }
 .btn-calcular-frete:hover { 
   background: #ffc107;
@@ -474,7 +473,7 @@ section h2 { font-size: 1.3rem; text-align: center; margin-bottom: 15px; color: 
 }
 
 .frete-gratis-aviso {
-    display: none; /* REMOVIDO - JÁ TEM A BARRA */
+    display: none; 
 }
 
 .coupon-form { 
@@ -485,10 +484,10 @@ section h2 { font-size: 1.3rem; text-align: center; margin-bottom: 15px; color: 
 }
 .coupon-form input[type="text"] {
   flex: 1;
-  padding: 6px 8px; /* PADDING REDUZIDO */
+  padding: 6px 8px;
   border: 1px solid #ccc;
   border-radius: 8px;
-  font-size: 0.8rem; /* FONTE REDUZIDA */
+  font-size: 0.8rem;
   box-shadow: inset 0 1px 2px rgba(0,0,0,0.05);
 }
 .coupon-form button {
@@ -497,10 +496,10 @@ section h2 { font-size: 1.3rem; text-align: center; margin-bottom: 15px; color: 
   font-weight: 700;
   border: none;
   border-radius: 8px;
-  padding: 6px 10px; /* PADDING REDUZIDO */
+  padding: 6px 10px;
   cursor: pointer;
   transition: background-color .2s ease;
-  font-size: 0.8rem; /* FONTE REDUZIDA */
+  font-size: 0.8rem;
 }
 .coupon-form button:hover { background-color: #43a047; }
 .coupon-message { margin-top: 3px; font-size: 0.8rem; color: #333; }
@@ -513,11 +512,7 @@ section h2 { font-size: 1.3rem; text-align: center; margin-bottom: 15px; color: 
   font-size: 0.85rem;
 }
 
-/* CONTINUA PARTE 2... */
-/* ===========================================================
-   PARTE 2/2 - MODAIS + BOTÕES LATERAIS + FOOTER
-   =========================================================== */
-
+/* ======== MODAIS ======== */
 .modal {
   position: fixed; 
   inset: 0; 
@@ -554,9 +549,9 @@ section h2 { font-size: 1.3rem; text-align: center; margin-bottom: 15px; color: 
 .btn-primary, .btn-secondary, .btn-primario {
   border: none; 
   border-radius: 10px; 
-  padding: 10px 14px; /* PADDING REDUZIDO */
+  padding: 10px 14px; 
   font-weight: 700; 
-  font-size: 0.9rem; /* FONTE REDUZIDA */
+  font-size: 0.9rem; 
   cursor: pointer; 
   transition: 0.2s;
   width: 100%;
@@ -662,12 +657,13 @@ section h2 { font-size: 1.3rem; text-align: center; margin-bottom: 15px; color: 
   transform: scale(1.02); 
 }
 
-/* ======== BOTÕES LATERAIS - ESCONDE OS DO HTML ======== */
+/* ======== BOTÕES LATERAIS ======== */
 .meus-pedidos, .minhas-recompensas {
-  display: none !important; /* ESCONDE OS BOTÕES DO HTML */
+  display: block !important; /* GARANTE QUE APAREÇAM */
 }
 
-/* Os botões serão criados pelo JavaScript */
+/* Escondemos inicialmente via opacidade para o JS controlar, 
+   mas o display block garante que existam no DOM */
 .meus-pedidos-btn, .recompensas-btn {
   position: fixed;
   background: linear-gradient(135deg, #ffca28, #ffb300); 
@@ -681,6 +677,7 @@ section h2 { font-size: 1.3rem; text-align: center; margin-bottom: 15px; color: 
   cursor: pointer; 
   transition: 0.2s;
   z-index: 1500;
+  display: none; /* JS vai dar display block se logado */
 }
 
 .meus-pedidos-btn {
@@ -730,9 +727,7 @@ section h2 { font-size: 1.3rem; text-align: center; margin-bottom: 15px; color: 
   padding: 16px; 
 }
 
-.pedidos-panel {
-  background-color: #f9f9f9;
-}
+.pedidos-panel { background-color: #f9f9f9; }
 
 #listaPedidos {
   display: flex;
@@ -910,10 +905,7 @@ section h2 { font-size: 1.3rem; text-align: center; margin-bottom: 15px; color: 
   }
   #cookie-banner p { margin-right: 0; }
   #cookie-banner button { width: 100%; padding: 12px; }
-  
-  .mini-cart {
-    width: 95vw;
-  }
+  .mini-cart { width: 95vw; }
 }
 
 #admin-dashboard .modal-content {
@@ -924,9 +916,7 @@ section h2 { font-size: 1.3rem; text-align: center; margin-bottom: 15px; color: 
     background: var(--botao); 
     color: var(--txt);
 }
-#admin-dashboard .dashboard-body {
-    padding: 20px;
-}
+#admin-dashboard .dashboard-body { padding: 20px; }
 
 .dashboard-body > div:first-child {
     display: flex; 
@@ -966,36 +956,15 @@ section h2 { font-size: 1.3rem; text-align: center; margin-bottom: 15px; color: 
         margin: auto; 
         border-radius: 16px; 
     }
-    .cardBox {
-        min-width: 100%;
-    }
+    .cardBox { min-width: 100%; }
     
-    .search-container {
-        padding: 0 10px;
-    }
+    .search-container { padding: 0 10px; }
+    #search-input { font-size: 0.95rem; padding: 12px 16px; }
     
-    #search-input {
-        font-size: 0.95rem;
-        padding: 12px 16px;
-    }
-    
-    .meus-pedidos-btn {
-        font-size: 0.8rem;
-        padding: 8px 14px;
-    }
-    
-    .recompensas-btn {
-        font-size: 0.8rem;
-        padding: 8px 14px;
-    }
+    .meus-pedidos-btn { font-size: 0.8rem; padding: 8px 14px; }
+    .recompensas-btn { font-size: 0.8rem; padding: 8px 14px; }
 }
 
 /* Ajuste para label checkbox */
-.mini-foot label {
-  font-size: 0.85rem;
-  margin-bottom: 6px;
-}
-
-.mini-foot hr {
-  margin: 10px 0;
-}
+.mini-foot label { font-size: 0.85rem; margin-bottom: 6px; }
+.mini-foot hr { margin: 10px 0; }
