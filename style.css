@@ -996,3 +996,42 @@ section h2 { font-size: 1.3rem; text-align: center; margin-bottom: 15px; color: 
         padding: 12px 16px;
     }
 }
+/* ===========================================================
+   🔧 FIX 1 — MINI-CART CORRIGIDO (altura + scroll)
+=========================================================== */
+
+.mini-cart {
+    overflow: hidden !important;
+    display: flex !important;
+    flex-direction: column !important;
+}
+
+.mini-list {
+    flex: 1 1 auto !important;
+    overflow-y: auto !important;
+    min-height: 0 !important;
+    padding-bottom: 20px !important;
+}
+
+.mini-foot {
+    flex-shrink: 0 !important;
+    overflow: visible !important;
+    max-height: none !important;
+    padding-bottom: 20px !important;
+}
+/* ===========================================================
+   🔧 FIX 2 — SOBREPOSIÇÃO DE PAINÉIS E MINI-CARRINHO
+=========================================================== */
+
+#painelPedidos,
+#recompensas-panel {
+    z-index: 950 !important; /* abaixo do mini-cart */
+}
+
+.mini-cart {
+    z-index: 990 !important; /* acima dos painéis */
+}
+
+#cart-backdrop {
+    z-index: 980 !important; /* entre eles */
+}
