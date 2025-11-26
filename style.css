@@ -1,7 +1,8 @@
 /* ===========================================================
-   🎨 Da Família Lanches – CSS v6.2 FINAL CORRIGIDO
-   - Botões laterais visíveis
-   - Carrinho compacto
+   🎨 Da Família Lanches – CSS v6.3 FINAL CORRIGIDO
+   - Botões laterais VISÍVEIS
+   - Carrinho COMPACTO
+   - Barra de progresso fina
    =========================================================== */
 
 :root {
@@ -268,7 +269,7 @@ section h2 { font-size: 1.3rem; text-align: center; margin-bottom: 15px; color: 
   transform: scale(1.03); 
 }
 
-/* ======== 🛒 CARRINHO COMPACTO E FUNCIONAL ======== */
+/* ======== 🛒 CARRINHO ULTRA-COMPACTO (CORRIGIDO) ======== */
 #cart-backdrop {
   position: fixed; 
   inset: 0; 
@@ -301,14 +302,14 @@ section h2 { font-size: 1.3rem; text-align: center; margin-bottom: 15px; color: 
   display: flex; 
   justify-content: space-between; 
   align-items: center;
-  padding: 8px 12px; /* Compacto */
+  padding: 10px 12px; /* Compacto */
   border-bottom: 1px solid #eee;
   flex-shrink: 0;
   background: #fff;
 }
 
 .mini-head h3 {
-  font-size: 0.95rem; /* Fonte reduzida */
+  font-size: 1rem;
   margin: 0;
 }
 
@@ -316,35 +317,35 @@ section h2 { font-size: 1.3rem; text-align: center; margin-bottom: 15px; color: 
   flex: 1;
   overflow-y: auto; 
   overflow-x: hidden;
-  padding: 8px 12px;
+  padding: 6px 12px; /* Mais compacto */
   min-height: 0;
   font-size: 0.85rem; 
 }
 
 .cart-item {
   border-bottom: 1px solid #eee;
-  padding: 8px 0;
+  padding: 6px 0; /* Mais compacto */
 }
 
 .cart-item p {
-  margin: 0 0 3px 0;
+  margin: 0 0 2px 0; /* Margem mínima */
   font-size: 0.85rem;
 }
 
 .mini-foot { 
-  padding: 8px 12px;
+  padding: 6px 12px; /* Mais compacto */
   border-top: 1px solid #eee;
   flex-shrink: 0;
   background: #fff;
-  max-height: 55vh;
+  max-height: 65vh; /* Aumenta área visível */
   overflow-y: auto;
   font-size: 0.85rem;
 }
 
-/* ======== BARRA DE PROGRESSO COMPACTA ======== */
+/* ======== BARRA DE PROGRESSO FINA (6px) ======== */
 .progress-wrapper {
     background: #fff8d6;
-    padding: 6px 10px;
+    padding: 4px 8px; /* Super compacto */
     border-radius: var(--rad);
     margin-top: 0;
     margin-bottom: 6px;
@@ -352,17 +353,17 @@ section h2 { font-size: 1.3rem; text-align: center; margin-bottom: 15px; color: 
 }
 
 .progress-text {
-    font-size: 0.75rem; /* Fonte reduzida */
-    margin-bottom: 4px;
+    font-size: 0.75rem; /* Fonte pequena */
+    margin-bottom: 2px;
     font-weight: 600;
     color: #444;
     text-align: center;
-    line-height: 1.2;
+    line-height: 1.1;
 }
 
 .progress-bar {
     width: 100%;
-    height: 6px; /* Altura reduzida de 8px para 6px */
+    height: 6px; /* Altura corrigida para 6px */
     background: #ffe79b; 
     border-radius: 999px;
     overflow: hidden;
@@ -393,7 +394,7 @@ section h2 { font-size: 1.3rem; text-align: center; margin-bottom: 15px; color: 
 .link-acao:hover { color: #0056b3; }
 
 .frete-container {
-  margin-top: 8px;
+  margin-top: 6px;
   padding: 8px;
   border: 1px solid #ddd;
   border-radius: 10px;
@@ -401,7 +402,7 @@ section h2 { font-size: 1.3rem; text-align: center; margin-bottom: 15px; color: 
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 .frete-container h4 { 
-  margin: 0 0 6px 0;
+  margin: 0 0 4px 0;
   font-size: 0.9rem;
   color: #222;
 }
@@ -479,7 +480,7 @@ section h2 { font-size: 1.3rem; text-align: center; margin-bottom: 15px; color: 
 .coupon-form { 
   display: flex;
   gap: 4px;
-  margin-top: 8px;
+  margin-top: 6px;
   margin-bottom: 6px;
 }
 .coupon-form input[type="text"] {
@@ -502,7 +503,7 @@ section h2 { font-size: 1.3rem; text-align: center; margin-bottom: 15px; color: 
   font-size: 0.8rem;
 }
 .coupon-form button:hover { background-color: #43a047; }
-.coupon-message { margin-top: 3px; font-size: 0.8rem; color: #333; }
+.coupon-message { margin-top: 2px; font-size: 0.8rem; color: #333; }
 
 .summary-row {
   display: flex;
@@ -549,7 +550,7 @@ section h2 { font-size: 1.3rem; text-align: center; margin-bottom: 15px; color: 
 .btn-primary, .btn-secondary, .btn-primario {
   border: none; 
   border-radius: 10px; 
-  padding: 10px 14px; 
+  padding: 10px 14px; /* Compacto */
   font-weight: 700; 
   font-size: 0.9rem; 
   cursor: pointer; 
@@ -657,13 +658,11 @@ section h2 { font-size: 1.3rem; text-align: center; margin-bottom: 15px; color: 
   transform: scale(1.02); 
 }
 
-/* ======== BOTÕES LATERAIS ======== */
+/* ======== BOTÕES LATERAIS VISÍVEIS (CORRIGIDO) ======== */
 .meus-pedidos, .minhas-recompensas {
-  display: block !important; /* GARANTE QUE APAREÇAM */
+  display: block !important; /* Garante que existam no DOM */
 }
 
-/* Escondemos inicialmente via opacidade para o JS controlar, 
-   mas o display block garante que existam no DOM */
 .meus-pedidos-btn, .recompensas-btn {
   position: fixed;
   background: linear-gradient(135deg, #ffca28, #ffb300); 
@@ -677,7 +676,7 @@ section h2 { font-size: 1.3rem; text-align: center; margin-bottom: 15px; color: 
   cursor: pointer; 
   transition: 0.2s;
   z-index: 1500;
-  display: none; /* JS vai dar display block se logado */
+  display: none; /* JS vai ativar com style.display = 'block' */
 }
 
 .meus-pedidos-btn {
@@ -905,7 +904,10 @@ section h2 { font-size: 1.3rem; text-align: center; margin-bottom: 15px; color: 
   }
   #cookie-banner p { margin-right: 0; }
   #cookie-banner button { width: 100%; padding: 12px; }
-  .mini-cart { width: 95vw; }
+  
+  .mini-cart {
+    width: 95vw;
+  }
 }
 
 #admin-dashboard .modal-content {
