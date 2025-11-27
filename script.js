@@ -1,7 +1,8 @@
 /* =========================================================  
-   🚀 DFL v7.0 FINAL — SCRIPT COMPLETO (FUNCIONALIDADES RESTAURADAS)
-   - Baseado na v5.6 + Melhorias v6.x
-   - Login, Pedidos, Recompensas, Cupons, Frete, Admin: TUDO INCLUÍDO
+   🚀 DFL v7.1 FINAL — SCRIPT COMPLETO E RESTAURADO
+   - Recompensas v5.6 restauradas
+   - Botões Pedidos/Recompensas corrigidos (pede login se deslogado)
+   - Cookies e Promoções v6.x mantidos
 ========================================================= */  
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -48,78 +49,15 @@ document.addEventListener("DOMContentLoaded", () => {
     ============================================================ */
     const PROMO_DATA = [  
         null,   
-        { 
-            id: 1, 
-            nome: "2 Purizin + 1 Fanta 1L", 
-            preco: 34.99, 
-            precoAntigo: 40.00, 
-            img: "promocoes/promo1.jpg",
-            descricao: "2 Hot Dogs 'Purizin' com purê cremoso + 1 Fanta 1L geladinha!"
-        },  
-        { 
-            id: 2, 
-            nome: "3 Hot Dog Padaná", 
-            preco: 37.99, 
-            precoAntigo: 45.00, 
-            img: "promocoes/promo2.jpg",
-            descricao: "3 Padaná completos, perfeitos pra dividir com a galera!"
-        },  
-        { 
-            id: 3, 
-            nome: "2 Burgers Peleja", 
-            preco: 39.99, 
-            precoAntigo: 52.00, 
-            img: "promocoes/promo3.jpg",
-            descricao: "Bora artesanar o bolso! Dois Burgers artesanais 'Peleja' no precinho!"
-        },  
-        { 
-            id: 4, 
-            nome: "3 Trem + 1 Fanta 1L", 
-            preco: 44.99, 
-            precoAntigo: 51.00, 
-            img: "promocoes/promo4.jpg",
-            descricao: "3 Burgers Trem com bacon, queijo e batata palha + 1 Fanta 1L."
-        },  
-        { 
-            id: 5, 
-            nome: "4 Trem + 1 Fanta 1L", 
-            preco: 49.99, 
-            precoAntigo: 65.00, 
-            img: "promocoes/promo5.jpg",
-            descricao: "O clássico da família! 4 Burgers Trem + Fanta 1L."
-        },  
-        { 
-            id: 6, 
-            nome: "5 Burgers Uai", 
-            preco: 54.00, 
-            precoAntigo: 65.00, 
-            img: "promocoes/promo6.jpg",
-            descricao: "Pra família toda! 5 Burgers UAI recheados no precinho!"
-        },  
-        { 
-            id: 7, 
-            nome: "4 TremBão + 1 Fanta 1L", 
-            preco: 59.99, 
-            precoAntigo: 77.00, 
-            img: "promocoes/promo7.jpg",
-            descricao: "O maior hot dog da casa! 4 TremBão com purê cremoso + Fanta 1L."
-        },  
-        { 
-            id: 8, 
-            nome: "4 Armaria", 
-            preco: 59.99, 
-            precoAntigo: 72.00, 
-            img: "promocoes/promo8.jpg",
-            descricao: "A queridinha da galera! 4 Armaria no super desconto."
-        },  
-        { 
-            id: 9, 
-            nome: "5 Uai + 1 Kuat 2L (Brinde)", 
-            preco: 64.99, 
-            precoAntigo: 75.00, 
-            img: "promocoes/promo9.jpg",
-            descricao: "Compre 5 Burgers Uai e leve 1 Kuat 2L por nossa conta! 🎁"
-        }
+        { id: 1, nome: "2 Purizin + 1 Fanta 1L", preco: 34.99, precoAntigo: 40.00, img: "promocoes/promo1.jpg", descricao: "2 Hot Dogs 'Purizin' com purê cremoso + 1 Fanta 1L geladinha!" },  
+        { id: 2, nome: "3 Hot Dog Padaná", preco: 37.99, precoAntigo: 45.00, img: "promocoes/promo2.jpg", descricao: "3 Padaná completos, perfeitos pra dividir com a galera!" },  
+        { id: 3, nome: "2 Burgers Peleja", preco: 39.99, precoAntigo: 52.00, img: "promocoes/promo3.jpg", descricao: "Bora artesanar o bolso! Dois Burgers artesanais 'Peleja' no precinho!" },  
+        { id: 4, nome: "3 Trem + 1 Fanta 1L", preco: 44.99, precoAntigo: 51.00, img: "promocoes/promo4.jpg", descricao: "3 Burgers Trem com bacon, queijo e batata palha + 1 Fanta 1L." },  
+        { id: 5, nome: "4 Trem + 1 Fanta 1L", preco: 49.99, precoAntigo: 65.00, img: "promocoes/promo5.jpg", descricao: "O clássico da família! 4 Burgers Trem + Fanta 1L." },  
+        { id: 6, nome: "5 Burgers Uai", preco: 54.00, precoAntigo: 65.00, img: "promocoes/promo6.jpg", descricao: "Pra família toda! 5 Burgers UAI recheados no precinho!" },  
+        { id: 7, nome: "4 TremBão + 1 Fanta 1L", preco: 59.99, precoAntigo: 77.00, img: "promocoes/promo7.jpg", descricao: "O maior hot dog da casa! 4 TremBão com purê cremoso + Fanta 1L." },  
+        { id: 8, nome: "4 Armaria", preco: 59.99, precoAntigo: 72.00, img: "promocoes/promo8.jpg", descricao: "A queridinha da galera! 4 Armaria no super desconto." },  
+        { id: 9, nome: "5 Uai + 1 Kuat 2L (Brinde)", preco: 64.99, precoAntigo: 75.00, img: "promocoes/promo9.jpg", descricao: "Compre 5 Burgers Uai e leve 1 Kuat 2L por nossa conta! 🎁" }
     ];
 
     /* ============================================================
@@ -326,13 +264,13 @@ document.addEventListener("DOMContentLoaded", () => {
             currentUser = user;   
             if (user) {  
                 el.userBtn.textContent = `Olá, ${user.displayName?.split(" ")[0] || user.email.split("@")[0]}`;  
-                // ✅ BOTÕES AGORA SÃO EXIBIDOS
-                if (el.pedidosBtn) el.pedidosBtn.style.display = 'block';
+                // ✅ BOTÕES SEMPRE VISÍVEIS - NÃO PRECISA ESCONDER
+                if (el.pedidosBtn) el.pedidosBtn.style.display = 'block'; 
                 if (el.recompensasBtn) el.recompensasBtn.style.display = 'block';
             } else {  
-                el.userBtn.textContent = "Entrar / Cadastrar"; 
-                // ✅ ELES CONTINUAM EXIBIDOS PARA PEDIR LOGIN
-                if (el.pedidosBtn) el.pedidosBtn.style.display = 'block';
+                el.userBtn.textContent = "Entrar / Cadastrar";  
+                // ✅ MANTEMOS VISÍVEIS PARA PEDIR LOGIN AO CLICAR
+                if (el.pedidosBtn) el.pedidosBtn.style.display = 'block'; 
                 if (el.recompensasBtn) el.recompensasBtn.style.display = 'block';
             }  
             if (user && isAdmin(user)) { if (el.reportsBtn) createAdminFab(); } else { if (el.reportsBtn) el.reportsBtn.style.display = "none"; document.getElementById("admin-dashboard")?.remove(); }  
@@ -426,7 +364,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }); 
     }
 
-    console.log("%c🔥 DFL v7.0 — SCRIPT COMPLETO RESTAURADO", "background:#4CAF50;color:#fff;padding:5px;border-radius:5px;");  
+    console.log("%c🔥 DFL v7.1 — SCRIPT COMPLETO RESTAURADO", "background:#4CAF50;color:#fff;padding:5px;border-radius:5px;");  
     
     renderPromoCards();
     inicializarFirebase();  
