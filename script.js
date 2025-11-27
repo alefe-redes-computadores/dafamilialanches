@@ -1,8 +1,9 @@
 /* =========================================================  
-   🚀 DFL v7.2 CORRIGIDO — SCRIPT INTEGRAL
-   - Banner e Timer restaurados
-   - Recompensas e Pedidos integrados
+   🚀 DFL v7.3 CORRIGIDO — SCRIPT INTEGRAL UNIFICADO
+   - Banner e Timer funcionando
+   - Recompensas, Pedidos e Carrinho integrados
    - Frete Manual e Dinâmico ativos
+   - Event listeners consolidados
 ========================================================= */  
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -247,12 +248,12 @@ document.addEventListener("DOMContentLoaded", () => {
             currentUser = user;   
             if (user) {  
                 el.userBtn.textContent = `Olá, ${user.displayName?.split(" ")[0] || user.email.split("@")[0]}`;  
-                // BOTÕES VISÍVEIS
+                // ✅ BOTÕES AGORA SÃO EXIBIDOS
                 if (el.pedidosBtn) el.pedidosBtn.style.display = 'block';
                 if (el.recompensasBtn) el.recompensasBtn.style.display = 'block';
             } else {  
-                el.userBtn.textContent = "Entrar / Cadastrar";  
-                // BOTÕES VISÍVEIS TAMBÉM
+                el.userBtn.textContent = "Entrar / Cadastrar"; 
+                // ✅ ELES CONTINUAM EXIBIDOS PARA PEDIR LOGIN
                 if (el.pedidosBtn) el.pedidosBtn.style.display = 'block';
                 if (el.recompensasBtn) el.recompensasBtn.style.display = 'block';
             }  
@@ -307,6 +308,30 @@ document.addEventListener("DOMContentLoaded", () => {
     el.cPrev?.addEventListener("click", () => { if (!el.slides) return; el.slides.scrollLeft -= Math.min(el.slides.clientWidth * 0.9, 320); });
     el.cNext?.addEventListener("click", () => { if (!el.slides) return; el.slides.scrollLeft += Math.min(el.slides.clientWidth * 0.9, 320); });
 
+    /* ------------------ 🚨 RECOMPENSAS E BOTÕES LATERAIS (RESTAURADOS) ------------------ */
+    el.recompensasBtn?.addEventListener("click", () => { 
+        if (!currentUser) { 
+            alert("Faça login para ver suas recompensas!"); 
+            Overlays.open(el.loginModal); 
+            return; 
+        } 
+        Overlays.open(el.recompensasPanel); 
+        carregarRecompensas(currentUser.uid); 
+    });
+    el.recompensasFecharBtn?.addEventListener("click", () => Overlays.closeAll());
+    
+    /* ------------------ 📦 MEUS PEDIDOS (RESTAURADO) ------------------ */
+    el.pedidosBtn?.addEventListener("click", () => { 
+        if (!currentUser) { 
+            alert("Faça login para ver seus pedidos!"); 
+            Overlays.open(el.loginModal); 
+            return; 
+        } 
+        Overlays.open(el.pedidosPanel); 
+        carregarPedidos(currentUser.uid); 
+    });
+    el.pedidosFecharBtn?.addEventListener("click", () => Overlays.closeAll());
+
     /* ------------------ 🚨 STATUS BANNER & TIMER (RESTAURADOS v7.2) ------------------ */
     const atualizarStatus = safe(() => {  
         const agora = new Date(); const h = agora.getHours();  
@@ -326,30 +351,6 @@ document.addEventListener("DOMContentLoaded", () => {
         elTimer.textContent = `${h}:${m}:${s}`;  
     });  
     atualizarTimer(); setInterval(atualizarTimer, 1000);
-
-    /* ------------------ 🚨 RECOMPENSAS E BOTÕES LATERAIS (CORRIGIDOS) ------------------ */
-    el.recompensasBtn?.addEventListener("click", () => { 
-        if (!currentUser) { 
-            alert("Faça login para ver suas recompensas!"); 
-            Overlays.open(el.loginModal); 
-            return; 
-        } 
-        Overlays.open(el.recompensasPanel); 
-        carregarRecompensas(currentUser.uid); 
-    });
-    el.recompensasFecharBtn?.addEventListener("click", () => Overlays.closeAll());
-    
-    /* ------------------ 📦 MEUS PEDIDOS (CORRIGIDO) ------------------ */
-    el.pedidosBtn?.addEventListener("click", () => { 
-        if (!currentUser) { 
-            alert("Faça login para ver seus pedidos!"); 
-            Overlays.open(el.loginModal); 
-            return; 
-        } 
-        Overlays.open(el.pedidosPanel); 
-        carregarPedidos(currentUser.uid); 
-    });
-    el.pedidosFecharBtn?.addEventListener("click", () => Overlays.closeAll());
 
     const cookieBanner = document.getElementById("cookie-banner"); const cookieAcceptBtn = document.getElementById("cookie-accept");  
     if (cookieBanner && cookieAcceptBtn) { 
