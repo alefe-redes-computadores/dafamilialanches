@@ -1,5 +1,5 @@
 /* ===========================================================
-   🎨 Da Família Lanches – CSS v6.3 FINAL CORRIGIDO
+   🎨 Da Família Lanches – CSS v6.4 FINAL CORRIGIDO
    - Botões laterais VISÍVEIS
    - Carrinho COMPACTO
    - Barra de progresso fina
@@ -676,7 +676,7 @@ section h2 { font-size: 1.3rem; text-align: center; margin-bottom: 15px; color: 
   cursor: pointer; 
   transition: 0.2s;
   z-index: 1500;
-  display: none; /* JS vai ativar com style.display = 'block' */
+  display: block; /* Forçado para aparecer */
 }
 
 .meus-pedidos-btn {
