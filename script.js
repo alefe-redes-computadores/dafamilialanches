@@ -374,8 +374,3 @@ document.addEventListener("DOMContentLoaded", () => {
     inicializarFirebase();  
 
 }); 
-
-document.addEventListener('DOMContentLoaded', () => {  
-    document.querySelectorAll('.modal').forEach(m => m.addEventListener('click', e => { if (e.target.classList.contains('modal')) { m.classList.remove('show'); document.getElementById('cart-backdrop').classList.remove('active'); } }));  
-    document.getElementById('cart-backdrop')?.addEventListener('click', () => { document.querySelectorAll('.active').forEach(e => e.classList.remove('active')); });  
-});
