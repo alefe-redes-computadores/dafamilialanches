@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>🍔 Da Família Lanches — DFL v6.5</title>
+  <title>🍔 Da Família Lanches — DFL v6.6</title>
 
   <meta http-equiv="Content-Security-Policy" content="
     default-src * data: blob: 'unsafe-inline' 'unsafe-eval';
@@ -18,8 +18,8 @@
   <link rel="preconnect" href="https://www.gstatic.com" crossorigin>
   <link rel="preload" as="image" href="logo.png">
   
-  <link rel="stylesheet" href="style.css?v=6.5" />
-  <noscript><link rel="stylesheet" href="style.css?v=6.5"/></noscript>
+  <link rel="stylesheet" href="style.css?v=6.6" />
+  <noscript><link rel="stylesheet" href="style.css?v=6.6"/></noscript>
 
   <script defer src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
   <script defer src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
@@ -79,8 +79,7 @@
                 <div id="progressFill" class="progress-fill"></div>
             </div>
         </div>
-        
-        <div class="frete-container">
+        <div class="frete-container" aria-disabled="true">
           <h4 style="margin-top:5px; margin-bottom: 5px;">🚚 Entrega</h4>
           
           <div class="frete-cep-group">
@@ -266,7 +265,7 @@
           <img src="imagens/nimin.png" alt="Nimin" width="120" height="120" loading="lazy">
           <h3>Nimin <span class="badge-small">Molho Verde</span></h3>
           <p class="price">R$ 13,00</p>
-          <p>Pão, molho, 2 salsichas (Sadia/Perdigão), milho, batata palha, bacon, vinagrete, ketchup, maionese e vinagrete. Acompanha ketchup sachê.</p>
+          <p>Pão, molho, 2 salsichas (Sadia/Perdigão), milho, batata palha, bacon, vinagrete, ketchup e maionese. Acompanha ketchup sachê.</p>
           <div class="actions"><button class="add-cart" type="button">Adicionar</button><button class="extras-btn" type="button">Adicionais</button></div>
         </div>
         <div class="card" data-name="Padaná" data-price="15.00">
@@ -406,7 +405,7 @@
         <a href="https://www.instagram.com/dafamilialanches" target="_blank" class="footer-btn" rel="noopener">📸 Instagram</a>
         <a href="https://www.ifood.com.br/delivery/patos-de-minas/dafamilialanches" target="_blank" class="footer-btn" rel="noopener">🍔 iFood</a>
       </div>
-      <div class="footer-copy">© 2025 Da Família Lanches — Todos os direitos reservados 🍔 • <b>v6.5</b></div>
+      <div class="footer-copy">© 2025 Da Família Lanches — Todos os direitos reservados 🍔 • <b>v6.6</b></div>
     </footer>
   </div>
 
@@ -454,7 +453,7 @@
     <button id="cookie-accept" type="button">Aceitar</button>
   </div>
 
-  <script defer src="script.js?v=6.5"></script>
+  <script defer src="script.js?v=6.6"></script>
   <script defer src="extras.js?v=5.2.2"></script>
 </body>
 </html>
