@@ -48,7 +48,7 @@ document.addEventListener("DOMContentLoaded", () => {
         null,   
         { 
             id: 1, 
-            nome: "2 Purizin + 1 Fanta 1L", 
+            nome: "2 Purizin + 1 Fanta 1L", // Removido "Promo 1 — "
             preco: 34.99, 
             precoAntigo: 40.00, 
             img: "promocoes/promo1.jpg",
@@ -1108,32 +1108,8 @@ document.addEventListener("DOMContentLoaded", () => {
         } catch (err) { console.error("Erro repetir:", err); alert("Erro ao processar."); }  
     }
 
-    /* ------------------ 🍪 LÓGICA DO BANNER DE COOKIES (CORRIGIDA v6.8) ------------------ */
-    const cookieBanner = document.getElementById("cookie-banner");
-    const cookieAcceptBtn = document.getElementById("cookie-accept");
-
-    if (cookieBanner && cookieAcceptBtn) {
-        // Checagem ao carregar
-        if (localStorage.getItem("dfl-cookies-accepted") === "true") {
-            cookieBanner.style.display = "none";
-            cookieBanner.classList.remove("show");
-        } else {
-            // Garante que apareça se não aceitou
-            cookieBanner.style.display = "flex";
-            // Pequeno delay para animação CSS funcionar
-            setTimeout(() => cookieBanner.classList.add("show"), 100);
-        }
-
-        // Evento de clique
-        cookieAcceptBtn.addEventListener("click", () => {
-            localStorage.setItem("dfl-cookies-accepted", "true");
-            cookieBanner.classList.remove("show");
-            // Aguarda a transição CSS (0.5s) antes de dar display:none
-            setTimeout(() => {
-                cookieBanner.style.display = "none";
-            }, 500);
-        });
-    }
+    const cookieBanner = document.getElementById("cookie-banner"); const cookieAcceptBtn = document.getElementById("cookie-accept");  
+    if (cookieBanner && cookieAcceptBtn) { if (localStorage.getItem("dfl-cookies-accepted") === "true") cookieBanner.style.display = "none"; else cookieBanner.classList.add("show"); cookieAcceptBtn.addEventListener("click", () => { localStorage.setItem("dfl-cookies-accepted", "true"); cookieBanner.classList.remove("show"); }); }
 
     console.log("%c🔥 DFL v6.8 — CORREÇÃO BANNER COOKIES", "background:#4CAF50;color:#fff;padding:5px;border-radius:5px;");  
     
@@ -1146,5 +1122,3 @@ document.addEventListener('DOMContentLoaded', () => {
     document.querySelectorAll('.modal').forEach(m => m.addEventListener('click', e => { if (e.target.classList.contains('modal')) { m.classList.remove('show'); document.getElementById('cart-backdrop').classList.remove('active'); } }));  
     document.getElementById('cart-backdrop')?.addEventListener('click', () => { document.querySelectorAll('.active').forEach(e => e.classList.remove('active')); });  
 });
-
-}
