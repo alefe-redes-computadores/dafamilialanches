@@ -1,8 +1,8 @@
 /* =========================================================  
-   🚀 DFL v7.1 FINAL — SCRIPT COMPLETO E RESTAURADO
-   - Recompensas v5.6 restauradas
-   - Botões Pedidos/Recompensas corrigidos (pede login se deslogado)
-   - Cookies e Promoções v6.x mantidos
+   🚀 DFL v7.2 CORRIGIDO — SCRIPT INTEGRAL
+   - Banner e Timer restaurados
+   - Recompensas e Pedidos integrados
+   - Frete Manual e Dinâmico ativos
 ========================================================= */  
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -44,9 +44,7 @@ document.addEventListener("DOMContentLoaded", () => {
         return '👤';   
     }  
 
-    /* ============================================================
-       🔥 DADOS DAS PROMOÇÕES
-    ============================================================ */
+    /* PROMOÇÕES */
     const PROMO_DATA = [  
         null,   
         { id: 1, nome: "2 Purizin + 1 Fanta 1L", preco: 34.99, precoAntigo: 40.00, img: "promocoes/promo1.jpg", descricao: "2 Hot Dogs 'Purizin' com purê cremoso + 1 Fanta 1L geladinha!" },  
@@ -60,9 +58,6 @@ document.addEventListener("DOMContentLoaded", () => {
         { id: 9, nome: "5 Uai + 1 Kuat 2L (Brinde)", preco: 64.99, precoAntigo: 75.00, img: "promocoes/promo9.jpg", descricao: "Compre 5 Burgers Uai e leve 1 Kuat 2L por nossa conta! 🎁" }
     ];
 
-    /* ============================================================
-       🎨 RENDERIZAR PROMOÇÕES
-    ============================================================ */
     function renderPromoCards() {
         const container = document.getElementById('promocoes-grid');
         if (!container) return;
@@ -85,32 +80,14 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-    /* ============================================================
-       🔍 BUSCA INTELIGENTE
-    ============================================================ */
+    /* BUSCA */
     const searchInput = document.getElementById('search-input');
     const PRODUTOS_BUSCA = [
-        { nome: "Bão", aliases: ["bao", "bon"] },
-        { nome: "Uai", aliases: ["uai", "way"] },
-        { nome: "Trem", aliases: ["trem", "tren"] },
-        { nome: "Cadim", aliases: ["cadim", "kadim"] },
-        { nome: "Armaria", aliases: ["armaria", "armário", "armario"] },
-        { nome: "Bitela", aliases: ["bitela", "vitela"] },
-        { nome: "Apruma", aliases: ["apruma", "apuma"] },
-        { nome: "Peleja", aliases: ["peleja"] },
-        { nome: "Tudibom", aliases: ["tudibom", "tudo bom", "tudobom"] },
-        { nome: "Custoso", aliases: ["custoso"] },
-        { nome: "Nigucim", aliases: ["nigucim", "ningucim"] },
-        { nome: "Simprão", aliases: ["simprao", "simprão", "simples"] },
-        { nome: "Nimin", aliases: ["nimin", "ninin"] },
-        { nome: "Padaná", aliases: ["padana", "padaná"] },
-        { nome: "Purizin", aliases: ["purizin", "purezin", "pure"] },
-        { nome: "Trembão", aliases: ["trembao", "trembão", "trembaum"] }
+        { nome: "Bão", aliases: ["bao", "bon"] }, { nome: "Uai", aliases: ["uai", "way"] }, { nome: "Trem", aliases: ["trem", "tren"] }, { nome: "Cadim", aliases: ["cadim", "kadim"] }, { nome: "Armaria", aliases: ["armaria", "armário", "armario"] }, { nome: "Bitela", aliases: ["bitela", "vitela"] }, { nome: "Apruma", aliases: ["apruma", "apuma"] }, { nome: "Peleja", aliases: ["peleja"] }, { nome: "Tudibom", aliases: ["tudibom", "tudo bom", "tudobom"] }, { nome: "Custoso", aliases: ["custoso"] }, { nome: "Nigucim", aliases: ["nigucim", "ningucim"] }, { nome: "Simprão", aliases: ["simprao", "simprão", "simples"] }, { nome: "Nimin", aliases: ["nimin", "ninin"] }, { nome: "Padaná", aliases: ["padana", "padaná"] }, { nome: "Purizin", aliases: ["purizin", "purezin", "pure"] }, { nome: "Trembão", aliases: ["trembao", "trembão", "trembaum"] }
     ];
     function normalizar(texto) { return texto.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim(); }
     function distanciaLevenshtein(a, b) {
-        const matrix = []; for (let i = 0; i <= b.length; i++) matrix[i] = [i];
-        for (let j = 0; j <= a.length; j++) matrix[0][j] = j;
+        const matrix = []; for (let i = 0; i <= b.length; i++) matrix[i] = [i]; for (let j = 0; j <= a.length; j++) matrix[0][j] = j;
         for (let i = 1; i <= b.length; i++) { for (let j = 1; j <= a.length; j++) { if (b.charAt(i - 1) === a.charAt(j - 1)) matrix[i][j] = matrix[i - 1][j - 1]; else matrix[i][j] = Math.min(matrix[i - 1][j - 1] + 1, matrix[i][j - 1] + 1, matrix[i - 1][j] + 1); } }
         return matrix[b.length][a.length];
     }
@@ -135,6 +112,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
     if (searchInput) searchInput.addEventListener('input', (e) => filtrarCards(e.target.value));
 
+    /* ELEMENTOS */
     const el = {  
         cartIcon: document.getElementById("cart-icon"),  
         cartCount: document.getElementById("cart-count"),  
@@ -153,6 +131,7 @@ document.addEventListener("DOMContentLoaded", () => {
         googleBtn: document.getElementById("google-login"),  
         userBtn: document.getElementById("user-btn"),  
         statusBanner: document.getElementById("status-banner"),  
+        hoursBanner: document.querySelector(".hours-banner"), 
         reportsBtn: document.getElementById("reports-btn"),   
         pedidosContainer: document.querySelector(".meus-pedidos"),  
         pedidosBtn: document.querySelector(".meus-pedidos-btn"),  
@@ -174,7 +153,6 @@ document.addEventListener("DOMContentLoaded", () => {
         progressWrapper: document.getElementById("progressWrapper"),
         progressText: document.getElementById("progressText"),
         progressFill: document.getElementById("progressFill"),
-        // v2.7 - Elementos de Promo
         promoModal: document.getElementById("promo-modal"),
         promoImg: document.getElementById("promo-modal-img"),
         promoTitle: document.getElementById("promo-modal-title"),
@@ -182,9 +160,13 @@ document.addEventListener("DOMContentLoaded", () => {
         promoAddBtn: document.getElementById("promo-modal-add"),
         promoNavPrev: document.querySelector("#promo-modal .promo-nav.prev"),
         promoNavNext: document.querySelector("#promo-modal .promo-nav.next"),
-        promoClose: document.querySelector("#promo-modal .promo-close")
+        promoClose: document.querySelector("#promo-modal .promo-close"),
+        cPrev: document.querySelector(".c-prev"),
+        cNext: document.querySelector(".c-next"),
+        slides: document.querySelector(".slides")
     };
 
+    /* BACKDROP & OVERLAYS */
     if (!el.cartBackdrop) {  
         const bd = document.createElement("div"); bd.id = "cart-backdrop"; document.body.appendChild(bd); el.cartBackdrop = bd;  
     }  
@@ -209,6 +191,7 @@ document.addEventListener("DOMContentLoaded", () => {
     };  
     el.cartBackdrop.addEventListener("click", () => Overlays.closeAll());
 
+    /* CUPONS */
     const couponForm = document.getElementById("coupon-form");  
     let couponApplied = (localStorage.getItem("dflCoupon") || "").toUpperCase();  
     couponForm?.addEventListener("submit", (e) => {  
@@ -264,13 +247,13 @@ document.addEventListener("DOMContentLoaded", () => {
             currentUser = user;   
             if (user) {  
                 el.userBtn.textContent = `Olá, ${user.displayName?.split(" ")[0] || user.email.split("@")[0]}`;  
-                // ✅ BOTÕES SEMPRE VISÍVEIS - NÃO PRECISA ESCONDER
-                if (el.pedidosBtn) el.pedidosBtn.style.display = 'block'; 
+                // BOTÕES VISÍVEIS
+                if (el.pedidosBtn) el.pedidosBtn.style.display = 'block';
                 if (el.recompensasBtn) el.recompensasBtn.style.display = 'block';
             } else {  
                 el.userBtn.textContent = "Entrar / Cadastrar";  
-                // ✅ MANTEMOS VISÍVEIS PARA PEDIR LOGIN AO CLICAR
-                if (el.pedidosBtn) el.pedidosBtn.style.display = 'block'; 
+                // BOTÕES VISÍVEIS TAMBÉM
+                if (el.pedidosBtn) el.pedidosBtn.style.display = 'block';
                 if (el.recompensasBtn) el.recompensasBtn.style.display = 'block';
             }  
             if (user && isAdmin(user)) { if (el.reportsBtn) createAdminFab(); } else { if (el.reportsBtn) el.reportsBtn.style.display = "none"; document.getElementById("admin-dashboard")?.remove(); }  
@@ -324,7 +307,27 @@ document.addEventListener("DOMContentLoaded", () => {
     el.cPrev?.addEventListener("click", () => { if (!el.slides) return; el.slides.scrollLeft -= Math.min(el.slides.clientWidth * 0.9, 320); });
     el.cNext?.addEventListener("click", () => { if (!el.slides) return; el.slides.scrollLeft += Math.min(el.slides.clientWidth * 0.9, 320); });
 
-    /* ------------------ 🚨 RECOMPENSAS E BOTÕES LATERAIS (RESTAURADOS) ------------------ */
+    /* ------------------ 🚨 STATUS BANNER & TIMER (RESTAURADOS v7.2) ------------------ */
+    const atualizarStatus = safe(() => {  
+        const agora = new Date(); const h = agora.getHours();  
+        const aberto = h >= 18 && h < 23;   
+        if (el.statusBanner) { 
+            el.statusBanner.textContent = aberto ? "🟢 Aberto — Faça seu pedido!" : "🔴 Fechado — Voltamos às 18h!"; 
+            el.statusBanner.className = `status-banner ${aberto ? "open" : "closed"}`; 
+        }  
+    });  
+    atualizarStatus(); setInterval(atualizarStatus, 60000);  
+
+    const atualizarTimer = safe(() => {  
+        const agora = new Date(); const fim = new Date(); fim.setHours(23, 59, 59, 999); const diff = fim - agora;  
+        const elTimer = document.getElementById("promo-timer"); if (!elTimer) return;  
+        if (diff <= 0) return (elTimer.textContent = "00:00:00");  
+        const h = String(Math.floor(diff / 3600000)).padStart(2, "0"); const m = String(Math.floor((diff % 3600000) / 60000)).padStart(2, "0"); const s = String(Math.floor((diff % 60000) / 1000)).padStart(2, "0");  
+        elTimer.textContent = `${h}:${m}:${s}`;  
+    });  
+    atualizarTimer(); setInterval(atualizarTimer, 1000);
+
+    /* ------------------ 🚨 RECOMPENSAS E BOTÕES LATERAIS (CORRIGIDOS) ------------------ */
     el.recompensasBtn?.addEventListener("click", () => { 
         if (!currentUser) { 
             alert("Faça login para ver suas recompensas!"); 
@@ -336,7 +339,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });
     el.recompensasFecharBtn?.addEventListener("click", () => Overlays.closeAll());
     
-    /* ------------------ 📦 MEUS PEDIDOS (RESTAURADO) ------------------ */
+    /* ------------------ 📦 MEUS PEDIDOS (CORRIGIDO) ------------------ */
     el.pedidosBtn?.addEventListener("click", () => { 
         if (!currentUser) { 
             alert("Faça login para ver seus pedidos!"); 
@@ -364,7 +367,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }); 
     }
 
-    console.log("%c🔥 DFL v7.1 — SCRIPT COMPLETO RESTAURADO", "background:#4CAF50;color:#fff;padding:5px;border-radius:5px;");  
+    console.log("%c🔥 DFL v7.2 — SCRIPT COMPLETO RESTAURADO", "background:#4CAF50;color:#fff;padding:5px;border-radius:5px;");  
     
     renderPromoCards();
     inicializarFirebase();  
