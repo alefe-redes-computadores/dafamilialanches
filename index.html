@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>🍔 Da Família Lanches — DFL v5.3.6</title>
+  <title>🍔 Da Família Lanches — DFL v7.5</title>
 
   <meta http-equiv="Content-Security-Policy" content="
     default-src * data: blob: 'unsafe-inline' 'unsafe-eval';
@@ -18,8 +18,8 @@
   <link rel="preconnect" href="https://www.gstatic.com" crossorigin>
   <link rel="preload" as="image" href="logo.png">
   
-  <link rel="stylesheet" href="style.css?v=5.3.6" />
-  <noscript><link rel="stylesheet" href="style.css?v=5.3.6"/></noscript>
+  <link rel="stylesheet" href="style.css?v=7.3" />
+  <noscript><link rel="stylesheet" href="style.css?v=7.3"/></noscript>
 
   <script defer src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
   <script defer src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
@@ -49,26 +49,16 @@
   <div class="main-content-wrapper">
     <div id="status-banner" class="status-banner"></div>
 
+    <div class="search-container">
+        <input type="text" id="search-input" placeholder="🔍 Busque por lanches (Ex: TremBão)..." autocomplete="off">
+    </div>
+
     <section class="promo-section">
-      <h2>🔥 Promoções do Dia</h2>
+      <h2>🔥 Promoções Relâmpago</h2>
       <p class="promo-sub">Aproveite antes que acabe!</p>
       <div class="countdown-ticker">⏳ Tempo restante: <span id="promo-timer"></span></div>
 
-      <div class="carousel">
-        <button class="c-btn c-prev" type="button" aria-label="Anterior">‹</button>
-        <div class="slides">
-          <img class="slide" src="promocoes/promo1.jpg" data-promo-id="1" width="300" height="200" alt="Promoção 1" loading="lazy"/>
-          <img class="slide" src="promocoes/promo2.jpg" data-promo-id="2" width="300" height="200" alt="Promoção 2" loading="lazy"/>
-          <img class="slide" src="promocoes/promo3.jpg" data-promo-id="3" width="300" height="200" alt="Promoção 3" loading="lazy"/>
-          <img class="slide" src="promocoes/promo4.jpg" data-promo-id="4" width="300" height="200" alt="Promoção 4" loading="lazy"/>
-          <img class="slide" src="promocoes/promo5.jpg" data-promo-id="5" width="300" height="200" alt="Promoção 5" loading="lazy"/>
-          <img class="slide" src="promocoes/promo6.jpg" data-promo-id="6" width="300" height="200" alt="Promoção 6" loading="lazy"/>
-          <img class="slide" src="promocoes/promo7.jpg" data-promo-id="7" width="300" height="200" alt="Promoção 7" loading="lazy"/>
-          <img class="slide" src="promocoes/promo8.jpg" data-promo-id="8" width="300" height="200" alt="Promoção 8" loading="lazy"/>
-          <img class="slide" src="promocoes/promo9.jpg" data-promo-id="9" width="300" height="200" alt="Promoção 9" loading="lazy"/>
-        </div>
-        <button class="c-btn c-next" type="button" aria-label="Próximo">›</button>
-      </div>
+      <div id="promocoes-grid" class="grid"></div>
     </section>
 
     <div id="cart-backdrop"></div>
@@ -90,62 +80,40 @@
             </div>
         </div>
         <div class="frete-container" aria-disabled="true">
-          <h4 style="margin-top:10px;">🚚 Entrega</h4>
+          <h4 style="margin-top:5px; margin-bottom: 5px;">🚚 Entrega</h4>
           
           <div class="frete-cep-group">
             <input id="cep-input" type="text" placeholder="Digite o CEP" maxlength="9" autocomplete="postal-code">
-
-            <button id="btn-calcular-frete" class="btn-calcular-frete" type="button">
-              Buscar
-            </button>
+            <button id="btn-calcular-frete" class="btn-calcular-frete" type="button">Buscar</button>
           </div>
 
-          <button id="btnNaoSeiCEP" class="link-acao" type="button">
-            Não sei meu CEP 🤔
-          </button>
-          
-          <button id="btnManual" class="link-acao" type="button">
-            Preencher endereço manualmente ✏️
-          </button>
+          <button id="btnNaoSeiCEP" class="link-acao" type="button">Não sei meu CEP 🤔</button>
+          <button id="btnManual" class="link-acao" type="button">Preencher endereço manualmente ✏️</button>
 
           <input id="endereco-auto" type="text" class="input-endereco-longo" placeholder="Rua e Bairro (Preenchido via CEP)" disabled>
           
-          <p class="frete-gratis-aviso">
-            Frete grátis acima de R$ 80,00 (até 5 km). Um mimo da DFL pra matar a fome sem pesar no bolso 😋
-          </p>
-
           <div class="endereco-duplo">
             <input id="numero-input" type="text" placeholder="Número" disabled>
             <input id="complemento-input" type="text" placeholder="Complemento (opcional)" disabled>
           </div>
 
-          <label style="display:flex;align-items:center;gap:6px;margin-bottom:8px; color:#555;">
+          <label style="display:flex;align-items:center;gap:6px;margin-bottom:4px; color:#555; font-size: 0.85rem;">
             <input type="checkbox" id="retirar-local">
             Retirar no Local (sem taxa)
           </label>
           
-          <hr style="border:0; border-top:1px solid #eee; margin:15px 0;">
-          
+          <hr style="border:0; border-top:1px solid #eee; margin:8px 0;">
         </div>
         
         <div id="manualArea" class="frete-container" style="display:none;">
             <h4>Endereço Manual</h4>
-            
-            <label for="manualEndereco">Endereço completo (Rua, Bairro, Cidade):</label>
-            <textarea id="manualEndereco" placeholder="Ex: Rua Netuno - Jardim Andrades (Patos de Minas/MG)" style="width: 100%; min-height: 70px; margin-bottom: 8px; padding: 8px; border: 1px solid #ccc; border-radius: 8px;"></textarea>
-
+            <label for="manualEndereco">Endereço completo:</label>
+            <textarea id="manualEndereco" placeholder="Rua, Bairro, Cidade..." style="width: 100%; min-height: 60px; margin-bottom: 6px; padding: 6px; border: 1px solid #ccc; border-radius: 8px;"></textarea>
             <label for="manualNumero">Número:</label>
-            <input type="text" id="manualNumero" placeholder="Ex: 123" style="width: 100%; margin-bottom: 8px; padding: 8px; border: 1px solid #ccc; border-radius: 8px;" />
-
-            <button id="btnConfirmarEndereco" class="btn-primary" type="button" style="width: 100%; margin-bottom: 8px;">
-                Confirmar endereço 🔍
-            </button>
-
-            <button id="btnVoltarCEP" class="btn-secondary" type="button" style="width: 100%;">
-                Voltar e Usar CEP
-            </button>
+            <input type="text" id="manualNumero" placeholder="Ex: 123" style="width: 100%; margin-bottom: 6px; padding: 6px; border: 1px solid #ccc; border-radius: 8px;" />
+            <button id="btnConfirmarEndereco" class="btn-primary" type="button" style="width: 100%; margin-bottom: 6px;">Confirmar 🔍</button>
+            <button id="btnVoltarCEP" class="btn-secondary" type="button" style="width: 100%;">Voltar</button>
         </div>
-
 
         <form id="coupon-form" class="coupon-form" novalidate>
           <input type="text" id="coupon-input" placeholder="Cupom de desconto" aria-label="Cupom de desconto"/>
@@ -157,7 +125,6 @@
           <span>Desconto</span>
           <span id="cart-discount">R$ 0,00</span>
         </div>
-
       </div>
     </aside>
 
@@ -171,7 +138,6 @@
           <p>2 Burger <b>Trem</b> + 1 Fanta 1L.</p>
           <div class="actions"><button class="add-cart" type="button">Adicionar</button></div>
         </div>
-
         <div class="card" data-name="Combo Casal Artesanal" data-price="49.99">
           <img src="imagens/combo2.png" alt="Combo Casal Artesanal" width="120" height="120" loading="lazy">
           <h3>Combo Casal Artesanal <span class="badge economia"><span class="badge-icon">💸</span> Economia de R$ 11,01</span></h3>
@@ -179,7 +145,6 @@
           <p>2 Burger <b>Peleja</b> + 1 Fanta 1L.</p>
           <div class="actions"><button class="add-cart" type="button">Adicionar</button></div>
         </div>
-
         <div class="card" data-name="Combo Família Tradicional" data-price="59.99">
           <img src="imagens/combo3.png" alt="Combo Família Tradicional" width="120" height="120" loading="lazy">
           <h3>Combo Família Tradicional <span class="badge economia"><span class="badge-icon">💸</span> Economia de R$ 10,01</span></h3>
@@ -187,7 +152,6 @@
           <p>4 Burger <b>Trem</b> + 1 Kuat 2L.</p>
           <div class="actions"><button class="add-cart" type="button">Adicionar</button></div>
         </div>
-
         <div class="card" data-name="Combo Família Artesanal" data-price="84.99">
           <img src="imagens/combo4.png" alt="Combo Família Artesanal" width="120" height="120" loading="lazy">
           <h3>Combo Família Artesanal <span class="badge economia"><span class="badge-icon">💸</span> Economia de R$ 29,01</span></h3>
@@ -208,7 +172,6 @@
           <p>Pão, hambúrguer, alface, tomate, presunto e mussarela. Acompanha ketchup sachê.</p>
           <div class="actions"><button class="add-cart" type="button">Adicionar</button><button class="extras-btn" type="button">Adicionais</button></div>
         </div>
-
         <div class="card" data-name="Uai" data-price="13.00">
           <img src="imagens/uai.png" alt="Uai" width="120" height="120" loading="lazy">
           <h3>Uai <span class="badge-small">Com Molho Verde</span></h3>
@@ -216,7 +179,6 @@
           <p>Pão, hambúrguer, milho, bacon, alface, tomate, presunto e mussarela. Acompanha ketchup sachê.</p>
           <div class="actions"><button class="add-cart" type="button">Adicionar</button><button class="extras-btn" type="button">Adicionais</button></div>
         </div>
-
         <div class="card" data-name="Trem" data-price="14.00">
           <img src="imagens/trem.png" alt="Trem" width="120" height="120" loading="lazy">
           <h3>Trem <span class="badge-small">Com Molho Verde</span></h3>
@@ -224,7 +186,6 @@
           <p>Pão, hambúrguer, salsicha, bacon, milho, alface, tomate, presunto e mussarela. Acompanha ketchup sachê.</p>
           <div class="actions"><button class="add-cart" type="button">Adicionar</button><button class="extras-btn" type="button">Adicionais</button></div>
         </div>
-
         <div class="card" data-name="Cadim" data-price="17.00">
           <img src="imagens/cadim.png" alt="Cadim" width="120" height="120" loading="lazy">
           <h3>Cadim <span class="badge-small">Com Molho Verde</span></h3>
@@ -232,7 +193,6 @@
           <p>Pão, hambúrguer, 1 filé frango, bacon, milho, salsicha, alface, tomate, presunto e mussarela. Acompanha ketchup sachê.</p>
           <div class="actions"><button class="add-cart" type="button">Adicionar</button><button class="extras-btn" type="button">Adicionais</button></div>
         </div>
-
         <div class="card" data-name="Armaria" data-price="18.00">
           <img src="imagens/armaria.png" alt="Armaria" width="120" height="120" loading="lazy">
           <h3>Armaria <span class="badge-small">Com Molho Verde</span></h3>
@@ -240,7 +200,6 @@
           <p>Pão, 1 hambúrguer, 1 filé frango, bacon, milho, batata palha, alface, tomate, salsicha, presunto e mussarela. Acompanha ketchup sachê.</p>
           <div class="actions"><button class="add-cart" type="button">Adicionar</button><button class="extras-btn" type="button">Adicionais</button></div>
         </div>
-
         <div class="card" data-name="Bitela" data-price="22.00">
           <img src="imagens/bitela.png" alt="Bitela" width="120" height="120" loading="lazy">
           <h3>Bitela <span class="badge-small">Com Molho Verde</span></h3>
@@ -248,7 +207,6 @@
           <p>Pão, 2 hambúrgueres, filé frango, bacon, milho, batata palha, alface, salsicha, tomate, presunto e mussarela. Acompanha ketchup sachê.</p>
           <div class="actions"><button class="add-cart" type="button">Adicionar</button><button class="extras-btn" type="button">Adicionais</button></div>
         </div>
-
         <div class="card" data-name="Apruma" data-price="25.00">
           <img src="imagens/apruma.png" alt="Apruma" width="120" height="120" loading="lazy">
           <h3>Apruma <span class="badge-small">Com Molho Verde</span></h3>
@@ -269,7 +227,6 @@
           <p>Pão, hambúrguer artesanal, filé de frango, bacon, milho, batata palha.</p>
           <div class="actions"><button class="add-cart" type="button">Adicionar</button><button class="extras-btn" type="button">Adicionais</button></div>
         </div>
-
         <div class="card" data-name="Tudibom" data-price="28.50">
           <img src="imagens/tudibom.png" alt="Tudibom" width="120" height="120" loading="lazy">
           <h3>Tudibom <span class="badge-small">Com Molho Verde</span></h3>
@@ -277,7 +234,6 @@
           <p>Pão, 2 hambúrgueres artesanais, 2 filés de frango, bacon, milho.</p>
           <div class="actions"><button class="add-cart" type="button">Adicionar</button><button class="extras-btn" type="button">Adicionais</button></div>
         </div>
-
         <div class="card" data-name="Custoso" data-price="31.00">
           <img src="imagens/custoso.png" alt="Custoso" width="120" height="120" loading="lazy">
           <h3>Custoso <span class="badge-small">Com Molho Verde</span></h3>
@@ -292,47 +248,42 @@
       <h2>🌭 DFD – Hot Dogs</h2>
       <div class="grid">
         <div class="card" data-name="Nigucim" data-price="10.00">
-          <img src="imagens/nigucim.png" alt="Hot Dog Nigucim" loading="lazy">
+          <img src="imagens/nigucim.png" alt="Nigucim" width="120" height="120" loading="lazy">
           <h3>Nigucim <span class="badge-small">Molho Verde</span></h3>
           <p class="price">R$ 10,00</p>
           <p>Pão, molho, salsicha (Sadia/Perdigão), milho, batata palha, ketchup e maionese. Acompanha ketchup sachê.</p>
           <div class="actions"><button class="add-cart" type="button">Adicionar</button><button class="extras-btn" type="button">Adicionais</button></div>
         </div>
-
         <div class="card" data-name="Simprão" data-price="12.00">
-          <img src="imagens/simprao.png" alt="Hot Dog Simprão" loading="lazy">
+          <img src="imagens/simprao.png" alt="Simprão" width="120" height="120" loading="lazy">
           <h3>Simprão <span class="badge-small">Molho Verde</span></h3>
           <p class="price">R$ 12,00</p>
           <p>Pão, molho, salsicha (Sadia/Perdigão), milho, batata palha, bacon, ketchup e maionese. Acompanha ketchup sachê.</p>
           <div class="actions"><button class="add-cart" type="button">Adicionar</button><button class="extras-btn" type="button">Adicionais</button></div>
         </div>
-
         <div class="card" data-name="Nimin" data-price="13.00">
-          <img src="imagens/nimin.png" alt="Hot Dog Nimin" loading="lazy">
+          <img src="imagens/nimin.png" alt="Nimin" width="120" height="120" loading="lazy">
           <h3>Nimin <span class="badge-small">Molho Verde</span></h3>
           <p class="price">R$ 13,00</p>
-          <p>Pão, molho, 2 salsichas (Sadia/Perdigão), milho, batata palha, bacon, vinagrete, ketchup e maionese. Acompanha ketchup sachê.</p>
+          <p>Pão, molho, 2 salsichas (Sadia/Perdigão), milho, batata palha, bacon, vinagrete, ketchup, maionese e vinagrete. Acompanha ketchup sachê.</p>
           <div class="actions"><button class="add-cart" type="button">Adicionar</button><button class="extras-btn" type="button">Adicionais</button></div>
         </div>
-
         <div class="card" data-name="Padaná" data-price="15.00">
-          <img src="imagens/padana.png" alt="Hot Dog Padaná" loading="lazy">
+          <img src="imagens/padana.png" alt="Padaná" width="120" height="120" loading="lazy">
           <h3>Padaná <span class="badge-small">Molho Verde</span></h3>
           <p class="price">R$ 15,00</p>
           <p>Pão, molho, 2 salsichas (Sadia/Perdigão), milho, batata palha, bacon, vinagrete, mussarela, ketchup e maionese. Acompanha ketchup sachê.</p>
           <div class="actions"><button class="add-cart" type="button">Adicionar</button><button class="extras-btn" type="button">Adicionais</button></div>
         </div>
-
         <div class="card" data-name="Purizin" data-price="14.00">
-          <img src="imagens/purizin.png" alt="Hot Dog Purizin (com purê)" loading="lazy">
+          <img src="imagens/purizin.png" alt="Purizin" width="120" height="120" loading="lazy">
           <h3>Purizin <span class="badge-small">Molho Verde</span><span class="badge-small pure">Com Purê</span></h3>
           <p class="price">R$ 14,00</p>
           <p>Pão, molho, milho, purê de batata cremoso, 1 salsicha, batata palha, ketchup e maionese. Acompanha ketchup sachê.</p>
           <div class="actions"><button class="add-cart" type="button">Adicionar</button><button class="extras-btn" type="button">Adicionais</button></div>
         </div>
-
         <div class="card" data-name="Trembão" data-price="17.00">
-          <img src="imagens/trembao.png" alt="Hot Dog Trembão (com purê)" loading="lazy">
+          <img src="imagens/trembao.png" alt="Trembão" width="120" height="120" loading="lazy">
           <h3>Trembão <span class="badge-small">Molho Verde</span><span class="badge-small pure">Com Purê</span></h3>
           <p class="price">R$ 17,00</p>
           <p>Pão, molho, milho, purê de batata cremoso, 2 salsichas, bacon crocante, mussarela, batata palha, vinagrete, ketchup e maionese. Acompanha ketchup sachê.</p>
@@ -397,24 +348,6 @@
       </div>
     </section>
 
-    <div id="promo-modal" class="modal" aria-hidden="true">
-      <div class="promo-content modal-content" role="dialog" aria-modal="true">
-        <div class="modal-head">
-          <button class="promo-close" type="button" aria-label="Fechar modal">✖</button>
-          <div style="display:flex;gap:8px;margin-left:auto">
-            <button class="promo-nav prev" type="button" aria-label="Anterior">‹</button>
-            <button class="promo-nav next" type="button" aria-label="Próximo">›</button>
-          </div>
-        </div>
-        <img id="promo-modal-img" src="" alt="Promoção" style="width:100%;height:auto" loading="lazy"/>
-        <div class="promo-info" style="padding:12px 16px;">
-          <h3 id="promo-modal-title" style="margin:6px 0;"></h3>
-          <p id="promo-modal-price" style="margin:6px 0 14px;"></p>
-          <button id="promo-modal-add" class="btn-primary" type="button">Adicionar ao Pedido</button>
-        </div>
-      </div>
-    </div>
-
     <div id="extras-modal" class="modal" aria-hidden="true">
       <div class="modal-content" role="dialog" aria-modal="true">
         <div class="modal-head">
@@ -450,38 +383,29 @@
           <button class="login-close" type="button" aria-label="Fechar modal">✖</button>
         </div>
         <div style="padding:20px 24px;">
-          <button id="google-login" class="btn-google" type="button" style="display:flex;align-items:center;justify-content:center;gap:12px;padding:12px;border:1px solid #ccc;border-radius:10px;background:#fff;width:100%;font-size:1rem;font-weight:600;box-shadow:0 3px 6px rgba(0,0,0,.15);">
+          <button id="google-login" class="btn-google" type="button">
             <img src="imagens/google-icon.png" alt="Google" class="google-icon" width="20" height="20" loading="lazy"/>
             Entrar com Google
           </button>
           <small class="login-safe" style="display:block;text-align:center;color:#777;margin-top:10px;">🔒 Login seguro e criptografado</small>
-
           <div class="divider" style="text-align:center;margin:20px 0 16px;font-weight:600;color:#999;font-size:.95rem;">— OU E-MAIL —</div>
-
           <form id="login-form" class="login-form" style="display:grid;gap:15px;" novalidate>
-            <input id="login-email" type="email" placeholder="Seu E-mail" required
-                   style="padding:14px;border:1px solid #ccc;border-radius:10px;font-size:1rem;"/>
-            <input id="login-senha" type="password" placeholder="Sua Senha" required
-                   style="padding:14px;border:1px solid #ccc;border-radius:10px;font-size:1rem;"/>
-
-            <button type="submit" class="btn-primario" style="background:linear-gradient(135deg,var(--success), #388e3c); color:white; border:none; border-radius:10px; padding:14px; font-weight:700; font-size:1rem; cursor:pointer; transition:.2s; box-shadow: 0 4px 6px rgba(0,0,0,.15); margin-top:5px;">Entrar</button>
+            <input id="login-email" type="email" placeholder="Seu E-mail" required style="padding:14px;border:1px solid #ccc;border-radius:10px;font-size:1rem;"/>
+            <input id="login-senha" type="password" placeholder="Sua Senha" required style="padding:14px;border:1px solid #ccc;border-radius:10px;font-size:1rem;"/>
+            <button type="submit" class="btn-primario">Entrar</button>
           </form>
         </div>
       </div>
     </div>
 
     <footer class="footer">
-      <p>📍
-        <a href="https://www.google.com/maps/search/?api=1&query=Rua+dos+Caiçaras,+212,+Patos+de+Minas,+MG" target="_blank" rel="noopener">
-          Rua dos Caiçaras, 212 — Patos de Minas/MG
-        </a>
-      </p>
+      <p>📍 <a href="https://www.google.com/maps/search/?api=1&query=Rua+dos+Caiçaras,+212,+Patos+de+Minas,+MG" target="_blank" rel="noopener">Rua dos Caiçaras, 212 — Patos de Minas/MG</a></p>
       <div class="footer-links">
         <a href="https://wa.me/5534997178336" target="_blank" class="footer-btn" rel="noopener">💬 WhatsApp</a>
         <a href="https://www.instagram.com/dafamilialanches" target="_blank" class="footer-btn" rel="noopener">📸 Instagram</a>
         <a href="https://www.ifood.com.br/delivery/patos-de-minas/dafamilialanches" target="_blank" class="footer-btn" rel="noopener">🍔 iFood</a>
       </div>
-      <div class="footer-copy">© 2025 Da Família Lanches — Todos os direitos reservados 🍔 • <b>v5.0</b></div>
+      <div class="footer-copy">© 2025 Da Família Lanches — Todos os direitos reservados 🍔 • <b>v7.3</b></div>
     </footer>
   </div>
 
@@ -503,14 +427,10 @@
           </div>
           <p id="progresso-mensagem" style="margin-top:8px;font-size:.9rem;color:#666;">Carregando progresso...</p>
         </div>
-
         <h4 class="recompensas-header-secundario">🏷️ Recompensas Desbloqueadas</h4>
         <div id="listaRecompensas"></div>
-
         <h4 class="recompensas-header-secundario">📜 Histórico de Recompensas</h4>
-        <div id="historicoRecompensas">
-          <p class="empty-rewards">Você ainda não recebeu recompensas.</p>
-        </div>
+        <div id="historicoRecompensas"><p class="empty-rewards">Você ainda não recebeu recompensas.</p></div>
       </div>
     </div>
   </div>
@@ -522,9 +442,7 @@
         <span>📦 Meus Pedidos</span>
         <button class="fechar-pedidos" type="button" aria-label="Fechar painel">✖</button>
       </div>
-      <div class="pedidos-body" id="listaPedidos">
-        <p class="empty-orders">Faça login para ver seus pedidos.</p>
-      </div>
+      <div class="pedidos-body" id="listaPedidos"><p class="empty-orders">Faça login para ver seus pedidos.</p></div>
     </div>
   </div>
 
@@ -535,7 +453,7 @@
     <button id="cookie-accept" type="button">Aceitar</button>
   </div>
 
-  <script defer src="script.js?v=5.3.6"></script>
+  <script defer src="script.js?v=7.5"></script>
   <script defer src="extras.js?v=5.2.2"></script>
 </body>
 </html>
