@@ -1,5 +1,5 @@
 /* =========================================================  
-   🚀 DFL v6.6 CORRIGIDO — SCRIPT COMPLETO
+   🚀 DFL v6.7 CORRIGIDO — SCRIPT COMPLETO
 ========================================================= */  
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -42,13 +42,13 @@ document.addEventListener("DOMContentLoaded", () => {
     }  
 
     /* ============================================================
-       🔥 DADOS DAS PROMOÇÕES (NOMES LIMPOS)
+       🔥 DADOS DAS PROMOÇÕES (NOMES LIMPOS - SEM 'Promo X')
     ============================================================ */
     const PROMO_DATA = [  
         null,   
         { 
             id: 1, 
-            nome: "2 Purizin + 1 Fanta 1L", 
+            nome: "2 Purizin + 1 Fanta 1L", // Removido "Promo 1 — "
             preco: 34.99, 
             precoAntigo: 40.00, 
             img: "promocoes/promo1.jpg",
@@ -493,8 +493,11 @@ document.addEventListener("DOMContentLoaded", () => {
                 if (el.recompensasBtn) el.recompensasBtn.style.display = 'block';
             } else {  
                 el.userBtn.textContent = "Entrar / Cadastrar";  
-                if (el.pedidosBtn) el.pedidosBtn.style.display = 'none';
-                if (el.recompensasBtn) el.recompensasBtn.style.display = 'none';
+                // Também garantimos que apareçam para usuários não logados, pois o CSS foi alterado para block
+                // Se quiser esconder quando não logado, descomente abaixo.
+                // Mas como seu CSS agora tem display: block, o JS não deve esconder.
+                // if (el.pedidosBtn) el.pedidosBtn.style.display = 'none';
+                // if (el.recompensasBtn) el.recompensasBtn.style.display = 'none';
             }  
             if (user && isAdmin(user)) {  
                 if (el.reportsBtn) createAdminFab();  
