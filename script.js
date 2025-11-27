@@ -1,5 +1,6 @@
+
 /* =========================================================  
-   🚀 DFL v6.3 CORRIGIDO — SCRIPT COMPLETO
+   🚀 DFL v6.4 CORRIGIDO — SCRIPT COMPLETO
 ========================================================= */  
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -493,8 +494,11 @@ document.addEventListener("DOMContentLoaded", () => {
                 if (el.recompensasBtn) el.recompensasBtn.style.display = 'block';
             } else {  
                 el.userBtn.textContent = "Entrar / Cadastrar";  
-                if (el.pedidosBtn) el.pedidosBtn.style.display = 'none';
-                if (el.recompensasBtn) el.recompensasBtn.style.display = 'none';
+                // Também garantimos que apareçam para usuários não logados, pois o CSS foi alterado para block
+                // Se quiser esconder quando não logado, descomente abaixo.
+                // Mas como seu CSS agora tem display: block, o JS não deve esconder.
+                // if (el.pedidosBtn) el.pedidosBtn.style.display = 'none';
+                // if (el.recompensasBtn) el.recompensasBtn.style.display = 'none';
             }  
             if (user && isAdmin(user)) {  
                 if (el.reportsBtn) createAdminFab();  
@@ -782,12 +786,15 @@ document.addEventListener("DOMContentLoaded", () => {
         }  
     }
 
-    document.getElementById('btn-calcular-frete')?.addEventListener('click', safe(() => {  
+    // CORREÇÃO CRÍTICA: stopPropagation para não fechar o carrinho
+    document.getElementById('btn-calcular-frete')?.addEventListener('click', (e) => {
+        e.stopPropagation();
+        e.preventDefault();
         const cepInput = document.getElementById('cep-input');  
         const cep = cepInput.value.trim().replace(/\D/g, '');  
         if (cep.length === 8) buscarCEP(cep);  
         else popupAdd("CEP deve ter 8 dígitos.");  
-    }));
+    });
 
     async function getDynamicDeliveryFee(enderecoCompleto) {
         if (!enderecoCompleto || typeof enderecoCompleto !== "string") {
@@ -982,22 +989,6 @@ document.addEventListener("DOMContentLoaded", () => {
         } catch (e) { console.error("Erro recompensas:", e); return []; }  
     }
 
-    const atualizarStatus = safe(() => {  
-        const agora = new Date(); const h = agora.getHours();  
-        const aberto = h >= 18 && h < 23;   
-        if (el.statusBanner) { el.statusBanner.textContent = aberto ? "🟢 Aberto — Faça seu pedido!" : "🔴 Fechado — Voltamos às 18h!"; el.statusBanner.className = `status-banner ${aberto ? "open" : "closed"}`; }  
-    });  
-    atualizarStatus(); setInterval(atualizarStatus, 60000);  
-
-    const atualizarTimer = safe(() => {  
-        const agora = new Date(); const fim = new Date(); fim.setHours(23, 59, 59, 999); const diff = fim - agora;  
-        const elTimer = document.getElementById("promo-timer"); if (!elTimer) return;  
-        if (diff <= 0) return (elTimer.textContent = "00:00:00");  
-        const h = String(Math.floor(diff / 3600000)).padStart(2, "0"); const m = String(Math.floor((diff % 3600000) / 60000)).padStart(2, "0"); const s = String(Math.floor((diff % 60000) / 1000)).padStart(2, "0");  
-        elTimer.textContent = `${h}:${m}:${s}`;  
-    });  
-    atualizarTimer(); setInterval(atualizarTimer, 1000);
-
     async function fecharPedido() {  
         if (!cart.length) return alert("Carrinho vazio!");  
         if (!currentUser) { alert("Faça login para enviar o pedido!"); Overlays.open(el.loginModal); return; }  
@@ -1108,7 +1099,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const cookieBanner = document.getElementById("cookie-banner"); const cookieAcceptBtn = document.getElementById("cookie-accept");  
     if (cookieBanner && cookieAcceptBtn) { if (localStorage.getItem("dfl-cookies-accepted") === "true") cookieBanner.style.display = "none"; else cookieBanner.classList.add("show"); cookieAcceptBtn.addEventListener("click", () => { localStorage.setItem("dfl-cookies-accepted", "true"); cookieBanner.classList.remove("show"); }); }
 
-    console.log("%c🔥 DFL v6.2 — BOTÕES LATERAIS VISÍVEIS", "background:#4CAF50;color:#fff;padding:5px;border-radius:5px;");  
+    console.log("%c🔥 DFL v6.4 — BOTÕES E FRETE CORRIGIDOS", "background:#4CAF50;color:#fff;padding:5px;border-radius:5px;");  
     
     renderPromoCards();
     inicializarFirebase();  
