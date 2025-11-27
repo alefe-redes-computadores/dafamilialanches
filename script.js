@@ -1,5 +1,5 @@
 /* =========================================================  
-   🚀 DFL v6.7 CORRIGIDO — SCRIPT COMPLETO
+   🚀 DFL v6.8 CORRIGIDO — SCRIPT COMPLETO
 ========================================================= */  
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -42,13 +42,13 @@ document.addEventListener("DOMContentLoaded", () => {
     }  
 
     /* ============================================================
-       🔥 DADOS DAS PROMOÇÕES (NOMES LIMPOS - SEM 'Promo X')
+       🔥 DADOS DAS PROMOÇÕES (NOMES LIMPOS)
     ============================================================ */
     const PROMO_DATA = [  
         null,   
         { 
             id: 1, 
-            nome: "2 Purizin + 1 Fanta 1L", // Removido "Promo 1 — "
+            nome: "2 Purizin + 1 Fanta 1L", 
             preco: 34.99, 
             precoAntigo: 40.00, 
             img: "promocoes/promo1.jpg",
@@ -493,11 +493,8 @@ document.addEventListener("DOMContentLoaded", () => {
                 if (el.recompensasBtn) el.recompensasBtn.style.display = 'block';
             } else {  
                 el.userBtn.textContent = "Entrar / Cadastrar";  
-                // Também garantimos que apareçam para usuários não logados, pois o CSS foi alterado para block
-                // Se quiser esconder quando não logado, descomente abaixo.
-                // Mas como seu CSS agora tem display: block, o JS não deve esconder.
-                // if (el.pedidosBtn) el.pedidosBtn.style.display = 'none';
-                // if (el.recompensasBtn) el.recompensasBtn.style.display = 'none';
+                if (el.pedidosBtn) el.pedidosBtn.style.display = 'none';
+                if (el.recompensasBtn) el.recompensasBtn.style.display = 'none';
             }  
             if (user && isAdmin(user)) {  
                 if (el.reportsBtn) createAdminFab();  
@@ -1111,10 +1108,34 @@ document.addEventListener("DOMContentLoaded", () => {
         } catch (err) { console.error("Erro repetir:", err); alert("Erro ao processar."); }  
     }
 
-    const cookieBanner = document.getElementById("cookie-banner"); const cookieAcceptBtn = document.getElementById("cookie-accept");  
-    if (cookieBanner && cookieAcceptBtn) { if (localStorage.getItem("dfl-cookies-accepted") === "true") cookieBanner.style.display = "none"; else cookieBanner.classList.add("show"); cookieAcceptBtn.addEventListener("click", () => { localStorage.setItem("dfl-cookies-accepted", "true"); cookieBanner.classList.remove("show"); }); }
+    /* ------------------ 🍪 LÓGICA DO BANNER DE COOKIES (CORRIGIDA v6.8) ------------------ */
+    const cookieBanner = document.getElementById("cookie-banner");
+    const cookieAcceptBtn = document.getElementById("cookie-accept");
 
-    console.log("%c🔥 DFL v6.6 — BOTÕES E NOMES LIMPOS", "background:#4CAF50;color:#fff;padding:5px;border-radius:5px;");  
+    if (cookieBanner && cookieAcceptBtn) {
+        // Checagem ao carregar
+        if (localStorage.getItem("dfl-cookies-accepted") === "true") {
+            cookieBanner.style.display = "none";
+            cookieBanner.classList.remove("show");
+        } else {
+            // Garante que apareça se não aceitou
+            cookieBanner.style.display = "flex";
+            // Pequeno delay para animação CSS funcionar
+            setTimeout(() => cookieBanner.classList.add("show"), 100);
+        }
+
+        // Evento de clique
+        cookieAcceptBtn.addEventListener("click", () => {
+            localStorage.setItem("dfl-cookies-accepted", "true");
+            cookieBanner.classList.remove("show");
+            // Aguarda a transição CSS (0.5s) antes de dar display:none
+            setTimeout(() => {
+                cookieBanner.style.display = "none";
+            }, 500);
+        });
+    }
+
+    console.log("%c🔥 DFL v6.8 — CORREÇÃO BANNER COOKIES", "background:#4CAF50;color:#fff;padding:5px;border-radius:5px;");  
     
     renderPromoCards();
     inicializarFirebase();  
@@ -1125,3 +1146,5 @@ document.addEventListener('DOMContentLoaded', () => {
     document.querySelectorAll('.modal').forEach(m => m.addEventListener('click', e => { if (e.target.classList.contains('modal')) { m.classList.remove('show'); document.getElementById('cart-backdrop').classList.remove('active'); } }));  
     document.getElementById('cart-backdrop')?.addEventListener('click', () => { document.querySelectorAll('.active').forEach(e => e.classList.remove('active')); });  
 });
+
+}
