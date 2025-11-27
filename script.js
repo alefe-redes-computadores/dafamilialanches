@@ -1,6 +1,5 @@
-
 /* =========================================================  
-   🚀 DFL v6.4 CORRIGIDO — SCRIPT COMPLETO
+   🚀 DFL v6.5 CORRIGIDO — SCRIPT COMPLETO
 ========================================================= */  
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -43,13 +42,13 @@ document.addEventListener("DOMContentLoaded", () => {
     }  
 
     /* ============================================================
-       🔥 DADOS DAS PROMOÇÕES (NOMES LIMPOS - SEM 'Promo X')
+       🔥 DADOS DAS PROMOÇÕES (NOMES LIMPOS)
     ============================================================ */
     const PROMO_DATA = [  
         null,   
         { 
             id: 1, 
-            nome: "2 Purizin + 1 Fanta 1L", // Removido "Promo 1 — "
+            nome: "2 Purizin + 1 Fanta 1L", 
             preco: 34.99, 
             precoAntigo: 40.00, 
             img: "promocoes/promo1.jpg",
@@ -489,16 +488,9 @@ document.addEventListener("DOMContentLoaded", () => {
             currentUser = user;   
             if (user) {  
                 el.userBtn.textContent = `Olá, ${user.displayName?.split(" ")[0] || user.email.split("@")[0]}`;  
-                // ✅ CORREÇÃO CRÍTICA: Garante que os botões apareçam ao logar
-                if (el.pedidosBtn) el.pedidosBtn.style.display = 'block';
-                if (el.recompensasBtn) el.recompensasBtn.style.display = 'block';
+                // ✅ BOTÕES VISÍVEIS SEMPRE - CLIQUE ABRE O MODAL SE NÃO LOGADO
             } else {  
                 el.userBtn.textContent = "Entrar / Cadastrar";  
-                // Também garantimos que apareçam para usuários não logados, pois o CSS foi alterado para block
-                // Se quiser esconder quando não logado, descomente abaixo.
-                // Mas como seu CSS agora tem display: block, o JS não deve esconder.
-                // if (el.pedidosBtn) el.pedidosBtn.style.display = 'none';
-                // if (el.recompensasBtn) el.recompensasBtn.style.display = 'none';
             }  
             if (user && isAdmin(user)) {  
                 if (el.reportsBtn) createAdminFab();  
@@ -988,6 +980,22 @@ document.addEventListener("DOMContentLoaded", () => {
             return configuracoesRecompensa;  
         } catch (e) { console.error("Erro recompensas:", e); return []; }  
     }
+
+    const atualizarStatus = safe(() => {  
+        const agora = new Date(); const h = agora.getHours();  
+        const aberto = h >= 18 && h < 23;   
+        if (el.statusBanner) { el.statusBanner.textContent = aberto ? "🟢 Aberto — Faça seu pedido!" : "🔴 Fechado — Voltamos às 18h!"; el.statusBanner.className = `status-banner ${aberto ? "open" : "closed"}`; }  
+    });  
+    atualizarStatus(); setInterval(atualizarStatus, 60000);  
+
+    const atualizarTimer = safe(() => {  
+        const agora = new Date(); const fim = new Date(); fim.setHours(23, 59, 59, 999); const diff = fim - agora;  
+        const elTimer = document.getElementById("promo-timer"); if (!elTimer) return;  
+        if (diff <= 0) return (elTimer.textContent = "00:00:00");  
+        const h = String(Math.floor(diff / 3600000)).padStart(2, "0"); const m = String(Math.floor((diff % 3600000) / 60000)).padStart(2, "0"); const s = String(Math.floor((diff % 60000) / 1000)).padStart(2, "0");  
+        elTimer.textContent = `${h}:${m}:${s}`;  
+    });  
+    atualizarTimer(); setInterval(atualizarTimer, 1000);
 
     async function fecharPedido() {  
         if (!cart.length) return alert("Carrinho vazio!");  
