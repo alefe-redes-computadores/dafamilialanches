@@ -1,6 +1,7 @@
 /* =========================================================  
-   🚀 DFL v6.9 CORRIGIDO — SCRIPT COMPLETO
-   - Correção de Sintaxe (Chave extra removida)
+   🚀 DFL v6.10 CORRIGIDO — SCRIPT COMPLETO
+   - Botões "Meus Pedidos" e "Recompensas" SEMPRE visíveis
+   - Correção definitiva de visibilidade
 ========================================================= */  
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -43,7 +44,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }  
 
     /* ============================================================
-       🔥 DADOS DAS PROMOÇÕES (NOMES LIMPOS)
+       🔥 DADOS DAS PROMOÇÕES
     ============================================================ */
     const PROMO_DATA = [  
         null,   
@@ -122,7 +123,7 @@ document.addEventListener("DOMContentLoaded", () => {
     ];
 
     /* ============================================================
-       🎨 RENDERIZAR PROMOÇÕES COMO CARDS
+       🎨 RENDERIZAR PROMOÇÕES
     ============================================================ */
     function renderPromoCards() {
         const container = document.getElementById('promocoes-grid');
@@ -489,14 +490,13 @@ document.addEventListener("DOMContentLoaded", () => {
             currentUser = user;   
             if (user) {  
                 el.userBtn.textContent = `Olá, ${user.displayName?.split(" ")[0] || user.email.split("@")[0]}`;  
-                // ✅ CORREÇÃO CRÍTICA: Garante que os botões apareçam ao logar
-                if (el.pedidosBtn) el.pedidosBtn.style.display = 'block';
-                if (el.recompensasBtn) el.recompensasBtn.style.display = 'block';
             } else {  
                 el.userBtn.textContent = "Entrar / Cadastrar";  
-                if (el.pedidosBtn) el.pedidosBtn.style.display = 'none';
-                if (el.recompensasBtn) el.recompensasBtn.style.display = 'none';
             }  
+            // 🔥 CORREÇÃO: Botões sempre visíveis, controlados apenas pelo clique
+            if (el.pedidosBtn) el.pedidosBtn.style.display = 'block';
+            if (el.recompensasBtn) el.recompensasBtn.style.display = 'block';
+
             if (user && isAdmin(user)) {  
                 if (el.reportsBtn) createAdminFab();  
             } else {  
@@ -1109,34 +1109,10 @@ document.addEventListener("DOMContentLoaded", () => {
         } catch (err) { console.error("Erro repetir:", err); alert("Erro ao processar."); }  
     }
 
-    /* ------------------ 🍪 LÓGICA DO BANNER DE COOKIES (CORRIGIDA v6.8) ------------------ */
-    const cookieBanner = document.getElementById("cookie-banner");
-    const cookieAcceptBtn = document.getElementById("cookie-accept");
+    const cookieBanner = document.getElementById("cookie-banner"); const cookieAcceptBtn = document.getElementById("cookie-accept");  
+    if (cookieBanner && cookieAcceptBtn) { if (localStorage.getItem("dfl-cookies-accepted") === "true") cookieBanner.style.display = "none"; else cookieBanner.classList.add("show"); cookieAcceptBtn.addEventListener("click", () => { localStorage.setItem("dfl-cookies-accepted", "true"); cookieBanner.classList.remove("show"); }); }
 
-    if (cookieBanner && cookieAcceptBtn) {
-        // Checagem ao carregar
-        if (localStorage.getItem("dfl-cookies-accepted") === "true") {
-            cookieBanner.style.display = "none";
-            cookieBanner.classList.remove("show");
-        } else {
-            // Garante que apareça se não aceitou
-            cookieBanner.style.display = "flex";
-            // Pequeno delay para animação CSS funcionar
-            setTimeout(() => cookieBanner.classList.add("show"), 100);
-        }
-
-        // Evento de clique
-        cookieAcceptBtn.addEventListener("click", () => {
-            localStorage.setItem("dfl-cookies-accepted", "true");
-            cookieBanner.classList.remove("show");
-            // Aguarda a transição CSS (0.5s) antes de dar display:none
-            setTimeout(() => {
-                cookieBanner.style.display = "none";
-            }, 500);
-        });
-    }
-
-    console.log("%c🔥 DFL v6.8 — CORREÇÃO BANNER COOKIES", "background:#4CAF50;color:#fff;padding:5px;border-radius:5px;");  
+    console.log("%c🔥 DFL v6.9 — SINTAXE CORRIGIDA", "background:#4CAF50;color:#fff;padding:5px;border-radius:5px;");  
     
     renderPromoCards();
     inicializarFirebase();  
