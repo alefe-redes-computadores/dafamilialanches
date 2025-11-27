@@ -1,8 +1,7 @@
 /* ===========================================================
-   🎨 Da Família Lanches – CSS v6.4 FINAL CORRIGIDO
-   - Botões laterais VISÍVEIS
-   - Carrinho COMPACTO
-   - Barra de progresso fina
+   🎨 Da Família Lanches – CSS v6.5 FINAL CORRIGIDO
+   - Sem gambiarras de !important nos botões
+   - Correção do pointer-events no frete
    =========================================================== */
 
 :root {
@@ -660,7 +659,7 @@ section h2 { font-size: 1.3rem; text-align: center; margin-bottom: 15px; color: 
 
 /* ======== BOTÕES LATERAIS VISÍVEIS (CORRIGIDO) ======== */
 .meus-pedidos, .minhas-recompensas {
-  display: block !important; /* Garante que existam no DOM */
+  display: block; /* Garante que existam no DOM, sem !important */
 }
 
 .meus-pedidos-btn, .recompensas-btn {
