@@ -1,5 +1,5 @@
 /* ===========================================================
-   🎨 Da Família Lanches – CSS v6.8 FINAL CORRIGIDO
+   🎨 Da Família Lanches – CSS v7.3 FINAL CORRIGIDO
    =========================================================== */
 
 :root {
@@ -274,7 +274,7 @@ section h2 { font-size: 1.3rem; text-align: center; margin-bottom: 15px; color: 
   opacity: 0; 
   pointer-events: none; 
   transition: opacity 0.25s ease; 
-  z-index: 980;
+  z-index: 1600; /* AUMENTADO para ficar acima dos botões */
 }
 #cart-backdrop.active { opacity: 1; pointer-events: auto; }
 
@@ -288,7 +288,7 @@ section h2 { font-size: 1.3rem; text-align: center; margin-bottom: 15px; color: 
   box-shadow: -4px 0 20px rgba(0, 0, 0, 0.25);
   transform: translateX(100%); 
   transition: transform 0.25s; 
-  z-index: 990; 
+  z-index: 1610; /* AUMENTADO para ficar acima do backdrop */
   display: none;
   flex-direction: column;
   overflow: hidden;
@@ -520,7 +520,7 @@ section h2 { font-size: 1.3rem; text-align: center; margin-bottom: 15px; color: 
   opacity: 0; 
   pointer-events: none;
   transition: opacity 0.25s; 
-  z-index: 999; 
+  z-index: 1620; /* AUMENTADO para ficar acima de tudo */
   background: rgba(0, 0, 0, 0.5);
 }
 .modal.show { opacity: 1; pointer-events: auto; }
@@ -611,7 +611,7 @@ section h2 { font-size: 1.3rem; text-align: center; margin-bottom: 15px; color: 
   transform: scale(1.1);
 }
 
-#login-modal { z-index: 1000; }
+#login-modal { z-index: 1630; } /* AINDA MAIOR */
 #login-modal .modal-content { 
   max-width: 480px; 
   border-radius: 14px; 
@@ -672,7 +672,7 @@ section h2 { font-size: 1.3rem; text-align: center; margin-bottom: 15px; color: 
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
   cursor: pointer; 
   transition: 0.2s;
-  z-index: 800; /* Z-Index reduzido para não furar o modal */
+  z-index: 1500;
   display: block; /* Forçado para aparecer */
 }
 
@@ -702,7 +702,7 @@ section h2 { font-size: 1.3rem; text-align: center; margin-bottom: 15px; color: 
   transition: right 0.4s; 
   display: flex; 
   flex-direction: column; 
-  z-index: 990;
+  z-index: 1610; /* MESMO NÍVEL DO CARRINHO */
 }
 .pedidos-panel.active, .recompensas-panel.active { right: 0; }
 
