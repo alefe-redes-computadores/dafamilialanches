@@ -1,5 +1,5 @@
 /* =========================================================  
-   🚀 DFL v6.5 CORRIGIDO — SCRIPT COMPLETO
+   🚀 DFL v6.6 CORRIGIDO — SCRIPT COMPLETO
 ========================================================= */  
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -488,9 +488,13 @@ document.addEventListener("DOMContentLoaded", () => {
             currentUser = user;   
             if (user) {  
                 el.userBtn.textContent = `Olá, ${user.displayName?.split(" ")[0] || user.email.split("@")[0]}`;  
-                // ✅ BOTÕES VISÍVEIS SEMPRE - CLIQUE ABRE O MODAL SE NÃO LOGADO
+                // ✅ CORREÇÃO CRÍTICA: Garante que os botões apareçam ao logar
+                if (el.pedidosBtn) el.pedidosBtn.style.display = 'block';
+                if (el.recompensasBtn) el.recompensasBtn.style.display = 'block';
             } else {  
                 el.userBtn.textContent = "Entrar / Cadastrar";  
+                if (el.pedidosBtn) el.pedidosBtn.style.display = 'none';
+                if (el.recompensasBtn) el.recompensasBtn.style.display = 'none';
             }  
             if (user && isAdmin(user)) {  
                 if (el.reportsBtn) createAdminFab();  
@@ -1107,7 +1111,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const cookieBanner = document.getElementById("cookie-banner"); const cookieAcceptBtn = document.getElementById("cookie-accept");  
     if (cookieBanner && cookieAcceptBtn) { if (localStorage.getItem("dfl-cookies-accepted") === "true") cookieBanner.style.display = "none"; else cookieBanner.classList.add("show"); cookieAcceptBtn.addEventListener("click", () => { localStorage.setItem("dfl-cookies-accepted", "true"); cookieBanner.classList.remove("show"); }); }
 
-    console.log("%c🔥 DFL v6.4 — BOTÕES E FRETE CORRIGIDOS", "background:#4CAF50;color:#fff;padding:5px;border-radius:5px;");  
+    console.log("%c🔥 DFL v6.6 — BOTÕES E NOMES LIMPOS", "background:#4CAF50;color:#fff;padding:5px;border-radius:5px;");  
     
     renderPromoCards();
     inicializarFirebase();  
