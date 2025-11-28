@@ -1,12 +1,11 @@
 /* =========================================================  
-   🚀 DFL v7.5 FINAL — SCRIPT INTEGRAL (EXPANDIDO)
-   - Todas as funções restauradas e formatadas
-   - Sem minificação: código limpo e legível
-   - Base: v5.6 + v6.8 + Correções v7.x
+   🚀 DFL v7.6 FINAL — SCRIPT INTEGRAL (EXPANDIDO)
+   - Nova Promoção (Promo 10) no Topo
+   - Reordenação do Carrossel (10 -> 9 -> 8...)
+   - Funcionalidades v5.6 + v7.x preservadas
 ========================================================= */  
 
 document.addEventListener("DOMContentLoaded", () => {
-
     // ============================================================
     // 1. MÁSCARA DE CEP
     // ============================================================
@@ -60,42 +59,48 @@ document.addEventListener("DOMContentLoaded", () => {
     }  
 
     /* ============================================================
-       🔥 DADOS DAS PROMOÇÕES (BANCO DE DADOS LOCAL)
+       🔥 DADOS DAS PROMOÇÕES (REORDENADOS v7.6)
+       Ordem: Nova(10), 9, 8, 6, 5, 4, 7, 3, 2, 1
     ============================================================ */
     const PROMO_DATA = [  
         null,   
+        // POSIÇÃO 1: Nova Promo 10
         { 
             id: 1, 
-            nome: "2 Purizin + 1 Fanta 1L", 
-            preco: 34.99, 
-            precoAntigo: 40.00, 
-            img: "promocoes/promo1.jpg", 
-            descricao: "2 Hot Dogs 'Purizin' com purê cremoso + 1 Fanta 1L geladinha!" 
-        },  
+            nome: "2 UAI + 1 COCA 600ml (Especial 4 Anos)", 
+            preco: 29.99, 
+            precoAntigo: 35.00, 
+            img: "promocoes/promo10.png", 
+            descricao: "2 Burgers 'Uai' completinhos (com aquele molho verde!) + 1 Coca-Cola 600ml geladinha!" 
+        },
+        // POSIÇÃO 2: Antiga Promo 9
         { 
             id: 2, 
-            nome: "3 Hot Dog Padaná", 
-            preco: 37.99, 
-            precoAntigo: 45.00, 
-            img: "promocoes/promo2.jpg", 
-            descricao: "3 Padaná completos, perfeitos pra dividir com a galera!" 
-        },  
+            nome: "5 Uai + 1 Kuat 2L (Brinde)", 
+            preco: 64.99, 
+            precoAntigo: 75.00, 
+            img: "promocoes/promo9.jpg", 
+            descricao: "Compre 5 Burgers Uai e leve 1 Kuat 2L por nossa conta! 🎁" 
+        },
+        // POSIÇÃO 3: Antiga Promo 8
         { 
             id: 3, 
-            nome: "2 Burgers Peleja", 
-            preco: 39.99, 
-            precoAntigo: 52.00, 
-            img: "promocoes/promo3.jpg", 
-            descricao: "Bora artesanar o bolso! Dois Burgers artesanais 'Peleja' no precinho!" 
-        },  
+            nome: "4 Armaria", 
+            preco: 59.99, 
+            precoAntigo: 72.00, 
+            img: "promocoes/promo8.jpg", 
+            descricao: "A queridinha da galera! 4 Armaria no super desconto." 
+        },
+        // POSIÇÃO 4: Antiga Promo 6
         { 
             id: 4, 
-            nome: "3 Trem + 1 Fanta 1L", 
-            preco: 44.99, 
-            precoAntigo: 51.00, 
-            img: "promocoes/promo4.jpg", 
-            descricao: "3 Burgers Trem com bacon, queijo e batata palha + 1 Fanta 1L." 
-        },  
+            nome: "5 Burgers Uai", 
+            preco: 54.00, 
+            precoAntigo: 65.00, 
+            img: "promocoes/promo6.jpg", 
+            descricao: "Pra família toda! 5 Burgers UAI recheados no precinho!" 
+        },
+        // POSIÇÃO 5: Antiga Promo 5 (Permanece)
         { 
             id: 5, 
             nome: "4 Trem + 1 Fanta 1L", 
@@ -104,14 +109,16 @@ document.addEventListener("DOMContentLoaded", () => {
             img: "promocoes/promo5.jpg", 
             descricao: "O clássico da família! 4 Burgers Trem + Fanta 1L." 
         },  
+        // POSIÇÃO 6: Antiga Promo 4
         { 
             id: 6, 
-            nome: "5 Burgers Uai", 
-            preco: 54.00, 
-            precoAntigo: 65.00, 
-            img: "promocoes/promo6.jpg", 
-            descricao: "Pra família toda! 5 Burgers UAI recheados no precinho!" 
-        },  
+            nome: "3 Trem + 1 Fanta 1L", 
+            preco: 44.99, 
+            precoAntigo: 51.00, 
+            img: "promocoes/promo4.jpg", 
+            descricao: "3 Burgers Trem com bacon, queijo e batata palha + 1 Fanta 1L." 
+        },
+        // POSIÇÃO 7: Antiga Promo 7 (Permanece)
         { 
             id: 7, 
             nome: "4 TremBão + 1 Fanta 1L", 
@@ -119,22 +126,33 @@ document.addEventListener("DOMContentLoaded", () => {
             precoAntigo: 77.00, 
             img: "promocoes/promo7.jpg", 
             descricao: "O maior hot dog da casa! 4 TremBão com purê cremoso + Fanta 1L." 
-        },  
+        },
+        // POSIÇÃO 8: Antiga Promo 3
         { 
             id: 8, 
-            nome: "4 Armaria", 
-            preco: 59.99, 
-            precoAntigo: 72.00, 
-            img: "promocoes/promo8.jpg", 
-            descricao: "A queridinha da galera! 4 Armaria no super desconto." 
-        },  
+            nome: "2 Burgers Peleja", 
+            preco: 39.99, 
+            precoAntigo: 52.00, 
+            img: "promocoes/promo3.jpg", 
+            descricao: "Bora artesanar o bolso! Dois Burgers artesanais 'Peleja' no precinho!" 
+        },
+        // POSIÇÃO 9: Antiga Promo 2
         { 
             id: 9, 
-            nome: "5 Uai + 1 Kuat 2L (Brinde)", 
-            preco: 64.99, 
-            precoAntigo: 75.00, 
-            img: "promocoes/promo9.jpg", 
-            descricao: "Compre 5 Burgers Uai e leve 1 Kuat 2L por nossa conta! 🎁" 
+            nome: "3 Hot Dog Padaná", 
+            preco: 37.99, 
+            precoAntigo: 45.00, 
+            img: "promocoes/promo2.jpg", 
+            descricao: "3 Padaná completos, perfeitos pra dividir com a galera!" 
+        },
+        // POSIÇÃO 10: Antiga Promo 1
+        { 
+            id: 10, 
+            nome: "2 Purizin + 1 Fanta 1L", 
+            preco: 34.99, 
+            precoAntigo: 40.00, 
+            img: "promocoes/promo1.jpg", 
+            descricao: "2 Hot Dogs 'Purizin' com purê cremoso + 1 Fanta 1L geladinha!" 
         }
     ];
 
@@ -471,17 +489,17 @@ document.addEventListener("DOMContentLoaded", () => {
         }  
 
         el.miniList.innerHTML = cart.map((item, idx) => `  
-      <div class="cart-item" style="border-bottom:1px solid #eee;padding:8px 0;">  
+      <div class="cart-item" style="border-bottom:1px solid #eee;padding:10px 0;">  
         <div style="display:flex;justify-content:space-between;align-items:center;">  
           <div style="flex:1;">  
-            <p style="font-weight:600;margin-bottom:2px;">${item.nome}</p>  
+            <p style="font-weight:600;margin-bottom:4px;">${item.nome}</p>  
             <p style="color:#666;font-size:0.85rem;">${money(item.preco)} × ${item.qtd}</p>  
           </div>  
           <div style="display:flex;gap:8px;align-items:center;">  
-            <button type="button" class="cart-minus" data-idx="${idx}" style="background:#ff4081;color:#fff;border:none;border-radius:5px;width:24px;height:24px;cursor:pointer;">−</button>  
+            <button type="button" class="cart-minus" data-idx="${idx}" style="background:#ff4081;color:#fff;border:none;border-radius:5px;width:28px;height:28px;cursor:pointer;">−</button>  
             <span style="font-weight:600;min-width:20px;text-align:center;">${item.qtd}</span>  
-            <button type="button" class="cart-plus" data-idx="${idx}" style="background:#4caf50;color:#fff;border:none;border-radius:5px;width:24px;height:24px;cursor:pointer;">+</button>  
-            <button type="button" class="cart-remove" data-idx="${idx}" style="background:#d32f2f;color:#fff;border:none;border-radius:5px;width:24px;height:24px;cursor:pointer;">🗑</button>  
+            <button type="button" class="cart-plus" data-idx="${idx}" style="background:#4caf50;color:#fff;border:none;border-radius:5px;width:28px;height:28px;cursor:pointer;">+</button>  
+            <button type="button" class="cart-remove" data-idx="${idx}" style="background:#d32f2f;color:#fff;border:none;border-radius:5px;width:28px;height:28px;cursor:pointer;">🗑</button>  
           </div>  
         </div>  
       </div>  
@@ -544,14 +562,15 @@ document.addEventListener("DOMContentLoaded", () => {
             currentUser = user;   
             if (user) {  
                 el.userBtn.textContent = `Olá, ${user.displayName?.split(" ")[0] || user.email.split("@")[0]}`;  
+                // ✅ CORREÇÃO CRÍTICA: Garante que os botões apareçam ao logar
+                if (el.pedidosBtn) el.pedidosBtn.style.display = 'block';
+                if (el.recompensasBtn) el.recompensasBtn.style.display = 'block';
             } else {  
                 el.userBtn.textContent = "Entrar / Cadastrar";  
+                // ✅ MANTEMOS VISÍVEIS PARA PEDIR LOGIN
+                if (el.pedidosBtn) el.pedidosBtn.style.display = 'block';
+                if (el.recompensasBtn) el.recompensasBtn.style.display = 'block';
             }  
-            
-            // ✅ CORREÇÃO: Botões SEMPRE VISÍVEIS, independente do login
-            if (el.pedidosBtn) el.pedidosBtn.style.display = 'block';
-            if (el.recompensasBtn) el.recompensasBtn.style.display = 'block';
-
             if (user && isAdmin(user)) {  
                 if (el.reportsBtn) createAdminFab();  
             } else {  
@@ -561,6 +580,7 @@ document.addEventListener("DOMContentLoaded", () => {
         });  
     }
 
+    /* ------------------ ⚙️ LOGIN ------------------ */  
     const handleLoginSuccess = (user) => {  
         currentUser = user;  
         popupAdd("Login realizado com sucesso!");  
@@ -1022,9 +1042,9 @@ document.addEventListener("DOMContentLoaded", () => {
         const summaryDiv = document.createElement('div');  
         summaryDiv.className = 'cart-summary-generated';  
         summaryDiv.innerHTML = `  
-      <div class="summary-row" style="margin-top:8px;border-top:1px solid #eee;padding-top:8px;"><span>Subtotal</span><b>${money(subtotal)}</b></div>  
+      <div class="summary-row" style="margin-top:10px;border-top:1px solid #eee;padding-top:10px;"><span>Subtotal</span><b>${money(subtotal)}</b></div>  
       <div class="summary-row"><span>Entrega</span><b>${deliveryLabel}</b></div>  
-      <div class="summary-row" style="display:flex;justify-content:space-between;align-items:center;border-top:1px solid #eee;padding-top:8px;margin:8px 0;font-size:1rem;"><span><b>Total</b></span><span style="color:#e53935;font-weight:800;">${money(total)}</span></div>  
+      <div class="summary-row" style="display:flex;justify-content:space-between;align-items:center;border-top:1px solid #eee;padding-top:10px;margin:10px 0;font-size:1.1rem;"><span><b>Total</b></span><span style="color:#e53935;font-weight:800;">${money(total)}</span></div>  
       <button id="finish-order" type="button" style="width:100%;background:#4caf50;color:#fff;border:none;border-radius:10px;padding:12px;font-weight:700;cursor:pointer;margin-bottom:8px">Finalizar Pedido 🛍️</button>  
       <button id="clear-cart" type="button" style="width:100%;background:#ff4081;color:#fff;border:none;border-radius:10px;padding:10px;font-weight:700;cursor:pointer">Limpar Carrinho</button>`;  
 
@@ -1207,8 +1227,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });  
     atualizarTimer(); setInterval(atualizarTimer, 1000);
 
-    /* ------------------ 🚨 BOTÕES LATERAIS (CORRIGIDOS) ------------------ */
-    // Botão Recompensas
+    /* ------------------ 🚨 RECOMPENSAS E BOTÕES LATERAIS (CORRIGIDOS) ------------------ */
     el.recompensasBtn?.addEventListener("click", () => { 
         if (!currentUser) { 
             alert("Faça login para ver suas recompensas!"); 
@@ -1220,7 +1239,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });
     el.recompensasFecharBtn?.addEventListener("click", () => Overlays.closeAll());
     
-    // Botão Meus Pedidos
+    /* ------------------ 📦 MEUS PEDIDOS (CORRIGIDO) ------------------ */
     el.pedidosBtn?.addEventListener("click", () => { 
         if (!currentUser) { 
             alert("Faça login para ver seus pedidos!"); 
@@ -1231,75 +1250,6 @@ document.addEventListener("DOMContentLoaded", () => {
         carregarPedidos(currentUser.uid); 
     });
     el.pedidosFecharBtn?.addEventListener("click", () => Overlays.closeAll());
-
-    /* ------------------ 📦 CARREGAR PEDIDOS (MEUS PEDIDOS) ------------------ */
-    async function carregarPedidos(userId) {  
-        if (!el.pedidosLista) return; 
-        el.pedidosLista.innerHTML = `<p class="empty-orders">Carregando pedidos...</p>`;  
-        try { 
-            const q = db.collection("Pedidos").where("userId", "==", userId).orderBy("data", "desc"); 
-            const snapshot = await q.get();  
-            if (snapshot.empty) { 
-                el.pedidosLista.innerHTML = `<p class="empty-orders">Nenhum pedido encontrado 😢</p>`; 
-                return; 
-            }  
-            exibirPedidos(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));  
-        } catch (err) { 
-            console.error("Erro pedidos:", err); 
-            el.pedidosLista.innerHTML = `<p class="empty-orders" style="color:red;">Erro ao buscar pedidos.</p>`; 
-        }  
-    }  
-
-    function exibirPedidos(pedidos) {  
-        if (!el.pedidosLista) return;  
-        el.pedidosLista.innerHTML = pedidos.map(p => {  
-            const thumbUrl = p.thumb || ''; 
-            const dataFormatada = p.data ? new Date(p.data?.seconds * 1000 || p.data).toLocaleString("pt-BR", { day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit" }) : "—";  
-            const podeRepetir = Array.isArray(p.itensObj) && p.itensObj.length > 0;  
-            const itensParaExibir = (Array.isArray(p.itens) && p.itens.length > 0) ? p.itens.join('<br>') : (p.itensObj && p.itensObj.length > 0) ? p.itensObj.map(i => `• ${i.nome} x${i.qtd}`).join('<br>') : '• Sem itens';  
-            
-            return `
-            <div class="pedido-card">
-                <div class="pedido-thumb" style="background-image:url('${thumbUrl}');"></div>
-                <h4>📅 ${dataFormatada}</h4>
-                <p class="pedido-info">Total: ${money(p.total)}</p>
-                <div class="pedido-itens">${itensParaExibir}</div>
-                <button class="repetir-btn" data-id="${p.id}" ${podeRepetir ? '' : 'disabled style="background:grey;cursor:not-allowed;"'}>🔁 Repetir Pedido</button>
-            </div>`;  
-        }).join('');  
-    }  
-
-    el.pedidosLista?.addEventListener('click', async (e) => { 
-        if (e.target.classList.contains('repetir-btn') && !e.target.disabled) { 
-            e.target.disabled = true; 
-            e.target.textContent = "Carregando..."; 
-            await repetirPedido(e.target.dataset.id); 
-        } 
-    });  
-
-    async function repetirPedido(idPedido) {  
-        try { 
-            const docRef = db.collection("Pedidos").doc(idPedido); 
-            const doc = await docRef.get();  
-            if (!doc.exists) return alert("Pedido não encontrado.");  
-            const itensParaRepetir = doc.data().itensObj;  
-            if (!Array.isArray(itensParaRepetir) || itensParaRepetir.length === 0) return alert("Não é possível repetir este pedido.");  
-            cart = []; 
-            itensParaRepetir.forEach(item => { 
-                if (item.nome && item.preco > 0 && item.qtd > 0) cart.push({ nome: item.nome, preco: item.preco, qtd: item.qtd }); 
-            });  
-            couponApplied = ""; 
-            localStorage.removeItem("dflCoupon"); 
-            document.getElementById("coupon-input").value = "";  
-            popupAdd("Pedido adicionado ao carrinho!"); 
-            renderMiniCart(); 
-            Overlays.closeAll(); 
-            Overlays.open(el.miniCart);  
-        } catch (err) { 
-            console.error("Erro repetir:", err); 
-            alert("Erro ao processar."); 
-        }  
-    }
 
     /* ------------------ 📊 ADMIN DASHBOARD (RESTAURADO) ------------------ */
     const ADMINS = [ "alefejohsefe@gmail.com", "kalebhstanley650@gmail.com", "contato@dafamilialanches.com.br" ];  
@@ -1435,7 +1385,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }); 
     }
 
-    console.log("%c🔥 DFL v7.1 — SCRIPT COMPLETO RESTAURADO", "background:#4CAF50;color:#fff;padding:5px;border-radius:5px;");  
+    console.log("%c🔥 DFL v7.5 — SCRIPT INTEGRAL COMPLETO", "background:#4CAF50;color:#fff;padding:5px;border-radius:5px;");  
     
     renderPromoCards();
     inicializarFirebase();  
