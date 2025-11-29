@@ -1,5 +1,8 @@
 /* ===========================================================
-   🎨 Da Família Lanches – CSS v8.1 FINAL "BLINDADO"
+   🎨 Da Família Lanches – CSS v9.0 (COM SIDE MENU)
+   - Botões laterais VISÍVEIS (Z-Index ajustado)
+   - Carrinho COMPACTO
+   - Menu Lateral Hambúrguer
    =========================================================== */
 
 :root {
@@ -36,6 +39,7 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
+/* HEADER */
 .header {
   position: fixed;
   inset-inline: 0;
@@ -50,6 +54,110 @@ body {
 }
 
 .header-content { display: flex; align-items: center; gap: 12px; }
+
+/* MENU HAMBÚRGUER (NOVO v9.0) */
+#hamburger-btn {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  padding: 5px;
+  z-index: 1100;
+}
+#hamburger-btn .bar {
+  width: 25px;
+  height: 3px;
+  background-color: #333;
+  border-radius: 2px;
+  transition: 0.3s;
+}
+
+/* Side Menu */
+#side-menu {
+  position: fixed;
+  left: -300px;
+  top: 0;
+  width: 280px;
+  height: 100%;
+  background: #fff;
+  z-index: 2000; /* Acima de tudo menos modais */
+  box-shadow: 2px 0 10px rgba(0,0,0,0.2);
+  transition: left 0.3s ease;
+  display: flex;
+  flex-direction: column;
+}
+#side-menu.active {
+  left: 0;
+}
+
+#menu-overlay {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.5);
+  backdrop-filter: blur(3px);
+  z-index: 1999;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s;
+}
+#menu-overlay.active {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.menu-header {
+  padding: 20px;
+  background: var(--acento);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-weight: bold;
+  font-size: 1.1rem;
+}
+
+#menu-close {
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+}
+
+.menu-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  overflow-y: auto;
+}
+.menu-list li {
+  border-bottom: 1px solid #eee;
+}
+.menu-link {
+  display: block;
+  padding: 16px 20px;
+  text-decoration: none;
+  color: #333;
+  font-weight: 500;
+  transition: background 0.2s;
+}
+.menu-link:hover {
+  background: #f5f5f5;
+  color: #d84315;
+}
+
+/* Animação de Destaque */
+@keyframes highlight-pulse {
+  0% { transform: scale(1); box-shadow: 0 0 0 rgba(255, 202, 40, 0); }
+  50% { transform: scale(1.02); box-shadow: 0 0 20px rgba(255, 202, 40, 0.6); }
+  100% { transform: scale(1); box-shadow: 0 0 0 rgba(255, 202, 40, 0); }
+}
+.highlight-section {
+  animation: highlight-pulse 1s ease;
+  border-radius: 12px; /* Suaviza bordas durante destaque */
+}
+
+.logo-container { display: flex; align-items: center; gap: 8px; } /* Novo container para logo + texto */
 .logo { width: 52px; height: 52px; }
 .header-info h1 { margin: 0; font-size: 1.2rem; }
 .tagline { margin: 0; font-size: 0.85rem; color: #d84315; }
@@ -144,7 +252,7 @@ body {
   font-size: 1.05rem;
 }
 
-section { margin: 25px auto; width: 95%; max-width: 1200px; }
+section { margin: 25px auto; width: 95%; max-width: 1200px; scroll-margin-top: 90px; /* Espaço para o header fixo */ }
 section h2 { font-size: 1.3rem; text-align: center; margin-bottom: 15px; color: #ff7043; }
 .grid { 
   display: grid; 
