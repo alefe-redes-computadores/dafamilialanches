@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>🍔 Da Família Lanches — DFL v7.9</title>
+  <title>🍔 Da Família Lanches — DFL v8.0</title>
 
   <meta http-equiv="Content-Security-Policy" content="
     default-src * data: blob: 'unsafe-inline' 'unsafe-eval';
@@ -18,8 +18,8 @@
   <link rel="preconnect" href="https://www.gstatic.com" crossorigin>
   <link rel="preload" as="image" href="logo.png">
   
-  <link rel="stylesheet" href="style.css?v=7.7" />
-  <noscript><link rel="stylesheet" href="style.css?v=7.7"/></noscript>
+  <link rel="stylesheet" href="style.css?v=8.0" />
+  <noscript><link rel="stylesheet" href="style.css?v=8.0"/></noscript>
 
   <script defer src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
   <script defer src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
@@ -70,7 +70,6 @@
       </div>
       <div class="mini-list"></div>
       <div class="mini-foot">
-
         <div id="progressWrapper" class="progress-wrapper">
             <p id="progressText" class="progress-text">
                 Faltam <strong>R$ 80,00</strong> para Frete Grátis 🚀
@@ -81,32 +80,25 @@
         </div>
         <div class="frete-container" aria-disabled="true">
           <h4 style="margin-top:4px; margin-bottom: 4px;">🚚 Entrega</h4>
-          
           <div class="frete-cep-group">
             <input id="cep-input" type="text" placeholder="Digite o CEP" maxlength="9" autocomplete="postal-code">
             <button id="btn-calcular-frete" class="btn-calcular-frete" type="button">Buscar</button>
           </div>
-
           <div style="display:flex; justify-content:space-between; margin-bottom:4px;">
             <button id="btnNaoSeiCEP" class="link-acao" type="button">Não sei meu CEP 🤔</button>
             <button id="btnManual" class="link-acao" type="button">Endereço manual ✏️</button>
           </div>
-
           <input id="endereco-auto" type="text" class="input-endereco-longo" placeholder="Rua e Bairro (Preenchido via CEP)" disabled>
-          
           <div class="endereco-duplo">
             <input id="numero-input" type="text" placeholder="Número" disabled>
             <input id="complemento-input" type="text" placeholder="Comp. (opc)" disabled>
           </div>
-
           <label style="display:flex;align-items:center;gap:6px;margin-bottom:2px; color:#555; font-size: 0.85rem;">
             <input type="checkbox" id="retirar-local">
             Retirar no Local (sem taxa)
           </label>
-          
           <hr style="border:0; border-top:1px solid #eee; margin:6px 0;">
         </div>
-        
         <div id="manualArea" class="frete-container" style="display:none;">
             <h4>Endereço Manual</h4>
             <label for="manualEndereco">Endereço completo:</label>
@@ -116,13 +108,11 @@
             <button id="btnConfirmarEndereco" class="btn-primary" type="button" style="width: 100%; margin-bottom: 4px; padding:8px;">Confirmar 🔍</button>
             <button id="btnVoltarCEP" class="btn-secondary" type="button" style="width: 100%; padding:8px;">Voltar</button>
         </div>
-
         <form id="coupon-form" class="coupon-form" novalidate>
-          <input type="text" id="coupon-input" placeholder="Cupom de desconto" aria-label="Cupom de desconto"/>
+          <input type="text" id="coupon-input" placeholder="Cupom" aria-label="Cupom de desconto"/>
           <button type="submit" id="coupon-apply-btn" class="btn-primary">OK</button>
         </form>
         <div id="coupon-message" class="coupon-message" aria-live="polite"></div>
-
         <div class="summary-row" id="coupon-discount-row" style="display:none;">
           <span>Desconto</span>
           <span id="cart-discount">R$ 0,00</span>
@@ -245,7 +235,7 @@
         </div>
       </div>
     </section>
-
+    
     <section class="menu-section" id="hotdogs-section">
       <h2>🌭 DFD – Hot Dogs</h2>
       <div class="grid">
@@ -407,7 +397,7 @@
         <a href="https://www.instagram.com/dafamilialanches" target="_blank" class="footer-btn" rel="noopener">📸 Instagram</a>
         <a href="https://www.ifood.com.br/delivery/patos-de-minas/dafamilialanches" target="_blank" class="footer-btn" rel="noopener">🍔 iFood</a>
       </div>
-      <div class="footer-copy">© 2025 Da Família Lanches — Todos os direitos reservados 🍔 • <b>v7.7</b></div>
+      <div class="footer-copy">© 2025 Da Família Lanches — Todos os direitos reservados 🍔 • <b>v8.0</b></div>
     </footer>
   </div>
 
@@ -455,7 +445,7 @@
     <button id="cookie-accept" type="button">Aceitar</button>
   </div>
 
-  <script defer src="script.js?v=7.9"></script>
+  <script defer src="script.js?v=8.0"></script>
   <script defer src="extras.js?v=5.2.2"></script>
-  </body>
+</body>
 </html>
