@@ -1222,6 +1222,133 @@ document.addEventListener("DOMContentLoaded", () => {
         }  
     }
 
+   /* ------------------ 📦 MEUS PEDIDOS (FUNÇÕES COMPLETAS) ------------------ */
+async function carregarPedidos(userId) {  
+    if (!el.pedidosLista) return; 
+    el.pedidosLista.innerHTML = `<p class="empty-orders">Carregando pedidos...</p>`;  
+    
+    try { 
+        const q = db.collection("Pedidos").where("userId", "==", userId).orderBy("data", "desc"); 
+        const snapshot = await q.get();  
+        
+        if (snapshot.empty) { 
+            el.pedidosLista.innerHTML = `<p class="empty-orders">Nenhum pedido encontrado 😢</p>`; 
+            return; 
+        }  
+        
+        const pedidos = snapshot.docs.map(doc => ({ 
+            id: doc.id, 
+            ...doc.data() 
+        }));
+        
+        exibirPedidos(pedidos);  
+    } catch (err) { 
+        console.error("Erro ao carregar pedidos:", err); 
+        el.pedidosLista.innerHTML = `<p class="empty-orders" style="color:red;">Erro ao buscar pedidos: ${err.message}</p>`; 
+    }  
+}  
+
+function exibirPedidos(pedidos) {  
+    if (!el.pedidosLista) return;  
+    
+    el.pedidosLista.innerHTML = pedidos.map(p => {  
+        const thumbUrl = p.thumb || ''; 
+        const dataFormatada = p.data ? 
+            new Date(p.data?.seconds * 1000 || p.data).toLocaleString("pt-BR", { 
+                day: "2-digit", 
+                month: "2-digit", 
+                year: "numeric", 
+                hour: "2-digit", 
+                minute: "2-digit" 
+            }) : "—";  
+        
+        const podeRepetir = Array.isArray(p.itensObj) && p.itensObj.length > 0;  
+        const itensParaExibir = (Array.isArray(p.itens) && p.itens.length > 0) ? 
+            p.itens.join('<br>') : 
+            (p.itensObj && p.itensObj.length > 0) ? 
+                p.itensObj.map(i => `• ${i.nome} x${i.qtd}`).join('<br>') : 
+                '• Sem itens';  
+        
+        return `
+            <div class="pedido-card">
+                <div class="pedido-thumb" style="background-image:url('${thumbUrl}');"></div>
+                <h4>📅 ${dataFormatada}</h4>
+                <p class="pedido-info">Total: ${money(p.total)}</p>
+                <div class="pedido-itens">${itensParaExibir}</div>
+                <button class="repetir-btn" data-id="${p.id}" ${podeRepetir ? '' : 'disabled style="background:grey;cursor:not-allowed;"'}>
+                    🔁 Repetir Pedido
+                </button>
+            </div>
+        `;  
+    }).join('');  
+}  
+
+// Event listener para o botão "Repetir Pedido"
+el.pedidosLista?.addEventListener('click', async (e) => { 
+    if (e.target.classList.contains('repetir-btn') && !e.target.disabled) { 
+        e.target.disabled = true; 
+        e.target.textContent = "Carregando..."; 
+        await repetirPedido(e.target.dataset.id); 
+    } 
+});  
+
+async function repetirPedido(idPedido) {  
+    try { 
+        const docRef = db.collection("Pedidos").doc(idPedido); 
+        const doc = await docRef.get();  
+        
+        if (!doc.exists) {
+            popupAdd("Pedido não encontrado.");
+            return;
+        }  
+        
+        const itensParaRepetir = doc.data().itensObj;  
+        
+        if (!Array.isArray(itensParaRepetir) || itensParaRepetir.length === 0) {
+            popupAdd("Não é possível repetir este pedido.");
+            return;
+        }  
+        
+        // Limpa o carrinho atual e adiciona os itens do pedido
+        cart = []; 
+        itensParaRepetir.forEach(item => { 
+            if (item.nome && item.preco > 0 && item.qtd > 0) {
+                cart.push({ 
+                    nome: item.nome, 
+                    preco: item.preco, 
+                    qtd: item.qtd 
+                }); 
+            }
+        });  
+        
+        couponApplied = ""; 
+        localStorage.removeItem("dflCoupon"); 
+        document.getElementById("coupon-input").value = "";  
+        
+        popupAdd("Pedido adicionado ao carrinho!"); 
+        renderMiniCart(); 
+        Overlays.closeAll(); 
+        Overlays.open(el.miniCart);  
+        
+    } catch (err) { 
+        console.error("Erro ao repetir pedido:", err); 
+        popupAdd("Erro ao processar pedido."); 
+    }  
+}
+
+/* ------------------ 📦 BOTÃO MEUS PEDIDOS (CORRIGIDO) ------------------ */
+el.pedidosBtn?.addEventListener("click", () => { 
+    if (!currentUser) { 
+        alert("Faça login para ver seus pedidos!"); 
+        Overlays.open(el.loginModal); 
+        return; 
+    } 
+    Overlays.open(el.pedidosPanel); 
+    carregarPedidos(currentUser.uid); 
+});
+
+el.pedidosFecharBtn?.addEventListener("click", () => Overlays.closeAll());
+
     /* ------------------ 🚨 RECOMPENSAS (RESTAURADO v5.6) ------------------ */
     let configuracoesRecompensa = null;   
     async function carregarConfiguracoesDeRecompensas() {  
