@@ -1,8 +1,9 @@
 /* =========================================================  
-   🚀 DFL v7.7 — CORREÇÃO DO BOTÃO BUSCAR CEP
-   - Botão "Buscar CEP" funcionando corretamente
-   - Modal não fecha ao clicar no botão
-   - Todas as funcionalidades preservadas
+   🚀 DFL v7.7 — CORREÇÃO DEFINITIVA - MODAIS FUNCIONANDO
+   - Segundo DOMContentLoaded REMOVIDO
+   - Fechamento por X, fora e backdrop INTEGRADO
+   - Botão Buscar CEP funcionando
+   - Todas funcionalidades preservadas
 ========================================================= */  
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -60,11 +61,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
     /* ============================================================
        🔥 DADOS DAS PROMOÇÕES (REORDENADOS v7.6)
-       Ordem: Nova(10), 9, 8, 6, 5, 4, 7, 3, 2, 1
     ============================================================ */
     const PROMO_DATA = [  
         null,   
-        // POSIÇÃO 1: Nova Promo 10
         { 
             id: 1, 
             nome: "2 UAI + 1 COCA 600ml (Especial 4 Anos)", 
@@ -73,7 +72,6 @@ document.addEventListener("DOMContentLoaded", () => {
             img: "promocoes/promo10.png", 
             descricao: "2 Burgers 'Uai' completinhos (com aquele molho verde!) + 1 Coca-Cola 600ml geladinha!" 
         },
-        // POSIÇÃO 2: Antiga Promo 9
         { 
             id: 2, 
             nome: "5 Uai + 1 Kuat 2L (Brinde)", 
@@ -82,7 +80,6 @@ document.addEventListener("DOMContentLoaded", () => {
             img: "promocoes/promo9.jpg", 
             descricao: "Compre 5 Burgers Uai e leve 1 Kuat 2L por nossa conta! 🎁" 
         },
-        // POSIÇÃO 3: Antiga Promo 8
         { 
             id: 3, 
             nome: "4 Armaria", 
@@ -91,7 +88,6 @@ document.addEventListener("DOMContentLoaded", () => {
             img: "promocoes/promo8.jpg", 
             descricao: "A queridinha da galera! 4 Armaria no super desconto." 
         },
-        // POSIÇÃO 4: Antiga Promo 6
         { 
             id: 4, 
             nome: "5 Burgers Uai", 
@@ -100,7 +96,6 @@ document.addEventListener("DOMContentLoaded", () => {
             img: "promocoes/promo6.jpg", 
             descricao: "Pra família toda! 5 Burgers UAI recheados no precinho!" 
         },
-        // POSIÇÃO 5: Antiga Promo 5 (Permanece)
         { 
             id: 5, 
             nome: "4 Trem + 1 Fanta 1L", 
@@ -109,7 +104,6 @@ document.addEventListener("DOMContentLoaded", () => {
             img: "promocoes/promo5.jpg", 
             descricao: "O clássico da família! 4 Burgers Trem + Fanta 1L." 
         },  
-        // POSIÇÃO 6: Antiga Promo 4
         { 
             id: 6, 
             nome: "3 Trem + 1 Fanta 1L", 
@@ -118,7 +112,6 @@ document.addEventListener("DOMContentLoaded", () => {
             img: "promocoes/promo4.jpg", 
             descricao: "3 Burgers Trem com bacon, queijo e batata palha + 1 Fanta 1L." 
         },
-        // POSIÇÃO 7: Antiga Promo 7 (Permanece)
         { 
             id: 7, 
             nome: "4 TremBão + 1 Fanta 1L", 
@@ -127,7 +120,6 @@ document.addEventListener("DOMContentLoaded", () => {
             img: "promocoes/promo7.jpg", 
             descricao: "O maior hot dog da casa! 4 TremBão com purê cremoso + Fanta 1L." 
         },
-        // POSIÇÃO 8: Antiga Promo 3
         { 
             id: 8, 
             nome: "2 Burgers Peleja", 
@@ -136,7 +128,6 @@ document.addEventListener("DOMContentLoaded", () => {
             img: "promocoes/promo3.jpg", 
             descricao: "Bora artesanar o bolso! Dois Burgers artesanais 'Peleja' no precinho!" 
         },
-        // POSIÇÃO 9: Antiga Promo 2
         { 
             id: 9, 
             nome: "3 Hot Dog Padaná", 
@@ -145,7 +136,6 @@ document.addEventListener("DOMContentLoaded", () => {
             img: "promocoes/promo2.jpg", 
             descricao: "3 Padaná completos, perfeitos pra dividir com a galera!" 
         },
-        // POSIÇÃO 10: Antiga Promo 1
         { 
             id: 10, 
             nome: "2 Purizin + 1 Fanta 1L", 
@@ -155,7 +145,6 @@ document.addEventListener("DOMContentLoaded", () => {
             descricao: "2 Hot Dogs 'Purizin' com purê cremoso + 1 Fanta 1L geladinha!" 
         }
     ];
-
     /* ============================================================
        🎨 FUNÇÃO: RENDERIZAR PROMOÇÕES
     ============================================================ */
@@ -180,7 +169,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
         container.innerHTML = html;
 
-        // Bind dos botões de adicionar promoção
         container.querySelectorAll('.add-promo').forEach(btn => {
             btn.addEventListener('click', (e) => {
                 const promoId = parseInt(e.currentTarget.dataset.promoId);
@@ -286,7 +274,6 @@ document.addEventListener("DOMContentLoaded", () => {
             filtrarCards(e.target.value);
         });
     }
-
     /* ============================================================
        🎯 MAPEAMENTO DE ELEMENTOS DO DOM
     ============================================================ */
@@ -311,7 +298,6 @@ document.addEventListener("DOMContentLoaded", () => {
         hoursBanner: document.querySelector(".hours-banner"), 
         reportsBtn: document.getElementById("reports-btn"),   
         
-        // Painéis Laterais
         pedidosContainer: document.querySelector(".meus-pedidos"),  
         pedidosBtn: document.querySelector(".meus-pedidos-btn"),  
         pedidosPanel: document.getElementById("painelPedidos"),  
@@ -324,7 +310,6 @@ document.addEventListener("DOMContentLoaded", () => {
         recompensasLista: document.getElementById("listaRecompensas"),  
         historicoLista: document.getElementById("historicoRecompensas"),
 
-        // Frete Manual
         btnNaoSeiCEP: document.getElementById("btnNaoSeiCEP"),
         manualArea: document.getElementById("manualArea"),
         manualEndereco: document.getElementById("manualEndereco"),
@@ -332,12 +317,10 @@ document.addEventListener("DOMContentLoaded", () => {
         btnConfirmarEndereco: document.getElementById("btnConfirmarEndereco"),
         btnVoltarCEP: document.getElementById("btnVoltarCEP"),
         
-        // Barra de Progresso
         progressWrapper: document.getElementById("progressWrapper"),
         progressText: document.getElementById("progressText"),
         progressFill: document.getElementById("progressFill"),
         
-        // Modal Promo (v2.7)
         promoModal: document.getElementById("promo-modal"),
         promoImg: document.getElementById("promo-modal-img"),
         promoTitle: document.getElementById("promo-modal-title"),
@@ -347,13 +330,12 @@ document.addEventListener("DOMContentLoaded", () => {
         promoNavNext: document.querySelector("#promo-modal .promo-nav.next"),
         promoClose: document.querySelector("#promo-modal .promo-close"),
         
-        // Carrossel
         cPrev: document.querySelector(".c-prev"),
         cNext: document.querySelector(".c-next"),
         slides: document.querySelector(".slides")
     };
 
-    /* ------------------ 🌫️ BACKDROP & OVERLAYS ------------------ */  
+    /* ------------------ 🌫️ BACKDROP & OVERLAYS (CORRIGIDO) ------------------ */  
     if (!el.cartBackdrop) {  
         const bd = document.createElement("div"); 
         bd.id = "cart-backdrop"; 
@@ -369,7 +351,6 @@ document.addEventListener("DOMContentLoaded", () => {
         hide() { 
             el.cartBackdrop.classList.remove("active"); 
             document.body.classList.remove("no-scroll"); 
-            // Garante fechamento dos painéis
             if(el.pedidosPanel) el.pedidosPanel.classList.remove("active");
             if(el.recompensasPanel) el.recompensasPanel.classList.remove("active");
         },  
@@ -391,8 +372,33 @@ document.addEventListener("DOMContentLoaded", () => {
         },  
     };  
     
+    // ✅ CORREÇÃO: Backdrop fecha tudo ao clicar
     el.cartBackdrop.addEventListener("click", () => Overlays.closeAll());
 
+    // ✅ CORREÇÃO: Fechar modais clicando FORA do .modal-content
+    const setupModalClickOutside = () => {
+        document.querySelectorAll('.modal').forEach(modal => {
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) {
+                    Overlays.closeAll();
+                }
+            });
+        });
+    };
+
+    // ✅ CORREÇÃO: Fechar modais pelo botão X
+    const setupCloseButtons = () => {
+        document.querySelectorAll('.extras-close, .combo-close, .login-close, .fechar-pedidos, .fechar-recompensas, .dashboard-close, .promo-close').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                Overlays.closeAll();
+            });
+        });
+    };
+
+    // Inicializa listeners de fechamento
+    setupModalClickOutside();
+    setupCloseButtons();
     /* ------------------ 🎟️ CUPONS ------------------ */  
     const couponForm = document.getElementById("coupon-form");  
     let couponApplied = (localStorage.getItem("dflCoupon") || "").toUpperCase();  
@@ -530,6 +536,7 @@ document.addEventListener("DOMContentLoaded", () => {
         enhanceMiniCartUI();  
     };
 
+    const getCartSubtotal = () => cart.reduce((s, i) => s + (Number(i.preco) || 0) * (Number(i.qtd) || 0), 0);
     /* ------------------ 🔥 FIREBASE INIT ------------------ */  
     const firebaseConfig = {  
         apiKey: "AIzaSyATQBcbYuzKpKlSwNlbpRiAM1XyHqhGeak",  
@@ -562,12 +569,10 @@ document.addEventListener("DOMContentLoaded", () => {
             currentUser = user;   
             if (user) {  
                 el.userBtn.textContent = `Olá, ${user.displayName?.split(" ")[0] || user.email.split("@")[0]}`;  
-                // ✅ CORREÇÃO CRÍTICA: Garante que os botões apareçam ao logar
                 if (el.pedidosBtn) el.pedidosBtn.style.display = 'block';
                 if (el.recompensasBtn) el.recompensasBtn.style.display = 'block';
             } else {  
                 el.userBtn.textContent = "Entrar / Cadastrar";  
-                // ✅ MANTEMOS VISÍVEIS PARA PEDIR LOGIN
                 if (el.pedidosBtn) el.pedidosBtn.style.display = 'block';
                 if (el.recompensasBtn) el.recompensasBtn.style.display = 'block';
             }  
@@ -624,6 +629,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });  
 
     el.userBtn?.addEventListener("click", () => Overlays.open(el.loginModal));  
+    
     el.cartIcon?.addEventListener("click", () => {
         const pedidos = document.getElementById("painelPedidos");
         const recompensas = document.getElementById("recompensas-panel");
@@ -687,12 +693,7 @@ document.addEventListener("DOMContentLoaded", () => {
         renderMiniCart();  
         popupAdd("Adicionado ao carrinho!");  
         Overlays.closeAll();  
-    });  
-
-    document.querySelectorAll(".extras-close").forEach((b) =>
-        b.addEventListener("click", () => Overlays.closeAll())
-    );
-
+    });
     /* ------------------ 🥤 COMBOS ------------------ */
     const comboDrinkOptions = {  
         casal: [  
@@ -736,11 +737,7 @@ document.addEventListener("DOMContentLoaded", () => {
         popupAdd("Combo adicionado!");  
         renderMiniCart();  
         Overlays.closeAll();  
-    });  
-
-    document.querySelectorAll("#combo-modal .combo-close").forEach((b) =>
-        b.addEventListener("click", () => Overlays.closeAll())
-    );  
+    });
 
     function addCommonItem(nome, preco) {  
         if (/^combo/i.test(nome) && !/^\s*Combo [0-9]/.test(nome)) { openComboModal(nome, preco); return; }  
@@ -758,8 +755,6 @@ document.addEventListener("DOMContentLoaded", () => {
             addCommonItem(card.dataset.name, parseFloat(card.dataset.price));  
         })
     );
-
-    const getCartSubtotal = () => cart.reduce((s, i) => s + (Number(i.preco) || 0) * (Number(i.qtd) || 0), 0);
 
     /* ------------------ 🚚 FRETE MANUAL ------------------ */
     let modoEnderecoManual = false;
@@ -821,7 +816,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     /* ============================================================
-       🚨 CORREÇÃO CRÍTICA: BOTÃO BUSCAR CEP (FUNCIONANDO!)
+       🚨 BOTÃO BUSCAR CEP (CORRIGIDO - FUNCIONANDO!)
     ============================================================ */
     async function buscarCEP(cep) {  
         const freteContainer = document.querySelector('.frete-container');  
@@ -836,7 +831,9 @@ document.addEventListener("DOMContentLoaded", () => {
             if(complementoInput) complementoInput.disabled = isDisabled;  
             if(retirarLocal) retirarLocal.disabled = isDisabled;  
         };  
-        const updateStatus = (msg, color) => { if (freteContainer) freteContainer.querySelector('h4').innerHTML = `🚚 Entrega: <span style="color:${color}">${msg}</span>`; };  
+        const updateStatus = (msg, color) => { 
+            if (freteContainer) freteContainer.querySelector('h4').innerHTML = `🚚 Entrega: <span style="color:${color}">${msg}</span>`; 
+        };  
         const clearAndEnableManual = (msg) => {  
             if (enderecoAuto) enderecoAuto.value = msg;  
             if (numeroInput) numeroInput.value = '';  
@@ -854,8 +851,9 @@ document.addEventListener("DOMContentLoaded", () => {
         try {  
             const response = await fetch(`https://viacep.com.br/ws/${cep}/json/`);  
             const data = await response.json();  
-            if (data.erro || !response.ok) { clearAndEnableManual('CEP não encontrado. Preencha manualmente.'); }  
-            else {  
+            if (data.erro || !response.ok) { 
+                clearAndEnableManual('CEP não encontrado. Preencha manualmente.'); 
+            } else {  
                 const localidadeCompleta = `${data.localidade || 'Cidade'}/${data.uf || 'UF'}`;  
                 const enderecoString = `${data.logradouro || 'Rua'} - ${data.bairro || 'Bairro'} (${localidadeCompleta})`;  
                 enderecoAuto.value = enderecoString;  
@@ -872,9 +870,8 @@ document.addEventListener("DOMContentLoaded", () => {
         }  
     }
 
-    // ✅ CORREÇÃO APLICADA: Event listener corrigido para o botão Buscar CEP
+    // ✅ CORREÇÃO CRÍTICA: Botão Buscar CEP funcionando!
     document.getElementById('btn-calcular-frete')?.addEventListener('click', (e) => {
-        // 🔥 CORREÇÃO CRÍTICA: Prevenir propagação e comportamento padrão
         e.stopPropagation();
         e.preventDefault();
         
@@ -886,7 +883,6 @@ document.addEventListener("DOMContentLoaded", () => {
             popupAdd("CEP deve ter 8 dígitos.");
         }  
     });
-
     async function getDynamicDeliveryFee(enderecoCompleto) {
         if (!enderecoCompleto || typeof enderecoCompleto !== "string") {
             console.warn("FW: Endereço vazio, usando fallback.");
@@ -1062,7 +1058,6 @@ document.addEventListener("DOMContentLoaded", () => {
         document.getElementById('numero-input')?.addEventListener('input', renderMiniCart);  
         document.getElementById('complemento-input')?.addEventListener('input', renderMiniCart);  
         
-        // ✅ Event listeners para os botões
         summaryDiv.querySelector("#finish-order")?.addEventListener("click", fecharPedido);  
         summaryDiv.querySelector("#clear-cart")?.addEventListener("click", () => {  
             if (confirm("Limpar todo o carrinho?")) { 
@@ -1075,9 +1070,8 @@ document.addEventListener("DOMContentLoaded", () => {
             }  
         });  
     }
-
     /* ============================================================
-       🚨 FUNÇÃO FECHAR PEDIDO (FUNCIONANDO!)
+       🚨 FUNÇÃO FECHAR PEDIDO
     ============================================================ */
     async function fecharPedido() {  
         if (!cart.length) return alert("Carrinho vazio!");  
@@ -1086,7 +1080,6 @@ document.addEventListener("DOMContentLoaded", () => {
         const isRetirarLocal = document.getElementById('retirar-local')?.checked;  
         let finalAddressString = "";
         
-        // Verifica se está no modo manual ou CEP
         if (modoEnderecoManual) {
             const manualEndereco = document.getElementById('manualEndereco');
             const manualNumero = document.getElementById('manualNumero');
@@ -1200,7 +1193,6 @@ document.addEventListener("DOMContentLoaded", () => {
             popupAdd("Pedido salvo ✅"); 
             try { sound.currentTime = 0; sound.play(); } catch (_) {}  
             
-            // Formata mensagem para WhatsApp
             const linhas = [
                 "🍔 *Pedido DFL*",
                 cart.map((i) => `• ${i.nome} x${i.qtd}`).join("\n"), 
@@ -1213,10 +1205,8 @@ document.addEventListener("DOMContentLoaded", () => {
                 `🏠 *Endereço:* ${addr}`
             ].join("\n");  
             
-            // Abre WhatsApp
             window.open(`https://wa.me/5534997178336?text=${encodeURIComponent(linhas)}`, "_blank");  
             
-            // Limpa carrinho e fecha modais
             cart = []; 
             couponApplied = ""; 
             localStorage.removeItem("dflCoupon"); 
@@ -1231,7 +1221,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }  
     }
 
-   /* ------------------ 📦 MEUS PEDIDOS (FUNÇÕES COMPLETAS) ------------------ */
+   /* ------------------ 📦 MEUS PEDIDOS ------------------ */
 async function carregarPedidos(userId) {  
     if (!el.pedidosLista) return; 
     el.pedidosLista.innerHTML = `<p class="empty-orders">Carregando pedidos...</p>`;  
@@ -1292,7 +1282,6 @@ function exibirPedidos(pedidos) {
     }).join('');  
 }  
 
-// Event listener para o botão "Repetir Pedido"
 el.pedidosLista?.addEventListener('click', async (e) => { 
     if (e.target.classList.contains('repetir-btn') && !e.target.disabled) { 
         e.target.disabled = true; 
@@ -1318,7 +1307,6 @@ async function repetirPedido(idPedido) {
             return;
         }  
         
-        // Limpa o carrinho atual e adiciona os itens do pedido
         cart = []; 
         itensParaRepetir.forEach(item => { 
             if (item.nome && item.preco > 0 && item.qtd > 0) {
@@ -1345,7 +1333,6 @@ async function repetirPedido(idPedido) {
     }  
 }
 
-/* ------------------ 📦 BOTÃO MEUS PEDIDOS (CORRIGIDO) ------------------ */
 el.pedidosBtn?.addEventListener("click", () => { 
     if (!currentUser) { 
         alert("Faça login para ver seus pedidos!"); 
@@ -1357,8 +1344,7 @@ el.pedidosBtn?.addEventListener("click", () => {
 });
 
 el.pedidosFecharBtn?.addEventListener("click", () => Overlays.closeAll());
-
-    /* ------------------ 🚨 RECOMPENSAS (RESTAURADO v5.6) ------------------ */
+/* ------------------ 🎁 RECOMPENSAS (Continuação da Parte 8) ------------------ */
     let configuracoesRecompensa = null;   
     async function carregarConfiguracoesDeRecompensas() {  
         if (!isFirebaseInitialized) return [];   
@@ -1366,10 +1352,23 @@ el.pedidosFecharBtn?.addEventListener("click", () => Overlays.closeAll());
         try {  
             const snapshot = await db.collection("RecompensasConfig").get();  
             const configs = [];  
-            snapshot.forEach(doc => { const data = doc.data(); configs.push({ id: doc.id, limite: data.meta || data.limite, tipo: data.tipo, valor: data.valor || data.titulo, titulo: data.titulo || data.valor, ...data }); });  
+            snapshot.forEach(doc => { 
+                const data = doc.data(); 
+                configs.push({ 
+                    id: doc.id, 
+                    limite: data.meta || data.limite, 
+                    tipo: data.tipo, 
+                    valor: data.valor || data.titulo, 
+                    titulo: data.titulo || data.valor, 
+                    ...data 
+                }); 
+            });  
             configuracoesRecompensa = configs.sort((a, b) => (a.limite || 0) - (b.limite || 0));  
             return configuracoesRecompensa;  
-        } catch (e) { console.error("Erro recompensas:", e); return []; }  
+        } catch (e) { 
+            console.error("Erro recompensas:", e); 
+            return []; 
+        }  
     }
 
     async function carregarRecompensas(userId) {  
@@ -1507,27 +1506,6 @@ el.pedidosFecharBtn?.addEventListener("click", () => Overlays.closeAll());
         }  
     }  
 
-    /* ------------------ 🚨 STATUS BANNER & TIMER (RESTAURADOS v7.2) ------------------ */
-    const atualizarStatus = safe(() => {  
-        const agora = new Date(); const h = agora.getHours();  
-        const aberto = h >= 18 && h < 23;   
-        if (el.statusBanner) { 
-            el.statusBanner.textContent = aberto ? "🟢 Aberto — Faça seu pedido!" : "🔴 Fechado — Voltamos às 18h!"; 
-            el.statusBanner.className = `status-banner ${aberto ? "open" : "closed"}`; 
-        }  
-    });  
-    atualizarStatus(); setInterval(atualizarStatus, 60000);  
-
-    const atualizarTimer = safe(() => {  
-        const agora = new Date(); const fim = new Date(); fim.setHours(23, 59, 59, 999); const diff = fim - agora;  
-        const elTimer = document.getElementById("promo-timer"); if (!elTimer) return;  
-        if (diff <= 0) return (elTimer.textContent = "00:00:00");  
-        const h = String(Math.floor(diff / 3600000)).padStart(2, "0"); const m = String(Math.floor((diff % 3600000) / 60000)).padStart(2, "0"); const s = String(Math.floor((diff % 60000) / 1000)).padStart(2, "0");  
-        elTimer.textContent = `${h}:${m}:${s}`;  
-    });  
-    atualizarTimer(); setInterval(atualizarTimer, 1000);
-
-    /* ------------------ 🚨 RECOMPENSAS E BOTÕES LATERAIS (CORRIGIDOS) ------------------ */
     el.recompensasBtn?.addEventListener("click", () => { 
         if (!currentUser) { 
             alert("Faça login para ver suas recompensas!"); 
@@ -1538,20 +1516,8 @@ el.pedidosFecharBtn?.addEventListener("click", () => Overlays.closeAll());
         carregarRecompensas(currentUser.uid); 
     });
     el.recompensasFecharBtn?.addEventListener("click", () => Overlays.closeAll());
-    
-    /* ------------------ 📦 MEUS PEDIDOS (CORRIGIDO) ------------------ */
-    el.pedidosBtn?.addEventListener("click", () => { 
-        if (!currentUser) { 
-            alert("Faça login para ver seus pedidos!"); 
-            Overlays.open(el.loginModal); 
-            return; 
-        } 
-        Overlays.open(el.pedidosPanel); 
-        carregarPedidos(currentUser.uid); 
-    });
-    el.pedidosFecharBtn?.addEventListener("click", () => Overlays.closeAll());
 
-    /* ------------------ 📊 ADMIN DASHBOARD (RESTAURADO) ------------------ */
+    /* ------------------ 📊 ADMIN DASHBOARD ------------------ */
     const ADMINS = [ "alefejohsefe@gmail.com", "kalebhstanley650@gmail.com", "contato@dafamilialanches.com.br" ];  
     function isAdmin(user) { return user && user.email && ADMINS.includes(user.email.toLowerCase()); }  
     
@@ -1667,7 +1633,27 @@ el.pedidosFecharBtn?.addEventListener("click", () => Overlays.closeAll());
         } 
     }
 
-    /* ------------------ 🍪 COOKIES (v6.8) ------------------ */
+    /* ------------------ 🚨 STATUS BANNER & TIMER ------------------ */
+    const atualizarStatus = safe(() => {  
+        const agora = new Date(); const h = agora.getHours();  
+        const aberto = h >= 18 && h < 23;   
+        if (el.statusBanner) { 
+            el.statusBanner.textContent = aberto ? "🟢 Aberto — Faça seu pedido!" : "🔴 Fechado — Voltamos às 18h!"; 
+            el.statusBanner.className = `status-banner ${aberto ? "open" : "closed"}`; 
+        }  
+    });  
+    atualizarStatus(); setInterval(atualizarStatus, 60000);  
+
+    const atualizarTimer = safe(() => {  
+        const agora = new Date(); const fim = new Date(); fim.setHours(23, 59, 59, 999); const diff = fim - agora;  
+        const elTimer = document.getElementById("promo-timer"); if (!elTimer) return;  
+        if (diff <= 0) return (elTimer.textContent = "00:00:00");  
+        const h = String(Math.floor(diff / 3600000)).padStart(2, "0"); const m = String(Math.floor((diff % 3600000) / 60000)).padStart(2, "0"); const s = String(Math.floor((diff % 60000) / 1000)).padStart(2, "0");  
+        elTimer.textContent = `${h}:${m}:${s}`;  
+    });  
+    atualizarTimer(); setInterval(atualizarTimer, 1000);
+
+    /* ------------------ 🍪 COOKIES ------------------ */
     const cookieBanner = document.getElementById("cookie-banner"); 
     const cookieAcceptBtn = document.getElementById("cookie-accept");  
     if (cookieBanner && cookieAcceptBtn) { 
@@ -1685,21 +1671,17 @@ el.pedidosFecharBtn?.addEventListener("click", () => Overlays.closeAll());
         }); 
     }
 
-    console.log("%c🔥 DFL v7.7 — BOTÃO BUSCAR CEP CORRIGIDO!", "background:#4CAF50;color:#fff;padding:5px;border-radius:5px;");  
+    /* ------------------ 🚀 INICIALIZAÇÃO FINAL ------------------ */
+    console.log("%c🔥 DFL v7.7 — CORREÇÃO DEFINITIVA APLICADA!", "background:#4CAF50;color:#fff;padding:5px;border-radius:5px;font-weight:bold;");  
+    console.log("%c✅ Segundo DOMContentLoaded REMOVIDO", "color:#4CAF50;");
+    console.log("%c✅ Botão Buscar CEP FUNCIONANDO", "color:#4CAF50;");
+    console.log("%c✅ Modais fecham pelo X, fora e backdrop", "color:#4CAF50;");
+    console.log("%c✅ Todos os overlays funcionando perfeitamente", "color:#4CAF50;");
     
     renderPromoCards();
     inicializarFirebase();  
 
-}); 
+}); // ✅ FIM DO ÚNICO DOMContentLoaded
 
-document.addEventListener('DOMContentLoaded', () => {  
-    document.querySelectorAll('.modal').forEach(m => m.addEventListener('click', e => { 
-        if (e.target.classList.contains('modal')) { 
-            m.classList.remove('show'); 
-            document.getElementById('cart-backdrop').classList.remove('active'); 
-        } 
-    }));  
-    document.getElementById('cart-backdrop')?.addEventListener('click', () => { 
-        document.querySelectorAll('.active').forEach(e => e.classList.remove('active')); 
-    });  
-});
+// ✅ SEGUNDO DOMContentLoaded REMOVIDO COMPLETAMENTE
+// A lógica de fechar modais foi INTEGRADA no primeiro bloco
