@@ -1,8 +1,8 @@
 /* =========================================================  
-   🚀 DFL v7.6 FINAL — SCRIPT INTEGRAL (EXPANDIDO)
-   - Nova Promoção (Promo 10) no Topo
-   - Reordenação do Carrossel (10 -> 9 -> 8...)
-   - Funcionalidades v5.6 + v7.x preservadas
+   🚀 DFL v7.9 FINAL — SCRIPT INTEGRAL (LIMPO E UNIFICADO)
+   - Bloco duplicado removido (Fim do arquivo limpo)
+   - Lógica de Modais 100% integrada ao sistema Overlays
+   - Todas as funções preservadas (Admin, Recompensas, Frete, Login)
 ========================================================= */  
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -59,7 +59,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }  
 
     /* ============================================================
-       🔥 DADOS DAS PROMOÇÕES (REORDENADOS v7.6)
+       🔥 DADOS DAS PROMOÇÕES (REORDENADOS v7.8)
        Ordem: Nova(10), 9, 8, 6, 5, 4, 7, 3, 2, 1
     ============================================================ */
     const PROMO_DATA = [  
@@ -184,7 +184,7 @@ document.addEventListener("DOMContentLoaded", () => {
         container.querySelectorAll('.add-promo').forEach(btn => {
             btn.addEventListener('click', (e) => {
                 const promoId = parseInt(e.currentTarget.dataset.promoId);
-                const promo = PROMO_DATA[promoId];
+                const promo = PROMO_DATA.find(p => p && p.id === promoId);
                 if (promo) {
                     addCommonItem(promo.nome, promo.preco);
                 }
@@ -198,22 +198,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const searchInput = document.getElementById('search-input');
     
     const PRODUTOS_BUSCA = [
-        { nome: "Bão", aliases: ["bao", "bon"] },
-        { nome: "Uai", aliases: ["uai", "way"] },
-        { nome: "Trem", aliases: ["trem", "tren"] },
-        { nome: "Cadim", aliases: ["cadim", "kadim"] },
-        { nome: "Armaria", aliases: ["armaria", "armário", "armario"] },
-        { nome: "Bitela", aliases: ["bitela", "vitela"] },
-        { nome: "Apruma", aliases: ["apruma", "apuma"] },
-        { nome: "Peleja", aliases: ["peleja"] },
-        { nome: "Tudibom", aliases: ["tudibom", "tudo bom", "tudobom"] },
-        { nome: "Custoso", aliases: ["custoso"] },
-        { nome: "Nigucim", aliases: ["nigucim", "ningucim"] },
-        { nome: "Simprão", aliases: ["simprao", "simprão", "simples"] },
-        { nome: "Nimin", aliases: ["nimin", "ninin"] },
-        { nome: "Padaná", aliases: ["padana", "padaná"] },
-        { nome: "Purizin", aliases: ["purizin", "purezin", "pure"] },
-        { nome: "Trembão", aliases: ["trembao", "trembão", "trembaum"] }
+        { nome: "Bão", aliases: ["bao", "bon"] }, { nome: "Uai", aliases: ["uai", "way"] }, { nome: "Trem", aliases: ["trem", "tren"] }, { nome: "Cadim", aliases: ["cadim", "kadim"] }, { nome: "Armaria", aliases: ["armaria", "armário", "armario"] }, { nome: "Bitela", aliases: ["bitela", "vitela"] }, { nome: "Apruma", aliases: ["apruma", "apuma"] }, { nome: "Peleja", aliases: ["peleja"] }, { nome: "Tudibom", aliases: ["tudibom", "tudo bom", "tudobom"] }, { nome: "Custoso", aliases: ["custoso"] }, { nome: "Nigucim", aliases: ["nigucim", "ningucim"] }, { nome: "Simprão", aliases: ["simprao", "simprão", "simples"] }, { nome: "Nimin", aliases: ["nimin", "ninin"] }, { nome: "Padaná", aliases: ["padana", "padaná"] }, { nome: "Purizin", aliases: ["purizin", "purezin", "pure"] }, { nome: "Trembão", aliases: ["trembao", "trembão", "trembaum"] }
     ];
 
     function normalizar(texto) {
@@ -353,7 +338,7 @@ document.addEventListener("DOMContentLoaded", () => {
         slides: document.querySelector(".slides")
     };
 
-    /* ------------------ 🌫️ BACKDROP & OVERLAYS ------------------ */  
+    /* ------------------ 🌫️ SISTEMA DE OVERLAYS (UNIFICADO) ------------------ */  
     if (!el.cartBackdrop) {  
         const bd = document.createElement("div"); 
         bd.id = "cart-backdrop"; 
@@ -392,6 +377,14 @@ document.addEventListener("DOMContentLoaded", () => {
     };  
     
     el.cartBackdrop.addEventListener("click", () => Overlays.closeAll());
+
+    // 🔥 INTEGRAÇÃO DO FECHAMENTO DE MODAIS (SISTEMA UNIFICADO)
+    // Fecha modais ao clicar no "X" ou fora (se o alvo for o próprio overlay)
+    document.querySelectorAll('.modal').forEach(m => m.addEventListener('click', e => { 
+        if (e.target.classList.contains('modal')) { 
+            Overlays.closeAll();
+        } 
+    }));
 
     /* ------------------ 🎟️ CUPONS ------------------ */  
     const couponForm = document.getElementById("coupon-form");  
@@ -489,17 +482,17 @@ document.addEventListener("DOMContentLoaded", () => {
         }  
 
         el.miniList.innerHTML = cart.map((item, idx) => `  
-      <div class="cart-item" style="border-bottom:1px solid #eee;padding:10px 0;">  
+      <div class="cart-item" style="border-bottom:1px solid #eee;padding:8px 0;">  
         <div style="display:flex;justify-content:space-between;align-items:center;">  
           <div style="flex:1;">  
-            <p style="font-weight:600;margin-bottom:4px;">${item.nome}</p>  
+            <p style="font-weight:600;margin-bottom:2px;">${item.nome}</p>  
             <p style="color:#666;font-size:0.85rem;">${money(item.preco)} × ${item.qtd}</p>  
           </div>  
           <div style="display:flex;gap:8px;align-items:center;">  
-            <button type="button" class="cart-minus" data-idx="${idx}" style="background:#ff4081;color:#fff;border:none;border-radius:5px;width:28px;height:28px;cursor:pointer;">−</button>  
+            <button type="button" class="cart-minus" data-idx="${idx}" style="background:#ff4081;color:#fff;border:none;border-radius:5px;width:24px;height:24px;cursor:pointer;">−</button>  
             <span style="font-weight:600;min-width:20px;text-align:center;">${item.qtd}</span>  
-            <button type="button" class="cart-plus" data-idx="${idx}" style="background:#4caf50;color:#fff;border:none;border-radius:5px;width:28px;height:28px;cursor:pointer;">+</button>  
-            <button type="button" class="cart-remove" data-idx="${idx}" style="background:#d32f2f;color:#fff;border:none;border-radius:5px;width:28px;height:28px;cursor:pointer;">🗑</button>  
+            <button type="button" class="cart-plus" data-idx="${idx}" style="background:#4caf50;color:#fff;border:none;border-radius:5px;width:24px;height:24px;cursor:pointer;">+</button>  
+            <button type="button" class="cart-remove" data-idx="${idx}" style="background:#d32f2f;color:#fff;border:none;border-radius:5px;width:24px;height:24px;cursor:pointer;">🗑</button>  
           </div>  
         </div>  
       </div>  
@@ -759,8 +752,6 @@ document.addEventListener("DOMContentLoaded", () => {
         })
     );
 
-    const getCartSubtotal = () => cart.reduce((s, i) => s + (Number(i.preco) || 0) * (Number(i.qtd) || 0), 0);
-
     /* ------------------ 🚚 FRETE MANUAL ------------------ */
     let modoEnderecoManual = false;
 
@@ -869,6 +860,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }  
     }
 
+    // CORREÇÃO CRÍTICA: stopPropagation para não fechar o carrinho
     document.getElementById('btn-calcular-frete')?.addEventListener('click', (e) => {
         e.stopPropagation();
         e.preventDefault();
@@ -1052,13 +1044,16 @@ document.addEventListener("DOMContentLoaded", () => {
         document.getElementById('retirar-local')?.addEventListener('change', renderMiniCart);  
         document.getElementById('numero-input')?.addEventListener('input', renderMiniCart);  
         document.getElementById('complemento-input')?.addEventListener('input', renderMiniCart);  
+        
+        // EVENTOS DE CLIQUE (DELEGAÇÃO SEGURA)
+        // Aqui a gente adiciona o listener DIRETO no elemento criado, dentro do async
+        // Isso funciona porque o elemento acabou de ser criado na memória e no DOM.
         summaryDiv.querySelector("#finish-order")?.addEventListener("click", fecharPedido);  
         summaryDiv.querySelector("#clear-cart")?.addEventListener("click", () => {  
             if (confirm("Limpar todo o carrinho?")) { cart = []; couponApplied = ""; localStorage.removeItem("dflCoupon"); document.getElementById("coupon-input").value = ""; renderMiniCart(); popupAdd("Carrinho limpo!"); }  
         });  
     }
 
-    /* ------------------ 🚨 RECOMPENSAS (RESTAURADO v5.6) ------------------ */
     let configuracoesRecompensa = null;   
     async function carregarConfiguracoesDeRecompensas() {  
         if (!isFirebaseInitialized) return [];   
@@ -1072,148 +1067,53 @@ document.addEventListener("DOMContentLoaded", () => {
         } catch (e) { console.error("Erro recompensas:", e); return []; }  
     }
 
-    async function carregarRecompensas(userId) {  
-        if (!isFirebaseInitialized) return;  
-        const contadorValor = document.getElementById('contador-valor'); 
-        const progressoBar = document.getElementById('progresso-bar'); 
-        const progressoMsg = document.getElementById('progresso-mensagem');  
-        if (!contadorValor || !progressoBar || !progressoMsg || !el.recompensasLista) return;  
-        
-        contadorValor.textContent = '...'; 
-        progressoBar.style.width = '0%'; 
-        progressoMsg.textContent = 'Carregando metas...';  
-        el.recompensasLista.innerHTML = ''; 
-        if(el.historicoLista) el.historicoLista.innerHTML = `<p class="empty-orders" style="text-align:center;color:#999;">Carregando...</p>`;  
-        
-        const RECOMPENSAS_DATA = await carregarConfiguracoesDeRecompensas();  
-        if (RECOMPENSAS_DATA.length === 0) { 
-            progressoMsg.textContent = 'Erro ao carregar metas.'; 
-            el.recompensasLista.innerHTML = `<p class="empty-orders" style="text-align:center;color:red;">Sistema offline.</p>`; 
-            return; 
-        }  
-        const metaPrimeiroNivel = RECOMPENSAS_DATA[0]?.limite || 1;  
-
-        db.collection('Usuarios').doc(userId).onSnapshot(async doc => {  
-            el.recompensasLista.innerHTML = ''; 
-            if(el.historicoLista) el.historicoLista.innerHTML = '';  
-            const data = doc.data() || { pedidosFeitos: 0, recompensaNivel: 0 }; 
-            const feitos = data.pedidosFeitos; 
-            const nivelAtual = data.recompensaNivel;  
-            
-            let cupomStatus = null; 
-            const recompensaAtual = RECOMPENSAS_DATA.find(r => r.limite === nivelAtual * metaPrimeiroNivel);  
-            if (recompensaAtual && recompensaAtual.tipo === 'cupom') { 
-                const cupomSnap = await db.collection('CuponsUsuarios').doc(userId).get(); 
-                cupomStatus = cupomSnap.exists ? cupomSnap.data() : null; 
-            }  
-            
-            const proximaRecompensa = RECOMPENSAS_DATA.find(r => r.limite > feitos);  
-            const metaParaExibir = proximaRecompensa ? proximaRecompensa.limite : feitos;  
-            const metaBaseCalculo = proximaRecompensa ? proximaRecompensa.limite : metaPrimeiroNivel;  
-            const porcentagem = proximaRecompensa === undefined ? 100 : Math.min(100, (feitos / metaBaseCalculo) * 100);  
-            
-            contadorValor.textContent = feitos;  
-            const elMeta = document.querySelector('.progress-container span:last-child'); 
-            if(elMeta) elMeta.textContent = metaParaExibir;  
-            progressoBar.style.width = `${porcentagem}%`;  
-            
-            if (proximaRecompensa) { 
-                const faltam = proximaRecompensa.limite - feitos; 
-                progressoMsg.textContent = `Faltam ${faltam} pedidos para: ${proximaRecompensa.titulo || proximaRecompensa.valor}!`; 
-                progressoBar.style.background = 'linear-gradient(90deg, #ffb300, #ff7043)'; 
-                const recompensasObtidas = RECOMPENSAS_DATA.filter(r => r.limite <= feitos); 
-                exibirRecompensas(feitos, recompensasObtidas, cupomStatus, RECOMPENSAS_DATA); 
-                if (recompensasObtidas.length === 0) el.recompensasLista.innerHTML = `<p class="empty-orders" style="text-align:center;color:#666;margin-top:20px;">Faça ${faltam} pedidos para desbloquear.</p>`; 
-            } else { 
-                progressoMsg.textContent = '🎉 Parabéns! Todas as metas completas!'; 
-                progressoBar.style.background = 'linear-gradient(90deg, #4caf50, #43a047)'; 
-                exibirRecompensas(feitos, RECOMPENSAS_DATA, cupomStatus, RECOMPENSAS_DATA); 
-            }  
-            await carregarHistoricoRecompensas(userId);  
-        }, error => { 
-            console.error("Erro contador:", error); 
-            progressoMsg.textContent = 'Erro ao ler progresso.'; 
-            contadorValor.textContent = '0'; 
-        });  
+    /* CARROSSEL */  
+    let currentPromoId = 1;  
+    function showPromoModal(promoId) {  
+        if (!el.promoModal || !PROMO_DATA[promoId]) return;  
+        currentPromoId = Number(promoId);  
+        const promo = PROMO_DATA.find(p => p && p.id === currentPromoId);  // Correção para encontrar pelo ID
+        if (el.promoImg) el.promoImg.src = promo.img;  
+        if (el.promoTitle) el.promoTitle.textContent = promo.nome;  
+        if (el.promoPrice) el.promoPrice.innerHTML = `<span class="old-price">De ${money(promo.precoAntigo)}</span> por <b>${money(promo.preco)}</b>`;  
+        Overlays.open(el.promoModal);  
     }  
+    // Ajuste no listener para usar o ID correto do dataset
+    document.querySelectorAll(".slide").forEach((img) => img.addEventListener("click", () => { 
+        const id = parseInt(img.dataset.promoId, 10); 
+        if (id) showPromoModal(id); 
+    }));  
+    
+    el.promoAddBtn?.addEventListener("click", () => { 
+        const promo = PROMO_DATA.find(p => p && p.id === currentPromoId); 
+        if (!promo) return; 
+        addCommonItem(promo.nome, promo.preco); 
+        Overlays.closeAll(); 
+    });  
+    el.promoNavPrev?.addEventListener("click", () => { 
+        let newId = currentPromoId - 1; 
+        if (newId < 1) newId = 10; // Ajustado para 10 (total de promos)
+        showPromoModal(newId); 
+    });  
+    el.promoNavNext?.addEventListener("click", () => { 
+        let newId = currentPromoId + 1; 
+        if (newId > 10) newId = 1; // Ajustado para 10 (total de promos)
+        showPromoModal(newId); 
+    });  
+    el.promoClose?.addEventListener("click", () => Overlays.closeAll());  
+    el.cPrev?.addEventListener("click", () => { if (!el.slides) return; el.slides.scrollLeft -= Math.min(el.slides.clientWidth * 0.9, 320); });  
+    el.cNext?.addEventListener("click", () => { if (!el.slides) return; el.slides.scrollLeft += Math.min(el.slides.clientWidth * 0.9, 320); });
 
-    function exibirRecompensas(pedidosFeitos, recompensasDisponiveis, cupomStatus, RECOMPENSAS_DATA) {  
-        if (!el.recompensasLista) return;  
-        el.recompensasLista.innerHTML = (recompensasDisponiveis || []).map(r => {  
-            const liberada = pedidosFeitos >= r.limite; 
-            const cupomJaUsado = cupomStatus?.usado === true && cupomStatus?.cupom === r.valor;  
-            const tituloRaw = String(r.titulo || r.valor || ''); 
-            const titulo = r.titulo || `Recompensa: ${r.valor}`;  
-            let acaoBtn = '', statusTag = '', cardStyle = '', codigoCupom = r.valor || 'BRINDE';  
-            let icon = '🎁'; 
-            const tituloLower = tituloRaw.toLowerCase();  
-            
-            if (tituloLower.includes('ouro') || tituloLower.includes('platina') || tituloLower.includes('diamante')) icon = getTierIcon(tituloRaw);  
-            else if (r.tipo === 'cupom') icon = '🎟️'; 
-            else if (r.tipo === 'brinde') icon = '🍔';  
-            
-            if (cupomJaUsado) { 
-                statusTag = '<span style="color:#d32f2f;font-weight:bold;">(USADO)</span>'; 
-                acaoBtn = `<button disabled style="background:#ccc;color:#666;border:none;border-radius:6px;padding:8px;cursor:not-allowed;margin-top:5px;">Usado</button>`; 
-                cardStyle = 'opacity: 0.7;'; 
-            } else if (liberada && r.tipo === 'cupom') { 
-                statusTag = '<span style="color:#4caf50;font-weight:bold;">(DISPONÍVEL)</span>'; 
-                acaoBtn = `<button class="recompensa-aplicar-btn" data-cupom="${codigoCupom}" style="background:#4caf50;color:#fff;border:none;border-radius:6px;padding:8px 12px;cursor:pointer;font-weight:600;margin-top:5px;">Aplicar Cupom 🏷️</button>`; 
-            } else if (liberada && r.tipo === 'brinde') { 
-                statusTag = '<span style="color:#1976D2;font-weight:bold;">(LIBERADO)</span>'; 
-                acaoBtn = `<button disabled style="background:#1976D2;color:#fff;border:none;border-radius:6px;padding:8px;cursor:default;margin-top:5px;">Peça no Balcão</button>`; 
-            }  
-            const mostrarCupom = (r.valor && !String(r.valor).includes('Nível'));  
-            return `<div class="recompensa-card" style="display:flex;align-items:center;padding:15px;border-radius:10px;margin-bottom:10px;background:#f9f9f9;box-shadow:0 2px 5px rgba(0,0,0,0.1);${cardStyle}"><div style="font-size:2rem;margin-right:15px;">${icon}</div><div style="flex:1;"><h4 style="margin:0 0 5px 0;color:#333;">${titulo} ${statusTag}</h4><p style="margin:0;font-size:0.9rem;color:#666;">Meta: ${r.limite} Pedidos</p>${mostrarCupom ? `<b style="color:#4caf50;display:block;margin-top:4px;">CUPOM: ${codigoCupom}</b>` : ''}</div><div>${acaoBtn}</div></div>`;  
-        }).join('');  
-        el.recompensasLista.querySelectorAll('.recompensa-aplicar-btn').forEach(btn => { 
-            btn.addEventListener('click', (e) => { 
-                const codigo = e.currentTarget.dataset.cupom; 
-                if (codigo) { 
-                    couponApplied = codigo; 
-                    localStorage.setItem("dflCoupon", couponApplied); 
-                    document.getElementById("coupon-input").value = codigo; 
-                    renderMiniCart(); 
-                    Overlays.closeAll(); 
-                    popupAdd(`Cupom ${codigo} aplicado! ✅`); 
-                    Overlays.open(el.miniCart); 
-                } 
-            }); 
-        });  
-    }  
-
-    async function carregarHistoricoRecompensas(userId) {  
-        if (!el.historicoLista) return; 
-        el.historicoLista.innerHTML = `<p class="empty-orders" style="text-align:center;color:#999;">Carregando...</p>`;  
-        try { 
-            const q = db.collection("Usuarios").doc(userId).collection("RecompensasRecebidas").orderBy("liberadoEm", "desc"); 
-            const snapshot = await q.get();  
-            if (snapshot.empty) { 
-                el.historicoLista.innerHTML = `<p class="empty-orders" style="text-align:center;color:#999;">Nenhuma recompensa no histórico.</p>`; 
-                return; 
-            }  
-            el.historicoLista.innerHTML = snapshot.docs.map(doc => { 
-                const log = doc.data(); 
-                const dataRecebimento = log.liberadoEm ? log.liberadoEm.toDate().toLocaleDateString('pt-BR') : "—"; 
-                let icon = '🎁'; 
-                const tituloRaw = String(log.titulo || '').toLowerCase(); 
-                if (tituloRaw.includes('ouro') || tituloRaw.includes('platina') || tituloRaw.includes('diamante')) icon = getTierIcon(log.titulo); 
-                else if (log.tipo === 'cupom') icon = '🎟️'; 
-                return `<div class="historico-card" style="display:flex;padding:10px 0;border-bottom:1px dashed #eee;align-items:center;justify-content:space-between;"><div style="flex:1;"><p style="font-weight:600;margin:0;color:#333;">${icon} ${log.titulo || log.valor}</p><small style="color:#999;">${dataRecebimento}</small></div><span style="font-weight:700;color:#4caf50;">Recebido</span></div>`; 
-            }).join('');  
-        } catch (err) { 
-            console.error("Erro histórico:", err); 
-            el.historicoLista.innerHTML = `<p class="empty-orders" style="color:red;">Erro.</p>`; 
-        }  
-    }  
-
-    /* ------------------ 🚨 STATUS BANNER & TIMER (RESTAURADOS v7.2) ------------------ */
+    /* STATUS + TIMER */  
     const atualizarStatus = safe(() => {  
         const agora = new Date(); const h = agora.getHours();  
         const aberto = h >= 18 && h < 23;   
-        if (el.statusBanner) { 
-            el.statusBanner.textContent = aberto ? "🟢 Aberto — Faça seu pedido!" : "🔴 Fechado — Voltamos às 18h!"; 
-            el.statusBanner.className = `status-banner ${aberto ? "open" : "closed"}`; 
+        if (el.statusBanner) { el.statusBanner.textContent = aberto ? "🟢 Aberto — Faça seu pedido!" : "🔴 Fechado — Voltamos às 18h!"; el.statusBanner.className = `status-banner ${aberto ? "open" : "closed"}`; }  
+        if (el.hoursBanner) {  
+            const elMsg = el.hoursBanner.querySelector("#hours-message"); const elTimer = el.hoursBanner.querySelector("#timer");  
+            if (!elMsg || !elTimer) return;  
+            if (aberto) { const fim = new Date(agora); fim.setHours(23, 30, 0); let diff = (fim - agora) / 1000; if (diff < 0) diff = 0; const restH = Math.floor(diff / 3600); const restM = Math.floor((diff % 3600) / 60); elMsg.innerHTML = `⏰ Hoje atendemos até <b>23h30</b> — Faltam`; elTimer.textContent = `${restH}h ${restM}min`; }  
+            else { const inicio = new Date(agora); if (h >= 23) inicio.setDate(inicio.getDate() + 1); inicio.setHours(18, 0, 0); let diff = (inicio - agora) / 1000; const faltamH = Math.floor(diff / 3600); const faltamM = Math.floor((diff % 3600) / 60); elMsg.innerHTML = `🔒 Fechado — Abrimos em`; elTimer.textContent = `${faltamH}h ${faltamM}min`; }  
         }  
     });  
     atualizarStatus(); setInterval(atualizarStatus, 60000);  
@@ -1227,179 +1127,188 @@ document.addEventListener("DOMContentLoaded", () => {
     });  
     atualizarTimer(); setInterval(atualizarTimer, 1000);
 
-    /* ------------------ 🚨 RECOMPENSAS E BOTÕES LATERAIS (CORRIGIDOS) ------------------ */
-    el.recompensasBtn?.addEventListener("click", () => { 
-        if (!currentUser) { 
-            alert("Faça login para ver suas recompensas!"); 
-            Overlays.open(el.loginModal); 
-            return; 
-        } 
-        Overlays.open(el.recompensasPanel); 
-        carregarRecompensas(currentUser.uid); 
-    });
-    el.recompensasFecharBtn?.addEventListener("click", () => Overlays.closeAll());
-    
-    /* ------------------ 📦 MEUS PEDIDOS (CORRIGIDO) ------------------ */
-    el.pedidosBtn?.addEventListener("click", () => { 
-        if (!currentUser) { 
-            alert("Faça login para ver seus pedidos!"); 
-            Overlays.open(el.loginModal); 
-            return; 
-        } 
-        Overlays.open(el.pedidosPanel); 
-        carregarPedidos(currentUser.uid); 
-    });
-    el.pedidosFecharBtn?.addEventListener("click", () => Overlays.closeAll());
+    /* FECHAR PEDIDO (ATUALIZADO PARA MODO MANUAL!) */  
+    async function fecharPedido() {  
+        if (!cart.length) return alert("Carrinho vazio!");  
+        if (!currentUser) { alert("Faça login para enviar o pedido!"); Overlays.open(el.loginModal); return; }  
+        
+        const isRetirarLocal = document.getElementById('retirar-local')?.checked;  
+        let finalAddressString = "";
+        
+        // Verifica se está no modo manual ou CEP
+        if (modoEnderecoManual) {
+            const manualEndereco = document.getElementById('manualEndereco');
+            const manualNumero = document.getElementById('manualNumero');
+            const endereco = manualEndereco?.value?.trim() || '';
+            const numero = manualNumero?.value?.trim() || '';
+            
+            if (endereco && numero) {
+                finalAddressString = `${endereco}, N° ${numero} (MANUAL)`;
+            }
+        } else {
+            const cepInput = document.getElementById('cep-input');
+            const autoRuaBairro = document.getElementById("endereco-auto");
+            const autoNumero = document.getElementById("numero-input");
+            const autoComp = document.getElementById("complemento-input");
+            
+            const ruaBairroValue = autoRuaBairro ? autoRuaBairro.value.trim() : '';
+            const numeroValue = autoNumero ? autoNumero.value.trim() : '';
+            const compValue = autoComp ? autoComp.value.trim() : '';
+            const cepValue = cepInput ? cepInput.value.trim().replace(/\D/g, '') : '';
+            
+            if (ruaBairroValue && numeroValue) {
+                finalAddressString = `${ruaBairroValue}, N° ${numeroValue}`;
+                if (compValue) finalAddressString += `, Comp: ${compValue}`;
+                if (cepValue.length === 8) finalAddressString += ` | CEP: ${cepValue}`;
+            }
+        }
+        
+        if (isRetirarLocal) finalAddressString = "CLIENTE IRÁ RETIRAR NO LOCAL";  
+        else if (!finalAddressString) { alert("Preencha o endereço completo (via CEP ou manualmente), ou marque 'Retirar no Local'."); return; }  
 
-    /* ------------------ 📊 ADMIN DASHBOARD (RESTAURADO) ------------------ */
+        const addr = finalAddressString;  
+        const { subtotal, delivery, discount, total, cupomInfo } = await calcTotals();  
+        const pedido = { usuario: currentUser.email, userId: currentUser.uid, nome: currentUser.displayName || currentUser.email.split("@")[0], itens: cart.map((i) => `• ${i.nome} x${i.qtd}`).join("\n"), itensObj: cart.map(i => ({ nome: i.nome, preco: i.preco, qtd: i.qtd })), subtotal: Number(subtotal.toFixed(2)), entrega: Number(delivery.toFixed(2)), desconto: Number(discount.toFixed(2)), cupom: couponApplied || "", total: Number(total.toFixed(2)), endereco: addr, data: new Date().toISOString(), thumb: '' };  
+
+        try {  
+            const batch = db.batch(); const userId = currentUser.uid; const usuarioRef = db.collection("Usuarios").doc(userId);  
+            if (cupomInfo.isPersonalizado && couponApplied) { const cupomUserRef = db.collection("CuponsUsuarios").doc(userId); batch.update(cupomUserRef, { usado: true, dataUso: firebase.firestore.FieldValue.serverTimestamp(), pedidoId: 'PENDENTE' }); }  
+            const pedidoRef = db.collection("Pedidos").doc(); batch.set(pedidoRef, pedido);  
+            batch.set(usuarioRef, { email: currentUser.email, pedidosFeitos: firebase.firestore.FieldValue.increment(1) }, { merge: true });  
+            await batch.commit();  
+            if (cupomInfo.isPersonalizado && couponApplied) await db.collection("CuponsUsuarios").doc(userId).update({ pedidoId: pedidoRef.id });  
+
+            const RECOMPENSAS_DATA = await carregarConfiguracoesDeRecompensas();  
+            const doc = await usuarioRef.get(); const data = doc.data() || { pedidosFeitos: 0, recompensaNivel: 0 }; const feitos = data.pedidosFeitos; const nivelAtual = data.recompensaNivel;  
+            const recompensaAtingida = RECOMPENSAS_DATA.find(r => r.limite === feitos && (r.limite / (RECOMPENSAS_DATA[0]?.limite || 1)) > nivelAtual);  
+
+            if (recompensaAtingida) {  
+                const primeiroLimite = RECOMPENSAS_DATA[0]?.limite || 1; const novoNivel = recompensaAtingida.limite / primeiroLimite;  
+                const itemLiberado = { cupom: recompensaAtingida.valor, tipo: recompensaAtingida.tipo, valor: recompensaAtingida.valor, liberadoEm: firebase.firestore.FieldValue.serverTimestamp(), usado: false, pedidoLiberacao: pedidoRef.id, titulo: recompensaAtingida.titulo || `Recompensa Nível ${novoNivel}` };  
+                await usuarioRef.update({ recompensaNivel: novoNivel, ultimaRecompensa: recompensaAtingida.id });  
+                if (recompensaAtingida.tipo === 'cupom') await db.collection("CuponsUsuarios").doc(userId).set(itemLiberado, { merge: true });  
+                await db.collection("Usuarios").doc(userId).collection("RecompensasRecebidas").add(itemLiberado);  
+                const nomeNivel = String(recompensaAtingida.titulo || recompensaAtingida.valor || '');  
+                mostrarPopupRecompensa(`🎉 Parabéns! Você alcançou ${nomeNivel} ${getTierIcon(nomeNivel)} e ganhou: ${recompensaAtingida.valor}`);  
+                configuracoesRecompensa = null;  
+            }  
+
+            popupAdd("Pedido salvo ✅"); try { sound.currentTime = 0; sound.play(); } catch (_) {}  
+            const linhas = ["🍔 *Pedido DFL*", cart.map((i) => `• ${i.nome} x${i.qtd}`).join("\n"), "", `Subtotal: *${money(subtotal)}*`, `Entrega: *${money(delivery)}*${cupomInfo.freeShipping ? " _(Frete Grátis)_" : ""}`, `Desconto${couponApplied ? ` (${couponApplied})` : ""}: *-${money(discount)}*`, `*Total: ${money(total)}*`, "", `🏠 *Endereço:* ${addr}`].join("\n");  
+            window.open(`https://wa.me/5534997178336?text=${encodeURIComponent(linhas)}`, "_blank");  
+            cart = []; couponApplied = ""; localStorage.removeItem("dflCoupon"); document.getElementById("coupon-input").value = ""; modoEnderecoManual = false; renderMiniCart(); Overlays.closeAll();  
+        } catch (err) { console.error("Erro fechar pedido:", err); alert(`Erro: ${err.message}`); }  
+    }  
+    renderMiniCart();
+
+    /* MEUS PEDIDOS */  
+    el.pedidosBtn?.addEventListener("click", () => { if (!currentUser) { alert("Faça login para ver seus pedidos."); Overlays.open(el.loginModal); return; } Overlays.open(el.pedidosPanel); carregarPedidos(currentUser.uid); });  
+    el.pedidosFecharBtn?.addEventListener("click", () => Overlays.closeAll());  
+
+    async function carregarPedidos(userId) {  
+        if (!el.pedidosLista) return; el.pedidosLista.innerHTML = `<p class="empty-orders">Carregando pedidos...</p>`;  
+        try { const q = db.collection("Pedidos").where("userId", "==", userId).orderBy("data", "desc"); const snapshot = await q.get();  
+            if (snapshot.empty) { el.pedidosLista.innerHTML = `<p class="empty-orders">Nenhum pedido encontrado 😢</p>`; return; }  
+            exibirPedidos(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));  
+        } catch (err) { console.error("Erro pedidos:", err); el.pedidosLista.innerHTML = `<p class="empty-orders" style="color:red;">Erro ao buscar pedidos.</p>`; }  
+    }  
+
+    function exibirPedidos(pedidos) {  
+        if (!el.pedidosLista) return;  
+        el.pedidosLista.innerHTML = pedidos.map(p => {  
+            const thumbUrl = p.thumb || ''; const dataFormatada = p.data ? new Date(p.data?.seconds * 1000 || p.data).toLocaleString("pt-BR", { day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit" }) : "—";  
+            const podeRepetir = Array.isArray(p.itensObj) && p.itensObj.length > 0;  
+            const itensParaExibir = (Array.isArray(p.itens) && p.itens.length > 0) ? p.itens.join('<br>') : (p.itensObj && p.itensObj.length > 0) ? p.itensObj.map(i => `• ${i.nome} x${i.qtd}`).join('<br>') : '• Sem itens';  
+            return `<div class="pedido-card"><div class="pedido-thumb" style="background-image:url('${thumbUrl}');"></div><h4>📅 ${dataFormatada}</h4><p class="pedido-info">Total: ${money(p.total)}</p><div class="pedido-itens">${itensParaExibir}</div><button class="repetir-btn" data-id="${p.id}" ${podeRepetir ? '' : 'disabled style="background:grey;cursor:not-allowed;"'}>🔁 Repetir Pedido</button></div>`;  
+        }).join('');  
+    }  
+
+    el.pedidosLista?.addEventListener('click', async (e) => { if (e.target.classList.contains('repetir-btn') && !e.target.disabled) { e.target.disabled = true; e.target.textContent = "Carregando..."; await repetirPedido(e.target.dataset.id); } });  
+
+    async function repetirPedido(idPedido) {  
+        try { const docRef = db.collection("Pedidos").doc(idPedido); const doc = await docRef.get();  
+            if (!doc.exists) return alert("Pedido não encontrado.");  
+            const itensParaRepetir = doc.data().itensObj;  
+            if (!Array.isArray(itensParaRepetir) || itensParaRepetir.length === 0) return alert("Não é possível repetir este pedido.");  
+            cart = []; itensParaRepetir.forEach(item => { if (item.nome && item.preco > 0 && item.qtd > 0) cart.push({ nome: item.nome, preco: item.preco, qtd: item.qtd }); });  
+            couponApplied = ""; localStorage.removeItem("dflCoupon"); document.getElementById("coupon-input").value = "";  
+            popupAdd("Pedido adicionado ao carrinho!"); renderMiniCart(); Overlays.closeAll(); Overlays.open(el.miniCart);  
+        } catch (err) { console.error("Erro repetir:", err); alert("Erro ao processar."); }  
+    }
+
+    /* RECOMPENSAS */  
+    async function carregarRecompensas(userId) {  
+        if (!isFirebaseInitialized) return;  
+        const contadorValor = document.getElementById('contador-valor'); const progressoBar = document.getElementById('progresso-bar'); const progressoMsg = document.getElementById('progresso-mensagem');  
+        if (!contadorValor || !progressoBar || !progressoMsg || !el.recompensasLista) return;  
+        contadorValor.textContent = '...'; progressoBar.style.width = '0%'; progressoMsg.textContent = 'Carregando metas...';  
+        el.recompensasLista.innerHTML = ''; if(el.historicoLista) el.historicoLista.innerHTML = `<p class="empty-orders" style="text-align:center;color:#999;">Carregando...</p>`;  
+        const RECOMPENSAS_DATA = await carregarConfiguracoesDeRecompensas();  
+        if (RECOMPENSAS_DATA.length === 0) { progressoMsg.textContent = 'Erro ao carregar metas.'; el.recompensasLista.innerHTML = `<p class="empty-orders" style="text-align:center;color:red;">Sistema offline.</p>`; return; }  
+        const metaPrimeiroNivel = RECOMPENSAS_DATA[0]?.limite || 1;  
+
+        db.collection('Usuarios').doc(userId).onSnapshot(async doc => {  
+            el.recompensasLista.innerHTML = ''; if(el.historicoLista) el.historicoLista.innerHTML = '';  
+            const data = doc.data() || { pedidosFeitos: 0, recompensaNivel: 0 }; const feitos = data.pedidosFeitos; const nivelAtual = data.recompensaNivel;  
+            let cupomStatus = null; const recompensaAtual = RECOMPENSAS_DATA.find(r => r.limite === nivelAtual * metaPrimeiroNivel);  
+            if (recompensaAtual && recompensaAtual.tipo === 'cupom') { const cupomSnap = await db.collection('CuponsUsuarios').doc(userId).get(); cupomStatus = cupomSnap.exists ? cupomSnap.data() : null; }  
+            const proximaRecompensa = RECOMPENSAS_DATA.find(r => r.limite > feitos);  
+            const metaParaExibir = proximaRecompensa ? proximaRecompensa.limite : feitos;  
+            const metaBaseCalculo = proximaRecompensa ? proximaRecompensa.limite : metaPrimeiroNivel;  
+            const porcentagem = proximaRecompensa === undefined ? 100 : Math.min(100, (feitos / metaBaseCalculo) * 100);  
+            contadorValor.textContent = feitos;  
+            const elMeta = document.querySelector('.progress-container span:last-child'); if(elMeta) elMeta.textContent = metaParaExibir;  
+            progressoBar.style.width = `${porcentagem}%`;  
+            if (proximaRecompensa) { const faltam = proximaRecompensa.limite - feitos; progressoMsg.textContent = `Faltam ${faltam} pedidos para: ${proximaRecompensa.titulo || proximaRecompensa.valor}!`; progressoBar.style.background = 'linear-gradient(90deg, #ffb300, #ff7043)'; const recompensasObtidas = RECOMPENSAS_DATA.filter(r => r.limite <= feitos); exibirRecompensas(feitos, recompensasObtidas, cupomStatus, RECOMPENSAS_DATA); if (recompensasObtidas.length === 0) el.recompensasLista.innerHTML = `<p class="empty-orders" style="text-align:center;color:#666;margin-top:20px;">Faça ${faltam} pedidos para desbloquear.</p>`; }  
+            else { progressoMsg.textContent = '🎉 Parabéns! Todas as metas completas!'; progressoBar.style.background = 'linear-gradient(90deg, #4caf50, #43a047)'; exibirRecompensas(feitos, RECOMPENSAS_DATA, cupomStatus, RECOMPENSAS_DATA); }  
+            await carregarHistoricoRecompensas(userId);  
+        }, error => { console.error("Erro contador:", error); progressoMsg.textContent = 'Erro ao ler progresso.'; contadorValor.textContent = '0'; });  
+    }  
+
+    function exibirRecompensas(pedidosFeitos, recompensasDisponiveis, cupomStatus, RECOMPENSAS_DATA) {  
+        if (!el.recompensasLista) return;  
+        el.recompensasLista.innerHTML = (recompensasDisponiveis || []).map(r => {  
+            const liberada = pedidosFeitos >= r.limite; const cupomJaUsado = cupomStatus?.usado === true && cupomStatus?.cupom === r.valor;  
+            const tituloRaw = String(r.titulo || r.valor || ''); const titulo = r.titulo || `Recompensa: ${r.valor}`;  
+            let acaoBtn = '', statusTag = '', cardStyle = '', codigoCupom = r.valor || 'BRINDE';  
+            let icon = '🎁'; const tituloLower = tituloRaw.toLowerCase();  
+            if (tituloLower.includes('ouro') || tituloLower.includes('platina') || tituloLower.includes('diamante')) icon = getTierIcon(tituloRaw);  
+            else if (r.tipo === 'cupom') icon = '🎟️'; else if (r.tipo === 'brinde') icon = '🍔';  
+            if (cupomJaUsado) { statusTag = '<span style="color:#d32f2f;font-weight:bold;">(USADO)</span>'; acaoBtn = `<button disabled style="background:#ccc;color:#666;border:none;border-radius:6px;padding:8px;cursor:not-allowed;margin-top:5px;">Usado</button>`; cardStyle = 'opacity: 0.7;'; }  
+            else if (liberada && r.tipo === 'cupom') { statusTag = '<span style="color:#4caf50;font-weight:bold;">(DISPONÍVEL)</span>'; acaoBtn = `<button class="recompensa-aplicar-btn" data-cupom="${codigoCupom}" style="background:#4caf50;color:#fff;border:none;border-radius:6px;padding:8px 12px;cursor:pointer;font-weight:600;margin-top:5px;">Aplicar Cupom 🏷️</button>`; }  
+            else if (liberada && r.tipo === 'brinde') { statusTag = '<span style="color:#1976D2;font-weight:bold;">(LIBERADO)</span>'; acaoBtn = `<button disabled style="background:#1976D2;color:#fff;border:none;border-radius:6px;padding:8px;cursor:default;margin-top:5px;">Peça no Balcão</button>`; }  
+            const mostrarCupom = (r.valor && !String(r.valor).includes('Nível'));  
+            return `<div class="recompensa-card" style="display:flex;align-items:center;padding:15px;border-radius:10px;margin-bottom:10px;background:#f9f9f9;box-shadow:0 2px 5px rgba(0,0,0,0.1);${cardStyle}"><div style="font-size:2rem;margin-right:15px;">${icon}</div><div style="flex:1;"><h4 style="margin:0 0 5px 0;color:#333;">${titulo} ${statusTag}</h4><p style="margin:0;font-size:0.9rem;color:#666;">Meta: ${r.limite} Pedidos</p>${mostrarCupom ? `<b style="color:#4caf50;display:block;margin-top:4px;">CUPOM: ${codigoCupom}</b>` : ''}</div><div>${acaoBtn}</div></div>`;  
+        }).join('');  
+        el.recompensasLista.querySelectorAll('.recompensa-aplicar-btn').forEach(btn => { btn.addEventListener('click', (e) => { const codigo = e.currentTarget.dataset.cupom; if (codigo) { couponApplied = codigo; localStorage.setItem("dflCoupon", couponApplied); document.getElementById("coupon-input").value = codigo; renderMiniCart(); Overlays.closeAll(); popupAdd(`Cupom ${codigo} aplicado! ✅`); Overlays.open(el.miniCart); } }); });  
+    }  
+
+    async function carregarHistoricoRecompensas(userId) {  
+        if (!el.historicoLista) return; el.historicoLista.innerHTML = `<p class="empty-orders" style="text-align:center;color:#999;">Carregando...</p>`;  
+        try { const q = db.collection("Usuarios").doc(userId).collection("RecompensasRecebidas").orderBy("liberadoEm", "desc"); const snapshot = await q.get();  
+            if (snapshot.empty) { el.historicoLista.innerHTML = `<p class="empty-orders" style="text-align:center;color:#999;">Nenhuma recompensa no histórico.</p>`; return; }  
+            el.historicoLista.innerHTML = snapshot.docs.map(doc => { const log = doc.data(); const dataRecebimento = log.liberadoEm ? log.liberadoEm.toDate().toLocaleDateString('pt-BR') : "—"; let icon = '🎁'; const tituloRaw = String(log.titulo || '').toLowerCase(); if (tituloRaw.includes('ouro') || tituloRaw.includes('platina') || tituloRaw.includes('diamante')) icon = getTierIcon(log.titulo); else if (log.tipo === 'cupom') icon = '🎟️'; return `<div class="historico-card" style="display:flex;padding:10px 0;border-bottom:1px dashed #eee;align-items:center;justify-content:space-between;"><div style="flex:1;"><p style="font-weight:600;margin:0;color:#333;">${icon} ${log.titulo || log.valor}</p><small style="color:#999;">${dataRecebimento}</small></div><span style="font-weight:700;color:#4caf50;">Recebido</span></div>`; }).join('');  
+        } catch (err) { console.error("Erro histórico:", err); el.historicoLista.innerHTML = `<p class="empty-orders" style="color:red;">Erro.</p>`; }  
+    }  
+
+    el.recompensasBtn?.addEventListener("click", () => { if (!currentUser) { alert("Faça login!"); Overlays.open(el.loginModal); return; } Overlays.open(el.recompensasPanel); carregarRecompensas(currentUser.uid); });  
+    el.recompensasFecharBtn?.addEventListener("click", () => Overlays.closeAll());
+
     const ADMINS = [ "alefejohsefe@gmail.com", "kalebhstanley650@gmail.com", "contato@dafamilialanches.com.br" ];  
     function isAdmin(user) { return user && user.email && ADMINS.includes(user.email.toLowerCase()); }  
-    
     let chartPedidos = null; let chartProdutos = null;  
-    
-    function ensureChartJS(cb) { 
-        if (window.Chart) return cb(); 
-        const s = document.createElement("script"); 
-        s.src = "https://cdn.jsdelivr.net/npm/chart.js"; 
-        s.onload = cb; 
-        document.head.appendChild(s); 
-    }  
-    
-    function createDashboard() { 
-        if (document.getElementById("admin-dashboard")) return; 
-        const div = document.createElement("div"); 
-        div.id = "admin-dashboard"; 
-        div.className = "modal"; 
-        div.innerHTML = `<div class="modal-content" style="max-width:1000px;width:95%;height:85vh;overflow:auto;background:#fff;border-radius:12px;"><div class="modal-head" style="display:flex;justify-content:space-between;align-items:center;padding:10px 14px;"><h3>📊 Relatórios</h3><button class="dashboard-close">✖</button></div><div class="dashboard-body" style="padding:12px;"><div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:12px;"><div id="card-total" class="cardBox">Total: —</div><div id="card-pedidos" class="cardBox">Pedidos: —</div><div id="card-ticket" class="cardBox">Ticket Médio: —</div></div><div style="margin-bottom:10px;"><label>Período: </label><select id="filter-period"><option value="7">7 dias</option><option value="30">30 dias</option><option value="all">Todos</option></select></div><canvas id="chart-pedidos" style="width:100%;height:240px;"></canvas><canvas id="chart-produtos" style="width:100%;height:240px;margin-top:16px;"></canvas><div style="margin-top:12px;"><button id="export-csv" style="background:#4caf50;color:#fff;border:none;border-radius:8px;padding:10px;">Exportar CSV</button></div></div></div>`; 
-        document.body.appendChild(div); 
-        div.querySelector(".dashboard-close").addEventListener("click", () => Overlays.closeAll()); 
-    }  
-    
-    function createAdminFab() { 
-        if (el.reportsBtn) { 
-            el.reportsBtn.style.display = "block"; 
-            el.reportsBtn.addEventListener("click", () => { 
-                createDashboard(); 
-                ensureChartJS(() => carregarRelatorios("7")); 
-                Overlays.open(document.getElementById("admin-dashboard")); 
-            }); 
-        } 
-    }  
-    
-    function gerarResumoECharts(pedidos) { 
-        if (!window.Chart) return; 
-        const ctxPedidos = document.getElementById('chart-pedidos')?.getContext('2d'); 
-        const ctxProdutos = document.getElementById('chart-produtos')?.getContext('2d'); 
-        if (!ctxPedidos || !ctxProdutos) return; 
-        
-        const pedidosPorDia = {}; 
-        const produtosContagem = {}; 
-        
-        pedidos.forEach(p => { 
-            const dia = (p.data?.toDate?.() || new Date(p.data)).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' }); 
-            pedidosPorDia[dia] = (pedidosPorDia[dia] || 0) + 1; 
-            (Array.isArray(p.itens) ? p.itens : []).forEach(itemStr => { 
-                const nome = itemStr.split(' x')[0]; 
-                if (nome) produtosContagem[nome] = (produtosContagem[nome] || 0) + 1; 
-            }); 
-        }); 
-        
-        const labelsPedidos = Object.keys(pedidosPorDia).reverse(); 
-        const dataPedidos = Object.values(pedidosPorDia).reverse(); 
-        
-        if (chartPedidos) chartPedidos.destroy(); 
-        chartPedidos = new Chart(ctxPedidos, { 
-            type: 'line', 
-            data: { 
-                labels: labelsPedidos, 
-                datasets: [{ label: 'Pedidos', data: dataPedidos, borderColor: '#ffb300', tension: 0.1 }] 
-            }, 
-            options: { scales: { x: { ticks: { maxRotation: 45, minRotation: 45 } } } } 
-        }); 
-        
-        const produtosOrdenados = Object.entries(produtosContagem).sort(([, a], [, b]) => b - a).slice(0, 10); 
-        if (chartProdutos) chartProdutos.destroy(); 
-        chartProdutos = new Chart(ctxProdutos, { 
-            type: 'bar', 
-            data: { 
-                labels: produtosOrdenados.map(p=>p[0]), 
-                datasets: [{ label: 'Mais Vendidos', data: produtosOrdenados.map(p=>p[1]), backgroundColor: '#ff7043' }] 
-            }, 
-            options: { indexAxis: 'y' } 
-        }); 
-    }  
-    
-    function carregarRelatorios(periodo = "7") { 
-        const start = new Date(); 
-        if (periodo !== "all") start.setDate(start.getDate() - Number(periodo)); 
-        else start.setTime(0); 
-        
-        db.collection("Pedidos").orderBy("data", "desc").get().then(snap => { 
-            const pedidos = snap.docs.map(d => { 
-                const dataObjeto = d.data(); 
-                const rawDate = dataObjeto.data; 
-                let processedDate; 
-                if (rawDate && typeof rawDate.toDate === 'function') processedDate = rawDate.toDate(); 
-                else if (rawDate) processedDate = new Date(rawDate); 
-                else processedDate = new Date(); 
-                return { ...dataObjeto, id: d.id, data: processedDate }; 
-            }); 
-            const filtrados = pedidos.filter(p => p.data >= start); 
-            gerarResumoECharts(filtrados); 
-            document.getElementById("card-total").textContent = `Total: ${money(filtrados.reduce((s, p) => s + (Number(p.total) || 0), 0))}`; 
-            document.getElementById("card-pedidos").textContent = `Pedidos: ${filtrados.length}`; 
-            document.getElementById("card-ticket").textContent = `Ticket Médio: ${money(filtrados.length ? filtrados.reduce((s, p) => s + (Number(p.total) || 0), 0)/filtrados.length : 0)}`; 
-            
-            document.getElementById("export-csv").onclick = () => { 
-                const csv = "Data;Nome;Total\n" + filtrados.map(p => `${p.data.toLocaleString()};${p.nome};${p.total}`).join("\n"); 
-                const blob = new Blob([`\uFEFF${csv}`], { type: 'text/csv;charset=utf-8;' }); 
-                const link = document.createElement('a'); 
-                link.href = URL.createObjectURL(blob); 
-                link.download = "pedidos.csv"; 
-                link.click(); 
-            }; 
-        }); 
-        
-        const sel = document.getElementById("filter-period"); 
-        if(sel && !sel._bound) { 
-            sel.addEventListener("change", e => carregarRelatorios(e.target.value)); 
-            sel._bound = true; 
-        } 
-    }
+    function ensureChartJS(cb) { if (window.Chart) return cb(); const s = document.createElement("script"); s.src = "https://cdn.jsdelivr.net/npm/chart.js"; s.onload = cb; document.head.appendChild(s); }  
+    function createDashboard() { if (document.getElementById("admin-dashboard")) return; const div = document.createElement("div"); div.id = "admin-dashboard"; div.className = "modal"; div.innerHTML = `<div class="modal-content" style="max-width:1000px;width:95%;height:85vh;overflow:auto;background:#fff;border-radius:12px;"><div class="modal-head" style="display:flex;justify-content:space-between;align-items:center;padding:10px 14px;"><h3>📊 Relatórios</h3><button class="dashboard-close">✖</button></div><div class="dashboard-body" style="padding:12px;"><div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:12px;"><div id="card-total" class="cardBox">Total: —</div><div id="card-pedidos" class="cardBox">Pedidos: —</div><div id="card-ticket" class="cardBox">Ticket Médio: —</div></div><div style="margin-bottom:10px;"><label>Período: </label><select id="filter-period"><option value="7">7 dias</option><option value="30">30 dias</option><option value="all">Todos</option></select></div><canvas id="chart-pedidos" style="width:100%;height:240px;"></canvas><canvas id="chart-produtos" style="width:100%;height:240px;margin-top:16px;"></canvas><div style="margin-top:12px;"><button id="export-csv" style="background:#4caf50;color:#fff;border:none;border-radius:8px;padding:10px;">Exportar CSV</button></div></div></div>`; document.body.appendChild(div); div.querySelector(".dashboard-close").addEventListener("click", () => Overlays.closeAll()); }  
+    function createAdminFab() { if (el.reportsBtn) { el.reportsBtn.style.display = "block"; el.reportsBtn.addEventListener("click", () => { createDashboard(); ensureChartJS(() => carregarRelatorios("7")); Overlays.open(document.getElementById("admin-dashboard")); }); } }  
+    function gerarResumoECharts(pedidos) { if (!window.Chart) return; const ctxPedidos = document.getElementById('chart-pedidos')?.getContext('2d'); const ctxProdutos = document.getElementById('chart-produtos')?.getContext('2d'); if (!ctxPedidos || !ctxProdutos) return; const pedidosPorDia = {}; const produtosContagem = {}; pedidos.forEach(p => { const dia = (p.data?.toDate?.() || new Date(p.data)).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' }); pedidosPorDia[dia] = (pedidosPorDia[dia] || 0) + 1; (Array.isArray(p.itens) ? p.itens : []).forEach(itemStr => { const nome = itemStr.split(' x')[0]; if (nome) produtosContagem[nome] = (produtosContagem[nome] || 0) + 1; }); }); const labelsPedidos = Object.keys(pedidosPorDia).reverse(); const dataPedidos = Object.values(pedidosPorDia).reverse(); if (chartPedidos) chartPedidos.destroy(); chartPedidos = new Chart(ctxPedidos, { type: 'line', data: { labels: labelsPedidos, datasets: [{ label: 'Pedidos', data: dataPedidos, borderColor: '#ffb300', tension: 0.1 }] }, options: { scales: { x: { ticks: { maxRotation: 45, minRotation: 45 } } } } }); const produtosOrdenados = Object.entries(produtosContagem).sort(([, a], [, b]) => b - a).slice(0, 10); if (chartProdutos) chartProdutos.destroy(); chartProdutos = new Chart(ctxProdutos, { type: 'bar', data: { labels: produtosOrdenados.map(p=>p[0]), datasets: [{ label: 'Mais Vendidos', data: produtosOrdenados.map(p=>p[1]), backgroundColor: '#ff7043' }] }, options: { indexAxis: 'y' } }); }  
+    function carregarRelatorios(periodo = "7") { const start = new Date(); if (periodo !== "all") start.setDate(start.getDate() - Number(periodo)); else start.setTime(0); db.collection("Pedidos").orderBy("data", "desc").get().then(snap => { const pedidos = snap.docs.map(d => { const dataObjeto = d.data(); const rawDate = dataObjeto.data; let processedDate; if (rawDate && typeof rawDate.toDate === 'function') processedDate = rawDate.toDate(); else if (rawDate) processedDate = new Date(rawDate); else processedDate = new Date(); return { ...dataObjeto, id: d.id, data: processedDate }; }); const filtrados = pedidos.filter(p => p.data >= start); gerarResumoECharts(filtrados); document.getElementById("card-total").textContent = `Total: ${money(filtrados.reduce((s, p) => s + (Number(p.total) || 0), 0))}`; document.getElementById("card-pedidos").textContent = `Pedidos: ${filtrados.length}`; document.getElementById("card-ticket").textContent = `Ticket Médio: ${money(filtrados.length ? filtrados.reduce((s, p) => s + (Number(p.total) || 0), 0)/filtrados.length : 0)}`; document.getElementById("export-csv").onclick = () => { const csv = "Data;Nome;Total\n" + filtrados.map(p => `${p.data.toLocaleString()};${p.nome};${p.total}`).join("\n"); const blob = new Blob([`\uFEFF${csv}`], { type: 'text/csv;charset=utf-8;' }); const link = document.createElement('a'); link.href = URL.createObjectURL(blob); link.download = "pedidos.csv"; link.click(); }; }); const sel = document.getElementById("filter-period"); if(sel && !sel._bound) { sel.addEventListener("change", e => carregarRelatorios(e.target.value)); sel._bound = true; } }
 
-    /* ------------------ 🍪 COOKIES (v6.8) ------------------ */
-    const cookieBanner = document.getElementById("cookie-banner"); 
-    const cookieAcceptBtn = document.getElementById("cookie-accept");  
-    if (cookieBanner && cookieAcceptBtn) { 
-        if (localStorage.getItem("dfl-cookies-accepted") === "true") {
-            cookieBanner.style.display = "none"; 
-            cookieBanner.classList.remove("show");
-        } else { 
-            cookieBanner.style.display = "flex";
-            setTimeout(() => cookieBanner.classList.add("show"), 100);
-        } 
-        cookieAcceptBtn.addEventListener("click", () => { 
-            localStorage.setItem("dfl-cookies-accepted", "true"); 
-            cookieBanner.classList.remove("show"); 
-            setTimeout(() => { cookieBanner.style.display = "none"; }, 500);
-        }); 
-    }
+    const cookieBanner = document.getElementById("cookie-banner"); const cookieAcceptBtn = document.getElementById("cookie-accept");  
+    if (cookieBanner && cookieAcceptBtn) { if (localStorage.getItem("dfl-cookies-accepted") === "true") cookieBanner.style.display = "none"; else cookieBanner.classList.add("show"); cookieAcceptBtn.addEventListener("click", () => { localStorage.setItem("dfl-cookies-accepted", "true"); cookieBanner.classList.remove("show"); }); }
 
-    console.log("%c🔥 DFL v7.5 — SCRIPT INTEGRAL COMPLETO", "background:#4CAF50;color:#fff;padding:5px;border-radius:5px;");  
+    console.log("%c🔥 DFL v7.9 — SCRIPT UNIFICADO E INTEGRAL", "background:#4CAF50;color:#fff;padding:5px;border-radius:5px;");  
     
     renderPromoCards();
     inicializarFirebase();  
 
-}); 
-
-document.addEventListener('DOMContentLoaded', () => {  
-    document.querySelectorAll('.modal').forEach(m => m.addEventListener('click', e => { 
-        if (e.target.classList.contains('modal')) { 
-            m.classList.remove('show'); 
-            document.getElementById('cart-backdrop').classList.remove('active'); 
-        } 
-    }));  
-    document.getElementById('cart-backdrop')?.addEventListener('click', () => { 
-        document.querySelectorAll('.active').forEach(e => e.classList.remove('active')); 
-    });  
 });
