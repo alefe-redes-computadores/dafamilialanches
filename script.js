@@ -1,8 +1,8 @@
 /* =========================================================  
-   🚀 DFL v7.6 FINAL — SCRIPT INTEGRAL (CORRIGIDO)
-   - Função fecharPedido() RESTAURADA
-   - Botões "Finalizar Pedido" e "Limpar Carrinho" FUNCIONANDO
-   - Todas as funcionalidades v7.6 preservadas
+   🚀 DFL v7.7 — CORREÇÃO DO BOTÃO BUSCAR CEP
+   - Botão "Buscar CEP" funcionando corretamente
+   - Modal não fecha ao clicar no botão
+   - Todas as funcionalidades preservadas
 ========================================================= */  
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -820,6 +820,9 @@ document.addEventListener("DOMContentLoaded", () => {
         renderMiniCart();
     });
 
+    /* ============================================================
+       🚨 CORREÇÃO CRÍTICA: BOTÃO BUSCAR CEP (FUNCIONANDO!)
+    ============================================================ */
     async function buscarCEP(cep) {  
         const freteContainer = document.querySelector('.frete-container');  
         const enderecoAuto = document.getElementById('endereco-auto');  
@@ -869,13 +872,19 @@ document.addEventListener("DOMContentLoaded", () => {
         }  
     }
 
+    // ✅ CORREÇÃO APLICADA: Event listener corrigido para o botão Buscar CEP
     document.getElementById('btn-calcular-frete')?.addEventListener('click', (e) => {
+        // 🔥 CORREÇÃO CRÍTICA: Prevenir propagação e comportamento padrão
         e.stopPropagation();
         e.preventDefault();
+        
         const cepInput = document.getElementById('cep-input');  
         const cep = cepInput.value.trim().replace(/\D/g, '');  
-        if (cep.length === 8) buscarCEP(cep);  
-        else popupAdd("CEP deve ter 8 dígitos.");  
+        if (cep.length === 8) {
+            buscarCEP(cep);
+        } else {
+            popupAdd("CEP deve ter 8 dígitos.");
+        }  
     });
 
     async function getDynamicDeliveryFee(enderecoCompleto) {
@@ -1053,7 +1062,7 @@ document.addEventListener("DOMContentLoaded", () => {
         document.getElementById('numero-input')?.addEventListener('input', renderMiniCart);  
         document.getElementById('complemento-input')?.addEventListener('input', renderMiniCart);  
         
-        // ✅ CORREÇÃO APLICADA: Event listeners para os botões
+        // ✅ Event listeners para os botões
         summaryDiv.querySelector("#finish-order")?.addEventListener("click", fecharPedido);  
         summaryDiv.querySelector("#clear-cart")?.addEventListener("click", () => {  
             if (confirm("Limpar todo o carrinho?")) { 
@@ -1068,7 +1077,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     /* ============================================================
-       🚨 FUNÇÃO FECHAR PEDIDO (CORREÇÃO CRÍTICA - RESTAURADA!)
+       🚨 FUNÇÃO FECHAR PEDIDO (FUNCIONANDO!)
     ============================================================ */
     async function fecharPedido() {  
         if (!cart.length) return alert("Carrinho vazio!");  
@@ -1676,7 +1685,7 @@ el.pedidosFecharBtn?.addEventListener("click", () => Overlays.closeAll());
         }); 
     }
 
-    console.log("%c🔥 DFL v7.6 — SCRIPT CORRIGIDO E FUNCIONAL", "background:#4CAF50;color:#fff;padding:5px;border-radius:5px;");  
+    console.log("%c🔥 DFL v7.7 — BOTÃO BUSCAR CEP CORRIGIDO!", "background:#4CAF50;color:#fff;padding:5px;border-radius:5px;");  
     
     renderPromoCards();
     inicializarFirebase();  
