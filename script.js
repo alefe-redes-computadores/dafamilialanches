@@ -1,13 +1,11 @@
 /* =========================================================  
-   🚀 DFL v8.0 FINAL — SCRIPT INTEGRAL (VERSÃO MESTRE)
-   - Promoções Reordenadas (Nova Promo 10 em 1º)
-   - Lógica de Botões/Modais Corrigida
-   - Funções de Recompensa e Admin Restauradas
-   - Código Limpo e Unificado
+   🚀 DFL v8.1 FINAL — SCRIPT INTEGRAL (CORRIGIDO)
+   - Função addCommonItem restaurada (Botões voltam a funcionar)
+   - Bloco duplicado removido (Fim do arquivo limpo)
+   - Promo 10 em 1º lugar
 ========================================================= */  
 
 document.addEventListener("DOMContentLoaded", () => {
-
     // ============================================================
     // 1. MÁSCARA DE CEP
     // ============================================================
@@ -32,17 +30,15 @@ document.addEventListener("DOMContentLoaded", () => {
     const LIMITE_FRETE_GRATIS = 80.00;
     let deliveryFeesCache = null;   
 
+    // Formatador de Moeda
     const money = (n) => `R$ ${Number(n || 0).toFixed(2).replace(".", ",")}`;  
     
+    // Função Segura
     const safe = (fn) => (...a) => { 
-        try { 
-            fn(...a); 
-        } catch (e) { 
-            console.error(e); 
-        } 
+        try { fn(...a); } catch (e) { console.error(e); } 
     };  
 
-    // Ícones de Nível (Recompensas)
+    // Ícones de Nível
     function getTierIcon(tier) {  
         const level = tier ? String(tier).toLowerCase().trim() : '';  
         if (level.includes('ouro')) return '🥇';  
@@ -59,105 +55,24 @@ document.addEventListener("DOMContentLoaded", () => {
     }  
 
     /* ============================================================
-       🔥 DADOS DAS PROMOÇÕES (REORDENADOS v8.0)
-       Ordem: Nova(10), 9, 8, 6, 5, 4, 7, 3, 2, 1
+       🔥 DADOS DAS PROMOÇÕES (REORDENADOS)
     ============================================================ */
     const PROMO_DATA = [  
         null,   
-        // POSIÇÃO 1: Nova Promo 10
-        { 
-            id: 1, 
-            nome: "2 UAI + 1 COCA 600ml (Especial 4 Anos)", 
-            preco: 29.99, 
-            precoAntigo: 35.00, 
-            img: "promocoes/promo10.png", 
-            descricao: "2 Burgers 'Uai' completinhos (com aquele molho verde!) + 1 Coca-Cola 600ml geladinha!" 
-        },
-        // POSIÇÃO 2: Antiga Promo 9
-        { 
-            id: 2, 
-            nome: "5 Uai + 1 Kuat 2L (Brinde)", 
-            preco: 64.99, 
-            precoAntigo: 75.00, 
-            img: "promocoes/promo9.jpg", 
-            descricao: "Compre 5 Burgers Uai e leve 1 Kuat 2L por nossa conta! 🎁" 
-        },
-        // POSIÇÃO 3: Antiga Promo 8
-        { 
-            id: 3, 
-            nome: "4 Armaria", 
-            preco: 59.99, 
-            precoAntigo: 72.00, 
-            img: "promocoes/promo8.jpg", 
-            descricao: "A queridinha da galera! 4 Armaria no super desconto." 
-        },
-        // POSIÇÃO 4: Antiga Promo 6
-        { 
-            id: 4, 
-            nome: "5 Burgers Uai", 
-            preco: 54.00, 
-            precoAntigo: 65.00, 
-            img: "promocoes/promo6.jpg", 
-            descricao: "Pra família toda! 5 Burgers UAI recheados no precinho!" 
-        },
-        // POSIÇÃO 5: Antiga Promo 5 (Permanece)
-        { 
-            id: 5, 
-            nome: "4 Trem + 1 Fanta 1L", 
-            preco: 49.99, 
-            precoAntigo: 65.00, 
-            img: "promocoes/promo5.jpg", 
-            descricao: "O clássico da família! 4 Burgers Trem + Fanta 1L." 
-        },  
-        // POSIÇÃO 6: Antiga Promo 4
-        { 
-            id: 6, 
-            nome: "3 Trem + 1 Fanta 1L", 
-            preco: 44.99, 
-            precoAntigo: 51.00, 
-            img: "promocoes/promo4.jpg", 
-            descricao: "3 Burgers Trem com bacon, queijo e batata palha + 1 Fanta 1L." 
-        },
-        // POSIÇÃO 7: Antiga Promo 7 (Permanece)
-        { 
-            id: 7, 
-            nome: "4 TremBão + 1 Fanta 1L", 
-            preco: 59.99, 
-            precoAntigo: 77.00, 
-            img: "promocoes/promo7.jpg", 
-            descricao: "O maior hot dog da casa! 4 TremBão com purê cremoso + Fanta 1L." 
-        },
-        // POSIÇÃO 8: Antiga Promo 3
-        { 
-            id: 8, 
-            nome: "2 Burgers Peleja", 
-            preco: 39.99, 
-            precoAntigo: 52.00, 
-            img: "promocoes/promo3.jpg", 
-            descricao: "Bora artesanar o bolso! Dois Burgers artesanais 'Peleja' no precinho!" 
-        },
-        // POSIÇÃO 9: Antiga Promo 2
-        { 
-            id: 9, 
-            nome: "3 Hot Dog Padaná", 
-            preco: 37.99, 
-            precoAntigo: 45.00, 
-            img: "promocoes/promo2.jpg", 
-            descricao: "3 Padaná completos, perfeitos pra dividir com a galera!" 
-        },
-        // POSIÇÃO 10: Antiga Promo 1
-        { 
-            id: 10, 
-            nome: "2 Purizin + 1 Fanta 1L", 
-            preco: 34.99, 
-            precoAntigo: 40.00, 
-            img: "promocoes/promo1.jpg", 
-            descricao: "2 Hot Dogs 'Purizin' com purê cremoso + 1 Fanta 1L geladinha!" 
-        }
+        { id: 1, nome: "2 UAI + 1 COCA 600ml (Especial 4 Anos)", preco: 29.99, precoAntigo: 35.00, img: "promocoes/promo10.png", descricao: "2 Burgers 'Uai' completinhos (com aquele molho verde!) + 1 Coca-Cola 600ml geladinha!" },
+        { id: 2, nome: "5 Uai + 1 Kuat 2L (Brinde)", preco: 64.99, precoAntigo: 75.00, img: "promocoes/promo9.jpg", descricao: "Compre 5 Burgers Uai e leve 1 Kuat 2L por nossa conta! 🎁" },
+        { id: 3, nome: "4 Armaria", preco: 59.99, precoAntigo: 72.00, img: "promocoes/promo8.jpg", descricao: "A queridinha da galera! 4 Armaria no super desconto." },
+        { id: 4, nome: "5 Burgers Uai", preco: 54.00, precoAntigo: 65.00, img: "promocoes/promo6.jpg", descricao: "Pra família toda! 5 Burgers UAI recheados no precinho!" },
+        { id: 5, nome: "4 Trem + 1 Fanta 1L", preco: 49.99, precoAntigo: 65.00, img: "promocoes/promo5.jpg", descricao: "O clássico da família! 4 Burgers Trem + Fanta 1L." },  
+        { id: 6, nome: "3 Trem + 1 Fanta 1L", preco: 44.99, precoAntigo: 51.00, img: "promocoes/promo4.jpg", descricao: "3 Burgers Trem com bacon, queijo e batata palha + 1 Fanta 1L." },
+        { id: 7, nome: "4 TremBão + 1 Fanta 1L", preco: 59.99, precoAntigo: 77.00, img: "promocoes/promo7.jpg", descricao: "O maior hot dog da casa! 4 TremBão com purê cremoso + Fanta 1L." },
+        { id: 8, nome: "2 Burgers Peleja", preco: 39.99, precoAntigo: 52.00, img: "promocoes/promo3.jpg", descricao: "Bora artesanar o bolso! Dois Burgers artesanais 'Peleja' no precinho!" },
+        { id: 9, nome: "3 Hot Dog Padaná", preco: 37.99, precoAntigo: 45.00, img: "promocoes/promo2.jpg", descricao: "3 Padaná completos, perfeitos pra dividir com a galera!" },
+        { id: 10, nome: "2 Purizin + 1 Fanta 1L", preco: 34.99, precoAntigo: 40.00, img: "promocoes/promo1.jpg", descricao: "2 Hot Dogs 'Purizin' com purê cremoso + 1 Fanta 1L geladinha!" }
     ];
 
     /* ============================================================
-       🎨 FUNÇÃO: RENDERIZAR PROMOÇÕES (GRID)
+       🎨 RENDERIZAR PROMOÇÕES
     ============================================================ */
     function renderPromoCards() {
         const container = document.getElementById('promocoes-grid');
@@ -180,11 +95,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
         container.innerHTML = html;
 
-        // Bind dos botões de adicionar promoção
+        // Bind dos botões
         container.querySelectorAll('.add-promo').forEach(btn => {
             btn.addEventListener('click', (e) => {
                 const promoId = parseInt(e.currentTarget.dataset.promoId);
-                // Importante: Usar find para pegar pelo ID correto
                 const promo = PROMO_DATA.find(p => p && p.id === promoId);
                 if (promo) {
                     addCommonItem(promo.nome, promo.preco);
@@ -200,15 +114,12 @@ document.addEventListener("DOMContentLoaded", () => {
     const PRODUTOS_BUSCA = [
         { nome: "Bão", aliases: ["bao", "bon"] }, { nome: "Uai", aliases: ["uai", "way"] }, { nome: "Trem", aliases: ["trem", "tren"] }, { nome: "Cadim", aliases: ["cadim", "kadim"] }, { nome: "Armaria", aliases: ["armaria", "armário", "armario"] }, { nome: "Bitela", aliases: ["bitela", "vitela"] }, { nome: "Apruma", aliases: ["apruma", "apuma"] }, { nome: "Peleja", aliases: ["peleja"] }, { nome: "Tudibom", aliases: ["tudibom", "tudo bom", "tudobom"] }, { nome: "Custoso", aliases: ["custoso"] }, { nome: "Nigucim", aliases: ["nigucim", "ningucim"] }, { nome: "Simprão", aliases: ["simprao", "simprão", "simples"] }, { nome: "Nimin", aliases: ["nimin", "ninin"] }, { nome: "Padaná", aliases: ["padana", "padaná"] }, { nome: "Purizin", aliases: ["purizin", "purezin", "pure"] }, { nome: "Trembão", aliases: ["trembao", "trembão", "trembaum"] }
     ];
-
     function normalizar(texto) { return texto.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim(); }
-    
     function distanciaLevenshtein(a, b) {
         const matrix = []; for (let i = 0; i <= b.length; i++) matrix[i] = [i]; for (let j = 0; j <= a.length; j++) matrix[0][j] = j;
         for (let i = 1; i <= b.length; i++) { for (let j = 1; j <= a.length; j++) { if (b.charAt(i - 1) === a.charAt(j - 1)) matrix[i][j] = matrix[i - 1][j - 1]; else matrix[i][j] = Math.min(matrix[i - 1][j - 1] + 1, matrix[i][j - 1] + 1, matrix[i - 1][j] + 1); } }
         return matrix[b.length][a.length];
     }
-
     function filtrarCards(query) {
         if (!query || query.length < 2) { document.querySelectorAll('.card').forEach(c => c.style.display = ''); return; }
         const queryNorm = normalizar(query);
@@ -216,7 +127,8 @@ document.addEventListener("DOMContentLoaded", () => {
             const nome = card.dataset.name || card.querySelector('h3')?.textContent || '';
             const nomeNorm = normalizar(nome);
             let match = false;
-            if (nomeNorm.includes(queryNorm)) { match = true; } else {
+            if (nomeNorm.includes(queryNorm)) match = true;
+            else {
                 for (const produto of PRODUTOS_BUSCA) {
                     const dist = distanciaLevenshtein(queryNorm, normalizar(produto.nome));
                     if (dist <= 2 && nomeNorm.includes(normalizar(produto.nome))) { match = true; break; }
@@ -230,7 +142,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if (searchInput) searchInput.addEventListener('input', (e) => filtrarCards(e.target.value));
 
     /* ============================================================
-       🎯 MAPEAMENTO DE ELEMENTOS
+       🎯 ELEMENTOS
     ============================================================ */
     const el = {  
         cartIcon: document.getElementById("cart-icon"),  
@@ -252,7 +164,6 @@ document.addEventListener("DOMContentLoaded", () => {
         statusBanner: document.getElementById("status-banner"),  
         hoursBanner: document.querySelector(".hours-banner"), 
         reportsBtn: document.getElementById("reports-btn"),   
-        
         pedidosContainer: document.querySelector(".meus-pedidos"),  
         pedidosBtn: document.querySelector(".meus-pedidos-btn"),  
         pedidosPanel: document.getElementById("painelPedidos"),  
@@ -264,18 +175,15 @@ document.addEventListener("DOMContentLoaded", () => {
         recompensasFecharBtn: document.querySelector(".fechar-recompensas"),  
         recompensasLista: document.getElementById("listaRecompensas"),  
         historicoLista: document.getElementById("historicoRecompensas"),
-
         btnNaoSeiCEP: document.getElementById("btnNaoSeiCEP"),
         manualArea: document.getElementById("manualArea"),
         manualEndereco: document.getElementById("manualEndereco"),
         manualNumero: document.getElementById("manualNumero"),
         btnConfirmarEndereco: document.getElementById("btnConfirmarEndereco"),
         btnVoltarCEP: document.getElementById("btnVoltarCEP"),
-        
         progressWrapper: document.getElementById("progressWrapper"),
         progressText: document.getElementById("progressText"),
         progressFill: document.getElementById("progressFill"),
-        
         promoModal: document.getElementById("promo-modal"),
         promoImg: document.getElementById("promo-modal-img"),
         promoTitle: document.getElementById("promo-modal-title"),
@@ -283,28 +191,18 @@ document.addEventListener("DOMContentLoaded", () => {
         promoAddBtn: document.getElementById("promo-modal-add"),
         promoNavPrev: document.querySelector("#promo-modal .promo-nav.prev"),
         promoNavNext: document.querySelector("#promo-modal .promo-nav.next"),
-        promoClose: document.querySelector("#promo-modal .promo-close"),
-        
-        cPrev: document.querySelector(".c-prev"),
-        cNext: document.querySelector(".c-next"),
-        slides: document.querySelector(".slides")
+        promoClose: document.querySelector("#promo-modal .promo-close")
     };
 
-    /* ============================================================
-       🌫️ SISTEMA DE OVERLAYS (UNIFICADO)
-    ============================================================ */
+    /* ------------------ 🌫️ OVERLAYS (SISTEMA UNIFICADO) ------------------ */  
     if (!el.cartBackdrop) {  
         const bd = document.createElement("div"); bd.id = "cart-backdrop"; document.body.appendChild(bd); el.cartBackdrop = bd;  
     }  
 
     const Backdrop = {  
-        show() { 
-            el.cartBackdrop.classList.add("active"); 
-            document.body.classList.add("no-scroll"); 
-        },  
+        show() { el.cartBackdrop.classList.add("active"); document.body.classList.add("no-scroll"); },  
         hide() { 
-            el.cartBackdrop.classList.remove("active"); 
-            document.body.classList.remove("no-scroll"); 
+            el.cartBackdrop.classList.remove("active"); document.body.classList.remove("no-scroll"); 
             if(el.pedidosPanel) el.pedidosPanel.classList.remove("active");
             if(el.recompensasPanel) el.recompensasPanel.classList.remove("active");
         },  
@@ -324,7 +222,7 @@ document.addEventListener("DOMContentLoaded", () => {
     
     el.cartBackdrop.addEventListener("click", () => Overlays.closeAll());
 
-    // 🔥 INTEGRAÇÃO DO FECHAMENTO DE MODAIS
+    // 🔥 FECHAMENTO DE MODAIS (INTEGRADO)
     document.querySelectorAll('.modal').forEach(m => m.addEventListener('click', e => { 
         if (e.target.classList.contains('modal')) { Overlays.closeAll(); } 
     }));
@@ -338,7 +236,6 @@ document.addEventListener("DOMContentLoaded", () => {
         couponApplied = val; localStorage.setItem("dflCoupon", couponApplied); renderMiniCart();   
     });
 
-    /* ------------------ 💬 POPUPS ------------------ */  
     function popupAdd(msg) {  
         let pop = document.querySelector(".popup-add"); if (!pop) { pop = document.createElement("div"); pop.className = "popup-add"; document.body.appendChild(pop); }  
         pop.textContent = msg; pop.classList.add("show"); setTimeout(() => pop.classList.remove("show"), 2000);  
@@ -349,7 +246,6 @@ document.addEventListener("DOMContentLoaded", () => {
         pop.textContent = msg; pop.style.opacity = '1'; pop.style.transform = 'translateX(-50%) scale(1)'; setTimeout(() => { pop.style.transform = 'translateX(-50%) scale(0)'; pop.style.opacity = '0'; }, 6000);  
     }
 
-    /* ------------------ 📊 BARRA DE PROGRESSO ------------------ */
     function atualizarBarraProgresso() {
         const subtotal = getCartSubtotal();
         const progressText = document.getElementById("progressText"); const progressFill = document.getElementById("progressFill"); const progressWrapper = document.getElementById("progressWrapper");
@@ -359,7 +255,6 @@ document.addEventListener("DOMContentLoaded", () => {
         if (subtotal >= LIMITE_FRETE_GRATIS) { progressText.innerHTML = `🎉 <strong>Frete Grátis!</strong>`; progressFill.style.background = "linear-gradient(90deg, #4caf50, #2e7d32)"; progressWrapper.style.background = "#e8f5e9"; progressWrapper.style.borderColor = "#4caf50"; } else { progressText.innerHTML = `Faltam <strong>${money(falta)}</strong> p/ Frete Grátis`; progressFill.style.background = "linear-gradient(90deg, #ffb300, #ff9800)"; progressWrapper.style.background = "#fff8d6"; progressWrapper.style.borderColor = "#ffca28"; }
     }
 
-    /* ------------------ 🛒 MINI-CARRINHO ------------------ */  
     function renderMiniCart() {  
         if (!el.miniList) return; const totalItens = cart.reduce((s, i) => s + i.qtd, 0); if (el.cartCount) el.cartCount.textContent = totalItens;  
         atualizarBarraProgresso();
@@ -380,7 +275,6 @@ document.addEventListener("DOMContentLoaded", () => {
     }  
     const _renderMiniCartOrig = renderMiniCart; renderMiniCart = function () { _renderMiniCartOrig(); bindMiniCartButtons(); enhanceMiniCartUI(); };
 
-    /* ------------------ 🔥 FIREBASE INIT ------------------ */  
     const firebaseConfig = { apiKey: "AIzaSyATQBcbYuzKpKlSwNlbpRiAM1XyHqhGeak", authDomain: "da-familia-lanches.firebaseapp.com", projectId: "da-familia-lanches", storageBucket: "da-familia-lanches.appspot.com", messagingSenderId: "106857147317", appId: "1:106857147317:web:769c98aed26bb8fc9e87fc" };  
     let auth, db;   
     function inicializarFirebase() { if (isFirebaseInitialized) return; try { if (!window.firebase) throw new Error("Biblioteca principal do Firebase não carregou."); if (!firebase.apps.length) firebase.initializeApp(firebaseConfig); auth = firebase.auth(); db = firebase.firestore(); isFirebaseInitialized = true; setupAuthListener(); } catch (error) { console.error("ERRO FATAL AO INICIAR FIREBASE:", error); document.body.innerHTML = `<div style="padding:20px;text-align:center;font-size:1.2rem;color:red;font-family:sans-serif;margin-top:50px;"><b>Erro Crítico</b><br>Não foi possível conectar aos nossos serviços.<br><small>Verifique sua conexão e recarregue.</small></div>`; } }  
@@ -407,6 +301,7 @@ document.addEventListener("DOMContentLoaded", () => {
     el.userBtn?.addEventListener("click", () => Overlays.open(el.loginModal));  
     el.cartIcon?.addEventListener("click", () => { const pedidos = document.getElementById("painelPedidos"); const recompensas = document.getElementById("recompensas-panel"); if (pedidos) pedidos.classList.remove("active", "show"); if (recompensas) recompensas.classList.remove("active", "show"); renderMiniCart(); Overlays.open(el.miniCart); });
     
+    /* ------------------ ➕ ADICIONAIS ------------------ */
     const adicionais = [ { nome: "Cebola", preco: 0.99 }, { nome: "Salada", preco: 1.99 }, { nome: "Ovo", preco: 1.99 }, { nome: "Bacon", preco: 2.99 }, { nome: "Hambúrguer Tradicional 56g", preco: 2.99 }, { nome: "Cheddar Cremoso", preco: 3.99 }, { nome: "Filé de Frango", preco: 5.99 }, { nome: "Hambúrguer Artesanal 120g", preco: 7.99 }, ];  
     let produtoExtras = null; let produtoPrecoBase = 0;  
     const openExtrasFor = safe((card) => { if (!card || !el.extrasModal || !el.extrasList) return; produtoExtras = card.dataset.name; produtoPrecoBase = parseFloat(card.dataset.price) || 0; el.extrasList.innerHTML = adicionais.map((a, i) => ` <label class="extra-line"> <span style="font-weight:600;color:#222;">${a.nome} — <b style="color:#d32f2f;">${money(a.preco)}</b></span> <input type="checkbox" value="${i}" style="margin-left:10px;"> </label>`).join(""); Overlays.open(el.extrasModal); });  
@@ -414,14 +309,28 @@ document.addEventListener("DOMContentLoaded", () => {
     el.extrasConfirm?.addEventListener("click", () => { if (!produtoExtras) return Overlays.closeAll(); const checks = [...document.querySelectorAll("#extras-modal .extras-list input:checked")]; const extrasContagem = {}; checks.forEach(c => { const idx = +c.value; const adicional = adicionais[idx]; if (extrasContagem[adicional.nome]) extrasContagem[adicional.nome].qtd++; else extrasContagem[adicional.nome] = { preco: adicional.preco, qtd: 1 }; }); const extrasNomes = Object.keys(extrasContagem).map(nome => { const qtd = extrasContagem[nome].qtd; return qtd > 1 ? `${qtd}x ${nome}` : nome; }).join(", "); const precoExtras = Object.values(extrasContagem).reduce((t, e) => t + (e.preco * e.qtd), 0); const precoTotal = produtoPrecoBase + precoExtras; const nomeCompleto = extrasNomes ? `${produtoExtras} + ${extrasNomes}` : produtoExtras; const existente = cart.find(i => i.nome === nomeCompleto); if (existente) existente.qtd++; else cart.push({ nome: nomeCompleto, preco: precoTotal, qtd: 1 }); renderMiniCart(); popupAdd("Adicionado ao carrinho!"); Overlays.closeAll(); });  
     document.querySelectorAll(".extras-close").forEach((b) => b.addEventListener("click", () => Overlays.closeAll()));
 
+    /* ------------------ 🥤 COMBOS ------------------ */
     const comboDrinkOptions = { casal: [ { rotulo: "Fanta 1L (padrão)", delta: 0.01 }, { rotulo: "Coca-Cola 1L", delta: 3.0 }, { rotulo: "Coca-Cola 1L Zero", delta: 3.0 }, ], familia: [ { rotulo: "Kuat Guaraná 2L (padrão)", delta: 0.01 }, { rotulo: "Coca-Cola 2L", delta: 5.0 }, ], };  
     let _comboCtx = null;  
     const openComboModal = safe((nomeCombo, precoBase) => { if (!el.comboModal || !el.comboBody) { addCommonItem(nomeCombo, precoBase); return; } const low = (nomeCombo || "").toLowerCase(); const grupo = low.includes("casal") ? "casal" : (low.includes("família") || low.includes("familia")) ? "familia" : null; if (!grupo) { addCommonItem(nomeCombo, precoBase); return; } const opts = comboDrinkOptions[grupo]; el.comboBody.innerHTML = opts.map((o, i) => ` <label class="combo-option-line"> <span style="font-weight:600;color:#222;">${o.rotulo}</span> <span style="font-weight:700;color:#d32f2f;">+ ${money(o.delta)}</span> <input type="radio" name="combo-drink" value="${i}" ${i === 0 ? "checked" : ""} style="margin-left:10px;"> </label>`).join(""); _comboCtx = { nomeCombo, precoBase, grupo }; Overlays.open(el.comboModal); });  
     el.comboConfirm?.addEventListener("click", () => { if (!_comboCtx) return Overlays.closeAll(); const sel = el.comboBody?.querySelector('input[name="combo-drink"]:checked'); if (!sel) return; const opt = comboDrinkOptions[_comboCtx.grupo][+sel.value]; const finalName = `${_comboCtx.nomeCombo} + ${opt.rotulo}`; const finalPrice = Number(_comboCtx.precoBase) + (opt.delta || 0); const existente = cart.find(i => i.nome === finalName); if (existente) existente.qtd++; else cart.push({ nome: finalName, preco: finalPrice, qtd: 1 }); popupAdd("Combo adicionado!"); renderMiniCart(); Overlays.closeAll(); });  
     document.querySelectorAll("#combo-modal .combo-close").forEach((b) => b.addEventListener("click", () => Overlays.closeAll()));  
-    function addCommonItem(nome, preco) { if (/^combo/i.test(nome) && !/^\s*Combo [0-9]/.test(nome)) { openComboModal(nome, preco); return; } const found = cart.find((i) => i.nome === nome && i.preco === preco); if (found) found.qtd++; else cart.push({ nome, preco, qtd: 1 }); renderMiniCart(); popupAdd(`${nome} adicionado!`); }  
+    
+    /* 🔥 FUNÇÃO RESTAURADA: ADICIONAR ITEM AO CARRINHO */
+    function addCommonItem(nome, preco) { 
+        if (/^combo/i.test(nome) && !/^\s*Combo [0-9]/.test(nome)) { openComboModal(nome, preco); return; } 
+        const found = cart.find((i) => i.nome === nome && i.preco === preco); 
+        if (found) found.qtd++; 
+        else cart.push({ nome, preco, qtd: 1 }); 
+        renderMiniCart(); 
+        popupAdd(`${nome} adicionado!`); 
+    }  
+    
     document.querySelectorAll(".add-cart").forEach((btn) => btn.addEventListener("click", (e) => { const card = e.currentTarget.closest(".card"); if (!card) return; addCommonItem(card.dataset.name, parseFloat(card.dataset.price)); }));
 
+    const getCartSubtotal = () => cart.reduce((s, i) => s + (Number(i.preco) || 0) * (Number(i.qtd) || 0), 0);
+
+    /* ------------------ 🚚 FRETE MANUAL ------------------ */
     let modoEnderecoManual = false;
     document.getElementById("btnNaoSeiCEP")?.addEventListener("click", () => { window.open("https://buscacepinter.correios.com.br/app/endereco/index.php", "_blank"); });
     document.getElementById("btnManual")?.addEventListener("click", mostrarModoManual);
@@ -438,54 +347,17 @@ document.addEventListener("DOMContentLoaded", () => {
     async function calcTotals() { const subtotal = getCartSubtotal(); const d = await validarCupomFirestore(couponApplied, subtotal); const isRetirarLocal = document.getElementById('retirar-local')?.checked; let deliveryFee = DELIVERY_FEE_DEFAULT; let enderecoParaCalculo = ""; if (modoEnderecoManual) { const manualEndereco = document.getElementById('manualEndereco'); enderecoParaCalculo = manualEndereco?.value?.trim() || ""; } else { const cepInput = document.getElementById('cep-input'); const enderecoAuto = document.getElementById('endereco-auto'); const cepValue = cepInput ? cepInput.value.trim().replace(/\D/g, '') : ''; if (cepInput && cepValue.length === 8 && enderecoAuto && enderecoAuto.value) { enderecoParaCalculo = enderecoAuto.value.trim(); } } if (isRetirarLocal || subtotal >= LIMITE_FRETE_GRATIS) { deliveryFee = 0; } else if (enderecoParaCalculo) { try { deliveryFee = await getDynamicDeliveryFee(enderecoParaCalculo); } catch(e) { console.error("Erro frete dinâmico:", e); deliveryFee = DELIVERY_FEE_DEFAULT; } } const delivery = d.freeShipping ? 0 : deliveryFee; const total = Math.max(0, subtotal + delivery - d.discount); return { subtotal, delivery, discount: d.discount, discountLabel: d.label, total, cupomInfo: d }; }
     async function enhanceMiniCartUI() { if (!el.miniFoot) return; const couponMsg = document.getElementById("coupon-message"); const couponDiscountRow = document.getElementById("coupon-discount-row"); const cartDiscount = document.getElementById("cart-discount"); el.miniFoot.querySelectorAll(".cart-summary-generated").forEach(e => e.remove()); if (cart.length === 0) { if (couponMsg) couponMsg.innerHTML = ""; if (couponDiscountRow) couponDiscountRow.style.display = "none"; return; } const { subtotal, delivery, discount, total, cupomInfo } = await calcTotals(); const deliveryLabel = delivery === 0 ? "Grátis 🎉" : money(delivery); if (couponMsg) { couponMsg.textContent = cupomInfo.mensagem; couponMsg.className = `coupon-message ${cupomInfo.valido ? 'success' : 'error'}`; if (!cupomInfo.valido && couponApplied) { couponApplied = ""; localStorage.removeItem("dflCoupon"); const couponInput = document.getElementById("coupon-input"); if (couponInput && document.activeElement !== couponInput) couponInput.value = ""; } } if (couponDiscountRow && cartDiscount) { if (discount > 0 || cupomInfo.label) { cartDiscount.textContent = `- ${money(discount)} ${couponApplied ? `(${couponApplied})` : ""}`; couponDiscountRow.style.display = "flex"; } else couponDiscountRow.style.display = "none"; } const summaryDiv = document.createElement('div'); summaryDiv.className = 'cart-summary-generated'; summaryDiv.innerHTML = ` <div class="summary-row" style="margin-top:8px;border-top:1px solid #eee;padding-top:8px;"><span>Subtotal</span><b>${money(subtotal)}</b></div> <div class="summary-row"><span>Entrega</span><b>${deliveryLabel}</b></div> <div class="summary-row" style="display:flex;justify-content:space-between;align-items:center;border-top:1px solid #eee;padding-top:8px;margin:8px 0;font-size:1rem;"><span><b>Total</b></span><span style="color:#e53935;font-weight:800;">${money(total)}</span></div> <button id="finish-order" type="button" style="width:100%;background:#4caf50;color:#fff;border:none;border-radius:10px;padding:12px;font-weight:700;cursor:pointer;margin-bottom:8px">Finalizar Pedido 🛍️</button> <button id="clear-cart" type="button" style="width:100%;background:#ff4081;color:#fff;border:none;border-radius:10px;padding:10px;font-weight:700;cursor:pointer">Limpar Carrinho</button>`; el.miniFoot.appendChild(summaryDiv); document.getElementById('retirar-local')?.addEventListener('change', renderMiniCart); document.getElementById('numero-input')?.addEventListener('input', renderMiniCart); document.getElementById('complemento-input')?.addEventListener('input', renderMiniCart); summaryDiv.querySelector("#finish-order")?.addEventListener("click", fecharPedido); summaryDiv.querySelector("#clear-cart")?.addEventListener("click", () => { if (confirm("Limpar todo o carrinho?")) { cart = []; couponApplied = ""; localStorage.removeItem("dflCoupon"); document.getElementById("coupon-input").value = ""; renderMiniCart(); popupAdd("Carrinho limpo!"); } }); }
     
-    let configuracoesRecompensa = null;   
-    async function carregarConfiguracoesDeRecompensas() {  
-        if (!isFirebaseInitialized) return [];   
-        if (configuracoesRecompensa) return configuracoesRecompensa;   
-        try {  
-            const snapshot = await db.collection("RecompensasConfig").get();  
-            const configs = [];  
-            snapshot.forEach(doc => { const data = doc.data(); configs.push({ id: doc.id, limite: data.meta || data.limite, tipo: data.tipo, valor: data.valor || data.titulo, titulo: data.titulo || data.valor, ...data }); });  
-            configuracoesRecompensa = configs.sort((a, b) => (a.limite || 0) - (b.limite || 0));  
-            return configuracoesRecompensa;  
-        } catch (e) { console.error("Erro recompensas:", e); return []; }  
-    }
+    let currentPromoId = 1;
+    function showPromoModal(promoId) { if (!el.promoModal || !PROMO_DATA[promoId]) return; currentPromoId = Number(promoId); const promo = PROMO_DATA.find(p => p && p.id === currentPromoId); if (el.promoImg) el.promoImg.src = promo.img; if (el.promoTitle) el.promoTitle.textContent = promo.nome; if (el.promoPrice) { el.promoPrice.innerHTML = `<span class="old-price">De ${money(promo.precoAntigo)}</span> por <b>${money(promo.preco)}</b>`; } if (el.promoAddBtn) el.promoAddBtn.dataset.isCombo = "false"; Overlays.open(el.promoModal); }
+    document.querySelectorAll(".slide[data-promo-id]").forEach((img) => { img.addEventListener("click", () => { const id = parseInt(img.dataset.promoId, 10); if (id) { showPromoModal(id); } }); });
+    el.promoAddBtn?.addEventListener("click", (e) => { const promo = PROMO_DATA.find(p => p && p.id === currentPromoId); if (!promo) return; addCommonItem(promo.nome, promo.preco); Overlays.closeAll(); });
+    el.promoNavPrev?.addEventListener("click", () => { let newId = currentPromoId - 1; if (newId < 1) newId = 10; showPromoModal(newId); });
+    el.promoNavNext?.addEventListener("click", () => { let newId = currentPromoId + 1; if (newId > 10) newId = 1; showPromoModal(newId); });
+    el.promoClose?.addEventListener("click", () => Overlays.closeAll());
+    el.cPrev?.addEventListener("click", () => { if (!el.slides) return; el.slides.scrollLeft -= Math.min(el.slides.clientWidth * 0.9, 320); });
+    el.cNext?.addEventListener("click", () => { if (!el.slides) return; el.slides.scrollLeft += Math.min(el.slides.clientWidth * 0.9, 320); });
 
-    /* ------------------ 🚨 RECOMPENSAS E BOTÕES LATERAIS (RESTAURADOS) ------------------ */
-    el.recompensasBtn?.addEventListener("click", () => { 
-        if (!currentUser) { 
-            alert("Faça login para ver suas recompensas!"); 
-            Overlays.open(el.loginModal); 
-            return; 
-        } 
-        Overlays.open(el.recompensasPanel); 
-        carregarRecompensas(currentUser.uid); 
-    });
-    el.recompensasFecharBtn?.addEventListener("click", () => Overlays.closeAll());
-    
-    /* ------------------ 📦 MEUS PEDIDOS (RESTAURADO) ------------------ */
-    el.pedidosBtn?.addEventListener("click", () => { 
-        if (!currentUser) { 
-            alert("Faça login para ver seus pedidos!"); 
-            Overlays.open(el.loginModal); 
-            return; 
-        } 
-        Overlays.open(el.pedidosPanel); 
-        carregarPedidos(currentUser.uid); 
-    });
-    el.pedidosFecharBtn?.addEventListener("click", () => Overlays.closeAll());
-
-    /* ------------------ 📊 ADMIN DASHBOARD (RESTAURADO) ------------------ */
-    const ADMINS = [ "alefejohsefe@gmail.com", "kalebhstanley650@gmail.com", "contato@dafamilialanches.com.br" ];  
-    function isAdmin(user) { return user && user.email && ADMINS.includes(user.email.toLowerCase()); }  
-    let chartPedidos = null; let chartProdutos = null;  
-    function ensureChartJS(cb) { if (window.Chart) return cb(); const s = document.createElement("script"); s.src = "https://cdn.jsdelivr.net/npm/chart.js"; s.onload = cb; document.head.appendChild(s); }  
-    function createDashboard() { if (document.getElementById("admin-dashboard")) return; const div = document.createElement("div"); div.id = "admin-dashboard"; div.className = "modal"; div.innerHTML = `<div class="modal-content" style="max-width:1000px;width:95%;height:85vh;overflow:auto;background:#fff;border-radius:12px;"><div class="modal-head" style="display:flex;justify-content:space-between;align-items:center;padding:10px 14px;"><h3>📊 Relatórios</h3><button class="dashboard-close">✖</button></div><div class="dashboard-body" style="padding:12px;"><div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:12px;"><div id="card-total" class="cardBox">Total: —</div><div id="card-pedidos" class="cardBox">Pedidos: —</div><div id="card-ticket" class="cardBox">Ticket Médio: —</div></div><div style="margin-bottom:10px;"><label>Período: </label><select id="filter-period"><option value="7">7 dias</option><option value="30">30 dias</option><option value="all">Todos</option></select></div><canvas id="chart-pedidos" style="width:100%;height:240px;"></canvas><canvas id="chart-produtos" style="width:100%;height:240px;margin-top:16px;"></canvas><div style="margin-top:12px;"><button id="export-csv" style="background:#4caf50;color:#fff;border:none;border-radius:8px;padding:10px;">Exportar CSV</button></div></div></div>`; document.body.appendChild(div); div.querySelector(".dashboard-close").addEventListener("click", () => Overlays.closeAll()); }  
-    function createAdminFab() { if (el.reportsBtn) { el.reportsBtn.style.display = "block"; el.reportsBtn.addEventListener("click", () => { createDashboard(); ensureChartJS(() => carregarRelatorios("7")); Overlays.open(document.getElementById("admin-dashboard")); }); } }  
-    function gerarResumoECharts(pedidos) { if (!window.Chart) return; const ctxPedidos = document.getElementById('chart-pedidos')?.getContext('2d'); const ctxProdutos = document.getElementById('chart-produtos')?.getContext('2d'); if (!ctxPedidos || !ctxProdutos) return; const pedidosPorDia = {}; const produtosContagem = {}; pedidos.forEach(p => { const dia = (p.data?.toDate?.() || new Date(p.data)).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' }); pedidosPorDia[dia] = (pedidosPorDia[dia] || 0) + 1; (Array.isArray(p.itens) ? p.itens : []).forEach(itemStr => { const nome = itemStr.split(' x')[0]; if (nome) produtosContagem[nome] = (produtosContagem[nome] || 0) + 1; }); }); const labelsPedidos = Object.keys(pedidosPorDia).reverse(); const dataPedidos = Object.values(pedidosPorDia).reverse(); if (chartPedidos) chartPedidos.destroy(); chartPedidos = new Chart(ctxPedidos, { type: 'line', data: { labels: labelsPedidos, datasets: [{ label: 'Pedidos', data: dataPedidos, borderColor: '#ffb300', tension: 0.1 }] }, options: { scales: { x: { ticks: { maxRotation: 45, minRotation: 45 } } } } }); const produtosOrdenados = Object.entries(produtosContagem).sort(([, a], [, b]) => b - a).slice(0, 10); if (chartProdutos) chartProdutos.destroy(); chartProdutos = new Chart(ctxProdutos, { type: 'bar', data: { labels: produtosOrdenados.map(p=>p[0]), datasets: [{ label: 'Mais Vendidos', data: produtosOrdenados.map(p=>p[1]), backgroundColor: '#ff7043' }] }, options: { indexAxis: 'y' } }); }  
-    function carregarRelatorios(periodo = "7") { const start = new Date(); if (periodo !== "all") start.setDate(start.getDate() - Number(periodo)); else start.setTime(0); db.collection("Pedidos").orderBy("data", "desc").get().then(snap => { const pedidos = snap.docs.map(d => { const dataObjeto = d.data(); const rawDate = dataObjeto.data; let processedDate; if (rawDate && typeof rawDate.toDate === 'function') processedDate = rawDate.toDate(); else if (rawDate) processedDate = new Date(rawDate); else processedDate = new Date(); return { ...dataObjeto, id: d.id, data: processedDate }; }); const filtrados = pedidos.filter(p => p.data >= start); gerarResumoECharts(filtrados); document.getElementById("card-total").textContent = `Total: ${money(filtrados.reduce((s, p) => s + (Number(p.total) || 0), 0))}`; document.getElementById("card-pedidos").textContent = `Pedidos: ${filtrados.length}`; document.getElementById("card-ticket").textContent = `Ticket Médio: ${money(filtrados.length ? filtrados.reduce((s, p) => s + (Number(p.total) || 0), 0)/filtrados.length : 0)}`; document.getElementById("export-csv").onclick = () => { const csv = "Data;Nome;Total\n" + filtrados.map(p => `${p.data.toLocaleString()};${p.nome};${p.total}`).join("\n"); const blob = new Blob([`\uFEFF${csv}`], { type: 'text/csv;charset=utf-8;' }); const link = document.createElement('a'); link.href = URL.createObjectURL(blob); link.download = "pedidos.csv"; link.click(); }; }); const sel = document.getElementById("filter-period"); if(sel && !sel._bound) { sel.addEventListener("change", e => carregarRelatorios(e.target.value)); sel._bound = true; } }
-
-    /* ------------------ 🚨 STATUS BANNER & TIMER (RESTAURADOS) ------------------ */
+    /* ------------------ 🚨 STATUS BANNER & TIMER ------------------ */
     const atualizarStatus = safe(() => {  
         const agora = new Date(); const h = agora.getHours();  
         const aberto = h >= 18 && h < 23;   
@@ -505,25 +377,121 @@ document.addEventListener("DOMContentLoaded", () => {
     });  
     atualizarTimer(); setInterval(atualizarTimer, 1000);
 
-    const cookieBanner = document.getElementById("cookie-banner"); const cookieAcceptBtn = document.getElementById("cookie-accept");  
-    if (cookieBanner && cookieAcceptBtn) { 
-        if (localStorage.getItem("dfl-cookies-accepted") === "true") {
-            cookieBanner.style.display = "none"; 
-            cookieBanner.classList.remove("show");
-        } else { 
-            cookieBanner.style.display = "flex";
-            setTimeout(() => cookieBanner.classList.add("show"), 100);
-        } 
-        cookieAcceptBtn.addEventListener("click", () => { 
-            localStorage.setItem("dfl-cookies-accepted", "true"); 
-            cookieBanner.classList.remove("show"); 
-            setTimeout(() => { cookieBanner.style.display = "none"; }, 500);
-        }); 
+    async function fecharPedido() {  
+        if (!cart.length) return alert("Carrinho vazio!");  
+        if (!currentUser) { alert("Faça login para enviar o pedido!"); Overlays.open(el.loginModal); return; }  
+        
+        const isRetirarLocal = document.getElementById('retirar-local')?.checked;  
+        let finalAddressString = "";
+        
+        if (modoEnderecoManual) {
+            const manualEndereco = document.getElementById('manualEndereco');
+            const manualNumero = document.getElementById('manualNumero');
+            const endereco = manualEndereco?.value?.trim() || '';
+            const numero = manualNumero?.value?.trim() || '';
+            
+            if (endereco && numero) {
+                finalAddressString = `${endereco}, N° ${numero} (MANUAL)`;
+            }
+        } else {
+            const cepInput = document.getElementById('cep-input');
+            const autoRuaBairro = document.getElementById("endereco-auto");
+            const autoNumero = document.getElementById("numero-input");
+            const autoComp = document.getElementById("complemento-input");
+            
+            const ruaBairroValue = autoRuaBairro ? autoRuaBairro.value.trim() : '';
+            const numeroValue = autoNumero ? autoNumero.value.trim() : '';
+            const compValue = autoComp ? autoComp.value.trim() : '';
+            const cepValue = cepInput ? cepInput.value.trim().replace(/\D/g, '') : '';
+            
+            if (ruaBairroValue && numeroValue) {
+                finalAddressString = `${ruaBairroValue}, N° ${numeroValue}`;
+                if (compValue) finalAddressString += `, Comp: ${compValue}`;
+                if (cepValue.length === 8) finalAddressString += ` | CEP: ${cepValue}`;
+            }
+        }
+        
+        if (isRetirarLocal) finalAddressString = "CLIENTE IRÁ RETIRAR NO LOCAL";  
+        else if (!finalAddressString) { alert("Preencha o endereço completo (via CEP ou manualmente), ou marque 'Retirar no Local'."); return; }  
+
+        const addr = finalAddressString;  
+        const { subtotal, delivery, discount, total, cupomInfo } = await calcTotals();  
+        const pedido = { usuario: currentUser.email, userId: currentUser.uid, nome: currentUser.displayName || currentUser.email.split("@")[0], itens: cart.map((i) => `• ${i.nome} x${i.qtd}`).join("\n"), itensObj: cart.map(i => ({ nome: i.nome, preco: i.preco, qtd: i.qtd })), subtotal: Number(subtotal.toFixed(2)), entrega: Number(delivery.toFixed(2)), desconto: Number(discount.toFixed(2)), cupom: couponApplied || "", total: Number(total.toFixed(2)), endereco: addr, data: new Date().toISOString(), thumb: '' };  
+
+        try {  
+            const batch = db.batch(); const userId = currentUser.uid; const usuarioRef = db.collection("Usuarios").doc(userId);  
+            if (cupomInfo.isPersonalizado && couponApplied) { const cupomUserRef = db.collection("CuponsUsuarios").doc(userId); batch.update(cupomUserRef, { usado: true, dataUso: firebase.firestore.FieldValue.serverTimestamp(), pedidoId: 'PENDENTE' }); }  
+            const pedidoRef = db.collection("Pedidos").doc(); batch.set(pedidoRef, pedido);  
+            batch.set(usuarioRef, { email: currentUser.email, pedidosFeitos: firebase.firestore.FieldValue.increment(1) }, { merge: true });  
+            await batch.commit();  
+            if (cupomInfo.isPersonalizado && couponApplied) await db.collection("CuponsUsuarios").doc(userId).update({ pedidoId: pedidoRef.id });  
+
+            const RECOMPENSAS_DATA = await carregarConfiguracoesDeRecompensas();  
+            const doc = await usuarioRef.get(); const data = doc.data() || { pedidosFeitos: 0, recompensaNivel: 0 }; const feitos = data.pedidosFeitos; const nivelAtual = data.recompensaNivel;  
+            const recompensaAtingida = RECOMPENSAS_DATA.find(r => r.limite === feitos && (r.limite / (RECOMPENSAS_DATA[0]?.limite || 1)) > nivelAtual);  
+
+            if (recompensaAtingida) {  
+                const primeiroLimite = RECOMPENSAS_DATA[0]?.limite || 1; const novoNivel = recompensaAtingida.limite / primeiroLimite;  
+                const itemLiberado = { cupom: recompensaAtingida.valor, tipo: recompensaAtingida.tipo, valor: recompensaAtingida.valor, liberadoEm: firebase.firestore.FieldValue.serverTimestamp(), usado: false, pedidoLiberacao: pedidoRef.id, titulo: recompensaAtingida.titulo || `Recompensa Nível ${novoNivel}` };  
+                await usuarioRef.update({ recompensaNivel: novoNivel, ultimaRecompensa: recompensaAtingida.id });  
+                if (recompensaAtingida.tipo === 'cupom') await db.collection("CuponsUsuarios").doc(userId).set(itemLiberado, { merge: true });  
+                await db.collection("Usuarios").doc(userId).collection("RecompensasRecebidas").add(itemLiberado);  
+                const nomeNivel = String(recompensaAtingida.titulo || recompensaAtingida.valor || '');  
+                mostrarPopupRecompensa(`🎉 Parabéns! Você alcançou ${nomeNivel} ${getTierIcon(nomeNivel)} e ganhou: ${recompensaAtingida.valor}`);  
+                configuracoesRecompensa = null;  
+            }  
+
+            popupAdd("Pedido salvo ✅"); try { sound.currentTime = 0; sound.play(); } catch (_) {}  
+            const linhas = ["🍔 *Pedido DFL*", cart.map((i) => `• ${i.nome} x${i.qtd}`).join("\n"), "", `Subtotal: *${money(subtotal)}*`, `Entrega: *${money(delivery)}*${cupomInfo.freeShipping ? " _(Frete Grátis)_" : ""}`, `Desconto${couponApplied ? ` (${couponApplied})` : ""}: *-${money(discount)}*`, `*Total: ${money(total)}*`, "", `🏠 *Endereço:* ${addr}`].join("\n");  
+            window.open(`https://wa.me/5534997178336?text=${encodeURIComponent(linhas)}`, "_blank");  
+            cart = []; couponApplied = ""; localStorage.removeItem("dflCoupon"); document.getElementById("coupon-input").value = ""; modoEnderecoManual = false; renderMiniCart(); Overlays.closeAll();  
+        } catch (err) { console.error("Erro fechar pedido:", err); alert(`Erro: ${err.message}`); }  
+    }  
+    
+    renderMiniCart();
+
+    /* MEUS PEDIDOS & RECOMPENSAS */  
+    el.pedidosBtn?.addEventListener("click", () => { if (!currentUser) { alert("Faça login para ver seus pedidos."); Overlays.open(el.loginModal); return; } Overlays.open(el.pedidosPanel); carregarPedidos(currentUser.uid); });  
+    el.pedidosFecharBtn?.addEventListener("click", () => Overlays.closeAll());  
+
+    async function carregarPedidos(userId) {  
+        if (!el.pedidosLista) return; el.pedidosLista.innerHTML = `<p class="empty-orders">Carregando pedidos...</p>`;  
+        try { const q = db.collection("Pedidos").where("userId", "==", userId).orderBy("data", "desc"); const snapshot = await q.get();  
+            if (snapshot.empty) { el.pedidosLista.innerHTML = `<p class="empty-orders">Nenhum pedido encontrado 😢</p>`; return; }  
+            exibirPedidos(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));  
+        } catch (err) { console.error("Erro pedidos:", err); el.pedidosLista.innerHTML = `<p class="empty-orders" style="color:red;">Erro ao buscar pedidos.</p>`; }  
+    }  
+
+    function exibirPedidos(pedidos) {  
+        if (!el.pedidosLista) return;  
+        el.pedidosLista.innerHTML = pedidos.map(p => {  
+            const thumbUrl = p.thumb || ''; const dataFormatada = p.data ? new Date(p.data?.seconds * 1000 || p.data).toLocaleString("pt-BR", { day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit" }) : "—";  
+            const podeRepetir = Array.isArray(p.itensObj) && p.itensObj.length > 0;  
+            const itensParaExibir = (Array.isArray(p.itens) && p.itens.length > 0) ? p.itens.join('<br>') : (p.itensObj && p.itensObj.length > 0) ? p.itensObj.map(i => `• ${i.nome} x${i.qtd}`).join('<br>') : '• Sem itens';  
+            return `<div class="pedido-card"><div class="pedido-thumb" style="background-image:url('${thumbUrl}');"></div><h4>📅 ${dataFormatada}</h4><p class="pedido-info">Total: ${money(p.total)}</p><div class="pedido-itens">${itensParaExibir}</div><button class="repetir-btn" data-id="${p.id}" ${podeRepetir ? '' : 'disabled style="background:grey;cursor:not-allowed;"'}>🔁 Repetir Pedido</button></div>`;  
+        }).join('');  
+    }  
+
+    el.pedidosLista?.addEventListener('click', async (e) => { if (e.target.classList.contains('repetir-btn') && !e.target.disabled) { e.target.disabled = true; e.target.textContent = "Carregando..."; await repetirPedido(e.target.dataset.id); } });  
+
+    async function repetirPedido(idPedido) {  
+        try { const docRef = db.collection("Pedidos").doc(idPedido); const doc = await docRef.get();  
+            if (!doc.exists) return alert("Pedido não encontrado.");  
+            const itensParaRepetir = doc.data().itensObj;  
+            if (!Array.isArray(itensParaRepetir) || itensParaRepetir.length === 0) return alert("Não é possível repetir este pedido.");  
+            cart = []; itensParaRepetir.forEach(item => { if (item.nome && item.preco > 0 && item.qtd > 0) cart.push({ nome: item.nome, preco: item.preco, qtd: item.qtd }); });  
+            couponApplied = ""; localStorage.removeItem("dflCoupon"); document.getElementById("coupon-input").value = "";  
+            popupAdd("Pedido adicionado ao carrinho!"); renderMiniCart(); Overlays.closeAll(); Overlays.open(el.miniCart);  
+        } catch (err) { console.error("Erro repetir:", err); alert("Erro ao processar."); }  
     }
 
-    console.log("%c🔥 DFL v8.0 — SCRIPT INTEGRAL E UNIFICADO", "background:#4CAF50;color:#fff;padding:5px;border-radius:5px;");  
+    /* COOKIES */
+    const cookieBanner = document.getElementById("cookie-banner"); const cookieAcceptBtn = document.getElementById("cookie-accept");  
+    if (cookieBanner && cookieAcceptBtn) { if (localStorage.getItem("dfl-cookies-accepted") === "true") cookieBanner.style.display = "none"; else cookieBanner.classList.add("show"); cookieAcceptBtn.addEventListener("click", () => { localStorage.setItem("dfl-cookies-accepted", "true"); cookieBanner.classList.remove("show"); setTimeout(() => cookieBanner.style.display = "none", 500); }); }
+
+    console.log("%c🔥 DFL v8.1 — FINAL CORRIGIDO (SEM DUPLICATAS)", "background:#4CAF50;color:#fff;padding:5px;border-radius:5px;");  
     
     renderPromoCards();
     inicializarFirebase();  
 
-}); 
+}); // FIM DO ÚNICO DOMContentLoaded
