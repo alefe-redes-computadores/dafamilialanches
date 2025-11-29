@@ -1,8 +1,5 @@
 /* ===========================================================
-   🎨 Da Família Lanches – CSS v7.6 FINAL
-   - Compatível com Script v7.6
-   - Z-Index corrigidos (Carrinho sobrepõe botões)
-   - Estilos de Frete Manual e Barra de Progresso
+   🎨 Da Família Lanches – CSS v8.1 FINAL "BLINDADO"
    =========================================================== */
 
 :root {
@@ -97,11 +94,6 @@ body {
 .status-banner.open { background: var(--success); }
 .status-banner.closed { background: var(--danger); }
 
-/* Removendo banner antigo para evitar duplicidade */
-.hours-banner {
-    display: none !important;
-}
-
 .search-container {
   max-width: 800px;
   margin: 20px auto;
@@ -151,31 +143,6 @@ body {
   box-shadow: var(--shadow-1);
   font-size: 1.05rem;
 }
-
-/* Carrossel */
-.carousel { position: relative; max-width: 900px; margin: 0 auto; }
-.slides { display: flex; gap: 8px; overflow-x: auto; scroll-behavior: smooth; padding: 4px; }
-.slides::-webkit-scrollbar { height: 8px; }
-.slides::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 10px; }
-.slides::-webkit-scrollbar-thumb { background: #ddd; border-radius: 10px; }
-.slide {
-  display: block; border-radius: 12px; flex: 0 0 auto;
-  min-width: 250px; max-width: 250px; height: 180px; object-fit: cover;
-  box-shadow: var(--shadow-2); cursor: zoom-in;
-  transition: transform 0.2s, box-shadow 0.2s; background: #fff;
-}
-.slide:hover { transform: scale(1.05); box-shadow: var(--shadow-3); }
-.c-btn {
-  position: absolute; top: 50%; transform: translateY(-50%);
-  background: #ffca28; color: #000; border: none; border-radius: 50%;
-  width: 40px; height: 40px; font-size: 24px; font-weight: 700; opacity: 0.9;
-  display: flex; align-items: center; justify-content: center; cursor: pointer;
-  box-shadow: var(--shadow-2); transition: all 0.2s;
-}
-.c-btn:hover { opacity: 1; background: #ffb300; transform: translateY(-50%) scale(1.05); }
-.c-prev { left: 10px; }
-.c-next { right: 10px; }
-
 
 section { margin: 25px auto; width: 95%; max-width: 1200px; }
 section h2 { font-size: 1.3rem; text-align: center; margin-bottom: 15px; color: #ff7043; }
