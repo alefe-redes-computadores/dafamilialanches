@@ -1,13 +1,11 @@
 /* =========================================================  
-   🚀 DFL v8.4 FINAL — SCRIPT MESTRE INTEGRAL
-   - Base: v5.6 Estável + Melhorias v7.x/v8.x
-   - NENHUMA FUNÇÃO REMOVIDA
-   - Promoção 10 (4 Anos) no Topo
-   - Correção de Botões, Login e Modais
+   🚀 DFL v7.6 FINAL — SCRIPT INTEGRAL (CORRIGIDO)
+   - Função fecharPedido() RESTAURADA
+   - Botões "Finalizar Pedido" e "Limpar Carrinho" FUNCIONANDO
+   - Todas as funcionalidades v7.6 preservadas
 ========================================================= */  
 
 document.addEventListener("DOMContentLoaded", () => {
-
     // ============================================================
     // 1. MÁSCARA DE CEP
     // ============================================================
@@ -22,7 +20,7 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-    /* ------------------ ⚙️ CONFIGURAÇÕES GLOBAIS ------------------ */  
+    /* ------------------ ⚙️ CONFIGURAÇÕES BASE ------------------ */  
     const sound = new Audio("click.wav");   
     let cart = [];  
     let currentUser = null;  
@@ -32,25 +30,17 @@ document.addEventListener("DOMContentLoaded", () => {
     const LIMITE_FRETE_GRATIS = 80.00;
     let deliveryFeesCache = null;   
 
-    // Admins autorizados
-    const ADMINS = [ "alefejohsefe@gmail.com", "kalebhstanley650@gmail.com", "contato@dafamilialanches.com.br" ];
-
     // Formatador de Moeda
     const money = (n) => `R$ ${Number(n || 0).toFixed(2).replace(".", ",")}`;  
     
-    // Função Segura (ErrorHandler)
+    // Função Segura (evita crash se der erro em listener)
     const safe = (fn) => (...a) => { 
         try { 
             fn(...a); 
         } catch (e) { 
-            console.error("Erro na função:", e); 
+            console.error(e); 
         } 
     };  
-
-    // Função para verificar Admin
-    function isAdmin(user) { 
-        return user && user.email && ADMINS.includes(user.email.toLowerCase()); 
-    }
 
     // Ícones de Nível (Recompensas)
     function getTierIcon(tier) {  
@@ -69,7 +59,8 @@ document.addEventListener("DOMContentLoaded", () => {
     }  
 
     /* ============================================================
-       🔥 DADOS DAS PROMOÇÕES (ORDEM: NOVA EM 1º)
+       🔥 DADOS DAS PROMOÇÕES (REORDENADOS v7.6)
+       Ordem: Nova(10), 9, 8, 6, 5, 4, 7, 3, 2, 1
     ============================================================ */
     const PROMO_DATA = [  
         null,   
@@ -109,7 +100,7 @@ document.addEventListener("DOMContentLoaded", () => {
             img: "promocoes/promo6.jpg", 
             descricao: "Pra família toda! 5 Burgers UAI recheados no precinho!" 
         },
-        // POSIÇÃO 5: Antiga Promo 5
+        // POSIÇÃO 5: Antiga Promo 5 (Permanece)
         { 
             id: 5, 
             nome: "4 Trem + 1 Fanta 1L", 
@@ -127,7 +118,7 @@ document.addEventListener("DOMContentLoaded", () => {
             img: "promocoes/promo4.jpg", 
             descricao: "3 Burgers Trem com bacon, queijo e batata palha + 1 Fanta 1L." 
         },
-        // POSIÇÃO 7: Antiga Promo 7
+        // POSIÇÃO 7: Antiga Promo 7 (Permanece)
         { 
             id: 7, 
             nome: "4 TremBão + 1 Fanta 1L", 
@@ -166,7 +157,7 @@ document.addEventListener("DOMContentLoaded", () => {
     ];
 
     /* ============================================================
-       🎨 FUNÇÃO: RENDERIZAR PROMOÇÕES (GRID)
+       🎨 FUNÇÃO: RENDERIZAR PROMOÇÕES
     ============================================================ */
     function renderPromoCards() {
         const container = document.getElementById('promocoes-grid');
@@ -193,8 +184,7 @@ document.addEventListener("DOMContentLoaded", () => {
         container.querySelectorAll('.add-promo').forEach(btn => {
             btn.addEventListener('click', (e) => {
                 const promoId = parseInt(e.currentTarget.dataset.promoId);
-                // Importante: Usar find para pegar pelo ID correto
-                const promo = PROMO_DATA.find(p => p && p.id === promoId);
+                const promo = PROMO_DATA[promoId];
                 if (promo) {
                     addCommonItem(promo.nome, promo.preco);
                 }
@@ -208,7 +198,22 @@ document.addEventListener("DOMContentLoaded", () => {
     const searchInput = document.getElementById('search-input');
     
     const PRODUTOS_BUSCA = [
-        { nome: "Bão", aliases: ["bao", "bon"] }, { nome: "Uai", aliases: ["uai", "way"] }, { nome: "Trem", aliases: ["trem", "tren"] }, { nome: "Cadim", aliases: ["cadim", "kadim"] }, { nome: "Armaria", aliases: ["armaria", "armário", "armario"] }, { nome: "Bitela", aliases: ["bitela", "vitela"] }, { nome: "Apruma", aliases: ["apruma", "apuma"] }, { nome: "Peleja", aliases: ["peleja"] }, { nome: "Tudibom", aliases: ["tudibom", "tudo bom", "tudobom"] }, { nome: "Custoso", aliases: ["custoso"] }, { nome: "Nigucim", aliases: ["nigucim", "ningucim"] }, { nome: "Simprão", aliases: ["simprao", "simprão", "simples"] }, { nome: "Nimin", aliases: ["nimin", "ninin"] }, { nome: "Padaná", aliases: ["padana", "padaná"] }, { nome: "Purizin", aliases: ["purizin", "purezin", "pure"] }, { nome: "Trembão", aliases: ["trembao", "trembão", "trembaum"] }
+        { nome: "Bão", aliases: ["bao", "bon"] },
+        { nome: "Uai", aliases: ["uai", "way"] },
+        { nome: "Trem", aliases: ["trem", "tren"] },
+        { nome: "Cadim", aliases: ["cadim", "kadim"] },
+        { nome: "Armaria", aliases: ["armaria", "armário", "armario"] },
+        { nome: "Bitela", aliases: ["bitela", "vitela"] },
+        { nome: "Apruma", aliases: ["apruma", "apuma"] },
+        { nome: "Peleja", aliases: ["peleja"] },
+        { nome: "Tudibom", aliases: ["tudibom", "tudo bom", "tudobom"] },
+        { nome: "Custoso", aliases: ["custoso"] },
+        { nome: "Nigucim", aliases: ["nigucim", "ningucim"] },
+        { nome: "Simprão", aliases: ["simprao", "simprão", "simples"] },
+        { nome: "Nimin", aliases: ["nimin", "ninin"] },
+        { nome: "Padaná", aliases: ["padana", "padaná"] },
+        { nome: "Purizin", aliases: ["purizin", "purezin", "pure"] },
+        { nome: "Trembão", aliases: ["trembao", "trembão", "trembaum"] }
     ];
 
     function normalizar(texto) {
@@ -332,7 +337,7 @@ document.addEventListener("DOMContentLoaded", () => {
         progressText: document.getElementById("progressText"),
         progressFill: document.getElementById("progressFill"),
         
-        // Modal Promo
+        // Modal Promo (v2.7)
         promoModal: document.getElementById("promo-modal"),
         promoImg: document.getElementById("promo-modal-img"),
         promoTitle: document.getElementById("promo-modal-title"),
@@ -342,13 +347,13 @@ document.addEventListener("DOMContentLoaded", () => {
         promoNavNext: document.querySelector("#promo-modal .promo-nav.next"),
         promoClose: document.querySelector("#promo-modal .promo-close"),
         
-        // Carrossel (Antigo/Compatibilidade)
+        // Carrossel
         cPrev: document.querySelector(".c-prev"),
         cNext: document.querySelector(".c-next"),
         slides: document.querySelector(".slides")
     };
 
-    /* ------------------ 🌫️ SISTEMA DE OVERLAYS (UNIFICADO) ------------------ */  
+    /* ------------------ 🌫️ BACKDROP & OVERLAYS ------------------ */  
     if (!el.cartBackdrop) {  
         const bd = document.createElement("div"); 
         bd.id = "cart-backdrop"; 
@@ -364,6 +369,7 @@ document.addEventListener("DOMContentLoaded", () => {
         hide() { 
             el.cartBackdrop.classList.remove("active"); 
             document.body.classList.remove("no-scroll"); 
+            // Garante fechamento dos painéis
             if(el.pedidosPanel) el.pedidosPanel.classList.remove("active");
             if(el.recompensasPanel) el.recompensasPanel.classList.remove("active");
         },  
@@ -386,13 +392,6 @@ document.addEventListener("DOMContentLoaded", () => {
     };  
     
     el.cartBackdrop.addEventListener("click", () => Overlays.closeAll());
-
-    // 🔥 INTEGRAÇÃO DO FECHAMENTO DE MODAIS (CLIQUE FORA/X)
-    document.querySelectorAll('.modal').forEach(m => m.addEventListener('click', e => { 
-        if (e.target.classList.contains('modal')) { 
-            Overlays.closeAll();
-        } 
-    }));
 
     /* ------------------ 🎟️ CUPONS ------------------ */  
     const couponForm = document.getElementById("coupon-form");  
@@ -490,17 +489,17 @@ document.addEventListener("DOMContentLoaded", () => {
         }  
 
         el.miniList.innerHTML = cart.map((item, idx) => `  
-      <div class="cart-item" style="border-bottom:1px solid #eee;padding:8px 0;">  
+      <div class="cart-item" style="border-bottom:1px solid #eee;padding:10px 0;">  
         <div style="display:flex;justify-content:space-between;align-items:center;">  
           <div style="flex:1;">  
-            <p style="font-weight:600;margin-bottom:2px;">${item.nome}</p>  
+            <p style="font-weight:600;margin-bottom:4px;">${item.nome}</p>  
             <p style="color:#666;font-size:0.85rem;">${money(item.preco)} × ${item.qtd}</p>  
           </div>  
           <div style="display:flex;gap:8px;align-items:center;">  
-            <button type="button" class="cart-minus" data-idx="${idx}" style="background:#ff4081;color:#fff;border:none;border-radius:5px;width:24px;height:24px;cursor:pointer;">−</button>  
+            <button type="button" class="cart-minus" data-idx="${idx}" style="background:#ff4081;color:#fff;border:none;border-radius:5px;width:28px;height:28px;cursor:pointer;">−</button>  
             <span style="font-weight:600;min-width:20px;text-align:center;">${item.qtd}</span>  
-            <button type="button" class="cart-plus" data-idx="${idx}" style="background:#4caf50;color:#fff;border:none;border-radius:5px;width:24px;height:24px;cursor:pointer;">+</button>  
-            <button type="button" class="cart-remove" data-idx="${idx}" style="background:#d32f2f;color:#fff;border:none;border-radius:5px;width:24px;height:24px;cursor:pointer;">🗑</button>  
+            <button type="button" class="cart-plus" data-idx="${idx}" style="background:#4caf50;color:#fff;border:none;border-radius:5px;width:28px;height:28px;cursor:pointer;">+</button>  
+            <button type="button" class="cart-remove" data-idx="${idx}" style="background:#d32f2f;color:#fff;border:none;border-radius:5px;width:28px;height:28px;cursor:pointer;">🗑</button>  
           </div>  
         </div>  
       </div>  
@@ -743,7 +742,6 @@ document.addEventListener("DOMContentLoaded", () => {
         b.addEventListener("click", () => Overlays.closeAll())
     );  
 
-    // 🔥 FUNÇÃO ADICIONAR RESTAURADA
     function addCommonItem(nome, preco) {  
         if (/^combo/i.test(nome) && !/^\s*Combo [0-9]/.test(nome)) { openComboModal(nome, preco); return; }  
         const found = cart.find((i) => i.nome === nome && i.preco === preco);  
@@ -871,7 +869,6 @@ document.addEventListener("DOMContentLoaded", () => {
         }  
     }
 
-    // CORREÇÃO CRÍTICA: stopPropagation para não fechar o carrinho
     document.getElementById('btn-calcular-frete')?.addEventListener('click', (e) => {
         e.stopPropagation();
         e.preventDefault();
@@ -1056,11 +1053,173 @@ document.addEventListener("DOMContentLoaded", () => {
         document.getElementById('numero-input')?.addEventListener('input', renderMiniCart);  
         document.getElementById('complemento-input')?.addEventListener('input', renderMiniCart);  
         
-        // EVENTOS DE CLIQUE (DELEGAÇÃO SEGURA)
+        // ✅ CORREÇÃO APLICADA: Event listeners para os botões
         summaryDiv.querySelector("#finish-order")?.addEventListener("click", fecharPedido);  
         summaryDiv.querySelector("#clear-cart")?.addEventListener("click", () => {  
-            if (confirm("Limpar todo o carrinho?")) { cart = []; couponApplied = ""; localStorage.removeItem("dflCoupon"); document.getElementById("coupon-input").value = ""; renderMiniCart(); popupAdd("Carrinho limpo!"); }  
+            if (confirm("Limpar todo o carrinho?")) { 
+                cart = []; 
+                couponApplied = ""; 
+                localStorage.removeItem("dflCoupon"); 
+                document.getElementById("coupon-input").value = ""; 
+                renderMiniCart(); 
+                popupAdd("Carrinho limpo!"); 
+            }  
         });  
+    }
+
+    /* ============================================================
+       🚨 FUNÇÃO FECHAR PEDIDO (CORREÇÃO CRÍTICA - RESTAURADA!)
+    ============================================================ */
+    async function fecharPedido() {  
+        if (!cart.length) return alert("Carrinho vazio!");  
+        if (!currentUser) { alert("Faça login para enviar o pedido!"); Overlays.open(el.loginModal); return; }  
+        
+        const isRetirarLocal = document.getElementById('retirar-local')?.checked;  
+        let finalAddressString = "";
+        
+        // Verifica se está no modo manual ou CEP
+        if (modoEnderecoManual) {
+            const manualEndereco = document.getElementById('manualEndereco');
+            const manualNumero = document.getElementById('manualNumero');
+            const endereco = manualEndereco?.value?.trim() || '';
+            const numero = manualNumero?.value?.trim() || '';
+            
+            if (endereco && numero) {
+                finalAddressString = `${endereco}, N° ${numero} (MANUAL)`;
+            }
+        } else {
+            const cepInput = document.getElementById('cep-input');
+            const autoRuaBairro = document.getElementById("endereco-auto");
+            const autoNumero = document.getElementById("numero-input");
+            const autoComp = document.getElementById("complemento-input");
+            
+            const ruaBairroValue = autoRuaBairro ? autoRuaBairro.value.trim() : '';
+            const numeroValue = autoNumero ? autoNumero.value.trim() : '';
+            const compValue = autoComp ? autoComp.value.trim() : '';
+            const cepValue = cepInput ? cepInput.value.trim().replace(/\D/g, '') : '';
+            
+            if (ruaBairroValue && numeroValue) {
+                finalAddressString = `${ruaBairroValue}, N° ${numeroValue}`;
+                if (compValue) finalAddressString += `, Comp: ${compValue}`;
+                if (cepValue.length === 8) finalAddressString += ` | CEP: ${cepValue}`;
+            }
+        }
+        
+        if (isRetirarLocal) finalAddressString = "CLIENTE IRÁ RETIRAR NO LOCAL";  
+        else if (!finalAddressString) { alert("Preencha o endereço completo (via CEP ou manualmente), ou marque 'Retirar no Local'."); return; }  
+
+        const addr = finalAddressString;  
+        const { subtotal, delivery, discount, total, cupomInfo } = await calcTotals();  
+        const pedido = { 
+            usuario: currentUser.email, 
+            userId: currentUser.uid, 
+            nome: currentUser.displayName || currentUser.email.split("@")[0], 
+            itens: cart.map((i) => `• ${i.nome} x${i.qtd}`).join("\n"), 
+            itensObj: cart.map(i => ({ nome: i.nome, preco: i.preco, qtd: i.qtd })), 
+            subtotal: Number(subtotal.toFixed(2)), 
+            entrega: Number(delivery.toFixed(2)), 
+            desconto: Number(discount.toFixed(2)), 
+            cupom: couponApplied || "", 
+            total: Number(total.toFixed(2)), 
+            endereco: addr, 
+            data: new Date().toISOString(), 
+            thumb: '' 
+        };  
+
+        try {  
+            const batch = db.batch(); 
+            const userId = currentUser.uid; 
+            const usuarioRef = db.collection("Usuarios").doc(userId);  
+            
+            if (cupomInfo.isPersonalizado && couponApplied) { 
+                const cupomUserRef = db.collection("CuponsUsuarios").doc(userId); 
+                batch.update(cupomUserRef, { 
+                    usado: true, 
+                    dataUso: firebase.firestore.FieldValue.serverTimestamp(), 
+                    pedidoId: 'PENDENTE' 
+                }); 
+            }  
+            
+            const pedidoRef = db.collection("Pedidos").doc(); 
+            batch.set(pedidoRef, pedido);  
+            batch.set(usuarioRef, { 
+                email: currentUser.email, 
+                pedidosFeitos: firebase.firestore.FieldValue.increment(1) 
+            }, { merge: true });  
+            
+            await batch.commit();  
+            
+            if (cupomInfo.isPersonalizado && couponApplied) {
+                await db.collection("CuponsUsuarios").doc(userId).update({ pedidoId: pedidoRef.id });  
+            }
+
+            const RECOMPENSAS_DATA = await carregarConfiguracoesDeRecompensas();  
+            const doc = await usuarioRef.get(); 
+            const data = doc.data() || { pedidosFeitos: 0, recompensaNivel: 0 }; 
+            const feitos = data.pedidosFeitos; 
+            const nivelAtual = data.recompensaNivel;  
+            const recompensaAtingida = RECOMPENSAS_DATA.find(r => r.limite === feitos && (r.limite / (RECOMPENSAS_DATA[0]?.limite || 1)) > nivelAtual);  
+
+            if (recompensaAtingida) {  
+                const primeiroLimite = RECOMPENSAS_DATA[0]?.limite || 1; 
+                const novoNivel = recompensaAtingida.limite / primeiroLimite;  
+                const itemLiberado = { 
+                    cupom: recompensaAtingida.valor, 
+                    tipo: recompensaAtingida.tipo, 
+                    valor: recompensaAtingida.valor, 
+                    liberadoEm: firebase.firestore.FieldValue.serverTimestamp(), 
+                    usado: false, 
+                    pedidoLiberacao: pedidoRef.id, 
+                    titulo: recompensaAtingida.titulo || `Recompensa Nível ${novoNivel}` 
+                };  
+                
+                await usuarioRef.update({ 
+                    recompensaNivel: novoNivel, 
+                    ultimaRecompensa: recompensaAtingida.id 
+                });  
+                
+                if (recompensaAtingida.tipo === 'cupom') {
+                    await db.collection("CuponsUsuarios").doc(userId).set(itemLiberado, { merge: true });  
+                }
+                
+                await db.collection("Usuarios").doc(userId).collection("RecompensasRecebidas").add(itemLiberado);  
+                const nomeNivel = String(recompensaAtingida.titulo || recompensaAtingida.valor || '');  
+                mostrarPopupRecompensa(`🎉 Parabéns! Você alcançou ${nomeNivel} ${getTierIcon(nomeNivel)} e ganhou: ${recompensaAtingida.valor}`);  
+                configuracoesRecompensa = null;  
+            }  
+
+            popupAdd("Pedido salvo ✅"); 
+            try { sound.currentTime = 0; sound.play(); } catch (_) {}  
+            
+            // Formata mensagem para WhatsApp
+            const linhas = [
+                "🍔 *Pedido DFL*",
+                cart.map((i) => `• ${i.nome} x${i.qtd}`).join("\n"), 
+                "", 
+                `Subtotal: *${money(subtotal)}*`, 
+                `Entrega: *${money(delivery)}*${cupomInfo.freeShipping ? " _(Frete Grátis)_" : ""}`, 
+                `Desconto${couponApplied ? ` (${couponApplied})` : ""}: *-${money(discount)}*`, 
+                `*Total: ${money(total)}*`, 
+                "", 
+                `🏠 *Endereço:* ${addr}`
+            ].join("\n");  
+            
+            // Abre WhatsApp
+            window.open(`https://wa.me/5534997178336?text=${encodeURIComponent(linhas)}`, "_blank");  
+            
+            // Limpa carrinho e fecha modais
+            cart = []; 
+            couponApplied = ""; 
+            localStorage.removeItem("dflCoupon"); 
+            document.getElementById("coupon-input").value = ""; 
+            modoEnderecoManual = false; 
+            renderMiniCart(); 
+            Overlays.closeAll();  
+            
+        } catch (err) { 
+            console.error("Erro fechar pedido:", err); 
+            alert(`Erro: ${err.message}`); 
+        }  
     }
 
     /* ------------------ 🚨 RECOMPENSAS (RESTAURADO v5.6) ------------------ */
@@ -1257,6 +1416,9 @@ document.addEventListener("DOMContentLoaded", () => {
     el.pedidosFecharBtn?.addEventListener("click", () => Overlays.closeAll());
 
     /* ------------------ 📊 ADMIN DASHBOARD (RESTAURADO) ------------------ */
+    const ADMINS = [ "alefejohsefe@gmail.com", "kalebhstanley650@gmail.com", "contato@dafamilialanches.com.br" ];  
+    function isAdmin(user) { return user && user.email && ADMINS.includes(user.email.toLowerCase()); }  
+    
     let chartPedidos = null; let chartProdutos = null;  
     
     function ensureChartJS(cb) { 
@@ -1387,7 +1549,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }); 
     }
 
-    console.log("%c🔥 DFL v8.4 — SCRIPT INTEGRAL CORRIGIDO E VERIFICADO", "background:#4CAF50;color:#fff;padding:5px;border-radius:5px;");  
+    console.log("%c🔥 DFL v7.6 — SCRIPT CORRIGIDO E FUNCIONAL", "background:#4CAF50;color:#fff;padding:5px;border-radius:5px;");  
     
     renderPromoCards();
     inicializarFirebase();  
