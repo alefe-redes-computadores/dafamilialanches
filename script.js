@@ -1,9 +1,10 @@
 /* =========================================================  
-   🚀 DFL v9.1 — SISTEMA UI BLINDADO + ATALHOS MENU LATERAL
+   🚀 DFL v9.2 — SISTEMA UI BLINDADO + PIX ESTÁTICO
    - UIManager universal para controle de painéis
    - Anti-spam de cliques múltiplos
    - Atalhos do menu lateral funcionando perfeitamente
    - Todas funções originais preservadas
+   - Novo: Modal PIX Estático integrado
 ========================================================= */  
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -29,7 +30,7 @@ document.addEventListener("DOMContentLoaded", () => {
             if (panelElement) {
                 this.currentPanel = panelName;
                 
-                if (panelElement.id === "mini-cart" || panelElement.id === "painelPedidos" || panelElement.id === "recompensas-panel") {
+                if (panelElement.id === "mini-cart" || panelElement.id === "painelPedidos" || panelElement.id === "recompensas-panel" || panelElement.id === "pix-modal") {
                     panelElement.classList.add("active");
                 } else {
                     panelElement.classList.add("show");
@@ -55,7 +56,7 @@ document.addEventListener("DOMContentLoaded", () => {
         },
         
         closeAll() {
-            document.querySelectorAll(".modal.show, #mini-cart.active, .pedidos-panel.active, .recompensas-panel.active, #admin-dashboard.show").forEach(el => {
+            document.querySelectorAll(".modal.show, #mini-cart.active, .pedidos-panel.active, .recompensas-panel.active, #admin-dashboard.show, #pix-modal.active").forEach(el => {
                 el.classList.remove("show", "active");
             });
             
@@ -212,6 +213,161 @@ document.addEventListener("DOMContentLoaded", () => {
             UIManager.closeSideMenu();
         });
     });
+
+    // ============================================================
+    // 💰 NOVO: SISTEMA PIX ESTÁTICO v9.2
+    // ============================================================
+    const pixModal = document.getElementById("pix-modal");
+    const pixValor = document.getElementById("pix-valor");
+    const pixCopiaCola = document.getElementById("pix-copia-cola");
+    const pixBtnCopy = document.querySelector(".pix-btn-copy");
+    const pixBtnWhatsapp = document.querySelector(".pix-btn-whatsapp");
+    const pixClose = document.querySelector(".pix-close");
+
+    // Chave PIX estática
+    const CHAVE_PIX = "34997178336";
+    const INFO_PIX = "34997178336 (Stone) - Da Família / Kalebh";
+
+    // Função para abrir modal PIX
+    async function abrirModalPIX() {
+        try {
+            // Calcula o total usando a função existente
+            const { total } = await calcTotals();
+            
+            // Preenche os dados no modal
+            if (pixValor) pixValor.textContent = money(total);
+            if (pixCopiaCola) {
+                pixCopiaCola.innerHTML = `<strong>${INFO_PIX}</strong>`;
+            }
+            
+            // Abre o modal
+            UIManager.open("pix", pixModal);
+        } catch (error) {
+            console.error("Erro ao abrir modal PIX:", error);
+            // Fallback: continua com fluxo normal se der erro
+            fecharPedidoOriginal();
+        }
+    }
+
+    // Botão Copiar Código PIX
+    if (pixBtnCopy) {
+        pixBtnCopy.addEventListener("click", async () => {
+            try {
+                await navigator.clipboard.writeText(CHAVE_PIX);
+                
+                // Feedback visual
+                const originalText = pixBtnCopy.textContent;
+                pixBtnCopy.textContent = "Copiado! ✓";
+                pixBtnCopy.style.background = "#4CAF50";
+                
+                setTimeout(() => {
+                    pixBtnCopy.textContent = originalText;
+                    pixBtnCopy.style.background = "";
+                }, 2000);
+                
+            } catch (err) {
+                // Fallback para navegadores mais antigos
+                const textArea = document.createElement("textarea");
+                textArea.value = CHAVE_PIX;
+                document.body.appendChild(textArea);
+                textArea.select();
+                document.execCommand("copy");
+                document.body.removeChild(textArea);
+                
+                const originalText = pixBtnCopy.textContent;
+                pixBtnCopy.textContent = "Copiado! ✓";
+                setTimeout(() => {
+                    pixBtnCopy.textContent = originalText;
+                }, 2000);
+            }
+        });
+    }
+
+    // Botão Enviar Comprovante WhatsApp
+    if (pixBtnWhatsapp) {
+        pixBtnWhatsapp.addEventListener("click", async () => {
+            const { total } = await calcTotals();
+            const mensagem = `💳 *COMPROVANTE PIX - Da Família Lanches*\n\n` +
+                           `📦 *Pedido:* R$ ${Number(total).toFixed(2).replace(".", ",")}\n` +
+                           `🏷️ *Chave PIX:* ${CHAVE_PIX}\n` +
+                           `👤 *Beneficiário:* Da Família / Kalebh\n` +
+                           `🏦 *Banco:* Stone\n\n` +
+                           `📎 *Anexe o comprovante do pagamento*\n` +
+                           `⏰ Pedido será liberado após confirmação do pagamento`;
+            
+            window.open(`https://wa.me/5534997178336?text=${encodeURIComponent(mensagem)}`, "_blank");
+        });
+    }
+
+    // Fechar Modal PIX
+    if (pixClose) {
+        pixClose.addEventListener("click", (e) => {
+            e.preventDefault();
+            UIManager.closeAll();
+            // Continua fluxo normal após fechar
+            setTimeout(() => fecharPedidoOriginal(), 300);
+        });
+    }
+
+    // Fechar modal clicando fora
+    if (pixModal) {
+        pixModal.addEventListener("click", (e) => {
+            if (e.target === pixModal) {
+                UIManager.closeAll();
+                // Continua fluxo normal após fechar
+                setTimeout(() => fecharPedidoOriginal(), 300);
+            }
+        });
+    }
+
+    // Nova função fecharPedido que abre modal PIX
+    window.fecharPedido = async function() {
+        if (!cart.length) return alert("Carrinho vazio!");
+        if (!currentUser) { 
+            alert("Faça login para enviar o pedido!"); 
+            UIManager.open("login", el.loginModal); 
+            return; 
+        }
+        
+        const isRetirarLocal = document.getElementById('retirar-local')?.checked;
+        let finalAddressString = "";
+        
+        if (modoEnderecoManual) {
+            const manualEndereco = document.getElementById('manualEndereco');
+            const manualNumero = document.getElementById('manualNumero');
+            const endereco = manualEndereco?.value?.trim() || '';
+            const numero = manualNumero?.value?.trim() || '';
+            
+            if (endereco && numero) {
+                finalAddressString = `${endereco}, N° ${numero} (MANUAL)`;
+            }
+        } else {
+            const cepInput = document.getElementById('cep-input');
+            const autoRuaBairro = document.getElementById("endereco-auto");
+            const autoNumero = document.getElementById("numero-input");
+            const autoComp = document.getElementById("complemento-input");
+            
+            const ruaBairroValue = autoRuaBairro ? autoRuaBairro.value.trim() : '';
+            const numeroValue = autoNumero ? autoNumero.value.trim() : '';
+            const compValue = autoComp ? autoComp.value.trim() : '';
+            const cepValue = cepInput ? cepInput.value.trim().replace(/\D/g, '') : '';
+            
+            if (ruaBairroValue && numeroValue) {
+                finalAddressString = `${ruaBairroValue}, N° ${numeroValue}`;
+                if (compValue) finalAddressString += `, Comp: ${compValue}`;
+                if (cepValue.length === 8) finalAddressString += ` | CEP: ${cepValue}`;
+            }
+        }
+        
+        if (isRetirarLocal) finalAddressString = "CLIENTE IRÁ RETIRAR NO LOCAL";
+        else if (!finalAddressString) { 
+            alert("Preencha o endereço completo (via CEP ou manualmente), ou marque 'Retirar no Local'."); 
+            return; 
+        }
+
+        // Validações passaram, agora abre modal PIX
+        abrirModalPIX();
+    };
 
     // ============================================================
     // 1. MÁSCARA DE CEP (MANTIDO ORIGINAL)
@@ -1267,11 +1423,11 @@ document.addEventListener("DOMContentLoaded", () => {
         });  
     }
     /* ============================================================
-       🚨 FUNÇÃO FECHAR PEDIDO
+       🚨 FUNÇÃO FECHAR PEDIDO ORIGINAL (AGORA CHAMADA APÓS PIX)
     ============================================================ */
-    async function fecharPedido() {  
-        if (!cart.length) return alert("Carrinho vazio!");  
-        if (!currentUser) { alert("Faça login para enviar o pedido!"); UIManager.open("login", el.loginModal); return; }  
+    async function fecharPedidoOriginal() {  
+        if (!cart.length) return;  
+        if (!currentUser) return;  
         
         const isRetirarLocal = document.getElementById('retirar-local')?.checked;  
         let finalAddressString = "";
@@ -1304,7 +1460,10 @@ document.addEventListener("DOMContentLoaded", () => {
         }
         
         if (isRetirarLocal) finalAddressString = "CLIENTE IRÁ RETIRAR NO LOCAL";  
-        else if (!finalAddressString) { alert("Preencha o endereço completo (via CEP ou manualmente), ou marque 'Retirar no Local'."); return; }  
+        else if (!finalAddressString) { 
+            popupAdd("Erro: Endereço incompleto.");
+            return; 
+        }  
 
         const addr = finalAddressString;  
         const { subtotal, delivery, discount, total, cupomInfo } = await calcTotals();  
@@ -1866,10 +2025,10 @@ el.recompensasBtn?.addEventListener("click", () => {
     }
 
     /* ------------------ 🚀 INICIALIZAÇÃO FINAL ------------------ */
-    console.log("%c🔥 DFL v9.1 — SISTEMA UI BLINDADO + ATALHOS MENU LATERAL!", "background:#4CAF50;color:#fff;padding:5px;border-radius:5px;font-weight:bold;");  
+    console.log("%c🔥 DFL v9.2 — SISTEMA UI BLINDADO + PIX ESTÁTICO!", "background:#4CAF50;color:#fff;padding:5px;border-radius:5px;font-weight:bold;");  
     console.log("%c✅ UIManager implementado com anti-spam", "color:#4CAF50;");
-    console.log("%c✅ Atalhos do menu lateral funcionando", "color:#4CAF50;");
-    console.log("%c✅ Todos os painéis controlados pelo sistema", "color:#4CAF50;");
+    console.log("%c✅ Modal PIX integrado perfeitamente", "color:#4CAF50;");
+    console.log("%c✅ Fluxo de pagamento preservado", "color:#4CAF50;");
     console.log("%c✅ Nenhuma função original removida", "color:#4CAF50;");
     console.log("%c✅ Firebase, ViaCEP, Cupons, Recompensas intactos", "color:#4CAF50;");
     
