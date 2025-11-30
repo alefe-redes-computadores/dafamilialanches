@@ -19,85 +19,81 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     const UIManager = {
-        currentPanel: null,
-        
-            open(panelName, panelElement) {
-    if (ui_lock) return;
-    lockUI();
-    
-    // ⚠️ Não fechar tudo aqui. Isso causava o bug de fechar instantâneo.
-    
-    if (panelElement) {
-        this.currentPanel = panelName;
-        
-        if (
-            panelElement.id === "mini-cart" ||
-            panelElement.id === "painelPedidos" ||
-            panelElement.id === "recompensas-panel" ||
-            panelElement.id === "pix-modal"
-        ) {
-            panelElement.classList.add("active");
-        } else {
-            panelElement.classList.add("show");
-        }
-        
-        if (panelElement.id !== "side-menu") {
-            Backdrop.show();
-        }
+    currentPanel: null,
 
-        // Fecha menu lateral se estiver aberto
-        this.closeSideMenu();
-    }
-}
-        close(panelName, panelElement) {
-            if (panelElement) {
-                panelElement.classList.remove("show", "active");
+    open(panelName, panelElement) {
+        if (ui_lock) return;
+        lockUI();
+
+        if (panelElement) {
+            this.currentPanel = panelName;
+
+            if (
+                panelElement.id === "mini-cart" ||
+                panelElement.id === "painelPedidos" ||
+                panelElement.id === "recompensas-panel" ||
+                panelElement.id === "pix-modal"
+            ) {
+                panelElement.classList.add("active");
+            } else {
+                panelElement.classList.add("show");
             }
-            
-            if (this.currentPanel === panelName) {
-                this.currentPanel = null;
+
+            if (panelElement.id !== "side-menu") {
+                Backdrop.show();
             }
-        },
-        
-        closeAll() {
-            document.querySelectorAll(".modal.show, #mini-cart.active, .pedidos-panel.active, .recompensas-panel.active, #admin-dashboard.show, #pix-modal.active").forEach(el => {
-                el.classList.remove("show", "active");
-            });
-            
+
+            // Fecha menu lateral se estiver aberto
             this.closeSideMenu();
-            Backdrop.hide();
-            this.currentPanel = null;
-        },
-        
-        closeSideMenu() {
-            const sideMenu = document.getElementById("side-menu");
-            const menuOverlay = document.getElementById("menu-overlay");
-            
-            if (sideMenu) sideMenu.classList.remove("active");
-            if (menuOverlay) menuOverlay.classList.remove("active");
-            document.body.style.overflow = "";
-        },
-        
-        isOpen(panelName) {
-            return this.currentPanel === panelName;
-        },
-        
-        // Função especial para atalhos do menu lateral
-        handleMenuAction(actionCallback) {
-            if (ui_lock) return;
-            lockUI(200);
-            
-            // Fecha o menu primeiro
-            this.closeSideMenu();
-            
-            // Executa a ação após um pequeno delay para fluidez
-            setTimeout(() => {
-                if (typeof actionCallback === 'function') {
-                    actionCallback();
-                }
-            }, 150);
         }
-    };
+    },
+
+    close(panelName, panelElement) {
+        if (panelElement) {
+            panelElement.classList.remove("show", "active");
+        }
+        
+        if (this.currentPanel === panelName) {
+            this.currentPanel = null;
+        }
+    },
+
+    closeAll() {
+        document.querySelectorAll(".modal.show, #mini-cart.active, .pedidos-panel.active, .recompensas-panel.active, #admin-dashboard.show, #pix-modal.active")
+            .forEach(el => el.classList.remove("show", "active"));
+
+        this.closeSideMenu();
+        Backdrop.hide();
+        this.currentPanel = null;
+    },
+
+    closeSideMenu() {
+        const sideMenu = document.getElementById("side-menu");
+        const menuOverlay = document.getElementById("menu-overlay");
+
+        if (sideMenu) sideMenu.classList.remove("active");
+        if (menuOverlay) menuOverlay.classList.remove("active");
+
+        document.body.style.overflow = "";
+    },
+
+    isOpen(panelName) {
+        return this.currentPanel === panelName;
+    },
+
+    handleMenuAction(actionCallback) {
+        if (ui_lock) return;
+        lockUI(200);
+
+        this.closeSideMenu();
+
+        setTimeout(() => {
+            if (typeof actionCallback === 'function') {
+                actionCallback();
+            }
+        }, 150);
+    }
+};
 
     // ============================================================
     // 🍔 MENU HAMBÚRGUER - SISTEMA ATUALIZADO v9.1
