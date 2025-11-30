@@ -21,28 +21,34 @@ document.addEventListener("DOMContentLoaded", () => {
     const UIManager = {
         currentPanel: null,
         
-        open(panelName, panelElement) {
-            if (ui_lock) return;
-            lockUI();
-            
-            if (panelElement) {
-                this.currentPanel = panelName;
-                
-                if (panelElement.id === "mini-cart" || panelElement.id === "painelPedidos" || panelElement.id === "recompensas-panel" || panelElement.id === "pix-modal") {
-                    panelElement.classList.add("active");
-                } else {
-                    panelElement.classList.add("show");
-                }
-                
-                if (panelElement.id !== "side-menu") {
-                    Backdrop.show();
-                }
-                
-                // Fecha o menu lateral se estiver aberto
-                this.closeSideMenu();
-            }
-        },
+            open(panelName, panelElement) {
+    if (ui_lock) return;
+    lockUI();
+    
+    // ⚠️ Não fechar tudo aqui. Isso causava o bug de fechar instantâneo.
+    
+    if (panelElement) {
+        this.currentPanel = panelName;
         
+        if (
+            panelElement.id === "mini-cart" ||
+            panelElement.id === "painelPedidos" ||
+            panelElement.id === "recompensas-panel" ||
+            panelElement.id === "pix-modal"
+        ) {
+            panelElement.classList.add("active");
+        } else {
+            panelElement.classList.add("show");
+        }
+        
+        if (panelElement.id !== "side-menu") {
+            Backdrop.show();
+        }
+
+        // Fecha menu lateral se estiver aberto
+        this.closeSideMenu();
+    }
+}
         close(panelName, panelElement) {
             if (panelElement) {
                 panelElement.classList.remove("show", "active");
