@@ -320,9 +320,6 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-    // Backup da função original fecharPedido
-    const fecharPedidoOriginal = fecharPedido;
-
     // Nova função fecharPedido que abre modal PIX
     window.fecharPedido = async function() {
         if (!cart.length) return alert("Carrinho vazio!");
