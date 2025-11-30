@@ -717,8 +717,12 @@ document.addEventListener("DOMContentLoaded", () => {
     };
 
     // ✅ CORREÇÃO: Backdrop fecha tudo ao clicar
-    el.cartBackdrop.addEventListener("click", () => UIManager.closeAll());
+    el.cartBackdrop.addEventListener("click", () => {
+    // Se o painel atual for o mini-carrinho, não fechar automaticamente
+    if (UIManager.currentPanel === "cart") return;
 
+    UIManager.closeAll();
+});
     // ✅ CORREÇÃO: Fechar modais clicando FORA do .modal-content
     const setupModalClickOutside = () => {
         document.querySelectorAll('.modal').forEach(modal => {
@@ -989,6 +993,7 @@ document.addEventListener("DOMContentLoaded", () => {
     el.cartIcon?.addEventListener("click", () => {
         renderMiniCart();
         UIManager.open("cart", el.miniCart);
+UIManager.currentPanel = "cart";
     });
     
     /* ------------------ ➕ ADICIONAIS ------------------ */
