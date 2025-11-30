@@ -25,8 +25,6 @@ document.addEventListener("DOMContentLoaded", () => {
             if (ui_lock) return;
             lockUI();
             
-            this.closeAll();
-            
             if (panelElement) {
                 this.currentPanel = panelName;
                 
