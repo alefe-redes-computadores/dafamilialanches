@@ -1,6 +1,8 @@
+
 /* ===========================================================
    🎨 Da Família Lanches – CSS v9.2 CORRIGIDO (Parte 1/2)
-   ✅ CORREÇÃO: Z-index do menu ajustado
+   ✅ CORREÇÃO: Z-index do menu ajustado (OK)
+   ✅ CORREÇÃO: Alinhamento de WhatsApp/Instagram ajustado
    =========================================================== */
 
 :root {
@@ -173,10 +175,14 @@ body {
   padding: 12px 16px;
 }
 
+/* ✅ CORREÇÃO: Nova regra para forçar o alinhamento dos ícones sociais */
+.menu-list .menu-link.menu-link-social {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
 .menu-link-social {
-  display: flex;
-  align-items: center;
-  gap: 8px;
+  /* Regra original para .menu-link-social removida para usar a mais específica acima */
 }
 
 .menu-footer-info {
@@ -995,12 +1001,12 @@ section h2 { font-size: 1.3rem; text-align: center; margin-bottom: 15px; color: 
 .pix-btn-whatsapp:hover { transform: translateY(-2px); box-shadow: 0 6px 15px rgba(37, 211, 102, 0.4); }
 
 @media (max-width: 600px) {
-    #admin-dashboard .modal-content { width: 95% !important; height: 90vh !important; margin: auto; border-radius: 16px; }
-    .cardBox { min-width: 100%; }
-    .search-container { padding: 0 10px; }
-    #search-input { font-size: 0.95rem; padding: 12px 16px; }
-    .meus-pedidos-btn { font-size: 0.8rem; padding: 8px 14px; }
-    .recompensas-btn { font-size: 0.8rem; padding: 8px 14px; }
+  #admin-dashboard .modal-content { width: 95% !important; height: 90vh !important; margin: auto; border-radius: 16px; }
+  .cardBox { min-width: 100%; }
+  .search-container { padding: 0 10px; }
+  #search-input { font-size: 0.95rem; padding: 12px 16px; }
+  .meus-pedidos-btn { font-size: 0.8rem; padding: 8px 14px; }
+  .recompensas-btn { font-size: 0.8rem; padding: 8px 14px; }
 }
 
 .mini-foot label { font-size: 0.85rem; margin-bottom: 6px; }
