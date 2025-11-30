@@ -628,7 +628,11 @@ section h2 { font-size: 1.3rem; text-align: center; margin-bottom: 15px; color: 
   z-index: 1620;
   background: rgba(0, 0, 0, 0.5);
 }
-.modal.show { opacity: 1; pointer-events: auto; }
+/* >> CORREÇÃO CRÍTICA APLICADA AQUI << */
+.modal.show, .modal.active { 
+    opacity: 1; 
+    pointer-events: auto; 
+}
 .modal-content {
   background: #fff; 
   border-radius: 16px; 
