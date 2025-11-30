@@ -138,7 +138,8 @@
 
       <div id="promocoes-grid" class="grid"></div>
     </section>
-     <div id="backdrop"></div>
+     
+    <!-- ✅ CORREÇÃO 1: Backdrop duplicado REMOVIDO (era <div id="backdrop"></div>) -->
 
     <aside id="mini-cart" class="mini-cart" aria-hidden="true">
       <div class="mini-head">
@@ -205,22 +206,7 @@
           <span id="cart-discount">R$ 0,00</span>
         </div>
 
-        <!-- ✅ BOTÃO FINALIZAR PEDIDO ADICIONADO AQUI -->
-        <button id="finalizar-pedido" class="btn-finalizar" type="button"
-          style="
-            width: 100%;
-            padding: 12px;
-            background: #4caf50;
-            color: #fff;
-            font-weight: bold;
-            border: none;
-            border-radius: 10px;
-            font-size: 1.1rem;
-            margin-top: 10px;
-            cursor: pointer;
-          ">
-          Finalizar Pedido 🚀
-        </button>
+        <!-- ✅ CORREÇÃO 2: Botão duplicado REMOVIDO (JavaScript já cria dinamicamente) -->
       </div>
     </aside>
 
@@ -257,7 +243,6 @@
         </div>
       </div>
     </section>
-
     <section class="menu-section" id="tradicionais-section">
       <h2>🍔 Nossos Lanches Tradicionais</h2>
       <div class="grid">
