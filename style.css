@@ -1,8 +1,6 @@
-
 /* ===========================================================
-   🎨 Da Família Lanches – CSS v9.2 CORRIGIDO (Parte 1/2)
-   ✅ CORREÇÃO: Z-index do menu ajustado (OK)
-   ✅ CORREÇÃO: Alinhamento de WhatsApp/Instagram ajustado
+   🎨 Da Família Lanches – CSS v9.2 CORRIGIDO
+   ✅ CORREÇÃO: Alinhamento de WhatsApp/Instagram ajustado (FINAL)
    =========================================================== */
 
 :root {
@@ -175,15 +173,18 @@ body {
   padding: 12px 16px;
 }
 
-/* ✅ CORREÇÃO: Nova regra para forçar o alinhamento dos ícones sociais */
-.menu-list .menu-link.menu-link-social {
+/* ✅ CORREÇÃO FINAL: Regra para forçar o alinhamento dos ícones sociais */
+.menu-list a.menu-link-social {
     display: flex;
-    align-items: center;
-    gap: 8px;
+    align-items: center; /* Centraliza verticalmente o emoji e o texto */
+    gap: 8px; /* Espaço entre o emoji e o texto */
 }
+/* Removendo a regra genérica anterior */
 .menu-link-social {
-  /* Regra original para .menu-link-social removida para usar a mais específica acima */
+  /* display: flex;  Removido */
+  /* align-items: center; Removido */
 }
+
 
 .menu-footer-info {
   padding: 15px 20px;
