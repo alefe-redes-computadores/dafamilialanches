@@ -1,7 +1,6 @@
 /* ===========================================================
-   🎨 Da Família Lanches – CSS v9.2 FINAL (COM PIX)
-   - Novo: Estilos do Modal PIX
-   - Mantido: Menu Lateral, Carrinho, Cards
+   🎨 Da Família Lanches – CSS v9.2 CORRIGIDO (Parte 1/2)
+   ✅ CORREÇÃO: Z-index do menu ajustado
    =========================================================== */
 
 :root {
@@ -38,7 +37,6 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* HEADER */
 .header {
   position: fixed;
   inset-inline: 0;
@@ -54,7 +52,6 @@ body {
 
 .header-content { display: flex; align-items: center; gap: 12px; }
 
-/* MENU HAMBÚRGUER */
 #hamburger-btn {
   background: transparent;
   border: none;
@@ -73,7 +70,7 @@ body {
   transition: 0.3s;
 }
 
-/* Side Menu */
+/* ✅ CORREÇÃO: Z-index ajustado para não cobrir modais críticos */
 #side-menu {
   position: fixed;
   left: -300px;
@@ -81,7 +78,7 @@ body {
   width: 280px;
   height: 100%;
   background: #fff;
-  z-index: 2000; /* Acima de tudo menos modais */
+  z-index: 1700;
   box-shadow: 2px 0 10px rgba(0,0,0,0.2);
   transition: left 0.3s ease;
   display: flex;
@@ -96,7 +93,7 @@ body {
   top: 0; left: 0; right: 0; bottom: 0;
   background: rgba(0,0,0,0.5);
   backdrop-filter: blur(3px);
-  z-index: 1999;
+  z-index: 1699;
   opacity: 0;
   pointer-events: none;
   transition: opacity 0.3s;
@@ -123,29 +120,74 @@ body {
   cursor: pointer;
 }
 
+.menu-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 10px 0;
+}
+
+.menu-section-block {
+  margin-bottom: 20px;
+  padding: 0 10px;
+}
+
+.menu-title {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #999;
+  text-transform: uppercase;
+  margin: 10px 10px 8px;
+  letter-spacing: 0.5px;
+}
+
 .menu-list {
   list-style: none;
   padding: 0;
   margin: 0;
-  overflow-y: auto;
 }
 .menu-list li {
   border-bottom: 1px solid #eee;
 }
-.menu-link {
+.menu-link, .menu-link-action {
   display: block;
-  padding: 16px 20px;
+  padding: 14px 16px;
   text-decoration: none;
   color: #333;
   font-weight: 500;
   transition: background 0.2s;
+  cursor: pointer;
+  border: none;
+  background: none;
+  width: 100%;
+  text-align: left;
+  font-size: 0.95rem;
 }
-.menu-link:hover {
+.menu-link:hover, .menu-link-action:hover {
   background: #f5f5f5;
   color: #d84315;
 }
 
-/* Animação de Destaque */
+.menu-link-action.admin-btn {
+  color: #ff5722;
+  font-weight: 600;
+  padding: 12px 16px;
+}
+
+.menu-link-social {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.menu-footer-info {
+  padding: 15px 20px;
+  border-top: 1px solid #eee;
+  background: #f9f9f9;
+  font-size: 0.85rem;
+  color: #666;
+  text-align: center;
+}
+
 @keyframes highlight-pulse {
   0% { transform: scale(1); box-shadow: 0 0 0 rgba(255, 202, 40, 0); }
   50% { transform: scale(1.02); box-shadow: 0 0 20px rgba(255, 202, 40, 0.6); }
@@ -153,7 +195,7 @@ body {
 }
 .highlight-section {
   animation: highlight-pulse 1s ease;
-  border-radius: 12px; /* Suaviza bordas durante destaque */
+  border-radius: 12px;
 }
 
 .logo-container { display: flex; align-items: center; gap: 8px; } 
@@ -337,7 +379,6 @@ section h2 { font-size: 1.3rem; text-align: center; margin-bottom: 15px; color: 
   border-color: #66bb6a; 
   color: #1b5e20; 
 }
-
 .actions { 
   margin-top: 10px; 
   display: flex; 
@@ -373,7 +414,6 @@ section h2 { font-size: 1.3rem; text-align: center; margin-bottom: 15px; color: 
   transform: scale(1.03); 
 }
 
-/* ======== 🛒 CARRINHO ULTRA-COMPACTO ======== */
 #cart-backdrop {
   position: fixed; 
   inset: 0; 
@@ -412,10 +452,7 @@ section h2 { font-size: 1.3rem; text-align: center; margin-bottom: 15px; color: 
   background: #fff;
 }
 
-.mini-head h3 {
-  font-size: 1rem;
-  margin: 0;
-}
+.mini-head h3 { font-size: 1rem; margin: 0; }
 
 .mini-list { 
   flex: 1;
@@ -426,15 +463,8 @@ section h2 { font-size: 1.3rem; text-align: center; margin-bottom: 15px; color: 
   font-size: 0.85rem; 
 }
 
-.cart-item {
-  border-bottom: 1px solid #eee;
-  padding: 6px 0;
-}
-
-.cart-item p {
-  margin: 0 0 2px 0;
-  font-size: 0.85rem;
-}
+.cart-item { border-bottom: 1px solid #eee; padding: 6px 0; }
+.cart-item p { margin: 0 0 2px 0; font-size: 0.85rem; }
 
 .mini-foot { 
   padding: 6px 12px;
@@ -446,7 +476,6 @@ section h2 { font-size: 1.3rem; text-align: center; margin-bottom: 15px; color: 
   font-size: 0.85rem;
 }
 
-/* ======== BARRA DE PROGRESSO FINA (6px) ======== */
 .progress-wrapper {
     background: #fff8d6;
     padding: 4px 8px;
@@ -505,16 +534,8 @@ section h2 { font-size: 1.3rem; text-align: center; margin-bottom: 15px; color: 
   background: #fff;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
-.frete-container h4 { 
-  margin: 0 0 4px 0;
-  font-size: 0.9rem;
-  color: #222;
-}
-.frete-cep-group { 
-  display: flex;
-  gap: 4px;
-  margin-bottom: 4px;
-}
+.frete-container h4 { margin: 0 0 4px 0; font-size: 0.9rem; color: #222; }
+.frete-cep-group { display: flex; gap: 4px; margin-bottom: 4px; }
 
 .frete-container input[type="text"],
 .frete-container textarea {
@@ -539,19 +560,9 @@ section h2 { font-size: 1.3rem; text-align: center; margin-bottom: 15px; color: 
 }
 .input-endereco-longo::-webkit-scrollbar { display: none; }
 
-.endereco-duplo {
-    display: flex;
-    gap: 4px;
-    margin-bottom: 4px;
-}
-#numero-input {
-    flex: 0 0 30%;
-    max-width: 90px;
-}
-#complemento-input {
-    flex: 1;
-    min-width: 0;
-}
+.endereco-duplo { display: flex; gap: 4px; margin-bottom: 4px; }
+#numero-input { flex: 0 0 30%; max-width: 90px; }
+#complemento-input { flex: 1; min-width: 0; }
 
 .mini-foot input:disabled,
 .mini-foot textarea:disabled {
@@ -572,21 +583,9 @@ section h2 { font-size: 1.3rem; text-align: center; margin-bottom: 15px; color: 
   box-shadow: var(--shadow-1);
   font-size: 0.8rem;
 }
-.btn-calcular-frete:hover { 
-  background: #ffc107;
-  transform: scale(1.02);
-}
+.btn-calcular-frete:hover { background: #ffc107; transform: scale(1.02); }
 
-.frete-gratis-aviso {
-    display: none; 
-}
-
-.coupon-form { 
-  display: flex;
-  gap: 4px;
-  margin-top: 6px;
-  margin-bottom: 6px;
-}
+.coupon-form { display: flex; gap: 4px; margin-top: 6px; margin-bottom: 6px; }
 .coupon-form input[type="text"] {
   flex: 1;
   padding: 6px 8px;
@@ -617,7 +616,6 @@ section h2 { font-size: 1.3rem; text-align: center; margin-bottom: 15px; color: 
   font-size: 0.85rem;
 }
 
-/* ======== MODAIS ======== */
 .modal {
   position: fixed; 
   inset: 0; 
@@ -654,7 +652,7 @@ section h2 { font-size: 1.3rem; text-align: center; margin-bottom: 15px; color: 
 .btn-primary, .btn-secondary, .btn-primario {
   border: none; 
   border-radius: 10px; 
-  padding: 10px 14px; /* Compacto */
+  padding: 10px 14px;
   font-weight: 700; 
   font-size: 0.9rem; 
   cursor: pointer; 
@@ -671,15 +669,8 @@ section h2 { font-size: 1.3rem; text-align: center; margin-bottom: 15px; color: 
   transform: translateY(-2px); 
   box-shadow: 0 6px 10px rgba(0, 0, 0, 0.25);
 }
-.btn-secondary { 
-  background: transparent; 
-  color: #555; 
-  border: 1px solid #ddd; 
-}
-.btn-secondary:hover { 
-  background: #f1f1f1; 
-  border-color: #ccc; 
-}
+.btn-secondary { background: transparent; color: #555; border: 1px solid #ddd; }
+.btn-secondary:hover { background: #f1f1f1; border-color: #ccc; }
 
 .btn-google {
   border: 1px solid #ddd; 
@@ -696,7 +687,7 @@ section h2 { font-size: 1.3rem; text-align: center; margin-bottom: 15px; color: 
 }
 .btn-google:hover { background: #f8f8f8; }
 
-.fechar-pedidos, .fechar-recompensas, .extras-close, .combo-close, .login-close, .promo-close, .dashboard-close {
+.fechar-pedidos, .fechar-recompensas, .extras-close, .combo-close, .login-close, .promo-close, .dashboard-close, .pix-close {
   background: var(--botao); 
   border: none; 
   border-radius: 50%;
@@ -712,23 +703,15 @@ section h2 { font-size: 1.3rem; text-align: center; margin-bottom: 15px; color: 
   pointer-events: auto;
 }
 .fechar-pedidos:hover, .fechar-recompensas:hover, .extras-close:hover,
-.combo-close:hover, .login-close:hover, .promo-close:hover, .dashboard-close:hover {
+.combo-close:hover, .login-close:hover, .promo-close:hover, .dashboard-close:hover, .pix-close:hover {
   background: #ff7043; 
   color: #fff; 
   transform: scale(1.1);
 }
 
 #login-modal { z-index: 1630; }
-#login-modal .modal-content { 
-  max-width: 480px; 
-  border-radius: 14px; 
-}
-#login-modal .login-close { 
-  position: absolute; 
-  top: 12px; 
-  right: 12px; 
-  z-index: 10; 
-}
+#login-modal .modal-content { max-width: 480px; border-radius: 14px; }
+#login-modal .login-close { position: absolute; top: 12px; right: 12px; z-index: 10; }
 
 .extras-list label.extra-line {
   display: flex; 
@@ -757,15 +740,9 @@ section h2 { font-size: 1.3rem; text-align: center; margin-bottom: 15px; color: 
   font-weight: 600; 
   cursor: pointer;
 }
-#combo-body label:hover { 
-  background: #fff9e6; 
-  transform: scale(1.02); 
-}
+#combo-body label:hover { background: #fff9e6; transform: scale(1.02); }
 
-/* ======== BOTÕES LATERAIS VISÍVEIS (CORRIGIDO) ======== */
-.meus-pedidos, .minhas-recompensas {
-  display: block !important; /* Garante que existam no DOM */
-}
+.meus-pedidos, .minhas-recompensas { display: block !important; }
 
 .meus-pedidos-btn, .recompensas-btn {
   position: fixed;
@@ -780,19 +757,11 @@ section h2 { font-size: 1.3rem; text-align: center; margin-bottom: 15px; color: 
   cursor: pointer; 
   transition: 0.2s;
   z-index: 1500;
-  display: block; /* Forçado para aparecer */
+  display: block;
 }
 
-.meus-pedidos-btn {
-  bottom: 20px;
-  right: 20px;
-}
-
-.recompensas-btn {
-  bottom: 70px;
-  right: 20px;
-}
-
+.meus-pedidos-btn { bottom: 20px; right: 20px; }
+.recompensas-btn { bottom: 70px; right: 20px; }
 .meus-pedidos-btn:hover, .recompensas-btn:hover {
   transform: scale(1.05); 
   box-shadow: 0 6px 15px rgba(0, 0, 0, 0.3);
@@ -809,7 +778,7 @@ section h2 { font-size: 1.3rem; text-align: center; margin-bottom: 15px; color: 
   transition: right 0.4s; 
   display: flex; 
   flex-direction: column; 
-  z-index: 1610; /* MESMO NÍVEL DO CARRINHO */
+  z-index: 1610;
 }
 .pedidos-panel.active, .recompensas-panel.active { right: 0; }
 
@@ -824,19 +793,11 @@ section h2 { font-size: 1.3rem; text-align: center; margin-bottom: 15px; color: 
   color: #222; 
   box-shadow: var(--shadow-in);
 }
-.pedidos-body, .recompensas-body { 
-  flex: 1; 
-  overflow: auto; 
-  padding: 16px; 
-}
+.pedidos-body, .recompensas-body { flex: 1; overflow: auto; padding: 16px; }
 
 .pedidos-panel { background-color: #f9f9f9; }
 
-#listaPedidos {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-}
+#listaPedidos { display: flex; flex-direction: column; gap: 16px; }
 
 .pedido-card {
   background: #fff;
@@ -849,10 +810,7 @@ section h2 { font-size: 1.3rem; text-align: center; margin-bottom: 15px; color: 
   gap: 12px;
   transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
-.pedido-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-}
+.pedido-card:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
 
 .pedido-thumb {
   width: 100%;
@@ -875,12 +833,7 @@ section h2 { font-size: 1.3rem; text-align: center; margin-bottom: 15px; color: 
   gap: 6px;
 }
 
-.pedido-info {
-  font-size: 1.15rem;
-  font-weight: 800;
-  color: #2e7d32;
-  margin: 0;
-}
+.pedido-info { font-size: 1.15rem; font-weight: 800; color: #2e7d32; margin: 0; }
 
 .pedido-itens {
   font-size: 0.9rem;
@@ -928,19 +881,9 @@ section h2 { font-size: 1.3rem; text-align: center; margin-bottom: 15px; color: 
   font-size: 0.9rem; 
   color: #222;
 }
-.footer a { 
-  color: #ff7043; 
-  text-decoration: none; 
-  transition: color 0.2s; 
-}
+.footer a { color: #ff7043; text-decoration: none; transition: color 0.2s; }
 .footer a:hover { color: #ff5722; }
-.footer-links { 
-  display: flex; 
-  justify-content: center; 
-  gap: 10px; 
-  flex-wrap: wrap; 
-  margin: 8px 0; 
-}
+.footer-links { display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; margin: 8px 0; }
 .footer-btn {
   background: #ffb300; 
   color: #222; 
@@ -950,15 +893,8 @@ section h2 { font-size: 1.3rem; text-align: center; margin-bottom: 15px; color: 
   text-decoration: none; 
   transition: 0.25s;
 }
-.footer-btn:hover { 
-  background: #ffca28; 
-  transform: scale(1.03); 
-}
-.footer-copy { 
-  font-size: 0.8rem; 
-  color: #000; 
-  margin-top: 10px; 
-}
+.footer-btn:hover { background: #ffca28; transform: scale(1.03); }
+.footer-copy { font-size: 0.8rem; color: #000; margin-top: 10px; }
 
 #cookie-banner {
   position: fixed; 
@@ -976,17 +912,8 @@ section h2 { font-size: 1.3rem; text-align: center; margin-bottom: 15px; color: 
   transition: transform 0.5s;
 }
 #cookie-banner.show { transform: translateY(0); }
-#cookie-banner p { 
-  margin: 0; 
-  font-size: 0.9rem; 
-  line-height: 1.4; 
-  margin-right: 16px; 
-}
-#cookie-banner a { 
-  color: #ffca28; 
-  font-weight: 600; 
-  text-decoration: underline; 
-}
+#cookie-banner p { margin: 0; font-size: 0.9rem; line-height: 1.4; margin-right: 16px; }
+#cookie-banner a { color: #ffca28; font-weight: 600; text-decoration: underline; }
 #cookie-banner button {
   background: #4caf50; 
   color: #fff; 
@@ -1001,35 +928,17 @@ section h2 { font-size: 1.3rem; text-align: center; margin-bottom: 15px; color: 
 #cookie-banner button:hover { background: #43a047; }
 
 @media (max-width: 600px) {
-  #cookie-banner { 
-    flex-direction: column; 
-    text-align: center; 
-    gap: 12px; 
-  }
+  #cookie-banner { flex-direction: column; text-align: center; gap: 12px; }
   #cookie-banner p { margin-right: 0; }
   #cookie-banner button { width: 100%; padding: 12px; }
-  
-  .mini-cart {
-    width: 95vw;
-  }
+  .mini-cart { width: 95vw; }
 }
 
-#admin-dashboard .modal-content {
-    max-width: 1100px !important;
-    width: 95% !important; 
-}
-#admin-dashboard .modal-head {
-    background: var(--botao); 
-    color: var(--txt);
-}
+#admin-dashboard .modal-content { max-width: 1100px !important; width: 95% !important; }
+#admin-dashboard .modal-head { background: var(--botao); color: var(--txt); }
 #admin-dashboard .dashboard-body { padding: 20px; }
 
-.dashboard-body > div:first-child {
-    display: flex; 
-    gap: 15px;     
-    flex-wrap: wrap; 
-    margin-bottom: 20px;
-}
+.dashboard-body > div:first-child { display: flex; gap: 15px; flex-wrap: wrap; margin-bottom: 20px; }
 
 .cardBox {
     flex: 1; 
@@ -1055,84 +964,13 @@ section h2 { font-size: 1.3rem; text-align: center; margin-bottom: 15px; color: 
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
 }
 
-@media (max-width: 600px) {
-    #admin-dashboard .modal-content {
-        width: 95% !important;
-        height: 90vh !important; 
-        margin: auto; 
-        border-radius: 16px; 
-    }
-    .cardBox { min-width: 100%; }
-    
-    .search-container { padding: 0 10px; }
-    #search-input { font-size: 0.95rem; padding: 12px 16px; }
-    
-    .meus-pedidos-btn { font-size: 0.8rem; padding: 8px 14px; }
-    .recompensas-btn { font-size: 0.8rem; padding: 8px 14px; }
-}
-
-/* Ajuste para label checkbox */
-.mini-foot label { font-size: 0.85rem; margin-bottom: 6px; }
-.mini-foot hr { margin: 10px 0; }
-
-/* ==========================
-   💠 MODAL PIX (NOVO v9.2)
-   ========================== */
-#pix-modal .modal-content {
-  max-width: 400px;
-  text-align: center;
-}
-
-.pix-body {
-  padding: 20px 24px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-
-.pix-body p {
-  font-size: 0.95rem;
-  color: #555;
-  margin-bottom: 12px;
-  line-height: 1.5;
-}
-
-#pix-valor {
-  font-size: 1.4rem;
-  font-weight: 800;
-  color: var(--success);
-  display: block;
-  margin: 5px 0 15px;
-}
-
-.pix-qrcode {
-  width: 180px;
-  height: 180px;
-  object-fit: contain;
-  border-radius: 12px;
-  border: 1px solid #eee;
-  margin-bottom: 16px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-}
-
-.pix-code-box {
-  background: #f8f9fa;
-  border: 2px dashed #ddd;
-  border-radius: 10px;
-  padding: 12px;
-  width: 100%;
-  margin-bottom: 16px;
-  text-align: center;
-}
-
-.pix-code-box strong {
-  font-size: 1.1rem;
-  color: #333;
-  display: block;
-  margin-top: 4px;
-  user-select: all; /* Facilita seleção */
-}
-
+#pix-modal .modal-content { max-width: 400px; text-align: center; }
+.pix-body { padding: 20px 24px; display: flex; flex-direction: column; align-items: center; }
+.pix-body p { font-size: 0.95rem; color: #555; margin-bottom: 12px; line-height: 1.5; }
+#pix-valor { font-size: 1.4rem; font-weight: 800; color: var(--success); display: block; margin: 5px 0 15px; }
+.pix-qrcode { width: 180px; height: 180px; object-fit: contain; border-radius: 12px; border: 1px solid #eee; margin-bottom: 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
+.pix-code-box { background: #f8f9fa; border: 2px dashed #ddd; border-radius: 10px; padding: 12px; width: 100%; margin-bottom: 16px; text-align: center; }
+.pix-code-box strong { font-size: 1.1rem; color: #333; display: block; margin-top: 4px; user-select: all; }
 .pix-btn-copy, .pix-btn-whatsapp {
   width: 100%;
   padding: 12px;
@@ -1147,30 +985,19 @@ section h2 { font-size: 1.3rem; text-align: center; margin-bottom: 15px; color: 
   justify-content: center;
   gap: 8px;
 }
+.pix-btn-copy { background: #e0e0e0; color: #333; margin-bottom: 10px; }
+.pix-btn-copy:hover { background: #d5d5d5; }
+.pix-btn-whatsapp { background: linear-gradient(135deg, #25D366, #128C7E); color: #fff; box-shadow: 0 4px 10px rgba(37, 211, 102, 0.3); }
+.pix-btn-whatsapp:hover { transform: translateY(-2px); box-shadow: 0 6px 15px rgba(37, 211, 102, 0.4); }
 
-.pix-btn-copy {
-  background: #e0e0e0;
-  color: #333;
-  margin-bottom: 10px;
-}
-.pix-btn-copy:hover {
-  background: #d5d5d5;
-}
-
-.pix-btn-whatsapp {
-  background: linear-gradient(135deg, #25D366, #128C7E);
-  color: #fff;
-  box-shadow: 0 4px 10px rgba(37, 211, 102, 0.3);
-}
-.pix-btn-whatsapp:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 15px rgba(37, 211, 102, 0.4);
+@media (max-width: 600px) {
+    #admin-dashboard .modal-content { width: 95% !important; height: 90vh !important; margin: auto; border-radius: 16px; }
+    .cardBox { min-width: 100%; }
+    .search-container { padding: 0 10px; }
+    #search-input { font-size: 0.95rem; padding: 12px 16px; }
+    .meus-pedidos-btn { font-size: 0.8rem; padding: 8px 14px; }
+    .recompensas-btn { font-size: 0.8rem; padding: 8px 14px; }
 }
 
-/* Ajuste no botão de fechar específico do pix se necessário, ou reuso do genérico */
-.pix-close {
-  background: transparent;
-  border: none;
-  font-size: 1.2rem;
-  cursor: pointer;
-}
+.mini-foot label { font-size: 0.85rem; margin-bottom: 6px; }
+.mini-foot hr { margin: 10px 0; }
