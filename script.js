@@ -698,12 +698,10 @@ document.addEventListener("DOMContentLoaded", () => {
     };
 
     /* ------------------ 🌫️ BACKDROP & OVERLAYS (ATUALIZADO) ------------------ */  
-    if (!el.cartBackdrop) {  
-        const bd = document.createElement("div"); 
-        bd.id = "cart-backdrop"; 
-        document.body.appendChild(bd); 
-        el.cartBackdrop = bd;  
-    }  
+    // ❌ DESATIVADO — o UIManager já controla o backdrop global
+el.cartBackdrop = {
+    classList: { add(){}, remove(){} }
+};
 
     const Backdrop = {  
         show() { 
@@ -717,8 +715,8 @@ document.addEventListener("DOMContentLoaded", () => {
     };
 
     // ✅ CORREÇÃO: Backdrop fecha tudo ao clicar
-    el.cartBackdrop.addEventListener("click", () => UIManager.closeAll());
-
+    // ❌ DESATIVADO — evita fechar mini-cart imediatamente
+// el.cartBackdrop.addEventListener("click", () => UIManager.closeAll());
     // ✅ CORREÇÃO: Fechar modais clicando FORA do .modal-content
     const setupModalClickOutside = () => {
         document.querySelectorAll('.modal').forEach(modal => {
