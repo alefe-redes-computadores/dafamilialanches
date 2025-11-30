@@ -1,7 +1,7 @@
 /* ===========================================================
-   🎨 Da Família Lanches – CSS v9.1 FINAL
-   - Novo: Menu Hambúrguer Lateral (Side-Menu)
-   - Mantido: Estilos do Carrinho, Cards, Modais
+   🎨 Da Família Lanches – CSS v9.2 FINAL (COM PIX)
+   - Novo: Estilos do Modal PIX
+   - Mantido: Menu Lateral, Carrinho, Cards
    =========================================================== */
 
 :root {
@@ -38,162 +38,7 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* ==========================
-   🍔 MENU LATERAL (SIDE-MENU)
-   ========================== */
-#side-menu {
-  position: fixed;
-  left: -320px; /* Escondido */
-  top: 0;
-  width: 300px;
-  height: 100%;
-  background: #fff;
-  z-index: 2000; /* Camada superior */
-  box-shadow: 4px 0 15px rgba(0,0,0,0.1);
-  transition: left 0.3s ease-in-out;
-  display: flex;
-  flex-direction: column;
-  overflow-y: auto;
-}
-#side-menu.active {
-  left: 0;
-}
-
-#menu-overlay {
-  position: fixed;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.6);
-  backdrop-filter: blur(3px); /* Efeito Blur no fundo */
-  z-index: 1999;
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 0.3s ease;
-}
-#menu-overlay.active {
-  opacity: 1;
-  pointer-events: auto;
-}
-
-.menu-header {
-  background: var(--acento);
-  padding: 20px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  color: #222;
-}
-.menu-header h3 {
-  margin: 0;
-  font-size: 1.2rem;
-}
-#menu-close {
-  background: none;
-  border: none;
-  font-size: 1.5rem;
-  cursor: pointer;
-  color: #222;
-}
-
-.menu-content {
-  flex: 1;
-  padding: 10px 0;
-}
-
-.menu-section-block {
-  margin-bottom: 15px;
-  padding-bottom: 10px;
-  border-bottom: 1px solid #eee;
-}
-.menu-section-block:last-child {
-  border-bottom: none;
-}
-
-.menu-title {
-  font-size: 0.85rem;
-  text-transform: uppercase;
-  color: #888;
-  padding: 0 20px;
-  margin: 10px 0 5px;
-  font-weight: 700;
-  letter-spacing: 0.5px;
-}
-
-.menu-list {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-}
-
-.menu-link, .menu-link-action, .menu-link-social {
-  display: flex;
-  align-items: center;
-  padding: 12px 20px;
-  text-decoration: none;
-  color: #333;
-  font-weight: 500;
-  font-size: 1rem;
-  transition: background 0.2s, color 0.2s;
-  border: none;
-  background: none;
-  width: 100%;
-  text-align: left;
-  cursor: pointer;
-}
-
-.menu-link:hover, .menu-link-action:hover, .menu-link-social:hover {
-  background: #fff8e1;
-  color: #ff6f00;
-  padding-left: 25px; /* Pequena animação de movimento */
-}
-
-/* Destaque visual da seção ao clicar no menu */
-@keyframes highlightPulse {
-  0% { box-shadow: 0 0 0 0 rgba(255, 202, 40, 0.7); }
-  50% { box-shadow: 0 0 0 10px rgba(255, 202, 40, 0); }
-  100% { box-shadow: 0 0 0 0 rgba(255, 202, 40, 0); }
-}
-.highlight-section {
-  animation: highlightPulse 1s ease-out;
-  border-radius: 12px;
-}
-
-/* Botão Hambúrguer no Header */
-#hamburger-btn {
-  background: none;
-  border: none;
-  cursor: pointer;
-  display: flex;
-  flex-direction: column;
-  gap: 5px;
-  padding: 5px;
-  z-index: 1010;
-}
-.bar {
-  width: 24px;
-  height: 3px;
-  background-color: #333;
-  border-radius: 3px;
-  transition: 0.3s;
-}
-
-.logo-container {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-}
-
-.menu-footer-info {
-    padding: 20px;
-    font-size: 0.8rem;
-    color: #777;
-    text-align: center;
-    background: #fafafa;
-    margin-top: auto;
-}
-
-/* ==========================
-   ESTILOS ANTIGOS (MANTIDOS)
-   ========================== */
+/* HEADER */
 .header {
   position: fixed;
   inset-inline: 0;
@@ -208,6 +53,110 @@ body {
 }
 
 .header-content { display: flex; align-items: center; gap: 12px; }
+
+/* MENU HAMBÚRGUER */
+#hamburger-btn {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  padding: 5px;
+  z-index: 1100;
+}
+#hamburger-btn .bar {
+  width: 25px;
+  height: 3px;
+  background-color: #333;
+  border-radius: 2px;
+  transition: 0.3s;
+}
+
+/* Side Menu */
+#side-menu {
+  position: fixed;
+  left: -300px;
+  top: 0;
+  width: 280px;
+  height: 100%;
+  background: #fff;
+  z-index: 2000; /* Acima de tudo menos modais */
+  box-shadow: 2px 0 10px rgba(0,0,0,0.2);
+  transition: left 0.3s ease;
+  display: flex;
+  flex-direction: column;
+}
+#side-menu.active {
+  left: 0;
+}
+
+#menu-overlay {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.5);
+  backdrop-filter: blur(3px);
+  z-index: 1999;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s;
+}
+#menu-overlay.active {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.menu-header {
+  padding: 20px;
+  background: var(--acento);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-weight: bold;
+  font-size: 1.1rem;
+}
+
+#menu-close {
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+}
+
+.menu-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  overflow-y: auto;
+}
+.menu-list li {
+  border-bottom: 1px solid #eee;
+}
+.menu-link {
+  display: block;
+  padding: 16px 20px;
+  text-decoration: none;
+  color: #333;
+  font-weight: 500;
+  transition: background 0.2s;
+}
+.menu-link:hover {
+  background: #f5f5f5;
+  color: #d84315;
+}
+
+/* Animação de Destaque */
+@keyframes highlight-pulse {
+  0% { transform: scale(1); box-shadow: 0 0 0 rgba(255, 202, 40, 0); }
+  50% { transform: scale(1.02); box-shadow: 0 0 20px rgba(255, 202, 40, 0.6); }
+  100% { transform: scale(1); box-shadow: 0 0 0 rgba(255, 202, 40, 0); }
+}
+.highlight-section {
+  animation: highlight-pulse 1s ease;
+  border-radius: 12px; /* Suaviza bordas durante destaque */
+}
+
+.logo-container { display: flex; align-items: center; gap: 8px; } 
 .logo { width: 52px; height: 52px; }
 .header-info h1 { margin: 0; font-size: 1.2rem; }
 .tagline { margin: 0; font-size: 0.85rem; color: #d84315; }
@@ -1125,3 +1074,103 @@ section h2 { font-size: 1.3rem; text-align: center; margin-bottom: 15px; color: 
 /* Ajuste para label checkbox */
 .mini-foot label { font-size: 0.85rem; margin-bottom: 6px; }
 .mini-foot hr { margin: 10px 0; }
+
+/* ==========================
+   💠 MODAL PIX (NOVO v9.2)
+   ========================== */
+#pix-modal .modal-content {
+  max-width: 400px;
+  text-align: center;
+}
+
+.pix-body {
+  padding: 20px 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.pix-body p {
+  font-size: 0.95rem;
+  color: #555;
+  margin-bottom: 12px;
+  line-height: 1.5;
+}
+
+#pix-valor {
+  font-size: 1.4rem;
+  font-weight: 800;
+  color: var(--success);
+  display: block;
+  margin: 5px 0 15px;
+}
+
+.pix-qrcode {
+  width: 180px;
+  height: 180px;
+  object-fit: contain;
+  border-radius: 12px;
+  border: 1px solid #eee;
+  margin-bottom: 16px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+}
+
+.pix-code-box {
+  background: #f8f9fa;
+  border: 2px dashed #ddd;
+  border-radius: 10px;
+  padding: 12px;
+  width: 100%;
+  margin-bottom: 16px;
+  text-align: center;
+}
+
+.pix-code-box strong {
+  font-size: 1.1rem;
+  color: #333;
+  display: block;
+  margin-top: 4px;
+  user-select: all; /* Facilita seleção */
+}
+
+.pix-btn-copy, .pix-btn-whatsapp {
+  width: 100%;
+  padding: 12px;
+  border: none;
+  border-radius: 10px;
+  font-weight: 700;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.pix-btn-copy {
+  background: #e0e0e0;
+  color: #333;
+  margin-bottom: 10px;
+}
+.pix-btn-copy:hover {
+  background: #d5d5d5;
+}
+
+.pix-btn-whatsapp {
+  background: linear-gradient(135deg, #25D366, #128C7E);
+  color: #fff;
+  box-shadow: 0 4px 10px rgba(37, 211, 102, 0.3);
+}
+.pix-btn-whatsapp:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 15px rgba(37, 211, 102, 0.4);
+}
+
+/* Ajuste no botão de fechar específico do pix se necessário, ou reuso do genérico */
+.pix-close {
+  background: transparent;
+  border: none;
+  font-size: 1.2rem;
+  cursor: pointer;
+}
