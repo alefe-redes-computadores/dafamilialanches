@@ -2033,4 +2033,45 @@ el.recompensasBtn?.addEventListener("click", () => {
     renderPromoCards();
     inicializarFirebase();  
 
-}); // ✅ FIM DO DOMContentLoaded
+});
+document.addEventListener("DOMContentLoaded", () => {
+    const finishOrderBtn = document.getElementById("finish-order");
+    if (finishOrderBtn) {
+        finishOrderBtn.addEventListener("click", () => {
+            abrirModalPIX();
+        });
+    }
+});
+function abrirModalPIX() {
+    const modal = document.getElementById("pix-modal");
+    modal.setAttribute("aria-hidden", "false");
+    modal.classList.add("modal-open");
+
+    // Atualizar valor PIX
+    const valorPIX = document.getElementById("pix-valor");
+    if (valorPIX) {
+        valorPIX.textContent = money(getCartTotal());
+    }
+
+    // Mostrar backdrop se estiver usando
+    const backdrop = document.getElementById("backdrop");
+    if (backdrop) backdrop.style.display = "block";
+}
+document.addEventListener("click", (e) => {
+    const modal = document.getElementById("pix-modal");
+
+    if (!modal.classList.contains("modal-open")) return;
+
+    const clickedInside = modal.contains(e.target);
+    const clickedButton = e.target.closest(".pix-close");
+
+    if (!clickedInside || clickedButton) {
+        modal.classList.remove("modal-open");
+        modal.setAttribute("aria-hidden", "true");
+        const backdrop = document.getElementById("backdrop");
+        if (backdrop) backdrop.style.display = "none";
+    }
+});
+document.getElementById("btn-finish-pix").addEventListener("click", () => {
+    enviarPedidoParaWhatsApp();
+});
