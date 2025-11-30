@@ -698,10 +698,12 @@ document.addEventListener("DOMContentLoaded", () => {
     };
 
     /* ------------------ 🌫️ BACKDROP & OVERLAYS (ATUALIZADO) ------------------ */  
-    // ❌ DESATIVADO — o UIManager já controla o backdrop global
-el.cartBackdrop = {
-    classList: { add(){}, remove(){} }
-};
+    if (!el.cartBackdrop) {  
+        const bd = document.createElement("div"); 
+        bd.id = "cart-backdrop"; 
+        document.body.appendChild(bd); 
+        el.cartBackdrop = bd;  
+    }  
 
     const Backdrop = {  
         show() { 
@@ -715,8 +717,8 @@ el.cartBackdrop = {
     };
 
     // ✅ CORREÇÃO: Backdrop fecha tudo ao clicar
-    // ❌ DESATIVADO — evita fechar mini-cart imediatamente
-// el.cartBackdrop.addEventListener("click", () => UIManager.closeAll());
+    el.cartBackdrop.addEventListener("click", () => UIManager.closeAll());
+
     // ✅ CORREÇÃO: Fechar modais clicando FORA do .modal-content
     const setupModalClickOutside = () => {
         document.querySelectorAll('.modal').forEach(modal => {
@@ -2033,56 +2035,4 @@ el.recompensasBtn?.addEventListener("click", () => {
     renderPromoCards();
     inicializarFirebase();  
 
-});
-document.addEventListener("DOMContentLoaded", () => {
-    const finishOrderBtn = document.getElementById("finish-order");
-    if (finishOrderBtn) {
-        finishOrderBtn.addEventListener("click", () => {
-            abrirModalPIX();
-        });
-    }
-});
-function abrirModalPIX() {
-    const modal = document.getElementById("pix-modal");
-    modal.setAttribute("aria-hidden", "false");
-    modal.classList.add("modal-open");
-
-    // Atualizar valor PIX
-    const valorPIX = document.getElementById("pix-valor");
-    if (valorPIX) {
-        valorPIX.textContent = money(getCartTotal());
-    }
-
-    // Mostrar backdrop se estiver usando
-    const backdrop = document.getElementById("backdrop");
-    if (backdrop) backdrop.style.display = "block";
-}
-document.addEventListener("click", (e) => {
-    const modal = document.getElementById("pix-modal");
-
-    if (!modal.classList.contains("modal-open")) return;
-
-    const clickedInside = modal.contains(e.target);
-    const clickedButton = e.target.closest(".pix-close");
-
-    if (!clickedInside || clickedButton) {
-        modal.classList.remove("modal-open");
-        modal.setAttribute("aria-hidden", "true");
-        const backdrop = document.getElementById("backdrop");
-        if (backdrop) backdrop.style.display = "none";
-    }
-});
-document.getElementById("btn-finish-pix").addEventListener("click", () => {
-    enviarPedidoParaWhatsApp();
-});
-// Garantir que o botão finalize abra o PIX
-document.addEventListener("click", (e) => {
-    const btn = e.target.closest("#finish-order");
-
-    if (btn) {
-        e.stopPropagation();   // Impede o clique de fechar o carrinho
-        e.preventDefault();    // Impede comportamento inesperado
-
-        abrirModalPIX();
-    }
-});
+}); // ✅ FIM DO DOMContentLoaded
