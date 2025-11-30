@@ -2075,3 +2075,14 @@ document.addEventListener("click", (e) => {
 document.getElementById("btn-finish-pix").addEventListener("click", () => {
     enviarPedidoParaWhatsApp();
 });
+// Garantir que o botão finalize abra o PIX
+document.addEventListener("click", (e) => {
+    const btn = e.target.closest("#finish-order");
+
+    if (btn) {
+        e.stopPropagation();   // Impede o clique de fechar o carrinho
+        e.preventDefault();    // Impede comportamento inesperado
+
+        abrirModalPIX();
+    }
+});
