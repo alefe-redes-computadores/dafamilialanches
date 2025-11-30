@@ -19,81 +19,81 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     const UIManager = {
-    currentPanel: null,
-
-    open(panelName, panelElement) {
-        if (ui_lock) return;
-        lockUI();
-
-        if (panelElement) {
-            this.currentPanel = panelName;
-
-            if (
-                panelElement.id === "mini-cart" ||
-                panelElement.id === "painelPedidos" ||
-                panelElement.id === "recompensas-panel" ||
-                panelElement.id === "pix-modal"
-            ) {
-                panelElement.classList.add("active");
-            } else {
-                panelElement.classList.add("show");
-            }
-
-            if (panelElement.id !== "side-menu") {
-                Backdrop.show();
-            }
-
-            // Fecha menu lateral se estiver aberto
-            this.closeSideMenu();
-        }
-    },
-
-    close(panelName, panelElement) {
-        if (panelElement) {
-            panelElement.classList.remove("show", "active");
-        }
+        currentPanel: null,
         
-        if (this.currentPanel === panelName) {
-            this.currentPanel = null;
-        }
-    },
-
-    closeAll() {
-        document.querySelectorAll(".modal.show, #mini-cart.active, .pedidos-panel.active, .recompensas-panel.active, #admin-dashboard.show, #pix-modal.active")
-            .forEach(el => el.classList.remove("show", "active"));
-
-        this.closeSideMenu();
-        Backdrop.hide();
-        this.currentPanel = null;
-    },
-
-    closeSideMenu() {
-        const sideMenu = document.getElementById("side-menu");
-        const menuOverlay = document.getElementById("menu-overlay");
-
-        if (sideMenu) sideMenu.classList.remove("active");
-        if (menuOverlay) menuOverlay.classList.remove("active");
-
-        document.body.style.overflow = "";
-    },
-
-    isOpen(panelName) {
-        return this.currentPanel === panelName;
-    },
-
-    handleMenuAction(actionCallback) {
-        if (ui_lock) return;
-        lockUI(200);
-
-        this.closeSideMenu();
-
-        setTimeout(() => {
-            if (typeof actionCallback === 'function') {
-                actionCallback();
+        open(panelName, panelElement) {
+            if (ui_lock) return;
+            lockUI();
+            
+            this.closeAll();
+            
+            if (panelElement) {
+                this.currentPanel = panelName;
+                
+                if (panelElement.id === "mini-cart" || panelElement.id === "painelPedidos" || panelElement.id === "recompensas-panel" || panelElement.id === "pix-modal") {
+                    panelElement.classList.add("active");
+                } else {
+                    panelElement.classList.add("show");
+                }
+                
+                if (panelElement.id !== "side-menu") {
+                    Backdrop.show();
+                }
+                
+                // Fecha o menu lateral se estiver aberto
+                this.closeSideMenu();
             }
-        }, 150);
-    }
-};
+        },
+        
+        close(panelName, panelElement) {
+            if (panelElement) {
+                panelElement.classList.remove("show", "active");
+            }
+            
+            if (this.currentPanel === panelName) {
+                this.currentPanel = null;
+            }
+        },
+        
+        closeAll() {
+            document.querySelectorAll(".modal.show, #mini-cart.active, .pedidos-panel.active, .recompensas-panel.active, #admin-dashboard.show, #pix-modal.active").forEach(el => {
+                el.classList.remove("show", "active");
+            });
+            
+            this.closeSideMenu();
+            Backdrop.hide();
+            this.currentPanel = null;
+        },
+        
+        closeSideMenu() {
+            const sideMenu = document.getElementById("side-menu");
+            const menuOverlay = document.getElementById("menu-overlay");
+            
+            if (sideMenu) sideMenu.classList.remove("active");
+            if (menuOverlay) menuOverlay.classList.remove("active");
+            document.body.style.overflow = "";
+        },
+        
+        isOpen(panelName) {
+            return this.currentPanel === panelName;
+        },
+        
+        // Função especial para atalhos do menu lateral
+        handleMenuAction(actionCallback) {
+            if (ui_lock) return;
+            lockUI(200);
+            
+            // Fecha o menu primeiro
+            this.closeSideMenu();
+            
+            // Executa a ação após um pequeno delay para fluidez
+            setTimeout(() => {
+                if (typeof actionCallback === 'function') {
+                    actionCallback();
+                }
+            }, 150);
+        }
+    };
 
     // ============================================================
     // 🍔 MENU HAMBÚRGUER - SISTEMA ATUALIZADO v9.1
@@ -219,9 +219,7 @@ document.addEventListener("DOMContentLoaded", () => {
     // ============================================================
     const pixModal = document.getElementById("pix-modal");
     const pixValor = document.getElementById("pix-valor");
-    // ✅ CORREÇÃO: Remove pixCopiaCola, pois não existe esse ID no HTML fornecido, evitando erro.
-    // const pixCopiaCola = document.getElementById("pix-copia-cola"); 
-    // Usamos o pixKey para chave e deixamos a informação no HTML
+    // const pixCopiaCola = document.getElementById("pix-copia-cola"); // Elemento removido/comentado
     const pixBtnCopy = document.getElementById("btn-copy-pix"); 
     const pixBtnWhatsapp = document.getElementById("btn-finish-pix"); 
     const pixClose = document.querySelector(".pix-close");
@@ -238,7 +236,6 @@ document.addEventListener("DOMContentLoaded", () => {
             
             // Preenche os dados no modal
             if (pixValor) pixValor.textContent = money(total);
-            // ✅ CORREÇÃO: Removido preenchimento de pixCopiaCola, pois o texto da chave está direto no HTML via ID pix-key.
             
             // Abre o modal
             UIManager.open("pix", pixModal);
@@ -320,16 +317,7 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-    // ✅ CORREÇÃO 1 CRÍTICA: Renomeada a função original de fecharPedido para fecharPedidoOriginal
-    // para que a nova window.fecharPedido possa ser a wrapper.
-
-    // A função fecharPedidoOriginal é declarada mais abaixo no script.js.
-    // Para garantir que ela esteja disponível para ser chamada na nova fecharPedido (linha 183),
-    // a mantivemos inalterada (como você solicitou) e apenas a nova função é a que sobrescreve
-    // o método global para iniciar o fluxo PIX.
-
-    // ✅ CORREÇÃO 3 CRÍTICA: Nova função fecharPedido (o que é chamado pelo botão dinâmico)
-    // para iniciar o fluxo PIX. A original agora é fecharPedidoOriginal (linha 1157).
+    // Nova função fecharPedido que abre modal PIX (resolve conflito de sobrescrita)
     window.fecharPedido = async function() {
         if (!cart.length) return alert("Carrinho vazio!");
         if (!currentUser) { 
@@ -692,6 +680,9 @@ document.addEventListener("DOMContentLoaded", () => {
         progressText: document.getElementById("progressText"),
         progressFill: document.getElementById("progressFill"),
         
+        // >> CORREÇÃO 1: Mapeamento do Modal PIX ADICIONADO
+        pixModal: document.getElementById("pix-modal"),
+        
         promoModal: document.getElementById("promo-modal"),
         promoImg: document.getElementById("promo-modal-img"),
         promoTitle: document.getElementById("promo-modal-title"),
@@ -707,8 +698,6 @@ document.addEventListener("DOMContentLoaded", () => {
     };
 
     /* ------------------ 🌫️ BACKDROP & OVERLAYS (ATUALIZADO) ------------------ */  
-    // ✅ CORREÇÃO 2: A verificação do backdrop é mantida, mas no index.html o div duplicado foi removido. 
-    // O código abaixo garante que o backdrop dinâmico funcione se não houver um.
     if (!el.cartBackdrop) {  
         const bd = document.createElement("div"); 
         bd.id = "cart-backdrop"; 
@@ -741,9 +730,9 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     };
 
-    // ✅ CORREÇÃO: Fechar modais pelo botão X
+    // >> CORREÇÃO 2: Fechar modais pelo botão X (Classe .pix-close ADICIONADA)
     const setupCloseButtons = () => {
-        document.querySelectorAll('.extras-close, .combo-close, .login-close, .fechar-pedidos, .fechar-recompensas, .dashboard-close, .promo-close').forEach(btn => {
+        document.querySelectorAll('.extras-close, .combo-close, .login-close, .fechar-pedidos, .fechar-recompensas, .dashboard-close, .promo-close, .pix-close').forEach(btn => {
             btn.addEventListener('click', (e) => {
                 e.stopPropagation();
                 UIManager.closeAll();
@@ -1409,8 +1398,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
         const summaryDiv = document.createElement('div');  
         summaryDiv.className = 'cart-summary-generated';  
-        // ✅ CORREÇÃO 2: O botão Finalizar Pedido Duplicado foi removido do HTML. 
-        // A linha abaixo é a que o cria dinamicamente, e agora ele chama a NOVA função fecharPedido.
         summaryDiv.innerHTML = `  
       <div class="summary-row" style="margin-top:10px;border-top:1px solid #eee;padding-top:10px;"><span>Subtotal</span><b>${money(subtotal)}</b></div>  
       <div class="summary-row"><span>Entrega</span><b>${deliveryLabel}</b></div>  
