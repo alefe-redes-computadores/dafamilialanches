@@ -215,13 +215,13 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     // ============================================================
-    // 💰 NOVO: SISTEMA PIX ESTÁTICO v9.2
+    // 💰 NOVO: SISTEMA PIX ESTÁTICO v9.2 - CORRIGIDO!
     // ============================================================
     const pixModal = document.getElementById("pix-modal");
     const pixValor = document.getElementById("pix-valor");
     const pixCopiaCola = document.getElementById("pix-copia-cola");
-    const pixBtnCopy = document.querySelector(".pix-btn-copy");
-    const pixBtnWhatsapp = document.querySelector(".pix-btn-whatsapp");
+    const pixBtnCopy = document.getElementById("btn-copy-pix"); // ✅ CORRIGIDO: ID correto
+    const pixBtnWhatsapp = document.getElementById("btn-finish-pix"); // ✅ CORRIGIDO: ID correto
     const pixClose = document.querySelector(".pix-close");
 
     // Chave PIX estática
@@ -230,20 +230,30 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Função para abrir modal PIX
     async function abrirModalPIX() {
+        console.log("🔹 abrirModalPIX() chamado");
         try {
-            // Calcula o total usando a função existente
+            // Calcula o total usando a função existente - ✅ CORRIGIDO: função correta
             const { total } = await calcTotals();
+            console.log("🔹 Total calculado:", total);
             
             // Preenche os dados no modal
-            if (pixValor) pixValor.textContent = money(total);
+            if (pixValor) {
+                pixValor.textContent = money(total);
+                console.log("🔹 Valor PIX preenchido:", money(total));
+            }
+            
             if (pixCopiaCola) {
                 pixCopiaCola.innerHTML = `<strong>${INFO_PIX}</strong>`;
+                console.log("🔹 Chave PIX preenchida");
             }
             
             // Abre o modal
+            console.log("🔹 Abrindo modal PIX...");
             UIManager.open("pix", pixModal);
+            console.log("🔹 Modal PIX aberto com sucesso!");
+            
         } catch (error) {
-            console.error("Erro ao abrir modal PIX:", error);
+            console.error("❌ Erro ao abrir modal PIX:", error);
             // Fallback: continua com fluxo normal se der erro
             fecharPedidoOriginal();
         }
@@ -251,7 +261,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Botão Copiar Código PIX
     if (pixBtnCopy) {
+        console.log("🔹 Botão copiar PIX encontrado");
         pixBtnCopy.addEventListener("click", async () => {
+            console.log("🔹 Clicou em copiar PIX");
             try {
                 await navigator.clipboard.writeText(CHAVE_PIX);
                 
@@ -266,6 +278,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 }, 2000);
                 
             } catch (err) {
+                console.error("❌ Erro ao copiar:", err);
                 // Fallback para navegadores mais antigos
                 const textArea = document.createElement("textarea");
                 textArea.value = CHAVE_PIX;
@@ -281,11 +294,15 @@ document.addEventListener("DOMContentLoaded", () => {
                 }, 2000);
             }
         });
+    } else {
+        console.error("❌ Botão copiar PIX não encontrado!");
     }
 
     // Botão Enviar Comprovante WhatsApp
     if (pixBtnWhatsapp) {
+        console.log("🔹 Botão WhatsApp PIX encontrado");
         pixBtnWhatsapp.addEventListener("click", async () => {
+            console.log("🔹 Clicou em WhatsApp PIX");
             const { total } = await calcTotals();
             const mensagem = `💳 *COMPROVANTE PIX - Da Família Lanches*\n\n` +
                            `📦 *Pedido:* R$ ${Number(total).toFixed(2).replace(".", ",")}\n` +
@@ -297,15 +314,21 @@ document.addEventListener("DOMContentLoaded", () => {
             
             window.open(`https://wa.me/5534997178336?text=${encodeURIComponent(mensagem)}`, "_blank");
         });
+    } else {
+        console.error("❌ Botão WhatsApp PIX não encontrado!");
     }
 
     // Fechar Modal PIX
     if (pixClose) {
         pixClose.addEventListener("click", (e) => {
             e.preventDefault();
+            console.log("🔹 Fechando modal PIX");
             UIManager.closeAll();
             // Continua fluxo normal após fechar
-            setTimeout(() => fecharPedidoOriginal(), 300);
+            setTimeout(() => {
+                console.log("🔹 Continuando fluxo original após fechar PIX");
+                fecharPedidoOriginal();
+            }, 300);
         });
     }
 
@@ -313,17 +336,31 @@ document.addEventListener("DOMContentLoaded", () => {
     if (pixModal) {
         pixModal.addEventListener("click", (e) => {
             if (e.target === pixModal) {
+                console.log("🔹 Fechando modal PIX (clique fora)");
                 UIManager.closeAll();
                 // Continua fluxo normal após fechar
-                setTimeout(() => fecharPedidoOriginal(), 300);
+                setTimeout(() => {
+                    console.log("🔹 Continuando fluxo original após fechar PIX");
+                    fecharPedidoOriginal();
+                }, 300);
             }
         });
     }
 
-    // Nova função fecharPedido que abre modal PIX
+    // Backup da função original fecharPedido
+    const fecharPedidoOriginal = window.fecharPedido;
+
+    // ✅ CORREÇÃO CRÍTICA: Nova função fecharPedido que abre modal PIX
     window.fecharPedido = async function() {
-        if (!cart.length) return alert("Carrinho vazio!");
+        console.log("🔹 NOVA função fecharPedido chamada!");
+        
+        if (!cart.length) {
+            console.log("❌ Carrinho vazio");
+            return alert("Carrinho vazio!");
+        }
+        
         if (!currentUser) { 
+            console.log("❌ Usuário não logado");
             alert("Faça login para enviar o pedido!"); 
             UIManager.open("login", el.loginModal); 
             return; 
@@ -361,10 +398,12 @@ document.addEventListener("DOMContentLoaded", () => {
         
         if (isRetirarLocal) finalAddressString = "CLIENTE IRÁ RETIRAR NO LOCAL";
         else if (!finalAddressString) { 
+            console.log("❌ Endereço incompleto");
             alert("Preencha o endereço completo (via CEP ou manualmente), ou marque 'Retirar no Local'."); 
             return; 
         }
 
+        console.log("🔹 Validações passadas, abrindo modal PIX...");
         // Validações passaram, agora abre modal PIX
         abrirModalPIX();
     };
@@ -1338,6 +1377,7 @@ document.addEventListener("DOMContentLoaded", () => {
         } catch (err) { console.error("Erro ao validar cupom:", err); return { ...invalido, mensagem: "Erro ao processar cupom." }; }  
     }
 
+    // ✅ CORREÇÃO: função calcTotals (no plural) mantida como no original
     async function calcTotals() {  
         const subtotal = getCartSubtotal();  
         const d = await validarCupomFirestore(couponApplied, subtotal);   
@@ -1410,6 +1450,7 @@ document.addEventListener("DOMContentLoaded", () => {
         document.getElementById('numero-input')?.addEventListener('input', renderMiniCart);  
         document.getElementById('complemento-input')?.addEventListener('input', renderMiniCart);  
         
+        // ✅ CORREÇÃO: Agora o botão dinâmico chama a NOVA função fecharPedido
         summaryDiv.querySelector("#finish-order")?.addEventListener("click", fecharPedido);  
         summaryDiv.querySelector("#clear-cart")?.addEventListener("click", () => {  
             if (confirm("Limpar todo o carrinho?")) { 
@@ -1426,6 +1467,7 @@ document.addEventListener("DOMContentLoaded", () => {
        🚨 FUNÇÃO FECHAR PEDIDO ORIGINAL (AGORA CHAMADA APÓS PIX)
     ============================================================ */
     async function fecharPedidoOriginal() {  
+        console.log("🔹 fecharPedidoOriginal() chamado");
         if (!cart.length) return;  
         if (!currentUser) return;  
         
