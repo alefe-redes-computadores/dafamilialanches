@@ -1,10 +1,10 @@
 /* =========================================================  
-   🚀 DFL v9.2 — SISTEMA UI BLINDADO + PIX ESTÁTICO
+   🚀 DFL v9.5 — SISTEMA UI BLINDADO + PIX INTELIGENTE
    - UIManager universal para controle de painéis
    - Anti-spam de cliques múltiplos
    - Atalhos do menu lateral funcionando perfeitamente
    - Todas funções originais preservadas
-   - Novo: Modal PIX Estático integrado
+   - NOVO: Fluxo PIX Inteligente (rastreamento de cópia)
 ========================================================= */  
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -215,11 +215,11 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     // ============================================================
-    // 💰 NOVO: SISTEMA PIX ESTÁTICO v9.2 - CORRIGIDO!
+    // 💰 NOVO: SISTEMA PIX ESTÁTICO v9.5 - FLUXO INTELIGENTE
     // ============================================================
     const pixModal = document.getElementById("pix-modal");
     const pixValor = document.getElementById("pix-valor");
-    // const pixCopiaCola = document.getElementById("pix-copia-cola"); // Elemento removido/comentado
+    const pixBody = document.querySelector("#pix-modal .pix-body"); // Mapeamento para injetar o aviso
     const pixBtnCopy = document.getElementById("btn-copy-pix"); 
     const pixBtnWhatsapp = document.getElementById("btn-finish-pix"); 
     const pixClose = document.querySelector(".pix-close");
@@ -227,6 +227,9 @@ document.addEventListener("DOMContentLoaded", () => {
     // Chave PIX estática
     const CHAVE_PIX = "34997178336";
     const INFO_PIX = "34997178336 (Stone) - Da Família / Kalebh";
+
+    // Aviso obrigatório do PIX
+    const AVISO_PIX_OBRIGATORIO = '<p style="font-size:0.9rem; color:var(--danger); font-weight:600; margin-bottom:15px; border-radius:8px; border:1px solid var(--danger); padding:8px 12px; background:#fff3f3;">⚠️ IMPORTANTE: Antes de fazer o pagamento, clique em "Finalizar no WhatsApp" para enviar seu pedido. Após enviar o pedido, faça o pagamento via PIX e anexe o comprovante.</p>';
 
     // Função para abrir modal PIX
     async function abrirModalPIX() {
@@ -237,6 +240,16 @@ document.addEventListener("DOMContentLoaded", () => {
             // Preenche os dados no modal
             if (pixValor) pixValor.textContent = money(total);
             
+            // >> IMPLEMENTAÇÃO 3: Adicionar Aviso Obrigatório ao corpo do modal (se ainda não existir)
+            if (pixBody && !pixBody.querySelector('.pix-aviso-obrigatorio')) {
+                // Cria um elemento temporário para o aviso, se o HTML já não tiver.
+                // Usando a lógica de inserção após o cabeçalho, mas antes do conteúdo.
+                const avisoElement = document.createElement('div');
+                avisoElement.className = 'pix-aviso-obrigatorio';
+                avisoElement.innerHTML = AVISO_PIX_OBRIGATORIO;
+                pixBody.prepend(avisoElement);
+            }
+
             // Abre o modal
             UIManager.open("pix", pixModal);
         } catch (error) {
@@ -251,6 +264,14 @@ document.addEventListener("DOMContentLoaded", () => {
         pixBtnCopy.addEventListener("click", async () => {
             try {
                 await navigator.clipboard.writeText(CHAVE_PIX);
+                
+                // >> IMPLEMENTAÇÃO 1: Adicionar indicador pixCopied
+                sessionStorage.setItem("pixCopied", "true");
+                
+                // >> IMPLEMENTAÇÃO 4: Tentar focar a janela
+                try {
+                    window.focus();
+                } catch(e) {}
                 
                 // Feedback visual
                 const originalText = pixBtnCopy.textContent;
@@ -271,6 +292,9 @@ document.addEventListener("DOMContentLoaded", () => {
                 document.execCommand("copy");
                 document.body.removeChild(textArea);
                 
+                // >> IMPLEMENTAÇÃO 1: Adicionar indicador pixCopied no fallback
+                sessionStorage.setItem("pixCopied", "true");
+
                 const originalText = pixBtnCopy.textContent;
                 pixBtnCopy.textContent = "Copiado! ✓";
                 setTimeout(() => {
@@ -284,15 +308,30 @@ document.addEventListener("DOMContentLoaded", () => {
     if (pixBtnWhatsapp) {
         pixBtnWhatsapp.addEventListener("click", async () => {
             const { total } = await calcTotals();
-            const mensagem = `💳 *COMPROVANTE PIX - Da Família Lanches*\n\n` +
+            
+            // Verifica se o PIX foi copiado
+            const pixCopied = sessionStorage.getItem("pixCopied") === "true";
+            
+            let mensagem = `💳 *COMPROVANTE PIX - Da Família Lanches*\n\n` +
                            `📦 *Pedido:* R$ ${Number(total).toFixed(2).replace(".", ",")}\n` +
                            `🏷️ *Chave PIX:* ${CHAVE_PIX}\n` +
                            `👤 *Beneficiário:* Da Família / Kalebh\n` +
-                           `🏦 *Banco:* Stone\n\n` +
-                           `📎 *Anexe o comprovante do pagamento*\n` +
-                           `⏰ Pedido será liberado após confirmação do pagamento`;
+                           `🏦 *Banco:* Stone\n\n`;
+                           
+            // >> IMPLEMENTAÇÃO 2: Lógica Condicional para adicionar a mensagem de comprovante
+            if (pixCopied) {
+                mensagem += `📎 *Anexe o comprovante do pagamento*\n` +
+                            `⏰ Pedido será liberado após confirmação do pagamento`;
+            } else {
+                // Mensagem NORMAL (sem comprovante)
+                mensagem += `⚠️ *Atenção:* O pagamento via PIX deve ser feito antes da entrega.\n` +
+                            `O comprovante será solicitado após o envio do pedido.`;
+            }
             
             window.open(`https://wa.me/5534997178336?text=${encodeURIComponent(mensagem)}`, "_blank");
+            
+            // >> IMPLEMENTAÇÃO 5: Limpeza do indicador pixCopied após finalizar
+            sessionStorage.removeItem("pixCopied");
         });
     }
 
@@ -2026,12 +2065,10 @@ el.recompensasBtn?.addEventListener("click", () => {
     }
 
     /* ------------------ 🚀 INICIALIZAÇÃO FINAL ------------------ */
-    console.log("%c🔥 DFL v9.2 — SISTEMA UI BLINDADO + PIX ESTÁTICO!", "background:#4CAF50;color:#fff;padding:5px;border-radius:5px;font-weight:bold;");  
+    console.log("%c🔥 DFL v9.5 — SISTEMA UI BLINDADO + PIX INTELIGENTE!", "background:#4CAF50;color:#fff;padding:5px;border-radius:5px;font-weight:bold;");  
     console.log("%c✅ UIManager implementado com anti-spam", "color:#4CAF50;");
-    console.log("%c✅ Modal PIX integrado perfeitamente", "color:#4CAF50;");
+    console.log("%c✅ Fluxo PIX Inteligente implementado", "color:#4CAF50;");
     console.log("%c✅ Fluxo de pagamento preservado", "color:#4CAF50;");
-    console.log("%c✅ Nenhuma função original removida", "color:#4CAF50;");
-    console.log("%c✅ Firebase, ViaCEP, Cupons, Recompensas intactos", "color:#4CAF50;");
     
     renderPromoCards();
     inicializarFirebase();  
