@@ -4,10 +4,13 @@
    - Anti-spam de cliques múltiplos
    - Atalhos do menu lateral funcionando perfeitamente
    - Todas funções originais preservadas
-   - NOVO: Fluxo PIX Inteligente (rastreamento de cópia)
+   - NOVO: Fluxo PIX Inteligente (Envio Unificado de Pedido + PIX)
 ========================================================= */  
 
 document.addEventListener("DOMContentLoaded", () => {
+    // Variável Global para rastrear a cópia do PIX
+    let pixCopied = false; 
+
     /* =========================================================
        🛡️ NOVO SISTEMA UIManager v9.1 — Blindagem de Painéis
        ========================================================= */
@@ -228,8 +231,10 @@ document.addEventListener("DOMContentLoaded", () => {
     const CHAVE_PIX = "34997178336";
     const INFO_PIX = "34997178336 (Stone) - Da Família / Kalebh";
 
-    // Aviso obrigatório do PIX
-    const AVISO_PIX_OBRIGATORIO = '<p style="font-size:0.9rem; color:var(--danger); font-weight:600; margin-bottom:15px; border-radius:8px; border:1px solid var(--danger); padding:8px 12px; background:#fff3f3;">⚠️ IMPORTANTE: Antes de fazer o pagamento, clique em "Finalizar no WhatsApp" para enviar seu pedido. Após enviar o pedido, faça o pagamento via PIX e anexe o comprovante.</p>';
+    // Aviso obrigatório do PIX (HARDCODED NO JS, POIS NÃO DEVE MUDAR)
+    // >> IMPLEMENTAÇÃO 3: Aviso obrigatório dentro do modal PIX
+    const AVISO_PIX_OBRIGATORIO = '<p style="font-size:0.9rem; color:var(--danger); font-weight:600; margin-bottom:15px; border-radius:8px; border:1px solid var(--danger); padding:8px 12px; background:#fff3f3;">⚠️ IMPORTANTE: Antes de fazer o pagamento, clique em Finalizar no WhatsApp para enviar seu pedido. Após enviar o pedido, faça o pagamento via PIX e anexe o comprovante.</p>';
+
 
     // Função para abrir modal PIX
     async function abrirModalPIX() {
@@ -240,14 +245,20 @@ document.addEventListener("DOMContentLoaded", () => {
             // Preenche os dados no modal
             if (pixValor) pixValor.textContent = money(total);
             
-            // >> IMPLEMENTAÇÃO 3: Adicionar Aviso Obrigatório ao corpo do modal (se ainda não existir)
+            // Adicionar Aviso Obrigatório ao corpo do modal (se ainda não existir)
             if (pixBody && !pixBody.querySelector('.pix-aviso-obrigatorio')) {
                 // Cria um elemento temporário para o aviso, se o HTML já não tiver.
-                // Usando a lógica de inserção após o cabeçalho, mas antes do conteúdo.
                 const avisoElement = document.createElement('div');
                 avisoElement.className = 'pix-aviso-obrigatorio';
                 avisoElement.innerHTML = AVISO_PIX_OBRIGATORIO;
-                pixBody.prepend(avisoElement);
+                
+                // Encontra o elemento logo abaixo do Total a Pagar para inserir o aviso
+                const totalDisplay = pixBody.querySelector('#pix-valor')?.parentElement;
+                if(totalDisplay) {
+                    totalDisplay.after(avisoElement);
+                } else {
+                    pixBody.prepend(avisoElement);
+                }
             }
 
             // Abre o modal
@@ -265,8 +276,9 @@ document.addEventListener("DOMContentLoaded", () => {
             try {
                 await navigator.clipboard.writeText(CHAVE_PIX);
                 
-                // >> IMPLEMENTAÇÃO 1: Adicionar indicador pixCopied
-                sessionStorage.setItem("pixCopied", "true");
+                // >> IMPLEMENTAÇÃO 1: Ativar a flag interna: pixCopied = true.
+                pixCopied = true;
+                sessionStorage.setItem("pixCopied", "true"); // Manter sessionStorage para robustez
                 
                 // >> IMPLEMENTAÇÃO 4: Tentar focar a janela
                 try {
@@ -292,8 +304,9 @@ document.addEventListener("DOMContentLoaded", () => {
                 document.execCommand("copy");
                 document.body.removeChild(textArea);
                 
-                // >> IMPLEMENTAÇÃO 1: Adicionar indicador pixCopied no fallback
-                sessionStorage.setItem("pixCopied", "true");
+                // >> IMPLEMENTAÇÃO 1: Ativar a flag interna (fallback)
+                pixCopied = true;
+                sessionStorage.setItem("pixCopied", "true"); // Manter sessionStorage para robustez
 
                 const originalText = pixBtnCopy.textContent;
                 pixBtnCopy.textContent = "Copiado! ✓";
@@ -307,31 +320,44 @@ document.addEventListener("DOMContentLoaded", () => {
     // Botão Enviar Comprovante WhatsApp
     if (pixBtnWhatsapp) {
         pixBtnWhatsapp.addEventListener("click", async () => {
-            const { total } = await calcTotals();
             
-            // Verifica se o PIX foi copiado
-            const pixCopied = sessionStorage.getItem("pixCopied") === "true";
+            // Reutiliza a lógica de montagem do pedido e cálculo de totais
+            const { subtotal, delivery, discount, total, cupomInfo } = await calcTotals();
+            const addr = window.finalAddressStringForWhatsApp; // Endereço preenchido na fecharPedido
+
+            const linhasPedido = [
+                "🍔 *Pedido DFL*",
+                cart.map((i) => `• ${i.nome} x${i.qtd}`).join("\n"), 
+                "", 
+                `Subtotal: *${money(subtotal)}*`, 
+                `Entrega: *${money(delivery)}*${cupomInfo.freeShipping ? " _(Frete Grátis)_" : ""}`, 
+                `Desconto${couponApplied ? ` (${couponApplied})` : ""}: *-${money(discount)}*`, 
+                `*Total: ${money(total)}*`, 
+                "", 
+                `🏠 *Endereço:* ${addr}`
+            ].join("\n");
             
-            let mensagem = `💳 *COMPROVANTE PIX - Da Família Lanches*\n\n` +
-                           `📦 *Pedido:* R$ ${Number(total).toFixed(2).replace(".", ",")}\n` +
-                           `🏷️ *Chave PIX:* ${CHAVE_PIX}\n` +
-                           `👤 *Beneficiário:* Da Família / Kalebh\n` +
-                           `🏦 *Banco:* Stone\n\n`;
-                           
-            // >> IMPLEMENTAÇÃO 2: Lógica Condicional para adicionar a mensagem de comprovante
-            if (pixCopied) {
-                mensagem += `📎 *Anexe o comprovante do pagamento*\n` +
-                            `⏰ Pedido será liberado após confirmação do pagamento`;
-            } else {
-                // Mensagem NORMAL (sem comprovante)
-                mensagem += `⚠️ *Atenção:* O pagamento via PIX deve ser feito antes da entrega.\n` +
-                            `O comprovante será solicitado após o envio do pedido.`;
-            }
+            // Parte PIX
+            const linhasPix = [
+                "", // Separador
+                "💳 *COMPROVANTE PIX - Da Família Lanches*",
+                "",
+                `📦 *Pedido:* ${money(total)}`,
+                `🏷️ *Chave PIX:* ${CHAVE_PIX}`,
+                `👤 *Beneficiário:* Da Família / Kalebh`,
+                `🏦 *Banco:* Stone`,
+                "",
+                `📎 *Anexe o comprovante do pagamento*`,
+                `⏰ Pedido será liberado após confirmação do pagamento`
+            ].join("\n");
+
+            // Mensagem unificada
+            const mensagem = linhasPedido + linhasPix;
             
             window.open(`https://wa.me/5534997178336?text=${encodeURIComponent(mensagem)}`, "_blank");
             
-            // >> IMPLEMENTAÇÃO 5: Limpeza do indicador pixCopied após finalizar
-            sessionStorage.removeItem("pixCopied");
+            // Fechar modal após envio (Requisito extra)
+            UIManager.closeAll();
         });
     }
 
@@ -355,6 +381,9 @@ document.addEventListener("DOMContentLoaded", () => {
             }
         });
     }
+    
+    // Variável para armazenar o endereço e reutilizar no WhatsApp
+    window.finalAddressStringForWhatsApp = "";
 
     // Nova função fecharPedido que abre modal PIX (resolve conflito de sobrescrita)
     window.fecharPedido = async function() {
@@ -401,6 +430,9 @@ document.addEventListener("DOMContentLoaded", () => {
             return; 
         }
 
+        // Armazena o endereço para reutilização no envio unificado do WhatsApp
+        window.finalAddressStringForWhatsApp = finalAddressString;
+        
         // Validações passaram, agora abre modal PIX
         abrirModalPIX();
     };
@@ -1588,19 +1620,9 @@ document.addEventListener("DOMContentLoaded", () => {
             popupAdd("Pedido salvo ✅"); 
             try { sound.currentTime = 0; sound.play(); } catch (_) {}  
             
-            const linhas = [
-                "🍔 *Pedido DFL*",
-                cart.map((i) => `• ${i.nome} x${i.qtd}`).join("\n"), 
-                "", 
-                `Subtotal: *${money(subtotal)}*`, 
-                `Entrega: *${money(delivery)}*${cupomInfo.freeShipping ? " _(Frete Grátis)_" : ""}`, 
-                `Desconto${couponApplied ? ` (${couponApplied})` : ""}: *-${money(discount)}*`, 
-                `*Total: ${money(total)}*`, 
-                "", 
-                `🏠 *Endereço:* ${addr}`
-            ].join("\n");  
-            
-            window.open(`https://wa.me/5534997178336?text=${encodeURIComponent(linhas)}`, "_blank");  
+            // O fluxo original do WhatsApp não é mais chamado diretamente aqui, pois a nova lógica o faz no modal PIX.
+            // Apenas remove a variável de sessão.
+            sessionStorage.removeItem("pixCopied");
             
             cart = []; 
             couponApplied = ""; 
