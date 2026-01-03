@@ -33,38 +33,8 @@
   <script defer src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
   <script defer src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
   <script defer src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
-
-  <style>
-    #dfl-ifood-overlay{position:fixed;inset:0;z-index:999999;background:rgba(0,0,0,.78);display:flex;align-items:center;justify-content:center;padding:20px}
-    #dfl-ifood-overlay .box{max-width:560px;width:100%;background:#fff;border-radius:14px;padding:18px 18px 16px;box-shadow:0 10px 40px rgba(0,0,0,.35);text-align:center}
-    #dfl-ifood-overlay .title{font-size:1.25rem;font-weight:800;margin:0 0 6px}
-    #dfl-ifood-overlay .tag{display:inline-block;background:#ffca28;color:#111;font-weight:800;border-radius:999px;padding:6px 12px;margin:8px 0 10px}
-    #dfl-ifood-overlay .msg{color:#333;line-height:1.35;margin:8px 0 12px}
-    #dfl-ifood-overlay .btns{display:grid;gap:10px;margin-top:12px}
-    #dfl-ifood-overlay a.btn{display:block;text-decoration:none;border-radius:12px;padding:12px 14px;font-weight:800}
-    #dfl-ifood-overlay a.btn.ifood{background:#ea1d2c;color:#fff}
-    #dfl-ifood-overlay a.btn.wa{background:#25d366;color:#fff}
-    #dfl-ifood-overlay button.btnClose{margin-top:10px;background:transparent;border:none;color:#666;font-weight:700;cursor:pointer}
-    #dfl-ifood-overlay .small{font-size:.9rem;color:#666;margin-top:8px}
-  </style>
-  </head>
+</head>
 <body>
-  <div id="dfl-ifood-overlay" role="dialog" aria-modal="true" aria-label="Aviso de atendimento">
-    <div class="box">
-      <p class="title">🎄 Natal / 🎆 Ano Novo</p>
-      <span class="tag">ATENDENDO NORMAL ✅</span>
-      <p class="msg">
-        Nos dias <b>31</b> e <b>01</b>, estamos funcionando normalmente.<br>
-        Porém, para garantir disponibilidade e agilidade, pedimos preferência de pedidos via <b>iFood</b>.
-      </p>
-      <div class="btns">
-        <a class="btn ifood" href="https://www.ifood.com.br/delivery/patos-de-minas-mg/da-familia-lanches-caramuru/9aadff75-b014-4e7f-a9b4-b3e478e38af8?UTM_Medium=share" target="_blank" rel="noopener">🍔 Pedir no iFood agora</a>
-        <a class="btn wa" href="https://wa.me/5534997178336" target="_blank" rel="noopener">💬 Falar no WhatsApp</a>
-      </div>
-      <p class="small">Pedidos pelo site podem ficar indisponíveis temporariamente nesse período.</p>
-      <button class="btnClose" type="button" id="dflOverlayClose">Continuar mesmo assim</button>
-    </div>
-  </div>
   <audio id="checkout-sound" src="click.wav" preload="auto" hidden></audio>
 
   <div id="menu-overlay"></div>
@@ -631,27 +601,5 @@
       });
     }
   </script>
-
-  <script>
-    (function(){
-      var ov = document.getElementById("dfl-ifood-overlay");
-      if(!ov) return;
-      // trava scroll/click por baixo
-      document.documentElement.style.overflow = "hidden";
-      document.body.style.overflow = "hidden";
-      // fechar overlay (opcional)
-      var btn = document.getElementById("dflOverlayClose");
-      if(btn){
-        btn.addEventListener("click", function(){
-          ov.style.display = "none";
-          document.documentElement.style.overflow = "";
-          document.body.style.overflow = "";
-        });
-      }
-      // impede clique/scroll no fundo
-      ov.addEventListener("wheel", function(e){ e.preventDefault(); }, {passive:false});
-      ov.addEventListener("touchmove", function(e){ e.preventDefault(); }, {passive:false});
-    })();
-  </script>
-  </body>
+</body>
 </html>
