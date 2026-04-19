@@ -1182,52 +1182,96 @@ html, body {
     border-radius: 15px 15px 0 0;
 }
 
-/* --- AJUSTE FINAL DEGUST (PROTEÇÃO DE FUNDO) --- */
-html {
-    background-color: #F5E6CA !important; /* Cor bege */
-}
 
-body {
-    margin: 0;
-    padding: 0;
-    min-height: 100vh;
-    background-color: #F5E6CA !important;
-    display: flex;
-    flex-direction: column;
+
+/* ===========================================================
+   🚀 AJUSTE FINAL DE SEGURANÇA - DEGUST v10.1
+   =========================================================== */
+
+/* 1. FUNDO E RODAPÉ (Elimina o vácuo branco) */
+html, body {
+    background-color: var(--bege) !important;
 }
 
 .main-content-wrapper {
-    flex: 1 0 auto; /* Faz o conteúdo esticar e empurrar o rodapé */
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    padding-bottom: 120px; /* Abre espaço para os botões fixos */
 }
 
-.footer {
-    flex-shrink: 0;
-    background-color: #F5E6CA;
-    padding-bottom: 30px; /* Espaço para os botões não cobrirem o texto */
+/* 2. BOTÃO ACEITAR COOKIES (Design corrigido) */
+#cookie-banner {
+    position: fixed !important;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    z-index: 10001;
+    background: var(--marrom) !important;
+    padding: 20px !important;
+    display: flex !important;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    border-radius: 20px 20px 0 0;
+    box-shadow: 0 -5px 20px rgba(0,0,0,0.3);
+}
+
+#cookie-banner p {
+    color: var(--bege) !important; /* Força o texto a aparecer */
+    margin: 0;
+    font-size: 0.9rem;
     text-align: center;
 }
 
-/* Botões Flutuantes Arrumados */
-.minhas-recompensas, .meus-pedidos {
-    position: fixed !important;
-    right: 20px !important;
-    z-index: 9999;
+#cookie-accept {
+    background: var(--dourado) !important;
+    color: var(--marrom) !important;
+    border: none !important;
+    padding: 12px 30px !important;
+    border-radius: 10px !important;
+    font-weight: 800 !important;
+    text-transform: uppercase;
+    cursor: pointer;
+    width: 80%;
 }
-.minhas-recompensas { bottom: 100px; }
-.meus-pedidos { bottom: 30px; }
 
-.recompensas-btn, .meus-pedidos-btn {
-    width: 60px !important;
-    height: 60px !important;
-    border-radius: 50% !important;
-    background: #fff !important;
-    border: 2px solid #E1A95F !important;
-    font-size: 0 !important;
-    display: flex !important;
-    align-items: center;
-    justify-content: center;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+/* 3. MODAL DE LOGIN (Visual limpo) */
+.modal-content.login-box {
+    background: var(--bege) !important;
+    padding: 0 !important;
+    border: 3px solid var(--dourado) !important;
 }
+
+.login-form {
+    padding: 20px !important;
+}
+
+.login-form input {
+    width: 100%;
+    padding: 14px !important;
+    margin-bottom: 10px;
+    border: 2px solid var(--dourado) !important;
+    border-radius: 10px !important;
+    background: #fff !important;
+}
+
+.btn-primario {
+    background: var(--marrom) !important;
+    color: var(--bege) !important;
+    padding: 15px !important;
+    border: none !important;
+    border-radius: 10px !important;
+    font-weight: 700 !important;
+    width: 100%;
+}
+
+/* 4. BOTÕES FLUTUANTES (Garante que abram) */
+.recompensas-btn, .meus-pedidos-btn {
+    pointer-events: auto !important; /* Garante que o clique funcione */
+    cursor: pointer !important;
+}
+
 
 
 /* FIM DO ARQUIVO CSS */
