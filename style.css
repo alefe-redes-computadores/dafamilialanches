@@ -606,15 +606,16 @@ section h2 {
   border: 2px solid var(--dourado);
   background: #fffdf9;
 }
-
 /* ===========================================================
-   🛒 MINI-CARRINHO E SISTEMA VISUAL - DEGUST v10.5
+   🛒 MINI-CARRINHO (SIDEBAR DE COMPRAS)
    =========================================================== */
 
 .mini-cart {
   position: fixed;
-  right: 0; top: 0;
-  width: 100%; max-width: 380px;
+  right: 0;
+  top: 0;
+  width: 100%;
+  max-width: 380px;
   height: 100vh;
   background: var(--branco);
   z-index: 1800;
@@ -625,7 +626,9 @@ section h2 {
   box-shadow: -5px 0 20px rgba(75, 44, 32, 0.2);
 }
 
-.mini-cart.active { transform: translateX(0); }
+.mini-cart.active {
+  transform: translateX(0);
+}
 
 .mini-head {
   background: var(--marrom);
@@ -637,128 +640,603 @@ section h2 {
   border-bottom: 3px solid var(--dourado);
 }
 
-/* 🖼️ MODAIS PREMIUM (Login, Recompensas, Pedidos, PIX) */
-.modal, .pedidos-panel, .recompensas-panel {
-  position: fixed;
-  inset: 0;
-  background: rgba(75, 44, 32, 0.8) !important;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 10000;
-  backdrop-filter: blur(4px);
-  transition: opacity 0.3s ease;
+.mini-head h3 { margin: 0; font-size: 1.2rem; }
+
+.mini-list {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px;
+  background: #fdfaf5; /* Fundo levemente creme */
 }
 
-.modal-content, .pedidos-panel, .recompensas-panel {
-  background-color: #F5E6CA !important; /* Bege Degust */
-  border: 3px solid #E1A95F !important;
-  border-radius: 25px !important;
-  width: 100%;
-  max-width: 500px;
+/* ITENS DENTRO DO CARRINHO */
+.cart-item {
+  background: #fff;
+  border-radius: var(--rad);
+  padding: 12px;
+  margin-bottom: 12px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+  border: 1px solid rgba(75, 44, 32, 0.05);
+}
+
+.cart-item p { margin: 0; font-weight: 600; color: var(--marrom); }
+
+/* BARRA DE PROGRESSO (FRETE GRÁTIS) */
+#progressWrapper {
+  margin: 10px 16px;
+  padding: 12px;
+  border-radius: var(--rad);
+  background: #fff8e1;
+  border: 1px solid var(--dourado);
+  text-align: center;
+}
+
+#progressText {
+  font-size: 0.85rem;
+  margin-bottom: 8px;
+  color: var(--marrom);
+}
+
+.progress-bar-bg {
+  background: #eee;
+  height: 10px;
+  border-radius: 5px;
   overflow: hidden;
 }
 
-.modal-head, .painel-head, .pedidos-header, .recompensas-header {
-  background-color: #4B2C20 !important;
-  color: #F5E6CA !important;
-  padding: 18px 20px !important;
+#progressFill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--dourado), #ffa000);
+  width: 0%;
+  transition: width 0.5s ease;
+}
+
+/* CUPOM DE DESCONTO */
+#coupon-form {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
-  border-bottom: 3px solid #E1A95F;
+  gap: 8px;
+  padding: 16px;
+  background: var(--bege);
+  border-top: 1px solid rgba(75, 44, 32, 0.1);
 }
 
-/* 🔑 FORMULÁRIOS E INPUTS */
-#login-form input, #coupon-input, .address-auto-fields input {
-  width: 100%;
-  padding: 14px !important;
-  margin-bottom: 12px !important;
-  border: 2px solid #E1A95F !important;
-  border-radius: 12px !important;
-  background: #ffffff !important;
-  color: #4B2C20 !important;
-}
-
-.btn-primario, #extras-confirm, #coupon-apply-btn {
-  background: #4B2C20 !important;
-  color: #F5E6CA !important;
-  padding: 15px !important;
-  border: none;
-  border-radius: 12px !important;
-  font-weight: 700 !important;
-  width: 100%;
-}
-
-/* 🍪 BANNER DE COOKIES (Visual Flutuante Estilo App) */
-#cookie-banner {
-  position: fixed !important;
-  bottom: 25px !important;
-  left: 5% !important;
-  right: 5% !important;
-  width: 90% !important;
-  background: #4B2C20 !important;
-  border: 2px solid #E1A95F !important;
-  border-radius: 20px !important;
-  padding: 20px !important;
-  z-index: 110000 !important;
-  display: flex !important;
-  flex-direction: column;
-  align-items: center;
-  box-shadow: 0 8px 30px rgba(0,0,0,0.6);
-  transition: transform 0.4s ease, opacity 0.4s ease;
-}
-
-/* Classe vital para o JavaScript esconder o banner */
-#cookie-banner.hidden {
-  transform: translateY(150%) !important;
-  opacity: 0 !important;
-  pointer-events: none !important;
-}
-
-#cookie-banner p {
-  color: #F5E6CA !important;
-  font-size: 0.95rem;
-  text-align: center;
-  margin-bottom: 15px !important;
-}
-
-#cookie-accept {
-  background: #E1A95F !important;
-  color: #4B2C20 !important;
-  border: none !important;
-  padding: 12px 45px !important;
-  border-radius: 12px !important;
-  font-weight: 800 !important;
+#coupon-input {
+  flex: 1;
+  padding: 10px;
+  border: 1px solid var(--dourado);
+  border-radius: var(--rad-sm);
   text-transform: uppercase;
 }
 
-/* 🔘 BOTÕES FLUTUANTES REDONDOS */
-.minhas-recompensas, .meus-pedidos {
-  position: fixed !important;
-  right: 20px !important;
-  z-index: 9999 !important;
+#coupon-form button {
+  background: var(--marrom);
+  color: var(--bege);
+  border: none;
+  padding: 0 15px;
+  border-radius: var(--rad-sm);
+  font-weight: 700;
 }
+
+/* RODAPÉ DO CARRINHO (TOTAIS) */
+.mini-foot {
+  padding: 16px;
+  background: var(--branco);
+  border-top: 1px solid var(--bege);
+}
+
+.summary-row {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 6px;
+  font-size: 0.95rem;
+  color: var(--marrom);
+}
+
+#finish-order {
+  width: 100%;
+  background: var(--success);
+  color: #fff;
+  border: none;
+  border-radius: var(--rad);
+  padding: 16px;
+  font-size: 1.1rem;
+  font-weight: 800;
+  cursor: pointer;
+  margin-top: 10px;
+  box-shadow: 0 4px 0 #2e7d32;
+}
+
+#finish-order:active {
+  transform: translateY(2px);
+  box-shadow: 0 2px 0 #2e7d32;
+}
+/* ===========================================================
+   🖼️ MODAIS (SISTEMA UNIVERSAL)
+   =========================================================== */
+
+.modal {
+  position: fixed; 
+  inset: 0; 
+  background: rgba(75, 44, 32, 0.7); /* Overlay Marrom */
+  display: flex; 
+  align-items: center;
+  justify-content: center; 
+  opacity: 0; 
+  pointer-events: none;
+  z-index: 2500;
+  transition: opacity 0.3s ease;
+  padding: 16px;
+  backdrop-filter: blur(4px);
+}
+
+.modal.show, .modal.active { 
+  opacity: 1; 
+  pointer-events: auto; 
+}
+
+.modal-content {
+  background: var(--branco);
+  width: 100%;
+  max-width: 500px;
+  max-height: 90vh;
+  border-radius: var(--rad-lg);
+  overflow-y: auto;
+  box-shadow: var(--shadow-3);
+  position: relative;
+  transform: translateY(20px);
+  transition: transform 0.3s ease;
+  border: 2px solid var(--dourado);
+}
+
+.modal.show .modal-content, .modal.active .modal-content {
+  transform: translateY(0);
+}
+
+.modal-head {
+  background: var(--dourado);
+  color: var(--marrom);
+  padding: 16px 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.modal-head h3 { margin: 0; font-size: 1.1rem; font-weight: 800; }
+
+/* ===========================================================
+   📊 DASHBOARD ADMINISTRATIVO (RELATÓRIOS)
+   =========================================================== */
+
+#admin-dashboard .dashboard-body {
+  padding: 20px;
+}
+
+.cardBox {
+  flex: 1;
+  min-width: 140px;
+  background: var(--bege);
+  padding: 15px;
+  border-radius: var(--rad);
+  border: 1px solid var(--dourado);
+  color: var(--marrom);
+  font-weight: 700;
+  text-align: center;
+  box-shadow: var(--shadow-1);
+}
+
+#filter-period {
+  padding: 10px;
+  border-radius: var(--rad-sm);
+  border: 1px solid var(--dourado);
+  background: var(--branco);
+  color: var(--marrom);
+  margin-left: 10px;
+}
+
+/* ===========================================================
+   🎁 PAINEL DE RECOMPENSAS & PEDIDOS
+   =========================================================== */
+
+.pedidos-panel, .recompensas-panel {
+  position: fixed;
+  inset: 0;
+  background: var(--branco);
+  z-index: 2200;
+  display: flex;
+  flex-direction: column;
+  transform: translateY(100%);
+  transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.pedidos-panel.active, .recompensas-panel.active {
+  transform: translateY(0);
+}
+
+.painel-head {
+  background: var(--marrom);
+  color: var(--bege);
+  padding: 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 4px solid var(--dourado);
+}
+
+.recompensa-card {
+  display: flex;
+  align-items: center;
+  padding: 15px;
+  border-radius: var(--rad);
+  margin-bottom: 15px;
+  background: var(--bg2);
+  border: 1px solid rgba(225, 169, 95, 0.3);
+  box-shadow: var(--shadow-1);
+}
+
+.recompensa-aplicar-btn {
+  background: var(--success);
+  color: #fff;
+  border: none;
+  padding: 10px 15px;
+  border-radius: var(--rad-sm);
+  font-weight: 700;
+  cursor: pointer;
+}
+
+/* ===========================================================
+   💎 FLUXO PIX INTELIGENTE (MODAL)
+   =========================================================== */
+
+#pix-modal .pix-body {
+  padding: 20px;
+  text-align: center;
+}
+
+#pix-valor {
+  font-size: 1.8rem;
+  color: var(--vermelho);
+  display: block;
+  margin: 10px 0 20px;
+}
+
+.btn-success {
+  background: #25d366 !important; /* Cor oficial WhatsApp */
+  color: #fff !important;
+  width: 100%;
+  padding: 15px;
+  border-radius: var(--rad);
+  border: none;
+  font-weight: 800;
+  margin-top: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+/* ===========================================================
+   🔑 FORMULÁRIOS DE LOGIN & INPUTS
+   =========================================================== */
+
+#login-form {
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+#login-form input {
+  width: 100%;
+  padding: 12px 15px;
+  border: 1px solid var(--dourado);
+  border-radius: var(--rad);
+  background: var(--bg2);
+  color: var(--marrom);
+}
+
+.btn-google {
+  background: #fff;
+  color: #757575;
+  border: 1px solid #ddd !important;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 5px;
+}
+
+/* ===========================================================
+   🚚 ÁREA DE FRETE & ENDEREÇO (MINI-CARRINHO)
+   =========================================================== */
+
+.frete-container {
+  padding: 15px;
+  background: var(--bg2);
+  border-radius: var(--rad);
+  margin-top: 15px;
+  border: 1px dashed var(--dourado);
+}
+
+.frete-container h4 {
+  margin: 0 0 10px 0;
+  font-size: 0.9rem;
+  color: var(--marrom);
+}
+
+.cep-row {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+#cep-input {
+  flex: 1;
+  padding: 10px;
+  border: 1px solid var(--dourado);
+  border-radius: var(--rad-sm);
+  text-align: center;
+  font-weight: 700;
+  letter-spacing: 1px;
+}
+
+#btn-calcular-frete {
+  background: var(--marrom);
+  color: var(--bege);
+  border: none;
+  padding: 0 15px;
+  border-radius: var(--rad-sm);
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.address-auto-fields input {
+  width: 100%;
+  padding: 10px;
+  margin-bottom: 8px;
+  border: 1px solid #ddd;
+  border-radius: var(--rad-sm);
+  font-size: 0.85rem;
+}
+
+/* ===========================================================
+   🚦 STATUS BANNER & NOTIFICAÇÕES
+   =========================================================== */
+
+.status-banner {
+  padding: 10px;
+  text-align: center;
+  font-weight: 700;
+  font-size: 0.85rem;
+  box-shadow: var(--shadow-1);
+  transition: all 0.3s ease;
+}
+
+.status-banner.open {
+  background: #e8f5e9;
+  color: #2e7d32;
+  border-bottom: 2px solid #4caf50;
+}
+
+.status-banner.closed {
+  background: #ffebee;
+  color: #c62828;
+  border-bottom: 2px solid #ef5350;
+}
+
+.popup-add {
+  position: fixed;
+  bottom: 90px;
+  left: 50%;
+  transform: translateX(-50%) translateY(100px);
+  background: var(--marrom);
+  color: var(--bege);
+  padding: 12px 24px;
+  border-radius: 30px;
+  font-weight: 600;
+  z-index: 9999;
+  transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  box-shadow: var(--shadow-3);
+  pointer-events: none;
+}
+
+.popup-add.show {
+  transform: translateX(-50%) translateY(0);
+}
+
+/* ===========================================================
+   📱 RESPONSIVIDADE & AJUSTES FINAIS
+   =========================================================== */
+
+@media (max-width: 600px) {
+  .grid-produtos {
+    grid-template-columns: repeat(2, 1fr); /* Dois itens por linha no celular */
+    gap: 12px;
+  }
+
+  .card h3 {
+    font-size: 0.85rem;
+  }
+
+  .header-info h1 {
+    font-size: 1.1rem;
+  }
+
+  .main-content-wrapper {
+    padding: 12px;
+  }
+}
+
+@media (min-width: 1024px) {
+  .grid-produtos {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+/* Esconder barra de rolagem mas manter funcionalidade */
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: var(--bg2);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--dourado);
+  border-radius: 10px;
+}
+
+
+/* AJUSTE PARA O RODAPÉ NÃO QUEBRAR */
+.footer-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 15px;
+}
+
+.footer-links {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    flex-wrap: wrap;
+    width: 100%;
+}
+
+.footer-btn {
+    background: var(--bege);
+    color: var(--marrom) !important;
+    padding: 8px 15px;
+    border-radius: 20px;
+    text-decoration: none;
+    font-weight: 700;
+    font-size: 0.85rem;
+    border: 1px solid var(--dourado);
+    min-width: 120px;
+    text-align: center;
+}
+
+.footer-copy {
+    margin-top: 15px;
+    opacity: 0.8;
+    line-height: 1.2;
+}
+
+/* AJUSTE FINAL DE LAYOUT - DEGUST */
+
+/* Remove o espaço vago no fundo */
+html, body {
+    height: 100%;
+    margin: 0;
+    background-color: #F5E6CA; /* Cor bege do fundo */
+}
+
+.main-content-wrapper {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+.footer {
+    margin-top: auto; /* Empurra o rodapé para o fim, mas sem criar vácuo */
+    padding-bottom: 20px; 
+}
+
+/* BOTÕES FLUTUANTES REDONDOS (Estilo App) */
+.minhas-recompensas, .meus-pedidos {
+    position: fixed !important;
+    right: 20px !important;
+    z-index: 9999 !important;
+}
+
 .minhas-recompensas { bottom: 100px; }
 .meus-pedidos { bottom: 30px; }
 
 .recompensas-btn, .meus-pedidos-btn {
-  width: 60px !important;
-  height: 60px !important;
-  border-radius: 50% !important;
-  background: #fff !important;
-  border: 2px solid #E1A95F !important;
-  font-size: 0 !important;
-  display: flex !important;
-  align-items: center;
-  justify-content: center;
-  box-shadow: 0 4px 15px rgba(0,0,0,0.15);
-  cursor: pointer !important;
-  pointer-events: auto !important;
+    width: 60px !important;
+    height: 60px !important;
+    border-radius: 50% !important;
+    background: #fff !important;
+    border: 2px solid #E1A95F !important;
+    font-size: 0 !important; /* Esconde o texto */
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15) !important;
 }
 
+/* Ícones nos botões */
 .recompensas-btn::before { content: "🎁"; font-size: 26px; }
 .meus-pedidos-btn::before { content: "📦"; font-size: 26px; }
 
-/* FIM DO ARQUIVO CSS */
+/* BANNER DE COOKIES - SOBREPOSIÇÃO REAL */
+#cookie-banner {
+    position: fixed !important;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    z-index: 10001;
+    background: #4B2C20 !important;
+    flex-direction: column !important; /* Melhor no mobile */
+    padding: 15px !important;
+    border-radius: 15px 15px 0 0;
+}
 
+ ===========================================================
+/* ===========================================================
+   🚀 BLOCO ÚNICO DEFINITIVO - DEGUST v10.2
+   =========================================================== */
+html, body {
+    background-color: #F5E6CA !important;
+}
+
+.main-content-wrapper {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    padding-bottom: 120px;
+}
+
+#cookie-banner {
+    position: fixed !important;
+    bottom: 0; left: 0; width: 100%;
+    z-index: 10001;
+    background: #4B2C20 !important;
+    padding: 20px !important;
+    display: flex !important;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    border-radius: 20px 20px 0 0;
+    box-shadow: 0 -5px 20px rgba(0,0,0,0.3);
+}
+
+#cookie-banner p {
+    color: #F5E6CA !important;
+    margin: 0;
+    font-size: 0.95rem;
+    text-align: center;
+}
+
+#cookie-accept {
+    background: #E1A95F !important;
+    color: #4B2C20 !important;
+    border: none !important;
+    padding: 12px 40px !important;
+    border-radius: 10px !important;
+    font-weight: 800 !important;
+    cursor: pointer;
+}
+
+.modal-content.login-box {
+    background: #F5E6CA !important;
+    border: 3px solid #E1A95F !important;
+}
+
+.recompensas-btn, .meus-pedidos-btn {
+    pointer-events: auto !important;
+    cursor: pointer !important;
+}
+
+
+/* FIM DO ARQUIVO CSS */
