@@ -8,7 +8,6 @@
   <link rel="icon" type="image/png" sizes="16x16" href="logo.png">
   <link rel="icon" type="image/png" sizes="32x32" href="logo.png">
   <link rel="apple-touch-icon" sizes="180x180" href="logo.png">
-  
   <link rel="manifest" href="/manifest.webmanifest">
   <meta name="theme-color" content="#E1A95F">
 
@@ -20,13 +19,10 @@
     connect-src * data: blob:;
     frame-src * data: blob: https://*.firebaseapp.com https://accounts.google.com;
   ">
-  <meta http-equiv="Cache-control" content="public, max-age=31536000, immutable">
 
   <link rel="preconnect" href="https://www.gstatic.com" crossorigin>
   <link rel="preload" as="image" href="logo.png">
-  
-  <link rel="stylesheet" href="style.css?v=11.0" />
-  <noscript><link rel="stylesheet" href="style.css?v=11.0"/></noscript>
+  <link rel="stylesheet" href="style.css?v=11.1" />
 
   <script defer src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
   <script defer src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
@@ -36,14 +32,17 @@
 
   <audio id="checkout-sound" src="click.wav" preload="auto" hidden></audio>
 
+  <!-- OVERLAY DO MENU -->
   <div id="menu-overlay"></div>
+
+  <!-- MENU LATERAL -->
   <nav id="side-menu">
     <div class="menu-header">
       <h3>Degust Menu 🍰</h3>
-      <button id="menu-close">✖</button>
+      <button id="menu-close" type="button">✖</button>
     </div>
-
     <div class="menu-content">
+
       <div class="menu-section-block">
         <h4 class="menu-title">Minha Área</h4>
         <ul class="menu-list">
@@ -63,9 +62,7 @@
       <div class="menu-section-block admin-section" style="display:none;">
         <h4 class="menu-title">Administração</h4>
         <ul class="menu-list">
-          <li>
-            <a href="#" class="menu-link-action admin-btn" data-action="relatorios">📊 Relatórios</a>
-          </li>
+          <li><a href="#" class="menu-link-action" data-action="relatorios">📊 Relatórios</a></li>
         </ul>
       </div>
 
@@ -76,17 +73,18 @@
           <li><a href="https://www.instagram.com/degustbolosnopote" target="_blank" class="menu-link-social">🟣 Instagram</a></li>
         </ul>
       </div>
+
     </div>
   </nav>
 
+  <!-- HEADER -->
   <header class="header">
     <div class="header-content">
-      <button id="hamburger-btn" aria-label="Abrir Menu">
+      <button id="hamburger-btn" type="button" aria-label="Abrir Menu">
         <span class="bar"></span>
         <span class="bar"></span>
         <span class="bar"></span>
       </button>
-
       <div class="logo-container">
         <img src="logo.png" alt="Logo Degust" class="logo" width="52" height="52" />
         <div class="header-info">
@@ -95,26 +93,26 @@
         </div>
       </div>
     </div>
-
     <div class="header-actions">
-      <button id="user-btn" class="user-button" type="button">Entrar</button>
+      <button id="user-btn" class="user-button" type="button">Entrar / Perfil 👤</button>
       <button id="cart-icon" class="cart-button" type="button" aria-label="Ver carrinho">
         🛒 <span id="cart-count">0</span>
       </button>
     </div>
   </header>
 
-  <!-- Backdrop geral (carinho, modais) -->
+  <!-- BACKDROP GERAL -->
   <div id="cart-backdrop"></div>
 
+  <!-- CONTEÚDO PRINCIPAL -->
   <div class="main-content-wrapper">
+
     <div id="status-banner" class="status-banner"></div>
 
     <div class="search-container">
       <input type="text" id="search-input" placeholder="🔍 Qual doçura você procura?" autocomplete="off">
     </div>
 
-    <!-- ===== SEÇÃO BOLOS ===== -->
     <section class="menu-section" id="bolos-section">
       <h2>🍰 Bolos no Pote</h2>
       <div class="grid">
@@ -166,181 +164,74 @@
       </div>
     </section>
 
-    <!-- ===== MINI-CARRINHO ===== -->
+    <!-- MINI-CARRINHO -->
     <aside id="mini-cart" class="mini-cart" aria-hidden="true">
       <div class="mini-head">
         <h3>🛍 Seu Pedido</h3>
-        <button class="extras-close" type="button" aria-label="Fechar carrinho">✖</button>
+        <button class="extras-close" type="button" aria-label="Fechar">✖</button>
       </div>
-      
       <div class="mini-list"></div>
-      
       <div class="mini-foot">
         <div id="progressWrapper" class="progress-wrapper">
-          <p id="progressText" class="progress-text">
-            Faltam <strong>R$ 80,00</strong> para Frete Grátis 🚀
-          </p>
-          <div class="progress-bar">
-            <div id="progressFill" class="progress-fill"></div>
-          </div>
+          <p id="progressText" class="progress-text">Faltam <strong>R$ 80,00</strong> para Frete Grátis 🚀</p>
+          <div class="progress-bar"><div id="progressFill" class="progress-fill"></div></div>
         </div>
 
-        <!-- Área de endereço -->
         <div class="frete-container" style="margin-bottom:10px;">
-          <label style="font-size:0.8rem; font-weight:700; color:var(--marrom); display:block; margin-bottom:6px;">📍 CEP para entrega:</label>
-          <div style="display:flex; gap:6px;">
-            <input type="text" id="cep-input" placeholder="00000-000" maxlength="9" style="flex:1; padding:10px; border:2px solid var(--dourado); border-radius:8px; font-size:0.9rem;">
-            <button id="btn-calcular-frete" type="button" style="background:var(--marrom); color:var(--bege); border:none; padding:0 14px; border-radius:8px; font-weight:700; cursor:pointer;">Buscar</button>
+          <label style="font-size:.8rem;font-weight:700;color:var(--marrom);display:block;margin-bottom:6px;">📍 CEP para entrega:</label>
+          <div style="display:flex;gap:6px;">
+            <input type="text" id="cep-input" placeholder="00000-000" maxlength="9"
+              style="flex:1;padding:10px;border:2px solid var(--dourado);border-radius:8px;font-size:.9rem;">
+            <button id="btn-calcular-frete" type="button"
+              style="background:var(--marrom);color:var(--bege);border:none;padding:0 14px;border-radius:8px;font-weight:700;cursor:pointer;">Buscar</button>
           </div>
-          <input type="text" id="endereco-auto" placeholder="Rua, Bairro - Cidade/UF" readonly
-            style="width:100%; margin-top:6px; padding:10px; border:1px solid #ddd; border-radius:8px; background:#f9f9f9; font-size:0.85rem;">
-          <div style="display:flex; gap:6px; margin-top:6px;">
+          <input type="text" id="endereco-auto" placeholder="Rua, Bairro — Cidade/UF" readonly
+            style="width:100%;margin-top:6px;padding:10px;border:1px solid #ddd;border-radius:8px;background:#f9f9f9;font-size:.85rem;">
+          <div style="display:flex;gap:6px;margin-top:6px;">
             <input type="text" id="numero-input" placeholder="Número" disabled
-              style="width:90px; padding:10px; border:1px solid #ddd; border-radius:8px; font-size:0.85rem;">
+              style="width:90px;padding:10px;border:1px solid #ddd;border-radius:8px;font-size:.85rem;">
             <input type="text" id="complemento-input" placeholder="Complemento (opcional)" disabled
-              style="flex:1; padding:10px; border:1px solid #ddd; border-radius:8px; font-size:0.85rem;">
+              style="flex:1;padding:10px;border:1px solid #ddd;border-radius:8px;font-size:.85rem;">
           </div>
-          <div style="margin-top:8px; display:flex; gap:10px; flex-wrap:wrap;">
-            <button id="btnNaoSeiCEP" type="button" style="font-size:0.75rem; background:none; border:none; color:var(--vermelho); cursor:pointer; text-decoration:underline;">Não sei meu CEP</button>
-            <button id="btnManual" type="button" style="font-size:0.75rem; background:none; border:none; color:var(--marrom); cursor:pointer; text-decoration:underline;">Digitar endereço manualmente</button>
+          <div style="margin-top:8px;display:flex;gap:10px;flex-wrap:wrap;">
+            <button id="btnNaoSeiCEP" type="button"
+              style="font-size:.75rem;background:none;border:none;color:var(--vermelho);cursor:pointer;text-decoration:underline;">Não sei meu CEP</button>
+            <button id="btnManual" type="button"
+              style="font-size:.75rem;background:none;border:none;color:var(--marrom);cursor:pointer;text-decoration:underline;">Digitar endereço manualmente</button>
           </div>
         </div>
 
-        <!-- Endereço Manual -->
-        <div id="manualArea" style="display:none; margin-bottom:10px;">
+        <div id="manualArea" style="display:none;margin-bottom:10px;">
           <input type="text" id="manualEndereco" placeholder="Rua e Bairro"
-            style="width:100%; margin-bottom:6px; padding:10px; border:2px solid var(--dourado); border-radius:8px; font-size:0.9rem;">
+            style="width:100%;margin-bottom:6px;padding:10px;border:2px solid var(--dourado);border-radius:8px;font-size:.9rem;">
           <input type="text" id="manualNumero" placeholder="Número"
-            style="width:100%; margin-bottom:6px; padding:10px; border:1px solid #ddd; border-radius:8px; font-size:0.9rem;">
-          <div style="display:flex; gap:8px;">
-            <button id="btnConfirmarEndereco" type="button" style="flex:1; background:var(--marrom); color:var(--bege); border:none; padding:10px; border-radius:8px; font-weight:700; cursor:pointer;">Confirmar</button>
-            <button id="btnVoltarCEP" type="button" style="flex:1; background:var(--bege); color:var(--marrom); border:1px solid var(--dourado); padding:10px; border-radius:8px; font-weight:700; cursor:pointer;">Voltar</button>
+            style="width:100%;margin-bottom:6px;padding:10px;border:1px solid #ddd;border-radius:8px;font-size:.9rem;">
+          <div style="display:flex;gap:8px;">
+            <button id="btnConfirmarEndereco" type="button"
+              style="flex:1;background:var(--marrom);color:var(--bege);border:none;padding:10px;border-radius:8px;font-weight:700;cursor:pointer;">Confirmar</button>
+            <button id="btnVoltarCEP" type="button"
+              style="flex:1;background:var(--bege);color:var(--marrom);border:1px solid var(--dourado);padding:10px;border-radius:8px;font-weight:700;cursor:pointer;">Voltar</button>
           </div>
         </div>
 
-        <!-- Retirada no local -->
-        <label style="display:flex; align-items:center; gap:8px; margin-bottom:12px; cursor:pointer; font-size:0.9rem; font-weight:600; color:var(--marrom);">
-          <input type="checkbox" id="retirar-local" style="width:18px; height:18px; accent-color:var(--marrom);">
+        <label style="display:flex;align-items:center;gap:8px;margin-bottom:12px;cursor:pointer;font-size:.9rem;font-weight:600;color:var(--marrom);">
+          <input type="checkbox" id="retirar-local" style="width:18px;height:18px;accent-color:var(--marrom);">
           Retirar na Degust
         </label>
 
-        <!-- Cupom -->
-        <form id="coupon-form" style="display:flex; gap:8px; margin-bottom:10px;">
+        <form id="coupon-form" style="display:flex;gap:8px;margin-bottom:10px;">
           <input type="text" id="coupon-input" placeholder="Código do Cupom"
-            style="flex:1; padding:10px; border:1px solid var(--dourado); border-radius:8px; text-transform:uppercase; font-size:0.85rem;">
-          <button type="submit" style="background:var(--marrom); color:var(--bege); border:none; padding:0 14px; border-radius:8px; font-weight:700; cursor:pointer;">Aplicar</button>
+            style="flex:1;padding:10px;border:1px solid var(--dourado);border-radius:8px;text-transform:uppercase;font-size:.85rem;">
+          <button type="submit"
+            style="background:var(--marrom);color:var(--bege);border:none;padding:0 14px;border-radius:8px;font-weight:700;cursor:pointer;">Aplicar</button>
         </form>
-
-        <div id="coupon-message" style="min-height:20px; margin-bottom:6px;"></div>
+        <div id="coupon-message" style="min-height:20px;margin-bottom:6px;"></div>
         <div class="summary-row" id="coupon-discount-row" style="display:none;">
           <span>Desconto Cupom</span>
           <span id="cart-discount">R$ 0,00</span>
         </div>
       </div>
     </aside>
-
-    <!-- ===== MODAIS ===== -->
-
-    <!-- Modal Adicionais -->
-    <div id="extras-modal" class="modal" aria-hidden="true">
-      <div class="modal-content" role="dialog" aria-modal="true">
-        <div class="modal-head">
-          <h3>Adicionais</h3>
-          <button class="extras-close" type="button" aria-label="Fechar">✖</button>
-        </div>
-        <div class="extras-list" style="padding:16px 20px; display:grid; gap:10px;"></div>
-        <div class="modal-foot" style="display:flex;gap:10px;justify-content:flex-end;padding:16px 20px;border-top:1px solid #eee;">
-          <button id="extras-confirm" class="btn-primary" type="button">Confirmar Adicionais</button>
-          <button class="btn-secondary extras-close" type="button">Cancelar</button>
-        </div>
-      </div>
-    </div>
-
-    <!-- Modal Login -->
-    <div id="login-modal" class="modal" aria-hidden="true">
-      <div class="modal-content login-box" role="dialog" aria-modal="true">
-        <div class="modal-head">
-          <h3>Minha Conta Degust</h3>
-          <button class="login-close" type="button" aria-label="Fechar">✖</button>
-        </div>
-        <div style="padding:20px 24px;">
-          <button id="google-login" class="btn-google" type="button">
-            <img src="logo.png" alt="Google" class="google-icon" width="20" height="20" loading="lazy"/>
-            Entrar com Google
-          </button>
-          <div class="divider" style="text-align:center;margin:20px 0 16px;font-weight:600;color:#999;font-size:.95rem;">— OU E-MAIL —</div>
-          <form id="login-form" class="login-form" style="display:grid;gap:15px;" novalidate>
-            <input id="login-email" type="email" placeholder="Seu E-mail" required />
-            <input id="login-senha" type="password" placeholder="Sua Senha" required />
-            <button type="submit" class="btn-primario">Entrar Agora</button>
-          </form>
-        </div>
-      </div>
-    </div>
-
-    <!-- Modal PIX -->
-    <div id="pix-modal" class="modal" aria-hidden="true">
-      <div class="modal-content" role="dialog" aria-modal="true">
-        <div class="modal-head">
-          <h3>Pagamento via PIX 💠</h3>
-          <button class="pix-close" type="button" aria-label="Fechar">✖</button>
-        </div>
-        <div class="pix-body" style="padding: 20px; text-align: center;">
-          <p style="margin-bottom: 10px; color: #555;">Finalize seu pedido pagando antecipadamente.</p>
-          <div style="font-size: 1.2rem; margin: 15px 0; font-weight: bold; color: #222;">
-            Total a Pagar: <span id="pix-valor" style="color: #4caf50;">R$ 0,00</span>
-          </div>
-          <div class="pix-code-box" style="background: #f4f4f4; padding: 15px; border-radius: 8px; margin-bottom: 15px; border: 1px dashed #E1A95F;">
-            <p style="margin: 0; font-size: 0.9rem; color: #666;">Chave PIX (E-mail):</p>
-            <strong id="pix-key" style="font-size: 1.1rem; color: #333; display: block; margin: 5px 0;">carols2maite@gmail.com</strong>
-            <small style="display: block; color: #888;">Beneficiário: Degust / Carol</small>
-          </div>
-          <button id="btn-copy-pix" class="pix-btn-copy" type="button" style="width: 100%; margin-bottom: 10px;">📋 Copiar Chave PIX</button>
-          <button id="btn-finish-pix" class="pix-btn-whatsapp" type="button" style="width: 100%;">✅ Enviar Pedido no WhatsApp</button>
-        </div>
-      </div>
-    </div>
-
-    <!-- Painel Meus Pedidos -->
-    <div class="painel-overlay" id="painelPedidosOverlay">
-      <div class="painel-box" id="painelPedidos" role="dialog" aria-modal="true">
-        <div class="painel-head">
-          <span>📦 Histórico de Pedidos</span>
-          <button class="fechar-painel fechar-pedidos" type="button" aria-label="Fechar">✖</button>
-        </div>
-        <div class="painel-body" id="listaPedidos">
-          <p class="empty-orders">Faça login para ver suas doçuras anteriores.</p>
-        </div>
-      </div>
-    </div>
-
-    <!-- Painel Recompensas -->
-    <div class="painel-overlay" id="painelRecompensasOverlay">
-      <div class="painel-box" id="recompensas-panel" role="dialog" aria-modal="true">
-        <div class="painel-head">
-          <span>🎁 Fidelidade Doce</span>
-          <button class="fechar-painel fechar-recompensas" type="button" aria-label="Fechar">✖</button>
-        </div>
-        <div class="recompensas-body">
-          <h4 style="margin-top:0;">🏆 Seu Cartão Fidelidade</h4>
-          <div class="progress-container" style="margin-bottom:20px; border:1px solid var(--dourado); padding:15px; border-radius:12px; background:#fff; box-shadow:var(--shadow-1);">
-            <p style="margin:0 0 8px 0; font-size:1.1rem;">
-              Bolos Pedidos: <span id="contador-valor" style="font-weight:bold; color:var(--vermelho);">...</span> de <span style="font-weight:bold;">5</span>
-            </p>
-            <div style="background:#eee; height:15px; border-radius:10px; overflow:hidden;">
-              <div id="progresso-bar" style="height:100%; width:0%; transition:width .5s; background:var(--dourado);"></div>
-            </div>
-            <p id="progresso-mensagem" style="margin-top:8px; font-size:.9rem; color:#666;">Preparando suas recompensas...</p>
-          </div>
-
-          <h4 style="color:var(--marrom); margin-bottom:10px;">🏷️ Recompensas Disponíveis</h4>
-          <div id="listaRecompensas"></div>
-          
-          <h4 style="color:var(--marrom); margin-bottom:10px;">📜 Histórico de Prêmios</h4>
-          <div id="historicoRecompensas"><p style="color:#999; text-align:center;">Você ainda não resgatou prêmios.</p></div>
-        </div>
-      </div>
-    </div>
 
     <footer class="footer">
       <div class="footer-container">
@@ -351,13 +242,125 @@
         </div>
         <div class="footer-copy">
           <p>© 2026 <strong>Degust Bolos no Pote</strong></p>
-          <p><small>v11.0 • Doçura em cada camada 🍰</small></p>
+          <p><small>v11.1 • Doçura em cada camada 🍰</small></p>
         </div>
       </div>
     </footer>
+
+  </div><!-- fim .main-content-wrapper -->
+
+  <!-- ============================================================
+       MODAIS E PAINÉIS — TODOS FORA DO WRAPPER
+       position:fixed, começam invisíveis (opacity:0 pointer-events:none)
+  ============================================================= -->
+
+  <!-- Modal Adicionais -->
+  <div id="extras-modal" class="modal" aria-hidden="true">
+    <div class="modal-content" role="dialog" aria-modal="true">
+      <div class="modal-head">
+        <h3>Adicionais</h3>
+        <button class="extras-close" type="button">✖</button>
+      </div>
+      <div class="extras-list" style="padding:16px 20px;display:grid;gap:10px;"></div>
+      <div style="display:flex;gap:10px;justify-content:flex-end;padding:16px 20px;border-top:1px solid #eee;">
+        <button id="extras-confirm" class="btn-primary" type="button">Confirmar Adicionais</button>
+        <button class="btn-secondary extras-close" type="button">Cancelar</button>
+      </div>
+    </div>
   </div>
 
-  <!-- Botões flutuantes -->
+  <!-- Modal Login -->
+  <div id="login-modal" class="modal" aria-hidden="true">
+    <div class="modal-content login-box" role="dialog" aria-modal="true">
+      <div class="modal-head">
+        <h3>Minha Conta Degust</h3>
+        <button class="login-close" type="button">✖</button>
+      </div>
+      <div style="padding:20px 24px;">
+        <button id="google-login" class="btn-google" type="button">
+          <svg width="20" height="20" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+            <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
+            <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/>
+            <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/>
+            <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.18 1.48-4.97 2.31-8.16 2.31-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
+          </svg>
+          Entrar com Google
+        </button>
+        <div style="text-align:center;margin:18px 0 14px;font-weight:600;color:#999;font-size:.9rem;">— OU E-MAIL —</div>
+        <form id="login-form" style="display:grid;gap:12px;" novalidate>
+          <input id="login-email" type="email" placeholder="Seu E-mail" required />
+          <input id="login-senha" type="password" placeholder="Sua Senha" required />
+          <button type="submit" class="btn-primario">Entrar Agora</button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal PIX -->
+  <div id="pix-modal" class="modal" aria-hidden="true">
+    <div class="modal-content" role="dialog" aria-modal="true">
+      <div class="modal-head">
+        <h3>Pagamento via PIX 💠</h3>
+        <button class="pix-close" type="button">✖</button>
+      </div>
+      <div class="pix-body">
+        <p style="margin-bottom:10px;color:#555;">Finalize seu pedido pagando antecipadamente.</p>
+        <div style="font-size:1.2rem;margin:15px 0;font-weight:bold;color:#222;">
+          Total a Pagar: <span id="pix-valor" style="color:#4caf50;">R$ 0,00</span>
+        </div>
+        <div class="pix-code-box">
+          <p style="margin:0;font-size:.9rem;color:#666;">Chave PIX (E-mail):</p>
+          <strong style="font-size:1.1rem;color:#333;display:block;margin:5px 0;">carols2maite@gmail.com</strong>
+          <small style="display:block;color:#888;">Beneficiário: Degust / Carol</small>
+        </div>
+        <button id="btn-copy-pix" class="pix-btn-copy" type="button">📋 Copiar Chave PIX</button>
+        <button id="btn-finish-pix" class="pix-btn-whatsapp" type="button">✅ Enviar Pedido no WhatsApp</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Painel Meus Pedidos -->
+  <div class="painel-overlay" id="painelPedidosOverlay">
+    <div class="painel-box">
+      <div class="painel-head">
+        <span>📦 Histórico de Pedidos</span>
+        <button class="fechar-painel fechar-pedidos" type="button">✖</button>
+      </div>
+      <div class="painel-body" id="listaPedidos">
+        <p class="empty-orders">Faça login para ver suas doçuras anteriores.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Painel Recompensas -->
+  <div class="painel-overlay" id="painelRecompensasOverlay">
+    <div class="painel-box">
+      <div class="painel-head">
+        <span>🎁 Fidelidade Doce</span>
+        <button class="fechar-painel fechar-recompensas" type="button">✖</button>
+      </div>
+      <div class="painel-body">
+        <h4 style="margin-top:0;color:var(--marrom);">🏆 Seu Cartão Fidelidade</h4>
+        <div style="margin-bottom:20px;border:1px solid var(--dourado);padding:15px;border-radius:12px;background:#fff;">
+          <p style="margin:0 0 8px;font-size:1.05rem;">
+            Bolos Pedidos: <span id="contador-valor" style="font-weight:bold;color:var(--vermelho);">...</span> de <strong>5</strong>
+          </p>
+          <div style="background:#eee;height:14px;border-radius:10px;overflow:hidden;">
+            <div id="progresso-bar" style="height:100%;width:0%;transition:width .5s;background:var(--dourado);"></div>
+          </div>
+          <p id="progresso-mensagem" style="margin-top:8px;font-size:.85rem;color:#666;">Preparando suas recompensas...</p>
+        </div>
+        <h4 style="color:var(--marrom);margin-bottom:10px;">🏷️ Recompensas Disponíveis</h4>
+        <div id="listaRecompensas"></div>
+        <h4 style="color:var(--marrom);margin:16px 0 10px;">📜 Histórico de Prêmios</h4>
+        <div id="historicoRecompensas">
+          <p style="color:#999;text-align:center;font-size:.9rem;">Você ainda não resgatou prêmios.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- BOTÕES FLUTUANTES -->
   <div class="minhas-recompensas">
     <button class="recompensas-btn" type="button" aria-label="Minhas Recompensas"></button>
   </div>
@@ -365,24 +368,22 @@
     <button class="meus-pedidos-btn" type="button" aria-label="Meus Pedidos"></button>
   </div>
 
-  <!-- Banner de Cookies — começa escondido via JS/CSS -->
+  <!-- BANNER DE COOKIES -->
   <div id="cookie-banner" role="region" aria-label="Aviso de Cookies">
     <p>Usamos cookies para garantir que sua experiência na Degust seja a mais doce possível.
-      <a href="#" target="_blank" rel="noopener">Privacidade</a>.
+      <a href="#" rel="noopener">Privacidade</a>.
     </p>
     <button id="cookie-accept" type="button">Aceitar</button>
   </div>
 
-  <script defer src="script.js?v=11.0"></script>
+  <script defer src="script.js?v=11.1"></script>
   <script defer src="extras.js?v=5.2.2"></script>
-
   <script>
     if ("serviceWorker" in navigator) {
       window.addEventListener("load", () => {
-        navigator.serviceWorker
-          .register("/service-worker.js")
+        navigator.serviceWorker.register("/service-worker.js")
           .then(() => console.log("✅ PWA Degust: Service Worker Ativo"))
-          .catch(err => console.error("❌ PWA Degust: Erro no SW", err));
+          .catch(err => console.error("❌ SW erro:", err));
       });
     }
   </script>
