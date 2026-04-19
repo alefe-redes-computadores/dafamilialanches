@@ -1183,10 +1183,9 @@ html, body {
 }
 
  ===========================================================
-   🚀 AJUSTE FINAL DE SEGURANÇA - DEGUST v10.2
+/* ===========================================================
+   🚀 BLOCO ÚNICO DEFINITIVO - DEGUST v10.2
    =========================================================== */
-
-/* 1. FUNDO E RODAPÉ (Cobre o vácuo branco) */
 html, body {
     background-color: #F5E6CA !important;
 }
@@ -1198,7 +1197,6 @@ html, body {
     padding-bottom: 120px;
 }
 
-/* 2. BANNER DE COOKIES (Texto bege no fundo marrom) */
 #cookie-banner {
     position: fixed !important;
     bottom: 0; left: 0; width: 100%;
@@ -1218,7 +1216,6 @@ html, body {
     margin: 0;
     font-size: 0.95rem;
     text-align: center;
-    font-weight: 500;
 }
 
 #cookie-accept {
@@ -1228,46 +1225,18 @@ html, body {
     padding: 12px 40px !important;
     border-radius: 10px !important;
     font-weight: 800 !important;
-    text-transform: uppercase;
     cursor: pointer;
 }
 
-/* 3. MODAL DE LOGIN (Design Degust) */
 .modal-content.login-box {
     background: #F5E6CA !important;
     border: 3px solid #E1A95F !important;
-    padding: 0 !important;
 }
 
-.login-form { padding: 20px !important; }
-
-.login-form input {
-    width: 100%;
-    padding: 14px !important;
-    margin-bottom: 12px !important;
-    border: 2px solid #E1A95F !important;
-    border-radius: 10px !important;
-    background: #ffffff !important;
-    color: #4B2C20 !important;
-}
-
-.btn-primario {
-    background: #4B2C20 !important;
-    color: #F5E6CA !important;
-    padding: 15px !important;
-    border: none !important;
-    border-radius: 10px !important;
-    font-weight: 700 !important;
-    width: 100%;
-    cursor: pointer;
-}
-
-/* 4. BOTÕES FLUTUANTES (Ativação do Clique) */
 .recompensas-btn, .meus-pedidos-btn {
     pointer-events: auto !important;
     cursor: pointer !important;
 }
 
-  
 
 /* FIM DO ARQUIVO CSS */
