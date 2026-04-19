@@ -1,19 +1,19 @@
 {
-  "name": "Da Família Lanches",
-  "short_name": "DFL",
+  "name": "Degust Bolos no Pote",
+  "short_name": "Degust",
   "start_url": "/index.html",
   "scope": "/",
   "display": "standalone",
-  "background_color": "#0d0d0d",
-  "theme_color": "#ffca28",
+  "background_color": "#4B2C20",
+  "theme_color": "#E1A95F",
   "icons": [
     {
-      "src": "/imagens/icon-192.png",
+      "src": "logo.png",
       "sizes": "192x192",
       "type": "image/png"
     },
     {
-      "src": "/imagens/icon-512.png",
+      "src": "logo.png",
       "sizes": "512x512",
       "type": "image/png"
     }
