@@ -1182,49 +1182,7 @@ html, body {
     border-radius: 15px 15px 0 0;
 }
 
-
-
-/* ===========================================================
-   🚀 AJUSTE FINAL DE SEGURANÇA - DEGUST v10.1
-   =========================================================== */
-
-/* 1. FUNDO E RODAPÉ (Elimina o vácuo branco) */
-html, body {
-    background-color: var(--bege) !important;
-}
-
-.main-content-wrapper {
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-    padding-bottom: 120px; /* Abre espaço para os botões fixos */
-}
-
-/* 2. BOTÃO ACEITAR COOKIES (Design corrigido) */
-#cookie-banner {
-    position: fixed !important;
-    bottom: 0;
-    left: 0;
-    width: 100%;
-    z-index: 10001;
-    background: var(--marrom) !important;
-    padding: 20px !important;
-    display: flex !important;
-    flex-direction: column;
-    align-items: center;
-    gap: 12px;
-    border-radius: 20px 20px 0 0;
-    box-shadow: 0 -5px 20px rgba(0,0,0,0.3);
-}
-
-#cookie-banner p {
-    color: var(--bege) !important; /* Força o texto a aparecer */
-    margin: 0;
-    font-size: 0.9rem;
-    text-align: center;
-}
-
- /* ===========================================================
+ ===========================================================
    🚀 AJUSTE FINAL DE SEGURANÇA - DEGUST v10.2
    =========================================================== */
 
