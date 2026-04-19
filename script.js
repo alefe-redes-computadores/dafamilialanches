@@ -714,48 +714,57 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-    /* ------------------ 🚦 STATUS & COOKIES ------------------ */
-    const atualizarStatus = () => {  
-        const h = new Date().getHours();  
-        const aberto = h >= 14 && h < 22; // Exemplo: Aberto das 14h às 22h
-        if (el.statusBanner) { 
-            el.statusBanner.textContent = aberto ? "🟢 Degust aberta! Peça seu bolo agora." : "🔴 Fechado — Abrimos às 14h."; 
-            el.statusBanner.className = `status-banner ${aberto ? "open" : "closed"}`; 
-        }  
-    };  
-    atualizarStatus(); setInterval(atualizarStatus, 60000);  
+     /* --- STATUS & COOKIES (VERSÃO CORRIGIDA) --- */
+    const atualizarStatus = () => {
+        const h = new Date().getHours();
+        const aberto = h >= 14 && h < 22;
+        if (el.statusBanner) {
+            el.statusBanner.textContent = aberto ? "🟢 Degust aberta! Peça seu bolo agora." : "🔴 Fechado — Abrimos às 14h.";
+            // Usando concatenação simples para evitar erro de crase no celular
+            el.statusBanner.className = 'status-banner ' + (aberto ? 'open' : 'closed');
+        }
+    };
+    atualizarStatus();
+    setInterval(atualizarStatus, 60000);
 
-    const cookieBanner = document.getElementById("cookie-banner"); 
-    const cookieAcceptBtn = document.getElementById("cookie-accept");  
-    if (cookieBanner && cookieAcceptBtn) { 
-        if (localStorage.getItem("degust-cookies")) cookieBanner.style.display = "none";
-        cookieAcceptBtn.addEventListener("click", () => { 
-            localStorage.setItem("degust-cookies", "true"); 
-            cookieBanner.classList.remove("show"); 
-        }); 
+    const cookieBanner = document.getElementById("cookie-banner");
+    const cookieAcceptBtn = document.getElementById("cookie-accept");
+    if (cookieBanner && cookieAcceptBtn) {
+        if (localStorage.getItem("degust-cookies")) {
+            cookieBanner.style.display = "none";
+        }
+        cookieAcceptBtn.addEventListener("click", () => {
+            localStorage.setItem("degust-cookies", "true");
+            cookieBanner.classList.remove("show");
+            setTimeout(() => { cookieBanner.style.display = "none"; }, 500);
+        });
     }
 
     // Inicialização Final
-    console.log("%c🍰 Degust Bolos no Pote — v10.0 Ativa!", "color:#4B2C20; font-weight:bold; background:#F5E6CA; padding:5px;");
-    inicializarFirebase();  
-    renderMiniCart();
+    console.log("🍰 Degust Bolos no Pote v10.0 Ativa!");
+    if (typeof inicializarFirebase === "function") inicializarFirebase();
+    if (typeof renderMiniCart === "function") renderMiniCart();
 
-// FORÇAR LISTENERS NOS BOTÕES DE COMPRA
-function resetListeners() {
-    document.querySelectorAll(".add-cart").forEach(btn => {
-        btn.onclick = (e) => {
-            const card = e.currentTarget.closest(".card");
-            const nome = card.dataset.name;
-            const preco = parseFloat(card.dataset.price);
-            if (nome && preco) {
-                addCommonItem(nome, preco);
-                console.log("Adicionado:", nome);
-            }
-        };
-    });
-}
-// Chame essa função logo no final do script
-resetListeners();
+    // FORÇAR BOTÕES DE COMPRA
+    function resetListeners() {
+        document.querySelectorAll(".add-cart").forEach(btn => {
+            btn.onclick = (e) => {
+                e.preventDefault();
+                const card = e.currentTarget.closest(".card");
+                if (card) {
+                    const nome = card.getAttribute("data-name");
+                    const preco = parseFloat(card.getAttribute("data-price"));
+                    if (nome && typeof addCommonItem === "function") {
+                        addCommonItem(nome, preco);
+                    }
+                }
+            };
+        });
+    }
+    resetListeners();
+
+}); // Fim do DOMContentLoaded - NÃO APAGUE ESTA LINHA
+
 
 
 }); // Fim do DOMContentLoaded
