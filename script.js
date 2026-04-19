@@ -1308,4 +1308,21 @@ document.addEventListener("DOMContentLoaded", () => {
     // 4. Log de sucesso no console para debug
     console.log("%c🍰 Degust Bolos no Pote v10.0 — Sistema Carregado com Sucesso!", "color: #E1A95F; font-size: 14px; font-weight: bold;");
 
-}); // <--- 🔑 FIM DO DOMCONTENTLOADED (O fechamento mestre de todo o script!)
+// --- COPIE DAQUI ---
+// FORÇAR FECHAMENTO DO COOKIE (OPÇÃO 1)
+const btnCookie = document.getElementById("cookie-accept");
+if (btnCookie) {
+    btnCookie.onclick = function() {
+        const banner = document.getElementById("cookie-banner");
+        if (banner) {
+            banner.style.display = "none";
+        }
+        localStorage.setItem("degust-cookies-accepted", "true");
+        console.log("Cookie aceito e banner fechado.");
+    };
+}
+
+}); 
+
+
+// <--- 🔑 FIM DO DOMCONTENTLOADED (O fechamento mestre de todo o script!)
