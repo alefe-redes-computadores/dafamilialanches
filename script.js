@@ -1308,21 +1308,53 @@ document.addEventListener("DOMContentLoaded", () => {
     // 4. Log de sucesso no console para debug
     console.log("%c🍰 Degust Bolos no Pote v10.0 — Sistema Carregado com Sucesso!", "color: #E1A95F; font-size: 14px; font-weight: bold;");
 
-// --- COPIE DAQUI ---
-// FORÇAR FECHAMENTO DO COOKIE (OPÇÃO 1)
+// --- COPIE DAQUI ATÉ O FINAL DO ARQUIVO ---
+
+// 1. FORÇAR FECHAMENTO DO COOKIE (CORRIGIDO)
 const btnCookie = document.getElementById("cookie-accept");
 if (btnCookie) {
     btnCookie.onclick = function() {
         const banner = document.getElementById("cookie-banner");
         if (banner) {
-            banner.style.display = "none";
+            banner.style.display = 'none';
         }
         localStorage.setItem("degust-cookies-accepted", "true");
-        console.log("Cookie aceito e banner fechado.");
+        if (typeof popupAdd === 'function') popupAdd("Preferências salvas! 🍪");
     };
 }
 
-}); 
+// 2. ATIVAÇÃO DOS PAINÉIS (PEDIDOS E RECOMPENSAS)
+const btnMeusPedidos = document.querySelector(".meus-pedidos-btn");
+const btnMinhasRecompensas = document.querySelector(".recompensas-btn");
+const backdropGeral = document.getElementById("cart-backdrop") || document.getElementById("menu-overlay");
 
+if (btnMeusPedidos) {
+    btnMeusPedidos.onclick = () => {
+        const painel = document.getElementById("painelPedidos");
+        if (painel) {
+            painel.classList.add("active");
+            if (backdropGeral) backdropGeral.classList.add("active");
+        }
+    };
+}
 
-// <--- 🔑 FIM DO DOMCONTENTLOADED (O fechamento mestre de todo o script!)
+if (btnMinhasRecompensas) {
+    btnMinhasRecompensas.onclick = () => {
+        const painel = document.getElementById("recompensas-panel");
+        if (painel) {
+            painel.classList.add("active");
+            if (backdropGeral) backdropGeral.classList.add("active");
+        }
+    };
+}
+
+// 3. FECHAMENTO DOS PAINÉIS (BOTÃO X)
+document.querySelectorAll('.fechar-pedidos, .fechar-recompensas').forEach(btn => {
+    btn.onclick = () => {
+        document.querySelectorAll('.pedidos-panel, .recompensas-panel, #cart-backdrop, #menu-overlay').forEach(el => {
+            el.classList.remove('active');
+        });
+    };
+});
+
+}); // <--- FIM DO DOMCONTENTLOADED (O FECHAMENTO FINAL)
