@@ -1182,4 +1182,52 @@ html, body {
     border-radius: 15px 15px 0 0;
 }
 
+/* --- AJUSTE FINAL DEGUST (PROTEÇÃO DE FUNDO) --- */
+html {
+    background-color: #F5E6CA !important; /* Cor bege */
+}
+
+body {
+    margin: 0;
+    padding: 0;
+    min-height: 100vh;
+    background-color: #F5E6CA !important;
+    display: flex;
+    flex-direction: column;
+}
+
+.main-content-wrapper {
+    flex: 1 0 auto; /* Faz o conteúdo esticar e empurrar o rodapé */
+}
+
+.footer {
+    flex-shrink: 0;
+    background-color: #F5E6CA;
+    padding-bottom: 30px; /* Espaço para os botões não cobrirem o texto */
+    text-align: center;
+}
+
+/* Botões Flutuantes Arrumados */
+.minhas-recompensas, .meus-pedidos {
+    position: fixed !important;
+    right: 20px !important;
+    z-index: 9999;
+}
+.minhas-recompensas { bottom: 100px; }
+.meus-pedidos { bottom: 30px; }
+
+.recompensas-btn, .meus-pedidos-btn {
+    width: 60px !important;
+    height: 60px !important;
+    border-radius: 50% !important;
+    background: #fff !important;
+    border: 2px solid #E1A95F !important;
+    font-size: 0 !important;
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+}
+
+
 /* FIM DO ARQUIVO CSS */
