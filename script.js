@@ -740,4 +740,22 @@ document.addEventListener("DOMContentLoaded", () => {
     inicializarFirebase();  
     renderMiniCart();
 
+// FORÇAR LISTENERS NOS BOTÕES DE COMPRA
+function resetListeners() {
+    document.querySelectorAll(".add-cart").forEach(btn => {
+        btn.onclick = (e) => {
+            const card = e.currentTarget.closest(".card");
+            const nome = card.dataset.name;
+            const preco = parseFloat(card.dataset.price);
+            if (nome && preco) {
+                addCommonItem(nome, preco);
+                console.log("Adicionado:", nome);
+            }
+        };
+    });
+}
+// Chame essa função logo no final do script
+resetListeners();
+
+
 }); // Fim do DOMContentLoaded
