@@ -1122,4 +1122,76 @@ section h2 {
     line-height: 1.2;
 }
 
+/* 1. BOTÕES FLUTUANTES (Canto Inferior Direito) */
+.minhas-recompensas, .meus-pedidos {
+    position: fixed !important;
+    right: 15px !important;
+    z-index: 9999 !important; /* Sempre acima de tudo */
+}
+
+.recompensas-btn, .meus-pedidos-btn {
+    width: 60px;
+    height: 60px;
+    border-radius: 50% !important;
+    font-size: 0; /* Esconde o texto para ficar só o ícone no mobile */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+    border: 2px solid var(--bege) !important;
+}
+
+/* Ícone dentro do botão (usando o emoji que já está lá) */
+.recompensas-btn::before { content: "🎁"; font-size: 24px; }
+.meus-pedidos-btn::before { content: "📦"; font-size: 24px; }
+
+/* Posições individuais para não um ficar em cima do outro */
+.minhas-recompensas { bottom: 85px; } /* Fica em cima do outro */
+.meus-pedidos { bottom: 15px; }
+
+/* 2. BANNER DE COOKIES (Sobreposição Inferior) */
+#cookie-banner {
+    position: fixed !important;
+    bottom: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    width: 100% !important;
+    background: var(--marrom) !important;
+    color: var(--bege) !important;
+    padding: 15px 20px !important;
+    display: none; /* Controlado pelo JS */
+    align-items: center;
+    justify-content: space-between;
+    flex-direction: row !important; /* Lado a lado no mobile se couber */
+    z-index: 10000 !important;
+    box-shadow: 0 -4px 15px rgba(0,0,0,0.2);
+    border-top: 2px solid var(--dourado);
+}
+
+#cookie-banner.show {
+    display: flex !important;
+}
+
+#cookie-banner p {
+    font-size: 0.85rem;
+    margin: 0;
+    max-width: 75%;
+}
+
+#cookie-accept {
+    background: var(--dourado) !important;
+    color: var(--marrom) !important;
+    border: none;
+    padding: 8px 15px;
+    border-radius: 8px;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+/* 3. LIMPEZA DO RODAPÉ */
+.footer {
+    padding-bottom: 100px; /* Espaço para não cobrir o conteúdo com os botões fixos */
+}
+
+
 /* FIM DO ARQUIVO CSS */
