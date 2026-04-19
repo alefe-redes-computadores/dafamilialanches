@@ -1,34 +1,31 @@
 /* ===========================================================
-   🍰 Degust Bolos no Pote – CSS v10.0 (FULL VERSION)
-   - Paleta: Marrom Chocolate, Bege Creme, Vermelho Morango, Dourado
+   🍰 Degust Bolos no Pote – CSS v11.0
+   Paleta: Marrom Chocolate, Bege Creme, Vermelho Morango, Dourado
    =========================================================== */
 
 :root {
-  --marrom: #4B2C20;
-  --bege: #F5E6CA;
-  --vermelho: #C8282D;
+  --marrom:  #4B2C20;
+  --bege:    #F5E6CA;
+  --vermelho:#C8282D;
   --dourado: #E1A95F;
-  --branco: #ffffff;
-  
-  --preto: #000;
+  --branco:  #ffffff;
+
   --bg1: var(--bege);
   --bg2: #fdf8ef;
-  --acento: var(--dourado);
-  --botao: var(--vermelho);
-  --danger: #d32f2f;
-  --success: #4caf50;
   --txt: var(--marrom);
-  
+
   --rad-sm: 8px;
-  --rad: 10px;
+  --rad:    10px;
   --rad-lg: 12px;
-  --shadow-1: 0 2px 5px rgba(75, 44, 32, 0.15);
-  --shadow-2: 0 3px 10px rgba(75, 44, 32, 0.2);
-  --shadow-3: 0 5px 15px rgba(75, 44, 32, 0.3);
-  --shadow-in: inset 0 1px 0 rgba(255, 255, 255, 0.25);
+  --shadow-1: 0 2px 5px rgba(75,44,32,.15);
+  --shadow-2: 0 3px 10px rgba(75,44,32,.2);
+  --shadow-3: 0 5px 15px rgba(75,44,32,.3);
+  --shadow-in: inset 0 1px 0 rgba(255,255,255,.25);
+  --success: #4caf50;
+  --danger:  #d32f2f;
 }
 
-* {
+*, *::before, *::after {
   box-sizing: border-box;
   -webkit-tap-highlight-color: transparent;
   outline: none;
@@ -51,7 +48,7 @@ body {
 }
 
 /* ===========================================================
-   🏢 HEADER & NAVEGAÇÃO
+   🏢 HEADER
    =========================================================== */
 
 .header {
@@ -66,7 +63,7 @@ body {
   padding: 10px 16px;
   box-shadow: var(--shadow-1);
   height: 70px;
-  border-bottom: 2px solid rgba(75, 44, 32, 0.1);
+  border-bottom: 2px solid rgba(75,44,32,.1);
 }
 
 .header-content {
@@ -90,7 +87,7 @@ body {
   height: 3px;
   background: var(--marrom);
   border-radius: 2px;
-  transition: 0.3s;
+  transition: .3s;
 }
 
 .logo-container {
@@ -112,15 +109,15 @@ body {
   margin: 0;
   color: var(--marrom);
   font-weight: 800;
-  letter-spacing: -0.5px;
+  letter-spacing: -.5px;
 }
 
 .header-info p {
-  font-size: 0.7rem;
+  font-size: .7rem;
   margin: 0;
   color: var(--marrom);
   font-weight: 500;
-  opacity: 0.9;
+  opacity: .9;
 }
 
 .header-actions {
@@ -136,11 +133,13 @@ body {
   padding: 8px 14px;
   border-radius: var(--rad);
   font-weight: 600;
-  font-size: 0.85rem;
+  font-size: .85rem;
   cursor: pointer;
   box-shadow: var(--shadow-in);
-  transition: transform 0.2s;
+  transition: transform .2s;
 }
+
+#user-btn:active { transform: scale(.97); }
 
 #cart-icon {
   position: relative;
@@ -160,11 +159,10 @@ body {
 
 #cart-count {
   position: absolute;
-  top: -5px;
-  right: -5px;
+  top: -5px; right: -5px;
   background: var(--vermelho);
   color: #fff;
-  font-size: 0.7rem;
+  font-size: .7rem;
   font-weight: 800;
   min-width: 20px;
   height: 20px;
@@ -174,6 +172,7 @@ body {
   justify-content: center;
   border: 2px solid var(--dourado);
 }
+
 /* ===========================================================
    📂 MENU LATERAL & OVERLAYS
    =========================================================== */
@@ -181,11 +180,11 @@ body {
 #menu-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(75, 44, 32, 0.5); /* Tom marrom transparente */
+  background: rgba(75,44,32,.5);
   z-index: 1850;
   opacity: 0;
   pointer-events: none;
-  transition: opacity 0.3s;
+  transition: opacity .3s;
   backdrop-filter: blur(2px);
 }
 
@@ -202,15 +201,13 @@ body {
   height: 100%;
   background: var(--branco);
   z-index: 1900;
-  transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: 5px 0 20px rgba(75, 44, 32, 0.2);
+  transition: left .3s cubic-bezier(.4,0,.2,1);
+  box-shadow: 5px 0 20px rgba(75,44,32,.2);
   display: flex;
   flex-direction: column;
 }
 
-#side-menu.active {
-  left: 0;
-}
+#side-menu.active { left: 0; }
 
 .menu-header {
   background: var(--marrom);
@@ -242,17 +239,16 @@ body {
   padding: 10px 0;
 }
 
-.menu-section-block {
-  margin-bottom: 20px;
-}
+.menu-section-block { margin-bottom: 20px; }
 
 .menu-title {
   padding: 10px 16px;
-  font-size: 0.8rem;
+  font-size: .8rem;
   text-transform: uppercase;
-  color: #8d6e63; /* Marrom mais claro para subtitulo */
+  color: #8d6e63;
   font-weight: 700;
   letter-spacing: 1px;
+  margin: 0;
 }
 
 .menu-list {
@@ -261,18 +257,29 @@ body {
   margin: 0;
 }
 
-.menu-list li a {
+.menu-list li a,
+.menu-list li .menu-link-action {
   display: flex;
   align-items: center;
   padding: 14px 16px;
   color: var(--marrom);
   text-decoration: none;
   font-weight: 500;
-  border-bottom: 1px solid rgba(75, 44, 32, 0.05);
-  transition: background 0.2s, color 0.2s;
+  font-size: .95rem;
+  border-bottom: 1px solid rgba(75,44,32,.05);
+  transition: background .2s, color .2s;
+  cursor: pointer;
+  background: none;
+  border-left: none;
+  border-right: none;
+  border-top: none;
+  width: 100%;
+  text-align: left;
 }
 
-.menu-list li a:active, .menu-list li a:hover {
+.menu-list li a:active,
+.menu-list li a:hover,
+.menu-list li .menu-link-action:hover {
   background: var(--bege);
   color: var(--vermelho);
 }
@@ -306,158 +313,19 @@ body {
   font-size: 1rem;
   font-weight: 500;
   box-shadow: var(--shadow-1);
-  transition: border-color 0.3s, box-shadow 0.3s;
-}
-/* ===========================================================
-   🍰 GRID DE PRODUTOS & CARDS
-   =========================================================== */
-
-.grid-produtos {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
-  gap: 16px;
-  padding: 5px;
-}
-
-.card {
-  background: var(--branco); 
-  border-radius: var(--rad-lg);
-  box-shadow: var(--shadow-1);
-  padding: 14px; 
-  text-align: center;
-  transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.2s;
-  border: 1px solid rgba(225, 169, 95, 0.2);
-  display: flex;
-  flex-direction: column;
-  position: relative;
-  overflow: hidden;
-}
-
-/* Efeito de toque para celular */
-.card:active { 
-  transform: translateY(-4px) scale(1.02); 
-  box-shadow: var(--shadow-2);
-  border-color: var(--dourado);
-}
-
-.card img {
-  width: 100%;
-  height: 140px;
-  object-fit: cover;
-  border-radius: var(--rad);
-  margin-bottom: 12px;
-  background: var(--bg2);
-}
-
-.card h3 {
-  font-size: 1rem;
-  margin: 5px 0;
-  color: var(--marrom);
-  font-weight: 700;
-  min-height: 2.4em;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.card p {
-  font-size: 0.85rem;
-  color: #6d4c41;
-  margin-bottom: 12px;
-  line-height: 1.3;
-}
-
-.price { 
-  font-size: 1.2rem;
-  font-weight: 800; 
-  color: var(--vermelho); 
-  margin: 5px 0 15px 0;
-  display: block;
-}
-
-/* BADGES (ECONOMIA / NOVIDADE) */
-.badge {
-  position: absolute;
-  top: 10px;
-  right: 10px;
-  padding: 4px 8px;
-  border-radius: 6px;
-  font-size: 0.7rem;
-  font-weight: 700;
-  text-transform: uppercase;
-}
-
-.badge.economia {
-  background: var(--success);
-  color: #fff;
-}
-
-/* ===========================================================
-   🔘 BOTÕES DE AÇÃO (ADD CARRINHO)
-   =========================================================== */
-
-.actions {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  margin-top: auto;
-}
-
-.actions button { 
-  width: 100%;
-  border: none; 
-  border-radius: var(--rad); 
-  padding: 12px 10px; 
-  font-weight: 700; 
-  cursor: pointer; 
-  font-size: 0.85rem;
-  text-transform: uppercase;
-  transition: all 0.2s;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-}
-
-.add-cart { 
-  background: var(--vermelho); 
-  color: var(--branco); 
-  box-shadow: 0 3px 0 #a51f23;
-}
-
-.add-cart:active { 
-  transform: translateY(2px);
-  box-shadow: 0 1px 0 #a51f23;
-}
-
-.extras-btn { 
-  background: var(--bege); 
-  color: var(--marrom);
-  border: 1px solid var(--dourado) !important;
-}
-
-.extras-btn:active {
-  background: var(--dourado);
-}
-
-/* Destaque para seção de promoções */
-.promo-card {
-  border: 2px solid var(--dourado);
-  background: #fffdf9;
+  transition: border-color .3s, box-shadow .3s;
 }
 
 .search-container input:focus {
   border-color: var(--vermelho);
-  box-shadow: 0 0 0 4px rgba(200, 40, 45, 0.1);
+  box-shadow: 0 0 0 4px rgba(200,40,45,.1);
 }
 
 /* ===========================================================
-   🍰 GRID DE PRODUTOS & SEÇÕES
+   🍰 SEÇÕES & GRID DE CARDS
    =========================================================== */
 
-section {
-  margin-bottom: 35px;
-}
+section { margin-bottom: 35px; }
 
 section h2 {
   font-size: 1.4rem;
@@ -469,11 +337,8 @@ section h2 {
   padding-left: 5px;
   border-left: 4px solid var(--vermelho);
 }
-/* ===========================================================
-   🍰 GRID DE PRODUTOS & CARDS
-   =========================================================== */
 
-.grid-produtos {
+.grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
   gap: 16px;
@@ -481,22 +346,21 @@ section h2 {
 }
 
 .card {
-  background: var(--branco); 
+  background: var(--branco);
   border-radius: var(--rad-lg);
   box-shadow: var(--shadow-1);
-  padding: 14px; 
+  padding: 14px;
   text-align: center;
-  transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.2s;
-  border: 1px solid rgba(225, 169, 95, 0.2);
+  transition: transform .2s cubic-bezier(.175,.885,.32,1.275), box-shadow .2s;
+  border: 1px solid rgba(225,169,95,.2);
   display: flex;
   flex-direction: column;
   position: relative;
   overflow: hidden;
 }
 
-/* Efeito de toque para celular */
-.card:active { 
-  transform: translateY(-4px) scale(1.02); 
+.card:active {
+  transform: translateY(-4px) scale(1.02);
   box-shadow: var(--shadow-2);
   border-color: var(--dourado);
 }
@@ -519,42 +383,37 @@ section h2 {
   display: flex;
   align-items: center;
   justify-content: center;
+  flex-wrap: wrap;
+  gap: 4px;
 }
 
 .card p {
-  font-size: 0.85rem;
+  font-size: .85rem;
   color: #6d4c41;
   margin-bottom: 12px;
   line-height: 1.3;
 }
 
-.price { 
+.price {
   font-size: 1.2rem;
-  font-weight: 800; 
-  color: var(--vermelho); 
-  margin: 5px 0 15px 0;
+  font-weight: 800;
+  color: var(--vermelho);
+  margin: 5px 0 15px;
   display: block;
 }
 
-/* BADGES (ECONOMIA / NOVIDADE) */
-.badge {
-  position: absolute;
-  top: 10px;
-  right: 10px;
-  padding: 4px 8px;
-  border-radius: 6px;
-  font-size: 0.7rem;
+.badge-small {
+  font-size: .65rem;
+  background: var(--dourado);
+  color: var(--marrom);
+  padding: 2px 7px;
+  border-radius: 20px;
   font-weight: 700;
   text-transform: uppercase;
 }
 
-.badge.economia {
-  background: var(--success);
-  color: #fff;
-}
-
 /* ===========================================================
-   🔘 BOTÕES DE AÇÃO (ADD CARRINHO)
+   🔘 BOTÕES DE AÇÃO
    =========================================================== */
 
 .actions {
@@ -564,71 +423,91 @@ section h2 {
   margin-top: auto;
 }
 
-.actions button { 
+.actions button {
   width: 100%;
-  border: none; 
-  border-radius: var(--rad); 
-  padding: 12px 10px; 
-  font-weight: 700; 
-  cursor: pointer; 
-  font-size: 0.85rem;
+  border: none;
+  border-radius: var(--rad);
+  padding: 12px 10px;
+  font-weight: 700;
+  cursor: pointer;
+  font-size: .85rem;
   text-transform: uppercase;
-  transition: all 0.2s;
+  transition: all .2s;
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 8px;
 }
 
-.add-cart { 
-  background: var(--vermelho); 
-  color: var(--branco); 
+.add-cart {
+  background: var(--vermelho);
+  color: var(--branco);
   box-shadow: 0 3px 0 #a51f23;
 }
 
-.add-cart:active { 
+.add-cart:active {
   transform: translateY(2px);
   box-shadow: 0 1px 0 #a51f23;
 }
 
-.extras-btn { 
-  background: var(--bege); 
+.extras-btn {
+  background: var(--bege);
   color: var(--marrom);
   border: 1px solid var(--dourado) !important;
 }
 
-.extras-btn:active {
-  background: var(--dourado);
+.extras-btn:active { background: var(--dourado); }
+
+.btn-primary {
+  background: var(--marrom);
+  color: var(--bege);
+  border: none;
+  padding: 12px 20px;
+  border-radius: var(--rad);
+  font-weight: 700;
+  cursor: pointer;
 }
 
-/* Destaque para seção de promoções */
-.promo-card {
-  border: 2px solid var(--dourado);
-  background: #fffdf9;
+.btn-secondary {
+  background: var(--bege);
+  color: var(--marrom);
+  border: 1px solid var(--dourado);
+  padding: 12px 20px;
+  border-radius: var(--rad);
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.btn-primario {
+  background: var(--marrom);
+  color: var(--bege);
+  padding: 15px;
+  border: none;
+  border-radius: 10px;
+  width: 100%;
+  font-weight: 700;
+  cursor: pointer;
 }
 /* ===========================================================
-   🛒 MINI-CARRINHO (SIDEBAR DE COMPRAS)
+   🛒 MINI-CARRINHO
    =========================================================== */
 
 .mini-cart {
   position: fixed;
-  right: 0;
-  top: 0;
+  right: 0; top: 0;
   width: 100%;
   max-width: 380px;
   height: 100vh;
   background: var(--branco);
   z-index: 1800;
   transform: translateX(100%);
-  transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: transform .25s cubic-bezier(.4,0,.2,1);
   display: flex;
   flex-direction: column;
-  box-shadow: -5px 0 20px rgba(75, 44, 32, 0.2);
+  box-shadow: -5px 0 20px rgba(75,44,32,.2);
 }
 
-.mini-cart.active {
-  transform: translateX(0);
-}
+.mini-cart.active { transform: translateX(0); }
 
 .mini-head {
   background: var(--marrom);
@@ -638,215 +517,610 @@ section h2 {
   justify-content: space-between;
   align-items: center;
   border-bottom: 3px solid var(--dourado);
+  flex-shrink: 0;
 }
 
 .mini-head h3 { margin: 0; font-size: 1.2rem; }
+
+.mini-head button {
+  background: none;
+  border: none;
+  color: var(--bege);
+  font-size: 1.3rem;
+  cursor: pointer;
+}
 
 .mini-list {
   flex: 1;
   overflow-y: auto;
   padding: 16px;
-  background: #fdfaf5; /* Fundo levemente creme */
+  background: #fdfaf5;
 }
 
-/* ITENS DENTRO DO CARRINHO */
 .cart-item {
   background: #fff;
   border-radius: var(--rad);
   padding: 12px;
   margin-bottom: 12px;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-  border: 1px solid rgba(75, 44, 32, 0.05);
+  box-shadow: 0 2px 4px rgba(0,0,0,.05);
+  border: 1px solid rgba(75,44,32,.05);
 }
 
-.cart-item p { margin: 0; font-weight: 600; color: var(--marrom); }
+.mini-foot {
+  padding: 16px;
+  background: var(--branco);
+  border-top: 1px solid var(--bege);
+  flex-shrink: 0;
+  overflow-y: auto;
+  max-height: 55vh;
+}
 
-/* BARRA DE PROGRESSO (FRETE GRÁTIS) */
-#progressWrapper {
-  margin: 10px 16px;
-  padding: 12px;
+/* Barra de progresso frete grátis */
+.progress-wrapper {
+  margin-bottom: 12px;
+  padding: 10px 12px;
   border-radius: var(--rad);
   background: #fff8e1;
   border: 1px solid var(--dourado);
   text-align: center;
 }
 
-#progressText {
-  font-size: 0.85rem;
-  margin-bottom: 8px;
+.progress-text {
+  font-size: .82rem;
+  margin: 0 0 6px;
   color: var(--marrom);
 }
 
-.progress-bar-bg {
+.progress-bar {
   background: #eee;
   height: 10px;
   border-radius: 5px;
   overflow: hidden;
 }
 
-#progressFill {
+.progress-fill {
   height: 100%;
   background: linear-gradient(90deg, var(--dourado), #ffa000);
   width: 0%;
-  transition: width 0.5s ease;
-}
-
-/* CUPOM DE DESCONTO */
-#coupon-form {
-  display: flex;
-  gap: 8px;
-  padding: 16px;
-  background: var(--bege);
-  border-top: 1px solid rgba(75, 44, 32, 0.1);
-}
-
-#coupon-input {
-  flex: 1;
-  padding: 10px;
-  border: 1px solid var(--dourado);
-  border-radius: var(--rad-sm);
-  text-transform: uppercase;
-}
-
-#coupon-form button {
-  background: var(--marrom);
-  color: var(--bege);
-  border: none;
-  padding: 0 15px;
-  border-radius: var(--rad-sm);
-  font-weight: 700;
-}
-
-/* RODAPÉ DO CARRINHO (TOTAIS) */
-.mini-foot {
-  padding: 16px;
-  background: var(--branco);
-  border-top: 1px solid var(--bege);
+  transition: width .5s ease;
 }
 
 .summary-row {
   display: flex;
   justify-content: space-between;
   margin-bottom: 6px;
-  font-size: 0.95rem;
+  font-size: .9rem;
   color: var(--marrom);
 }
 
-#finish-order {
-  width: 100%;
-  background: var(--success);
-  color: #fff;
-  border: none;
-  border-radius: var(--rad);
-  padding: 16px;
-  font-size: 1.1rem;
-  font-weight: 800;
-  cursor: pointer;
-  margin-top: 10px;
-  box-shadow: 0 4px 0 #2e7d32;
-}
-
-#finish-order:active {
-  transform: translateY(2px);
-  box-shadow: 0 2px 0 #2e7d32;
-}
-
-
 /* ===========================================================
-   🖼️ MODAIS, ADMIN E PIX - VERSÃO COMPLETA REVISADA
+   🌫️ BACKDROP GERAL
    =========================================================== */
 
-.modal, .pedidos-panel, .recompensas-panel {
-  position: fixed; inset: 0;
-  background: rgba(75, 44, 32, 0.85) !important;
-  display: flex; align-items: center; justify-content: center;
-  z-index: 10000; backdrop-filter: blur(5px);
-  opacity: 0; pointer-events: none; transition: 0.3s;
+#cart-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(75,44,32,.55);
+  z-index: 1700;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .3s;
+  backdrop-filter: blur(2px);
 }
 
-.modal.active, .pedidos-panel.active, .recompensas-panel.active, .modal.show {
-  opacity: 1 !important; pointer-events: auto !important;
+#cart-backdrop.active {
+  opacity: 1;
+  pointer-events: auto;
 }
 
-.modal-content, .pedidos-panel, .recompensas-panel {
-  background: #F5E6CA !important;
-  border-radius: 25px !important;
-  border: 3px solid #E1A95F !important;
-  width: 95%; max-width: 500px;
-  max-height: 90vh; overflow-y: auto;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-}
+body.no-scroll { overflow: hidden; }
 
-.modal-head, .pedidos-header, .recompensas-header, .painel-head {
-  background: #4B2C20 !important;
-  color: #F5E6CA !important;
-  padding: 18px; display: flex; justify-content: space-between; align-items: center;
-}
+/* ===========================================================
+   🖼️ MODAIS
+   =========================================================== */
 
-/* DASHBOARD ADMIN */
-.cardBox {
-  background: #fff !important; border: 2px solid #E1A95F !important;
-  border-radius: 12px; padding: 15px; color: #4B2C20;
-}
-
-/* PIX MODAL */
-.pix-body { padding: 20px; text-align: center; }
-#pix-valor { font-size: 1.8rem; color: #C8282D; font-weight: 800; }
-.pix-code-box { background: #eee; padding: 10px; border-radius: 8px; border: 1px dashed #4B2C20; }
-
-/* 🍪 BANNER DE COOKIES (FLUTUANTE E FIXO) */
-#cookie-banner {
-  position: fixed !important;
-  bottom: 20px !important;
-  left: 5% !important;
-  right: 5% !important;
-  width: 90% !important;
-  background: #4B2C20 !important;
-  border: 2px solid #E1A95F !important;
-  border-radius: 20px !important;
-  padding: 20px !important;
-  z-index: 110000 !important;
-  display: flex !important;
-  flex-direction: column;
+.modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(75,44,32,.85);
+  display: flex;
   align-items: center;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-  transition: opacity 0.3s ease;
+  justify-content: center;
+  z-index: 10000;
+  backdrop-filter: blur(4px);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .3s;
 }
 
-/* CLASSE QUE O JS VAI USAR PARA SUMIR */
-.cookie-hidden {
-  display: none !important;
-  opacity: 0 !important;
-  visibility: hidden !important;
+.modal.show,
+.modal.active {
+  opacity: 1;
+  pointer-events: auto;
 }
 
-#cookie-banner p { color: #F5E6CA !important; text-align: center; margin-bottom: 15px; }
-#cookie-accept {
-  background: #E1A95F !important; color: #4B2C20 !important;
-  border: none; padding: 12px 40px; border-radius: 10px; font-weight: 800; cursor: pointer;
+.modal-content {
+  background: var(--bege);
+  border-radius: 20px;
+  border: 3px solid var(--dourado);
+  width: 95%;
+  max-width: 480px;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 10px 30px rgba(0,0,0,.45);
 }
 
-/* BOTÕES FLUTUANTES REDONDOS */
-.minhas-recompensas, .meus-pedidos { position: fixed; right: 20px; z-index: 9998; }
-.minhas-recompensas { bottom: 100px; }
-.meus-pedidos { bottom: 30px; }
+.modal-head {
+  background: var(--marrom);
+  color: var(--bege);
+  padding: 16px 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-radius: 17px 17px 0 0;
+}
 
-.recompensas-btn, .meus-pedidos-btn {
-  width: 60px; height: 60px; border-radius: 50%;
-  background: #fff !important; border: 2px solid #E1A95F !important;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 0 !important; box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+.modal-head h3 { margin: 0; font-size: 1.1rem; }
+
+.modal-head button {
+  background: none;
+  border: none;
+  color: var(--bege);
+  font-size: 1.3rem;
   cursor: pointer;
 }
+
+.modal-foot {
+  padding: 16px 20px;
+  border-top: 1px solid rgba(75,44,32,.1);
+}
+
+/* ===========================================================
+   📦 PAINÉIS LATERAIS (PEDIDOS & RECOMPENSAS) — v11.0
+   =========================================================== */
+
+/* Overlay do painel — igual ao backdrop dos modais */
+.painel-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(75,44,32,.7);
+  z-index: 9500;
+  display: flex;
+  align-items: flex-end;      /* painel sobe de baixo no mobile */
+  justify-content: center;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .3s;
+  backdrop-filter: blur(3px);
+}
+
+.painel-overlay.active {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* A caixa do painel */
+.painel-box {
+  background: var(--branco);
+  border-radius: 24px 24px 0 0;
+  border: 2px solid var(--dourado);
+  border-bottom: none;
+  width: 100%;
+  max-width: 480px;
+  max-height: 80vh;
+  overflow-y: auto;
+  box-shadow: 0 -6px 30px rgba(0,0,0,.25);
+  transform: translateY(100%);
+  transition: transform .35s cubic-bezier(.4,0,.2,1);
+}
+
+.painel-overlay.active .painel-box {
+  transform: translateY(0);
+}
+
+/* Cabeçalho do painel */
+.painel-head {
+  background: var(--marrom);
+  color: var(--bege);
+  padding: 16px 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-radius: 22px 22px 0 0;
+  position: sticky;
+  top: 0;
+}
+
+.painel-head span {
+  font-weight: 700;
+  font-size: 1.05rem;
+}
+
+.fechar-painel {
+  background: rgba(255,255,255,.15);
+  border: 1px solid rgba(255,255,255,.3);
+  color: var(--bege);
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  font-size: 1rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background .2s;
+}
+
+.fechar-painel:active { background: rgba(255,255,255,.3); }
+
+/* Corpo dos painéis */
+.painel-body,
+.recompensas-body {
+  padding: 20px;
+}
+
+.empty-orders {
+  text-align: center;
+  color: #999;
+  padding: 30px 0;
+  font-size: .95rem;
+}
+
+/* ===========================================================
+   🎯 BOTÕES FLUTUANTES (PEDIDOS & RECOMPENSAS)
+   =========================================================== */
+
+.minhas-recompensas,
+.meus-pedidos {
+  position: fixed;
+  right: 16px;
+  z-index: 9000;
+}
+
+.minhas-recompensas { bottom: 96px; }
+.meus-pedidos       { bottom: 24px; }
+
+.recompensas-btn,
+.meus-pedidos-btn {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: var(--marrom);
+  border: 2px solid var(--dourado);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0;          /* esconde texto original */
+  box-shadow: 0 4px 16px rgba(75,44,32,.4);
+  cursor: pointer;
+  transition: transform .2s, box-shadow .2s;
+}
+
+.recompensas-btn:active,
+.meus-pedidos-btn:active {
+  transform: scale(.93);
+  box-shadow: 0 2px 8px rgba(75,44,32,.3);
+}
+
+/* Ícones via pseudo-elemento */
 .recompensas-btn::before { content: "🎁"; font-size: 26px; }
 .meus-pedidos-btn::before { content: "📦"; font-size: 26px; }
 
-/* LOGIN FIX */
-#login-form input {
-  width: 100%; padding: 14px; margin-bottom: 10px;
-  border: 2px solid #E1A95F; border-radius: 10px;
+/* Tooltip ao lado do botão */
+.recompensas-btn::after,
+.meus-pedidos-btn::after {
+  content: attr(aria-label);
+  position: absolute;
+  right: 64px;
+  background: var(--marrom);
+  color: var(--bege);
+  font-size: .75rem;
+  font-weight: 600;
+  padding: 5px 10px;
+  border-radius: 8px;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .2s;
 }
-.btn-primario {
-  background: #4B2C20; color: #F5E6CA; padding: 15px;
-  border: none; border-radius: 10px; width: 100%; font-weight: 700;
+
+.recompensas-btn:hover::after,
+.meus-pedidos-btn:hover::after {
+  opacity: 1;
+}
+
+/* ===========================================================
+   🍪 BANNER DE COOKIES — CORRIGIDO v11.0
+   O banner começa ESCONDIDO e o JS adiciona .show
+   =========================================================== */
+
+#cookie-banner {
+  position: fixed;
+  bottom: 20px;
+  left: 5%;
+  right: 5%;
+  width: 90%;
+  background: var(--marrom);
+  border: 2px solid var(--dourado);
+  border-radius: 20px;
+  padding: 20px;
+  z-index: 9200;           /* abaixo dos modais mas acima do conteúdo */
+  display: none;           /* começa escondido — SEM !important */
+  flex-direction: column;
+  align-items: center;
+  box-shadow: 0 10px 30px rgba(0,0,0,.45);
+  transition: opacity .4s ease, transform .4s ease;
+  opacity: 0;
+  transform: translateY(20px);
+}
+
+/* JS adiciona .show para aparecer */
+#cookie-banner.show {
+  display: flex;
+  opacity: 1;
+  transform: translateY(0);
+}
+
+#cookie-banner p {
+  color: var(--bege);
+  text-align: center;
+  margin: 0 0 14px;
+  font-size: .9rem;
+}
+
+#cookie-banner p a {
+  color: var(--dourado);
+  text-decoration: underline;
+}
+
+#cookie-accept {
+  background: var(--dourado);
+  color: var(--marrom);
+  border: none;
+  padding: 12px 40px;
+  border-radius: 10px;
+  font-weight: 800;
+  font-size: .95rem;
+  cursor: pointer;
+  transition: transform .15s;
+}
+
+#cookie-accept:active { transform: scale(.96); }
+
+/* ===========================================================
+   🏆 STATUS DA LOJA
+   =========================================================== */
+
+.status-banner {
+  text-align: center;
+  padding: 8px 16px;
+  border-radius: var(--rad);
+  margin-bottom: 14px;
+  font-weight: 700;
+  font-size: .9rem;
+}
+
+.status-banner.open {
+  background: #e8f5e9;
+  color: #2e7d32;
+  border: 1px solid #a5d6a7;
+}
+
+.status-banner.closed {
+  background: #ffebee;
+  color: var(--vermelho);
+  border: 1px solid #ffcdd2;
+}
+
+/* ===========================================================
+   💬 POPUP / TOAST
+   =========================================================== */
+
+.popup-add {
+  position: fixed;
+  bottom: 100px;
+  left: 50%;
+  transform: translateX(-50%) translateY(20px);
+  background: var(--marrom);
+  color: var(--bege);
+  padding: 12px 24px;
+  border-radius: 30px;
+  font-weight: 700;
+  font-size: .9rem;
+  box-shadow: var(--shadow-3);
+  z-index: 20000;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .3s, transform .3s;
+  white-space: nowrap;
+}
+
+.popup-add.show {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+/* ===========================================================
+   🔑 LOGIN
+   =========================================================== */
+
+.btn-google {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 14px;
+  border: 2px solid var(--dourado);
+  border-radius: var(--rad);
+  background: var(--branco);
+  color: var(--marrom);
+  font-weight: 700;
+  font-size: .95rem;
+  cursor: pointer;
+  transition: background .2s;
+}
+
+.btn-google:active { background: var(--bege); }
+
+#login-form input {
+  width: 100%;
+  padding: 14px;
+  border: 2px solid var(--dourado);
+  border-radius: 10px;
+  font-size: .95rem;
+}
+
+/* ===========================================================
+   💳 PIX MODAL
+   =========================================================== */
+
+.pix-body { padding: 20px; text-align: center; }
+
+#pix-valor {
+  font-size: 1.8rem;
+  color: var(--vermelho);
+  font-weight: 800;
+}
+
+.pix-code-box {
+  background: #f4f4f4;
+  padding: 14px;
+  border-radius: 10px;
+  border: 1px dashed var(--marrom);
+  margin-bottom: 14px;
+}
+
+.pix-btn-copy {
+  background: var(--marrom);
+  color: var(--bege);
+  border: none;
+  padding: 14px;
+  border-radius: var(--rad);
+  font-weight: 700;
+  font-size: .95rem;
+  cursor: pointer;
+  width: 100%;
+  margin-bottom: 10px;
+}
+
+.pix-btn-whatsapp {
+  background: #25d366;
+  color: #fff;
+  border: none;
+  padding: 14px;
+  border-radius: var(--rad);
+  font-weight: 700;
+  font-size: .95rem;
+  cursor: pointer;
+  width: 100%;
+}
+
+.pix-close {
+  background: none;
+  border: none;
+  color: var(--bege);
+  font-size: 1.3rem;
+  cursor: pointer;
+}
+
+/* ===========================================================
+   📊 DASHBOARD ADMIN
+   =========================================================== */
+
+#admin-dashboard { z-index: 10500; }
+
+.cardBox {
+  background: #fff;
+  border: 2px solid var(--dourado);
+  border-radius: var(--rad-lg);
+  padding: 15px;
+  color: var(--marrom);
+}
+
+.dashboard-close {
+  background: none;
+  border: none;
+  color: var(--bege);
+  font-size: 1.3rem;
+  cursor: pointer;
+}
+
+/* ===========================================================
+   📱 FOOTER
+   =========================================================== */
+
+.footer {
+  background: var(--marrom);
+  color: var(--bege);
+  padding: 24px 16px;
+  margin-top: 40px;
+}
+
+.footer-container {
+  max-width: 600px;
+  margin: 0 auto;
+  text-align: center;
+}
+
+.footer-address {
+  margin: 0 0 12px;
+  font-size: .9rem;
+  opacity: .85;
+}
+
+.footer-links {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  margin-bottom: 16px;
+}
+
+.footer-btn {
+  background: rgba(255,255,255,.1);
+  color: var(--bege);
+  text-decoration: none;
+  padding: 9px 18px;
+  border-radius: 20px;
+  border: 1px solid var(--dourado);
+  font-weight: 600;
+  font-size: .85rem;
+  transition: background .2s;
+}
+
+.footer-btn:active { background: rgba(255,255,255,.25); }
+
+.footer-copy p {
+  margin: 4px 0;
+  font-size: .8rem;
+  opacity: .7;
+}
+
+/* ===========================================================
+   🌟 HIGHLIGHT DE SEÇÃO (SCROLL DO MENU)
+   =========================================================== */
+
+.highlight-section {
+  animation: sectionPulse .8s ease;
+}
+
+@keyframes sectionPulse {
+  0%,100% { background: transparent; }
+  50%      { background: rgba(225,169,95,.12); border-radius: 12px; }
+}
+
+/* ===========================================================
+   📱 RESPONSIVO
+   =========================================================== */
+
+@media (min-width: 600px) {
+  .painel-box {
+    border-radius: 20px;
+    margin: auto;
+    max-height: 85vh;
+  }
+
+  .painel-overlay {
+    align-items: center;
+  }
 }
