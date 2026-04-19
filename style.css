@@ -1086,4 +1086,40 @@ section h2 {
   border-radius: 10px;
 }
 
+
+/* AJUSTE PARA O RODAPÉ NÃO QUEBRAR */
+.footer-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 15px;
+}
+
+.footer-links {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    flex-wrap: wrap;
+    width: 100%;
+}
+
+.footer-btn {
+    background: var(--bege);
+    color: var(--marrom) !important;
+    padding: 8px 15px;
+    border-radius: 20px;
+    text-decoration: none;
+    font-weight: 700;
+    font-size: 0.85rem;
+    border: 1px solid var(--dourado);
+    min-width: 120px;
+    text-align: center;
+}
+
+.footer-copy {
+    margin-top: 15px;
+    opacity: 0.8;
+    line-height: 1.2;
+}
+
 /* FIM DO ARQUIVO CSS */
