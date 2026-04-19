@@ -1310,17 +1310,30 @@ document.addEventListener("DOMContentLoaded", () => {
 
 // --- COPIE DAQUI ATÉ O FINAL DO ARQUIVO ---
 
-// 1. FORÇAR FECHAMENTO DO COOKIE (CORRIGIDO)
+// FORÇAR FECHAMENTO DO COOKIE (CORRIGIDO V10.5)
 const btnCookie = document.getElementById("cookie-accept");
-if (btnCookie) {
+const bannerCookie = document.getElementById("cookie-banner");
+
+if (btnCookie && bannerCookie) {
     btnCookie.onclick = function() {
-        const banner = document.getElementById("cookie-banner");
-        if (banner) {
-            banner.style.display = 'none';
-        }
+        // 1. Adiciona a classe que forçamos o 'display: none' no CSS
+        bannerCookie.classList.add("cookie-hidden");
+        
+        // 2. Garante via estilo direto também (segurança extra no mobile)
+        bannerCookie.style.display = "none";
+
+        // 3. Salva a escolha do cliente
         localStorage.setItem("degust-cookies-accepted", "true");
-        if (typeof popupAdd === 'function') popupAdd("Preferências salvas! 🍪");
+        
+        if (typeof popupAdd === "function") popupAdd("Preferências salvas! 🍪");
     };
+}
+
+// Verifica ao carregar se o banner deve estar escondido
+if (localStorage.getItem("degust-cookies-accepted") === "true") {
+    if (bannerCookie) bannerCookie.style.display = "none";
+}
+
 }
 
 // 2. ATIVAÇÃO DOS PAINÉIS (PEDIDOS E RECOMPENSAS)
