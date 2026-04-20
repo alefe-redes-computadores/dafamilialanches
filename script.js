@@ -569,7 +569,7 @@ document.addEventListener("DOMContentLoaded", () => {
   };
 
   let auth, db;
-  const ADMINS = ["alefejohsefe@gmail.com", "kalebhstanley650@gmail.com", "contato@dafamilialanches.com.br"];
+  const ADMINS = ["carols2maite@gmail.com"];
   const isAdmin = (u) => u?.email && ADMINS.includes(u.email.toLowerCase());
 
   function inicializarFirebase() {
@@ -613,33 +613,7 @@ document.addEventListener("DOMContentLoaded", () => {
     UIManager.closeAll();
   };
 
-  const handleLoginError = (err) => {
-    console.error("Erro Auth:", err.code);
-    if (err.code === "auth/user-not-found") {
-      if (confirm("Conta não encontrada. Deseja criar um cadastro?")) {
-        auth.createUserWithEmailAndPassword(
-          document.getElementById("login-email")?.value?.trim(),
-          document.getElementById("login-senha")?.value?.trim()
-        ).then(c => handleLoginSuccess(c.user)).catch(e => alert("Erro: " + e.message));
-      }
-    } else if (err.code === "auth/wrong-password") {
-      alert("Senha incorreta. Tente o login com Google.");
-    } else if (err.code === "auth/invalid-email") {
-      alert("Formato de e-mail inválido.");
-    } else {
-      alert("Erro: " + err.message);
-    }
-  };
-
-  el.loginForm?.addEventListener("submit", (e) => {
-    e.preventDefault();
-    inicializarFirebase();
-    if (!isFirebaseInitialized) return alert("Erro de conexão. Recarregue a página.");
-    const email = document.getElementById("login-email")?.value?.trim();
-    const senha = document.getElementById("login-senha")?.value?.trim();
-    if (!email || !senha) return alert("Preencha todos os campos.");
-    auth.signInWithEmailAndPassword(email, senha).then(c => handleLoginSuccess(c.user)).catch(handleLoginError);
-  });
+  // Login apenas via Google — e-mail/senha desabilitado
 
   el.googleBtn?.addEventListener("click", () => {
     inicializarFirebase();
