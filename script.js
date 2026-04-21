@@ -587,7 +587,7 @@ document.addEventListener("DOMContentLoaded", () => {
   };
 
   let auth, db;
-  const ADMINS = ["carols2maite@gmail.com"];
+  const ADMINS = ["carols2maite@gmail.com", "degustbolosnopote@gmail.com"];
   const isAdmin = (u) => u?.email && ADMINS.map(e=>e.toLowerCase()).includes(u.email.toLowerCase());
 
   function inicializarFirebase() {
