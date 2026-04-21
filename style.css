@@ -126,7 +126,7 @@ body {
   min-height:calc(100vh - 140px);
 }
 
-.search-container { position:sticky; top:80px; z-index:850; margin-bottom:24px; }
+.search-container { position:sticky; top:80px; z-index:850; margin-top:0; margin-bottom:12px; }
 .search-container input {
   width:100%; padding:15px 20px; border-radius:var(--rad-lg);
   border:2px solid var(--dourado); background:var(--branco);
@@ -339,7 +339,7 @@ body.no-scroll { overflow:hidden; }
 #cookie-accept:active { transform:scale(.96); }
 
 /* ── STATUS ── */
-.status-banner { text-align:center; padding:8px 16px; border-radius:var(--rad); margin-bottom:14px; font-weight:700; font-size:.9rem; }
+.status-banner { text-align:center; padding:8px 16px; border-radius:var(--rad); margin-bottom:6px; font-weight:700; font-size:.9rem; }
 .status-banner.open   { background:#e8f5e9; color:#2e7d32; border:1px solid #a5d6a7; }
 .status-banner.closed { background:#ffebee; color:var(--vermelho); border:1px solid #ffcdd2; }
 
@@ -462,19 +462,19 @@ body.no-scroll { overflow:hidden; }
 
 /* ── ANIMAÇÃO DE ENTRADA DOS CARDS ── */
 @keyframes cardEntrada {
-  from { opacity: 0; transform: translateY(16px); }
+  from { opacity: 0; transform: translateY(12px); }
   to   { opacity: 1; transform: translateY(0); }
 }
-.card {
-  animation: cardEntrada .4s ease both;
+.grid .card {
+  animation: cardEntrada .35s ease both;
 }
-.card:nth-child(1) { animation-delay: .05s; }
-.card:nth-child(2) { animation-delay: .10s; }
-.card:nth-child(3) { animation-delay: .15s; }
-.card:nth-child(4) { animation-delay: .20s; }
+.grid .card:nth-child(1) { animation-delay: .04s; }
+.grid .card:nth-child(2) { animation-delay: .08s; }
+.grid .card:nth-child(3) { animation-delay: .12s; }
+.grid .card:nth-child(4) { animation-delay: .16s; }
 
 /* ── CAMPO DE BUSCA — ícone animado ── */
-.search-container {
+.search-container { position:sticky; top:80px; z-index:850; margin-top:0; margin-bottom:12px; }
   position: relative;
 }
 .search-container input {
