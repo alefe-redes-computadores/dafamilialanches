@@ -607,17 +607,59 @@ document.addEventListener("DOMContentLoaded", () => {
   function handleLoginSuccess(user) {
     currentUser = user;
     const nome = user.displayName?.split(" ")[0] || user.email?.split("@")[0] || "doçura";
-    popupAdd(`Bem-vinda(o), ${nome}! 🍰`);
     UIManager.closeAll();
-    // Atualiza botão imediatamente
-    if (el.userBtn) el.userBtn.textContent = `Olá, ${nome} ✨`;
-    if (el.pedidosBtn)     el.pedidosBtn.style.display     = "";
-    if (el.recompensasBtn) el.recompensasBtn.style.display = "";
-    if (isAdmin(user)) {
-      document.querySelector(".admin-section")?.style.setProperty("display","block");
-    }
+    atualizarBotaoUsuario(user);
     carregarPedidos(user);
     carregarRecompensas(user);
+    // Toast de boas-vindas mais destacado
+    mostrarToastLogin(`Bem-vinda(o), ${nome}! 🍰`);
+  }
+
+  function atualizarBotaoUsuario(user) {
+    if (!el.userBtn) return;
+    const nome = user
+      ? (user.displayName?.split(" ")[0] || user.email?.split("@")[0] || "você")
+      : null;
+
+    if (user) {
+      el.userBtn.innerHTML = `<span style="font-size:.75rem;display:block;opacity:.8;font-weight:500;">Olá,</span><span style="font-size:.9rem;">${nome} ✨</span>`;
+      el.userBtn.style.lineHeight = "1.2";
+      el.userBtn.style.padding = "6px 14px";
+      if (el.pedidosBtn)     el.pedidosBtn.style.display     = "";
+      if (el.recompensasBtn) el.recompensasBtn.style.display = "";
+      if (isAdmin(user)) {
+        document.querySelector(".admin-section")?.style.setProperty("display","block");
+      }
+    } else {
+      el.userBtn.innerHTML = "Entrar / Perfil 👤";
+      el.userBtn.style.lineHeight = "";
+      el.userBtn.style.padding = "";
+    }
+  }
+
+  function mostrarToastLogin(msg) {
+    let toast = document.getElementById("toast-login");
+    if (!toast) {
+      toast = document.createElement("div");
+      toast.id = "toast-login";
+      toast.style.cssText = `
+        position:fixed; top:80px; left:50%; transform:translateX(-50%) translateY(-20px);
+        background:#4B2C20; color:#F5E6CA; padding:14px 28px;
+        border-radius:30px; font-weight:700; font-size:1rem;
+        box-shadow:0 6px 20px rgba(0,0,0,.35); z-index:20001;
+        opacity:0; pointer-events:none; transition:all .35s ease;
+        border:2px solid #E1A95F; white-space:nowrap;
+        display:flex; align-items:center; gap:8px;
+      `;
+      document.body.appendChild(toast);
+    }
+    toast.textContent = msg;
+    toast.style.opacity = "1";
+    toast.style.transform = "translateX(-50%) translateY(0)";
+    setTimeout(() => {
+      toast.style.opacity = "0";
+      toast.style.transform = "translateX(-50%) translateY(-20px)";
+    }, 3500);
   }
 
   function setupAuthListener() {
@@ -665,20 +707,92 @@ document.addEventListener("DOMContentLoaded", () => {
     inicializarFirebase();
     if (!isFirebaseInitialized) return alert("Erro de conexão. Recarregue a página.");
     const provider = new firebase.auth.GoogleAuthProvider();
-    // Usa redirect no mobile (mais confiável que popup)
-    auth.signInWithRedirect(provider)
-      .catch(err => alert("Erro ao iniciar login: " + err.message));
+    provider.setCustomParameters({ prompt: "select_account" });
+    // Tenta popup primeiro; se bloqueado cai para redirect
+    auth.signInWithPopup(provider)
+      .then(r => { if (r.user) handleLoginSuccess(r.user); })
+      .catch(err => {
+        if (err.code === "auth/popup-blocked" || err.code === "auth/popup-closed-by-user") {
+          // Fallback: redirect
+          auth.signInWithRedirect(provider).catch(e => alert("Erro: " + e.message));
+        } else if (err.code !== "auth/cancelled-popup-request") {
+          alert("Erro ao entrar com Google: " + err.message);
+        }
+      });
   });
 
   el.userBtn?.addEventListener("click", () => {
     if (!currentUser) {
       UIManager.open("login", el.loginModal);
     } else {
-      if (confirm("Deseja sair da sua conta?")) {
-        auth.signOut().then(() => { popupAdd("Até logo! 👋"); location.reload(); });
-      }
+      // Mostra mini menu de conta
+      mostrarMenuConta();
     }
   });
+
+  function mostrarMenuConta() {
+    let menu = document.getElementById("conta-menu");
+    if (menu) { menu.remove(); return; }
+
+    const nome  = currentUser.displayName || currentUser.email?.split("@")[0] || "você";
+    const foto  = currentUser.photoURL;
+    const rect  = el.userBtn.getBoundingClientRect();
+
+    menu = document.createElement("div");
+    menu.id = "conta-menu";
+    menu.style.cssText = `
+      position:fixed; top:${rect.bottom + 8}px; right:16px;
+      background:#fff; border:2px solid #E1A95F; border-radius:14px;
+      box-shadow:0 8px 24px rgba(0,0,0,.18); z-index:9999;
+      min-width:200px; overflow:hidden;
+      animation:cardEntrada .2s ease both;
+    `;
+    menu.innerHTML = `
+      <div style="background:#4B2C20;padding:14px 16px;display:flex;align-items:center;gap:10px;">
+        ${foto ? `<img src="${foto}" style="width:38px;height:38px;border-radius:50%;border:2px solid #E1A95F;" onerror="this.style.display='none'">` : '<span style="font-size:1.8rem;">👤</span>'}
+        <div>
+          <div style="color:#F5E6CA;font-weight:700;font-size:.95rem;">${nome.split(" ")[0]}</div>
+          <div style="color:#E1A95F;font-size:.72rem;opacity:.85;">${currentUser.email || ""}</div>
+        </div>
+      </div>
+      <button id="conta-meus-pedidos" type="button" style="width:100%;padding:13px 16px;background:none;border:none;border-bottom:1px solid #f0e8d8;text-align:left;cursor:pointer;color:#4B2C20;font-weight:600;font-size:.9rem;display:flex;align-items:center;gap:8px;">
+        📦 Meus Pedidos
+      </button>
+      <button id="conta-recompensas" type="button" style="width:100%;padding:13px 16px;background:none;border:none;border-bottom:1px solid #f0e8d8;text-align:left;cursor:pointer;color:#4B2C20;font-weight:600;font-size:.9rem;display:flex;align-items:center;gap:8px;">
+        🎁 Recompensas
+      </button>
+      <button id="conta-sair" type="button" style="width:100%;padding:13px 16px;background:none;border:none;text-align:left;cursor:pointer;color:#C8282D;font-weight:700;font-size:.9rem;display:flex;align-items:center;gap:8px;">
+        🚪 Sair da conta
+      </button>
+    `;
+    document.body.appendChild(menu);
+
+    document.getElementById("conta-meus-pedidos").addEventListener("click", () => {
+      menu.remove();
+      document.getElementById("painelPedidosOverlay")?.classList.add("active");
+    });
+    document.getElementById("conta-recompensas").addEventListener("click", () => {
+      menu.remove();
+      document.getElementById("painelRecompensasOverlay")?.classList.add("active");
+    });
+    document.getElementById("conta-sair").addEventListener("click", () => {
+      menu.remove();
+      auth.signOut().then(() => {
+        mostrarToastLogin("Até logo! 👋");
+        setTimeout(() => location.reload(), 1200);
+      });
+    });
+
+    // Fecha ao clicar fora
+    setTimeout(() => {
+      document.addEventListener("click", function fecharMenu(e) {
+        if (!menu.contains(e.target) && e.target !== el.userBtn) {
+          menu.remove();
+          document.removeEventListener("click", fecharMenu);
+        }
+      });
+    }, 100);
+  }
 
   /* =========================================================
      🍬 ADICIONAIS (TOPPINGS)
