@@ -391,3 +391,120 @@ body.no-scroll { overflow:hidden; }
   .painel-overlay { align-items:center; }
   .painel-box { border-radius:20px; max-height:85vh; }
 }
+
+/* ── RELATÓRIOS ── */
+.rel-filtro {
+  padding: 8px 16px;
+  border: 2px solid var(--dourado);
+  border-radius: 20px;
+  background: var(--branco);
+  color: var(--marrom);
+  font-weight: 700;
+  font-size: .82rem;
+  cursor: pointer;
+  transition: all .2s;
+}
+.rel-filtro.rel-ativo,
+.rel-filtro:active {
+  background: var(--marrom);
+  color: var(--bege);
+  border-color: var(--marrom);
+}
+.rel-card {
+  background: linear-gradient(135deg, var(--bege) 0%, #fff 100%);
+  border: 1px solid rgba(225,169,95,.4);
+  border-radius: 12px;
+  padding: 14px 12px;
+  text-align: center;
+  box-shadow: 0 2px 6px rgba(75,44,32,.08);
+}
+.rel-card-val {
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: var(--marrom);
+  margin-bottom: 4px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.rel-card-label {
+  font-size: .72rem;
+  color: #8d6e63;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: .5px;
+}
+
+/* ── MELHORIAS VISUAIS CARDS ── */
+.card {
+  transition: transform .25s cubic-bezier(.175,.885,.32,1.275),
+              box-shadow .25s ease;
+}
+.card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 20px rgba(75,44,32,.15);
+  border-color: var(--dourado);
+}
+
+/* Badge novo na seção */
+.badge-new {
+  position: absolute;
+  top: 8px; left: 8px;
+  background: var(--vermelho);
+  color: #fff;
+  font-size: .6rem;
+  font-weight: 800;
+  padding: 3px 7px;
+  border-radius: 6px;
+  text-transform: uppercase;
+  letter-spacing: .5px;
+}
+
+/* ── ANIMAÇÃO DE ENTRADA DOS CARDS ── */
+@keyframes cardEntrada {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.card {
+  animation: cardEntrada .4s ease both;
+}
+.card:nth-child(1) { animation-delay: .05s; }
+.card:nth-child(2) { animation-delay: .10s; }
+.card:nth-child(3) { animation-delay: .15s; }
+.card:nth-child(4) { animation-delay: .20s; }
+
+/* ── CAMPO DE BUSCA — ícone animado ── */
+.search-container {
+  position: relative;
+}
+.search-container input {
+  padding-left: 20px;
+}
+.search-container input:focus {
+  transform: none;
+  box-shadow: 0 0 0 4px rgba(200,40,45,.12), 0 4px 12px rgba(75,44,32,.1);
+}
+
+/* ── BOTÃO ADICIONAR — efeito pulso no primeiro acesso ── */
+@keyframes pulseBotao {
+  0%,100% { box-shadow: 0 3px 0 #a51f23; }
+  50%      { box-shadow: 0 3px 0 #a51f23, 0 0 0 6px rgba(200,40,45,.2); }
+}
+
+/* ── MINI-CARRINHO — item animado ── */
+@keyframes itemEntrada {
+  from { opacity:0; transform:translateX(10px); }
+  to   { opacity:1; transform:translateX(0); }
+}
+.cart-item { animation: itemEntrada .25s ease both; }
+
+/* ── BANNER STATUS — brilho sutil ── */
+.status-banner.open {
+  background: linear-gradient(90deg, #e8f5e9, #f1f8e9);
+}
+
+/* ── FOOTER — link hover ── */
+.footer-btn:hover {
+  background: rgba(255,255,255,.2);
+  transform: translateY(-1px);
+}
