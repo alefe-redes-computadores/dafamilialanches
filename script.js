@@ -588,7 +588,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   let auth, db;
   const ADMINS = ["carols2maite@gmail.com"];
-  const isAdmin = (u) => u?.email && ADMINS.includes(u.email.toLowerCase());
+  const isAdmin = (u) => u?.email && ADMINS.map(e=>e.toLowerCase()).includes(u.email.toLowerCase());
 
   function inicializarFirebase() {
     if (isFirebaseInitialized) return;
@@ -1059,8 +1059,8 @@ document.addEventListener("DOMContentLoaded", () => {
     if (!lista) return;
     lista.innerHTML = '<p style="text-align:center;color:#999;padding:20px;">Carregando seus pedidos...</p>';
 
-    db.collection("pedidos")
-      .where("uid", "==", user.uid)
+    db.collection("Pedidos")
+      .where("userId", "==", user.uid)
       .orderBy("criadoEm", "desc")
       .limit(20)
       .get()
@@ -1139,7 +1139,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const historicoEl = document.getElementById("historicoRecompensas");
     if (!contadorEl) return;
 
-    db.collection("usuarios").doc(user.uid).get()
+    db.collection("Usuarios").doc(user.uid).get()
       .then(doc => {
         const dados = doc.exists ? doc.data() : {};
         const bolos    = dados.bolosPedidos  || 0;
@@ -1286,7 +1286,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if (!listaEl || !db) return;
     listaEl.innerHTML = '<p style="text-align:center;color:#999;padding:16px;">Carregando...</p>';
 
-    db.collection("pedidos")
+    db.collection("Pedidos")
       .where("criadoEm", ">=", firebase.firestore.Timestamp.fromDate(inicio))
       .where("criadoEm", "<=", firebase.firestore.Timestamp.fromDate(fim))
       .orderBy("criadoEm", "desc")
