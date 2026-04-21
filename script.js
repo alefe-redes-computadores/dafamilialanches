@@ -587,6 +587,19 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function setupAuthListener() {
+    // Captura retorno do redirect do Google
+    auth.getRedirectResult()
+      .then(result => {
+        if (result && result.user) {
+          handleLoginSuccess(result.user);
+        }
+      })
+      .catch(err => {
+        if (err.code !== "auth/no-auth-event") {
+          console.error("Redirect error:", err.code);
+        }
+      });
+
     auth.onAuthStateChanged(user => {
       currentUser = user;
       if (user) {
@@ -597,6 +610,9 @@ document.addEventListener("DOMContentLoaded", () => {
         if (isAdmin(user)) {
           document.querySelector(".admin-section")?.style.setProperty("display", "block");
         }
+        // Carrega pedidos e recompensas ao logar
+        carregarPedidos(user);
+        carregarRecompensas(user);
       } else {
         el.userBtn.textContent = "Entrar / Perfil 👤";
         document.querySelector(".admin-section")?.style.setProperty("display", "none");
@@ -617,11 +633,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
   el.googleBtn?.addEventListener("click", () => {
     inicializarFirebase();
-    if (!isFirebaseInitialized) return alert("Erro de conexão.");
+    if (!isFirebaseInitialized) return alert("Erro de conexão. Recarregue a página.");
     const provider = new firebase.auth.GoogleAuthProvider();
-    auth.signInWithPopup(provider)
-      .then(r => handleLoginSuccess(r.user))
-      .catch(err => { if (err.code !== "auth/popup-closed-by-user") alert("Erro: " + err.message); });
+    // Usa redirect no mobile (mais confiável que popup)
+    auth.signInWithRedirect(provider)
+      .catch(err => alert("Erro ao iniciar login: " + err.message));
   });
 
   el.userBtn?.addEventListener("click", () => {
@@ -878,6 +894,108 @@ document.addEventListener("DOMContentLoaded", () => {
     window.finalAddressStringForWhatsApp = addr;
     abrirModalPIX();
   };
+
+
+  /* =========================================================
+     📦 MEUS PEDIDOS — busca no Firestore
+  ========================================================= */
+  function carregarPedidos(user) {
+    if (!db || !user) return;
+    const lista = document.getElementById("listaPedidos");
+    if (!lista) return;
+    lista.innerHTML = '<p style="text-align:center;color:#999;padding:20px;">Carregando seus pedidos...</p>';
+
+    db.collection("pedidos")
+      .where("uid", "==", user.uid)
+      .orderBy("criadoEm", "desc")
+      .limit(20)
+      .get()
+      .then(snapshot => {
+        if (snapshot.empty) {
+          lista.innerHTML = '<p style="text-align:center;color:#999;padding:20px;">Você ainda não fez nenhum pedido. 🍰</p>';
+          return;
+        }
+        lista.innerHTML = snapshot.docs.map(doc => {
+          const d = doc.data();
+          const data = d.criadoEm?.toDate?.()?.toLocaleDateString("pt-BR") || "—";
+          const itens = Array.isArray(d.itens) ? d.itens.map(i => `${i.nome} x${i.qtd}`).join(", ") : (d.resumo || "Pedido");
+          const total = d.total ? money(d.total) : "";
+          const status = d.status || "enviado";
+          const cores = { enviado:"#E1A95F", preparando:"#1976d2", pronto:"#2e7d32", entregue:"#4caf50" };
+          const cor = cores[status] || "#999";
+          return `
+            <div style="background:#fff;border-radius:12px;padding:14px;margin-bottom:12px;border:1px solid rgba(225,169,95,.3);box-shadow:0 2px 6px rgba(0,0,0,.05);">
+              <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+                <span style="font-size:.8rem;color:#999;">${data}</span>
+                <span style="font-size:.75rem;font-weight:700;color:${cor};background:${cor}18;padding:3px 10px;border-radius:20px;text-transform:uppercase;">${status}</span>
+              </div>
+              <p style="margin:0 0 4px;font-weight:600;color:#4B2C20;font-size:.9rem;">${itens}</p>
+              ${total ? `<p style="margin:0;font-weight:800;color:#C8282D;">${total}</p>` : ""}
+            </div>`;
+        }).join("");
+      })
+      .catch(err => {
+        console.error("Erro ao carregar pedidos:", err);
+        lista.innerHTML = '<p style="text-align:center;color:#999;padding:20px;">Erro ao carregar pedidos.</p>';
+      });
+  }
+
+  /* =========================================================
+     🎁 RECOMPENSAS — busca no Firestore
+  ========================================================= */
+  function carregarRecompensas(user) {
+    if (!db || !user) return;
+    const contadorEl  = document.getElementById("contador-valor");
+    const barraEl     = document.getElementById("progresso-bar");
+    const mensagemEl  = document.getElementById("progresso-mensagem");
+    const listaEl     = document.getElementById("listaRecompensas");
+    const historicoEl = document.getElementById("historicoRecompensas");
+    if (!contadorEl) return;
+
+    db.collection("usuarios").doc(user.uid).get()
+      .then(doc => {
+        const dados = doc.exists ? doc.data() : {};
+        const bolos    = dados.bolosPedidos  || 0;
+        const meta     = dados.metaFidelidade || 5;
+        const pct      = Math.min(100, (bolos / meta) * 100);
+        const faltam   = Math.max(0, meta - bolos);
+
+        if (contadorEl) contadorEl.textContent = bolos;
+        if (barraEl)    barraEl.style.width = `${pct}%`;
+        if (mensagemEl) {
+          mensagemEl.textContent = bolos >= meta
+            ? "🎉 Parabéns! Você ganhou uma recompensa!"
+            : `Faltam ${faltam} bolo${faltam !== 1 ? "s" : ""} para sua próxima recompensa!`;
+        }
+
+        // Recompensas disponíveis
+        const recompensas = dados.recompensasDisponiveis || [];
+        if (listaEl) {
+          listaEl.innerHTML = recompensas.length
+            ? recompensas.map(r => `
+                <div style="background:#fff;border:1px solid var(--dourado);border-radius:10px;padding:12px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center;">
+                  <span style="font-weight:600;color:#4B2C20;">🎁 ${r.descricao || r}</span>
+                  <span style="font-size:.75rem;color:#E1A95F;font-weight:700;">DISPONÍVEL</span>
+                </div>`).join("")
+            : '<p style="color:#999;text-align:center;font-size:.9rem;">Nenhuma recompensa disponível no momento.</p>';
+        }
+
+        // Histórico
+        const historico = dados.historicoRecompensas || [];
+        if (historicoEl) {
+          historicoEl.innerHTML = historico.length
+            ? historico.map(h => `
+                <div style="padding:8px 0;border-bottom:1px solid #eee;font-size:.85rem;color:#666;">
+                  🏆 ${h.descricao || h} — <span style="color:#4B2C20;">${h.data || ""}</span>
+                </div>`).join("")
+            : '<p style="color:#999;text-align:center;font-size:.9rem;">Você ainda não resgatou prêmios.</p>';
+        }
+      })
+      .catch(err => {
+        console.error("Erro ao carregar recompensas:", err);
+        if (mensagemEl) mensagemEl.textContent = "Erro ao carregar recompensas.";
+      });
+  }
 
   /* =========================================================
      🕰️ STATUS DA LOJA
