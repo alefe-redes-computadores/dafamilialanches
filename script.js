@@ -142,8 +142,7 @@ document.addEventListener("DOMContentLoaded", () => {
           const userBtn = document.getElementById("user-btn");
           if (userBtn) userBtn.click();
         } else if (action === "relatorios") {
-          const reportsBtn = document.getElementById("reports-btn");
-          if (reportsBtn) reportsBtn.click();
+          abrirRelatorios();
         }
       });
     });
@@ -362,26 +361,45 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function filtrarCards(query) {
-    if (!query || query.length < 2) {
-      document.querySelectorAll(".card").forEach(c => (c.style.display = ""));
+    const cards = document.querySelectorAll(".card");
+    if (!query || query.length < 1) {
+      cards.forEach(c => (c.style.display = ""));
+      // Mostra seções vazias também
+      document.querySelectorAll(".menu-section").forEach(s => s.style.display = "");
       return;
     }
     const q = normalizar(query);
-    document.querySelectorAll(".card").forEach(card => {
-      const nome = normalizar(card.dataset.name || card.querySelector("h3")?.textContent || "");
-      let match = nome.includes(q);
+    cards.forEach(card => {
+      const nomeProduto = card.dataset.name || "";
+      const nomeH3      = card.querySelector("h3")?.textContent || "";
+      const nomeDesc    = card.querySelector("p:not(.price)")?.textContent || "";
+      const textoTotal  = normalizar(nomeProduto + " " + nomeH3 + " " + nomeDesc);
+
+      let match = textoTotal.includes(q);
+
       if (!match) {
         for (const p of PRODUTOS_BUSCA) {
-          if (distanciaLevenshtein(q, normalizar(p.nome)) <= 2 && nome.includes(normalizar(p.nome))) { match = true; break; }
+          // Fuzzy match no nome do produto
+          if (distanciaLevenshtein(q, normalizar(p.nome)) <= 2) {
+            if (textoTotal.includes(normalizar(p.nome))) { match = true; break; }
+          }
+          // Alias direto
           for (const alias of p.aliases) {
-            if (normalizar(alias).includes(q) || q.includes(normalizar(alias))) {
-              if (nome.includes(normalizar(p.nome))) { match = true; break; }
+            const aliasNorm = normalizar(alias);
+            if (aliasNorm.includes(q) || q.includes(aliasNorm)) {
+              if (textoTotal.includes(normalizar(p.nome))) { match = true; break; }
             }
           }
           if (match) break;
         }
       }
       card.style.display = match ? "" : "none";
+    });
+
+    // Esconde seções que ficaram sem cards visíveis
+    document.querySelectorAll(".menu-section").forEach(sec => {
+      const temVisivel = [...sec.querySelectorAll(".card")].some(c => c.style.display !== "none");
+      sec.style.display = temVisivel ? "" : "none";
     });
   }
 
@@ -586,6 +604,22 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
+  function handleLoginSuccess(user) {
+    currentUser = user;
+    const nome = user.displayName?.split(" ")[0] || user.email?.split("@")[0] || "doçura";
+    popupAdd(`Bem-vinda(o), ${nome}! 🍰`);
+    UIManager.closeAll();
+    // Atualiza botão imediatamente
+    if (el.userBtn) el.userBtn.textContent = `Olá, ${nome} ✨`;
+    if (el.pedidosBtn)     el.pedidosBtn.style.display     = "";
+    if (el.recompensasBtn) el.recompensasBtn.style.display = "";
+    if (isAdmin(user)) {
+      document.querySelector(".admin-section")?.style.setProperty("display","block");
+    }
+    carregarPedidos(user);
+    carregarRecompensas(user);
+  }
+
   function setupAuthListener() {
     // Captura retorno do redirect do Google
     auth.getRedirectResult()
@@ -623,11 +657,7 @@ document.addEventListener("DOMContentLoaded", () => {
   /* =========================================================
      🔑 LOGIN
   ========================================================= */
-  const handleLoginSuccess = (user) => {
-    currentUser = user;
-    popupAdd(`Bem-vindo(a), ${user.displayName?.split(" ")[0] || "doçura"}! ✨`);
-    UIManager.closeAll();
-  };
+  // handleLoginSuccess definida acima (próximo ao setupAuthListener)
 
   // Login apenas via Google — e-mail/senha desabilitado
 
@@ -899,6 +929,16 @@ document.addEventListener("DOMContentLoaded", () => {
   /* =========================================================
      📦 MEUS PEDIDOS — busca no Firestore
   ========================================================= */
+  // Emoji miniatura por nome do produto
+  function emojiProduto(nome) {
+    const n = (nome || "").toLowerCase();
+    if (n.includes("brigadeiro"))  return "🍫";
+    if (n.includes("prestígio") || n.includes("prestigio")) return "🥥";
+    if (n.includes("morango"))     return "🍓";
+    if (n.includes("ninho"))       return "🥛";
+    return "🍰";
+  }
+
   function carregarPedidos(user) {
     if (!db || !user) return;
     const lista = document.getElementById("listaPedidos");
@@ -912,31 +952,64 @@ document.addEventListener("DOMContentLoaded", () => {
       .get()
       .then(snapshot => {
         if (snapshot.empty) {
-          lista.innerHTML = '<p style="text-align:center;color:#999;padding:20px;">Você ainda não fez nenhum pedido. 🍰</p>';
+          lista.innerHTML = `
+            <div style="text-align:center;padding:30px 10px;">
+              <div style="font-size:3rem;margin-bottom:10px;">🍰</div>
+              <p style="color:#999;font-size:.95rem;">Você ainda não fez nenhum pedido.</p>
+              <p style="color:#E1A95F;font-size:.85rem;font-weight:600;">Que tal experimentar um bolinho hoje?</p>
+            </div>`;
           return;
         }
+
         lista.innerHTML = snapshot.docs.map(doc => {
           const d = doc.data();
-          const data = d.criadoEm?.toDate?.()?.toLocaleDateString("pt-BR") || "—";
-          const itens = Array.isArray(d.itens) ? d.itens.map(i => `${i.nome} x${i.qtd}`).join(", ") : (d.resumo || "Pedido");
-          const total = d.total ? money(d.total) : "";
+
+          // Data e hora formatadas
+          let dataHora = "—";
+          if (d.criadoEm?.toDate) {
+            const dt = d.criadoEm.toDate();
+            dataHora = dt.toLocaleDateString("pt-BR") + " às " +
+              dt.toLocaleTimeString("pt-BR", { hour:"2-digit", minute:"2-digit" });
+          }
+
+          // Itens
+          const itens = Array.isArray(d.itens) ? d.itens : [];
+
+          // Grade de miniaturas (máx 4 emojis)
+          const emojis = itens.slice(0, 4).map(i => emojiProduto(i.nome));
+          const miniatura = emojis.length > 0
+            ? `<div style="display:flex;gap:4px;margin-bottom:8px;flex-wrap:wrap;">
+                ${emojis.map(e => `<span style="font-size:1.6rem;background:#fdf8ef;border-radius:8px;width:36px;height:36px;display:flex;align-items:center;justify-content:center;">${e}</span>`).join("")}
+               </div>`
+            : `<div style="font-size:2rem;margin-bottom:8px;">🍰</div>`;
+
+          // Texto dos itens
+          const itensTexto = itens.length > 0
+            ? itens.map(i => `${i.nome}${i.qtd > 1 ? ` x${i.qtd}` : ""}`).join(" • ")
+            : (d.resumo || "Pedido");
+
+          const total  = d.total  ? money(d.total)  : "";
           const status = d.status || "enviado";
-          const cores = { enviado:"#E1A95F", preparando:"#1976d2", pronto:"#2e7d32", entregue:"#4caf50" };
-          const cor = cores[status] || "#999";
+          const cores  = { enviado:"#E1A95F", preparando:"#1976d2", pronto:"#2e7d32", entregue:"#4caf50", cancelado:"#d32f2f" };
+          const cor    = cores[status] || "#999";
+          const icones = { enviado:"📨", preparando:"👩‍🍳", pronto:"✅", entregue:"🎉", cancelado:"❌" };
+          const icone  = icones[status] || "📦";
+
           return `
-            <div style="background:#fff;border-radius:12px;padding:14px;margin-bottom:12px;border:1px solid rgba(225,169,95,.3);box-shadow:0 2px 6px rgba(0,0,0,.05);">
-              <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
-                <span style="font-size:.8rem;color:#999;">${data}</span>
-                <span style="font-size:.75rem;font-weight:700;color:${cor};background:${cor}18;padding:3px 10px;border-radius:20px;text-transform:uppercase;">${status}</span>
+            <div style="background:#fff;border-radius:14px;padding:14px;margin-bottom:12px;border:1px solid rgba(225,169,95,.25);box-shadow:0 2px 8px rgba(0,0,0,.06);">
+              <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+                <span style="font-size:.78rem;color:#aaa;">${dataHora}</span>
+                <span style="font-size:.72rem;font-weight:700;color:${cor};background:${cor}18;padding:3px 10px;border-radius:20px;text-transform:uppercase;">${icone} ${status}</span>
               </div>
-              <p style="margin:0 0 4px;font-weight:600;color:#4B2C20;font-size:.9rem;">${itens}</p>
-              ${total ? `<p style="margin:0;font-weight:800;color:#C8282D;">${total}</p>` : ""}
+              ${miniatura}
+              <p style="margin:0 0 6px;font-size:.85rem;color:#6d4c41;line-height:1.4;">${itensTexto}</p>
+              ${total ? `<p style="margin:0;font-weight:800;color:#C8282D;font-size:1rem;">${total}</p>` : ""}
             </div>`;
         }).join("");
       })
       .catch(err => {
         console.error("Erro ao carregar pedidos:", err);
-        lista.innerHTML = '<p style="text-align:center;color:#999;padding:20px;">Erro ao carregar pedidos.</p>';
+        lista.innerHTML = '<p style="text-align:center;color:#999;padding:20px;">Erro ao carregar pedidos. Tente novamente.</p>';
       });
   }
 
@@ -995,6 +1068,190 @@ document.addEventListener("DOMContentLoaded", () => {
         console.error("Erro ao carregar recompensas:", err);
         if (mensagemEl) mensagemEl.textContent = "Erro ao carregar recompensas.";
       });
+  }
+
+
+  /* =========================================================
+     📊 PAINEL DE RELATÓRIOS — Admin Only
+  ========================================================= */
+  function abrirRelatorios() {
+    let overlay = document.getElementById("relatoriosOverlay");
+    if (!overlay) {
+      overlay = document.createElement("div");
+      overlay.id = "relatoriosOverlay";
+      overlay.className = "painel-overlay";
+      overlay.innerHTML = `
+        <div class="painel-box" style="max-width:560px;">
+          <div class="painel-head">
+            <span>📊 Relatórios Degust</span>
+            <button class="fechar-painel" id="fechar-relatorios" type="button">✖</button>
+          </div>
+          <div class="painel-body">
+
+            <!-- Filtro de período -->
+            <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px;">
+              <button class="rel-filtro rel-ativo" data-dias="7"  type="button">7 dias</button>
+              <button class="rel-filtro" data-dias="30" type="button">30 dias</button>
+              <button class="rel-filtro" data-dias="0"  type="button">Personalizado</button>
+            </div>
+
+            <!-- Datas personalizadas -->
+            <div id="rel-datas-custom" style="display:none;gap:8px;margin-bottom:14px;flex-wrap:wrap;">
+              <input type="date" id="rel-data-inicio" style="flex:1;padding:8px;border:1px solid var(--dourado);border-radius:8px;font-size:.85rem;">
+              <input type="date" id="rel-data-fim"    style="flex:1;padding:8px;border:1px solid var(--dourado);border-radius:8px;font-size:.85rem;">
+              <button id="rel-btn-custom" type="button" style="background:var(--marrom);color:var(--bege);border:none;padding:8px 16px;border-radius:8px;font-weight:700;cursor:pointer;">Filtrar</button>
+            </div>
+
+            <!-- Cards de resumo -->
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px;" id="rel-cards">
+              <div class="rel-card"><div class="rel-card-val" id="rel-total-vendas">—</div><div class="rel-card-label">Total em Vendas</div></div>
+              <div class="rel-card"><div class="rel-card-val" id="rel-num-pedidos">—</div><div class="rel-card-label">Pedidos</div></div>
+              <div class="rel-card"><div class="rel-card-val" id="rel-ticket-medio">—</div><div class="rel-card-label">Ticket Médio</div></div>
+              <div class="rel-card"><div class="rel-card-val" id="rel-mais-vendido">—</div><div class="rel-card-label">Mais Vendido</div></div>
+            </div>
+
+            <!-- Lista de pedidos do período -->
+            <h4 style="color:var(--marrom);margin:0 0 10px;font-size:.95rem;">📋 Pedidos no Período</h4>
+            <div id="rel-lista-pedidos" style="max-height:260px;overflow-y:auto;"></div>
+
+            <!-- Exportar -->
+            <button id="rel-exportar" type="button" style="width:100%;margin-top:14px;background:var(--dourado);color:var(--marrom);border:none;padding:13px;border-radius:10px;font-weight:800;font-size:.95rem;cursor:pointer;">
+              📥 Exportar CSV
+            </button>
+          </div>
+        </div>`;
+      document.body.appendChild(overlay);
+
+      // Fechar
+      document.getElementById("fechar-relatorios").addEventListener("click", () => {
+        overlay.classList.remove("active");
+      });
+      overlay.addEventListener("click", e => { if (e.target === overlay) overlay.classList.remove("active"); });
+
+      // Filtros de período
+      overlay.querySelectorAll(".rel-filtro").forEach(btn => {
+        btn.addEventListener("click", () => {
+          overlay.querySelectorAll(".rel-filtro").forEach(b => b.classList.remove("rel-ativo"));
+          btn.classList.add("rel-ativo");
+          const dias = parseInt(btn.dataset.dias);
+          const custom = document.getElementById("rel-datas-custom");
+          if (dias === 0) {
+            custom.style.display = "flex";
+          } else {
+            custom.style.display = "none";
+            const fim   = new Date();
+            const inicio = new Date(); inicio.setDate(inicio.getDate() - dias);
+            buscarRelatorio(inicio, fim);
+          }
+        });
+      });
+
+      // Botão filtrar personalizado
+      document.getElementById("rel-btn-custom").addEventListener("click", () => {
+        const di = document.getElementById("rel-data-inicio").value;
+        const df = document.getElementById("rel-data-fim").value;
+        if (!di || !df) return alert("Selecione as duas datas.");
+        buscarRelatorio(new Date(di + "T00:00:00"), new Date(df + "T23:59:59"));
+      });
+
+      // Exportar CSV
+      document.getElementById("rel-exportar").addEventListener("click", exportarCSV);
+    }
+
+    overlay.classList.add("active");
+    // Carrega 7 dias por padrão
+    const fim    = new Date();
+    const inicio = new Date(); inicio.setDate(inicio.getDate() - 7);
+    buscarRelatorio(inicio, fim);
+  }
+
+  let _pedidosRelatorio = []; // cache para exportação
+
+  function buscarRelatorio(inicio, fim) {
+    const listaEl = document.getElementById("rel-lista-pedidos");
+    if (!listaEl || !db) return;
+    listaEl.innerHTML = '<p style="text-align:center;color:#999;padding:16px;">Carregando...</p>';
+
+    db.collection("pedidos")
+      .where("criadoEm", ">=", firebase.firestore.Timestamp.fromDate(inicio))
+      .where("criadoEm", "<=", firebase.firestore.Timestamp.fromDate(fim))
+      .orderBy("criadoEm", "desc")
+      .get()
+      .then(snap => {
+        _pedidosRelatorio = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+
+        // Métricas
+        const totalVendas  = _pedidosRelatorio.reduce((s, p) => s + (Number(p.total) || 0), 0);
+        const numPedidos   = _pedidosRelatorio.length;
+        const ticketMedio  = numPedidos > 0 ? totalVendas / numPedidos : 0;
+
+        // Produto mais vendido
+        const contagem = {};
+        _pedidosRelatorio.forEach(p => {
+          (p.itens || []).forEach(i => {
+            const k = i.nome?.split("(")[0].trim() || "?";
+            contagem[k] = (contagem[k] || 0) + (i.qtd || 1);
+          });
+        });
+        const maisVendido = Object.entries(contagem).sort((a,b) => b[1]-a[1])[0]?.[0] || "—";
+
+        document.getElementById("rel-total-vendas").textContent  = money(totalVendas);
+        document.getElementById("rel-num-pedidos").textContent   = numPedidos;
+        document.getElementById("rel-ticket-medio").textContent  = money(ticketMedio);
+        document.getElementById("rel-mais-vendido").textContent  = maisVendido.split(" ")[1] || maisVendido;
+
+        if (numPedidos === 0) {
+          listaEl.innerHTML = '<p style="text-align:center;color:#999;padding:16px;">Nenhum pedido neste período.</p>';
+          return;
+        }
+
+        listaEl.innerHTML = _pedidosRelatorio.map(p => {
+          const dt = p.criadoEm?.toDate?.();
+          const dataHora = dt
+            ? dt.toLocaleDateString("pt-BR") + " " + dt.toLocaleTimeString("pt-BR",{hour:"2-digit",minute:"2-digit"})
+            : "—";
+          const itens = (p.itens||[]).map(i=>`${i.nome} x${i.qtd||1}`).join(", ") || p.resumo || "—";
+          const cor = {enviado:"#E1A95F",preparando:"#1976d2",pronto:"#2e7d32",entregue:"#4caf50",cancelado:"#d32f2f"}[p.status||"enviado"] || "#999";
+          return `<div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid #f0e8d8;gap:8px;flex-wrap:wrap;">
+            <div style="flex:1;min-width:0;">
+              <div style="font-size:.75rem;color:#aaa;">${dataHora}</div>
+              <div style="font-size:.82rem;color:#4B2C20;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${itens}</div>
+            </div>
+            <div style="text-align:right;flex-shrink:0;">
+              <div style="font-weight:800;color:#C8282D;font-size:.9rem;">${p.total ? money(p.total) : "—"}</div>
+              <div style="font-size:.7rem;font-weight:700;color:${cor};text-transform:uppercase;">${p.status||"enviado"}</div>
+            </div>
+          </div>`;
+        }).join("");
+      })
+      .catch(err => {
+        console.error("Erro relatório:", err);
+        listaEl.innerHTML = '<p style="text-align:center;color:#c62828;padding:16px;">Erro ao carregar dados.</p>';
+      });
+  }
+
+  function exportarCSV() {
+    if (!_pedidosRelatorio.length) return alert("Nenhum dado para exportar.");
+    const linhas = [
+      ["Data","Hora","Cliente","Itens","Total","Status"],
+      ..._pedidosRelatorio.map(p => {
+        const dt = p.criadoEm?.toDate?.();
+        return [
+          dt ? dt.toLocaleDateString("pt-BR") : "—",
+          dt ? dt.toLocaleTimeString("pt-BR",{hour:"2-digit",minute:"2-digit"}) : "—",
+          p.nomeCliente || p.email || "—",
+          (p.itens||[]).map(i=>`${i.nome} x${i.qtd||1}`).join(" | ") || p.resumo || "—",
+          (p.total || 0).toFixed(2).replace(".",","),
+          p.status || "enviado"
+        ];
+      })
+    ];
+    const csv  = linhas.map(r => r.map(v => `"${String(v).replace(/"/g,'""')}"`).join(";")).join("\n");
+    const blob = new Blob(["﻿" + csv], { type: "text/csv;charset=utf-8;" });
+    const url  = URL.createObjectURL(blob);
+    const a    = document.createElement("a");
+    a.href = url; a.download = `degust-relatorio-${new Date().toISOString().slice(0,10)}.csv`;
+    a.click(); URL.revokeObjectURL(url);
   }
 
   /* =========================================================
