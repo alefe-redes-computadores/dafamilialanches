@@ -1,5 +1,5 @@
 /* =========================================================
-   🍰 Degust v11.0 — SISTEMA UI BLINDADO + PIX INTELIGENTE
+   🍰 Degust v11.4 — SISTEMA UI BLINDADO + PIX INTELIGENTE
    Correções: cookies, painéis, cliques, duplicações removidas
 ========================================================= */
 
@@ -279,40 +279,85 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
+  // Botão finalizar sem PIX
+  const btnSemPix = document.getElementById("btn-finish-sem-pix");
+  if (btnSemPix) {
+    btnSemPix.addEventListener("click", async () => {
+      const { subtotal, delivery, discount, total, cupomInfo } = await calcTotals();
+      const addr = window.finalAddressStringForWhatsApp || "Não informado";
+      const msg = [
+        "*NOVO PEDIDO - Degust Bolos no Pote*",
+        "------------------------------------",
+        "",
+        "*Itens do Pedido:*",
+        cart.map(i => `  - ${i.nome} x${i.qtd}  (${money(i.preco * i.qtd)})`).join("\n"),
+        "",
+        "------------------------------------",
+        `Subtotal: *${money(subtotal)}*`,
+        `Entrega: *${delivery === 0 ? "GRATIS" : money(delivery)}*`,
+        discount > 0 ? `Desconto: *-${money(discount)}*` : null,
+        `*TOTAL: ${money(total)}*`,
+        "",
+        `Endereco: ${addr}`,
+        "",
+        "------------------------------------",
+        "Pagamento: A COMBINAR",
+        "Por favor, informe como deseja pagar.",
+        "",
+        "Iniciamos o preparo apos confirmar. Obrigada!"
+      ].filter(l => l !== null).join("\n");
+      window.open(`https://wa.me/5538998527894?text=${encodeURIComponent(msg)}`, "_blank");
+      UIManager.closeAll();
+    });
+  }
+
   if (pixBtnWhatsapp) {
     pixBtnWhatsapp.addEventListener("click", async () => {
       const { subtotal, delivery, discount, total, cupomInfo } = await calcTotals();
       const addr = window.finalAddressStringForWhatsApp || "Não informado";
 
-      const msg = [
-        "🍰 *NOVO PEDIDO — Degust Bolos no Pote*",
-        "━━━━━━━━━━━━━━━━━━━━━",
+      // Linhas base do pedido (sem seção PIX — cliente já viu o modal)
+      const linhasPedido = [
+        "*NOVO PEDIDO - Degust Bolos no Pote*",
+        "------------------------------------",
         "",
-        "🛒 *Itens do Pedido:*",
-        cart.map(i => `  🍮 ${i.nome} x${i.qtd} — ${money(i.preco * i.qtd)}`).join("\n"),
+        "*Itens do Pedido:*",
+        cart.map(i => `  - ${i.nome} x${i.qtd}  (${money(i.preco * i.qtd)})`).join("\n"),
         "",
-        "━━━━━━━━━━━━━━━━━━━━━",
-        `💰 Subtotal: *${money(subtotal)}*`,
-        `🚚 Entrega: *${delivery === 0 ? "GRÁTIS 🎉" : money(delivery)}*`,
-        discount > 0 ? `🎟️ Desconto${couponApplied ? ` (${couponApplied})` : ""}: *-${money(discount)}*` : null,
-        `✅ *TOTAL: ${money(total)}*`,
+        "------------------------------------",
+        `Subtotal: *${money(subtotal)}*`,
+        `Entrega: *${delivery === 0 ? "GRATIS" : money(delivery)}*`,
+        discount > 0 ? `Desconto${couponApplied ? ` (${couponApplied})` : ""}: *-${money(discount)}*` : null,
+        `*TOTAL: ${money(total)}*`,
         "",
-        `📍 *Endereço:* ${addr}`,
+        `Endereco: ${addr}`,
+        ""
+      ].filter(l => l !== null);
+
+      // Seção PIX apenas se cliente copiou a chave
+      const linhasPix = pixCopied ? [
+        "------------------------------------",
+        "*PAGAMENTO VIA PIX*",
         "",
-        "━━━━━━━━━━━━━━━━━━━━━",
-        "💳 *PAGAMENTO VIA PIX*",
+        `Chave PIX: ${CHAVE_PIX}`,
+        `Beneficiario: Degust Bolos no Pote`,
+        `Valor: ${money(total)}`,
         "",
-        `🔑 *Chave PIX:* ${CHAVE_PIX}`,
-        `👤 *Beneficiário:* Degust Bolos no Pote`,
-        `💵 *Valor:* ${money(total)}`,
+        "IMPORTANTE:",
+        "1. Faca o PIX no valor acima",
+        "2. Tire print do comprovante",
+        "3. Envie o comprovante nessa conversa",
         "",
-        "⚠️ *IMPORTANTE:*",
-        "1️⃣ Faça o PIX no valor acima",
-        "2️⃣ Tire print do comprovante",
-        "3️⃣ Envie o comprovante *nessa conversa*",
+        "Iniciamos o preparo apos confirmar o pagamento. Obrigada!"
+      ] : [
+        "------------------------------------",
+        "Pagamento a combinar.",
+        "Por favor, informe a forma de pagamento desejada.",
         "",
-        "⏳ Iniciamos o preparo após confirmar o pagamento. Obrigada! 🍰"
-      ].filter(l => l !== null).join("\n");
+        "Iniciamos o preparo apos confirmar. Obrigada!"
+      ];
+
+      const msg = [...linhasPedido, ...linhasPix].join("\n");
 
       window.open(`https://wa.me/5538998527894?text=${encodeURIComponent(msg)}`, "_blank");
       UIManager.closeAll();
@@ -1092,21 +1137,14 @@ document.addEventListener("DOMContentLoaded", () => {
     if (!lista) return;
     lista.innerHTML = '<p style="text-align:center;color:#999;padding:20px;">Carregando seus pedidos...</p>';
 
-    // Tenta com userId primeiro, fallback para uid
-    const queryPedidos = db.collection("Pedidos")
+    // Query sem orderBy para evitar erro de índice — ordena no cliente
+    db.collection("Pedidos")
       .where("userId", "==", user.uid)
-      .orderBy("criadoEm", "desc")
-      .limit(20);
-
-    queryPedidos.get()
+      .limit(20)
+      .get()
       .then(snapshot => {
         if (snapshot.empty) {
-          // Fallback: tenta campo uid (versão antiga)
-          return db.collection("Pedidos")
-            .where("uid", "==", user.uid)
-            .orderBy("criadoEm", "desc")
-            .limit(20)
-            .get();
+          return db.collection("Pedidos").where("uid", "==", user.uid).limit(20).get();
         }
         return snapshot;
       })
@@ -1121,19 +1159,31 @@ document.addEventListener("DOMContentLoaded", () => {
           return;
         }
 
-        lista.innerHTML = snapshot.docs.map(doc => {
+        // Ordena no cliente por data desc
+        const docs = [...snapshot.docs].sort((a, b) => {
+          const da = a.data().criadoEm?.toDate?.() || new Date(a.data().data || 0);
+          const db2 = b.data().criadoEm?.toDate?.() || new Date(b.data().data || 0);
+          return db2 - da;
+        });
+        lista.innerHTML = docs.map(doc => {
           const d = doc.data();
 
-          // Data e hora formatadas
+          // Data — campo pode ser Timestamp ou string ISO
           let dataHora = "—";
           if (d.criadoEm?.toDate) {
             const dt = d.criadoEm.toDate();
-            dataHora = dt.toLocaleDateString("pt-BR") + " às " +
-              dt.toLocaleTimeString("pt-BR", { hour:"2-digit", minute:"2-digit" });
+            dataHora = dt.toLocaleDateString("pt-BR") + " às " + dt.toLocaleTimeString("pt-BR",{hour:"2-digit",minute:"2-digit"});
+          } else if (d.data) {
+            try {
+              const dt = new Date(d.data);
+              if (!isNaN(dt)) dataHora = dt.toLocaleDateString("pt-BR") + " às " + dt.toLocaleTimeString("pt-BR",{hour:"2-digit",minute:"2-digit"});
+            } catch(e) { dataHora = d.data; }
           }
 
-          // Itens
-          const itens = Array.isArray(d.itens) ? d.itens : [];
+          // Itens — pode ser array em itensObj ou string em itens
+          const itens = Array.isArray(d.itensObj) ? d.itensObj
+                      : Array.isArray(d.itens)    ? d.itens
+                      : [];
 
           // Grade de miniaturas (máx 4 emojis)
           const emojis = itens.slice(0, 4).map(i => emojiProduto(i.nome));
@@ -1462,6 +1512,6 @@ document.addEventListener("DOMContentLoaded", () => {
   resetListeners();
   renderMiniCart();
 
-  console.log("%c🍰 Degust Bolos no Pote v11.3 — Sistema Carregado!", "color:#E1A95F;font-size:14px;font-weight:bold;");
+  console.log("%c🍰 Degust Bolos no Pote v11.4 — Sistema Carregado!", "color:#E1A95F;font-size:14px;font-weight:bold;");
 
 }); // fim DOMContentLoaded
