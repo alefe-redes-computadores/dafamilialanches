@@ -182,15 +182,7 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   // Botões flutuantes
-  const btnMeusPedidos = document.querySelector(".meus-pedidos-btn");
-  const btnRecompensas = document.querySelector(".recompensas-btn");
-
-  if (btnMeusPedidos) {
-    btnMeusPedidos.addEventListener("click", () => abrirPainel("painelPedidosOverlay"));
-  }
-  if (btnRecompensas) {
-    btnRecompensas.addEventListener("click", () => abrirPainel("painelRecompensasOverlay"));
-  }
+  // Botões flutuantes removidos — acesso via menu conta e menu lateral
 
   // Fechar pelos botões X dentro dos painéis
   document.querySelectorAll(".fechar-painel, .fechar-pedidos, .fechar-recompensas").forEach(btn => {
@@ -217,11 +209,18 @@ document.addEventListener("DOMContentLoaded", () => {
   const pixBtnWhatsapp = document.getElementById("btn-finish-pix");
   const pixClose       = document.querySelector(".pix-close");
 
-  const CHAVE_PIX = "carols2maite@gmail.com";
+  const CHAVE_PIX = "degustbolosnopote@gmail.com";
 
-  const AVISO_PIX = `<p style="font-size:.85rem;color:#c62828;font-weight:600;margin-bottom:14px;border-radius:8px;border:1px solid #ffcdd2;padding:8px 12px;background:#fff3f3;">
-    ⚠️ IMPORTANTE: Antes de pagar, clique em "Enviar Pedido no WhatsApp". Após enviar, faça o PIX e mande o comprovante na mesma conversa.
-  </p>`;
+  const AVISO_PIX = `
+    <div style="background:#fff3cd;border:2px solid #ffc107;border-radius:12px;padding:14px;margin-bottom:14px;text-align:left;">
+      <p style="margin:0 0 8px;font-size:.95rem;font-weight:800;color:#856404;">📋 SIGA ESSES PASSOS:</p>
+      <p style="margin:0 0 6px;font-size:.85rem;color:#333;"><b>1️⃣</b> Clique em <b>"Enviar Pedido no WhatsApp"</b></p>
+      <p style="margin:0 0 6px;font-size:.85rem;color:#333;"><b>2️⃣</b> Faça o PIX no valor acima</p>
+      <p style="margin:0;font-size:.85rem;color:#333;"><b>3️⃣</b> Mande o comprovante <b>na mesma conversa</b></p>
+    </div>
+    <div style="background:#fff0f0;border:1px solid #ffcdd2;border-radius:8px;padding:10px;margin-bottom:14px;text-align:center;">
+      <p style="margin:0;font-size:.8rem;color:#c62828;font-weight:700;">⚠️ Sem o pedido no WhatsApp não saberemos do seu pedido!</p>
+    </div>`;
 
   async function abrirModalPIX() {
     try {
@@ -237,6 +236,14 @@ document.addEventListener("DOMContentLoaded", () => {
         else pixBody.prepend(div);
       }
 
+      // Mostra banner de pontos no modal PIX se não existir ainda
+      if (pixBody && !pixBody.querySelector(".pix-pontos")) {
+        const pontosDiv = document.createElement("div");
+        pontosDiv.className = "pix-pontos";
+        pontosDiv.style.cssText = "background:linear-gradient(135deg,#fff8e1,#fffde7);border:1px solid #E1A95F;border-radius:10px;padding:10px 12px;margin-bottom:12px;display:flex;align-items:center;gap:8px;text-align:left;";
+        pontosDiv.innerHTML = '<span style="font-size:1.3rem;">⭐</span><p style="margin:0;font-size:.78rem;color:#4B2C20;font-weight:600;">Este pedido acumula <b>+1 ponto</b> no seu cartão fidelidade!</p>';
+        pixBody.appendChild(pontosDiv);
+      }
       UIManager.open("pix", pixModal);
     } catch (err) {
       console.error("Erro ao abrir PIX:", err);
@@ -278,28 +285,36 @@ document.addEventListener("DOMContentLoaded", () => {
       const addr = window.finalAddressStringForWhatsApp || "Não informado";
 
       const msg = [
-        "🍰 *Novo Pedido - Degust Bolos no Pote*",
-        cart.map(i => `• ${i.nome} x${i.qtd}`).join("\n"),
+        "🍰 *NOVO PEDIDO — Degust Bolos no Pote*",
+        "━━━━━━━━━━━━━━━━━━━━━",
         "",
-        `Subtotal: *${money(subtotal)}*`,
-        `Entrega: *${money(delivery)}*${cupomInfo.freeShipping ? " _(Frete Grátis)_" : ""}`,
-        `Desconto${couponApplied ? ` (${couponApplied})` : ""}: *-${money(discount)}*`,
-        `*Total: ${money(total)}*`,
+        "🛒 *Itens do Pedido:*",
+        cart.map(i => `  🍮 ${i.nome} x${i.qtd} — ${money(i.preco * i.qtd)}`).join("\n"),
         "",
-        `🏠 *Endereço:* ${addr}`,
+        "━━━━━━━━━━━━━━━━━━━━━",
+        `💰 Subtotal: *${money(subtotal)}*`,
+        `🚚 Entrega: *${delivery === 0 ? "GRÁTIS 🎉" : money(delivery)}*`,
+        discount > 0 ? `🎟️ Desconto${couponApplied ? ` (${couponApplied})` : ""}: *-${money(discount)}*` : null,
+        `✅ *TOTAL: ${money(total)}*`,
         "",
-        "----------------------------------",
-        "💳 *DADOS PARA PAGAMENTO PIX*",
+        `📍 *Endereço:* ${addr}`,
         "",
-        `📦 *Pedido:* ${money(total)}`,
-        `🏷️ *Chave PIX:* ${CHAVE_PIX}`,
-        `👤 *Beneficiário:* Degust / Carol`,
+        "━━━━━━━━━━━━━━━━━━━━━",
+        "💳 *PAGAMENTO VIA PIX*",
         "",
-        "📎 *Por favor, anexe o comprovante após pagar*",
-        "⏰ Iniciamos o preparo após a confirmação."
-      ].join("\n");
+        `🔑 *Chave PIX:* ${CHAVE_PIX}`,
+        `👤 *Beneficiário:* Degust Bolos no Pote`,
+        `💵 *Valor:* ${money(total)}`,
+        "",
+        "⚠️ *IMPORTANTE:*",
+        "1️⃣ Faça o PIX no valor acima",
+        "2️⃣ Tire print do comprovante",
+        "3️⃣ Envie o comprovante *nessa conversa*",
+        "",
+        "⏳ Iniciamos o preparo após confirmar o pagamento. Obrigada! 🍰"
+      ].filter(l => l !== null).join("\n");
 
-      window.open(`https://wa.me/5534997178336?text=${encodeURIComponent(msg)}`, "_blank");
+      window.open(`https://wa.me/5538998527894?text=${encodeURIComponent(msg)}`, "_blank");
       UIManager.closeAll();
     });
   }
@@ -325,7 +340,7 @@ document.addEventListener("DOMContentLoaded", () => {
   let currentUser = null;
   let isFirebaseInitialized = false;
 
-  const DELIVERY_FEE_DEFAULT = 6.00;
+  const DELIVERY_FEE_DEFAULT = 8.00;
   const LIMITE_FRETE_GRATIS  = 80.00;
 
   const money = (n) => `R$ ${Number(n || 0).toFixed(2).replace(".", ",")}`;
@@ -336,7 +351,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const searchInput = document.getElementById("search-input");
 
   const PRODUTOS_BUSCA = [
-    { nome: "Brigadeiro",               aliases: ["chocolate", "preto", "granulado", "tradicional"] },
+    { nome: "Brigadeiro",               aliases: ["chocolate", "preto", "granulado", "tradicional"], preco: 10 },
     { nome: "Prestígio",                aliases: ["prestigio", "coco", "beijinho"] },
     { nome: "Ninho com Geleia de Morango", aliases: ["morango", "geleia", "fruta", "ninho morango"] },
     { nome: "Ninho Cremoso",            aliases: ["leite ninho", "branco", "puro", "ninho"] }
@@ -423,10 +438,10 @@ document.addEventListener("DOMContentLoaded", () => {
     googleBtn:        document.getElementById("google-login"),
     userBtn:          document.getElementById("user-btn"),
     statusBanner:     document.getElementById("status-banner"),
-    pedidosBtn:       document.querySelector(".meus-pedidos-btn"),
+    pedidosBtn:       null, // removido — acesso via menu conta
     pedidosPanel:     document.getElementById("painelPedidos"),
     pedidosLista:     document.getElementById("listaPedidos"),
-    recompensasBtn:   document.querySelector(".recompensas-btn"),
+    recompensasBtn:   null, // removido — acesso via menu conta
     recompensasPanel: document.getElementById("recompensas-panel"),
     recompensasLista: document.getElementById("listaRecompensas"),
     historicoLista:   document.getElementById("historicoRecompensas"),
@@ -622,18 +637,29 @@ document.addEventListener("DOMContentLoaded", () => {
       : null;
 
     if (user) {
-      el.userBtn.innerHTML = `<span style="font-size:.75rem;display:block;opacity:.8;font-weight:500;">Olá,</span><span style="font-size:.9rem;">${nome} ✨</span>`;
-      el.userBtn.style.lineHeight = "1.2";
-      el.userBtn.style.padding = "6px 14px";
-      if (el.pedidosBtn)     el.pedidosBtn.style.display     = "";
-      if (el.recompensasBtn) el.recompensasBtn.style.display = "";
+      const foto = user.photoURL;
+      const content = document.getElementById("user-btn-content");
+      if (content) {
+        if (foto) {
+          content.innerHTML = `<img src="${foto}" 
+            style="width:30px;height:30px;border-radius:50%;border:2px solid var(--bege);object-fit:cover;vertical-align:middle;margin-right:6px;"
+            onerror="this.style.display='none'"><span style="font-size:.82rem;font-weight:700;">${nome}</span>`;
+        } else {
+          content.innerHTML = `<span style="font-size:.82rem;font-weight:700;">👤 ${nome}</span>`;
+        }
+      }
+      el.userBtn.style.display = "flex";
+      el.userBtn.style.alignItems = "center";
+      el.userBtn.style.padding = "5px 12px";
+      el.userBtn.style.gap = "0";
       if (isAdmin(user)) {
         document.querySelector(".admin-section")?.style.setProperty("display","block");
       }
     } else {
-      el.userBtn.innerHTML = "Entrar / Perfil 👤";
-      el.userBtn.style.lineHeight = "";
+      const content = document.getElementById("user-btn-content");
+      if (content) content.innerHTML = "Entrar";
       el.userBtn.style.padding = "";
+      el.userBtn.style.display = "";
     }
   }
 
@@ -994,6 +1020,13 @@ document.addEventListener("DOMContentLoaded", () => {
           <span>Total:</span><span>${money(total)}</span>
         </div>
       </div>
+      <div style="background:linear-gradient(135deg,#fff8e1,#fffde7);border:1px solid #E1A95F;border-radius:10px;padding:10px 12px;margin-top:10px;display:flex;align-items:center;gap:8px;">
+        <span style="font-size:1.4rem;">🎁</span>
+        <div>
+          <p style="margin:0;font-size:.78rem;font-weight:700;color:#4B2C20;">Esta compra acumula pontos de fidelidade!</p>
+          <p style="margin:0;font-size:.72rem;color:#8d6e63;">Acesse pelo menu lateral ou pelo seu perfil</p>
+        </div>
+      </div>
       <button id="main-finish-btn" type="button" style="width:100%;background:#4caf50;color:#fff;border:none;padding:15px;border-radius:10px;font-weight:bold;font-size:1.1rem;cursor:pointer;margin-top:10px;box-shadow:0 4px 10px rgba(76,175,80,.3);">
         FINALIZAR PEDIDO 🍰
       </button>
@@ -1029,7 +1062,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     if (isRetirar) {
-      addr = "CLIENTE IRÁ RETIRAR NA DEGUST";
+      addr = "Retirada na loja: Rua Espanha, 72 - Parque das Nações, Três Marias/MG";
     } else if (!addr) {
       alert("Preencha o endereço completo (ou marque 'Retirar no Local') para continuar.");
       return;
@@ -1059,11 +1092,24 @@ document.addEventListener("DOMContentLoaded", () => {
     if (!lista) return;
     lista.innerHTML = '<p style="text-align:center;color:#999;padding:20px;">Carregando seus pedidos...</p>';
 
-    db.collection("Pedidos")
+    // Tenta com userId primeiro, fallback para uid
+    const queryPedidos = db.collection("Pedidos")
       .where("userId", "==", user.uid)
       .orderBy("criadoEm", "desc")
-      .limit(20)
-      .get()
+      .limit(20);
+
+    queryPedidos.get()
+      .then(snapshot => {
+        if (snapshot.empty) {
+          // Fallback: tenta campo uid (versão antiga)
+          return db.collection("Pedidos")
+            .where("uid", "==", user.uid)
+            .orderBy("criadoEm", "desc")
+            .limit(20)
+            .get();
+        }
+        return snapshot;
+      })
       .then(snapshot => {
         if (snapshot.empty) {
           lista.innerHTML = `
@@ -1416,6 +1462,6 @@ document.addEventListener("DOMContentLoaded", () => {
   resetListeners();
   renderMiniCart();
 
-  console.log("%c🍰 Degust Bolos no Pote v11.0 — Sistema Carregado!", "color:#E1A95F;font-size:14px;font-weight:bold;");
+  console.log("%c🍰 Degust Bolos no Pote v11.3 — Sistema Carregado!", "color:#E1A95F;font-size:14px;font-weight:bold;");
 
 }); // fim DOMContentLoaded
