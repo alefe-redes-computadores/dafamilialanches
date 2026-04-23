@@ -52,15 +52,19 @@ body {
 .logo-container { display:flex; align-items:center; gap:10px; }
 .logo { border-radius:50%; background:#fff; border:2px solid var(--marrom); object-fit:cover; box-shadow:var(--shadow-1); }
 .header-info h1 { font-size:1.2rem; margin:0; color:var(--marrom); font-weight:800; letter-spacing:-.5px; }
-.header-info p  { font-size:.7rem; margin:0; color:var(--marrom); font-weight:500; opacity:.9; }
+.header-info p  { font-size:.68rem; margin:0; color:var(--marrom); font-weight:500; opacity:.9; line-height:1.3; }
 .header-actions { display:flex; align-items:center; gap:12px; }
 
 #user-btn {
   background:var(--marrom); color:var(--bege); border:none;
   padding:8px 14px; border-radius:var(--rad); font-weight:600; font-size:.85rem;
   cursor:pointer; box-shadow:var(--shadow-in); transition:transform .2s;
+  display:flex; align-items:center; gap:6px;
+  max-width:160px; overflow:hidden;
+  white-space:nowrap;
 }
 #user-btn:active { transform:scale(.97); }
+#user-btn img { flex-shrink:0; }
 
 #cart-icon {
   position:relative; background:var(--marrom); color:var(--bege); border:none;
@@ -178,7 +182,9 @@ section h2 {
 
 /* ── MINI-CARRINHO ── */
 .mini-cart {
-  position:fixed; right:0; top:0; width:100%; max-width:380px; height:100vh;
+  position:fixed; right:0; top:0; width:100%; max-width:380px;
+  height: 100vh;
+  height: 100dvh; /* dynamic viewport — evita corte pela barra do browser */
   background:var(--branco); z-index:1800;
   transform:translateX(100%);
   transition:transform .25s cubic-bezier(.4,0,.2,1);
@@ -195,7 +201,7 @@ section h2 {
 .mini-head button { background:none; border:none; color:var(--bege); font-size:1.3rem; cursor:pointer; }
 .mini-list { flex:1; overflow-y:auto; padding:16px; background:#fdfaf5; }
 .cart-item { background:#fff; border-radius:var(--rad); padding:12px; margin-bottom:12px; box-shadow:0 2px 4px rgba(0,0,0,.05); border:1px solid rgba(75,44,32,.05); }
-.mini-foot { padding:16px; background:var(--branco); border-top:1px solid var(--bege); flex-shrink:0; overflow-y:auto; max-height:55vh; }
+.mini-foot { padding:16px 16px 32px; background:var(--branco); border-top:1px solid var(--bege); flex-shrink:0; overflow-y:auto; max-height:58vh; }
 .progress-wrapper { margin-bottom:12px; padding:10px 12px; border-radius:var(--rad); background:#fff8e1; border:1px solid var(--dourado); text-align:center; }
 .progress-text { font-size:.82rem; margin:0 0 6px; color:var(--marrom); }
 .progress-bar  { background:#eee; height:10px; border-radius:5px; overflow:hidden; }
@@ -298,24 +304,7 @@ body.no-scroll { overflow:hidden; }
 .painel-body { padding:20px; }
 .empty-orders { text-align:center; color:#999; padding:30px 0; font-size:.95rem; }
 
-/* ── BOTÕES FLUTUANTES ── */
-.minhas-recompensas,
-.meus-pedidos { position:fixed; right:16px; z-index:9000; }
-.minhas-recompensas { bottom:96px; }
-.meus-pedidos       { bottom:24px; }
-
-.recompensas-btn,
-.meus-pedidos-btn {
-  width:56px; height:56px; border-radius:50%;
-  background:var(--marrom); border:2px solid var(--dourado);
-  display:flex; align-items:center; justify-content:center;
-  font-size:0; box-shadow:0 4px 16px rgba(75,44,32,.4);
-  cursor:pointer; transition:transform .2s,box-shadow .2s;
-}
-.recompensas-btn:active,
-.meus-pedidos-btn:active { transform:scale(.93); box-shadow:0 2px 8px rgba(75,44,32,.3); }
-.recompensas-btn::before { content:"🎁"; font-size:26px; }
-.meus-pedidos-btn::before { content:"📦"; font-size:26px; }
+/* botões flutuantes removidos v11.3 */
 
 /* ── COOKIES ── */
 #cookie-banner {
@@ -507,4 +496,40 @@ body.no-scroll { overflow:hidden; }
 .footer-btn:hover {
   background: rgba(255,255,255,.2);
   transform: translateY(-1px);
+}
+
+/* ── PREÇO PROMOCIONAL ── */
+.price-promo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 6px 0 14px;
+}
+
+.price-old {
+  font-size: .95rem;
+  font-weight: 600;
+  color: #aaa;
+  text-decoration: line-through;
+}
+
+.price-new {
+  font-size: 1.35rem;
+  font-weight: 900;
+  color: var(--vermelho);
+}
+
+.promo-badge {
+  background: linear-gradient(135deg, #ff6b35, #f7c59f);
+  color: #fff;
+  font-size: .65rem;
+  font-weight: 800;
+  padding: 3px 8px;
+  border-radius: 20px;
+  text-transform: uppercase;
+  letter-spacing: .3px;
+  box-shadow: 0 2px 6px rgba(255,107,53,.35);
+  white-space: nowrap;
 }
