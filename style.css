@@ -499,37 +499,45 @@ body.no-scroll { overflow:hidden; }
 }
 
 /* ── PREÇO PROMOCIONAL ── */
-.price-promo {
+.price-promo-wrap {
   display: flex;
   align-items: center;
   justify-content: center;
   flex-wrap: wrap;
   gap: 6px;
-  margin: 6px 0 14px;
+  margin: 8px 0 14px;
 }
 
 .price-old {
-  font-size: .95rem;
+  font-size: .9rem;
   font-weight: 600;
-  color: #aaa;
+  color: #bbb;
   text-decoration: line-through;
+  text-decoration-color: #e74c3c;
 }
 
 .price-new {
-  font-size: 1.35rem;
+  font-size: 1.5rem;
   font-weight: 900;
   color: var(--vermelho);
+  letter-spacing: -.5px;
 }
 
-.promo-badge {
-  background: linear-gradient(135deg, #ff6b35, #f7c59f);
+.promo-tag {
+  background: linear-gradient(135deg, #e74c3c, #ff6b35);
   color: #fff;
-  font-size: .65rem;
+  font-size: .6rem;
   font-weight: 800;
   padding: 3px 8px;
   border-radius: 20px;
   text-transform: uppercase;
-  letter-spacing: .3px;
-  box-shadow: 0 2px 6px rgba(255,107,53,.35);
+  letter-spacing: .4px;
+  box-shadow: 0 2px 8px rgba(231,76,60,.4);
   white-space: nowrap;
+  animation: promoPulse 2s ease infinite;
+}
+
+@keyframes promoPulse {
+  0%,100% { box-shadow: 0 2px 8px rgba(231,76,60,.4); }
+  50%      { box-shadow: 0 2px 14px rgba(231,76,60,.7); }
 }
