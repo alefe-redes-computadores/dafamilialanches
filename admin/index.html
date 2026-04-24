@@ -1,1 +1,660 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Degust — Painel Admin</title>
+  <style>
+    :root {
+      --marrom: #4B2C20;
+      --bege:   #F5E6CA;
+      --dourado:#E1A95F;
+      --verm:   #C8282D;
+      --verde:  #2e7d32;
+      --azul:   #1565C0;
+      --cinza:  #f4f4f4;
+      --branco: #ffffff;
+    }
+    * { box-sizing:border-box; margin:0; padding:0; -webkit-tap-highlight-color:transparent; }
+    body { font-family:"Segoe UI",system-ui,sans-serif; background:#1a1008; color:#eee; min-height:100vh; }
+
+    /* ── LOGIN ── */
+    #tela-login {
+      display:flex; flex-direction:column; align-items:center; justify-content:center;
+      min-height:100vh; padding:20px; background:linear-gradient(135deg,#1a1008,#3b1f0e);
+    }
+    #tela-login img { width:90px; height:90px; border-radius:50%; border:3px solid var(--dourado); margin-bottom:20px; }
+    #tela-login h2 { font-size:1.3rem; color:var(--bege); margin-bottom:6px; }
+    #tela-login p  { font-size:.85rem; color:#aaa; margin-bottom:28px; }
+    #btn-login-google {
+      display:flex; align-items:center; gap:12px; background:#fff; color:#333;
+      border:none; padding:14px 28px; border-radius:30px; font-size:1rem; font-weight:700;
+      cursor:pointer; box-shadow:0 4px 16px rgba(0,0,0,.4); transition:transform .2s;
+    }
+    #btn-login-google:active { transform:scale(.97); }
+    #login-erro { margin-top:16px; color:#ff6b6b; font-size:.85rem; text-align:center; }
+
+    /* ── PAINEL ── */
+    #painel { display:none; flex-direction:column; min-height:100vh; }
+
+    /* Header admin */
+    .admin-header {
+      background:var(--marrom); padding:14px 16px;
+      display:flex; justify-content:space-between; align-items:center;
+      border-bottom:3px solid var(--dourado); position:sticky; top:0; z-index:100;
+    }
+    .admin-header-left { display:flex; align-items:center; gap:10px; }
+    .admin-header-left img { width:36px; height:36px; border-radius:50%; border:2px solid var(--dourado); }
+    .admin-header-left h1 { font-size:1rem; color:var(--bege); font-weight:800; }
+    .admin-header-left span { font-size:.7rem; color:var(--dourado); display:block; }
+
+    /* Toggle loja */
+    #toggle-loja {
+      display:flex; align-items:center; gap:8px;
+      background:none; border:2px solid var(--dourado);
+      color:var(--bege); padding:8px 14px; border-radius:20px;
+      font-weight:700; font-size:.8rem; cursor:pointer; transition:all .2s;
+    }
+    #toggle-loja.aberta  { background:#1b5e20; border-color:#4caf50; color:#fff; }
+    #toggle-loja.fechada { background:#b71c1c; border-color:#ef5350; color:#fff; }
+
+    /* Banner novo pedido */
+    #banner-novo-pedido {
+      display:none; position:fixed; top:0; left:0; right:0; z-index:999;
+      background:linear-gradient(90deg,#e65100,#f57c00);
+      padding:16px; text-align:center;
+      animation:piscar .6s ease infinite alternate;
+      cursor:pointer;
+    }
+    #banner-novo-pedido p { font-size:1.1rem; font-weight:800; color:#fff; }
+    @keyframes piscar { from{opacity:1;} to{opacity:.6;} }
+
+    /* Abas */
+    .abas {
+      display:flex; overflow-x:auto; background:#111;
+      border-bottom:2px solid #333; padding:0 8px;
+      scrollbar-width:none;
+    }
+    .abas::-webkit-scrollbar { display:none; }
+    .aba {
+      flex-shrink:0; padding:12px 16px; border:none; background:none;
+      color:#888; font-weight:700; font-size:.85rem; cursor:pointer;
+      border-bottom:3px solid transparent; transition:all .2s;
+      white-space:nowrap;
+    }
+    .aba.ativa { color:var(--dourado); border-bottom-color:var(--dourado); }
+    .aba .badge {
+      background:var(--verm); color:#fff; font-size:.65rem;
+      padding:2px 6px; border-radius:10px; margin-left:5px;
+    }
+
+    /* Lista de pedidos */
+    .pedidos-lista { padding:12px; display:flex; flex-direction:column; gap:10px; }
+
+    .card-pedido {
+      background:#1e1208; border:1px solid #333; border-radius:14px;
+      padding:14px; transition:border-color .2s;
+    }
+    .card-pedido.novo { border-color:var(--dourado); animation:glow .8s ease infinite alternate; }
+    @keyframes glow { from{box-shadow:0 0 0 rgba(225,169,95,0);} to{box-shadow:0 0 12px rgba(225,169,95,.4);} }
+
+    .card-pedido-header {
+      display:flex; justify-content:space-between; align-items:flex-start;
+      margin-bottom:10px; gap:8px;
+    }
+    .card-cliente { font-weight:700; color:var(--bege); font-size:.95rem; }
+    .card-hora    { font-size:.72rem; color:#666; }
+
+    .card-itens { font-size:.82rem; color:#bbb; margin-bottom:10px; line-height:1.6; }
+    .card-endereco { font-size:.78rem; color:#888; margin-bottom:12px; }
+    .card-total { font-size:1rem; font-weight:800; color:var(--dourado); margin-bottom:12px; }
+
+    .status-badge {
+      display:inline-block; font-size:.7rem; font-weight:800;
+      padding:4px 10px; border-radius:20px; text-transform:uppercase;
+    }
+    .status-novo       { background:#e65100; color:#fff; }
+    .status-preparando { background:#1565C0; color:#fff; }
+    .status-pronto     { background:#6a1b9a; color:#fff; }
+    .status-entregue   { background:#2e7d32; color:#fff; }
+    .status-cancelado  { background:#555; color:#fff; }
+
+    /* Botões de ação */
+    .acoes { display:flex; gap:8px; flex-wrap:wrap; }
+    .btn-acao {
+      flex:1; min-width:80px; border:none; padding:10px 8px;
+      border-radius:10px; font-weight:700; font-size:.78rem;
+      cursor:pointer; transition:transform .15s;
+    }
+    .btn-acao:active { transform:scale(.96); }
+    .btn-aceitar    { background:#1b5e20; color:#fff; }
+    .btn-preparando { background:#1565C0; color:#fff; }
+    .btn-pronto     { background:#6a1b9a; color:#fff; }
+    .btn-entregue   { background:#2e7d32; color:#fff; }
+    .btn-cancelar   { background:#333; color:#aaa; }
+
+    /* Vazio */
+    .vazio { text-align:center; padding:60px 20px; color:#555; font-size:.95rem; }
+    .vazio span { font-size:3rem; display:block; margin-bottom:12px; }
+
+    /* Relatório resumido */
+    .resumo-grid {
+      display:grid; grid-template-columns:1fr 1fr; gap:10px; padding:12px;
+    }
+    .resumo-card {
+      background:#1e1208; border:1px solid #333; border-radius:12px;
+      padding:14px; text-align:center;
+    }
+    .resumo-val   { font-size:1.4rem; font-weight:800; color:var(--dourado); }
+    .resumo-label { font-size:.72rem; color:#666; margin-top:4px; text-transform:uppercase; }
+
+    /* Toast */
+    #toast {
+      position:fixed; bottom:24px; left:50%; transform:translateX(-50%) translateY(20px);
+      background:var(--marrom); color:var(--bege); padding:12px 24px;
+      border-radius:30px; font-weight:700; font-size:.88rem;
+      box-shadow:0 6px 20px rgba(0,0,0,.4); z-index:9999;
+      opacity:0; pointer-events:none; transition:all .3s;
+      border:1px solid var(--dourado); white-space:nowrap;
+    }
+    #toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
+
+    /* Logout */
+    #btn-logout {
+      background:none; border:1px solid #555; color:#888;
+      padding:6px 12px; border-radius:8px; font-size:.75rem;
+      cursor:pointer; transition:all .2s;
+    }
+    #btn-logout:hover { border-color:var(--verm); color:var(--verm); }
+  </style>
+</head>
+<body>
+
+<!-- TELA DE LOGIN -->
+<div id="tela-login">
+  <img src="logo.png" alt="Degust" onerror="this.style.display='none'">
+  <h2>Painel Administrativo</h2>
+  <p>Degust Bolos no Pote — Acesso restrito</p>
+  <button id="btn-login-google">
+    <svg width="20" height="20" viewBox="0 0 48 48">
+      <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
+      <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/>
+      <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/>
+      <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.18 1.48-4.97 2.31-8.16 2.31-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
+    </svg>
+    Entrar com Google
+  </button>
+  <p id="login-erro"></p>
+</div>
+
+<!-- BANNER NOVO PEDIDO -->
+<div id="banner-novo-pedido">
+  <p>🔔 NOVO PEDIDO CHEGOU! — Toque para ver</p>
+</div>
+
+<!-- PAINEL PRINCIPAL -->
+<div id="painel">
+
+  <div class="admin-header">
+    <div class="admin-header-left">
+      <img id="admin-foto" src="" alt="admin">
+      <div>
+        <h1>Degust Admin</h1>
+        <span id="admin-nome">...</span>
+      </div>
+    </div>
+    <div style="display:flex;gap:8px;align-items:center;">
+      <button id="toggle-loja" class="fechada">⏳ Carregando...</button>
+      <button id="btn-logout">Sair</button>
+    </div>
+  </div>
+
+  <!-- Abas -->
+  <div class="abas">
+    <button class="aba ativa" data-aba="novos">🔔 Novos <span class="badge" id="badge-novos">0</span></button>
+    <button class="aba" data-aba="preparando">👩‍🍳 Preparando <span class="badge" id="badge-preparando">0</span></button>
+    <button class="aba" data-aba="pronto">✅ Pronto <span class="badge" id="badge-pronto">0</span></button>
+    <button class="aba" data-aba="entregue">🎉 Entregues</button>
+    <button class="aba" data-aba="resumo">📊 Resumo</button>
+  </div>
+
+  <!-- Conteúdo das abas -->
+  <div id="conteudo-aba">
+    <div class="pedidos-lista" id="lista-pedidos">
+      <div class="vazio"><span>🍰</span>Carregando pedidos...</div>
+    </div>
+  </div>
+
+</div>
+
+<!-- TOAST -->
+<div id="toast"></div>
+
+<!-- ÁUDIO notificação -->
+<audio id="som-pedido" preload="auto">
+  <!-- Tom simples gerado via Web Audio API no JS -->
+</audio>
+
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+
+<script>
+// ══════════════════════════════════════════
+// CONFIG FIREBASE — mesmo projeto da Degust
+// ══════════════════════════════════════════
+const firebaseConfig = {
+  apiKey: "AIzaSyATQBcbYuzKpKlSwNlbpRiAM1XyHqhGeak",
+  authDomain: "da-familia-lanches.firebaseapp.com",
+  projectId: "da-familia-lanches",
+  storageBucket: "da-familia-lanches.appspot.com",
+  messagingSenderId: "106857147317",
+  appId: "1:106857147317:web:769c98aed26bb8fc9e87fc"
+};
+
+// Evita inicializar duas vezes se o script.js estiver na mesma página
+if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const db   = firebase.firestore();
+
+const ADMINS = ["carols2maite@gmail.com", "degustbolosnopote@gmail.com"];
+const isAdmin = (u) => u?.email && ADMINS.map(e=>e.toLowerCase()).includes(u.email.toLowerCase());
+
+// ══════════════════════════════════════════
+// ELEMENTOS
+// ══════════════════════════════════════════
+const telaLogin        = document.getElementById("tela-login");
+const painel           = document.getElementById("painel");
+const btnLoginGoogle   = document.getElementById("btn-login-google");
+const loginErro        = document.getElementById("login-erro");
+const adminFoto        = document.getElementById("admin-foto");
+const adminNome        = document.getElementById("admin-nome");
+const toggleLoja       = document.getElementById("toggle-loja");
+const bannerNovoPedido = document.getElementById("banner-novo-pedido");
+const listaPedidos     = document.getElementById("lista-pedidos");
+const toast            = document.getElementById("toast");
+const btnLogout        = document.getElementById("btn-logout");
+
+// ══════════════════════════════════════════
+// SOM — gerado via Web Audio (sem arquivo externo)
+// ══════════════════════════════════════════
+let audioCtx = null;
+let somInterval = null;
+
+function tocarSom() {
+  try {
+    if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    const osc  = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    osc.connect(gain);
+    gain.connect(audioCtx.destination);
+    osc.frequency.setValueAtTime(880, audioCtx.currentTime);
+    osc.frequency.setValueAtTime(660, audioCtx.currentTime + 0.1);
+    osc.frequency.setValueAtTime(880, audioCtx.currentTime + 0.2);
+    gain.gain.setValueAtTime(0.4, audioCtx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.5);
+    osc.start(audioCtx.currentTime);
+    osc.stop(audioCtx.currentTime + 0.5);
+  } catch(e) {}
+}
+
+function iniciarAlertaSonoro() {
+  if (somInterval) return;
+  tocarSom();
+  somInterval = setInterval(tocarSom, 3000);
+  bannerNovoPedido.style.display = "block";
+}
+
+function pararAlertaSonoro() {
+  if (somInterval) { clearInterval(somInterval); somInterval = null; }
+  bannerNovoPedido.style.display = "none";
+}
+
+bannerNovoPedido.addEventListener("click", pararAlertaSonoro);
+
+// ══════════════════════════════════════════
+// TOAST
+// ══════════════════════════════════════════
+function mostrarToast(msg) {
+  toast.textContent = msg;
+  toast.classList.add("show");
+  setTimeout(() => toast.classList.remove("show"), 2500);
+}
+
+// ══════════════════════════════════════════
+// ESTADO
+// ══════════════════════════════════════════
+let abaAtual     = "novos";
+let todosPedidos = [];
+let unsubPedidos = null;
+let lojaAberta   = false;
+const DEGUST_ADMINS = ["carols2maite@gmail.com","degustbolosnopote@gmail.com"];
+
+// ══════════════════════════════════════════
+// AUTH
+// ══════════════════════════════════════════
+btnLoginGoogle.addEventListener("click", () => {
+  loginErro.textContent = "";
+  const provider = new firebase.auth.GoogleAuthProvider();
+  provider.setCustomParameters({ prompt: "select_account" });
+  auth.signInWithPopup(provider)
+    .then(r => {
+      if (!isAdmin(r.user)) {
+        auth.signOut();
+        loginErro.textContent = "Acesso negado. Conta não autorizada.";
+      }
+    })
+    .catch(err => {
+      loginErro.textContent = "Erro ao entrar: " + err.message;
+    });
+});
+
+btnLogout.addEventListener("click", () => {
+  if (confirm("Deseja sair do painel?")) {
+    if (unsubPedidos) unsubPedidos();
+    auth.signOut();
+  }
+});
+
+auth.onAuthStateChanged(user => {
+  if (user && isAdmin(user)) {
+    telaLogin.style.display = "none";
+    painel.style.display    = "flex";
+    adminFoto.src = user.photoURL || "";
+    adminNome.textContent = user.displayName?.split(" ")[0] || user.email;
+    iniciarPainel();
+  } else {
+    telaLogin.style.display = "flex";
+    painel.style.display    = "none";
+    if (unsubPedidos) { unsubPedidos(); unsubPedidos = null; }
+  }
+});
+
+// ══════════════════════════════════════════
+// ABAS
+// ══════════════════════════════════════════
+document.querySelectorAll(".aba").forEach(btn => {
+  btn.addEventListener("click", () => {
+    document.querySelectorAll(".aba").forEach(b => b.classList.remove("ativa"));
+    btn.classList.add("ativa");
+    abaAtual = btn.dataset.aba;
+    renderizarAba();
+  });
+});
+
+// ══════════════════════════════════════════
+// STATUS DA LOJA
+// ══════════════════════════════════════════
+function checarStatusLoja() {
+  db.collection("settings").doc("degust_status").onSnapshot(doc => {
+    lojaAberta = doc.exists ? (doc.data().aberta === true) : false;
+    atualizarBotaoLoja();
+  }, () => {
+    // Documento não existe ainda — loja fechada por padrão
+    lojaAberta = false;
+    atualizarBotaoLoja();
+  });
+}
+
+function atualizarBotaoLoja() {
+  if (lojaAberta) {
+    toggleLoja.textContent = "🟢 Loja Aberta";
+    toggleLoja.className   = "aberta";
+  } else {
+    toggleLoja.textContent = "🔴 Loja Fechada";
+    toggleLoja.className   = "fechada";
+  }
+}
+
+toggleLoja.addEventListener("click", () => {
+  const novoStatus = !lojaAberta;
+  const msg = novoStatus ? "Abrir a loja?" : "Fechar a loja?";
+  if (!confirm(msg)) return;
+
+  db.collection("settings").doc("degust_status").set({ aberta: novoStatus })
+    .then(() => mostrarToast(novoStatus ? "🟢 Loja aberta!" : "🔴 Loja fechada!"))
+    .catch(err => mostrarToast("Erro: " + err.message));
+});
+
+// ══════════════════════════════════════════
+// PEDIDOS EM TEMPO REAL
+// ══════════════════════════════════════════
+let idsPedidosConhecidos = new Set();
+let primeiraRodada = true;
+
+function iniciarPainel() {
+  checarStatusLoja();
+
+  // Busca pedidos Degust — filtra por userId diferente dos da lanchonete
+  // Usa query simples sem orderBy para evitar erro de índice
+  unsubPedidos = db.collection("Pedidos")
+    .where("fonte", "==", "degust")
+    .onSnapshot(handleSnapshot, handleErro);
+
+  // Fallback: se não tiver campo "fonte", pega todos e filtra no cliente
+  // (a lanchonete usa campos diferentes como "itensObj" com preços diferentes)
+}
+
+function handleSnapshot(snapshot) {
+  // Ordenar no cliente por data desc
+  const docs = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
+  docs.sort((a, b) => {
+    const da = a.criadoEm?.toDate?.() || new Date(a.data || 0);
+    const db2 = b.criadoEm?.toDate?.() || new Date(b.data || 0);
+    return db2 - da;
+  });
+
+  todosPedidos = docs;
+
+  // Detectar novos pedidos
+  if (!primeiraRodada) {
+    let temNovo = false;
+    docs.forEach(p => {
+      if (!idsPedidosConhecidos.has(p.id) && (p.status === "novo" || p.status === "Finalizado" || !p.status)) {
+        temNovo = true;
+      }
+    });
+    if (temNovo) iniciarAlertaSonoro();
+  }
+
+  docs.forEach(p => idsPedidosConhecidos.add(p.id));
+  primeiraRodada = false;
+
+  atualizarBadges();
+  renderizarAba();
+}
+
+function handleErro(err) {
+  console.error("Erro Firestore:", err);
+  // Fallback sem filtro fonte — pega tudo e mostra
+  if (unsubPedidos) unsubPedidos();
+  unsubPedidos = db.collection("Pedidos")
+    .onSnapshot(handleSnapshot, err2 => {
+      listaPedidos.innerHTML = `<div class="vazio"><span>⚠️</span>Erro ao carregar: ${err2.message}</div>`;
+    });
+}
+
+function filtrarPorAba(aba) {
+  if (aba === "novos") {
+    return todosPedidos.filter(p => !p.status || p.status === "novo" || p.status === "Finalizado");
+  }
+  if (aba === "preparando") return todosPedidos.filter(p => p.status === "preparando");
+  if (aba === "pronto")     return todosPedidos.filter(p => p.status === "pronto");
+  if (aba === "entregue")   return todosPedidos.filter(p => p.status === "entregue" || p.status === "cancelado");
+  return todosPedidos;
+}
+
+function atualizarBadges() {
+  document.getElementById("badge-novos").textContent =
+    todosPedidos.filter(p => !p.status || p.status === "novo" || p.status === "Finalizado").length;
+  document.getElementById("badge-preparando").textContent =
+    todosPedidos.filter(p => p.status === "preparando").length;
+  document.getElementById("badge-pronto").textContent =
+    todosPedidos.filter(p => p.status === "pronto").length;
+}
+
+// ══════════════════════════════════════════
+// RENDERIZAÇÃO
+// ══════════════════════════════════════════
+function renderizarAba() {
+  if (abaAtual === "resumo") { renderizarResumo(); return; }
+
+  const pedidos = filtrarPorAba(abaAtual);
+  const lista = document.getElementById("lista-pedidos");
+
+  if (!pedidos.length) {
+    lista.innerHTML = `<div class="vazio"><span>🍰</span>Nenhum pedido aqui.</div>`;
+    return;
+  }
+
+  lista.innerHTML = pedidos.map(p => cardPedido(p)).join("");
+
+  // Bind botões
+  lista.querySelectorAll("[data-acao]").forEach(btn => {
+    btn.addEventListener("click", () => {
+      const id     = btn.dataset.id;
+      const acao   = btn.dataset.acao;
+      const novoStatus = {
+        aceitar:    "preparando",
+        preparando: "pronto",
+        pronto:     "entregue",
+        cancelar:   "cancelado"
+      }[acao];
+      if (novoStatus) atualizarStatus(id, novoStatus);
+    });
+  });
+}
+
+function cardPedido(p) {
+  // Data
+  let dataHora = "—";
+  if (p.criadoEm?.toDate) {
+    const dt = p.criadoEm.toDate();
+    dataHora = dt.toLocaleDateString("pt-BR") + " " +
+      dt.toLocaleTimeString("pt-BR",{hour:"2-digit",minute:"2-digit"});
+  } else if (p.data) {
+    try {
+      const dt = new Date(p.data);
+      if (!isNaN(dt)) dataHora = dt.toLocaleDateString("pt-BR") + " " +
+        dt.toLocaleTimeString("pt-BR",{hour:"2-digit",minute:"2-digit"});
+    } catch(e) {}
+  }
+
+  // Itens
+  const itens = Array.isArray(p.itensObj) ? p.itensObj
+              : Array.isArray(p.itens)    ? p.itens
+              : [];
+  const itensTexto = itens.length
+    ? itens.map(i => `• ${i.nome} x${i.qtd||1} — R$ ${Number(i.preco||0).toFixed(2).replace(".",",")}`)
+           .join("<br>")
+    : (typeof p.itens === "string" ? p.itens : "Pedido");
+
+  const status = p.status || "novo";
+  const statusLabel = {
+    novo:"Novo", Finalizado:"Novo",
+    preparando:"Preparando",
+    pronto:"Pronto",
+    entregue:"Entregue",
+    cancelado:"Cancelado"
+  }[status] || status;
+
+  const total = p.total ? `R$ ${Number(p.total).toFixed(2).replace(".",",")}` : "—";
+  const nome  = p.nome || p.nomeCliente || p.usuario || "Cliente";
+  const end   = p.endereco || p.endereço || "—";
+
+  // Botões por status
+  let botoes = "";
+  if (status === "novo" || status === "Finalizado" || !p.status) {
+    botoes = `
+      <button class="btn-acao btn-aceitar" data-id="${p.id}" data-acao="aceitar">👩‍🍳 Aceitar</button>
+      <button class="btn-acao btn-cancelar" data-id="${p.id}" data-acao="cancelar">❌ Cancelar</button>`;
+  } else if (status === "preparando") {
+    botoes = `
+      <button class="btn-acao btn-pronto" data-id="${p.id}" data-acao="preparando">✅ Pronto</button>
+      <button class="btn-acao btn-cancelar" data-id="${p.id}" data-acao="cancelar">❌ Cancelar</button>`;
+  } else if (status === "pronto") {
+    botoes = `
+      <button class="btn-acao btn-entregue" data-id="${p.id}" data-acao="pronto">🎉 Entregue/Retirado</button>`;
+  }
+
+  const isNovo = (status === "novo" || status === "Finalizado" || !p.status);
+
+  return `
+    <div class="card-pedido ${isNovo ? "novo" : ""}">
+      <div class="card-pedido-header">
+        <div>
+          <div class="card-cliente">${nome}</div>
+          <div class="card-hora">${dataHora}</div>
+        </div>
+        <span class="status-badge status-${isNovo?"novo":status}">${statusLabel}</span>
+      </div>
+      <div class="card-itens">${itensTexto}</div>
+      <div class="card-endereco">📍 ${end}</div>
+      <div class="card-total">${total}</div>
+      <div class="acoes">${botoes}</div>
+    </div>`;
+}
+
+function atualizarStatus(id, novoStatus) {
+  db.collection("Pedidos").doc(id).update({ status: novoStatus })
+    .then(() => {
+      const msgs = {
+        preparando:"👩‍🍳 Pedido em preparo!",
+        pronto:"✅ Pedido pronto!",
+        entregue:"🎉 Pedido entregue!",
+        cancelado:"❌ Pedido cancelado."
+      };
+      mostrarToast(msgs[novoStatus] || "Status atualizado");
+      // Se aceitou um pedido, para o alerta
+      if (novoStatus === "preparando") pararAlertaSonoro();
+    })
+    .catch(err => mostrarToast("Erro: " + err.message));
+}
+
+// ══════════════════════════════════════════
+// RESUMO
+// ══════════════════════════════════════════
+function renderizarResumo() {
+  const hoje = new Date();
+  hoje.setHours(0,0,0,0);
+
+  const pedidosHoje = todosPedidos.filter(p => {
+    const dt = p.criadoEm?.toDate?.() || (p.data ? new Date(p.data) : null);
+    return dt && dt >= hoje;
+  });
+
+  const totalVendas  = pedidosHoje.reduce((s,p) => s + (Number(p.total)||0), 0);
+  const entregues    = pedidosHoje.filter(p => p.status === "entregue").length;
+  const emAndamento  = pedidosHoje.filter(p => p.status === "preparando" || p.status === "pronto").length;
+  const novos        = pedidosHoje.filter(p => !p.status || p.status === "novo" || p.status === "Finalizado").length;
+
+  const fmt = (n) => `R$ ${Number(n).toFixed(2).replace(".",",")}`;
+
+  document.getElementById("lista-pedidos").innerHTML = `
+    <div class="resumo-grid">
+      <div class="resumo-card">
+        <div class="resumo-val">${fmt(totalVendas)}</div>
+        <div class="resumo-label">Vendas hoje</div>
+      </div>
+      <div class="resumo-card">
+        <div class="resumo-val">${pedidosHoje.length}</div>
+        <div class="resumo-label">Pedidos hoje</div>
+      </div>
+      <div class="resumo-card">
+        <div class="resumo-val">${entregues}</div>
+        <div class="resumo-label">Entregues</div>
+      </div>
+      <div class="resumo-card">
+        <div class="resumo-val">${novos + emAndamento}</div>
+        <div class="resumo-label">Em aberto</div>
+      </div>
+    </div>
+    <div style="padding:12px;">
+      <h3 style="color:var(--dourado);margin-bottom:12px;font-size:.9rem;">📋 Todos os pedidos de hoje</h3>
+      ${pedidosHoje.length ? pedidosHoje.map(p => cardPedido(p)).join("") : '<div class="vazio"><span>🍰</span>Sem pedidos hoje ainda.</div>'}
+    </div>`;
+}
+</script>
+</body>
+</html>
 
