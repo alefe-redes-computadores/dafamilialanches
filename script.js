@@ -681,28 +681,34 @@ document.addEventListener("DOMContentLoaded", () => {
       ? (user.displayName?.split(" ")[0] || user.email?.split("@")[0] || "você")
       : null;
 
+    const content  = document.getElementById("user-btn-content");
+    const fotoWrap = document.getElementById("user-foto-wrap");
+    const fotoImg  = document.getElementById("user-foto");
+
     if (user) {
-      const foto = user.photoURL;
-      const content = document.getElementById("user-btn-content");
-      if (content) {
-        if (foto) {
-          content.innerHTML = `<img src="${foto}" 
-            style="width:30px;height:30px;border-radius:50%;border:2px solid var(--bege);object-fit:cover;vertical-align:middle;margin-right:6px;"
-            onerror="this.style.display='none'"><span style="font-size:.82rem;font-weight:700;">${nome}</span>`;
-        } else {
-          content.innerHTML = `<span style="font-size:.82rem;font-weight:700;">👤 ${nome}</span>`;
-        }
+      // Nome no botão
+      if (content) content.textContent = nome;
+
+      // Foto de perfil do Google visível no header
+      if (user.photoURL && fotoImg && fotoWrap) {
+        fotoImg.src = user.photoURL;
+        fotoImg.onerror = () => { fotoWrap.style.display = "none"; };
+        fotoWrap.style.display = "inline-flex";
+        fotoWrap.style.alignItems = "center";
+        fotoWrap.style.marginRight = "6px";
       }
+
       el.userBtn.style.display = "flex";
       el.userBtn.style.alignItems = "center";
-      el.userBtn.style.padding = "5px 12px";
       el.userBtn.style.gap = "0";
+      el.userBtn.style.padding = "5px 10px";
+
       if (isAdmin(user)) {
         document.querySelector(".admin-section")?.style.setProperty("display","block");
       }
     } else {
-      const content = document.getElementById("user-btn-content");
-      if (content) content.innerHTML = "Entrar";
+      if (content) content.textContent = "Entrar";
+      if (fotoWrap) fotoWrap.style.display = "none";
       el.userBtn.style.padding = "";
       el.userBtn.style.display = "";
     }
