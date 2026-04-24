@@ -307,6 +307,28 @@ document.addEventListener("DOMContentLoaded", () => {
         "Iniciamos o preparo apos confirmar. Obrigada!"
       ].filter(l => l !== null).join("\n");
       window.open(`https://wa.me/5538998527894?text=${encodeURIComponent(msg)}`, "_blank");
+
+      // Salva pedido no Firestore para aparecer no painel admin
+      if (db && currentUser) {
+        const itensSalvar = cart.map(i => ({ nome: i.nome, preco: i.preco, qtd: i.qtd }));
+        db.collection("Pedidos").add({
+          userId:    currentUser.uid,
+          nome:      currentUser.displayName || currentUser.email,
+          email:     currentUser.email,
+          itensObj:  itensSalvar,
+          itens:     itensSalvar.map(i => `${i.nome} x${i.qtd}`).join(", "),
+          total:     total,
+          subtotal:  subtotal,
+          entrega:   delivery,
+          desconto:  discount,
+          endereco:  addr,
+          status:    "novo",
+          fonte:     "degust",
+          data:      new Date().toISOString(),
+          criadoEm:  firebase.firestore.FieldValue.serverTimestamp()
+        }).catch(err => console.error("Erro ao salvar pedido:", err));
+      }
+
       UIManager.closeAll();
     });
   }
@@ -360,6 +382,28 @@ document.addEventListener("DOMContentLoaded", () => {
       const msg = [...linhasPedido, ...linhasPix].join("\n");
 
       window.open(`https://wa.me/5538998527894?text=${encodeURIComponent(msg)}`, "_blank");
+
+      // Salva pedido no Firestore para aparecer no painel admin
+      if (db && currentUser) {
+        const itensSalvar = cart.map(i => ({ nome: i.nome, preco: i.preco, qtd: i.qtd }));
+        db.collection("Pedidos").add({
+          userId:    currentUser.uid,
+          nome:      currentUser.displayName || currentUser.email,
+          email:     currentUser.email,
+          itensObj:  itensSalvar,
+          itens:     itensSalvar.map(i => `${i.nome} x${i.qtd}`).join(", "),
+          total:     total,
+          subtotal:  subtotal,
+          entrega:   delivery,
+          desconto:  discount,
+          endereco:  addr,
+          status:    "novo",
+          fonte:     "degust",
+          data:      new Date().toISOString(),
+          criadoEm:  firebase.firestore.FieldValue.serverTimestamp()
+        }).catch(err => console.error("Erro ao salvar pedido:", err));
+      }
+
       UIManager.closeAll();
     });
   }
@@ -737,6 +781,52 @@ document.addEventListener("DOMContentLoaded", () => {
       toast.style.opacity = "0";
       toast.style.transform = "translateX(-50%) translateY(-20px)";
     }, 3500);
+  }
+
+  // ══════════════════════════════════════════
+  // 🏪 STATUS DA LOJA — checa em tempo real
+  // ══════════════════════════════════════════
+  function checarStatusLoja() {
+    if (!db) return;
+    db.collection("settings").doc("degust_status").onSnapshot(doc => {
+      const aberta = doc.exists ? (doc.data().aberta === true) : false;
+      aplicarStatusLoja(aberta);
+    }, () => aplicarStatusLoja(false));
+  }
+
+  function aplicarStatusLoja(aberta) {
+    const cards   = document.querySelectorAll(".card");
+    const addBtns = document.querySelectorAll(".add-cart, .extras-btn");
+
+    if (!aberta) {
+      // Loja fechada — cards acinzentados, botões desabilitados
+      cards.forEach(card => {
+        card.style.opacity = "0.55";
+        card.style.filter  = "grayscale(60%)";
+        card.style.pointerEvents = "none";
+      });
+      addBtns.forEach(btn => { btn.disabled = true; });
+
+      // Banner de aviso se não existir
+      if (!document.getElementById("banner-loja-fechada")) {
+        const banner = document.createElement("div");
+        banner.id = "banner-loja-fechada";
+        banner.style.cssText = "background:#b71c1c;color:#fff;text-align:center;padding:12px 16px;font-weight:700;font-size:.9rem;border-radius:10px;margin-bottom:12px;";
+        banner.textContent = "🔴 Estamos fechados no momento. Volte em breve!";
+        const statusBanner = document.getElementById("status-banner");
+        if (statusBanner) statusBanner.after(banner);
+      }
+    } else {
+      // Loja aberta — restaura
+      cards.forEach(card => {
+        card.style.opacity = "";
+        card.style.filter  = "";
+        card.style.pointerEvents = "";
+      });
+      addBtns.forEach(btn => { btn.disabled = false; });
+      const banner = document.getElementById("banner-loja-fechada");
+      if (banner) banner.remove();
+    }
   }
 
   function setupAuthListener() {
@@ -1517,6 +1607,8 @@ document.addEventListener("DOMContentLoaded", () => {
   inicializarFirebase();
   resetListeners();
   renderMiniCart();
+  // Checa status da loja após Firebase inicializar
+  setTimeout(() => checarStatusLoja(), 800);
 
   console.log("%c🍰 Degust Bolos no Pote v11.4 — Sistema Carregado!", "color:#E1A95F;font-size:14px;font-weight:bold;");
 
