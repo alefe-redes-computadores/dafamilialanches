@@ -22,7 +22,7 @@
 
   <link rel="preconnect" href="https://www.gstatic.com" crossorigin>
   <link rel="preload" as="image" href="logo.png">
-  <link rel="stylesheet" href="style.css?v=11.5" />
+  <link rel="stylesheet" href="style.css?v=11.4" />
 
   <script defer src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
   <script defer src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
@@ -68,11 +68,10 @@
       <div class="menu-section-block">
         <h4 class="menu-title">Contatos</h4>
         <ul class="menu-list">
-          <li><a href="https://wa.me/message/VDQCBHWD33ORK1" target="_blank" class="menu-link-social">🟢 WhatsApp</a></li>
-          <li><a href="https://www.instagram.com/degustbolosnopote" target="_blank" class="menu-link-social">🟣 Instagram</a></li>
+          <li><a href="https://wa.me/message/VDQCBHWD33ORK1" target="_blank" rel="noopener noreferrer" class="menu-link-social">🟢 WhatsApp</a></li>
+          <li><a href="https://www.instagram.com/degustbolosnopote" target="_blank" rel="noopener noreferrer" class="menu-link-social">🟣 Instagram</a></li>
         </ul>
       </div>
-
     </div>
   </nav>
 
@@ -83,24 +82,27 @@
         <span class="bar"></span>
         <span class="bar"></span>
       </button>
+
       <div class="logo-container">
-        <img src="logo.png" alt="Logo Degust" class="logo" width="52" height="52" />
+        <img src="logo.png" alt="Logo Degust" class="logo" width="52" height="52">
         <div class="header-info">
           <h1>Degust</h1>
           <p class="tagline">Aqui a felicidade<br>vem em potes</p>
         </div>
       </div>
     </div>
+
     <div class="header-actions">
       <button id="user-btn" class="user-button" type="button">
         <span id="user-foto-wrap" style="display:none;">
-          <img id="user-foto" src="" alt="foto" width="30" height="30"
-            style="border-radius:50%;border:2px solid var(--bege);object-fit:cover;vertical-align:middle;">
+          <img id="user-foto" src="" alt="foto" width="30" height="30" style="border-radius:50%;border:2px solid var(--bege);object-fit:cover;vertical-align:middle;">
         </span>
         <span id="user-btn-content">Entrar</span>
       </button>
+
       <button id="cart-icon" class="cart-button" type="button" aria-label="Ver carrinho">
-        🛒 <span id="cart-count">0</span>
+        🛒
+        <span id="cart-count">0</span>
       </button>
     </div>
   </header>
@@ -108,7 +110,6 @@
   <div id="cart-backdrop"></div>
 
   <div class="main-content-wrapper">
-
     <div id="status-banner" class="status-banner"></div>
 
     <div class="search-container">
@@ -117,13 +118,13 @@
 
     <section class="menu-section" id="novidades-section">
       <h2>✨ Novidades da Semana</h2>
-      <div class="grid">
+      <div class="grid novidades-grid">
 
-        <div class="card" data-name="Tropical Cream" data-price="12.00">
+        <div class="card card-novidade" data-name="Tropical Cream" data-price="12.00">
           <span class="badge-new">Novo</span>
           <img src="produtos/tropicalcream.png" alt="Tropical Cream" width="120" height="120" loading="lazy">
           <h3>Tropical Cream</h3>
-          <div class="price-promo-wrap"><span class="price-new">R$&nbsp;12,00</span></div>
+          <span class="price">R$ 12,00</span>
           <p>Massa branca leve com recheio cremoso de Ninho e pedaços suculentos de abacaxi.</p>
           <div class="actions">
             <button class="add-cart" type="button">Adicionar</button>
@@ -131,12 +132,12 @@
           </div>
         </div>
 
-        <div class="card" data-name="Bombom de Maracujá" data-price="12.00">
+        <div class="card card-novidade" data-name="Bombom de Maracujá" data-price="12.00">
           <span class="badge-new">Novo</span>
-          <img src="produtos/bombomdemaracuja.png" alt="Bombom de Maracujá" width="120" height="120" loading="lazy">
+          <img src="produtos/bonmbomdemaracuja.png" alt="Bombom de Maracujá" width="120" height="120" loading="lazy">
           <h3>Bombom de Maracujá</h3>
-          <div class="price-promo-wrap"><span class="price-new">R$&nbsp;12,00</span></div>
-          <p>Massa chocolate, recheio 100% cacau e o toque refrescante do mousse de maracujá.</p>
+          <span class="price">R$ 12,00</span>
+          <p>Massa chocolate, recheio 50% cacau e o toque refrescante da mousse de maracujá.</p>
           <div class="actions">
             <button class="add-cart" type="button">Adicionar</button>
             <button class="extras-btn" type="button">Adicionais</button>
@@ -147,46 +148,63 @@
     </section>
 
     <section class="menu-section" id="bolos-section">
-      <h2>🍰 Nossos Clássicos</h2>
+      <h2>🍰 Bolos no Pote</h2>
       <div class="grid">
 
-        <div class="card" data-name="Chocolatudo" data-price="10.00">
-          <img src="produtos/chocolatudo.png" alt="Chocolatudo" width="120" height="120" loading="lazy">
-          <h3>Chocolatudo <span class="badge-small">100% Cacau</span></h3>
-          <div class="price-promo-wrap"><span class="price-new">R$&nbsp;10,00</span></div>
-          <p>Massa chocolate molhadinha com recheio de chocolate intenso 100% cacau.</p>
+        <div class="card" data-name="Bolo de Brigadeiro" data-price="9.99">
+          <img src="produtos/brigadeiro.png" alt="Bolo de Brigadeiro" width="120" height="120" loading="lazy">
+          <h3>Brigadeiro <span class="badge-small">O Clássico</span></h3>
+          <div class="price-promo-wrap">
+            <span class="price-old">R&nbsp;15,00</span>
+            <span class="price-new">R&nbsp;9,99</span>
+            <span class="promo-tag">PROMOÇÃO</span>
+          </div>
+          <p>Massa de chocolate molhadinha com recheio cremoso de brigadeiro gourmet.</p>
           <div class="actions">
             <button class="add-cart" type="button">Adicionar</button>
             <button class="extras-btn" type="button">Adicionais</button>
           </div>
         </div>
 
-        <div class="card" data-name="Prestígio" data-price="10.00">
-          <img src="produtos/prestigio.png" alt="Prestígio" width="120" height="120" loading="lazy">
-          <h3>Prestígio <span class="badge-small">Coco</span></h3>
-          <div class="price-promo-wrap"><span class="price-new">R$&nbsp;10,00</span></div>
-          <p>Combinação perfeita de massa de chocolate com recheio cremoso de côco.</p>
+        <div class="card" data-name="Bolo de Prestígio" data-price="9.99">
+          <img src="produtos/prestigio.png" alt="Bolo de Prestígio" width="120" height="120" loading="lazy">
+          <h3>Prestígio <span class="badge-small">Coco e Chocolate</span></h3>
+          <div class="price-promo-wrap">
+            <span class="price-old">R 15,00</span>
+            <span class="price-new">R 9,99</span>
+            <span class="promo-tag">🔥 PROMOÇÃO</span>
+          </div>
+          <p>Combinação perfeita de massa de chocolate com beijinho super cremoso.</p>
           <div class="actions">
             <button class="add-cart" type="button">Adicionar</button>
             <button class="extras-btn" type="button">Adicionais</button>
           </div>
         </div>
 
-        <div class="card" data-name="Ninho Silvestre" data-price="12.00">
-          <img src="produtos/ninhosilvestre.png" alt="Ninho Silvestre" width="120" height="120" loading="lazy">
-          <h3>Ninho Silvestre <span class="badge-small">Morango</span></h3>
-          <div class="price-promo-wrap"><span class="price-new">R$&nbsp;12,00</span></div>
-          <p>Massa branca com recheio de ninho cremoso e uma deliciosa geleia de morango.</p>
+        <div class="card" data-name="Ninho com Geleia de Morango" data-price="9.99">
+          <span class="badge-new">✨ Destaque</span>
+          <img src="produtos/ninhocomgeleiademorango.png" alt="Ninho com Morango" width="120" height="120" loading="lazy">
+          <h3>Ninho com Geleia de Morango <span class="badge-small">Favorito</span></h3>
+          <div class="price-promo-wrap">
+            <span class="price-old">R 16,00</span>
+            <span class="price-new">R 9,99</span>
+            <span class="promo-tag">🔥 PROMOÇÃO</span>
+          </div>
+          <p>Creme de Leite Ninho com uma deliciosa geleia artesanal de morango.</p>
           <div class="actions">
             <button class="add-cart" type="button">Adicionar</button>
             <button class="extras-btn" type="button">Adicionais</button>
           </div>
         </div>
 
-        <div class="card" data-name="Ninho Cremoso" data-price="10.00">
+        <div class="card" data-name="Ninho Cremoso" data-price="9.99">
           <img src="produtos/ninhocremoso.png" alt="Ninho Cremoso" width="120" height="120" loading="lazy">
           <h3>Ninho Cremoso <span class="badge-small">Suave</span></h3>
-          <div class="price-promo-wrap"><span class="price-new">R$&nbsp;10,00</span></div>
+          <div class="price-promo-wrap">
+            <span class="price-old">R 15,00</span>
+            <span class="price-new">R 9,99</span>
+            <span class="promo-tag">🔥 PROMOÇÃO</span>
+          </div>
           <p>O autêntico sabor do Leite Ninho em uma textura irresistivelmente cremosa.</p>
           <div class="actions">
             <button class="add-cart" type="button">Adicionar</button>
@@ -199,50 +217,44 @@
 
     <aside id="mini-cart" class="mini-cart" aria-hidden="true">
       <div class="mini-head">
-        <h3>🛍 Seu Pedido</h3>
+        <h3>🧾 Seu Pedido</h3>
         <button class="extras-close" type="button" aria-label="Fechar">✖</button>
       </div>
+
       <div class="mini-list"></div>
+
       <div class="mini-foot">
         <div id="progressWrapper" class="progress-wrapper">
-          <p id="progressText" class="progress-text">Faltam <strong>R$ 80,00</strong> para Frete Grátis 🚀</p>
+          <p id="progressText" class="progress-text">Faltam <strong>R$ 80,00</strong> para Frete Grátis</p>
           <div class="progress-bar"><div id="progressFill" class="progress-fill"></div></div>
         </div>
 
         <div class="frete-container" style="margin-bottom:10px;">
-          <label style="font-size:.8rem;font-weight:700;color:var(--marrom);display:block;margin-bottom:6px;">📍 CEP para entrega:</label>
+          <label style="font-size:.8rem;font-weight:700;color:var(--marrom);display:block;margin-bottom:6px;">CEP para entrega</label>
           <div style="display:flex;gap:6px;">
-            <input type="text" id="cep-input" placeholder="00000-000" maxlength="9"
-              style="flex:1;padding:10px;border:2px solid var(--dourado);border-radius:8px;font-size:.9rem;">
-            <button id="btn-calcular-frete" type="button"
-              style="background:var(--marrom);color:var(--bege);border:none;padding:0 14px;border-radius:8px;font-weight:700;cursor:pointer;">Buscar</button>
+            <input type="text" id="cep-input" placeholder="00000-000" maxlength="9" style="flex:1;padding:10px;border:2px solid var(--dourado);border-radius:8px;font-size:.9rem;">
+            <button id="btn-calcular-frete" type="button" style="background:var(--marrom);color:var(--bege);border:none;padding:0 14px;border-radius:8px;font-weight:700;cursor:pointer;">Buscar</button>
           </div>
-          <input type="text" id="endereco-auto" placeholder="Rua, Bairro — Cidade/UF" readonly
-            style="width:100%;margin-top:6px;padding:10px;border:1px solid #ddd;border-radius:8px;background:#f9f9f9;font-size:.85rem;">
+
+          <input type="text" id="endereco-auto" placeholder="Rua, Bairro - Cidade/UF" readonly style="width:100%;margin-top:6px;padding:10px;border:1px solid #ddd;border-radius:8px;background:#f9f9f9;font-size:.85rem;">
+
           <div style="display:flex;gap:6px;margin-top:6px;">
-            <input type="text" id="numero-input" placeholder="Número" disabled
-              style="width:90px;padding:10px;border:1px solid #ddd;border-radius:8px;font-size:.85rem;">
-            <input type="text" id="complemento-input" placeholder="Complemento (opcional)" disabled
-              style="flex:1;padding:10px;border:1px solid #ddd;border-radius:8px;font-size:.85rem;">
+            <input type="text" id="numero-input" placeholder="Número" disabled style="width:90px;padding:10px;border:1px solid #ddd;border-radius:8px;font-size:.85rem;">
+            <input type="text" id="complemento-input" placeholder="Complemento opcional" disabled style="flex:1;padding:10px;border:1px solid #ddd;border-radius:8px;font-size:.85rem;">
           </div>
+
           <div style="margin-top:8px;display:flex;gap:10px;flex-wrap:wrap;">
-            <button id="btnNaoSeiCEP" type="button"
-              style="font-size:.75rem;background:none;border:none;color:var(--vermelho);cursor:pointer;text-decoration:underline;">Não sei meu CEP</button>
-            <button id="btnManual" type="button"
-              style="font-size:.75rem;background:none;border:none;color:var(--marrom);cursor:pointer;text-decoration:underline;">Digitar endereço manualmente</button>
+            <button id="btnNaoSeiCEP" type="button" style="font-size:.75rem;background:none;border:none;color:var(--vermelho);cursor:pointer;text-decoration:underline;">Não sei meu CEP</button>
+            <button id="btnManual" type="button" style="font-size:.75rem;background:none;border:none;color:var(--marrom);cursor:pointer;text-decoration:underline;">Digitar endereço manualmente</button>
           </div>
         </div>
 
         <div id="manualArea" style="display:none;margin-bottom:10px;">
-          <input type="text" id="manualEndereco" placeholder="Rua e Bairro"
-            style="width:100%;margin-bottom:6px;padding:10px;border:2px solid var(--dourado);border-radius:8px;font-size:.9rem;">
-          <input type="text" id="manualNumero" placeholder="Número"
-            style="width:100%;margin-bottom:6px;padding:10px;border:1px solid #ddd;border-radius:8px;font-size:.9rem;">
+          <input type="text" id="manualEndereco" placeholder="Rua e Bairro" style="width:100%;margin-bottom:6px;padding:10px;border:2px solid var(--dourado);border-radius:8px;font-size:.9rem;">
+          <input type="text" id="manualNumero" placeholder="Número" style="width:100%;margin-bottom:6px;padding:10px;border:1px solid #ddd;border-radius:8px;font-size:.9rem;">
           <div style="display:flex;gap:8px;">
-            <button id="btnConfirmarEndereco" type="button"
-              style="flex:1;background:var(--marrom);color:var(--bege);border:none;padding:10px;border-radius:8px;font-weight:700;cursor:pointer;">Confirmar</button>
-            <button id="btnVoltarCEP" type="button"
-              style="flex:1;background:var(--bege);color:var(--marrom);border:1px solid var(--dourado);padding:10px;border-radius:8px;font-weight:700;cursor:pointer;">Voltar</button>
+            <button id="btnConfirmarEndereco" type="button" style="flex:1;background:var(--marrom);color:var(--bege);border:none;padding:10px;border-radius:8px;font-weight:700;cursor:pointer;">Confirmar</button>
+            <button id="btnVoltarCEP" type="button" style="flex:1;background:var(--bege);color:var(--marrom);border:1px solid var(--dourado);padding:10px;border-radius:8px;font-weight:700;cursor:pointer;">Voltar</button>
           </div>
         </div>
 
@@ -252,34 +264,34 @@
         </label>
 
         <form id="coupon-form" style="display:flex;gap:8px;margin-bottom:10px;">
-          <input type="text" id="coupon-input" placeholder="Código do Cupom"
-            style="flex:1;padding:10px;border:1px solid var(--dourado);border-radius:8px;text-transform:uppercase;font-size:.85rem;">
-          <button type="submit"
-            style="background:var(--marrom);color:var(--bege);border:none;padding:0 14px;border-radius:8px;font-weight:700;cursor:pointer;">Aplicar</button>
+          <input type="text" id="coupon-input" placeholder="Código do Cupom" style="flex:1;padding:10px;border:1px solid var(--dourado);border-radius:8px;text-transform:uppercase;font-size:.85rem;">
+          <button type="submit" style="background:var(--marrom);color:var(--bege);border:none;padding:0 14px;border-radius:8px;font-weight:700;cursor:pointer;">Aplicar</button>
         </form>
+
         <div id="coupon-message" style="min-height:20px;margin-bottom:6px;"></div>
         <div class="summary-row" id="coupon-discount-row" style="display:none;">
           <span>Desconto Cupom</span>
-          <span id="cart-discount">R$ 0,00</span>
+          <span id="cart-discount">R 0,00</span>
         </div>
       </div>
     </aside>
 
     <footer class="footer">
       <div class="footer-container">
-        <p class="footer-address">📍 Três Marias — MG</p>
+        <p class="footer-address">Três Marias - MG</p>
         <div class="footer-links">
-          <a href="https://wa.me/message/VDQCBHWD33ORK1" target="_blank" class="footer-btn">💬 WhatsApp</a>
-          <a href="https://www.instagram.com/degustbolosnopote" target="_blank" class="footer-btn">📸 Instagram</a>
+          <a href="https://wa.me/message/VDQCBHWD33ORK1" target="_blank" rel="noopener noreferrer" class="footer-btn">WhatsApp</a>
+          <a href="https://www.instagram.com/degustbolosnopote" target="_blank" rel="noopener noreferrer" class="footer-btn">Instagram</a>
         </div>
         <div class="footer-copy">
           <p>© 2026 <strong>Degust Bolos no Pote</strong></p>
-          <p><small>v11.5 • Doçura em cada camada 🍰</small></p>
+          <p><small>v11.4 • Doçura em cada camada</small></p>
         </div>
       </div>
     </footer>
+  </div>
 
-  </div><div id="extras-modal" class="modal" aria-hidden="true">
+  <div id="extras-modal" class="modal" aria-hidden="true">
     <div class="modal-content" role="dialog" aria-modal="true">
       <div class="modal-head">
         <h3>Adicionais</h3>
@@ -299,6 +311,7 @@
         <h3>Minha Conta Degust</h3>
         <button class="login-close" type="button">✖</button>
       </div>
+
       <div style="padding:20px 24px;">
         <button id="google-login" class="btn-google" type="button">
           <svg width="20" height="20" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
@@ -309,17 +322,14 @@
           </svg>
           Entrar com Google
         </button>
-        <p style="text-align:center;margin-top:16px;font-size:.85rem;color:#999;">
-          Entre com sua conta Google para continuar 🍰
-        </p>
+
+        <p style="text-align:center;margin-top:16px;font-size:.85rem;color:#999;">Entre com sua conta Google para continuar</p>
+
         <div style="margin-top:16px;padding:14px 16px;background:#f8f8f8;border-radius:12px;border:1px dashed #ddd;">
-          <p style="text-align:center;font-size:.75rem;color:#bbb;font-weight:600;margin:0 0 10px;letter-spacing:.5px;">— LOGIN POR E-MAIL (EM BREVE) —</p>
-          <input type="email" placeholder="Seu E-mail" disabled tabindex="-1"
-            style="width:100%;margin-bottom:8px;padding:12px 14px;border:1px solid #e0e0e0;border-radius:8px;background:#f0f0f0;color:#bbb;cursor:not-allowed;font-size:.9rem;">
-          <input type="password" placeholder="Sua Senha" disabled tabindex="-1"
-            style="width:100%;margin-bottom:10px;padding:12px 14px;border:1px solid #e0e0e0;border-radius:8px;background:#f0f0f0;color:#bbb;cursor:not-allowed;font-size:.9rem;">
-          <button type="button" disabled tabindex="-1"
-            style="width:100%;padding:13px;background:#e0e0e0;color:#bbb;border:none;border-radius:8px;font-weight:700;font-size:.9rem;cursor:not-allowed;">Em breve</button>
+          <p style="text-align:center;font-size:.75rem;color:#bbb;font-weight:600;margin:0 0 10px;letter-spacing:.5px;">LOGIN POR E-MAIL EM BREVE</p>
+          <input type="email" placeholder="Seu E-mail" disabled tabindex="-1" style="width:100%;margin-bottom:8px;padding:12px 14px;border:1px solid #e0e0e0;border-radius:8px;background:#f0f0f0;color:#bbb;cursor:not-allowed;font-size:.9rem;">
+          <input type="password" placeholder="Sua Senha" disabled tabindex="-1" style="width:100%;margin-bottom:10px;padding:12px 14px;border:1px solid #e0e0e0;border-radius:8px;background:#f0f0f0;color:#bbb;cursor:not-allowed;font-size:.9rem;">
+          <button type="button" disabled tabindex="-1" style="width:100%;padding:13px;background:#e0e0e0;color:#bbb;border:none;border-radius:8px;font-weight:700;font-size:.9rem;cursor:not-allowed;">Em breve</button>
         </div>
       </div>
     </div>
@@ -328,39 +338,34 @@
   <div id="pix-modal" class="modal" aria-hidden="true">
     <div class="modal-content" role="dialog" aria-modal="true">
       <div class="modal-head">
-        <h3>Pagamento via PIX 💠</h3>
+        <h3>Pagamento via PIX</h3>
         <button class="pix-close" type="button">✖</button>
       </div>
+
       <div class="pix-body">
         <div style="font-size:1.3rem;margin:10px 0 14px;font-weight:bold;color:#222;text-align:center;">
-          Total: <span id="pix-valor" style="color:#4caf50;font-size:1.6rem;">R$ 0,00</span>
+          Total <span id="pix-valor" style="color:#4caf50;font-size:1.6rem;">R 0,00</span>
         </div>
 
         <div style="background:#e8f5e9;border:1px solid #a5d6a7;border-radius:10px;padding:12px 14px;margin-bottom:12px;text-align:center;">
           <p style="margin:0;font-size:.82rem;color:#2e7d32;font-weight:700;">
-            Pagar via PIX e opcional neste pedido.<br>
-            Se preferir, clique direto no botao verde abaixo.
+            Pagar via PIX é opcional neste pedido.<br>
+            Se preferir, clique direto no botão verde abaixo.
           </p>
         </div>
 
         <div class="pix-code-box">
-          <p style="margin:0 0 4px;font-size:.8rem;color:#888;">Chave PIX (E-mail):</p>
+          <p style="margin:0 0 4px;font-size:.8rem;color:#888;">Chave PIX • E-mail</p>
           <strong style="font-size:1.05rem;color:#333;display:block;word-break:break-all;">degustbolosnopote@gmail.com</strong>
-          <small style="display:block;color:#aaa;margin-top:3px;">Beneficiario: Degust Bolos no Pote</small>
+          <small style="display:block;color:#aaa;margin-top:3px;">Beneficiário: Degust Bolos no Pote</small>
         </div>
 
         <button id="btn-copy-pix" class="pix-btn-copy" type="button">Copiar Chave PIX</button>
+        <button id="btn-finish-pix" class="pix-btn-whatsapp" type="button">Enviar Pedido no WhatsApp</button>
 
-        <button id="btn-finish-pix" class="pix-btn-whatsapp" type="button">
-          Enviar Pedido no WhatsApp
-        </button>
-
-        <p style="text-align:center;font-size:.75rem;color:#aaa;margin:8px 0 4px;">
-          — Nao vai pagar via PIX? —
-        </p>
-        <button id="btn-finish-sem-pix" type="button"
-          style="width:100%;background:none;border:1px solid #ddd;color:#888;padding:10px;border-radius:10px;font-size:.82rem;cursor:pointer;">
-          Finalizar sem PIX (combinar no WhatsApp)
+        <p style="text-align:center;font-size:.75rem;color:#aaa;margin:8px 0 4px;">Não vai pagar via PIX?</p>
+        <button id="btn-finish-sem-pix" type="button" style="width:100%;background:none;border:1px solid #ddd;color:#888;padding:10px;border-radius:10px;font-size:.82rem;cursor:pointer;">
+          Finalizar sem PIX / combinar no WhatsApp
         </button>
       </div>
     </div>
@@ -369,7 +374,7 @@
   <div class="painel-overlay" id="painelPedidosOverlay">
     <div class="painel-box">
       <div class="painel-head">
-        <span>📦 Histórico de Pedidos</span>
+        <span>Histórico de Pedidos</span>
         <button class="fechar-painel fechar-pedidos" type="button">✖</button>
       </div>
       <div class="painel-body" id="listaPedidos">
@@ -381,23 +386,23 @@
   <div class="painel-overlay" id="painelRecompensasOverlay">
     <div class="painel-box">
       <div class="painel-head">
-        <span>🎁 Fidelidade Doce</span>
+        <span>Fidelidade Doce</span>
         <button class="fechar-painel fechar-recompensas" type="button">✖</button>
       </div>
       <div class="painel-body">
-        <h4 style="margin-top:0;color:var(--marrom);">🏆 Seu Cartão Fidelidade</h4>
+        <h4 style="margin-top:0;color:var(--marrom);">Seu Cartão Fidelidade</h4>
         <div style="margin-bottom:20px;border:1px solid var(--dourado);padding:15px;border-radius:12px;background:#fff;">
-          <p style="margin:0 0 8px;font-size:1.05rem;">
-            Bolos Pedidos: <span id="contador-valor" style="font-weight:bold;color:var(--vermelho);">...</span> de <strong>5</strong>
-          </p>
+          <p style="margin:0 0 8px;font-size:1.05rem;">Bolos Pedidos: <span id="contador-valor" style="font-weight:bold;color:var(--vermelho);">0</span> de <strong>5</strong></p>
           <div style="background:#eee;height:14px;border-radius:10px;overflow:hidden;">
-            <div id="progresso-bar" style="height:100%;width:0%;transition:width .5s;background:var(--dourado);"></div>
+            <div id="progresso-bar" style="height:100%;width:0;transition:width .5s;background:var(--dourado);"></div>
           </div>
           <p id="progresso-mensagem" style="margin-top:8px;font-size:.85rem;color:#666;">Preparando suas recompensas...</p>
         </div>
-        <h4 style="color:var(--marrom);margin-bottom:10px;">🏷️ Recompensas Disponíveis</h4>
+
+        <h4 style="color:var(--marrom);margin-bottom:10px;">Recompensas Disponíveis</h4>
         <div id="listaRecompensas"></div>
-        <h4 style="color:var(--marrom);margin:16px 0 10px;">📜 Histórico de Prêmios</h4>
+
+        <h4 style="color:var(--marrom);margin:16px 0 10px;">Histórico de Prêmios</h4>
         <div id="historicoRecompensas">
           <p style="color:#999;text-align:center;font-size:.9rem;">Você ainda não resgatou prêmios.</p>
         </div>
@@ -406,23 +411,21 @@
   </div>
 
   <div id="cookie-banner" role="region" aria-label="Aviso de Cookies">
-    <p>Usamos cookies para garantir que sua experiência na Degust seja a mais doce possível.
-      <a href="#" rel="noopener">Privacidade</a>.
-    </p>
+    <p>Usamos cookies para garantir que sua experiência na Degust seja a mais doce possível. <a href="#" rel="noopener">Privacidade</a>.</p>
     <button id="cookie-accept" type="button">Aceitar</button>
   </div>
 
-  <script defer src="script.js?v=11.5"></script>
-  <script defer src="extras.js?v=5.2.3"></script>
+  <script defer src="script.js?v=11.4"></script>
+  <script defer src="extras.js?v=5.2.2"></script>
+
   <script>
-    if ("serviceWorker" in navigator) {
-      window.addEventListener("load", () => {
-        navigator.serviceWorker.register("/service-worker.js")
-          .then(() => console.log("✅ PWA Degust: Service Worker Ativo"))
-          .catch(err => console.error("❌ SW erro:", err));
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/service-worker.js')
+          .then(() => console.log('🍰 PWA Degust: Service Worker Ativo'))
+          .catch((err) => console.error('SW erro:', err));
       });
     }
   </script>
-
 </body>
 </html>
