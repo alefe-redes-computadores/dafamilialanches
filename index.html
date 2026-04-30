@@ -22,7 +22,7 @@
 
   <link rel="preconnect" href="https://www.gstatic.com" crossorigin>
   <link rel="preload" as="image" href="logo.png">
-  <link rel="stylesheet" href="style.css?v=11.4" />
+  <link rel="stylesheet" href="style.css?v=11.5" />
 
   <script defer src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
   <script defer src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
@@ -32,10 +32,8 @@
 
   <audio id="checkout-sound" src="click.wav" preload="auto" hidden></audio>
 
-  <!-- OVERLAY DO MENU -->
   <div id="menu-overlay"></div>
 
-  <!-- MENU LATERAL -->
   <nav id="side-menu">
     <div class="menu-header">
       <h3>Degust Menu 🍰</h3>
@@ -55,6 +53,7 @@
       <div class="menu-section-block">
         <h4 class="menu-title">Cardápio</h4>
         <ul class="menu-list">
+          <li><a href="#novidades-section" class="menu-link">✨ Novidades</a></li>
           <li><a href="#bolos-section" class="menu-link">🍰 Bolos no Pote</a></li>
         </ul>
       </div>
@@ -77,7 +76,6 @@
     </div>
   </nav>
 
-  <!-- HEADER -->
   <header class="header">
     <div class="header-content">
       <button id="hamburger-btn" type="button" aria-label="Abrir Menu">
@@ -107,10 +105,8 @@
     </div>
   </header>
 
-  <!-- BACKDROP GERAL -->
   <div id="cart-backdrop"></div>
 
-  <!-- CONTEÚDO PRINCIPAL -->
   <div class="main-content-wrapper">
 
     <div id="status-banner" class="status-banner"></div>
@@ -119,48 +115,78 @@
       <input type="text" id="search-input" placeholder="🔍 Qual doçura você procura?" autocomplete="off">
     </div>
 
-    <section class="menu-section" id="bolos-section">
-      <h2>🍰 Bolos no Pote</h2>
+    <section class="menu-section" id="novidades-section">
+      <h2>✨ Novidades da Semana</h2>
       <div class="grid">
 
-        <div class="card" data-name="Bolo de Brigadeiro" data-price="9.99">
-          <img src="produtos/brigadeiro.png" alt="Bolo de Brigadeiro" width="120" height="120" loading="lazy">
-          <h3>Brigadeiro <span class="badge-small">O Clássico</span></h3>
-          <div class="price-promo-wrap"><span class="price-old">R$&nbsp;15,00</span><span class="price-new">R$&nbsp;9,99</span><span class="promo-tag">PROMOÇÃO</span></div>
-          <p>Massa de chocolate molhadinha com recheio cremoso de brigadeiro gourmet.</p>
+        <div class="card" data-name="Tropical Cream" data-price="12.00">
+          <span class="badge-new">Novo</span>
+          <img src="produtos/tropicalcream.png" alt="Tropical Cream" width="120" height="120" loading="lazy">
+          <h3>Tropical Cream</h3>
+          <div class="price-promo-wrap"><span class="price-new">R$&nbsp;12,00</span></div>
+          <p>Massa branca leve com recheio cremoso de Ninho e pedaços suculentos de abacaxi.</p>
           <div class="actions">
             <button class="add-cart" type="button">Adicionar</button>
             <button class="extras-btn" type="button">Adicionais</button>
           </div>
         </div>
 
-        <div class="card" data-name="Bolo de Prestígio" data-price="9.99">
-          <img src="produtos/prestigio.png" alt="Bolo de Prestígio" width="120" height="120" loading="lazy">
-          <h3>Prestígio <span class="badge-small">Coco e Chocolate</span></h3>
-          <div class="price-promo-wrap"><span class="price-old">R$ 15,00</span><span class="price-new">R$ 9,99</span><span class="promo-tag">🔥 PROMOÇÃO</span></div>
-          <p>Combinação perfeita de massa de chocolate com beijinho super cremoso.</p>
+        <div class="card" data-name="Bombom de Maracujá" data-price="12.00">
+          <span class="badge-new">Novo</span>
+          <img src="produtos/bombomdemaracuja.png" alt="Bombom de Maracujá" width="120" height="120" loading="lazy">
+          <h3>Bombom de Maracujá</h3>
+          <div class="price-promo-wrap"><span class="price-new">R$&nbsp;12,00</span></div>
+          <p>Massa chocolate, recheio 100% cacau e o toque refrescante do mousse de maracujá.</p>
           <div class="actions">
             <button class="add-cart" type="button">Adicionar</button>
             <button class="extras-btn" type="button">Adicionais</button>
           </div>
         </div>
 
-        <div class="card" data-name="Ninho com Geleia de Morango" data-price="9.99">
-          <span class="badge-new">✨ Destaque</span>
-          <img src="produtos/ninhocomgeleiademorango.png" alt="Ninho com Morango" width="120" height="120" loading="lazy">
-          <h3>Ninho com Geleia de Morango <span class="badge-small">Favorito</span></h3>
-          <div class="price-promo-wrap"><span class="price-old">R$ 16,00</span><span class="price-new">R$ 9,99</span><span class="promo-tag">🔥 PROMOÇÃO</span></div>
-          <p>Creme de Leite Ninho com uma deliciosa geleia artesanal de morango.</p>
+      </div>
+    </section>
+
+    <section class="menu-section" id="bolos-section">
+      <h2>🍰 Nossos Clássicos</h2>
+      <div class="grid">
+
+        <div class="card" data-name="Chocolatudo" data-price="10.00">
+          <img src="produtos/chocolatudo.png" alt="Chocolatudo" width="120" height="120" loading="lazy">
+          <h3>Chocolatudo <span class="badge-small">100% Cacau</span></h3>
+          <div class="price-promo-wrap"><span class="price-new">R$&nbsp;10,00</span></div>
+          <p>Massa chocolate molhadinha com recheio de chocolate intenso 100% cacau.</p>
           <div class="actions">
             <button class="add-cart" type="button">Adicionar</button>
             <button class="extras-btn" type="button">Adicionais</button>
           </div>
         </div>
 
-        <div class="card" data-name="Ninho Cremoso" data-price="9.99">
+        <div class="card" data-name="Prestígio" data-price="10.00">
+          <img src="produtos/prestigio.png" alt="Prestígio" width="120" height="120" loading="lazy">
+          <h3>Prestígio <span class="badge-small">Coco</span></h3>
+          <div class="price-promo-wrap"><span class="price-new">R$&nbsp;10,00</span></div>
+          <p>Combinação perfeita de massa de chocolate com recheio cremoso de côco.</p>
+          <div class="actions">
+            <button class="add-cart" type="button">Adicionar</button>
+            <button class="extras-btn" type="button">Adicionais</button>
+          </div>
+        </div>
+
+        <div class="card" data-name="Ninho Silvestre" data-price="12.00">
+          <img src="produtos/ninhosilvestre.png" alt="Ninho Silvestre" width="120" height="120" loading="lazy">
+          <h3>Ninho Silvestre <span class="badge-small">Morango</span></h3>
+          <div class="price-promo-wrap"><span class="price-new">R$&nbsp;12,00</span></div>
+          <p>Massa branca com recheio de ninho cremoso e uma deliciosa geleia de morango.</p>
+          <div class="actions">
+            <button class="add-cart" type="button">Adicionar</button>
+            <button class="extras-btn" type="button">Adicionais</button>
+          </div>
+        </div>
+
+        <div class="card" data-name="Ninho Cremoso" data-price="10.00">
           <img src="produtos/ninhocremoso.png" alt="Ninho Cremoso" width="120" height="120" loading="lazy">
           <h3>Ninho Cremoso <span class="badge-small">Suave</span></h3>
-          <div class="price-promo-wrap"><span class="price-old">R$ 15,00</span><span class="price-new">R$ 9,99</span><span class="promo-tag">🔥 PROMOÇÃO</span></div>
+          <div class="price-promo-wrap"><span class="price-new">R$&nbsp;10,00</span></div>
           <p>O autêntico sabor do Leite Ninho em uma textura irresistivelmente cremosa.</p>
           <div class="actions">
             <button class="add-cart" type="button">Adicionar</button>
@@ -171,7 +197,6 @@
       </div>
     </section>
 
-    <!-- MINI-CARRINHO -->
     <aside id="mini-cart" class="mini-cart" aria-hidden="true">
       <div class="mini-head">
         <h3>🛍 Seu Pedido</h3>
@@ -249,20 +274,12 @@
         </div>
         <div class="footer-copy">
           <p>© 2026 <strong>Degust Bolos no Pote</strong></p>
-          <p><small>v11.4 • Doçura em cada camada 🍰</small></p>
+          <p><small>v11.5 • Doçura em cada camada 🍰</small></p>
         </div>
       </div>
     </footer>
 
-  </div><!-- fim .main-content-wrapper -->
-
-  <!-- ============================================================
-       MODAIS E PAINÉIS — TODOS FORA DO WRAPPER
-       position:fixed, começam invisíveis (opacity:0 pointer-events:none)
-  ============================================================= -->
-
-  <!-- Modal Adicionais -->
-  <div id="extras-modal" class="modal" aria-hidden="true">
+  </div><div id="extras-modal" class="modal" aria-hidden="true">
     <div class="modal-content" role="dialog" aria-modal="true">
       <div class="modal-head">
         <h3>Adicionais</h3>
@@ -276,7 +293,6 @@
     </div>
   </div>
 
-  <!-- Modal Login -->
   <div id="login-modal" class="modal" aria-hidden="true">
     <div class="modal-content login-box" role="dialog" aria-modal="true">
       <div class="modal-head">
@@ -309,7 +325,6 @@
     </div>
   </div>
 
-  <!-- Modal PIX -->
   <div id="pix-modal" class="modal" aria-hidden="true">
     <div class="modal-content" role="dialog" aria-modal="true">
       <div class="modal-head">
@@ -321,7 +336,6 @@
           Total: <span id="pix-valor" style="color:#4caf50;font-size:1.6rem;">R$ 0,00</span>
         </div>
 
-        <!-- Aviso: PIX não obrigatório -->
         <div style="background:#e8f5e9;border:1px solid #a5d6a7;border-radius:10px;padding:12px 14px;margin-bottom:12px;text-align:center;">
           <p style="margin:0;font-size:.82rem;color:#2e7d32;font-weight:700;">
             Pagar via PIX e opcional neste pedido.<br>
@@ -329,7 +343,6 @@
           </p>
         </div>
 
-        <!-- Dados PIX -->
         <div class="pix-code-box">
           <p style="margin:0 0 4px;font-size:.8rem;color:#888;">Chave PIX (E-mail):</p>
           <strong style="font-size:1.05rem;color:#333;display:block;word-break:break-all;">degustbolosnopote@gmail.com</strong>
@@ -338,7 +351,6 @@
 
         <button id="btn-copy-pix" class="pix-btn-copy" type="button">Copiar Chave PIX</button>
 
-        <!-- Botão principal -->
         <button id="btn-finish-pix" class="pix-btn-whatsapp" type="button">
           Enviar Pedido no WhatsApp
         </button>
@@ -354,7 +366,6 @@
     </div>
   </div>
 
-  <!-- Painel Meus Pedidos -->
   <div class="painel-overlay" id="painelPedidosOverlay">
     <div class="painel-box">
       <div class="painel-head">
@@ -367,7 +378,6 @@
     </div>
   </div>
 
-  <!-- Painel Recompensas -->
   <div class="painel-overlay" id="painelRecompensasOverlay">
     <div class="painel-box">
       <div class="painel-head">
@@ -395,7 +405,6 @@
     </div>
   </div>
 
-  <!-- BANNER DE COOKIES -->
   <div id="cookie-banner" role="region" aria-label="Aviso de Cookies">
     <p>Usamos cookies para garantir que sua experiência na Degust seja a mais doce possível.
       <a href="#" rel="noopener">Privacidade</a>.
@@ -403,8 +412,8 @@
     <button id="cookie-accept" type="button">Aceitar</button>
   </div>
 
-  <script defer src="script.js?v=11.4"></script>
-  <script defer src="extras.js?v=5.2.2"></script>
+  <script defer src="script.js?v=11.5"></script>
+  <script defer src="extras.js?v=5.2.3"></script>
   <script>
     if ("serviceWorker" in navigator) {
       window.addEventListener("load", () => {
