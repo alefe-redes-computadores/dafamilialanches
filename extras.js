@@ -1,11 +1,11 @@
 /* =====================================================
-   🍰 Degust Bolos no Pote — Extras.js (v11.5)
-   - Sistema de Toppings e Notificações Customizadas
+   🍰 Degust Bolos no Pote — Extras.js (v10.0)
+   - Ajuste: Notificações no topo e miniaturas de bolos
    ===================================================== */
 
 (function () {
 
-  // 1. INJEÇÃO DE ESTILOS PARA TOASTS E MINIATURAS
+  // 1. INJEÇÃO DE CSS (Cores Degust)
   (function injectStyles() {
     if (document.getElementById('degust-extras-style')) return;
     
@@ -18,8 +18,8 @@
         bottom: auto !important;
         left: 50% !important;
         transform: translateX(-50%) translateY(-150%) !important;
-        background: #4B2C20 !important; 
-        color: #F5E6CA !important; 
+        background: #4B2C20 !important; /* Marrom Degust */
+        color: #F5E6CA !important; /* Bege Degust */
         font-family: 'Poppins', sans-serif !important;
         font-weight: 700 !important;
         font-size: 0.95rem !important;
@@ -52,7 +52,7 @@
     document.head.appendChild(st);
   })();
 
-  // 2. CONFIGURAÇÃO DE ÍCONES PARA NOTIFICAÇÕES
+  // 2. ESTILIZADOR DE TOASTS (Ícones de Doces)
   function stylizePopup(el) {
     const msg = el.textContent || "";
     if (el.dataset.processed === msg) return;
@@ -76,15 +76,20 @@
   });
   observer.observe(document.body, { childList: true, subtree: true });
 
-  // 3. MAPA DE MINIATURAS ATUALIZADO (Incluindo Novidades)
+  // 3. MAPA DE MINIATURAS (Seus 4 Bolos)
   const THUMB_MAP = [
-    { key: 'chocolatudo', img: 'produtos/chocolatudo.png' },
-    { key: 'prestigio', img: 'produtos/prestigio.png' },
-    { key: 'silvestre', img: 'produtos/ninhosilvestre.png' },
-    { key: 'ninho', img: 'produtos/ninhocremoso.png' },
-    { key: 'tropical', img: 'produtos/tropicalcream.png' },
-    { key: 'bombom', img: 'produtos/bombomdemaracuja.png' }
-  ];
+  { key: 'brigadeiro', img: 'produtos/brigadeiro.png' },
+  { key: 'prestigio', img: 'produtos/prestigio.png' },
+  { key: 'prestígio', img: 'produtos/prestigio.png' },
+  { key: 'geleia', img: 'produtos/ninhocomgeleiademorango.png' },
+  { key: 'ninho silvestre', img: 'produtos/ninhosilvestre.png' },
+  { key: 'ninho cremoso', img: 'produtos/ninhocremoso.png' },
+  { key: 'ninho', img: 'produtos/ninhocremoso.png' },
+  { key: 'tropical cream', img: 'produtos/tropicalcream.png' },
+  { key: 'bombom de maracujá', img: 'produtos/bonmbomdemaracuja.png' },
+  { key: 'bombom de maracuja', img: 'produtos/bonmbomdemaracuja.png' },
+  { key: 'chocolatudo', img: 'produtos/chocolatudo.png' }
+];
 
   function fixThumbnail(el) {
     const thumb = el.querySelector('.pedido-thumb');
@@ -103,5 +108,4 @@
   }
 
   window.addEventListener('DOMContentLoaded', watchOrders);
-
 })();
