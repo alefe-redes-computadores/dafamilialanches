@@ -1345,6 +1345,38 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   };
 
+  
+    /* =========================================================
+     🎯 NAVEGAÇÃO POR CATEGORIAS (SCROLL SUAVE)
+     Faz o menu de abas acompanhar o movimento do usuário.
+  ========================================================= */
+  const observarCategorias = () => {
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          const id = entry.target.id;
+          document.querySelectorAll('.tab-item').forEach(tab => {
+            tab.classList.toggle('active', tab.dataset.target === id);
+          });
+        }
+      });
+    }, { rootMargin: '-20% 0px -70% 0px', threshold: 0 });
+
+    document.querySelectorAll('.menu-section').forEach(sec => observer.observe(sec));
+  };
+
+  const setupScrollSuave = () => {
+    document.querySelectorAll('.tab-item').forEach(tab => {
+      tab.addEventListener('click', () => {
+        const target = document.getElementById(tab.dataset.target);
+        if (target) {
+          window.scrollTo({ top: target.offsetTop - 80, behavior: 'smooth' });
+        }
+      });
+    });
+  };
+
+  
   /* =========================================================
      🚀 INICIALIZAÇÃO DE EVENTOS (A SOLDA FINAL)
      Conecta todos os IDs do HTML às funções do JavaScript.
@@ -1434,6 +1466,31 @@ document.addEventListener("DOMContentLoaded", () => {
     validarIntegridadeCart();
   };
 
+  /* =========================================================
+     💾 GESTÃO DE PERSISTÊNCIA (AUTO-SAVE)
+  ========================================================= */
+  const salvarSessaoLocal = () => {
+    localStorage.setItem('degust_session_v12', JSON.stringify({
+      cart: state.cart,
+      coupon: state.activeCoupon,
+      timestamp: Date.now()
+    }));
+  };
+
+  const carregarSessaoLocal = () => {
+    const salvo = localStorage.getItem('degust_session_v12');
+    if (!salvo) return;
+    try {
+      const dados = JSON.parse(salvo);
+      if (Date.now() - dados.timestamp < 86400000) {
+        state.cart = dados.cart || [];
+        state.activeCoupon = dados.coupon || null;
+        renderCart();
+      }
+    } catch (e) { console.warn("Falha ao recuperar sessão."); }
+  };
+
+
   const validarIntegridadeCart = () => {
     state.cart = state.cart.filter(item => item.nome && item.preco > 0);
   };
@@ -1450,12 +1507,16 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // --- IGNITE! (DISPARO DO SISTEMA) ---
   const bootstrap = async () => {
+  const bootstrap = async () => {
     try {
       await initFirebase();
-      sanitizarEstadoGlobal(); 
+      sanitizarEstadoGlobal();
+      carregarSessaoLocal(); // Ativa o que você colou antes
+      observarCategorias();  // Ativa o que você acabou de colar
+      setupScrollSuave();    // Ativa o clique nas categorias
       vincularEventosDOM();
       renderCart();
-      console.log("🍰 Degust v12.9: Sistema Robusto e Blindado.");
+      console.log("🍰 Degust v12.9: Sistema 100% Robusto.");
     } catch (err) {
       console.error("Erro no Bootstrap:", err);
     }
