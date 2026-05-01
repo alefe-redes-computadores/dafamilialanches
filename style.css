@@ -497,3 +497,68 @@ body.no-scroll { overflow:hidden; }
   0%,100% { box-shadow: 0 2px 8px rgba(231,76,60,.4); }
   50%      { box-shadow: 0 2px 14px rgba(231,76,60,.7); }
 }
+
+/* 1. CORREÇÃO DA HEADER (SEM CORTES) */
+.header {
+  height: 80px !important; /* Aumentado para dar respiro */
+  padding: 0 12px !important;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.header-info h1 {
+  font-size: 1.1rem !important; /* Ajuste para não cortar no celular */
+  line-height: 1;
+}
+
+/* 2. TRANSFORMAÇÃO DOS MODAIS (IDENTIFICAÇÃO E EXTRAS) */
+.modal-content {
+  background: var(--bege) !important; /* Fundo bege da marca */
+  border: 3px solid var(--dourado) !important;
+  border-radius: 20px !important;
+  box-shadow: 0 15px 40px rgba(75, 44, 32, 0.4) !important;
+  padding: 0;
+}
+.modal-head {
+  background: var(--marrom) !important;
+  color: var(--bege) !important;
+  padding: 15px 20px !important;
+  border-bottom: 2px solid var(--dourado) !important;
+}
+
+/* 3. BOTÃO "GOOGLE" E BOTÕES DE AÇÃO (ADEUS CINZA NAVEGADOR) */
+.btn-google-auth, .btn-primary-degust {
+  width: 100% !important;
+  background: var(--marrom) !important;
+  color: var(--bege) !important;
+  border: 2px solid var(--dourado) !important;
+  padding: 14px !important;
+  border-radius: 12px !important;
+  font-weight: 800 !important;
+  font-family: 'Poppins', sans-serif !important;
+  text-transform: uppercase !important;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  transition: transform 0.2s;
+}
+.btn-google-auth:active { transform: scale(0.96); }
+
+/* 4. AJUSTE DO MINI-CART (ORGANIZAÇÃO DO ENDEREÇO) */
+.delivery-system input {
+  background: #fff !important;
+  border: 1px solid var(--bege) !important;
+  border-radius: 8px !important;
+  padding: 10px !important;
+  margin-bottom: 8px !important;
+  font-size: 0.9rem !important;
+  width: 100%;
+}
+.retirar-local-wrapper {
+  margin: 15px 0 !important;
+  padding: 10px !important;
+  background: rgba(225, 169, 95, 0.1) !important;
+  border-radius: 10px !important;
+}
