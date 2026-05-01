@@ -1,5 +1,5 @@
 /* ===========================================================
-   ðŸ° Degust Bolos no Pote â€“ CSS v11.4
+   🍰 Degust Bolos no Pote – CSS v11.4
    =========================================================== */
 
 :root {
@@ -38,7 +38,7 @@ body {
   line-height: 1.5;
 }
 
-/* â”€â”€ HEADER â”€â”€ */
+/* ── HEADER ── */
 .header {
   position:fixed; inset-inline:0; top:0; z-index:1600;
   display:flex; justify-content:space-between; align-items:center;
@@ -80,7 +80,7 @@ body {
   border:2px solid var(--dourado);
 }
 
-/* â”€â”€ MENU LATERAL â”€â”€ */
+/* ── MENU LATERAL ── */
 #menu-overlay {
   position:fixed; inset:0; background:rgba(75,44,32,.5);
   z-index:1850; opacity:0; pointer-events:none; transition:opacity .3s;
@@ -123,23 +123,24 @@ body {
 .menu-list li a:hover,
 .menu-list li .menu-link-action:hover { background:var(--bege); color:var(--vermelho); }
 
-/* â”€â”€ CONTEÃšDO PRINCIPAL â”€â”€ */
+/* ── CONTEÚDO PRINCIPAL ── */
 .main-content-wrapper {
   margin-top:70px; padding:16px;
   max-width:1200px; margin-inline:auto;
   min-height:calc(100vh - 140px);
 }
 
-.search-container { position:sticky; top:80px; z-index:850; margin-top:0; margin-bottom:12px; }
+.search-container { position:sticky; top:80px; z-index:850; margin-top:0; margin-bottom:12px; position: relative; }
 .search-container input {
   width:100%; padding:15px 20px; border-radius:var(--rad-lg);
   border:2px solid var(--dourado); background:var(--branco);
   color:var(--marrom); font-size:1rem; font-weight:500;
   box-shadow:var(--shadow-1); transition:border-color .3s,box-shadow .3s;
+  padding-left: 20px;
 }
-.search-container input:focus { border-color:var(--vermelho); box-shadow:0 0 0 4px rgba(200,40,45,.1); }
+.search-container input:focus { border-color:var(--vermelho); box-shadow:0 0 0 4px rgba(200,40,45,.12), 0 4px 12px rgba(75,44,32,.1); transform: none; }
 
-/* â”€â”€ GRID & CARDS â”€â”€ */
+/* ── GRID & CARDS ── */
 section { margin-bottom:35px; }
 section h2 {
   font-size:1.4rem; color:var(--marrom); margin-bottom:15px;
@@ -165,7 +166,7 @@ section h2 {
 .price   { font-size:1.2rem; font-weight:800; color:var(--vermelho); margin:5px 0 15px; display:block; }
 .badge-small { font-size:.65rem; background:var(--dourado); color:var(--marrom); padding:2px 7px; border-radius:20px; font-weight:700; text-transform:uppercase; }
 
-/* â”€â”€ BOTÃ•ES DE AÃ‡ÃƒO â”€â”€ */
+/* ── BOTÕES DE AÇÃO ── */
 .actions { display:flex; flex-direction:column; gap:8px; margin-top:auto; }
 .actions button {
   width:100%; border:none; border-radius:var(--rad); padding:12px 10px;
@@ -180,11 +181,11 @@ section h2 {
 .btn-secondary { background:var(--bege); color:var(--marrom); border:1px solid var(--dourado); padding:12px 20px; border-radius:var(--rad); font-weight:700; cursor:pointer; }
 .btn-primario  { background:var(--marrom); color:var(--bege); padding:15px; border:none; border-radius:10px; width:100%; font-weight:700; cursor:pointer; }
 
-/* â”€â”€ MINI-CARRINHO â”€â”€ */
+/* ── MINI-CARRINHO ── */
 .mini-cart {
   position:fixed; right:0; top:0; width:100%; max-width:380px;
   height: 100vh;
-  height: 100dvh; /* dynamic viewport â€” evita corte pela barra do browser */
+  height: 100dvh;
   background:var(--branco); z-index:1800;
   transform:translateX(100%);
   transition:transform .25s cubic-bezier(.4,0,.2,1);
@@ -200,7 +201,7 @@ section h2 {
 .mini-head h3 { margin:0; font-size:1.2rem; }
 .mini-head button { background:none; border:none; color:var(--bege); font-size:1.3rem; cursor:pointer; }
 .mini-list { flex:1; overflow-y:auto; padding:16px; background:#fdfaf5; }
-.cart-item { background:#fff; border-radius:var(--rad); padding:12px; margin-bottom:12px; box-shadow:0 2px 4px rgba(0,0,0,.05); border:1px solid rgba(75,44,32,.05); }
+.cart-item { background:#fff; border-radius:var(--rad); padding:12px; margin-bottom:12px; box-shadow:0 2px 4px rgba(0,0,0,.05); border:1px solid rgba(75,44,32,.05); animation: itemEntrada .25s ease both; }
 .mini-foot { padding:16px 16px 32px; background:var(--branco); border-top:1px solid var(--bege); flex-shrink:0; overflow-y:auto; max-height:58vh; }
 .progress-wrapper { margin-bottom:12px; padding:10px 12px; border-radius:var(--rad); background:#fff8e1; border:1px solid var(--dourado); text-align:center; }
 .progress-text { font-size:.82rem; margin:0 0 6px; color:var(--marrom); }
@@ -208,7 +209,7 @@ section h2 {
 .progress-fill { height:100%; background:linear-gradient(90deg,var(--dourado),#ffa000); width:0%; transition:width .5s ease; }
 .summary-row { display:flex; justify-content:space-between; margin-bottom:6px; font-size:.9rem; color:var(--marrom); }
 
-/* â”€â”€ BACKDROP â”€â”€ */
+/* ── BACKDROP ── */
 #cart-backdrop {
   position:fixed; inset:0; background:rgba(75,44,32,.55);
   z-index:1700; opacity:0; pointer-events:none; transition:opacity .3s;
@@ -217,7 +218,7 @@ section h2 {
 #cart-backdrop.active { opacity:1; pointer-events:auto; }
 body.no-scroll { overflow:hidden; }
 
-/* â”€â”€ MODAIS â”€â”€ */
+/* ── MODAIS ── */
 .modal {
   position:fixed; inset:0; background:rgba(75,44,32,.85);
   display:flex; align-items:center; justify-content:center;
@@ -240,12 +241,9 @@ body.no-scroll { overflow:hidden; }
 .modal-head h3 { margin:0; font-size:1.1rem; }
 .modal-head button { background:none; border:none; color:var(--bege); font-size:1.3rem; cursor:pointer; }
 
-/* â”€â”€ PAINÃ‰IS DESLIZANTES v11.1 â”€â”€
-   CHAVE: comeÃ§am com display:none
-   JS adiciona .active â†’ display:flex + animaÃ§Ã£o
-*/
+/* ── PAINÉIS DESLIZANTES v11.1 ── */
 .painel-overlay {
-  display: none;                          /* ESCONDIDO por padrÃ£o */
+  display: none;
   position: fixed;
   inset: 0;
   background: rgba(75,44,32,.7);
@@ -255,7 +253,7 @@ body.no-scroll { overflow:hidden; }
   backdrop-filter: blur(3px);
 }
 .painel-overlay.active {
-  display: flex;                          /* Aparece ao receber .active */
+  display: flex;
   animation: fadeInOverlay .25s ease forwards;
 }
 @keyframes fadeInOverlay { from { opacity:0; } to { opacity:1; } }
@@ -304,14 +302,12 @@ body.no-scroll { overflow:hidden; }
 .painel-body { padding:20px; }
 .empty-orders { text-align:center; color:#999; padding:30px 0; font-size:.95rem; }
 
-/* botÃµes flutuantes removidos v11.3 */
-
-/* â”€â”€ COOKIES â”€â”€ */
+/* ── COOKIES ── */
 #cookie-banner {
   position:fixed; bottom:20px; left:5%; right:5%; width:90%;
   background:var(--marrom); border:2px solid var(--dourado); border-radius:20px;
   padding:20px; z-index:9200;
-  display:none;              /* comeÃ§a oculto SEM !important */
+  display:none;
   flex-direction:column; align-items:center;
   box-shadow:0 10px 30px rgba(0,0,0,.45);
   opacity:0; transform:translateY(20px);
@@ -327,12 +323,12 @@ body.no-scroll { overflow:hidden; }
 }
 #cookie-accept:active { transform:scale(.96); }
 
-/* â”€â”€ STATUS â”€â”€ */
+/* ── STATUS ── */
 .status-banner { text-align:center; padding:8px 16px; border-radius:var(--rad); margin-bottom:6px; font-weight:700; font-size:.9rem; }
 .status-banner.open   { background:#e8f5e9; color:#2e7d32; border:1px solid #a5d6a7; }
 .status-banner.closed { background:#ffebee; color:var(--vermelho); border:1px solid #ffcdd2; }
 
-/* â”€â”€ POPUP TOAST â”€â”€ */
+/* ── POPUP TOAST ── */
 .popup-add {
   position:fixed; bottom:100px; left:50%;
   transform:translateX(-50%) translateY(20px);
@@ -344,7 +340,7 @@ body.no-scroll { overflow:hidden; }
 }
 .popup-add.show { opacity:1; transform:translateX(-50%) translateY(0); }
 
-/* â”€â”€ LOGIN â”€â”€ */
+/* ── LOGIN ── */
 .btn-google {
   width:100%; display:flex; align-items:center; justify-content:center; gap:10px;
   padding:14px; border:2px solid var(--dourado); border-radius:var(--rad);
@@ -354,7 +350,7 @@ body.no-scroll { overflow:hidden; }
 .btn-google:active { background:var(--bege); }
 #login-form input { width:100%; padding:14px; border:2px solid var(--dourado); border-radius:10px; font-size:.95rem; }
 
-/* â”€â”€ PIX â”€â”€ */
+/* ── PIX ── */
 .pix-body { padding:20px; text-align:center; }
 #pix-valor { font-size:1.8rem; color:var(--vermelho); font-weight:800; }
 .pix-code-box { background:#f4f4f4; padding:14px; border-radius:10px; border:1px dashed var(--marrom); margin-bottom:14px; }
@@ -362,7 +358,7 @@ body.no-scroll { overflow:hidden; }
 .pix-btn-whatsapp { background:#25d366; color:#fff; border:none; padding:14px; border-radius:var(--rad); font-weight:700; font-size:.95rem; cursor:pointer; width:100%; display:block; }
 .pix-close        { background:none; border:none; color:var(--bege); font-size:1.3rem; cursor:pointer; }
 
-/* â”€â”€ FOOTER â”€â”€ */
+/* ── FOOTER ── */
 .footer { background:var(--marrom); color:var(--bege); padding:24px 16px; margin-top:40px; }
 .footer-container { max-width:600px; margin:0 auto; text-align:center; }
 .footer-address { margin:0 0 12px; font-size:.9rem; opacity:.85; }
@@ -371,17 +367,17 @@ body.no-scroll { overflow:hidden; }
 .footer-btn:active { background:rgba(255,255,255,.25); }
 .footer-copy p { margin:4px 0; font-size:.8rem; opacity:.7; }
 
-/* â”€â”€ HIGHLIGHT SEÃ‡ÃƒO â”€â”€ */
+/* ── HIGHLIGHT SEÇÃO ── */
 .highlight-section { animation:sectionPulse .8s ease; }
 @keyframes sectionPulse { 0%,100%{background:transparent;} 50%{background:rgba(225,169,95,.12);border-radius:12px;} }
 
-/* â”€â”€ RESPONSIVO â”€â”€ */
+/* ── RESPONSIVO ── */
 @media (min-width:600px) {
   .painel-overlay { align-items:center; }
   .painel-box { border-radius:20px; max-height:85vh; }
 }
 
-/* â”€â”€ RELATÃ“RIOS â”€â”€ */
+/* ── RELATÓRIOS ── */
 .rel-filtro {
   padding: 8px 16px;
   border: 2px solid var(--dourado);
@@ -424,7 +420,7 @@ body.no-scroll { overflow:hidden; }
   letter-spacing: .5px;
 }
 
-/* â”€â”€ MELHORIAS VISUAIS CARDS â”€â”€ */
+/* ── MELHORIAS VISUAIS CARDS ── */
 .card {
   transition: transform .25s cubic-bezier(.175,.885,.32,1.275),
               box-shadow .25s ease;
@@ -435,7 +431,7 @@ body.no-scroll { overflow:hidden; }
   border-color: var(--dourado);
 }
 
-/* Badge novo na seÃ§Ã£o */
+/* Badge novo na seção */
 .badge-new {
   position: absolute;
   top: 8px; left: 8px;
@@ -449,7 +445,7 @@ body.no-scroll { overflow:hidden; }
   letter-spacing: .5px;
 }
 
-/* â”€â”€ ANIMAÃ‡ÃƒO DE ENTRADA DOS CARDS â”€â”€ */
+/* ── ANIMAÇÃO DE ENTRADA DOS CARDS ── */
 @keyframes cardEntrada {
   from { opacity: 0; transform: translateY(12px); }
   to   { opacity: 1; transform: translateY(0); }
@@ -462,43 +458,7 @@ body.no-scroll { overflow:hidden; }
 .grid .card:nth-child(3) { animation-delay: .12s; }
 .grid .card:nth-child(4) { animation-delay: .16s; }
 
-/* â”€â”€ CAMPO DE BUSCA â€” Ã­cone animado â”€â”€ */
-.search-container { position:sticky; top:80px; z-index:850; margin-top:0; margin-bottom:12px; }
-  position: relative;
-}
-.search-container input {
-  padding-left: 20px;
-}
-.search-container input:focus {
-  transform: none;
-  box-shadow: 0 0 0 4px rgba(200,40,45,.12), 0 4px 12px rgba(75,44,32,.1);
-}
-
-/* â”€â”€ BOTÃƒO ADICIONAR â€” efeito pulso no primeiro acesso â”€â”€ */
-@keyframes pulseBotao {
-  0%,100% { box-shadow: 0 3px 0 #a51f23; }
-  50%      { box-shadow: 0 3px 0 #a51f23, 0 0 0 6px rgba(200,40,45,.2); }
-}
-
-/* â”€â”€ MINI-CARRINHO â€” item animado â”€â”€ */
-@keyframes itemEntrada {
-  from { opacity:0; transform:translateX(10px); }
-  to   { opacity:1; transform:translateX(0); }
-}
-.cart-item { animation: itemEntrada .25s ease both; }
-
-/* â”€â”€ BANNER STATUS â€” brilho sutil â”€â”€ */
-.status-banner.open {
-  background: linear-gradient(90deg, #e8f5e9, #f1f8e9);
-}
-
-/* â”€â”€ FOOTER â€” link hover â”€â”€ */
-.footer-btn:hover {
-  background: rgba(255,255,255,.2);
-  transform: translateY(-1px);
-}
-
-/* â”€â”€ PREÃ‡O PROMOCIONAL â”€â”€ */
+/* ── PREÇO PROMOCIONAL ── */
 .price-promo-wrap {
   display: flex;
   align-items: center;
@@ -507,7 +467,6 @@ body.no-scroll { overflow:hidden; }
   gap: 6px;
   margin: 8px 0 14px;
 }
-
 .price-old {
   font-size: .9rem;
   font-weight: 600;
@@ -515,14 +474,12 @@ body.no-scroll { overflow:hidden; }
   text-decoration: line-through;
   text-decoration-color: #e74c3c;
 }
-
 .price-new {
   font-size: 1.5rem;
   font-weight: 900;
   color: var(--vermelho);
   letter-spacing: -.5px;
 }
-
 .promo-tag {
   background: linear-gradient(135deg, #e74c3c, #ff6b35);
   color: #fff;
@@ -536,7 +493,6 @@ body.no-scroll { overflow:hidden; }
   white-space: nowrap;
   animation: promoPulse 2s ease infinite;
 }
-
 @keyframes promoPulse {
   0%,100% { box-shadow: 0 2px 8px rgba(231,76,60,.4); }
   50%      { box-shadow: 0 2px 14px rgba(231,76,60,.7); }
