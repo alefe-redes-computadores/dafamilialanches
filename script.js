@@ -1012,7 +1012,7 @@ document.addEventListener("DOMContentLoaded", () => {
           nome: item.nome,
           qtd: item.qtd,
           preco_un: item.preco,
-          extras: item.detalhes || "Nenhum"
+          extras: item.detalhes || "Nenhum",
           obs: item.obs || "Sem observações" 
         })),
         financeiro: {
