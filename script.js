@@ -21,6 +21,48 @@ document.addEventListener("DOMContentLoaded", () => {
       statusLoja: 'aberto' // 'aberto' ou 'fechado'
     }
   };
+  
+    // --- CONFIGURAÇÃO LOGÍSTICA AVANÇADA (EXPANSÃO 1) ---
+  const CONFIG_BUSINESS = {
+    horarios: {
+      abertura: "09:00",
+      fechamento: "22:00",
+      dias: [1, 2, 3, 4, 5, 6, 0] // 0 é domingo
+    },
+    contatos: {
+      whatsapp: "5534999999999",
+      instagram: "@degust.bolos",
+      email_admin: "degustbolosnopote@gmail.com"
+    }
+  };
+
+  const isLojaAberta = () => {
+    const agora = new Date();
+    const horaAtual = agora.getHours().toString().padStart(2, '0') + ":" + agora.getMinutes().toString().padStart(2, '0');
+    const diaSemana = agora.getDay();
+    if (!CONFIG_BUSINESS.horarios.dias.includes(diaSemana)) return false;
+    return horaAtual >= CONFIG_BUSINESS.horarios.abertura && horaAtual <= CONFIG_BUSINESS.horarios.fechamento;
+  };
+
+  /* =========================================================
+     🛡️ SISTEMA DE AUDITORIA E LOGS (EXPANSÃO 2)
+  ========================================================= */
+  const registrarErroTecnico = async (contexto, erro) => {
+    console.error(`[Erro - ${contexto}]:`, erro);
+    if (!state.db) return;
+    try {
+      await state.db.collection("LogsErros").add({
+        usuario: state.currentUser ? state.currentUser.email : "Visitante",
+        contexto: contexto,
+        mensagem: erro.message || "Erro desconhecido",
+        timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+        prefixo: "degust"
+      });
+    } catch (e) {
+      console.warn("Falha ao registrar log.");
+    }
+  };
+
 
   // --- CONFIGURAÇÃO DE FIDELIDADE (MATRIZ DE PRÊMIOS) ---
   const FIDELIDADE_MASTER = {
@@ -611,8 +653,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
   /* FIM DA PARTE 6 - AGUARDANDO OK PARA A PARTE 7: RENDERIZAÇÃO DO CARRINHO E RESUMO DE VALORES */
   /* =========================================================
-     🎨 MOTOR DE RENDERIZAÇÃO DO CARRINHO (v12.0)
-     Transforma o array state.cart em HTML interativo.
+     🎨 MOTOR DE RENDERIZAÇÃO PRO (v12.5 - ESTENDIDO)
+     Inclui gestão de observações e metadados por item.
   ========================================================= */
 
   window.renderCart = () => {
@@ -620,7 +662,6 @@ document.addEventListener("DOMContentLoaded", () => {
     const countHeader = document.getElementById("cart-count");
     if (!listCont) return;
 
-    // Limpa a lista para reconstrução (Evita duplicatas visuais)
     listCont.innerHTML = "";
     let subtotal = 0;
     let totalItensQtd = 0;
@@ -630,8 +671,7 @@ document.addEventListener("DOMContentLoaded", () => {
         <div class="cart-empty-state">
           <span class="empty-icon">🍰</span>
           <p>Seu carrinho está vazio.<br>Escolha uma doçura!</p>
-        </div>
-      `;
+        </div>`;
     }
 
     state.cart.forEach((item, index) => {
@@ -640,7 +680,7 @@ document.addEventListener("DOMContentLoaded", () => {
       totalItensQtd += item.qtd;
 
       const itemDiv = document.createElement("div");
-      itemDiv.className = "cart-item";
+      itemDiv.className = "cart-item-expanded";
       itemDiv.innerHTML = `
         <div class="cart-item-main">
           <div class="cart-item-details">
@@ -649,40 +689,33 @@ document.addEventListener("DOMContentLoaded", () => {
             <span class="cart-item-price-unit">${formatCurrency(item.preco)}</span>
           </div>
           <div class="cart-item-ctrl">
-            <button class="btn-qty" onclick="changeQty(${index}, -1)" aria-label="Remover um">−</button>
+            <button class="btn-qty" onclick="changeQty(${index}, -1)">−</button>
             <span class="qty-val">${item.qtd}</span>
-            <button class="btn-qty" onclick="changeQty(${index}, 1)" aria-label="Adicionar outro">+</button>
+            <button class="btn-qty" onclick="changeQty(${index}, 1)">+</button>
           </div>
+        </div>
+        <div class="item-obs-area" style="margin-top: 8px;">
+          <input type="text" class="input-obs-cart" 
+                 placeholder="Alguma observação para este item?" 
+                 onchange="state.cart[${index}].obs = this.value" 
+                 value="${item.obs || ''}"
+                 style="width: 100%; font-size: 12px; padding: 5px; border-radius: 5px; border: 1px solid #ddd; background: #f9f9f9;">
         </div>
       `;
       listCont.appendChild(itemDiv);
     });
 
-    // Atualiza o contador de bolhas no header
     if (countHeader) countHeader.textContent = totalItensQtd;
 
-    // --- CÁLCULO DE FINANCEIRO ---
     atualizarVisualFrete(subtotal);
     
     let valorDesconto = 0;
-    const rowDesc = document.getElementById("coupon-discount-row");
-    const labelDesc = document.getElementById("cart-discount");
-
     if (state.activeCoupon) {
       const c = state.activeCoupon;
       valorDesconto = c.tipo === "fixo" ? c.valor : (subtotal * (c.valor / 100));
-      
-      if (rowDesc && labelDesc) {
-        rowDesc.style.display = "flex";
-        labelDesc.textContent = `- ${formatCurrency(valorDesconto)}`;
-      }
-    } else if (rowDesc) {
-      rowDesc.style.display = "none";
     }
 
     const totalFinal = Math.max(0, subtotal + state.deliveryConfig.taxa - valorDesconto);
-    
-    // Injeta o resumo final e o botão de checkout
     atualizarResumoFinalUI(subtotal, state.deliveryConfig.taxa, totalFinal);
   };
 
@@ -1057,7 +1090,7 @@ document.addEventListener("DOMContentLoaded", () => {
     msg += `--------------------------------------\n\n`;
     msg += `_Pedido enviado via site Degust Bolos_`;
 
-    const numeroCarol = "5534999999999"; // Substitua pelo número real dela
+    const numeroCarol = "5538998527894"; // Substitua pelo número real dela
     const url = `https://wa.me/${numeroCarol}?text=${encodeURIComponent(msg)}`;
     
     // Pequeno delay para o usuário ver o feedback de sucesso no site antes de sair
@@ -1311,7 +1344,6 @@ document.addEventListener("DOMContentLoaded", () => {
       container.innerHTML = `<p class="err-msg">Erro ao gerar relatório. Verifique sua conexão. ⚠️</p>`;
     }
   };
-  };
 
   /* =========================================================
      🚀 INICIALIZAÇÃO DE EVENTOS (A SOLDA FINAL)
@@ -1387,12 +1419,46 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   };
 
+  /* =========================================================
+     🛡️ MOTOR DE RESILIÊNCIA E LIFECYCLE (v12.9.3)
+  ========================================================= */
+  window.addEventListener('unhandledrejection', (event) => {
+    registrarErroTecnico("Promessa Rejeitada", {
+      message: event.reason.message || "Erro de Promessa",
+      stack: event.reason.stack || "N/A"
+    });
+  });
+
+  const sanitizarEstadoGlobal = () => {
+    if (state.cart.length > 50) state.cart = state.cart.slice(0, 50);
+    validarIntegridadeCart();
+  };
+
+  const validarIntegridadeCart = () => {
+    state.cart = state.cart.filter(item => item.nome && item.preco > 0);
+  };
+
+  window.updateItemObs = (index, valor) => {
+    if (state.cart[index]) state.cart[index].obs = valor.substring(0, 100);
+  };
+
+  window.forceCloseUI = () => {
+    state.ui_lock = false;
+    UIManager.closeAll();
+    popupAdd("Interface resetada! 🔄");
+  };
+
   // --- IGNITE! (DISPARO DO SISTEMA) ---
   const bootstrap = async () => {
-    await initFirebase();
-    vincularEventosDOM();
-    renderCart(); // Inicia carrinho zerado
-    console.log("🍰 Degust v12.0: Sistema totalmente operacional.");
+    try {
+      await initFirebase();
+      sanitizarEstadoGlobal(); 
+      vincularEventosDOM();
+      renderCart();
+      console.log("🍰 Degust v12.9: Sistema Robusto e Blindado.");
+    } catch (err) {
+      console.error("Erro no Bootstrap:", err);
+    }
   };
 
   bootstrap();
