@@ -223,12 +223,6 @@ const sound = new Audio('click.wav');
      Garante que o DOM não sofra "reflow" pesado no celular.
   ========================================================= */
 
-  const playFeedback = (type = 'click') => {
-    if (navigator.vibrate) {
-      const patterns = { click: 10, success: [10, 30, 10], error: [50, 50, 50] };
-      navigator.vibrate(patterns[type] || 10);
-    }
-  };
 
   const safeAnimate = (element, className, displayType = 'flex') => {
     return new Promise((resolve) => {
@@ -443,7 +437,7 @@ const sound = new Audio('click.wav');
       if (error.code === 'auth/popup-closed-by-user') {
         popupAdd("⚠️ O login foi cancelado.");
       } else if (error.code === 'auth/network-request-failed') {
-        popupAdd("❌ Erve de rede. Verifique seu sinal de celular.");
+        popupAdd("❌ Ervro de rede. Verifique seu sinal de celular.");
       } else {
         popupAdd("❌ Falha ao entrar. Tente novamente mais tarde.");
       }
@@ -1227,8 +1221,9 @@ const sound = new Audio('click.wav');
       // Encontra qual é o próximo prêmio que ele ainda não ganhou
       const proximoMarco = FIDELIDADE_MASTER.recompensas.find(r => r.pedido > bolosRealizados);
       
-      if (proximoMarco && progBar && progMsg) {
-        const metaAtual = proximo.pedido;
+        if (proximoMarco && progBar && progMsg) {
+        const metaAtual = proximoMarco.pedido;
+
         const faltam = metaAtual - bolosRealizados;
         const percentual = (bolosRealizados / metaAtual) * 100;
         
