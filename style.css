@@ -1353,138 +1353,70 @@ button:disabled {
 
 
 /* ===========================================================
-   🏆 DEGUST v12.3 — OPERAÇÃO TRÊS MARIAS (ULTRA FORCED FIX)
+   🛒 FIX: CARRINHO SEM CORTES E TOTAL VISÍVEL
    =========================================================== */
 
-/* 1. FAZER O ÍCONE DO MENU REAPARECER NORMAL (SEM SER GIGANTE) */
-#hamburger-btn {
+/* 1. CONTAINER DO CARRINHO (AJUSTE DE ALTURA) */
+.mini-cart {
   display: flex !important;
-  flex-direction: column;
-  justify-content: center;
-  gap: 5px;
-  width: 44px;
-  height: 44px;
-  background: none !important;
-  border: none !important;
-  transform: none !important; /* Reseta escala gigante */
-  padding: 10px;
+  flex-direction: column !important;
+  height: 100vh !important;
+  height: 100dvh !important; /* Altura dinâmica para mobile */
+  max-height: 100% !important;
+  overflow: hidden !important; /* Trava o container pai */
 }
 
-#hamburger-btn .bar {
+/* 2. ÁREA DE SCROLL (ONDE OS BOLOS E O ENDEREÇO FICAM) */
+.mini-list-wrapper {
+  flex: 1 !important; /* Ocupa todo o espaço sobrando */
+  overflow-y: auto !important; /* Só essa parte rola */
+  padding: 15px !important;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* 3. RODAPÉ DO CARRINHO (TOTAL E BOTÃO FINALIZAR) */
+.mini-foot {
+  background: white !important;
+  padding: 20px 20px calc(20px + env(safe-area-inset-bottom)) !important;
+  border-top: 2px solid var(--bege) !important;
+  box-shadow: 0 -10px 25px rgba(0,0,0,0.1) !important;
+  z-index: 100;
+  flex-shrink: 0 !important; /* Impede que o botão seja esmagado */
+}
+
+/* 4. BOTÃO FINALIZAR (FORÇANDO APARECIMENTO) */
+#main-finish-btn {
   display: block !important;
-  width: 24px !important;
-  height: 3px !important;
-  background-color: var(--marrom) !important; /* Cor marrom para aparecer no dourado */
-  border-radius: 3px;
-  transform: none !important;
-}
-
-/* 2. MATAR O BOTÃO CINZA "SISTEMA ANTIGO" */
-button, input[type="button"], #extras-confirm, #main-finish-btn, .btn-primary-degust, .add-cart, .extras-btn {
-  appearance: none !important;
-  -webkit-appearance: none !important;
-  font-family: 'Poppins', sans-serif !important;
-}
-
-/* Forçar visual premium em todos os botões principais */
-#extras-confirm, #main-finish-btn, .btn-primary-degust {
-  background: var(--marrom) !important;
-  color: var(--bege) !important;
-  border: 2px solid var(--dourado) !important;
-  padding: 16px !important;
+  width: 100% !important;
+  background: linear-gradient(135deg, #2e7d32 0%, #1b5e20 100%) !important;
+  color: white !important;
+  padding: 18px !important;
   border-radius: 12px !important;
   font-weight: 800 !important;
-  text-transform: uppercase !important;
-  font-size: 0.9rem !important;
-  width: 100% !important;
-  box-shadow: 0 4px 15px rgba(75, 44, 32, 0.3) !important;
-  cursor: pointer;
+  font-size: 1rem !important;
+  text-transform: uppercase;
+  border: none !important;
+  box-shadow: 0 4px 12px rgba(46, 125, 50, 0.4) !important;
 }
 
-/* 3. LOGIN: TEXTO ESCURO E BOTÃO LEGISLÁVEL */
-#login-modal .modal-body {
-  color: var(--marrom) !important;
-  text-align: center;
-  padding: 30px 20px !important;
-  background: white !important;
+/* 5. RESUMO DE VALORES (TEXTO LEGÍVEL) */
+.cart-summary-generated {
+  margin-bottom: 15px !important;
 }
 
-#login-modal .modal-body p {
-  color: #5d4037 !important; /* Marrom escuro para leitura */
-  font-weight: 500 !important;
-  margin-bottom: 20px;
-  line-height: 1.5;
-}
-
-.btn-google-auth {
-  display: flex !important;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
-  background: white !important;
-  color: #444 !important;
-  border: 2px solid #ddd !important;
-  border-radius: 12px !important;
-  padding: 15px !important;
-  font-weight: 700 !important;
-  box-shadow: 0 4px 0 #eee !important;
-}
-
-/* 4. ADICIONAIS: CARDS COMPACTOS E PREÇO ALINHADO */
-.extras-list label {
-  background: white !important;
-  border: 2px solid #f0e8d8 !important;
-  padding: 12px 15px !important;
-  margin-bottom: 8px !important;
-  border-radius: 12px !important;
+.cart-summary-generated div {
   display: flex;
   justify-content: space-between;
-  align-items: center;
+  margin-bottom: 5px;
   font-weight: 600;
   color: var(--marrom);
 }
 
-/* 5. RODAPÉ: TIRAR O AZUL DOS LINKS */
-.footer-links p, .footer-legal p {
-  color: var(--bege) !important;
-  opacity: 0.9;
-}
-
-.footer-btn-link, .menu-link-social, a[href*="wa.me"], a[href*="instagram"] {
-  color: var(--dourado) !important; /* Dourado em vez de azul */
-  text-decoration: none !important;
-  font-weight: 700 !important;
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-}
-
-/* 6. Fix da Tagline e Bolinha de Status */
-.header-info {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  position: relative;
-}
-
-#status-banner {
-  position: absolute;
-  bottom: -2px;
-  right: -2px;
-  width: 12px;
-  height: 12px;
-}
-
-.tagline {
-  font-size: 0.65rem;
-  margin-top: 2px;
-  color: var(--marrom);
-}
-
-/* 7. Ajustes de Responsividade Extra para Celular */
-@media (max-width: 380px) {
-  .grid {
-    grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)) !important;
-    gap: 12px !important;
-  }
+.cart-total-row {
+  font-size: 1.2rem !important;
+  font-weight: 900 !important;
+  color: var(--vermelho) !important;
+  margin-top: 10px;
+  border-top: 1px dashed #ddd;
+  padding-top: 10px;
 }
