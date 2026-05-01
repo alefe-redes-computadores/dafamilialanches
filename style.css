@@ -147,24 +147,41 @@ body {
   min-height:calc(100vh - 140px);
 }
 
-/* ── BUSCA ── */
-.search-container { 
-  position:sticky; 
-  top:80px; 
-  z-index:850; 
-  margin-bottom:12px; 
-}
-.search-container input {
-  width:100%; padding:15px 20px; border-radius:var(--rad-lg);
-  border:2px solid var(--dourado); background:var(--branco);
-  color:var(--marrom); font-size:1rem; font-weight:500;
-  box-shadow:var(--shadow-1); transition:border-color .3s,box-shadow .3s;
-}
-.search-container input:focus { 
-  border-color:var(--vermelho); 
-  box-shadow:0 0 0 4px rgba(200,40,45,.12), 0 4px 12px rgba(75,44,32,.1); 
+/* ── BARRA DE BUSCA (ESTÁTICA, SEM ÍCONE, FONTE MAIOR) ── */
+.search-container {
+  margin: 0 8px 20px 8px;   /* sem position: sticky */
+  padding: 0;
 }
 
+.search-input-wrapper {
+  width: 100%;
+}
+
+.search-container input {
+  width: 100%;
+  padding: 16px 20px;          /* altura confortável */
+  border-radius: 60px;
+  border: 2px solid var(--dourado);
+  background: var(--branco);
+  color: var(--marrom);
+  font-size: 1rem;
+  font-weight: 700;            /* mais grossa */
+  font-family: 'Poppins', 'Inter', sans-serif;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+  transition: 0.2s;
+}
+
+.search-container input:focus {
+  border-color: var(--vermelho);
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(200,40,45,0.15);
+}
+
+/* garante que qualquer ícone de lupa seja removido */
+.search-icon,
+.search-input-wrapper::before {
+  display: none !important;
+}
 /* ── GRID & CARDS ── */
 section { margin-bottom:35px; }
 section h2 {
@@ -173,9 +190,10 @@ section h2 {
   padding-left:5px; border-left:4px solid var(--vermelho);
 }
 .grid {
-  display:grid;
-  grid-template-columns:repeat(auto-fill, minmax(160px,1fr));
-  gap:16px; padding:5px;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 16px;
+  padding: 0 4px;
 }
 .card {
   background:var(--branco); border-radius:var(--rad-lg); box-shadow:var(--shadow-1);
@@ -225,13 +243,13 @@ section h2 {
   align-items: center;
   justify-content: center;
   gap: 6px;
-  margin: 8px 0 14px;
+  margin: 10px 0 12px;
 }
 .price-new {
   font-size: 1.5rem;
   font-weight: 900;
   color: var(--vermelho);
-  letter-spacing: -.5px;
+  letter-spacing: -0.5px;
 }
 .price-old {
   font-size: .9rem;
@@ -240,28 +258,45 @@ section h2 {
   text-decoration: line-through;
 }
 
-/* ── BOTÕES DE AÇÃO ── */
-.actions { display:flex; flex-direction:column; gap:8px; margin-top:auto; }
+/* ── BOTÕES DE AÇÃO (CARDS) ── */
+.actions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: auto;
+}
 .actions button {
-  width:100%; border:none; border-radius:var(--rad); padding:12px 10px;
-  font-weight:700; cursor:pointer; font-size:.85rem; text-transform:uppercase;
-  transition:all .2s; display:flex; align-items:center; justify-content:center; gap:8px;
+  width: 100%;
+  border: none;
+  border-radius: 40px;
+  padding: 14px 6px;
+  font-weight: 800;
+  cursor: pointer;
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
 }
-.add-cart   { background:var(--vermelho); color:var(--branco); box-shadow:0 3px 0 #a51f23; }
-.add-cart:active { transform:translateY(2px); box-shadow:0 1px 0 #a51f23; }
-.extras-btn { background:var(--bege); color:var(--marrom); border:1px solid var(--dourado) !important; }
-.extras-btn:active { background:var(--dourado); }
-
-/* ── ANIMAÇÃO DE ENTRADA DOS CARDS ── */
-@keyframes cardEntrada {
-  from { opacity: 0; transform: translateY(12px); }
-  to   { opacity: 1; transform: translateY(0); }
+.add-cart {
+  background: var(--vermelho);
+  color: var(--branco);
+  box-shadow: 0 3px 0 #a51f23;
 }
-.grid .card:nth-child(1) { animation-delay: .04s; }
-.grid .card:nth-child(2) { animation-delay: .08s; }
-.grid .card:nth-child(3) { animation-delay: .12s; }
-.grid .card:nth-child(4) { animation-delay: .16s; }
-
+.add-cart:active {
+  transform: translateY(2px);
+  box-shadow: 0 1px 0 #a51f23;
+}
+.extras-btn {
+  background: var(--bege);
+  color: var(--marrom);
+  border: 1px solid var(--dourado) !important;
+}
+.extras-btn:active {
+  background: var(--dourado) !important;
+}
 /* ── MINI-CARRINHO ── */
 .mini-cart {
   position:fixed; right:0; top:0; width:100%; max-width:380px;
