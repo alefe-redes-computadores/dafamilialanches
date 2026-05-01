@@ -303,11 +303,28 @@
   </div>
 
   <div class="painel-overlay" id="painelRecompensasOverlay">
-    <div class="painel-box">
-      <div class="painel-head"><div class="painel-title">🎁 Cartão Fidelidade</div><button class="fechar-painel">✖</button></div>
-      <div class="painel-body"><div id="listaRecompensas"></div></div>
+  <div class="painel-box">
+    <div class="painel-head">
+      <div class="painel-title">🎁 Cartão Fidelidade</div>
+      <button class="fechar-painel">✖</button>
+    </div>
+    <div class="painel-body">
+      <!-- ÁREA DE PROGRESSO -->
+      <div class="fidelidade-status-card">
+        <div class="contador-wrapper">
+          <span class="numero-pontos" id="contador-valor">0</span>
+          <span class="unidade-pontos">bolos pedidos</span>
+        </div>
+        <div class="fidelidade-progress-bar-container">
+          <div id="progresso-bar" class="progress-fill-fidelidade" style="width:0%"></div>
+        </div>
+        <p id="progresso-mensagem" class="progresso-texto">Carregando...</p>
+      </div>
+      <!-- LISTA DE RECOMPENSAS DISPONÍVEIS -->
+      <div id="listaRecompensas"></div>
     </div>
   </div>
+</div>
 
   <!-- RODAPÉ CORRIGIDO (TRÊS MARIAS) -->
   <footer class="footer">
