@@ -1,6 +1,7 @@
 /* =========================================================
    🍰 Degust v11.4 — SISTEMA UI BLINDADO + PIX INTELIGENTE
    Correções: cookies, painéis, cliques, duplicações removidas
+   CORREÇÃO BOLINHA: Online/Offline no header
 ========================================================= */
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -783,7 +784,7 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   // ═══════════════════════════════════════════════════════════════
-  // 🏪 STATUS DA LOJA — checa em tempo real
+  // 🏪 STATUS DA LOJA — checa em tempo real (COM BOLINHA)
   // ═══════════════════════════════════════════════════════════════
   function checarStatusLoja() {
     if (!db) return;
@@ -797,6 +798,22 @@ document.addEventListener("DOMContentLoaded", () => {
     const cards   = document.querySelectorAll(".card");
     const addBtns = document.querySelectorAll(".add-cart, .extras-btn");
 
+    // ATUALIZAR BOLINHA DE STATUS NO HEADER
+    const statusDot = document.getElementById("status-dot");
+    if (statusDot) {
+      if (aberta) {
+        statusDot.classList.remove("offline");
+        statusDot.classList.add("online");
+        statusDot.title = "🟢 Loja aberta - 14h às 22h";
+        statusDot.style.background = "#4caf50";
+      } else {
+        statusDot.classList.remove("online");
+        statusDot.classList.add("offline");
+        statusDot.title = "🔴 Loja fechada - Horário: 14h às 22h";
+        statusDot.style.background = "#d32f2f";
+      }
+    }
+
     if (!aberta) {
       // Loja fechada — cards acinzentados, botões desabilitados
       cards.forEach(card => {
@@ -806,7 +823,7 @@ document.addEventListener("DOMContentLoaded", () => {
       });
       addBtns.forEach(btn => { btn.disabled = true; });
 
-      // Banner de aviso se não existir
+      // Banner de aviso se não existir (opcional, mantido)
       if (!document.getElementById("banner-loja-fechada")) {
         const banner = document.createElement("div");
         banner.id = "banner-loja-fechada";
@@ -1560,41 +1577,27 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   /* =========================================================
-     🕰️ STATUS DA LOJA
+     🕰️ STATUS DA LOJA (HORÁRIO FIXO) — removido, agora usa Firestore
   ========================================================= */
-  const atualizarStatusLoja = () => {
-    const hora = new Date().getHours();
-    const aberto = hora >= 14 && hora < 22;
-    if (el.statusBanner) {
-      el.statusBanner.textContent = aberto ? "🟢 Aberto — Peça sua doçura agora!" : "🔴 Fechado — Abrimos hoje às 14h";
-      el.statusBanner.className   = `status-banner ${aberto ? "open" : "closed"}`;
-    }
-  };
-
-  atualizarStatusLoja();
-  setInterval(atualizarStatusLoja, 60000);
+  // A função checarStatusLoja já está usando o Firestore
+  // O banner de horário fixo foi removido
 
   /* =========================================================
      🍪 COOKIES — CORRIGIDO v11.0
-     Problema anterior: display:flex !important no CSS impedia
-     que o JS fechasse com display:none ou classList.remove
   ========================================================= */
   const cookieBanner    = document.getElementById("cookie-banner");
   const cookieAcceptBtn = document.getElementById("cookie-accept");
 
   if (cookieBanner && cookieAcceptBtn) {
     if (localStorage.getItem("degust-cookies-accepted")) {
-      // Já aceitou antes — mantém oculto
       cookieBanner.style.display = "none";
     } else {
-      // Aparece após 2s via classe .show (sem !important no CSS)
       setTimeout(() => cookieBanner.classList.add("show"), 2000);
     }
 
     cookieAcceptBtn.addEventListener("click", () => {
       localStorage.setItem("degust-cookies-accepted", "true");
       cookieBanner.classList.remove("show");
-      // Aguarda a transição terminar e então oculta definitivamente
       setTimeout(() => { cookieBanner.style.display = "none"; }, 450);
       popupAdd("Preferências salvas! 🍪");
     });
@@ -1609,6 +1612,6 @@ document.addEventListener("DOMContentLoaded", () => {
   // Checa status da loja após Firebase inicializar
   setTimeout(() => checarStatusLoja(), 800);
 
-  console.log("%c🍰 Degust Bolos no Pote v11.4 — Sistema Carregado!", "color:#E1A95F;font-size:14px;font-weight:bold;");
+  console.log("%c🍰 Degust Bolos no Pote v12.0 — Sistema Carregado com Bolinha de Status!", "color:#E1A95F;font-size:14px;font-weight:bold;");
 
 }); // fim DOMContentLoaded
