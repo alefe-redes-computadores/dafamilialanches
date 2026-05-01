@@ -1348,3 +1348,67 @@ button:disabled {
 }
 
 /* FINAL DO ARQUIVO CSS */
+
+/* 1. FORÇAR APARECIMENTO DO MENU HAMBÚRGUER */
+#hamburger-btn {
+  display: flex !important;
+  flex-direction: column;
+  justify-content: center;
+  gap: 5px;
+  width: 40px;
+  height: 40px;
+  background: none !important;
+  border: none !important;
+}
+
+#hamburger-btn .bar {
+  display: block !important;
+  width: 25px !important;
+  height: 3px !important;
+  background-color: var(--marrom) !important; /* Cor marrom para aparecer no dourado */
+  border-radius: 2px;
+}
+
+/* 2. TRANSFORMAR O BOTÃO "FEIO" DO MODAL */
+#extras-confirm, .btn-primary-degust, #main-finish-btn {
+  appearance: none;
+  -webkit-appearance: none;
+  background: var(--marrom) !important;
+  color: var(--bege) !important;
+  border: 2px solid var(--dourado) !important;
+  padding: 16px !important;
+  border-radius: 12px !important;
+  font-weight: 800 !important;
+  font-size: 1rem !important;
+  text-transform: uppercase;
+  width: 100% !important;
+  box-shadow: 0 4px 15px rgba(75, 44, 32, 0.3) !important;
+  cursor: pointer;
+}
+
+/* 3. AJUSTE DO MODAL (REMOVER O BRANCO CHAPADO) */
+.modal-content {
+  background: var(--bg2) !important; /* Bege clarinho */
+  border: 3px solid var(--dourado) !important;
+  border-radius: 22px !important;
+}
+
+/* 4. FIX DA HEADER (NÃO CORTAR MAIS) */
+.header {
+  height: 80px !important;
+  padding: 0 15px !important;
+}
+
+.logo-wrapper {
+  min-width: 54px;
+  min-height: 54px;
+}
+
+/* 5. INPUTS DO CARRINHO (ESTILO NOTION) */
+.delivery-system input, .coupon-form-wrapper input {
+  border: 2px solid var(--bege) !important;
+  border-radius: 10px !important;
+  padding: 12px !important;
+  margin-bottom: 10px !important;
+  background: white !important;
+}
