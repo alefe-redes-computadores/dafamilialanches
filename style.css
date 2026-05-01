@@ -1,7 +1,6 @@
 /* ===========================================================
-   🍰 Degust Bolos no Pote – v12.1.0 (CSS COMPLETO + AJUSTES)
+   🍰 Degust Bolos no Pote – v12.1.0 (CSS COMPLETO)
    Localização Oficial: Três Marias — MG
-   AJUSTES: Bolinha de status, compatibilidade com modais
    =========================================================== */
 
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&family=Inter:wght@400;600;700&display=swap');
@@ -81,41 +80,12 @@ body.no-scroll {
 
 /* --- UTILS --- */
 .hidden { display: none !important; }
-
-/* --- BOLINHA DE STATUS (NOVA) --- */
-.status-dot {
-  width: 14px;
-  height: 14px;
-  border-radius: 50%;
-  border: 2px solid var(--branco);
-  transition: var(--transition);
-  cursor: pointer;
-  flex-shrink: 0;
-}
-
-.status-dot.online {
-  background: var(--success);
-  box-shadow: 0 0 0 0 rgba(46, 204, 113, 0.7);
-  animation: pulseStatus 2s infinite;
-}
-
-.status-dot.offline {
-  background: var(--vermelho);
-  animation: none;
-}
-
-@keyframes pulseStatus {
-  0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(46, 204, 113, 0.7); }
-  70% { transform: scale(1); box-shadow: 0 0 0 8px rgba(46, 204, 113, 0); }
-  100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(46, 204, 113, 0); }
-}
-
 /* --- HEADER: ESTRUTURA E RESPIRARE --- */
 .header {
   position: fixed;
   inset-inline: 0;
   top: 0;
-  height: 80px;
+  height: 80px; /* Altura ideal para mobile sem cortar nada */
   background: var(--dourado);
   display: flex;
   justify-content: space-between;
@@ -175,9 +145,34 @@ body.no-scroll {
   opacity: 0.85;
 }
 
-/* --- BANNER DE STATUS (SUPORTE A LEGADOS) --- */
+/* --- A NOVA BOLINHA DE STATUS (SUBSTITUI O BANNER) --- */
 #status-banner {
-  display: none !important;
+  position: absolute;
+  bottom: -2px;
+  right: -2px;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  border: 2px solid var(--branco);
+  font-size: 0; /* Esconde o texto do banner */
+  z-index: 10;
+}
+
+#status-banner.open {
+  background: var(--success);
+  box-shadow: 0 0 0 0 rgba(46, 204, 113, 0.7);
+  animation: pulseStatus 2s infinite;
+}
+
+#status-banner.closed {
+  background: var(--vermelho);
+  animation: none;
+}
+
+@keyframes pulseStatus {
+  0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(46, 204, 113, 0.7); }
+  70% { transform: scale(1); box-shadow: 0 0 0 8px rgba(46, 204, 113, 0); }
+  100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(46, 204, 113, 0); }
 }
 
 /* --- BOTÕES DE AÇÃO DO HEADER --- */
@@ -238,13 +233,12 @@ body.no-scroll {
   justify-content: center;
   border: 2px solid var(--dourado);
 }
-
 /* --- OVERLAY DO MENU (EFEITO BLUR) --- */
 #menu-overlay {
   position: fixed;
   inset: 0;
   background: rgba(75, 44, 32, 0.4);
-  backdrop-filter: blur(6px);
+  backdrop-filter: blur(6px); /* Efeito vidro jateado premium */
   -webkit-backdrop-filter: blur(6px);
   z-index: 1850;
   opacity: 0;
@@ -375,7 +369,7 @@ body.no-scroll {
 /* --- BUSCADOR (STICKY) --- */
 .search-container {
   position: sticky;
-  top: 80px;
+  top: 80px; /* Logo abaixo da header */
   z-index: 800;
   background: var(--bg-page);
   padding: 15px 0;
@@ -417,7 +411,6 @@ body.no-scroll {
   transform: translateY(-2px);
   box-shadow: 0 10px 25px rgba(200, 40, 45, 0.15);
 }
-
 /* --- SEÇÕES DE CARDÁPIO --- */
 .menu-section {
   padding: 10px 16px 30px;
@@ -476,12 +469,14 @@ body.no-scroll {
   height: 100%;
 }
 
+/* Efeito de Clique no Celular */
 .card:active {
   transform: scale(0.97) translateY(2px);
   box-shadow: var(--shadow-md);
   border-color: var(--dourado);
 }
 
+/* Badge de "Novo" com Pulso */
 .card-badge-wrap {
   position: absolute;
   top: 12px;
@@ -501,6 +496,7 @@ body.no-scroll {
   box-shadow: 0 4px 10px rgba(200, 40, 45, 0.3);
 }
 
+/* Imagem do Produto */
 .card-img-container {
   width: 100%;
   height: 155px;
@@ -513,22 +509,21 @@ body.no-scroll {
 .card-img-container img {
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  object-fit: cover; /* Não distorce a foto do bolo */
   transition: transform 0.5s ease;
 }
 
+/* Informações do Produto */
 .card-info h3 {
   font-size: 1.05rem;
   font-weight: 800;
   color: var(--marrom);
   line-height: 1.2;
   margin-bottom: 6px;
-  min-height: 2.4em;
+  min-height: 2.4em; /* Alinha os títulos */
   display: flex;
   align-items: center;
   justify-content: center;
-  flex-wrap: wrap;
-  gap: 5px;
 }
 
 .card-info p {
@@ -537,11 +532,12 @@ body.no-scroll {
   line-height: 1.4;
   margin-bottom: 12px;
   display: -webkit-box;
-  -webkit-line-clamp: 3;
+  -webkit-line-clamp: 3; /* Corta texto longo em 3 linhas */
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
 
+/* Preços */
 .price-promo-wrap {
   margin-bottom: 15px;
   display: flex;
@@ -567,19 +563,21 @@ body.no-scroll {
   border: 1px solid var(--dourado);
 }
 
+/* Animação de Entrada dos Cards */
 @keyframes fadeIn {
   from { opacity: 0; transform: translateY(15px); }
   to { opacity: 1; transform: translateY(0); }
 }
-
+/* --- CONTAINER DE BOTÕES NOS CARDS --- */
 .actions {
   display: flex;
   flex-direction: column;
   gap: 10px;
-  margin-top: auto;
+  margin-top: auto; /* Empurra os botões para o fim do card */
   padding-top: 10px;
 }
 
+/* --- BOTÃO PRIMÁRIO: ADICIONAR AO CARRINHO --- */
 .add-cart {
   width: 100%;
   background: var(--vermelho) !important;
@@ -596,15 +594,17 @@ body.no-scroll {
   align-items: center;
   justify-content: center;
   gap: 8px;
-  box-shadow: 0 4px 0 #a51f23;
+  box-shadow: 0 4px 0 #a51f23; /* Sombra sólida para efeito 3D */
   transition: all 0.15s ease;
 }
 
+/* Feedback de clique (Botão afundando) */
 .add-cart:active {
   transform: translateY(2px) !important;
   box-shadow: 0 2px 0 #a51f23 !important;
 }
 
+/* --- BOTÃO SECUNDÁRIO: ADICIONAIS --- */
 .extras-btn {
   width: 100%;
   background: var(--bege) !important;
@@ -628,6 +628,7 @@ body.no-scroll {
   color: var(--marrom) !important;
 }
 
+/* --- BOTÃO DE LOGIN NO HEADER (REFINAMENTO) --- */
 .btn-google-auth {
   background: var(--branco) !important;
   border: 2px solid #ea4335 !important;
@@ -647,6 +648,7 @@ body.no-scroll {
   color: var(--branco) !important;
 }
 
+/* --- ANIMAÇÃO DE ADICIONADO (FEEDBACK VISUAL) --- */
 @keyframes addedSuccess {
   0% { transform: scale(1); }
   50% { transform: scale(1.05); background: #2ecc71 !important; }
@@ -657,6 +659,7 @@ body.no-scroll {
   animation: addedSuccess 0.4s ease;
 }
 
+/* --- ESTILO PARA BOTÕES DESABILITADOS (LOJA FECHADA) --- */
 button:disabled {
   background: #ccc !important;
   color: #888 !important;
@@ -664,19 +667,18 @@ button:disabled {
   cursor: not-allowed !important;
   border-color: #bbb !important;
 }
-
 /* --- CONTAINER DESLIZANTE DO CARRINHO --- */
 .mini-cart {
   position: fixed;
   right: 0;
   top: 0;
   width: 100%;
-  max-width: 400px;
+  max-width: 400px; /* Largura ideal para celulares maiores */
   height: 100vh;
-  height: 100dvh;
+  height: 100dvh; /* Fix para barra de navegação mobile */
   background: var(--branco);
   z-index: 2000;
-  transform: translateX(100%);
+  transform: translateX(100%); /* Escondido à direita */
   transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
   display: flex;
   flex-direction: column;
@@ -687,6 +689,7 @@ button:disabled {
   transform: translateX(0);
 }
 
+/* --- TOPO DO CARRINHO --- */
 .mini-head {
   background: var(--marrom);
   color: var(--bege);
@@ -725,6 +728,7 @@ button:disabled {
   justify-content: center;
 }
 
+/* --- LISTAGEM DE ITENS (SCROLL) --- */
 .mini-list-wrapper {
   flex: 1;
   overflow-y: auto;
@@ -747,6 +751,7 @@ button:disabled {
   to { opacity: 1; transform: translateX(0); }
 }
 
+/* --- BOTÕES DE QUANTIDADE (+/-) --- */
 .btn-qty, .cart-plus, .cart-minus {
   width: 34px !important;
   height: 34px !important;
@@ -771,6 +776,7 @@ button:disabled {
   margin-left: 10px;
 }
 
+/* --- RODAPÉ DO CARRINHO (RESUMO) --- */
 .mini-foot {
   padding: 20px;
   background: var(--branco);
@@ -778,7 +784,7 @@ button:disabled {
   flex-shrink: 0;
   box-shadow: 0 -5px 20px rgba(0,0,0,0.03);
 }
-
+/* --- BARRA DE PROGRESSO (FRETE GRÁTIS) --- */
 .progress-wrapper {
   background: #fff8e1;
   border: 1px solid var(--dourado);
@@ -807,11 +813,12 @@ button:disabled {
 .progress-fill {
   height: 100%;
   background: linear-gradient(90deg, var(--dourado), #ffa000);
-  width: 0%;
+  width: 0%; /* Controlado pelo JS */
   transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
   box-shadow: 0 0 10px rgba(225, 169, 95, 0.5);
 }
 
+/* --- SISTEMA DE ENTREGA (ESTILO NOTION) --- */
 .delivery-system {
   display: flex;
   flex-direction: column;
@@ -852,6 +859,7 @@ button:disabled {
   box-shadow: 0 0 0 4px rgba(225, 169, 95, 0.1);
 }
 
+/* Inputs Lado a Lado (Nº e Complemento) */
 .input-row-degust {
   display: flex;
   gap: 10px;
@@ -866,6 +874,7 @@ button:disabled {
   cursor: not-allowed;
 }
 
+/* --- CHECKBOX: RETIRADA NA DEGUST --- */
 .retirar-local-wrapper {
   background: rgba(225, 169, 95, 0.1);
   padding: 14px;
@@ -890,6 +899,7 @@ button:disabled {
   accent-color: var(--marrom);
 }
 
+/* --- SEÇÃO DE CUPOM --- */
 .coupon-section-degust {
   margin-top: 15px;
 }
@@ -921,28 +931,11 @@ button:disabled {
   margin-top: 6px;
   font-weight: 600;
 }
-
-/* --- FUNDO ESCURECIDO (BACKDROP) E MODAIS --- */
-#cart-backdrop {
-  position: fixed;
-  inset: 0;
-  background: rgba(75, 44, 32, 0.55);
-  z-index: 1700;
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 0.3s;
-  backdrop-filter: blur(2px);
-}
-
-#cart-backdrop.active {
-  opacity: 1;
-  pointer-events: auto;
-}
-
+/* --- FUNDO ESCURECIDO (BACKDROP) --- */
 .modal {
   position: fixed;
   inset: 0;
-  background: rgba(75, 44, 32, 0.85);
+  background: rgba(75, 44, 32, 0.85); /* Marrom translúcido */
   backdrop-filter: blur(5px);
   display: flex;
   align-items: center;
@@ -959,13 +952,14 @@ button:disabled {
   pointer-events: auto;
 }
 
+/* --- CORPO DO MODAL (ESTILO PREMIUM) --- */
 .modal-content {
-  background: var(--bege);
+  background: var(--bg2);
   width: 100%;
   max-width: 450px;
   max-height: 90vh;
-  border-radius: var(--rad-lg);
-  border: 4px solid var(--dourado);
+  border-radius: var(--rad-lg); /* 22px de arredondamento */
+  border: 4px solid var(--dourado); /* Borda marcante */
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
   display: flex;
   flex-direction: column;
@@ -1007,6 +1001,31 @@ button:disabled {
   border-top: 1px solid #eee;
 }
 
+/* --- BOTÃO GOOGLE (LOGIN MODAL) --- */
+.btn-google-auth {
+  width: 100%;
+  background: var(--branco) !important;
+  color: #444 !important;
+  border: 2px solid #ddd !important;
+  padding: 15px !important;
+  border-radius: 14px !important;
+  font-weight: 700 !important;
+  font-size: 0.95rem !important;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  cursor: pointer;
+  box-shadow: 0 4px 0 #eee;
+  transition: all 0.2s;
+}
+
+.btn-google-auth:active {
+  transform: translateY(2px);
+  box-shadow: 0 0 0 #eee;
+}
+
+/* --- LISTA DE EXTRAS (ADICIONAIS) --- */
 .extras-list {
   display: flex;
   flex-direction: column;
@@ -1025,6 +1044,7 @@ button:disabled {
   transition: var(--transition);
 }
 
+/* Efeito quando o checkbox é marcado */
 .extras-list label:has(input:checked) {
   border-color: var(--dourado);
   background: #fffdf9;
@@ -1036,38 +1056,18 @@ button:disabled {
   color: var(--marrom);
 }
 
-.topping-check {
-  width: 20px;
-  height: 20px;
-  accent-color: var(--marrom);
-  margin-right: 10px;
-}
-
-#extras-confirm {
-  width: 100%;
-  background: var(--marrom);
-  color: var(--bege);
-  border: none;
-  padding: 14px;
-  border-radius: 12px;
+.extras-list .topping-price {
+  color: var(--dourado);
   font-weight: 800;
-  font-size: 0.9rem;
-  cursor: pointer;
-  transition: var(--transition);
 }
-
-#extras-confirm:active {
-  transform: scale(0.98);
-}
-
-/* --- MODAL DO PIX --- */
+/* --- MODAL DO PIX: FINALIZAÇÃO --- */
 .pix-body {
   padding: 25px;
   text-align: center;
 }
 
 .pix-amount-display {
-  background: #fff8e1;
+  background: var(--bege);
   padding: 20px;
   border-radius: 15px;
   margin-bottom: 20px;
@@ -1088,6 +1088,7 @@ button:disabled {
   display: block;
 }
 
+/* Botões do PIX */
 .pix-btn-copy {
   background: var(--marrom) !important;
   color: var(--bege) !important;
@@ -1103,7 +1104,7 @@ button:disabled {
 }
 
 .pix-btn-whatsapp {
-  background: #25d366 !important;
+  background: #25d366 !important; /* Verde WhatsApp */
   color: #fff !important;
   border: none !important;
   padding: 16px !important;
@@ -1118,17 +1119,6 @@ button:disabled {
   box-shadow: 0 4px 15px rgba(37, 211, 102, 0.3);
 }
 
-.btn-link-gray {
-  background: none;
-  border: none;
-  color: #8d6e63;
-  font-size: 0.8rem;
-  text-decoration: underline;
-  cursor: pointer;
-  margin-top: 12px;
-  display: inline-block;
-}
-
 /* --- PAINÉIS DESLIZANTES (PEDIDOS E RECOMPENSAS) --- */
 .painel-overlay {
   display: none;
@@ -1136,7 +1126,7 @@ button:disabled {
   inset: 0;
   background: rgba(75, 44, 32, 0.7);
   z-index: 9500;
-  align-items: flex-end;
+  align-items: flex-end; /* Abre de baixo para cima */
   justify-content: center;
   backdrop-filter: blur(4px);
 }
@@ -1150,7 +1140,7 @@ button:disabled {
   width: 100%;
   max-width: 500px;
   max-height: 85vh;
-  border-radius: 30px 30px 0 0;
+  border-radius: 30px 30px 0 0; /* Bordas arredondadas só em cima */
   border: 3px solid var(--dourado);
   border-bottom: none;
   overflow-y: auto;
@@ -1183,39 +1173,57 @@ button:disabled {
   font-size: 1.1rem;
 }
 
-.fechar-painel {
-  background: rgba(255, 255, 255, 0.15);
-  border: 1px solid rgba(255, 255, 255, 0.4);
-  color: var(--bege);
-  width: 34px;
-  height: 34px;
-  border-radius: 50%;
-  font-size: 0.9rem;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: background 0.2s;
-}
-
-.fechar-painel:active {
-  background: rgba(255, 255, 255, 0.35);
-}
-
-.painel-body {
-  padding: 20px;
-}
-
-/* --- CARTÃO FIDELIDADE --- */
+/* --- CARTÃO FIDELIDADE (STAMPS) --- */
 #listaRecompensas {
   padding: 10px 0;
 }
 
-/* --- RODAPÉ PREMIUM (TRÊS MARIAS - MG) --- */
+.fidelidade-card {
+  background: linear-gradient(135deg, #fff 0%, var(--bege) 100%);
+  border-radius: 20px;
+  padding: 20px;
+  border: 2px solid var(--dourado);
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+.stamp-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 10px;
+  margin: 15px 0;
+}
+
+.stamp-slot {
+  width: 100%;
+  aspect-ratio: 1/1;
+  background: rgba(75, 44, 32, 0.05);
+  border: 2px dashed var(--dourado);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  color: rgba(75, 44, 32, 0.2);
+}
+
+.stamp-slot.active {
+  background: var(--branco);
+  border-style: solid;
+  color: var(--vermelho);
+  box-shadow: var(--shadow-sm);
+  animation: stampPop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+@keyframes stampPop {
+  from { transform: scale(0); }
+  to { transform: scale(1); }
+}
+/* --- RODAPÉ PREMIUM (DESIGN TRÊS MARIAS) --- */
 .footer {
   background: var(--marrom);
   color: var(--bege);
-  padding: 40px 20px 30px;
+  padding: 50px 20px 30px;
   margin-top: 50px;
   border-top: 6px solid var(--dourado);
   text-align: center;
@@ -1245,34 +1253,6 @@ button:disabled {
   opacity: 0.85;
 }
 
-.footer-links {
-  display: flex;
-  gap: 16px;
-  justify-content: center;
-  margin-bottom: 20px;
-  flex-wrap: wrap;
-}
-
-.footer-link {
-  background: rgba(255, 255, 255, 0.1);
-  color: var(--bege);
-  text-decoration: none;
-  padding: 8px 20px;
-  border-radius: 30px;
-  border: 1px solid var(--dourado);
-  font-weight: 600;
-  font-size: 0.8rem;
-  transition: var(--transition);
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-}
-
-.footer-link:active {
-  background: rgba(255, 255, 255, 0.25);
-  transform: scale(0.96);
-}
-
 .footer-legal {
   border-top: 1px solid rgba(245, 230, 202, 0.1);
   padding-top: 20px;
@@ -1296,7 +1276,7 @@ button:disabled {
   padding: 20px;
   z-index: 9999;
   box-shadow: var(--shadow-lg);
-  display: none;
+  display: none; /* Controlado pelo JS */
   flex-direction: column;
   align-items: center;
   gap: 12px;
@@ -1331,7 +1311,7 @@ button:disabled {
 /* --- TOASTS / POPUPS (NOTIFICAÇÕES NO TOPO) --- */
 .popup-add, .dfl-toast {
   position: fixed;
-  top: 90px;
+  top: 90px; /* Logo abaixo da header */
   left: 50%;
   transform: translateX(-50%) translateY(-20px);
   background: var(--marrom);
@@ -1365,97 +1345,6 @@ button:disabled {
 @keyframes slideInUp {
   from { transform: translateY(100px); opacity: 0; }
   to { transform: translateY(0); opacity: 1; }
-}
-
-/* --- HIGHLIGHT SEÇÃO (SCROLL) --- */
-.highlight-section {
-  animation: sectionPulse 0.8s ease;
-}
-
-@keyframes sectionPulse {
-  0%,100%{background:transparent;}
-  50%{background:rgba(225,169,95,0.12);border-radius:12px;}
-}
-
-/* --- RELATÓRIOS (ADMIN) --- */
-.rel-filtro {
-  padding: 6px 14px;
-  border: 2px solid var(--dourado);
-  border-radius: 20px;
-  background: var(--branco);
-  color: var(--marrom);
-  font-weight: 700;
-  font-size: 0.75rem;
-  cursor: pointer;
-  transition: all .2s;
-}
-
-.rel-filtro.rel-ativo,
-.rel-filtro:active {
-  background: var(--marrom);
-  color: var(--bege);
-  border-color: var(--marrom);
-}
-
-.rel-card {
-  background: linear-gradient(135deg, var(--bege) 0%, #fff 100%);
-  border: 1px solid rgba(225,169,95,.4);
-  border-radius: 12px;
-  padding: 12px 10px;
-  text-align: center;
-  box-shadow: 0 2px 6px rgba(75,44,32,.08);
-}
-
-.rel-card-val {
-  font-size: 1.1rem;
-  font-weight: 800;
-  color: var(--marrom);
-  margin-bottom: 4px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.rel-card-label {
-  font-size: 0.65rem;
-  color: #8d6e63;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: .5px;
-}
-
-/* --- RESPONSIVIDADE --- */
-@media (max-width: 480px) {
-  .grid {
-    grid-template-columns: repeat(auto-fill, minmax(145px, 1fr));
-    gap: 12px;
-  }
-  
-  .card-info h3 {
-    font-size: 0.9rem;
-  }
-  
-  .price-new {
-    font-size: 1.1rem;
-  }
-  
-  .add-cart, .extras-btn {
-    padding: 10px 6px !important;
-    font-size: 0.7rem !important;
-  }
-  
-  .modal-content {
-    width: 95%;
-  }
-  
-  .footer-links {
-    gap: 10px;
-  }
-  
-  .footer-link {
-    padding: 6px 14px;
-    font-size: 0.7rem;
-  }
 }
 
 /* FINAL DO ARQUIVO CSS */
