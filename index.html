@@ -2,7 +2,7 @@
 <html lang="pt-br">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=yes" />
   <title>Degust Bolos no Pote — A felicidade vem em potes</title>
 
   <link rel="icon" type="image/png" sizes="16x16" href="logo.png">
@@ -101,8 +101,9 @@
           </li>
         </ul>
       </div>
-    </div> <div class="menu-footer">
-      <p>v12.0 — Patos de Minas/MG</p>
+    </div>
+    <div class="menu-footer">
+      <p>v12.0 — Três Marias/MG</p>
     </div>
   </nav>
 
@@ -126,6 +127,7 @@
     </div>
 
     <div class="header-actions">
+      <div id="status-dot" class="status-dot online" title="Status da loja"></div>
       <button id="user-btn" class="user-button" type="button">
         <div id="user-foto-wrap" style="display:none;">
           <img id="user-foto" src="" alt="Perfil" width="30" height="30">
@@ -142,7 +144,7 @@
 
   <main class="main-content-wrapper" id="main-content">
     
-    <div id="status-banner" class="status-banner"></div>
+    <div id="status-banner" class="status-banner" style="display:none;"></div>
 
     <div class="search-container">
       <div class="search-input-wrapper">
@@ -355,8 +357,13 @@
         <img src="logo.png" alt="Degust" width="45" height="45" loading="lazy">
         <p>Doçura em cada camada.</p>
       </div>
+      <div class="footer-links">
+        <a href="https://wa.me/message/VDQCBHWD33ORK1" target="_blank" class="footer-link">🟢 WhatsApp</a>
+        <a href="https://www.instagram.com/degustbolosnopote" target="_blank" class="footer-link">📸 Instagram</a>
+      </div>
       <div class="footer-legal">
-        <p>© 2026 <strong>Degust Bolos no Pote</strong></p>
+        <p>© 2026 <strong>Degust Bolos no Pote</strong> | Três Marias - MG</p>
+        <p>Desenvolvido com carinho para Álefe Jõhsefe | v12.0</p>
       </div>
     </div>
   </footer>
@@ -383,9 +390,11 @@
         <button class="login-close" type="button" aria-label="Fechar">✖</button>
       </div>
       <div class="modal-body login-body">
+        <p style="text-align:center; margin-bottom:16px;">Entre para acumular pontos em cada bolo e ganhar prêmios exclusivos! 🎉</p>
         <button id="google-login" class="btn-google-auth" type="button">
           Entrar com Google
         </button>
+        <p style="text-align:center; font-size:0.7rem; margin-top:16px; color:#8d6e63;">Seus dados estão seguros com a criptografia do Google.</p>
       </div>
     </div>
   </div>
