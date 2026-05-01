@@ -1,221 +1,164 @@
 /* ===========================================================
-   🍰 Degust Bolos no Pote – v12.1.0 (CSS COMPLETO)
-   Localização Oficial: Três Marias — MG
+   🍰 Degust Bolos no Pote – v13.0 (CSS COMPLETO E CORRIGIDO)
+   Localização: Três Marias — MG
+   CORREÇÕES: Rodapé, modais, carrinho, cards, responsividade
    =========================================================== */
 
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&family=Inter:wght@400;600;700&display=swap');
 
 :root {
-  /* Paleta Degust */
-  --marrom:   #4B2C20;
-  --bege:     #F5E6CA;
-  --vermelho: #C8282D;
-  --dourado:  #E1A95F;
-  --branco:   #ffffff;
+  --marrom:    #4B2C20;
+  --bege:      #F5E6CA;
+  --vermelho:  #C8282D;
+  --dourado:   #E1A95F;
+  --branco:    #ffffff;
+  --cinza:     #6d4c41;
+  --cinza-claro: #a1887f;
   
-  /* Sistema de Cores */
-  --bg-page:  linear-gradient(180deg, #F5E6CA 0%, #fdf8ef 100%);
-  --bg-card:  #ffffff;
-  --text-main: var(--marrom);
-  --text-muted: #6d4c41;
-  
-  /* Status */
-  --success:  #2ecc71;
-  --danger:   #d32f2f;
-  --warning:  #f1c40f;
-
-  /* Bordas e Sombras */
-  --rad-sm:   8px;
-  --rad-md:   12px;
-  --rad-lg:   22px;
-  --rad-full: 50px;
-  
-  --shadow-sm: 0 2px 5px rgba(75, 44, 32, 0.1);
-  --shadow-md: 0 8px 20px rgba(75, 44, 32, 0.15);
-  --shadow-lg: 0 15px 35px rgba(75, 44, 32, 0.25);
-  --shadow-in: inset 0 2px 4px rgba(255,255,255,0.3);
-  
-  --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  --bg-page:   linear-gradient(180deg, #F5E6CA 0%, #fdf8ef 100%);
+  --rad:       12px;
+  --rad-lg:    20px;
+  --shadow:    0 4px 12px rgba(75, 44, 32, 0.1);
+  --transition: all 0.2s ease;
 }
 
-/* --- RESET GERAL --- */
-*, *::before, *::after {
+* {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
   -webkit-tap-highlight-color: transparent;
-  font-family: 'Poppins', 'Inter', sans-serif;
-}
-
-html, body {
-  height: 100%;
-  width: 100%;
-  scroll-behavior: smooth;
-  overflow-x: hidden;
 }
 
 body {
   background: var(--bg-page);
   background-attachment: fixed;
-  color: var(--text-main);
+  color: var(--marrom);
+  font-family: 'Poppins', 'Inter', sans-serif;
   line-height: 1.5;
-  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
 }
 
-body.no-scroll {
-  overflow: hidden !important;
-}
+body.no-scroll { overflow: hidden !important; }
 
-/* --- ESTILIZAÇÃO DA SCROLLBAR (PARA CELULARES QUE SUPORTAM) --- */
-::-webkit-scrollbar {
-  width: 6px;
-}
-::-webkit-scrollbar-track {
-  background: var(--bege);
-}
-::-webkit-scrollbar-thumb {
-  background: var(--dourado);
-  border-radius: 10px;
-}
-
-/* --- UTILS --- */
-.hidden { display: none !important; }
-/* --- HEADER: ESTRUTURA E RESPIRARE --- */
+/* ========== HEADER ========== */
 .header {
   position: fixed;
-  inset-inline: 0;
   top: 0;
-  height: 80px; /* Altura ideal para mobile sem cortar nada */
+  left: 0;
+  right: 0;
+  height: 70px;
   background: var(--dourado);
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 0 16px;
+  padding: 0 12px;
   z-index: 1600;
-  box-shadow: var(--shadow-sm);
-  border-bottom: 2px solid rgba(75, 44, 32, 0.1);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
 }
 
 .header-content {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 8px;
+  flex: 1;
 }
 
-/* --- LOGO CIRCULAR PREMIUM --- */
+#hamburger-btn {
+  background: none;
+  border: none;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 4px;
+  cursor: pointer;
+}
+
+#hamburger-btn .bar {
+  width: 22px;
+  height: 2.5px;
+  background: var(--marrom);
+  border-radius: 2px;
+}
+
 .logo-container {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
 }
 
 .logo-wrapper {
-  position: relative;
-  width: 54px;
-  height: 54px;
+  width: 44px;
+  height: 44px;
   background: var(--branco);
   border-radius: 50%;
-  padding: 2px;
   border: 2px solid var(--marrom);
-  box-shadow: var(--shadow-sm);
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
 .logo {
-  width: 100%;
-  height: 100%;
+  width: 38px;
+  height: 38px;
   border-radius: 50%;
   object-fit: cover;
 }
 
 .header-info h1 {
-  font-size: 1.25rem;
+  font-size: 1rem;
   font-weight: 800;
   color: var(--marrom);
-  letter-spacing: -0.5px;
   line-height: 1.1;
 }
 
 .header-info .tagline {
-  font-size: 0.65rem;
+  font-size: 0.55rem;
   font-weight: 600;
   color: var(--marrom);
-  opacity: 0.85;
+  opacity: 0.8;
 }
 
-/* --- A NOVA BOLINHA DE STATUS (SUBSTITUI O BANNER) --- */
-#status-banner {
-  position: absolute;
-  bottom: -2px;
-  right: -2px;
-  width: 14px;
-  height: 14px;
-  border-radius: 50%;
-  border: 2px solid var(--branco);
-  font-size: 0; /* Esconde o texto do banner */
-  z-index: 10;
-}
-
-#status-banner.open {
-  background: var(--success);
-  box-shadow: 0 0 0 0 rgba(46, 204, 113, 0.7);
-  animation: pulseStatus 2s infinite;
-}
-
-#status-banner.closed {
-  background: var(--vermelho);
-  animation: none;
-}
-
-@keyframes pulseStatus {
-  0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(46, 204, 113, 0.7); }
-  70% { transform: scale(1); box-shadow: 0 0 0 8px rgba(46, 204, 113, 0); }
-  100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(46, 204, 113, 0); }
-}
-
-/* --- BOTÕES DE AÇÃO DO HEADER --- */
 .header-actions {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
 }
 
 .user-button {
   background: var(--marrom);
   color: var(--bege);
   border: none;
-  padding: 8px 12px;
-  border-radius: var(--rad-md);
-  font-size: 0.75rem;
+  padding: 6px 12px;
+  border-radius: 30px;
+  font-size: 0.7rem;
   font-weight: 700;
   display: flex;
   align-items: center;
-  gap: 6px;
-  box-shadow: var(--shadow-in);
-  transition: var(--transition);
+  gap: 4px;
+  cursor: pointer;
 }
 
-.user-button:active { transform: scale(0.95); }
+.user-button:active { transform: scale(0.96); }
 
 .cart-button {
   position: relative;
   background: var(--marrom);
   color: var(--bege);
   border: none;
-  width: 44px;
-  height: 44px;
+  width: 38px;
+  height: 38px;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 1.1rem;
-  box-shadow: var(--shadow-md);
-  transition: var(--transition);
+  font-size: 1rem;
+  cursor: pointer;
 }
 
-.cart-button:active { transform: scale(0.9); }
+.cart-button:active { transform: scale(0.94); }
 
 #cart-count {
   position: absolute;
@@ -223,27 +166,27 @@ body.no-scroll {
   right: -4px;
   background: var(--vermelho);
   color: var(--branco);
-  font-size: 0.65rem;
+  font-size: 0.6rem;
   font-weight: 800;
-  width: 20px;
-  height: 20px;
+  width: 18px;
+  height: 18px;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
   border: 2px solid var(--dourado);
 }
-/* --- OVERLAY DO MENU (EFEITO BLUR) --- */
+
+/* ========== MENU LATERAL ========== */
 #menu-overlay {
   position: fixed;
   inset: 0;
   background: rgba(75, 44, 32, 0.4);
-  backdrop-filter: blur(6px); /* Efeito vidro jateado premium */
-  -webkit-backdrop-filter: blur(6px);
+  backdrop-filter: blur(4px);
   z-index: 1850;
   opacity: 0;
   pointer-events: none;
-  transition: opacity 0.4s ease;
+  transition: opacity 0.3s;
 }
 
 #menu-overlay.active {
@@ -251,92 +194,78 @@ body.no-scroll {
   pointer-events: auto;
 }
 
-/* --- CONTAINER DO MENU LATERAL --- */
 #side-menu {
   position: fixed;
-  left: -300px;
+  left: -280px;
   top: 0;
-  width: 290px;
+  width: 280px;
   height: 100%;
   background: var(--branco);
   z-index: 1900;
-  transition: left 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: 5px 0 30px rgba(0, 0, 0, 0.2);
+  transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 5px 0 20px rgba(0,0,0,0.2);
   display: flex;
   flex-direction: column;
 }
 
-#side-menu.active {
-  left: 0;
-}
+#side-menu.active { left: 0; }
 
 .menu-header {
   background: var(--marrom);
   color: var(--bege);
-  padding: 30px 20px;
+  padding: 20px 16px;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  border-bottom: 4px solid var(--dourado);
-}
-
-.menu-logo-area {
-  display: flex;
-  align-items: center;
-  gap: 12px;
+  border-bottom: 3px solid var(--dourado);
 }
 
 .menu-header h3 {
-  font-size: 1.3rem;
-  font-weight: 800;
-  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 700;
 }
 
 #menu-close {
-  background: rgba(255, 255, 255, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: rgba(255,255,255,0.15);
+  border: none;
   color: var(--bege);
-  width: 36px;
-  height: 36px;
+  width: 32px;
+  height: 32px;
   border-radius: 50%;
-  font-size: 1.2rem;
+  font-size: 1rem;
   cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
 }
 
-/* --- LISTA DE LINKS DO MENU --- */
 .menu-content {
   flex: 1;
   overflow-y: auto;
-  padding: 20px 0;
+  padding: 16px 0;
 }
 
 .menu-title {
-  padding: 10px 20px;
-  font-size: 0.75rem;
+  padding: 8px 16px;
+  font-size: 0.7rem;
   text-transform: uppercase;
-  color: #a1887f;
-  font-weight: 800;
-  letter-spacing: 1.5px;
+  color: var(--cinza-claro);
+  font-weight: 700;
+  letter-spacing: 1px;
 }
 
 .menu-list {
   list-style: none;
-  margin-bottom: 25px;
+  margin-bottom: 20px;
 }
 
 .menu-list li a,
 .menu-list li .menu-link-action {
   display: flex;
   align-items: center;
-  padding: 16px 20px;
+  gap: 12px;
+  padding: 12px 16px;
   color: var(--marrom);
   text-decoration: none;
   font-weight: 600;
-  font-size: 0.95rem;
-  gap: 15px;
+  font-size: 0.9rem;
   transition: var(--transition);
   background: none;
   border: none;
@@ -347,595 +276,390 @@ body.no-scroll {
 .menu-list li a:active,
 .menu-list li .menu-link-action:active {
   background: var(--bege);
-  padding-left: 30px;
   color: var(--vermelho);
 }
 
-.menu-icon {
-  font-size: 1.2rem;
-  width: 24px;
-  text-align: center;
-}
+.menu-icon { font-size: 1.1rem; width: 24px; }
 
 .menu-footer {
-  padding: 20px;
+  padding: 16px;
   border-top: 1px solid #eee;
-  font-size: 0.75rem;
-  color: #999;
+  font-size: 0.7rem;
+  color: var(--cinza-claro);
   text-align: center;
-  font-weight: 600;
 }
 
-/* --- BUSCADOR (STICKY) --- */
+/* ========== CONTEÚDO PRINCIPAL ========== */
+.main-content-wrapper {
+  margin-top: 70px;
+  padding: 12px;
+  max-width: 1200px;
+  margin-inline: auto;
+  min-height: calc(100vh - 140px);
+}
+
+/* ========== BUSCA ========== */
 .search-container {
   position: sticky;
-  top: 80px; /* Logo abaixo da header */
+  top: 75px;
   z-index: 800;
-  background: var(--bg-page);
-  padding: 15px 0;
-  margin-bottom: 10px;
+  margin-bottom: 12px;
 }
 
 .search-input-wrapper {
   position: relative;
-  display: flex;
-  align-items: center;
   background: var(--branco);
-  border-radius: var(--rad-lg);
+  border-radius: 50px;
   border: 2px solid var(--dourado);
-  box-shadow: var(--shadow-md);
-  transition: var(--transition);
-  margin: 0 16px;
-}
-
-.search-icon {
-  position: absolute;
-  left: 18px;
-  font-size: 1.1rem;
-  pointer-events: none;
+  margin: 0 12px;
 }
 
 .search-container input {
   width: 100%;
-  padding: 16px 50px;
+  padding: 12px 20px;
   border: none;
   background: none;
-  font-size: 1rem;
-  font-weight: 600;
-  color: var(--marrom);
-  font-family: 'Inter', sans-serif;
+  font-size: 0.9rem;
+  font-weight: 500;
+  border-radius: 50px;
 }
 
-.search-input-wrapper:focus-within {
-  border-color: var(--vermelho);
-  transform: translateY(-2px);
-  box-shadow: 0 10px 25px rgba(200, 40, 45, 0.15);
-}
-/* --- SEÇÕES DE CARDÁPIO --- */
+/* ========== SEÇÕES E CARDS ========== */
 .menu-section {
-  padding: 10px 16px 30px;
-  animation: fadeIn 0.8s ease-out;
+  padding: 10px 8px 30px;
 }
 
 .section-header {
-  margin-bottom: 20px;
-  padding-left: 5px;
+  margin-bottom: 16px;
+  padding-left: 4px;
 }
 
 .section-header h2 {
-  font-size: 1.5rem;
-  font-weight: 850;
+  font-size: 1.3rem;
+  font-weight: 800;
   color: var(--marrom);
   display: flex;
   align-items: center;
-  gap: 10px;
-  letter-spacing: -0.8px;
+  gap: 8px;
 }
 
 .section-header h2::before {
   content: '';
-  width: 5px;
-  height: 28px;
+  width: 4px;
+  height: 22px;
   background: var(--vermelho);
-  border-radius: 10px;
+  border-radius: 4px;
 }
 
 .section-desc {
-  font-size: 0.8rem;
-  color: var(--text-muted);
-  font-weight: 500;
-  margin-top: 2px;
+  font-size: 0.75rem;
+  color: var(--cinza);
+  margin-top: 4px;
 }
 
-/* --- GRID DE PRODUTOS --- */
 .grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(165px, 1fr));
-  gap: 18px;
+  grid-template-columns: repeat(auto-fill, minmax(155px, 1fr));
+  gap: 14px;
 }
 
-/* --- O CARD DEGUST PREMIUM --- */
 .card {
   background: var(--branco);
-  border-radius: var(--rad-lg);
+  border-radius: 18px;
   padding: 12px;
-  display: flex;
-  flex-direction: column;
-  position: relative;
-  border: 1px solid rgba(225, 169, 95, 0.2);
-  box-shadow: var(--shadow-sm);
+  border: 1px solid rgba(225, 169, 95, 0.25);
+  box-shadow: var(--shadow);
   transition: var(--transition);
-  overflow: hidden;
-  height: 100%;
 }
 
-/* Efeito de Clique no Celular */
 .card:active {
-  transform: scale(0.97) translateY(2px);
-  box-shadow: var(--shadow-md);
+  transform: scale(0.97);
   border-color: var(--dourado);
 }
 
-/* Badge de "Novo" com Pulso */
 .card-badge-wrap {
   position: absolute;
-  top: 12px;
-  left: 12px;
-  z-index: 5;
+  top: 10px;
+  left: 10px;
+  z-index: 2;
 }
 
 .badge-new {
   background: var(--vermelho);
   color: var(--branco);
-  font-size: 0.6rem;
+  font-size: 0.55rem;
   font-weight: 800;
-  padding: 4px 10px;
-  border-radius: 8px;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  box-shadow: 0 4px 10px rgba(200, 40, 45, 0.3);
+  padding: 3px 8px;
+  border-radius: 6px;
 }
 
-/* Imagem do Produto */
 .card-img-container {
   width: 100%;
-  height: 155px;
-  border-radius: var(--rad-md);
+  height: 130px;
+  border-radius: 14px;
   overflow: hidden;
   background: var(--bege);
-  margin-bottom: 12px;
+  margin-bottom: 10px;
 }
 
 .card-img-container img {
   width: 100%;
   height: 100%;
-  object-fit: cover; /* Não distorce a foto do bolo */
-  transition: transform 0.5s ease;
+  object-fit: cover;
 }
 
-/* Informações do Produto */
 .card-info h3 {
-  font-size: 1.05rem;
-  font-weight: 800;
+  font-size: 0.9rem;
+  font-weight: 700;
   color: var(--marrom);
-  line-height: 1.2;
-  margin-bottom: 6px;
-  min-height: 2.4em; /* Alinha os títulos */
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  margin-bottom: 4px;
+  text-align: center;
 }
 
 .card-info p {
-  font-size: 0.78rem;
-  color: var(--text-muted);
-  line-height: 1.4;
-  margin-bottom: 12px;
+  font-size: 0.7rem;
+  color: var(--cinza);
+  margin-bottom: 10px;
+  text-align: center;
   display: -webkit-box;
-  -webkit-line-clamp: 3; /* Corta texto longo em 3 linhas */
+  -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
 
-/* Preços */
 .price-promo-wrap {
-  margin-bottom: 15px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
+  text-align: center;
+  margin-bottom: 10px;
 }
 
 .price-new {
-  font-size: 1.4rem;
-  font-weight: 900;
+  font-size: 1.2rem;
+  font-weight: 800;
   color: var(--vermelho);
-  letter-spacing: -0.5px;
 }
 
 .badge-small {
-  font-size: 0.6rem;
+  font-size: 0.55rem;
   background: var(--bege);
   color: var(--marrom);
-  padding: 2px 8px;
-  border-radius: 5px;
-  font-weight: 700;
-  margin-left: 5px;
-  border: 1px solid var(--dourado);
+  padding: 2px 6px;
+  border-radius: 10px;
+  margin-left: 4px;
 }
 
-/* Animação de Entrada dos Cards */
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(15px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-/* --- CONTAINER DE BOTÕES NOS CARDS --- */
 .actions {
   display: flex;
   flex-direction: column;
-  gap: 10px;
-  margin-top: auto; /* Empurra os botões para o fim do card */
-  padding-top: 10px;
-}
-
-/* --- BOTÃO PRIMÁRIO: ADICIONAR AO CARRINHO --- */
-.add-cart {
-  width: 100%;
-  background: var(--vermelho) !important;
-  color: var(--branco) !important;
-  border: none !important;
-  padding: 14px 10px !important;
-  border-radius: var(--rad-md) !important;
-  font-weight: 800 !important;
-  font-size: 0.82rem !important;
-  text-transform: uppercase;
-  letter-spacing: 0.8px;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  box-shadow: 0 4px 0 #a51f23; /* Sombra sólida para efeito 3D */
-  transition: all 0.15s ease;
-}
-
-/* Feedback de clique (Botão afundando) */
-.add-cart:active {
-  transform: translateY(2px) !important;
-  box-shadow: 0 2px 0 #a51f23 !important;
-}
-
-/* --- BOTÃO SECUNDÁRIO: ADICIONAIS --- */
-.extras-btn {
-  width: 100%;
-  background: var(--bege) !important;
-  color: var(--marrom) !important;
-  border: 2px solid var(--dourado) !important;
-  padding: 12px 10px !important;
-  border-radius: var(--rad-md) !important;
-  font-weight: 700 !important;
-  font-size: 0.8rem !important;
-  text-transform: uppercase;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
   gap: 6px;
-  transition: var(--transition);
 }
 
-.extras-btn:active {
-  background: var(--dourado) !important;
-  color: var(--marrom) !important;
+.add-cart {
+  background: var(--vermelho);
+  color: var(--branco);
+  border: none;
+  padding: 10px;
+  border-radius: 30px;
+  font-weight: 700;
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  cursor: pointer;
 }
 
-/* --- BOTÃO DE LOGIN NO HEADER (REFINAMENTO) --- */
-.btn-google-auth {
-  background: var(--branco) !important;
-  border: 2px solid #ea4335 !important;
-  color: #ea4335 !important;
-  padding: 12px 18px !important;
-  border-radius: var(--rad-md) !important;
-  font-weight: 700 !important;
-  font-size: 0.85rem !important;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  transition: var(--transition);
+.add-cart:active { transform: scale(0.97); }
+
+.extras-btn {
+  background: var(--bege);
+  color: var(--marrom);
+  border: 1.5px solid var(--dourado);
+  padding: 8px;
+  border-radius: 30px;
+  font-weight: 600;
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  cursor: pointer;
 }
 
-.btn-google-auth:active {
-  background: #ea4335 !important;
-  color: var(--branco) !important;
-}
+.extras-btn:active { background: var(--dourado); }
 
-/* --- ANIMAÇÃO DE ADICIONADO (FEEDBACK VISUAL) --- */
-@keyframes addedSuccess {
-  0% { transform: scale(1); }
-  50% { transform: scale(1.05); background: #2ecc71 !important; }
-  100% { transform: scale(1); }
-}
-
-.item-added-animation {
-  animation: addedSuccess 0.4s ease;
-}
-
-/* --- ESTILO PARA BOTÕES DESABILITADOS (LOJA FECHADA) --- */
-button:disabled {
-  background: #ccc !important;
-  color: #888 !important;
-  box-shadow: none !important;
-  cursor: not-allowed !important;
-  border-color: #bbb !important;
-}
-/* --- CONTAINER DESLIZANTE DO CARRINHO --- */
+/* ========== CARRINHO LATERAL ========== */
 .mini-cart {
   position: fixed;
   right: 0;
   top: 0;
   width: 100%;
-  max-width: 400px; /* Largura ideal para celulares maiores */
+  max-width: 380px;
   height: 100vh;
-  height: 100dvh; /* Fix para barra de navegação mobile */
   background: var(--branco);
   z-index: 2000;
-  transform: translateX(100%); /* Escondido à direita */
-  transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+  transform: translateX(100%);
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   display: flex;
   flex-direction: column;
-  box-shadow: -10px 0 30px rgba(75, 44, 32, 0.2);
+  box-shadow: -5px 0 20px rgba(0,0,0,0.2);
 }
 
-.mini-cart.active {
-  transform: translateX(0);
-}
+.mini-cart.active { transform: translateX(0); }
 
-/* --- TOPO DO CARRINHO --- */
 .mini-head {
   background: var(--marrom);
   color: var(--bege);
-  padding: 22px 20px;
+  padding: 16px;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  border-bottom: 4px solid var(--dourado);
   flex-shrink: 0;
 }
 
-.mini-title-area {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
+.mini-head h3 { font-size: 1rem; font-weight: 700; }
 
-.mini-title-area h3 {
-  margin: 0;
-  font-size: 1.2rem;
-  font-weight: 800;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
-
-.mini-head .extras-close {
-  background: rgba(255, 255, 255, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.2);
+.mini-head button {
+  background: rgba(255,255,255,0.15);
+  border: none;
   color: var(--bege);
-  width: 32px;
-  height: 32px;
+  width: 30px;
+  height: 30px;
   border-radius: 50%;
   cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
 }
 
-/* --- LISTAGEM DE ITENS (SCROLL) --- */
 .mini-list-wrapper {
   flex: 1;
   overflow-y: auto;
-  padding: 15px;
+  padding: 12px;
   background: #fdfaf5;
 }
 
 .cart-item {
   background: var(--branco);
-  border-radius: var(--rad-md);
-  padding: 15px;
-  margin-bottom: 12px;
-  border: 1px solid rgba(225, 169, 95, 0.15);
-  box-shadow: var(--shadow-sm);
-  animation: itemIn 0.3s ease-out both;
+  border-radius: 12px;
+  padding: 12px;
+  margin-bottom: 10px;
+  border: 1px solid rgba(225,169,95,0.2);
 }
 
-@keyframes itemIn {
-  from { opacity: 0; transform: translateX(20px); }
-  to { opacity: 1; transform: translateX(0); }
-}
-
-/* --- BOTÕES DE QUANTIDADE (+/-) --- */
-.btn-qty, .cart-plus, .cart-minus {
-  width: 34px !important;
-  height: 34px !important;
-  border-radius: 8px !important;
-  border: none !important;
-  font-weight: 800 !important;
-  font-size: 1.1rem !important;
+.cart-plus, .cart-minus {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  border: none;
+  font-weight: 700;
+  font-size: 1rem;
   cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: var(--transition);
 }
 
-.cart-minus { background: var(--bege) !important; color: var(--marrom) !important; }
-.cart-plus  { background: var(--marrom) !important; color: var(--bege) !important; }
-.cart-remove { 
-  background: none !important; 
-  color: var(--vermelho) !important; 
-  border: none !important; 
-  font-size: 1.2rem !important;
-  margin-left: 10px;
-}
+.cart-plus { background: var(--marrom); color: var(--bege); }
+.cart-minus { background: var(--bege); color: var(--marrom); border: 1px solid var(--dourado); }
+.cart-remove { background: none; color: var(--vermelho); border: none; font-size: 1.1rem; margin-left: 8px; }
 
-/* --- RODAPÉ DO CARRINHO (RESUMO) --- */
 .mini-foot {
-  padding: 20px;
+  padding: 14px;
   background: var(--branco);
-  border-top: 2px solid var(--bege);
+  border-top: 1px solid var(--bege);
   flex-shrink: 0;
-  box-shadow: 0 -5px 20px rgba(0,0,0,0.03);
+  max-height: 50vh;
+  overflow-y: auto;
 }
-/* --- BARRA DE PROGRESSO (FRETE GRÁTIS) --- */
+
 .progress-wrapper {
   background: #fff8e1;
   border: 1px solid var(--dourado);
-  border-radius: var(--rad-md);
-  padding: 12px;
-  margin-bottom: 20px;
+  border-radius: 12px;
+  padding: 10px;
+  margin-bottom: 14px;
   text-align: center;
-  box-shadow: var(--shadow-sm);
 }
 
 .progress-text {
-  font-size: 0.82rem;
+  font-size: 0.75rem;
   font-weight: 600;
-  color: var(--marrom);
-  margin-bottom: 8px;
+  margin-bottom: 6px;
 }
 
 .progress-bar-container {
-  background: rgba(75, 44, 32, 0.1);
-  height: 10px;
-  border-radius: 20px;
+  background: rgba(75,44,32,0.1);
+  height: 6px;
+  border-radius: 3px;
   overflow: hidden;
-  position: relative;
 }
 
 .progress-fill {
   height: 100%;
   background: linear-gradient(90deg, var(--dourado), #ffa000);
-  width: 0%; /* Controlado pelo JS */
-  transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: 0 0 10px rgba(225, 169, 95, 0.5);
+  width: 0%;
+  transition: width 0.5s;
 }
 
-/* --- SISTEMA DE ENTREGA (ESTILO NOTION) --- */
 .delivery-system {
   display: flex;
   flex-direction: column;
-  gap: 12px;
-  margin-top: 15px;
-}
-
-.label-degust {
-  font-size: 0.8rem;
-  font-weight: 700;
-  color: var(--marrom);
-  margin-bottom: 4px;
-  display: block;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
-
-.input-group-degust {
-  display: flex;
-  gap: 8px;
+  gap: 10px;
 }
 
 .delivery-system input {
   width: 100%;
-  padding: 14px 16px;
+  padding: 12px;
   border-radius: 10px;
   border: 2px solid var(--bege);
   background: var(--branco);
-  font-size: 0.9rem;
-  color: var(--marrom);
-  font-family: 'Inter', sans-serif;
-  transition: var(--transition);
+  font-size: 0.85rem;
 }
 
-.delivery-system input:focus {
-  border-color: var(--dourado);
-  background: #fff;
-  box-shadow: 0 0 0 4px rgba(225, 169, 95, 0.1);
-}
-
-/* Inputs Lado a Lado (Nº e Complemento) */
-.input-row-degust {
-  display: flex;
-  gap: 10px;
-}
-
-.input-short { width: 35% !important; }
-.input-flex  { width: 65% !important; }
-
-.input-readonly {
-  background: #f9f4eb !important;
-  color: #8d6e63 !important;
-  cursor: not-allowed;
-}
-
-/* --- CHECKBOX: RETIRADA NA DEGUST --- */
 .retirar-local-wrapper {
-  background: rgba(225, 169, 95, 0.1);
-  padding: 14px;
+  background: rgba(225,169,95,0.1);
+  padding: 12px;
   border-radius: 12px;
-  margin: 10px 0;
-  border: 1px dashed var(--dourado);
+  margin: 8px 0;
 }
 
 .checkbox-container-degust {
   display: flex;
   align-items: center;
-  gap: 10px;
-  cursor: pointer;
-  font-weight: 700;
-  font-size: 0.9rem;
-  color: var(--marrom);
-}
-
-.checkbox-container-degust input {
-  width: 22px;
-  height: 22px;
-  accent-color: var(--marrom);
-}
-
-/* --- SEÇÃO DE CUPOM --- */
-.coupon-section-degust {
-  margin-top: 15px;
+  gap: 8px;
+  font-weight: 600;
+  font-size: 0.85rem;
 }
 
 .coupon-form-wrapper {
   display: flex;
   gap: 8px;
+  margin: 10px 0;
 }
 
 .coupon-form-wrapper input {
   flex: 1;
-  text-transform: uppercase;
-  font-weight: 700;
-  letter-spacing: 1px;
+  padding: 10px;
+  border-radius: 10px;
+  border: 2px solid var(--bege);
 }
 
 .coupon-form-wrapper button {
   background: var(--marrom);
   color: var(--bege);
   border: none;
-  padding: 0 20px;
+  padding: 0 16px;
   border-radius: 10px;
   font-weight: 700;
   cursor: pointer;
 }
 
-.coupon-feedback {
-  font-size: 0.75rem;
-  margin-top: 6px;
-  font-weight: 600;
+#main-finish-btn {
+  width: 100%;
+  background: linear-gradient(135deg, var(--vermelho), #a51f23);
+  color: var(--branco);
+  border: none;
+  padding: 14px;
+  border-radius: 40px;
+  font-weight: 800;
+  font-size: 0.9rem;
+  margin-top: 14px;
+  cursor: pointer;
 }
-/* --- FUNDO ESCURECIDO (BACKDROP) --- */
+
+/* ========== MODAIS ========== */
 .modal {
   position: fixed;
   inset: 0;
-  background: rgba(75, 44, 32, 0.85); /* Marrom translúcido */
+  background: rgba(75, 44, 32, 0.85);
   backdrop-filter: blur(5px);
   display: flex;
   align-items: center;
@@ -943,89 +667,66 @@ button:disabled {
   z-index: 10000;
   opacity: 0;
   pointer-events: none;
-  transition: opacity 0.3s ease;
-  padding: 15px;
+  transition: opacity 0.3s;
+  padding: 16px;
 }
 
-.modal.active, .modal.show {
+.modal.show, .modal.active {
   opacity: 1;
   pointer-events: auto;
 }
 
-/* --- CORPO DO MODAL (ESTILO PREMIUM) --- */
 .modal-content {
-  background: var(--bg2);
+  background: var(--branco);
   width: 100%;
-  max-width: 450px;
-  max-height: 90vh;
-  border-radius: var(--rad-lg); /* 22px de arredondamento */
-  border: 4px solid var(--dourado); /* Borda marcante */
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
-  display: flex;
-  flex-direction: column;
+  max-width: 420px;
+  max-height: 85vh;
+  border-radius: 28px;
+  border: 3px solid var(--dourado);
   overflow: hidden;
-  animation: modalScale 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  transform: scale(0.95);
+  transition: transform 0.25s;
 }
 
-@keyframes modalScale {
-  from { transform: scale(0.8); opacity: 0; }
-  to { transform: scale(1); opacity: 1; }
+.modal.show .modal-content {
+  transform: scale(1);
 }
 
 .modal-head {
   background: var(--marrom);
   color: var(--bege);
-  padding: 20px;
+  padding: 14px 18px;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  border-bottom: 2px solid var(--dourado);
 }
 
 .modal-head h3 {
-  margin: 0;
-  font-size: 1.15rem;
-  font-weight: 800;
-  letter-spacing: -0.5px;
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.modal-head button {
+  background: rgba(255,255,255,0.15);
+  border: none;
+  color: var(--bege);
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  cursor: pointer;
 }
 
 .modal-body {
-  padding: 20px;
+  padding: 18px;
   overflow-y: auto;
-  flex: 1;
 }
 
 .modal-foot {
-  padding: 15px 20px;
-  background: var(--branco);
+  padding: 12px 18px;
   border-top: 1px solid #eee;
 }
 
-/* --- BOTÃO GOOGLE (LOGIN MODAL) --- */
-.btn-google-auth {
-  width: 100%;
-  background: var(--branco) !important;
-  color: #444 !important;
-  border: 2px solid #ddd !important;
-  padding: 15px !important;
-  border-radius: 14px !important;
-  font-weight: 700 !important;
-  font-size: 0.95rem !important;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 12px;
-  cursor: pointer;
-  box-shadow: 0 4px 0 #eee;
-  transition: all 0.2s;
-}
-
-.btn-google-auth:active {
-  transform: translateY(2px);
-  box-shadow: 0 0 0 #eee;
-}
-
-/* --- LISTA DE EXTRAS (ADICIONAIS) --- */
+/* Modal de Adicionais */
 .extras-list {
   display: flex;
   flex-direction: column;
@@ -1035,117 +736,133 @@ button:disabled {
 .extras-list label {
   background: var(--branco);
   border: 2px solid #f0e8d8;
-  padding: 14px 18px;
-  border-radius: 15px;
+  border-radius: 14px;
+  padding: 12px;
   display: flex;
   justify-content: space-between;
   align-items: center;
   cursor: pointer;
-  transition: var(--transition);
 }
 
-/* Efeito quando o checkbox é marcado */
-.extras-list label:has(input:checked) {
-  border-color: var(--dourado);
-  background: #fffdf9;
-  box-shadow: 0 4px 12px rgba(225, 169, 95, 0.15);
+.extras-list input {
+  width: 20px;
+  height: 20px;
+  accent-color: var(--marrom);
+  margin-right: 10px;
 }
 
-.extras-list span {
-  font-weight: 700;
-  color: var(--marrom);
-}
-
-.extras-list .topping-price {
-  color: var(--dourado);
+#extras-confirm {
+  width: 100%;
+  background: var(--marrom);
+  color: var(--bege);
+  border: none;
+  padding: 14px;
+  border-radius: 40px;
   font-weight: 800;
+  font-size: 0.9rem;
+  cursor: pointer;
 }
-/* --- MODAL DO PIX: FINALIZAÇÃO --- */
-.pix-body {
-  padding: 25px;
+
+/* Modal de Login */
+.login-body {
   text-align: center;
 }
 
-.pix-amount-display {
-  background: var(--bege);
-  padding: 20px;
-  border-radius: 15px;
-  margin-bottom: 20px;
-  border: 2px dashed var(--dourado);
-}
-
-.pix-amount-display p {
-  font-size: 0.85rem;
-  font-weight: 700;
+.login-body p {
   color: var(--marrom);
-  margin-bottom: 5px;
+  font-size: 0.8rem;
+  margin-bottom: 16px;
 }
 
-#pix-valor {
-  font-size: 2.2rem;
-  color: var(--vermelho);
-  font-weight: 900;
-  display: block;
-}
-
-/* Botões do PIX */
-.pix-btn-copy {
-  background: var(--marrom) !important;
-  color: var(--bege) !important;
-  border: none !important;
-  padding: 16px !important;
-  border-radius: 12px !important;
-  font-weight: 800 !important;
-  font-size: 1rem !important;
+.btn-google-auth {
   width: 100%;
-  margin-bottom: 12px !important;
-  cursor: pointer;
-  box-shadow: var(--shadow-sm);
-}
-
-.pix-btn-whatsapp {
-  background: #25d366 !important; /* Verde WhatsApp */
-  color: #fff !important;
-  border: none !important;
-  padding: 16px !important;
-  border-radius: 12px !important;
-  font-weight: 800 !important;
-  font-size: 1rem !important;
-  width: 100%;
+  background: var(--branco);
+  border: 2px solid #ddd;
+  color: #444;
+  padding: 14px;
+  border-radius: 40px;
+  font-weight: 700;
+  font-size: 0.9rem;
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 10px;
-  box-shadow: 0 4px 15px rgba(37, 211, 102, 0.3);
+  cursor: pointer;
 }
 
-/* --- PAINÉIS DESLIZANTES (PEDIDOS E RECOMPENSAS) --- */
+/* Modal PIX */
+.pix-body {
+  text-align: center;
+}
+
+.pix-amount-display {
+  background: #fff8e1;
+  border-radius: 16px;
+  padding: 16px;
+  margin-bottom: 16px;
+  border: 2px dashed var(--dourado);
+}
+
+#pix-valor {
+  font-size: 1.6rem;
+  font-weight: 800;
+  color: var(--vermelho);
+}
+
+.pix-btn-copy, .pix-btn-whatsapp {
+  width: 100%;
+  padding: 14px;
+  border-radius: 40px;
+  font-weight: 700;
+  margin-bottom: 10px;
+  cursor: pointer;
+}
+
+.pix-btn-copy {
+  background: var(--marrom);
+  color: var(--bege);
+  border: none;
+}
+
+.pix-btn-whatsapp {
+  background: #25d366;
+  color: #fff;
+  border: none;
+}
+
+.btn-link-gray {
+  background: none;
+  border: none;
+  color: var(--cinza);
+  font-size: 0.75rem;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+/* ========== PAINÉIS ========== */
 .painel-overlay {
   display: none;
   position: fixed;
   inset: 0;
-  background: rgba(75, 44, 32, 0.7);
+  background: rgba(75,44,32,0.7);
   z-index: 9500;
-  align-items: flex-end; /* Abre de baixo para cima */
+  align-items: flex-end;
   justify-content: center;
   backdrop-filter: blur(4px);
 }
 
-.painel-overlay.active {
-  display: flex;
-}
+.painel-overlay.active { display: flex; }
 
 .painel-box {
   background: var(--branco);
   width: 100%;
-  max-width: 500px;
-  max-height: 85vh;
-  border-radius: 30px 30px 0 0; /* Bordas arredondadas só em cima */
-  border: 3px solid var(--dourado);
+  max-width: 480px;
+  max-height: 80vh;
+  border-radius: 24px 24px 0 0;
+  border: 2px solid var(--dourado);
   border-bottom: none;
   overflow-y: auto;
-  box-shadow: 0 -10px 40px rgba(0,0,0,0.3);
-  animation: slideUp 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  animation: slideUp 0.3s ease;
 }
 
 @keyframes slideUp {
@@ -1156,314 +873,207 @@ button:disabled {
 .painel-head {
   background: var(--marrom);
   color: var(--bege);
-  padding: 20px;
+  padding: 14px 18px;
   display: flex;
   justify-content: space-between;
   align-items: center;
   position: sticky;
   top: 0;
-  z-index: 10;
 }
 
-.painel-title {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  font-weight: 800;
-  font-size: 1.1rem;
-}
-
-/* --- CARTÃO FIDELIDADE (STAMPS) --- */
-#listaRecompensas {
-  padding: 10px 0;
-}
-
-.fidelidade-card {
-  background: linear-gradient(135deg, #fff 0%, var(--bege) 100%);
-  border-radius: 20px;
-  padding: 20px;
-  border: 2px solid var(--dourado);
-  margin-bottom: 20px;
-  text-align: center;
-}
-
-.stamp-grid {
-  display: grid;
-  grid-template-columns: repeat(5, 1fr);
-  gap: 10px;
-  margin: 15px 0;
-}
-
-.stamp-slot {
-  width: 100%;
-  aspect-ratio: 1/1;
-  background: rgba(75, 44, 32, 0.05);
-  border: 2px dashed var(--dourado);
+.fechar-painel {
+  background: rgba(255,255,255,0.15);
+  border: none;
+  color: var(--bege);
+  width: 32px;
+  height: 32px;
   border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 1.5rem;
-  color: rgba(75, 44, 32, 0.2);
+  cursor: pointer;
 }
 
-.stamp-slot.active {
-  background: var(--branco);
-  border-style: solid;
-  color: var(--vermelho);
-  box-shadow: var(--shadow-sm);
-  animation: stampPop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-}
+.painel-body { padding: 16px; }
 
-@keyframes stampPop {
-  from { transform: scale(0); }
-  to { transform: scale(1); }
-}
-/* --- RODAPÉ PREMIUM (DESIGN TRÊS MARIAS) --- */
+/* ========== RODAPÉ (CORRIGIDO: TRÊS MARIAS + ÍCONES) ========== */
 .footer {
   background: var(--marrom);
   color: var(--bege);
-  padding: 50px 20px 30px;
-  margin-top: 50px;
-  border-top: 6px solid var(--dourado);
+  padding: 32px 16px 24px;
+  margin-top: 30px;
+  border-top: 4px solid var(--dourado);
   text-align: center;
 }
 
 .footer-container {
-  max-width: 800px;
+  max-width: 600px;
   margin: 0 auto;
 }
 
 .footer-brand {
-  margin-bottom: 25px;
+  margin-bottom: 20px;
 }
 
 .footer-brand img {
-  width: 60px;
-  height: 60px;
+  width: 50px;
+  height: 50px;
   border-radius: 50%;
   border: 2px solid var(--dourado);
-  margin-bottom: 12px;
+  margin-bottom: 10px;
 }
 
 .footer-brand p {
-  font-family: 'Inter', sans-serif;
-  font-weight: 500;
-  font-style: italic;
+  font-size: 0.85rem;
   opacity: 0.85;
 }
 
+.footer-links {
+  display: flex;
+  justify-content: center;
+  gap: 16px;
+  margin: 20px 0;
+}
+
+.footer-link {
+  background: rgba(255,255,255,0.1);
+  padding: 8px 20px;
+  border-radius: 40px;
+  text-decoration: none;
+  color: var(--bege);
+  font-weight: 600;
+  font-size: 0.8rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.footer-link:active {
+  background: rgba(255,255,255,0.25);
+}
+
 .footer-legal {
-  border-top: 1px solid rgba(245, 230, 202, 0.1);
-  padding-top: 20px;
-  font-size: 0.75rem;
+  border-top: 1px solid rgba(255,255,255,0.15);
+  padding-top: 16px;
+  font-size: 0.7rem;
 }
 
 .footer-legal strong {
   color: var(--dourado);
-  font-weight: 700;
 }
 
-/* --- BANNER DE COOKIES (FLOATING) --- */
+/* ========== COOKIES ========== */
 #cookie-banner {
   position: fixed;
-  bottom: 25px;
-  left: 20px;
-  right: 20px;
+  bottom: 20px;
+  left: 16px;
+  right: 16px;
   background: var(--marrom);
   border: 2px solid var(--dourado);
   border-radius: 20px;
-  padding: 20px;
+  padding: 16px;
   z-index: 9999;
-  box-shadow: var(--shadow-lg);
-  display: none; /* Controlado pelo JS */
+  display: none;
   flex-direction: column;
   align-items: center;
-  gap: 12px;
-  animation: slideInUp 0.5s ease-out;
+  gap: 10px;
 }
 
-#cookie-banner.show {
-  display: flex;
-}
+#cookie-banner.show { display: flex; }
 
 #cookie-banner p {
   color: var(--bege);
-  font-size: 0.85rem;
+  font-size: 0.8rem;
   text-align: center;
-  line-height: 1.4;
 }
 
 #cookie-accept {
   background: var(--dourado);
   color: var(--marrom);
   border: none;
-  padding: 10px 30px;
-  border-radius: 10px;
-  font-weight: 800;
-  font-size: 0.9rem;
+  padding: 8px 24px;
+  border-radius: 40px;
+  font-weight: 700;
   cursor: pointer;
-  transition: transform 0.2s;
 }
 
-#cookie-accept:active { transform: scale(0.95); }
-
-/* --- TOASTS / POPUPS (NOTIFICAÇÕES NO TOPO) --- */
-.popup-add, .dfl-toast {
+/* ========== TOAST ========== */
+.popup-add {
   position: fixed;
-  top: 90px; /* Logo abaixo da header */
+  top: 80px;
   left: 50%;
   transform: translateX(-50%) translateY(-20px);
   background: var(--marrom);
   color: var(--bege);
-  padding: 12px 25px;
-  border-radius: 50px;
+  padding: 10px 20px;
+  border-radius: 40px;
   font-weight: 700;
-  font-size: 0.85rem;
-  box-shadow: var(--shadow-lg);
-  border: 2px solid var(--dourado);
+  font-size: 0.8rem;
+  border: 1px solid var(--dourado);
   z-index: 11000;
   opacity: 0;
-  pointer-events: none;
-  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-  display: flex;
-  align-items: center;
-  gap: 10px;
+  transition: all 0.3s;
   white-space: nowrap;
 }
 
-.popup-add.show, .dfl-toast.show {
+.popup-add.show {
   opacity: 1;
   transform: translateX(-50%) translateY(0);
 }
 
-/* --- AJUSTES FINAIS PARA IPHONE / ANDROID GESTOS --- */
-.main-content-wrapper {
-  padding-bottom: env(safe-area-inset-bottom, 20px);
+/* ========== RESPONSIVIDADE ========== */
+@media (max-width: 480px) {
+  .grid {
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 10px;
+  }
+  
+  .card-img-container { height: 110px; }
+  .price-new { font-size: 1rem; }
+  .add-cart, .extras-btn { font-size: 0.65rem; padding: 8px; }
+  
+  .user-button span:last-child { display: none; }
+  .user-button { padding: 6px 8px; }
+  
+  .modal-content { max-width: 95%; }
+  
+  .footer-links { gap: 10px; }
+  .footer-link { padding: 6px 14px; font-size: 0.7rem; }
 }
 
-@keyframes slideInUp {
-  from { transform: translateY(100px); opacity: 0; }
-  to { transform: translateY(0); opacity: 1; }
+/* ========== HIGHLIGHT ========== */
+.highlight-section {
+  animation: pulse 0.8s ease;
 }
 
-/* FINAL DO ARQUIVO CSS */
-
-
-
-
-
-/* ===========================================================
-   🏆 DEGUST v12.2 — AJUSTE DE ELITE FINAL
-   Foco: Carrinho, Login Legível e Rodapé Premium
-   =========================================================== */
-
-/* 1. LOGIN: RESOLVENDO O TEXTO INVISÍVEL */
-.login-body, #login-modal .modal-body {
-  text-align: center;
-  padding: 30px 20px !important;
-  color: var(--marrom) !important;
+@keyframes pulse {
+  0%,100% { background: transparent; }
+  50% { background: rgba(225,169,95,0.2); border-radius: 12px; }
 }
 
-#login-modal .modal-body p {
-  color: #5d4037 !important; /* Marrom escuro para leitura */
-  font-weight: 500 !important;
-  margin-bottom: 20px;
-  line-height: 1.5;
-}
-
-/* 2. CARRINHO: BOTÕES MODERNOS (SEM SER "ESQUISITOS") */
-.cart-item {
-  background: white !important;
-  border-radius: 16px !important;
-  padding: 15px !important;
-  margin-bottom: 12px !important;
-  border: 1px solid rgba(225, 169, 95, 0.2) !important;
-  display: flex !important;
-  flex-direction: column;
-  gap: 10px;
-}
-
-.cart-controls {
-  display: flex !important;
-  align-items: center;
-  justify-content: flex-end;
-  gap: 12px;
-}
-
-.cart-plus, .cart-minus {
-  width: 38px !important;
-  height: 38px !important;
-  border-radius: 10px !important;
-  font-size: 1.2rem !important;
-  font-weight: 800 !important;
+/* ========== RELATÓRIOS ADMIN ========== */
+.rel-filtro {
+  padding: 6px 14px;
+  border: 2px solid var(--dourado);
+  border-radius: 20px;
+  background: var(--branco);
+  font-weight: 700;
+  font-size: 0.7rem;
   cursor: pointer;
-  transition: transform 0.1s ease;
-  border: none !important;
 }
 
-.cart-minus { background: #f0e8d8 !important; color: var(--marrom) !important; }
-.cart-plus  { background: var(--marrom) !important; color: var(--bege) !important; }
-
-.cart-plus:active, .cart-minus:active { transform: scale(0.9); }
-
-.cart-remove {
-  background: #fff0f0 !important;
-  color: var(--vermelho) !important;
-  border: 1px solid #ffcdd2 !important;
-  width: 38px; height: 38px;
-  border-radius: 10px;
-  display: flex; align-items: center; justify-content: center;
+.rel-filtro.rel-ativo {
+  background: var(--marrom);
+  color: var(--bege);
 }
 
-/* 3. BOTÃO FINALIZAR: O "BOTÃO DE OURO" */
-#main-finish-btn {
-  background: linear-gradient(135deg, #2e7d32 0%, #1b5e20 100%) !important;
-  color: white !important;
-  border: none !important;
-  padding: 20px !important;
-  border-radius: 16px !important;
-  font-weight: 800 !important;
-  font-size: 1.1rem !important;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-  box-shadow: 0 8px 20px rgba(46, 125, 50, 0.3) !important;
-  margin-top: 25px !important;
+.rel-card {
+  background: linear-gradient(135deg, var(--bege), #fff);
+  border-radius: 12px;
+  padding: 12px;
+  text-align: center;
+  border: 1px solid rgba(225,169,95,0.3);
 }
 
-/* 4. RODAPÉ: IDENTIDADE TRÊS MARIAS MG */
-.footer {
-  background: var(--marrom) !important;
-  border-top: 5px solid var(--dourado) !important;
-}
-
-.footer-btn-link, .menu-link-social {
-  color: var(--dourado) !important;
-  text-decoration: none !important;
-  font-weight: 700 !important;
-  font-size: 0.9rem !important;
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-}
-
-/* 5. HEADER: RESPONSIVIDADE TOTAL */
-@media (max-width: 380px) {
-  .header-info h1 { font-size: 1.1rem !important; }
-  .logo-wrapper { width: 48px !important; height: 48px !important; }
-  .user-button { padding: 6px 10px !important; font-size: 0.7rem !important; }
-}
-
-/* 6. INPUTS: ESTILO LIMPO (NOTION) */
-input[type="text"], input[type="tel"] {
-  border: 1px solid #ddd !important;
-  background: #fafafa !important;
-  border-radius: 10px !important;
-  padding: 14px !important;
-  font-family: 'Inter', sans-serif !important;
-}
-
-input:focus {
-  border-color: var(--dourado) !important;
-  background: white !important;
+.rel-card-val {
+  font-weight: 800;
+  font-size: 1.1rem;
+  color: var(--marrom);
 }
