@@ -1349,308 +1349,121 @@ button:disabled {
 
 /* FINAL DO ARQUIVO CSS */
 
-/* 1. FORÇAR APARECIMENTO DO MENU HAMBÚRGUER */
-#hamburger-btn {
-  display: flex !important;
-  flex-direction: column;
-  justify-content: center;
-  gap: 5px;
-  width: 40px;
-  height: 40px;
-  background: none !important;
-  border: none !important;
-}
 
-#hamburger-btn .bar {
-  display: block !important;
-  width: 25px !important;
-  height: 3px !important;
-  background-color: var(--marrom) !important; /* Cor marrom para aparecer no dourado */
-  border-radius: 2px;
-}
 
-/* 2. TRANSFORMAR O BOTÃO "FEIO" DO MODAL */
-#extras-confirm, .btn-primary-degust, #main-finish-btn {
-  appearance: none;
-  -webkit-appearance: none;
-  background: var(--marrom) !important;
-  color: var(--bege) !important;
-  border: 2px solid var(--dourado) !important;
-  padding: 16px !important;
-  border-radius: 12px !important;
-  font-weight: 800 !important;
-  font-size: 1rem !important;
-  text-transform: uppercase;
-  width: 100% !important;
-  box-shadow: 0 4px 15px rgba(75, 44, 32, 0.3) !important;
-  cursor: pointer;
-}
-
-/* 3. AJUSTE DO MODAL (REMOVER O BRANCO CHAPADO) */
-.modal-content {
-  background: var(--bg2) !important; /* Bege clarinho */
-  border: 3px solid var(--dourado) !important;
-  border-radius: 22px !important;
-}
-
-/* 4. FIX DA HEADER (NÃO CORTAR MAIS) */
-.header {
-  height: 80px !important;
-  padding: 0 15px !important;
-}
-
-.logo-wrapper {
-  min-width: 54px;
-  min-height: 54px;
-}
-
-/* 5. INPUTS DO CARRINHO (ESTILO NOTION) */
-.delivery-system input, .coupon-form-wrapper input {
-  border: 2px solid var(--bege) !important;
-  border-radius: 10px !important;
-  padding: 12px !important;
-  margin-bottom: 10px !important;
-  background: white !important;
-}
 
 
 /* ===========================================================
-   CORREÇÕES FINAIS — MODAIS, RODAPÉ, CARRINHO
+   🏆 DEGUST v12.2 — AJUSTE DE ELITE FINAL
+   Foco: Carrinho, Login Legível e Rodapé Premium
    =========================================================== */
 
-/* 1. CORREÇÃO DO MODAL DE LOGIN (texto branco no fundo escuro) */
-.login-body p {
+/* 1. LOGIN: RESOLVENDO O TEXTO INVISÍVEL */
+.login-body, #login-modal .modal-body {
+  text-align: center;
+  padding: 30px 20px !important;
   color: var(--marrom) !important;
-  font-size: 0.75rem !important;
-  margin-top: 16px !important;
+}
+
+#login-modal .modal-body p {
+  color: #5d4037 !important; /* Marrom escuro para leitura */
   font-weight: 500 !important;
+  margin-bottom: 20px;
+  line-height: 1.5;
 }
 
-/* 2. CORREÇÃO DO MODAL DE ADICIONAIS (botão e layout) */
-.extras-list {
-  gap: 12px !important;
-}
-
-.extras-list label {
-  background: var(--branco) !important;
-  border: 2px solid #f0e8d8 !important;
-  border-radius: 16px !important;
-  padding: 14px 16px !important;
-  display: flex !important;
-  justify-content: space-between !important;
-  align-items: center !important;
-  cursor: pointer !important;
-  transition: all 0.2s !important;
-}
-
-.extras-list label:active {
-  background: var(--bege) !important;
-  border-color: var(--dourado) !important;
-}
-
-.extras-list input[type="checkbox"] {
-  width: 22px !important;
-  height: 22px !important;
-  accent-color: var(--marrom) !important;
-  margin-right: 12px !important;
-}
-
-.extras-list span:first-of-type {
-  font-weight: 600 !important;
-  color: var(--marrom) !important;
-  flex: 1 !important;
-}
-
-.extras-list .topping-price {
-  font-weight: 700 !important;
-  color: var(--vermelho) !important;
-  font-size: 0.85rem !important;
-}
-
-/* Botão confirmar do modal de adicionais */
-#extras-confirm {
-  background: var(--marrom) !important;
-  color: var(--bege) !important;
-  border: none !important;
-  padding: 14px 20px !important;
-  border-radius: 40px !important;
-  font-weight: 800 !important;
-  font-size: 0.9rem !important;
-  width: 100% !important;
-  cursor: pointer !important;
-  transition: all 0.2s !important;
-}
-
-#extras-confirm:active {
-  transform: scale(0.97) !important;
-  background: var(--vermelho) !important;
-}
-
-/* 3. CORREÇÃO DO RODAPÉ (ícones e cidade Três Marias) */
-.footer-links {
-  display: flex !important;
-  justify-content: center !important;
-  gap: 20px !important;
-  margin: 20px 0 !important;
-}
-
-.footer-link {
-  background: rgba(255, 255, 255, 0.1) !important;
-  padding: 10px 20px !important;
-  border-radius: 40px !important;
-  text-decoration: none !important;
-  color: var(--bege) !important;
-  font-weight: 600 !important;
-  font-size: 0.85rem !important;
-  display: inline-flex !important;
-  align-items: center !important;
-  gap: 8px !important;
-  transition: all 0.2s !important;
-}
-
-.footer-link:active {
-  background: rgba(255, 255, 255, 0.25) !important;
-  transform: scale(0.96) !important;
-}
-
-.footer-legal p {
-  margin: 5px 0 !important;
-}
-
-.footer-legal strong {
-  color: var(--dourado) !important;
-}
-
-/* 4. CORREÇÃO DO CARRINHO (botões de quantidade) */
+/* 2. CARRINHO: BOTÕES MODERNOS (SEM SER "ESQUISITOS") */
 .cart-item {
-  background: var(--branco) !important;
-  border-radius: 14px !important;
-  padding: 14px !important;
+  background: white !important;
+  border-radius: 16px !important;
+  padding: 15px !important;
   margin-bottom: 12px !important;
   border: 1px solid rgba(225, 169, 95, 0.2) !important;
+  display: flex !important;
+  flex-direction: column;
+  gap: 10px;
 }
 
-.cart-plus, .cart-minus, .cart-remove {
-  width: 36px !important;
-  height: 36px !important;
+.cart-controls {
+  display: flex !important;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+}
+
+.cart-plus, .cart-minus {
+  width: 38px !important;
+  height: 38px !important;
   border-radius: 10px !important;
+  font-size: 1.2rem !important;
   font-weight: 800 !important;
-  font-size: 1.1rem !important;
-  cursor: pointer !important;
-  display: inline-flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-}
-
-.cart-plus {
-  background: var(--marrom) !important;
-  color: var(--bege) !important;
+  cursor: pointer;
+  transition: transform 0.1s ease;
   border: none !important;
 }
 
-.cart-minus {
-  background: var(--bege) !important;
-  color: var(--marrom) !important;
-  border: 1px solid var(--dourado) !important;
-}
+.cart-minus { background: #f0e8d8 !important; color: var(--marrom) !important; }
+.cart-plus  { background: var(--marrom) !important; color: var(--bege) !important; }
+
+.cart-plus:active, .cart-minus:active { transform: scale(0.9); }
 
 .cart-remove {
-  background: none !important;
+  background: #fff0f0 !important;
   color: var(--vermelho) !important;
-  border: none !important;
-  font-size: 1.2rem !important;
+  border: 1px solid #ffcdd2 !important;
+  width: 38px; height: 38px;
+  border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
 }
 
-/* 5. MELHORIA DO BOTÃO DE FINALIZAR NO CARRINHO */
+/* 3. BOTÃO FINALIZAR: O "BOTÃO DE OURO" */
 #main-finish-btn {
-  background: linear-gradient(135deg, var(--vermelho) 0%, #a51f23 100%) !important;
-  color: var(--branco) !important;
+  background: linear-gradient(135deg, #2e7d32 0%, #1b5e20 100%) !important;
+  color: white !important;
   border: none !important;
-  padding: 16px !important;
-  border-radius: 60px !important;
+  padding: 20px !important;
+  border-radius: 16px !important;
   font-weight: 800 !important;
-  font-size: 1rem !important;
-  width: 100% !important;
-  cursor: pointer !important;
-  box-shadow: 0 6px 15px rgba(200, 40, 45, 0.4) !important;
+  font-size: 1.1rem !important;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  box-shadow: 0 8px 20px rgba(46, 125, 50, 0.3) !important;
+  margin-top: 25px !important;
 }
 
-#main-finish-btn:active {
-  transform: translateY(2px) !important;
-  box-shadow: 0 2px 8px rgba(200, 40, 45, 0.4) !important;
+/* 4. RODAPÉ: IDENTIDADE TRÊS MARIAS MG */
+.footer {
+  background: var(--marrom) !important;
+  border-top: 5px solid var(--dourado) !important;
 }
 
-/* 6. CORREÇÃO DO HEADER (menu hambúrguer visível) */
-.header-content {
-  flex: 1 !important;
+.footer-btn-link, .menu-link-social {
+  color: var(--dourado) !important;
+  text-decoration: none !important;
+  font-weight: 700 !important;
+  font-size: 0.9rem !important;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
 }
 
-#hamburger-btn {
-  display: flex !important;
-  background: transparent !important;
-  border: none !important;
-  width: 44px !important;
-  height: 44px !important;
-  align-items: center !important;
-  justify-content: center !important;
-  cursor: pointer !important;
+/* 5. HEADER: RESPONSIVIDADE TOTAL */
+@media (max-width: 380px) {
+  .header-info h1 { font-size: 1.1rem !important; }
+  .logo-wrapper { width: 48px !important; height: 48px !important; }
+  .user-button { padding: 6px 10px !important; font-size: 0.7rem !important; }
 }
 
-#hamburger-btn .bar {
-  display: block !important;
-  width: 24px !important;
-  height: 2.5px !important;
-  background-color: var(--marrom) !important;
-  margin: 4px 0 !important;
-  border-radius: 4px !important;
-  transition: all 0.3s !important;
+/* 6. INPUTS: ESTILO LIMPO (NOTION) */
+input[type="text"], input[type="tel"] {
+  border: 1px solid #ddd !important;
+  background: #fafafa !important;
+  border-radius: 10px !important;
+  padding: 14px !important;
+  font-family: 'Inter', sans-serif !important;
 }
 
-/* 7. CORREÇÃO DO FUNDO ESCURO NOS MODAIS */
-.modal {
-  background: rgba(75, 44, 32, 0.85) !important;
-  backdrop-filter: blur(6px) !important;
-}
-
-.modal-content {
-  background: var(--branco) !important;
-  border-radius: 28px !important;
-  border: 3px solid var(--dourado) !important;
-  overflow: hidden !important;
-}
-
-/* 8. RESPONSIVIDADE EXTRA PARA CELULAR MUITO PEQUENO */
-@media (max-width: 400px) {
-  .grid {
-    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)) !important;
-    gap: 12px !important;
-  }
-  
-  .card-info h3 {
-    font-size: 0.85rem !important;
-  }
-  
-  .price-new {
-    font-size: 1rem !important;
-  }
-  
-  .add-cart, .extras-btn {
-    padding: 10px 6px !important;
-    font-size: 0.7rem !important;
-  }
-  
-  .user-button span:last-child {
-    display: none !important; /* Esconde texto "Entrar" em telas muito pequenas */
-  }
-  
-  .user-button {
-    padding: 8px 8px !important;
-  }
-}
-
-/* 9. CORREÇÃO DO TEXTO DO MODAL DE LOGIN */
-#login-modal .modal-body p {
-  color: var(--marrom) !important;
-  background: transparent !important;
-  font-weight: 500 !important;
+input:focus {
+  border-color: var(--dourado) !important;
+  background: white !important;
 }
