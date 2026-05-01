@@ -1,1619 +1,1400 @@
-/* =========================================================
-   🍰 Degust v11.4 — SISTEMA UI BLINDADO + PIX INTELIGENTE
-   Correções: cookies, painéis, cliques, duplicações removidas
-========================================================= */
+/* ===========================================================
+   🍰 Degust script.js — v12.0.4 (ENGINE PRINCIPAL)
+   ESTRATÉGIA: LEGO DE MICRO-MÓDULOS (PARTE 1)
+   =========================================================== */
 
 document.addEventListener("DOMContentLoaded", () => {
+  
+  // --- ESTADO GLOBAL (REATIVO) ---
+  const state = {
+    cart: [],
+    currentUser: null,
+    db: null,
+    auth: null,
+    isFirebaseInitialized: false,
+    ui_lock: false,
+    pixCopied: false,
+    activeCoupon: null,
+    deliveryConfig: {
+      taxa: 7.00,
+      gratisAcima: 80.00,
+      statusLoja: 'aberto' // 'aberto' ou 'fechado'
+    }
+  };
 
-  let pixCopied = false;
+  // --- CONFIGURAÇÃO DE FIDELIDADE (MATRIZ DE PRÊMIOS) ---
+  const FIDELIDADE_MASTER = {
+    prefixo: "degust_",
+    meta: 5,
+    recompensas: [
+      { nível: 1, pedido: 5,  tipo: "cupom",  valor: 5,  desc: "Cupom R$ 5,00 OFF" },
+      { nível: 2, pedido: 10, tipo: "cupom",  valor: 10, desc: "Cupom R$ 10,00 OFF" },
+      { nível: 3, pedido: 15, tipo: "brinde", valor: 1,  desc: "1 Bolo no Pote Grátis" },
+      { nível: 4, pedido: 20, tipo: "cupom",  valor: 15, desc: "Cupom R$ 15,00 OFF" },
+      { nível: 5, pedido: 25, tipo: "brinde", valor: 2,  desc: "2 Bolos no Pote Grátis" },
+      { nível: 6, pedido: 30, tipo: "combo",  valor: 0,  desc: "Combo Degust Especial" }
+    ]
+  };
 
+  // --- UTILS: TRAVA DE SEGURANÇA (Debounce de Cliques) ---
+  const lockUI = (duration = 400) => {
+    state.ui_lock = true;
+    setTimeout(() => { state.ui_lock = false; }, duration);
+  };
+
+  // --- UTILS: MOTOR DE RETRY (Blindagem de Conexão) ---
+  const withRetry = async (fn, maxRetries = 3, interval = 1500) => {
+    let lastError;
+    for (let i = 0; i < maxRetries; i++) {
+      try {
+        return await fn();
+      } catch (err) {
+        lastError = err;
+        const wait = interval * Math.pow(2, i); // Exponential Backoff
+        console.warn(`[Retry ${i+1}/${maxRetries}] Falha na conexão. Tentando em ${wait}ms...`);
+        await new Promise(resolve => setTimeout(resolve, wait));
+      }
+    }
+    throw lastError;
+  };
+
+  // --- UTILS: FORMATADOR DE MOEDA ---
+  const formatCurrency = (value) => {
+    return value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+  };
+
+  /* FIM DA PARTE 1 - AGUARDANDO OK PARA INICIAR O UIMANAGER COMPLETO */
   /* =========================================================
-     🛡️ UIManager v11.0
+     🛡️ UIManager v11.5 (CONTROLE DE FLUXO E INTERFACE)
+     Focado em performance mobile e prevenção de conflitos.
   ========================================================= */
-  let ui_lock = false;
-
-  function lockUI(ms = 350) {
-    ui_lock = true;
-    setTimeout(() => ui_lock = false, ms);
-  }
-
   const UIManager = {
-    currentPanel: null,
+    activePanels: new Set(),
 
-    open(panelName, panelElement) {
-      if (ui_lock) return;
-      lockUI();
-      this.closeAll();
-      if (!panelElement) return;
+    open(name, element) {
+      if (state.ui_lock || !element) return;
+      lockUI(500);
 
-      this.currentPanel = panelName;
+      // Se o painel já estiver aberto, não faz nada
+      if (this.activePanels.has(name)) return;
 
-      // mini-cart e pix-modal usam classe 'active'; modais comuns usam 'show'
-      const useActive = ["mini-cart", "pix-modal"];
-      if (useActive.includes(panelElement.id)) {
-        panelElement.classList.add("active");
-      } else {
-        panelElement.classList.add("show");
+      console.log(`[UI] Abrindo: ${name}`);
+
+      // Lógica de visualização baseada no tipo de container
+      if (element.classList.contains('modal') || element.classList.contains('painel-overlay')) {
+        element.style.display = 'flex';
+        // Pequeno delay para a animação CSS (fade-in/scale) funcionar
+        setTimeout(() => element.classList.add('show', 'active'), 10);
+      } else if (element.id === 'mini-cart' || element.id === 'side-menu') {
+        element.classList.add('active');
+        element.setAttribute('aria-hidden', 'false');
       }
 
-      // Painéis deslizantes (pedidos / recompensas) têm overlay próprio
-      const overlayId = panelElement.dataset.overlay;
-      if (overlayId) {
-        const overlay = document.getElementById(overlayId);
-        if (overlay) overlay.classList.add("active");
-        return; // não usa o backdrop geral
+      this.activePanels.add(name);
+
+      // Gestão de Backdrop e Travamento de Scroll
+      const backdrop = document.getElementById('cart-backdrop');
+      if (backdrop && name !== 'side-menu') {
+        backdrop.classList.add('active');
+        document.body.classList.add('no-scroll');
       }
 
-      if (panelElement.id !== "side-menu") {
-        Backdrop.show();
-      }
-      this.closeSideMenu();
+      // Se abrir algo que não seja o menu lateral, garante que o menu feche
+      if (name !== 'side-menu') this.closeSideMenu();
     },
 
-    close(panelName, panelElement) {
-      if (panelElement) panelElement.classList.remove("show", "active");
-      if (this.currentPanel === panelName) this.currentPanel = null;
+    close(name, element) {
+      if (!element) return;
+      console.log(`[UI] Fechando: ${name}`);
+
+      element.classList.remove('show', 'active');
+      element.setAttribute('aria-hidden', 'true');
+
+      // Se for modal, espera a animação de saída antes de dar display: none
+      if (element.classList.contains('modal') || element.classList.contains('painel-overlay')) {
+        setTimeout(() => {
+          if (!element.classList.contains('show')) {
+            element.style.display = 'none';
+          }
+        }, 400);
+      }
+
+      this.activePanels.delete(name);
+
+      // Só remove o backdrop e o no-scroll se não houver mais nada aberto
+      if (this.activePanels.size === 0 || (this.activePanels.size === 1 && this.activePanels.has('side-menu'))) {
+        const backdrop = document.getElementById('cart-backdrop');
+        if (backdrop) backdrop.classList.remove('active');
+        document.body.classList.remove('no-scroll');
+      }
     },
 
     closeAll() {
-      // Fecha modais normais
-      document.querySelectorAll(".modal.show, .modal.active, #mini-cart.active").forEach(el => {
-        el.classList.remove("show", "active");
+      console.log("[UI] Fechando todos os componentes ativos");
+      
+      // Fecha Modais e Overlays
+      document.querySelectorAll('.modal, .painel-overlay, #mini-cart').forEach(el => {
+        const name = el.id || 'unnamed-panel';
+        this.close(name, el);
       });
-      // Fecha os painéis deslizantes
-      document.querySelectorAll(".painel-overlay.active").forEach(el => {
-        el.classList.remove("active");
-      });
+
       this.closeSideMenu();
-      Backdrop.hide();
-      this.currentPanel = null;
+      this.activePanels.clear();
+      
+      const backdrop = document.getElementById('cart-backdrop');
+      if (backdrop) backdrop.classList.remove('active');
+      document.body.classList.remove('no-scroll');
     },
 
     closeSideMenu() {
-      const sideMenu   = document.getElementById("side-menu");
-      const menuOverlay = document.getElementById("menu-overlay");
-      if (sideMenu)   sideMenu.classList.remove("active");
-      if (menuOverlay) menuOverlay.classList.remove("active");
-      document.body.style.overflow = "";
+      const menu = document.getElementById('side-menu');
+      const overlay = document.getElementById('menu-overlay');
+      if (menu) menu.classList.remove('active');
+      if (overlay) overlay.classList.remove('active');
+      this.activePanels.delete('side-menu');
+      
+      // Se for a única coisa aberta, devolve o scroll ao body
+      if (this.activePanels.size === 0) {
+        document.body.classList.remove('no-scroll');
+      }
     },
 
-    handleMenuAction(actionCallback) {
-      if (ui_lock) return;
-      lockUI(200);
+    // Executa uma ação após fechar o menu (limpa a fila de execução)
+    handleMenuAction(callback) {
       this.closeSideMenu();
       setTimeout(() => {
-        if (typeof actionCallback === "function") actionCallback();
-      }, 150);
+        if (typeof callback === 'function') callback();
+      }, 350);
     }
   };
 
-  /* --- BACKDROP --- */
-  const Backdrop = {
-    show() {
-      const bd = document.getElementById("cart-backdrop");
-      if (bd) { bd.classList.add("active"); document.body.classList.add("no-scroll"); }
-    },
-    hide() {
-      const bd = document.getElementById("cart-backdrop");
-      if (bd) { bd.classList.remove("active"); document.body.classList.remove("no-scroll"); }
+  /* FIM DA PARTE 2 - AGUARDANDO OK PARA A PARTE 3: FIREBASE E AUTH COMPLETO */
+    /* =========================================================
+     ✨ UI ENHANCEMENTS (Lifecycle de Animação)
+     Garante que o DOM não sofra "reflow" pesado no celular.
+  ========================================================= */
+
+  const playFeedback = (type = 'click') => {
+    if (navigator.vibrate) {
+      const patterns = { click: 10, success: [10, 30, 10], error: [50, 50, 50] };
+      navigator.vibrate(patterns[type] || 10);
     }
   };
 
-  const bdElement = document.getElementById("cart-backdrop");
-  if (bdElement) bdElement.addEventListener("click", () => UIManager.closeAll());
-
-  /* =========================================================
-     🍔 MENU HAMBÚRGUER
-  ========================================================= */
-  const hamburgerBtn = document.getElementById("hamburger-btn");
-  const sideMenu     = document.getElementById("side-menu");
-  const menuOverlay  = document.getElementById("menu-overlay");
-  const menuClose    = document.getElementById("menu-close");
-
-  function openSideMenu() {
-    if (ui_lock) return;
-    lockUI();
-    UIManager.closeAll();
-    if (sideMenu)   sideMenu.classList.add("active");
-    if (menuOverlay) menuOverlay.classList.add("active");
-    document.body.style.overflow = "hidden";
-  }
-
-  if (hamburgerBtn) hamburgerBtn.addEventListener("click", openSideMenu);
-  if (menuClose)    menuClose.addEventListener("click",    () => UIManager.closeSideMenu());
-  if (menuOverlay)  menuOverlay.addEventListener("click",  () => UIManager.closeSideMenu());
-
-  /* =========================================================
-     🎯 ATALHOS DO MENU LATERAL — usando data-action
-  ========================================================= */
-  document.querySelectorAll(".menu-link-action[data-action]").forEach(link => {
-    link.addEventListener("click", (e) => {
-      e.preventDefault();
-      const action = link.dataset.action;
-
-      UIManager.handleMenuAction(() => {
-        if (action === "meus-pedidos") {
-          const overlay = document.getElementById("painelPedidosOverlay");
-          if (overlay) overlay.classList.add("active");
-        } else if (action === "recompensas") {
-          const overlay = document.getElementById("painelRecompensasOverlay");
-          if (overlay) overlay.classList.add("active");
-        } else if (action === "perfil") {
-          const userBtn = document.getElementById("user-btn");
-          if (userBtn) userBtn.click();
-        } else if (action === "relatorios") {
-          abrirRelatorios();
-        }
-      });
+  const safeAnimate = (element, className, displayType = 'flex') => {
+    return new Promise((resolve) => {
+      if (!element) return resolve();
+      
+      if (className === 'show') {
+        element.style.display = displayType;
+        void element.offsetWidth; 
+        element.classList.add('show');
+        element.addEventListener('transitionend', () => resolve(), { once: true });
+      } else {
+        element.classList.remove('show');
+        element.addEventListener('transitionend', () => {
+          element.style.display = 'none';
+          resolve();
+        }, { once: true });
+      }
     });
-  });
+  };
 
-  // Scroll suave para seções
-  document.querySelectorAll(".menu-link[href^='#']").forEach(link => {
-    link.addEventListener("click", (e) => {
-      e.preventDefault();
-      UIManager.handleMenuAction(() => {
-        const target = document.querySelector(link.getAttribute("href"));
-        if (target) {
-          target.scrollIntoView({ behavior: "smooth", block: "start" });
-          target.classList.add("highlight-section");
-          setTimeout(() => target.classList.remove("highlight-section"), 1000);
-        }
-      });
-    });
-  });
+  const originalOpen = UIManager.open;
+  UIManager.open = async function(name, element) {
+    playFeedback('click');
+    if (element && element.classList.contains('modal')) {
+      await safeAnimate(element, 'show');
+    }
+    originalOpen.apply(this, arguments);
+  };
 
-  document.querySelectorAll(".menu-link-social").forEach(link => {
-    link.addEventListener("click", () => UIManager.closeSideMenu());
-  });
-
+  
   /* =========================================================
-     🎁 PAINÉIS DESLIZANTES (PEDIDOS & RECOMPENSAS) v11.0
+     🔥 FIREBASE CORE & AUTHENTICATION (DETALHADO)
+     Garante que o app saiba quem é o usuário em tempo real.
   ========================================================= */
-  function abrirPainel(overlayId) {
-    const overlay = document.getElementById(overlayId);
-    if (!overlay) return;
-    UIManager.closeAll();
-    overlay.classList.add("active");
-  }
 
-  function fecharTodosPaineis() {
-    document.querySelectorAll(".painel-overlay").forEach(el => el.classList.remove("active"));
-  }
+  const firebaseConfig = {
+    apiKey: "SUA_API_KEY_AQUI",
+    authDomain: "degust-bolos.firebaseapp.com",
+    projectId: "degust-bolos",
+    storageBucket: "degust-bolos.appspot.com",
+    messagingSenderId: "9514758263",
+    appId: "1:9514758263:web:ce0f8a8e3"
+  };
 
-  // Botões flutuantes
-  // Botões flutuantes removidos — acesso via menu conta e menu lateral
-
-  // Fechar pelos botões X dentro dos painéis
-  document.querySelectorAll(".fechar-painel, .fechar-pedidos, .fechar-recompensas").forEach(btn => {
-    btn.addEventListener("click", (e) => {
-      e.stopPropagation();
-      fecharTodosPaineis();
-    });
-  });
-
-  // Fechar clicando no overlay (fundo escuro)
-  document.querySelectorAll(".painel-overlay").forEach(overlay => {
-    overlay.addEventListener("click", (e) => {
-      if (e.target === overlay) fecharTodosPaineis();
-    });
-  });
-
-  /* =========================================================
-     💰 SISTEMA PIX v11.0
-  ========================================================= */
-  const pixModal       = document.getElementById("pix-modal");
-  const pixValor       = document.getElementById("pix-valor");
-  const pixBody        = document.querySelector("#pix-modal .pix-body");
-  const pixBtnCopy     = document.getElementById("btn-copy-pix");
-  const pixBtnWhatsapp = document.getElementById("btn-finish-pix");
-  const pixClose       = document.querySelector(".pix-close");
-
-  const CHAVE_PIX = "degustbolosnopote@gmail.com";
-
-  const AVISO_PIX = `
-    <div style="background:#fff3cd;border:2px solid #ffc107;border-radius:12px;padding:14px;margin-bottom:14px;text-align:left;">
-      <p style="margin:0 0 8px;font-size:.95rem;font-weight:800;color:#856404;">📋 SIGA ESSES PASSOS:</p>
-      <p style="margin:0 0 6px;font-size:.85rem;color:#333;"><b>1️⃣</b> Clique em <b>"Enviar Pedido no WhatsApp"</b></p>
-      <p style="margin:0 0 6px;font-size:.85rem;color:#333;"><b>2️⃣</b> Faça o PIX no valor acima</p>
-      <p style="margin:0;font-size:.85rem;color:#333;"><b>3️⃣</b> Mande o comprovante <b>na mesma conversa</b></p>
-    </div>
-    <div style="background:#fff0f0;border:1px solid #ffcdd2;border-radius:8px;padding:10px;margin-bottom:14px;text-align:center;">
-      <p style="margin:0;font-size:.8rem;color:#c62828;font-weight:700;">⚠️ Sem o pedido no WhatsApp não saberemos do seu pedido!</p>
-    </div>`;
-
-  async function abrirModalPIX() {
+  const initFirebase = async () => {
     try {
-      const { total } = await calcTotals();
-      if (pixValor) pixValor.textContent = money(total);
+      if (state.isFirebaseInitialized) return;
 
-      if (pixBody && !pixBody.querySelector(".pix-aviso")) {
-        const div = document.createElement("div");
-        div.className = "pix-aviso";
-        div.innerHTML = AVISO_PIX;
-        const valorEl = pixBody.querySelector("#pix-valor")?.parentElement;
-        if (valorEl) valorEl.after(div);
-        else pixBody.prepend(div);
+      // Inicializa App apenas se não houver um ativo
+      if (!firebase.apps.length) {
+        firebase.initializeApp(firebaseConfig);
       }
 
-      // Mostra banner de pontos no modal PIX se não existir ainda
-      if (pixBody && !pixBody.querySelector(".pix-pontos")) {
-        const pontosDiv = document.createElement("div");
-        pontosDiv.className = "pix-pontos";
-        pontosDiv.style.cssText = "background:linear-gradient(135deg,#fff8e1,#fffde7);border:1px solid #E1A95F;border-radius:10px;padding:10px 12px;margin-bottom:12px;display:flex;align-items:center;gap:8px;text-align:left;";
-        pontosDiv.innerHTML = '<span style="font-size:1.3rem;">⭐</span><p style="margin:0;font-size:.78rem;color:#4B2C20;font-weight:600;">Este pedido acumula <b>+1 ponto</b> no seu cartão fidelidade!</p>';
-        pixBody.appendChild(pontosDiv);
-      }
-      UIManager.open("pix", pixModal);
-    } catch (err) {
-      console.error("Erro ao abrir PIX:", err);
-      fecharPedidoOriginal();
-    }
-  }
+      state.db = firebase.firestore();
+      state.auth = firebase.auth();
+      state.isFirebaseInitialized = true;
 
-  if (pixBtnCopy) {
-    pixBtnCopy.addEventListener("click", async () => {
-      try {
-        await navigator.clipboard.writeText(CHAVE_PIX);
-      } catch {
-        const ta = document.createElement("textarea");
-        ta.value = CHAVE_PIX;
-        document.body.appendChild(ta);
-        ta.select();
-        document.execCommand("copy");
-        document.body.removeChild(ta);
-      }
-      pixCopied = true;
-      const orig = pixBtnCopy.textContent;
-      pixBtnCopy.textContent = "Chave Copiada! ✓";
-      pixBtnCopy.style.background = "#4CAF50";
-      setTimeout(() => { pixBtnCopy.textContent = orig; pixBtnCopy.style.background = ""; }, 2000);
-    });
-  }
-
-  if (pixClose) {
-    pixClose.addEventListener("click", (e) => {
-      e.preventDefault();
-      UIManager.closeAll();
-      setTimeout(() => fecharPedidoOriginal?.(), 300);
-    });
-  }
-
-  // Botão finalizar sem PIX
-  const btnSemPix = document.getElementById("btn-finish-sem-pix");
-  if (btnSemPix) {
-    btnSemPix.addEventListener("click", async () => {
-      const { subtotal, delivery, discount, total, cupomInfo } = await calcTotals();
-      const addr = window.finalAddressStringForWhatsApp || "Não informado";
-      const msg = [
-        "*NOVO PEDIDO - Degust Bolos no Pote*",
-        "------------------------------------",
-        "",
-        "*Itens do Pedido:*",
-        cart.map(i => `  - ${i.nome} x${i.qtd}  (${money(i.preco * i.qtd)})`).join("\n"),
-        "",
-        "------------------------------------",
-        `Subtotal: *${money(subtotal)}*`,
-        `Entrega: *${delivery === 0 ? "GRATIS" : money(delivery)}*`,
-        discount > 0 ? `Desconto: *-${money(discount)}*` : null,
-        `*TOTAL: ${money(total)}*`,
-        "",
-        `Endereco: ${addr}`,
-        "",
-        "------------------------------------",
-        "Pagamento: A COMBINAR",
-        "Por favor, informe como deseja pagar.",
-        "",
-        "Iniciamos o preparo apos confirmar. Obrigada!"
-      ].filter(l => l !== null).join("\n");
-      window.open(`https://wa.me/5538998527894?text=${encodeURIComponent(msg)}`, "_blank");
-
-      // Salva pedido no Firestore para aparecer no painel admin
-      if (db && currentUser) {
-        const itensSalvar = cart.map(i => ({ nome: i.nome, preco: i.preco, qtd: i.qtd }));
-        db.collection("Pedidos").add({
-          userId:    currentUser.uid,
-          nome:      currentUser.displayName || currentUser.email,
-          email:     currentUser.email,
-          itensObj:  itensSalvar,
-          itens:     itensSalvar.map(i => `${i.nome} x${i.qtd}`).join(", "),
-          total:     total,
-          subtotal:  subtotal,
-          entrega:   delivery,
-          desconto:  discount,
-          endereco:  addr,
-          status:    "novo",
-          fonte:     "degust",
-          data:      new Date().toISOString(),
-          criadoEm:  firebase.firestore.FieldValue.serverTimestamp()
-        }).catch(err => console.error("Erro ao salvar pedido:", err));
-      }
-
-      UIManager.closeAll();
-    });
-  }
-
-  if (pixBtnWhatsapp) {
-    pixBtnWhatsapp.addEventListener("click", async () => {
-      const { subtotal, delivery, discount, total, cupomInfo } = await calcTotals();
-      const addr = window.finalAddressStringForWhatsApp || "Não informado";
-
-      // Linhas base do pedido (sem seção PIX — cliente já viu o modal)
-      const linhasPedido = [
-        "*NOVO PEDIDO - Degust Bolos no Pote*",
-        "------------------------------------",
-        "",
-        "*Itens do Pedido:*",
-        cart.map(i => `  - ${i.nome} x${i.qtd}  (${money(i.preco * i.qtd)})`).join("\n"),
-        "",
-        "------------------------------------",
-        `Subtotal: *${money(subtotal)}*`,
-        `Entrega: *${delivery === 0 ? "GRATIS" : money(delivery)}*`,
-        discount > 0 ? `Desconto${couponApplied ? ` (${couponApplied})` : ""}: *-${money(discount)}*` : null,
-        `*TOTAL: ${money(total)}*`,
-        "",
-        `Endereco: ${addr}`,
-        ""
-      ].filter(l => l !== null);
-
-      // Seção PIX apenas se cliente copiou a chave
-      const linhasPix = pixCopied ? [
-        "------------------------------------",
-        "*PAGAMENTO VIA PIX*",
-        "",
-        `Chave PIX: ${CHAVE_PIX}`,
-        `Beneficiario: Degust Bolos no Pote`,
-        `Valor: ${money(total)}`,
-        "",
-        "IMPORTANTE:",
-        "1. Faca o PIX no valor acima",
-        "2. Tire print do comprovante",
-        "3. Envie o comprovante nessa conversa",
-        "",
-        "Iniciamos o preparo apos confirmar o pagamento. Obrigada!"
-      ] : [
-        "------------------------------------",
-        "Pagamento a combinar.",
-        "Por favor, informe a forma de pagamento desejada.",
-        "",
-        "Iniciamos o preparo apos confirmar. Obrigada!"
-      ];
-
-      const msg = [...linhasPedido, ...linhasPix].join("\n");
-
-      window.open(`https://wa.me/5538998527894?text=${encodeURIComponent(msg)}`, "_blank");
-
-      // Salva pedido no Firestore para aparecer no painel admin
-      if (db && currentUser) {
-        const itensSalvar = cart.map(i => ({ nome: i.nome, preco: i.preco, qtd: i.qtd }));
-        db.collection("Pedidos").add({
-          userId:    currentUser.uid,
-          nome:      currentUser.displayName || currentUser.email,
-          email:     currentUser.email,
-          itensObj:  itensSalvar,
-          itens:     itensSalvar.map(i => `${i.nome} x${i.qtd}`).join(", "),
-          total:     total,
-          subtotal:  subtotal,
-          entrega:   delivery,
-          desconto:  discount,
-          endereco:  addr,
-          status:    "novo",
-          fonte:     "degust",
-          data:      new Date().toISOString(),
-          criadoEm:  firebase.firestore.FieldValue.serverTimestamp()
-        }).catch(err => console.error("Erro ao salvar pedido:", err));
-      }
-
-      UIManager.closeAll();
-    });
-  }
-
-  window.finalAddressStringForWhatsApp = "";
-  /* =========================================================
-     1. MÁSCARA DE CEP
-  ========================================================= */
-  const cepInputMask = document.getElementById("cep-input");
-  if (cepInputMask) {
-    cepInputMask.addEventListener("input", function (e) {
-      let v = e.target.value.replace(/\D/g, "");
-      if (v.length > 5) v = v.slice(0, 5) + "-" + v.slice(5, 8);
-      e.target.value = v;
-    });
-  }
-
-  /* =========================================================
-     ⚙️ CONFIGURAÇÕES BASE
-  ========================================================= */
-  const sound = new Audio("click.wav");
-  let cart = [];
-  let currentUser = null;
-  let isFirebaseInitialized = false;
-
-  const DELIVERY_FEE_DEFAULT = 8.00;
-  const LIMITE_FRETE_GRATIS  = 80.00;
-
-  const money = (n) => `R$ ${Number(n || 0).toFixed(2).replace(".", ",")}`;
-
-  /* =========================================================
-     🔍 BUSCA INTELIGENTE
-  ========================================================= */
-  const searchInput = document.getElementById("search-input");
-
-  const PRODUTOS_BUSCA = [
-  { nome: "Brigadeiro", aliases: ["chocolate", "preto", "granulado", "tradicional"], preco: 10 },
-  { nome: "Prestígio", aliases: ["prestigio", "coco", "beijinho"] },
-  { nome: "Ninho com Geleia de Morango", aliases: ["morango", "geleia", "fruta", "ninho morango"] },
-  { nome: "Ninho Cremoso", aliases: ["leite ninho", "branco", "puro", "ninho"] },
-  { nome: "Tropical Cream", aliases: ["tropical", "cream", "abacaxi", "ninho com abacaxi"] },
-  { nome: "Bombom de Maracujá", aliases: ["bombom", "maracuja", "maracujá", "mousse de maracuja", "mousse de maracujá"] },
-  { nome: "Chocolatudo", aliases: ["chocolate 100 cacau", "chocolate 100% cacau", "chocolatudo"] },
-  { nome: "Ninho Silvestre", aliases: ["ninho silvestre", "morango", "geleia de morango"] }
-];
-
-  function normalizar(t) {
-    return t.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim();
-  }
-
-  function distanciaLevenshtein(a, b) {
-    const m = [];
-    for (let i = 0; i <= b.length; i++) m[i] = [i];
-    for (let j = 0; j <= a.length; j++) m[0][j] = j;
-    for (let i = 1; i <= b.length; i++) {
-      for (let j = 1; j <= a.length; j++) {
-        m[i][j] = b[i - 1] === a[j - 1]
-          ? m[i-1][j-1]
-          : Math.min(m[i-1][j-1] + 1, m[i][j-1] + 1, m[i-1][j] + 1);
-      }
-    }
-    return m[b.length][a.length];
-  }
-
-  function filtrarCards(query) {
-    const cards = document.querySelectorAll(".card");
-    if (!query || query.length < 1) {
-      cards.forEach(c => (c.style.display = ""));
-      // Mostra seções vazias também
-      document.querySelectorAll(".menu-section").forEach(s => s.style.display = "");
-      return;
-    }
-    const q = normalizar(query);
-    cards.forEach(card => {
-      const nomeProduto = card.dataset.name || "";
-      const nomeH3      = card.querySelector("h3")?.textContent || "";
-      const nomeDesc    = card.querySelector("p:not(.price)")?.textContent || "";
-      const textoTotal  = normalizar(nomeProduto + " " + nomeH3 + " " + nomeDesc);
-
-      let match = textoTotal.includes(q);
-
-      if (!match) {
-        for (const p of PRODUTOS_BUSCA) {
-          // Fuzzy match no nome do produto
-          if (distanciaLevenshtein(q, normalizar(p.nome)) <= 2) {
-            if (textoTotal.includes(normalizar(p.nome))) { match = true; break; }
-          }
-          // Alias direto
-          for (const alias of p.aliases) {
-            const aliasNorm = normalizar(alias);
-            if (aliasNorm.includes(q) || q.includes(aliasNorm)) {
-              if (textoTotal.includes(normalizar(p.nome))) { match = true; break; }
-            }
-          }
-          if (match) break;
+      // ATIVAÇÃO DE PERSISTÊNCIA (Crucial para o seu 4G/5G em Patos)
+      // Permite que o carrinho e dados do user fiquem salvos mesmo sem internet
+      await state.db.enablePersistence({ synchronizeTabs: true }).catch((err) => {
+        if (err.code === 'failed-precondition') {
+          console.warn("[Firestore] Persistência falhou: Múltiplas abas.");
+        } else if (err.code === 'unimplemented') {
+          console.warn("[Firestore] Persistência não suportada pelo navegador.");
         }
-      }
-      card.style.display = match ? "" : "none";
-    });
+      });
 
-    // Esconde seções que ficaram sem cards visíveis
-    document.querySelectorAll(".menu-section").forEach(sec => {
-      const temVisivel = [...sec.querySelectorAll(".card")].some(c => c.style.display !== "none");
-      sec.style.display = temVisivel ? "" : "none";
-    });
-  }
+      console.log("Firebase: Sistema On-line e Persistente. ✅");
+      
+      // Gatilhos iniciais
+      loadGlobalSettings();
+      setupAuthListener();
 
-  if (searchInput) searchInput.addEventListener("input", e => filtrarCards(e.target.value));
-
-  /* =========================================================
-     🎯 MAPEAMENTO DO DOM
-  ========================================================= */
-  const el = {
-    cartIcon:         document.getElementById("cart-icon"),
-    cartCount:        document.getElementById("cart-count"),
-    miniCart:         document.getElementById("mini-cart"),
-    miniList:         document.querySelector(".mini-list"),
-    miniFoot:         document.querySelector(".mini-foot"),
-    cartBackdrop:     document.getElementById("cart-backdrop"),
-    extrasModal:      document.getElementById("extras-modal"),
-    extrasList:       document.querySelector("#extras-modal .extras-list"),
-    extrasConfirm:    document.getElementById("extras-confirm"),
-    loginModal:       document.getElementById("login-modal"),
-    loginForm:        document.getElementById("login-form"),
-    googleBtn:        document.getElementById("google-login"),
-    userBtn:          document.getElementById("user-btn"),
-    statusBanner:     document.getElementById("status-banner"),
-    pedidosBtn:       null, // removido — acesso via menu conta
-    pedidosPanel:     document.getElementById("painelPedidos"),
-    pedidosLista:     document.getElementById("listaPedidos"),
-    recompensasBtn:   null, // removido — acesso via menu conta
-    recompensasPanel: document.getElementById("recompensas-panel"),
-    recompensasLista: document.getElementById("listaRecompensas"),
-    historicoLista:   document.getElementById("historicoRecompensas"),
-    btnNaoSeiCEP:     document.getElementById("btnNaoSeiCEP"),
-    manualArea:       document.getElementById("manualArea"),
-    manualEndereco:   document.getElementById("manualEndereco"),
-    manualNumero:     document.getElementById("manualNumero"),
-    btnConfirmar:     document.getElementById("btnConfirmarEndereco"),
-    btnVoltarCEP:     document.getElementById("btnVoltarCEP"),
-    progressWrapper:  document.getElementById("progressWrapper"),
-    progressText:     document.getElementById("progressText"),
-    progressFill:     document.getElementById("progressFill"),
-    pixModal:         document.getElementById("pix-modal")
+    } catch (error) {
+      console.error("Erro Crítico Firebase:", error);
+      popupAdd("⚠️ Erro de conexão com o servidor. Verifique seu sinal.");
+    }
   };
 
-  // Botões de fechar modais
-  document.querySelectorAll(".extras-close, .login-close, .dashboard-close, .pix-close").forEach(btn => {
-    btn.addEventListener("click", (e) => { e.stopPropagation(); UIManager.closeAll(); });
-  });
+  // 👤 O VIGILANTE (Auth Listener)
+  const setupAuthListener = () => {
+    state.auth.onAuthStateChanged(async (user) => {
+      const loginBtn = document.getElementById("user-btn-content");
+      const fotoWrap = document.getElementById("user-foto-wrap");
+      const fotoImg = document.getElementById("user-foto");
 
-  document.querySelectorAll(".modal").forEach(modal => {
-    modal.addEventListener("click", (e) => { if (e.target === modal) UIManager.closeAll(); });
-  });
+      if (user) {
+        console.log(`[Auth] Usuário logado: ${user.displayName}`);
+        state.currentUser = user;
+        
+        // Atualiza UI do Header
+        if (loginBtn) loginBtn.textContent = user.displayName.split(' ')[0];
+        if (fotoWrap && fotoImg) {
+          fotoImg.src = user.photoURL || 'default-avatar.png';
+          fotoWrap.style.display = "block";
+        }
 
-  if (el.cartBackdrop) el.cartBackdrop.addEventListener("click", () => UIManager.closeAll());
+        // Sincroniza dados do banco com o prefixo degust_
+        await syncUserProgress(user.uid);
+        
+      } else {
+        console.log("[Auth] Usuário deslogado.");
+        state.currentUser = null;
+        
+        // Reseta UI do Header
+        if (loginBtn) loginBtn.textContent = "Entrar";
+        if (fotoWrap) fotoWrap.style.display = "none";
+      }
 
+      // Re-renderiza o carrinho para atualizar possíveis benefícios de logado
+      renderCart();
+    });
+  };
+
+  // 🔄 SINCRONIZAÇÃO DE PERFIL (Proteção de Dados)
+  const syncUserProgress = async (uid) => {
+    try {
+      const userRef = state.db.collection("usuarios").doc(uid);
+      const doc = await withRetry(() => userRef.get());
+
+      if (!doc.exists) {
+        console.log("[Sync] Criando perfil para novo cliente...");
+        await userRef.set({
+          degust_nome: state.currentUser.displayName,
+          degust_email: state.currentUser.email,
+          degust_bolosPedidos: 0,
+          degust_pontosAcumulados: 0,
+          degust_cadastroData: firebase.firestore.FieldValue.serverTimestamp(),
+          prefixo: "degust"
+        });
+      } else {
+        console.log("[Sync] Perfil existente carregado.");
+      }
+    } catch (err) {
+      console.error("[Sync] Erro ao sincronizar:", err);
+    }
+  };
+
+  /* FIM DA PARTE 3 - AGUARDANDO OK PARA A PARTE 4: LOGIN GOOGLE E CONFIGS DA CAROL */
   /* =========================================================
-     🎟️ CUPONS
+     🔑 LOGIN GOOGLE & CONFIGURAÇÕES REMOTAS
+     Gerencia a entrada do usuário e os ajustes da Carol.
   ========================================================= */
-  const couponForm = document.getElementById("coupon-form");
-  let couponApplied = (localStorage.getItem("degustCoupon") || "").toUpperCase();
 
-  couponForm?.addEventListener("submit", (e) => {
-    e.preventDefault();
-    const input = document.getElementById("coupon-input");
-    const val = (input?.value || "").trim().toUpperCase();
-    if (!val) {
-      couponApplied = "";
-      localStorage.removeItem("degustCoupon");
-      popupAdd("Cupom removido. 🏷️");
+  // ⚙️ BUSCA AJUSTES DA CAROL (settings/degust_config)
+  const loadGlobalSettings = async () => {
+    try {
+      // Tenta buscar as configurações reais do banco de dados
+      const configDoc = await withRetry(() => 
+        state.db.collection("settings").doc("degust_config").get()
+      );
+
+      if (configDoc.exists) {
+        const remoteData = configDoc.data();
+        // Mescla as configurações remotas com os estados locais
+        if (remoteData.gratisAcima) state.deliveryConfig.gratisAcima = remoteData.gratisAcima;
+        if (remoteData.taxaPadrao) state.deliveryConfig.taxa = remoteData.taxaPadrao;
+        
+        console.log("Configurações: Ajustes da Carol aplicados com sucesso.");
+      } else {
+        console.warn("Configurações: Documento não encontrado. Usando padrões locais.");
+      }
+    } catch (err) {
+      console.error("Configurações: Falha ao carregar ajustes remotos.", err);
+    }
+  };
+
+  // 🔐 HANDLER DO LOGIN GOOGLE
+  const handleGoogleLogin = async () => {
+    if (state.ui_lock) return;
+    lockUI(1500); // Trava maior para processo de login
+
+    const loginBtn = document.getElementById("google-login");
+    const originalContent = loginBtn ? loginBtn.innerHTML : "Entrar com Google";
+
+    const provider = new firebase.auth.GoogleAuthProvider();
+    // Força a escolha da conta para evitar logins automáticos indesejados
+    provider.setCustomParameters({ prompt: 'select_account' });
+
+    try {
+      if (loginBtn) {
+        loginBtn.disabled = true;
+        loginBtn.innerHTML = '<span class="spinner"></span> Conectando ao Google...';
+      }
+
+      const result = await state.auth.signInWithPopup(provider);
+      const userFirstName = result.user.displayName.split(' ')[0];
+      
+      popupAdd(`Seja bem-vindo(a), ${userFirstName}! 🧁`);
+      UIManager.closeAll();
+
+    } catch (error) {
+      console.error("Login: Erro na autenticação.", error);
+      
+      // Tratamento de erros específicos para o usuário
+      if (error.code === 'auth/popup-closed-by-user') {
+        popupAdd("⚠️ O login foi cancelado.");
+      } else if (error.code === 'auth/network-request-failed') {
+        popupAdd("❌ Erve de rede. Verifique seu sinal de celular.");
+      } else {
+        popupAdd("❌ Falha ao entrar. Tente novamente mais tarde.");
+      }
+    } finally {
+      if (loginBtn) {
+        loginBtn.disabled = false;
+        loginBtn.innerHTML = originalContent;
+      }
+    }
+  };
+
+  // 🚪 LOGOUT (Para o menu de configurações)
+  const handleLogout = async () => {
+    try {
+      await state.auth.signOut();
+      popupAdd("Você saiu da sua conta. Até logo! 👋");
+      UIManager.closeAll();
+    } catch (err) {
+      console.error("Logout: Erro ao sair.", err);
+    }
+  };
+
+  /* FIM DA PARTE 4 - AGUARDANDO OK PARA A PARTE 5: GESTÃO DO CARRINHO E ADICIONAIS */
+  /* =========================================================
+     🛒 MOTOR DO CARRINHO & CUSTOMIZAÇÃO (EXTRAS)
+     Gerencia a entrada de itens e a lógica de toppings.
+  ========================================================= */
+
+  // ➕ ADIÇÃO SIMPLES (Botão Adicionar direto)
+  window.addItem = (nome, preco) => {
+    if (state.ui_lock) return;
+    lockUI(200);
+
+    // Procura se já existe exatamente esse mesmo item (sem extras) no carrinho
+    const index = state.cart.findIndex(item => item.nome === nome && !item.extras);
+    
+    if (index !== -1) {
+      state.cart[index].qtd++;
     } else {
-      couponApplied = val;
-      localStorage.setItem("degustCoupon", couponApplied);
+      state.cart.push({
+        nome: nome,
+        preco: parseFloat(preco),
+        qtd: 1,
+        extras: null // Identificador de item "puro"
+      });
     }
-    renderMiniCart();
-  });
-
-  /* =========================================================
-     💬 POPUP / TOAST
-  ========================================================= */
-  function popupAdd(msg) {
-    let pop = document.querySelector(".popup-add");
-    if (!pop) {
-      pop = document.createElement("div");
-      pop.className = "popup-add";
-      document.body.appendChild(pop);
-    }
-    pop.textContent = msg;
-    pop.classList.add("show");
-    setTimeout(() => pop.classList.remove("show"), 2000);
-  }
-
-  /* =========================================================
-     📊 BARRA DE PROGRESSO (FRETE GRÁTIS)
-  ========================================================= */
-  function atualizarBarraProgresso() {
-    const subtotal      = getCartSubtotal();
-    const progressText  = document.getElementById("progressText");
-    const progressFill  = document.getElementById("progressFill");
-    const progressWrapper = document.getElementById("progressWrapper");
-    if (!progressText || !progressFill || !progressWrapper) return;
-
-    const pct = Math.min(100, (subtotal / LIMITE_FRETE_GRATIS) * 100);
-    progressFill.style.width = `${pct}%`;
-
-    if (subtotal >= LIMITE_FRETE_GRATIS) {
-      progressText.innerHTML = `🎉 <strong>Frete Grátis Liberado!</strong>`;
-      progressFill.style.background = "linear-gradient(90deg,#4caf50,#2e7d32)";
+    
+    // Feedback visual e sonoro
+    renderCart();
+    if (typeof sound !== 'undefined') sound.play(); 
+    
+    // Incentivo de Fidelidade (Função virá na Parte 7)
+    if (state.currentUser) {
+      mostrarIncentivoFidelidade();
     } else {
-      progressText.innerHTML = `Faltam <strong>${money(LIMITE_FRETE_GRATIS - subtotal)}</strong> p/ Frete Grátis`;
-      progressFill.style.background = "linear-gradient(90deg,#E1A95F,#4B2C20)";
+      popupAdd("Bolo no carrinho! Entre para ganhar prêmios. 🎁");
     }
-  }
+  };
 
-  /* =========================================================
-     🛒 CARRINHO
-  ========================================================= */
-  function renderMiniCart() {
-    if (!el.miniList) return;
-    const totalItens = cart.reduce((s, i) => s + i.qtd, 0);
-    if (el.cartCount) el.cartCount.textContent = totalItens;
-    atualizarBarraProgresso();
+  // 🍫 ABRIR CONFIGURADOR DE EXTRAS
+  window.openExtras = (nome, precoBase) => {
+    const modal = document.getElementById("extras-modal");
+    const container = modal ? modal.querySelector(".extras-list") : null;
+    
+    if (!modal || !container) return;
 
-    if (!cart.length) {
-      el.miniList.innerHTML = '<p style="text-align:center;color:#999;padding:20px;">Seu carrinho está vazio 🍰</p>';
-      if (el.miniFoot) el.miniFoot.querySelectorAll(".cart-summary-generated").forEach(e => e.remove());
-      const cm = document.getElementById("coupon-message");
-      const cdr = document.getElementById("coupon-discount-row");
-      if (cm) cm.innerHTML = "";
-      if (cdr) cdr.style.display = "none";
-      return;
-    }
-
-    el.miniList.innerHTML = cart.map((item, idx) => `
-      <div class="cart-item">
-        <div style="display:flex;justify-content:space-between;align-items:center;">
-          <div style="flex:1;">
-            <p style="font-weight:700;margin-bottom:4px;color:#4B2C20;">${item.nome}</p>
-            <p style="color:#666;font-size:.85rem;">${money(item.preco)} × ${item.qtd}</p>
-          </div>
-          <div style="display:flex;gap:6px;align-items:center;">
-            <button type="button" class="cart-minus" data-idx="${idx}" style="background:#E1A95F;color:#4B2C20;border:none;border-radius:5px;width:30px;height:30px;cursor:pointer;font-weight:bold;font-size:1.1rem;">−</button>
-            <span style="font-weight:700;min-width:20px;text-align:center;">${item.qtd}</span>
-            <button type="button" class="cart-plus"  data-idx="${idx}" style="background:#4B2C20;color:#F5E6CA;border:none;border-radius:5px;width:30px;height:30px;cursor:pointer;font-weight:bold;font-size:1.1rem;">+</button>
-            <button type="button" class="cart-remove" data-idx="${idx}" style="background:#d32f2f;color:#fff;border:none;border-radius:5px;width:30px;height:30px;cursor:pointer;">🗑</button>
-          </div>
+    // Limpa e reconstrói a lista de Toppings (TOPPINGS_DATA vem do extras.js)
+    container.innerHTML = TOPPINGS_DATA.map(t => `
+      <div class="extra-item-row" onclick="this.querySelector('input').click()">
+        <div class="extra-main-info">
+          <input type="checkbox" name="topping" value="${t.nome}" data-price="${t.preco}" onclick="event.stopPropagation()">
+          <span class="extra-name">${t.nome}</span>
         </div>
+        <span class="extra-price-tag">+ ${formatCurrency(t.preco)}</span>
       </div>
     `).join("");
 
-    bindMiniCartButtons();
-    enhanceMiniCartUI();
-  }
-
-  const getCartSubtotal = () => cart.reduce((s, i) => s + (Number(i.preco) || 0) * (Number(i.qtd) || 0), 0);
-
-  function bindMiniCartButtons() {
-    el.miniList.querySelectorAll(".cart-plus").forEach(b => b.addEventListener("click", e => {
-      const i = +e.currentTarget.dataset.idx;
-      if (cart[i]) { cart[i].qtd++; renderMiniCart(); }
-    }));
-    el.miniList.querySelectorAll(".cart-minus").forEach(b => b.addEventListener("click", e => {
-      const i = +e.currentTarget.dataset.idx;
-      if (cart[i]) {
-        if (cart[i].qtd > 1) cart[i].qtd--;
-        else cart.splice(i, 1);
-        renderMiniCart();
-      }
-    }));
-    el.miniList.querySelectorAll(".cart-remove").forEach(b => b.addEventListener("click", e => {
-      const i = +e.currentTarget.dataset.idx;
-      cart.splice(i, 1);
-      renderMiniCart();
-      popupAdd("Item removido! 🗑️");
-    }));
-  }
-
-  /* =========================================================
-     🔥 FIREBASE
-  ========================================================= */
-  const firebaseConfig = {
-    apiKey: "AIzaSyATQBcbYuzKpKlSwNlbpRiAM1XyHqhGeak",
-    authDomain: "da-familia-lanches.firebaseapp.com",
-    projectId: "da-familia-lanches",
-    storageBucket: "da-familia-lanches.appspot.com",
-    messagingSenderId: "106857147317",
-    appId: "1:106857147317:web:769c98aed26bb8fc9e87fc"
+    // Armazena metadados no elemento para a confirmação
+    modal.dataset.tempNome = nome;
+    modal.dataset.tempPreco = precoBase;
+    
+    UIManager.open("extras", modal);
   };
 
-  let auth, db;
-  const ADMINS = ["carols2maite@gmail.com", "degustbolosnopote@gmail.com"];
-  const isAdmin = (u) => u?.email && ADMINS.map(e=>e.toLowerCase()).includes(u.email.toLowerCase());
+  // ✅ CONFIRMAR E ADICIONAR COM EXTRAS
+  document.getElementById("extras-confirm")?.addEventListener("click", () => {
+    const modal = document.getElementById("extras-modal");
+    if (!modal) return;
 
-  function inicializarFirebase() {
-    if (isFirebaseInitialized) return;
-    try {
-      if (!window.firebase) throw new Error("Firebase SDK não carregado.");
-      if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
-      auth = firebase.auth();
-      db   = firebase.firestore();
-      isFirebaseInitialized = true;
-      setupAuthListener();
-    } catch (err) {
-      console.error("ERRO FIREBASE:", err);
-    }
-  }
+    const nomeOriginal = modal.dataset.tempNome;
+    const precoOriginal = parseFloat(modal.dataset.tempPreco);
+    
+    // Captura apenas os marcados
+    const selecionados = Array.from(modal.querySelectorAll('input[name="topping"]:checked')).map(i => ({
+      nome: i.value,
+      preco: parseFloat(i.dataset.price)
+    }));
 
-  function handleLoginSuccess(user) {
-    currentUser = user;
-    const nome = user.displayName?.split(" ")[0] || user.email?.split("@")[0] || "doçura";
-    UIManager.closeAll();
-    atualizarBotaoUsuario(user);
-    carregarPedidos(user);
-    carregarRecompensas(user);
-    // Toast de boas-vindas mais destacado
-    mostrarToastLogin(`Bem-vinda(o), ${nome}! 🍰`);
-  }
-
-  function atualizarBotaoUsuario(user) {
-    if (!el.userBtn) return;
-    const nome = user
-      ? (user.displayName?.split(" ")[0] || user.email?.split("@")[0] || "você")
-      : null;
-
-    const content  = document.getElementById("user-btn-content");
-    const fotoWrap = document.getElementById("user-foto-wrap");
-    const fotoImg  = document.getElementById("user-foto");
-
-    if (user) {
-      // Nome no botão
-      if (content) content.textContent = nome;
-
-      // Foto de perfil do Google visível no header
-      if (user.photoURL && fotoImg && fotoWrap) {
-        fotoImg.src = user.photoURL;
-        fotoImg.onerror = () => { fotoWrap.style.display = "none"; };
-        fotoWrap.style.display = "inline-flex";
-        fotoWrap.style.alignItems = "center";
-        fotoWrap.style.marginRight = "6px";
-      }
-
-      el.userBtn.style.display = "flex";
-      el.userBtn.style.alignItems = "center";
-      el.userBtn.style.gap = "0";
-      el.userBtn.style.padding = "5px 10px";
-
-      if (isAdmin(user)) {
-        document.querySelector(".admin-section")?.style.setProperty("display","block");
-      }
+    if (selecionados.length === 0) {
+      // Se não escolheu nada, trata como item comum
+      window.addItem(nomeOriginal, precoOriginal);
     } else {
-      if (content) content.textContent = "Entrar";
-      if (fotoWrap) fotoWrap.style.display = "none";
-      el.userBtn.style.padding = "";
-      el.userBtn.style.display = "";
+      // Cria um nome descritivo para o carrinho
+      const extrasNomes = selecionados.map(s => s.nome).join(", ");
+      const precoAdicionais = selecionados.reduce((acc, curr) => acc + curr.preco, 0);
+      
+      state.cart.push({
+        nome: `${nomeOriginal} (+ ${selecionados.length} extras)`,
+        detalhes: extrasNomes,
+        preco: precoOriginal + precoAdicionais,
+        qtd: 1,
+        extras: selecionados // Guarda o array para relatórios futuros
+      });
+      
+      renderCart();
+      if (typeof sound !== 'undefined') sound.play();
+      popupAdd("Personalizado com sucesso! 🍰✨");
     }
-  }
 
-  function mostrarToastLogin(msg) {
-    let toast = document.getElementById("toast-login");
-    if (!toast) {
-      toast = document.createElement("div");
-      toast.id = "toast-login";
-      toast.style.cssText = `
-        position:fixed; top:80px; left:50%; transform:translateX(-50%) translateY(-20px);
-        background:#4B2C20; color:#F5E6CA; padding:14px 28px;
-        border-radius:30px; font-weight:700; font-size:1rem;
-        box-shadow:0 6px 20px rgba(0,0,0,.35); z-index:20001;
-        opacity:0; pointer-events:none; transition:all .35s ease;
-        border:2px solid #E1A95F; white-space:nowrap;
-        display:flex; align-items:center; gap:8px;
-      `;
-      document.body.appendChild(toast);
-    }
-    toast.textContent = msg;
-    toast.style.opacity = "1";
-    toast.style.transform = "translateX(-50%) translateY(0)";
-    setTimeout(() => {
-      toast.style.opacity = "0";
-      toast.style.transform = "translateX(-50%) translateY(-20px)";
-    }, 3500);
-  }
-
-  // ══════════════════════════════════════════
-  // 🏪 STATUS DA LOJA — checa em tempo real
-  // ══════════════════════════════════════════
-  function checarStatusLoja() {
-    if (!db) return;
-    db.collection("settings").doc("degust_status").onSnapshot(doc => {
-      const aberta = doc.exists ? (doc.data().aberta === true) : false;
-      aplicarStatusLoja(aberta);
-    }, () => aplicarStatusLoja(false));
-  }
-
-  function aplicarStatusLoja(aberta) {
-    const cards   = document.querySelectorAll(".card");
-    const addBtns = document.querySelectorAll(".add-cart, .extras-btn");
-
-    if (!aberta) {
-      // Loja fechada — cards acinzentados, botões desabilitados
-      cards.forEach(card => {
-        card.style.opacity = "0.55";
-        card.style.filter  = "grayscale(60%)";
-        card.style.pointerEvents = "none";
-      });
-      addBtns.forEach(btn => { btn.disabled = true; });
-
-      // Banner de aviso se não existir
-      if (!document.getElementById("banner-loja-fechada")) {
-        const banner = document.createElement("div");
-        banner.id = "banner-loja-fechada";
-        banner.style.cssText = "background:#b71c1c;color:#fff;text-align:center;padding:12px 16px;font-weight:700;font-size:.9rem;border-radius:10px;margin-bottom:12px;";
-        banner.textContent = "🔴 Estamos fechados no momento. Volte em breve!";
-        const statusBanner = document.getElementById("status-banner");
-        if (statusBanner) statusBanner.after(banner);
-      }
-    } else {
-      // Loja aberta — restaura
-      cards.forEach(card => {
-        card.style.opacity = "";
-        card.style.filter  = "";
-        card.style.pointerEvents = "";
-      });
-      addBtns.forEach(btn => { btn.disabled = false; });
-      const banner = document.getElementById("banner-loja-fechada");
-      if (banner) banner.remove();
-    }
-  }
-
-  function setupAuthListener() {
-    // Captura retorno do redirect do Google
-    auth.getRedirectResult()
-      .then(result => {
-        if (result && result.user) {
-          handleLoginSuccess(result.user);
-        }
-      })
-      .catch(err => {
-        if (err.code !== "auth/no-auth-event") {
-          console.error("Redirect error:", err.code);
-        }
-      });
-
-    auth.onAuthStateChanged(user => {
-      currentUser = user;
-      if (user) {
-        const nome = user.displayName?.split(" ")[0] || user.email.split("@")[0];
-        el.userBtn.textContent = `Olá, ${nome} ✨`;
-        if (el.pedidosBtn)    el.pedidosBtn.style.display    = "";
-        if (el.recompensasBtn) el.recompensasBtn.style.display = "";
-        if (isAdmin(user)) {
-          document.querySelector(".admin-section")?.style.setProperty("display", "block");
-        }
-        // Carrega pedidos e recompensas ao logar
-        carregarPedidos(user);
-        carregarRecompensas(user);
-      } else {
-        el.userBtn.textContent = "Entrar / Perfil 👤";
-        document.querySelector(".admin-section")?.style.setProperty("display", "none");
-      }
-    });
-  }
-
-  /* =========================================================
-     🔑 LOGIN
-  ========================================================= */
-  // handleLoginSuccess definida acima (próximo ao setupAuthListener)
-
-  // Login apenas via Google — e-mail/senha desabilitado
-
-  el.googleBtn?.addEventListener("click", () => {
-    inicializarFirebase();
-    if (!isFirebaseInitialized) return alert("Erro de conexão. Recarregue a página.");
-    const provider = new firebase.auth.GoogleAuthProvider();
-    provider.setCustomParameters({ prompt: "select_account" });
-    // Tenta popup primeiro; se bloqueado cai para redirect
-    auth.signInWithPopup(provider)
-      .then(r => { if (r.user) handleLoginSuccess(r.user); })
-      .catch(err => {
-        if (err.code === "auth/popup-blocked" || err.code === "auth/popup-closed-by-user") {
-          // Fallback: redirect
-          auth.signInWithRedirect(provider).catch(e => alert("Erro: " + e.message));
-        } else if (err.code !== "auth/cancelled-popup-request") {
-          alert("Erro ao entrar com Google: " + err.message);
-        }
-      });
+    UIManager.close("extras", modal);
   });
 
-  el.userBtn?.addEventListener("click", () => {
-    if (!currentUser) {
-      UIManager.open("login", el.loginModal);
-    } else {
-      // Mostra mini menu de conta
-      mostrarMenuConta();
-    }
-  });
-
-  function mostrarMenuConta() {
-    let menu = document.getElementById("conta-menu");
-    if (menu) { menu.remove(); return; }
-
-    const nome  = currentUser.displayName || currentUser.email?.split("@")[0] || "você";
-    const foto  = currentUser.photoURL;
-    const rect  = el.userBtn.getBoundingClientRect();
-
-    menu = document.createElement("div");
-    menu.id = "conta-menu";
-    menu.style.cssText = `
-      position:fixed; top:${rect.bottom + 8}px; right:16px;
-      background:#fff; border:2px solid #E1A95F; border-radius:14px;
-      box-shadow:0 8px 24px rgba(0,0,0,.18); z-index:9999;
-      min-width:200px; overflow:hidden;
-      animation:cardEntrada .2s ease both;
-    `;
-    menu.innerHTML = `
-      <div style="background:#4B2C20;padding:14px 16px;display:flex;align-items:center;gap:10px;">
-        ${foto ? `<img src="${foto}" style="width:38px;height:38px;border-radius:50%;border:2px solid #E1A95F;" onerror="this.style.display='none'">` : '<span style="font-size:1.8rem;">👤</span>'}
-        <div>
-          <div style="color:#F5E6CA;font-weight:700;font-size:.95rem;">${nome.split(" ")[0]}</div>
-          <div style="color:#E1A95F;font-size:.72rem;opacity:.85;">${currentUser.email || ""}</div>
-        </div>
-      </div>
-      <button id="conta-meus-pedidos" type="button" style="width:100%;padding:13px 16px;background:none;border:none;border-bottom:1px solid #f0e8d8;text-align:left;cursor:pointer;color:#4B2C20;font-weight:600;font-size:.9rem;display:flex;align-items:center;gap:8px;">
-        📦 Meus Pedidos
-      </button>
-      <button id="conta-recompensas" type="button" style="width:100%;padding:13px 16px;background:none;border:none;border-bottom:1px solid #f0e8d8;text-align:left;cursor:pointer;color:#4B2C20;font-weight:600;font-size:.9rem;display:flex;align-items:center;gap:8px;">
-        🎁 Recompensas
-      </button>
-      <button id="conta-sair" type="button" style="width:100%;padding:13px 16px;background:none;border:none;text-align:left;cursor:pointer;color:#C8282D;font-weight:700;font-size:.9rem;display:flex;align-items:center;gap:8px;">
-        🚪 Sair da conta
-      </button>
-    `;
-    document.body.appendChild(menu);
-
-    document.getElementById("conta-meus-pedidos").addEventListener("click", () => {
-      menu.remove();
-      document.getElementById("painelPedidosOverlay")?.classList.add("active");
-    });
-    document.getElementById("conta-recompensas").addEventListener("click", () => {
-      menu.remove();
-      document.getElementById("painelRecompensasOverlay")?.classList.add("active");
-    });
-    document.getElementById("conta-sair").addEventListener("click", () => {
-      menu.remove();
-      auth.signOut().then(() => {
-        mostrarToastLogin("Até logo! 👋");
-        setTimeout(() => location.reload(), 1200);
-      });
-    });
-
-    // Fecha ao clicar fora
-    setTimeout(() => {
-      document.addEventListener("click", function fecharMenu(e) {
-        if (!menu.contains(e.target) && e.target !== el.userBtn) {
-          menu.remove();
-          document.removeEventListener("click", fecharMenu);
-        }
-      });
-    }, 100);
-  }
-
+  /* FIM DA PARTE 5 - AGUARDANDO OK PARA A PARTE 6: LOGÍSTICA, VIACEP E FRETE DINÂMICO */
   /* =========================================================
-     🍬 ADICIONAIS (TOPPINGS)
+     🚚 LOGÍSTICA: VIA CEP & CÁLCULO DE FRETE
+     Calcula a distância (CEP) e o progresso para frete grátis.
   ========================================================= */
-  const TOPPINGS_DATA = [
-    { id: "extra_ninho",     nome: "Leite Ninho em Pó",   preco: 2.00 },
-    { id: "extra_nutella",   nome: "Nutella Pura",         preco: 4.50 },
-    { id: "extra_granulado", nome: "Granulado Gourmet",    preco: 1.50 },
-    { id: "extra_morango",   nome: "Morango Picado",       preco: 3.00 },
-    { id: "extra_coco",      nome: "Coco Ralado",          preco: 1.50 }
-  ];
 
-  let currentItemForExtras = null;
-
-  function abrirModalExtras(nome, preco) {
-    currentItemForExtras = { nome, preco };
-    if (el.extrasList) {
-      el.extrasList.innerHTML = TOPPINGS_DATA.map(t => `
-        <label style="display:flex;justify-content:space-between;align-items:center;padding:12px;background:#fff;border-radius:8px;margin-bottom:8px;border:1px solid #eee;cursor:pointer;">
-          <div style="display:flex;align-items:center;gap:10px;">
-            <input type="checkbox" class="topping-check" data-id="${t.id}" data-nome="${t.nome}" data-preco="${t.preco}" style="width:20px;height:20px;accent-color:#4B2C20;">
-            <span style="font-weight:600;color:#4B2C20;">${t.nome}</span>
-          </div>
-          <span style="color:#E1A95F;font-weight:bold;">+ ${money(t.preco)}</span>
-        </label>
-      `).join("");
-    }
-    UIManager.open("extras", el.extrasModal);
-  }
-
-  el.extrasConfirm?.addEventListener("click", () => {
-    if (!currentItemForExtras) return;
-    let precoExtra = 0;
-    const tops = [];
-    document.querySelectorAll(".topping-check:checked").forEach(c => {
-      tops.push(c.dataset.nome);
-      precoExtra += parseFloat(c.dataset.preco);
-    });
-    const nomeFinal  = tops.length ? `${currentItemForExtras.nome} (+ ${tops.join(", ")})` : currentItemForExtras.nome;
-    const precoFinal = currentItemForExtras.preco + precoExtra;
-    addCommonItem(nomeFinal, precoFinal);
-    UIManager.closeAll();
-    currentItemForExtras = null;
-  });
-
-  /* =========================================================
-     🚀 PRODUTOS — LISTENERS
-  ========================================================= */
-  function addCommonItem(nome, preco) {
-    const found = cart.find(i => i.nome === nome && i.preco === preco);
-    if (found) found.qtd++;
-    else cart.push({ nome, preco: Number(preco), qtd: 1 });
-    renderMiniCart();
-    popupAdd(`${nome.split("(")[0].trim()} adicionado! 🍰`);
-    try { if (sound) sound.play(); } catch (e) {}
-  }
-
-  function resetListeners() {
-    document.querySelectorAll(".add-cart").forEach(btn => {
-      btn.onclick = null;
-      btn.addEventListener("click", (e) => {
-        const card = e.currentTarget.closest(".card");
-        if (card) addCommonItem(card.dataset.name, parseFloat(card.dataset.price));
-      });
-    });
-    document.querySelectorAll(".extras-btn").forEach(btn => {
-      btn.onclick = null;
-      btn.addEventListener("click", (e) => {
-        const card = e.currentTarget.closest(".card");
-        if (card) abrirModalExtras(card.dataset.name, parseFloat(card.dataset.price));
-      });
-    });
-    if (el.cartIcon) {
-      el.cartIcon.onclick = () => UIManager.open("cart", el.miniCart);
-    }
-  }
-
-  /* =========================================================
-     🚚 FRETE & ENDEREÇO
-  ========================================================= */
-  let modoEnderecoManual = false;
-
-  const buscarCEP = async () => {
-    const cep = document.getElementById("cep-input")?.value.replace(/\D/g, "");
-    if (cep?.length !== 8) return alert("Digite um CEP válido com 8 dígitos.");
+  // 📍 BUSCA DE ENDEREÇO VIA API
+  const executarBuscaCEP = async (cep) => {
+    const cleanCEP = cep.replace(/\D/g, "");
     const btn = document.getElementById("btn-calcular-frete");
-    btn.textContent = "Buscando...";
-    btn.disabled = true;
-    try {
-      const res  = await fetch(`https://viacep.com.br/ws/${cep}/json/`);
-      const data = await res.json();
-      if (data.erro) throw new Error("CEP não encontrado.");
-      const ruaBairro = document.getElementById("endereco-auto");
-      if (ruaBairro) ruaBairro.value = `${data.logradouro}, ${data.bairro} - ${data.localidade}/${data.uf}`;
-      document.getElementById("numero-input").disabled    = false;
-      document.getElementById("complemento-input").disabled = false;
-      document.getElementById("numero-input")?.focus();
-      popupAdd("Endereço localizado! 📍");
-    } catch {
-      alert("Erro ao buscar CEP. Tente digitar o endereço manualmente.");
-    } finally {
-      btn.textContent = "Buscar";
-      btn.disabled = false;
-    }
-  };
+    const inputEndereco = document.getElementById("endereco-auto");
 
-  const ativarManual   = () => { modoEnderecoManual = true;  if (el.manualArea) el.manualArea.style.display = "block";  document.querySelector(".frete-container")?.style.setProperty("display","none"); };
-  const desativarManual = () => { modoEnderecoManual = false; if (el.manualArea) el.manualArea.style.display = "none";   document.querySelector(".frete-container")?.style.setProperty("display","block"); };
-
-  document.getElementById("btn-calcular-frete")?.addEventListener("click", buscarCEP);
-  document.getElementById("btnManual")?.addEventListener("click", ativarManual);
-  el.btnVoltarCEP?.addEventListener("click", desativarManual);
-  el.btnNaoSeiCEP?.addEventListener("click", () => window.open("https://buscacepinter.correios.com.br/", "_blank"));
-
-  el.btnConfirmar?.addEventListener("click", () => {
-    const end = el.manualEndereco?.value.trim();
-    const num = el.manualNumero?.value.trim();
-    if (!end || !num) return alert("Preencha o endereço e o número!");
-    popupAdd("Endereço manual salvo! ✅");
-    renderMiniCart();
-  });
-
-  // Retirada no local
-  document.getElementById("retirar-local")?.addEventListener("change", (e) => {
-    ["cep-input","btn-calcular-frete","numero-input","complemento-input"].forEach(id => {
-      const el2 = document.getElementById(id);
-      if (!el2) return;
-      el2.style.opacity = e.target.checked ? "0.5" : "1";
-      if (el2.tagName === "INPUT") el2.disabled = e.target.checked;
-    });
-    if (e.target.checked) popupAdd("Opção: Retirada na Degust 🍰");
-    renderMiniCart();
-  });
-
-  /* =========================================================
-     💰 CÁLCULOS
-  ========================================================= */
-  async function calcTotals() {
-    const subtotal = getCartSubtotal();
-    let delivery = DELIVERY_FEE_DEFAULT;
-    let discount = 0;
-    let cupomInfo = { valid: false, freeShipping: false };
-
-    if (couponApplied) {
-      const cp = couponApplied.toUpperCase();
-      if (cp === "DEGUST10")    { discount = subtotal * 0.10; cupomInfo.valid = true; }
-      else if (cp === "FRETEGRATIS") { cupomInfo.freeShipping = true; cupomInfo.valid = true; }
-      else if (cp === "BOASVINDAS")  { discount = 5.00;              cupomInfo.valid = true; }
-    }
-
-    const isRetirar = document.getElementById("retirar-local")?.checked;
-    if (isRetirar || subtotal >= LIMITE_FRETE_GRATIS || cupomInfo.freeShipping) delivery = 0;
-
-    const total = Math.max(0, subtotal + delivery - discount);
-    return { subtotal, delivery, discount, total, cupomInfo };
-  }
-
-  async function enhanceMiniCartUI() {
-    if (!el.miniFoot) return;
-    const { subtotal, delivery, discount, total, cupomInfo } = await calcTotals();
-    const couponMsg = document.getElementById("coupon-message");
-    const couponDiscountRow = document.getElementById("coupon-discount-row");
-
-    if (couponApplied) {
-      if (cupomInfo.valid) {
-        if (couponMsg) couponMsg.innerHTML = `<span style="color:#2e7d32;font-size:.85rem;">✅ Cupom <b>${couponApplied}</b> aplicado!</span>`;
-        if (discount > 0 && couponDiscountRow) {
-          couponDiscountRow.style.display = "flex";
-          const cd = document.getElementById("cart-discount");
-          if (cd) cd.textContent = `-${money(discount)}`;
-        }
-      } else {
-        if (couponMsg) couponMsg.innerHTML = `<span style="color:#d32f2f;font-size:.85rem;">❌ Cupom inválido ou expirado.</span>`;
-        if (couponDiscountRow) couponDiscountRow.style.display = "none";
-      }
-    }
-
-    let summaryDiv = el.miniFoot.querySelector(".cart-summary-generated");
-    if (!summaryDiv) {
-      summaryDiv = document.createElement("div");
-      summaryDiv.className = "cart-summary-generated";
-      el.miniFoot.appendChild(summaryDiv);
-    }
-
-    summaryDiv.innerHTML = `
-      <div style="padding:10px 0;border-top:1px solid #eee;margin-top:10px;">
-        <div style="display:flex;justify-content:space-between;margin-bottom:5px;color:#666;">
-          <span>Subtotal:</span><span>${money(subtotal)}</span>
-        </div>
-        <div style="display:flex;justify-content:space-between;margin-bottom:5px;color:#666;">
-          <span>Taxa de Entrega:</span>
-          <span>${delivery === 0 ? '<b style="color:#2e7d32;">GRÁTIS</b>' : money(delivery)}</span>
-        </div>
-        ${discount > 0 ? `
-        <div style="display:flex;justify-content:space-between;margin-bottom:5px;color:#2e7d32;">
-          <span>Desconto:</span><span>-${money(discount)}</span>
-        </div>` : ""}
-        <div style="display:flex;justify-content:space-between;margin-top:8px;font-size:1.2rem;font-weight:800;color:#4B2C20;">
-          <span>Total:</span><span>${money(total)}</span>
-        </div>
-      </div>
-      <div style="background:linear-gradient(135deg,#fff8e1,#fffde7);border:1px solid #E1A95F;border-radius:10px;padding:10px 12px;margin-top:10px;display:flex;align-items:center;gap:8px;">
-        <span style="font-size:1.4rem;">🎁</span>
-        <div>
-          <p style="margin:0;font-size:.78rem;font-weight:700;color:#4B2C20;">Esta compra acumula pontos de fidelidade!</p>
-          <p style="margin:0;font-size:.72rem;color:#8d6e63;">Acesse pelo menu lateral ou pelo seu perfil</p>
-        </div>
-      </div>
-      <button id="main-finish-btn" type="button" style="width:100%;background:#4caf50;color:#fff;border:none;padding:15px;border-radius:10px;font-weight:bold;font-size:1.1rem;cursor:pointer;margin-top:10px;box-shadow:0 4px 10px rgba(76,175,80,.3);">
-        FINALIZAR PEDIDO 🍰
-      </button>
-    `;
-
-    document.getElementById("main-finish-btn")?.addEventListener("click", () => window.fecharPedido());
-  }
-
-  /* =========================================================
-     📦 FINALIZAR PEDIDO
-  ========================================================= */
-  window.fecharPedido = async function () {
-    if (!cart.length) return alert("O carrinho está vazio! Escolha uma doçura primeiro. 🍰");
-    if (!currentUser) { alert("Faça login para finalizar seu pedido!"); UIManager.open("login", el.loginModal); return; }
-
-    const isRetirar = document.getElementById("retirar-local")?.checked;
-    let addr = "";
-
-    if (modoEnderecoManual) {
-      const end = el.manualEndereco?.value?.trim() || "";
-      const num = el.manualNumero?.value?.trim()   || "";
-      if (end && num) addr = `${end}, N° ${num} (Manual)`;
-    } else {
-      const rua   = document.getElementById("endereco-auto")?.value.trim()   || "";
-      const num   = document.getElementById("numero-input")?.value.trim()    || "";
-      const comp  = document.getElementById("complemento-input")?.value.trim() || "";
-      const cepV  = document.getElementById("cep-input")?.value.replace(/\D/g,"") || "";
-      if (rua && num) {
-        addr = `${rua}, N° ${num}`;
-        if (comp) addr += `, Comp: ${comp}`;
-        if (cepV.length === 8) addr += ` | CEP: ${cepV}`;
-      }
-    }
-
-    if (isRetirar) {
-      addr = "Retirada na loja: Rua Espanha, 72 - Parque das Nações, Três Marias/MG";
-    } else if (!addr) {
-      alert("Preencha o endereço completo (ou marque 'Retirar no Local') para continuar.");
+    if (cleanCEP.length !== 8) {
+      popupAdd("⚠️ CEP incompleto. Digite os 8 números.");
       return;
     }
 
-    window.finalAddressStringForWhatsApp = addr;
-    abrirModalPIX();
+    try {
+      if (btn) {
+        btn.disabled = true;
+        btn.innerHTML = '<span class="spinner"></span>';
+      }
+
+      // Consulta ViaCEP com o motor de Retry para falhas de sinal
+      const response = await withRetry(() => fetch(`https://viacep.com.br/ws/${cleanCEP}/json/`));
+      const data = await response.json();
+
+      if (data.erro) {
+        popupAdd("❌ CEP não encontrado. Verifique os números.");
+        return;
+      }
+
+      // Preenche os campos automaticamente
+      if (inputEndereco) {
+        inputEndereco.value = `${data.logradouro}, ${data.bairro} — ${data.localidade}/${data.uf}`;
+      }
+      
+      // Habilita campos de complemento e número
+      document.getElementById("numero-input").disabled = false;
+      document.getElementById("complemento-input").disabled = false;
+      
+      // Define a taxa padrão (que pode ser sobrescrita pela Carol no Firebase)
+      state.deliveryConfig.taxa = 7.00; 
+      
+      popupAdd("Endereço localizado! 📍");
+      renderCart(); // Re-renderiza para aplicar a taxa no total
+
+    } catch (err) {
+      console.error("Erro ViaCEP:", err);
+      popupAdd("⚠️ Erro ao conectar ao serviço de mapas.");
+    } finally {
+      if (btn) {
+        btn.disabled = false;
+        btn.textContent = "Buscar";
+      }
+    }
   };
 
+  // 📈 ATUALIZADOR DA BARRA DE PROGRESSO (UX)
+  const atualizarVisualFrete = (subtotal) => {
+    const barFill = document.getElementById("progressFill");
+    const labelText = document.getElementById("progressText");
+    const meta = state.deliveryConfig.gratisAcima;
 
+    if (!barFill || !labelText) return;
+
+    if (subtotal >= meta) {
+      // FRETE GRÁTIS ATINGIDO
+      barFill.style.width = "100%";
+      barFill.style.background = "var(--success)";
+      labelText.innerHTML = "<strong>Parabéns!</strong> Você ganhou Frete Grátis! 🚀";
+      state.deliveryConfig.taxa = 0;
+    } else {
+      // CALCULA O QUE FALTA
+      const faltam = meta - subtotal;
+      const porcentagem = (subtotal / meta) * 100;
+      
+      barFill.style.width = `${porcentagem}%`;
+      barFill.style.background = "linear-gradient(90deg, var(--dourado), var(--vermelho))";
+      labelText.innerHTML = `Faltam <strong>${formatCurrency(faltam)}</strong> para Frete Grátis 🚀`;
+      
+      // Se não for retirada e o CEP foi buscado, restaura a taxa padrão
+      const isRetirada = document.getElementById("retirar-local")?.checked;
+      if (!isRetirada && document.getElementById("endereco-auto")?.value !== "") {
+        state.deliveryConfig.taxa = 7.00;
+      }
+    }
+  };
+
+  // Listeners de Logística
+  document.getElementById("btn-calcular-frete")?.addEventListener("click", () => {
+    const val = document.getElementById("cep-input").value;
+    executarBuscaCEP(val);
+  });
+
+  document.getElementById("retirar-local")?.addEventListener("change", (e) => {
+    const areaEntrega = document.getElementById("frete-area");
+    if (e.target.checked) {
+      if (areaEntrega) areaEntrega.style.opacity = "0.5";
+      state.deliveryConfig.taxa = 0;
+    } else {
+      if (areaEntrega) areaEntrega.style.opacity = "1";
+      // Recalcula se deve cobrar taxa ou se já bateu o frete grátis
+      renderCart();
+    }
+    renderCart();
+  });
+
+  /* FIM DA PARTE 6 - AGUARDANDO OK PARA A PARTE 7: RENDERIZAÇÃO DO CARRINHO E RESUMO DE VALORES */
   /* =========================================================
-     📦 MEUS PEDIDOS — busca no Firestore
+     🎨 MOTOR DE RENDERIZAÇÃO DO CARRINHO (v12.0)
+     Transforma o array state.cart em HTML interativo.
   ========================================================= */
-  // Emoji miniatura por nome do produto
-  function emojiProduto(nome) {
-    const n = (nome || "").toLowerCase();
-    if (n.includes("brigadeiro"))  return "🍫";
-    if (n.includes("prestígio") || n.includes("prestigio")) return "🥥";
-    if (n.includes("morango"))     return "🍓";
-    if (n.includes("ninho"))       return "🥛";
-    return "🍰";
-  }
 
-  function carregarPedidos(user) {
-    if (!db || !user) return;
-    const lista = document.getElementById("listaPedidos");
-    if (!lista) return;
-    lista.innerHTML = '<p style="text-align:center;color:#999;padding:20px;">Carregando seus pedidos...</p>';
+  window.renderCart = () => {
+    const listCont = document.querySelector(".mini-list");
+    const countHeader = document.getElementById("cart-count");
+    if (!listCont) return;
 
-    // Query sem orderBy para evitar erro de índice — ordena no cliente
-    db.collection("Pedidos")
-      .where("userId", "==", user.uid)
-      .limit(20)
-      .get()
-      .then(snapshot => {
-        if (snapshot.empty) {
-          return db.collection("Pedidos").where("uid", "==", user.uid).limit(20).get();
-        }
-        return snapshot;
-      })
-      .then(snapshot => {
-        if (snapshot.empty) {
-          lista.innerHTML = `
-            <div style="text-align:center;padding:30px 10px;">
-              <div style="font-size:3rem;margin-bottom:10px;">🍰</div>
-              <p style="color:#999;font-size:.95rem;">Você ainda não fez nenhum pedido.</p>
-              <p style="color:#E1A95F;font-size:.85rem;font-weight:600;">Que tal experimentar um bolinho hoje?</p>
-            </div>`;
-          return;
-        }
+    // Limpa a lista para reconstrução (Evita duplicatas visuais)
+    listCont.innerHTML = "";
+    let subtotal = 0;
+    let totalItensQtd = 0;
 
-        // Ordena no cliente por data desc
-        const docs = [...snapshot.docs].sort((a, b) => {
-          const da = a.data().criadoEm?.toDate?.() || new Date(a.data().data || 0);
-          const db2 = b.data().criadoEm?.toDate?.() || new Date(b.data().data || 0);
-          return db2 - da;
-        });
-        lista.innerHTML = docs.map(doc => {
-          const d = doc.data();
-
-          // Data — campo pode ser Timestamp ou string ISO
-          let dataHora = "—";
-          if (d.criadoEm?.toDate) {
-            const dt = d.criadoEm.toDate();
-            dataHora = dt.toLocaleDateString("pt-BR") + " às " + dt.toLocaleTimeString("pt-BR",{hour:"2-digit",minute:"2-digit"});
-          } else if (d.data) {
-            try {
-              const dt = new Date(d.data);
-              if (!isNaN(dt)) dataHora = dt.toLocaleDateString("pt-BR") + " às " + dt.toLocaleTimeString("pt-BR",{hour:"2-digit",minute:"2-digit"});
-            } catch(e) { dataHora = d.data; }
-          }
-
-          // Itens — pode ser array em itensObj ou string em itens
-          const itens = Array.isArray(d.itensObj) ? d.itensObj
-                      : Array.isArray(d.itens)    ? d.itens
-                      : [];
-
-          // Grade de miniaturas (máx 4 emojis)
-          const emojis = itens.slice(0, 4).map(i => emojiProduto(i.nome));
-          const miniatura = emojis.length > 0
-            ? `<div style="display:flex;gap:4px;margin-bottom:8px;flex-wrap:wrap;">
-                ${emojis.map(e => `<span style="font-size:1.6rem;background:#fdf8ef;border-radius:8px;width:36px;height:36px;display:flex;align-items:center;justify-content:center;">${e}</span>`).join("")}
-               </div>`
-            : `<div style="font-size:2rem;margin-bottom:8px;">🍰</div>`;
-
-          // Texto dos itens
-          const itensTexto = itens.length > 0
-            ? itens.map(i => `${i.nome}${i.qtd > 1 ? ` x${i.qtd}` : ""}`).join(" • ")
-            : (d.resumo || "Pedido");
-
-          const total  = d.total  ? money(d.total)  : "";
-          const status = d.status || "enviado";
-          const cores  = { enviado:"#E1A95F", preparando:"#1976d2", pronto:"#2e7d32", entregue:"#4caf50", cancelado:"#d32f2f" };
-          const cor    = cores[status] || "#999";
-          const icones = { enviado:"📨", preparando:"👩‍🍳", pronto:"✅", entregue:"🎉", cancelado:"❌" };
-          const icone  = icones[status] || "📦";
-
-          return `
-            <div style="background:#fff;border-radius:14px;padding:14px;margin-bottom:12px;border:1px solid rgba(225,169,95,.25);box-shadow:0 2px 8px rgba(0,0,0,.06);">
-              <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
-                <span style="font-size:.78rem;color:#aaa;">${dataHora}</span>
-                <span style="font-size:.72rem;font-weight:700;color:${cor};background:${cor}18;padding:3px 10px;border-radius:20px;text-transform:uppercase;">${icone} ${status}</span>
-              </div>
-              ${miniatura}
-              <p style="margin:0 0 6px;font-size:.85rem;color:#6d4c41;line-height:1.4;">${itensTexto}</p>
-              ${total ? `<p style="margin:0;font-weight:800;color:#C8282D;font-size:1rem;">${total}</p>` : ""}
-            </div>`;
-        }).join("");
-      })
-      .catch(err => {
-        console.error("Erro ao carregar pedidos:", err);
-        lista.innerHTML = '<p style="text-align:center;color:#999;padding:20px;">Erro ao carregar pedidos. Tente novamente.</p>';
-      });
-  }
-
-  /* =========================================================
-     🎁 RECOMPENSAS — busca no Firestore
-  ========================================================= */
-  function carregarRecompensas(user) {
-    if (!db || !user) return;
-    const contadorEl  = document.getElementById("contador-valor");
-    const barraEl     = document.getElementById("progresso-bar");
-    const mensagemEl  = document.getElementById("progresso-mensagem");
-    const listaEl     = document.getElementById("listaRecompensas");
-    const historicoEl = document.getElementById("historicoRecompensas");
-    if (!contadorEl) return;
-
-    db.collection("Usuarios").doc(user.uid).get()
-      .then(doc => {
-        const dados = doc.exists ? doc.data() : {};
-        const bolos    = dados.bolosPedidos  || 0;
-        const meta     = dados.metaFidelidade || 5;
-        const pct      = Math.min(100, (bolos / meta) * 100);
-        const faltam   = Math.max(0, meta - bolos);
-
-        if (contadorEl) contadorEl.textContent = bolos;
-        if (barraEl)    barraEl.style.width = `${pct}%`;
-        if (mensagemEl) {
-          mensagemEl.textContent = bolos >= meta
-            ? "🎉 Parabéns! Você ganhou uma recompensa!"
-            : `Faltam ${faltam} bolo${faltam !== 1 ? "s" : ""} para sua próxima recompensa!`;
-        }
-
-        // Recompensas disponíveis
-        const recompensas = dados.recompensasDisponiveis || [];
-        if (listaEl) {
-          listaEl.innerHTML = recompensas.length
-            ? recompensas.map(r => `
-                <div style="background:#fff;border:1px solid var(--dourado);border-radius:10px;padding:12px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center;">
-                  <span style="font-weight:600;color:#4B2C20;">🎁 ${r.descricao || r}</span>
-                  <span style="font-size:.75rem;color:#E1A95F;font-weight:700;">DISPONÍVEL</span>
-                </div>`).join("")
-            : '<p style="color:#999;text-align:center;font-size:.9rem;">Nenhuma recompensa disponível no momento.</p>';
-        }
-
-        // Histórico
-        const historico = dados.historicoRecompensas || [];
-        if (historicoEl) {
-          historicoEl.innerHTML = historico.length
-            ? historico.map(h => `
-                <div style="padding:8px 0;border-bottom:1px solid #eee;font-size:.85rem;color:#666;">
-                  🏆 ${h.descricao || h} — <span style="color:#4B2C20;">${h.data || ""}</span>
-                </div>`).join("")
-            : '<p style="color:#999;text-align:center;font-size:.9rem;">Você ainda não resgatou prêmios.</p>';
-        }
-      })
-      .catch(err => {
-        console.error("Erro ao carregar recompensas:", err);
-        if (mensagemEl) mensagemEl.textContent = "Erro ao carregar recompensas.";
-      });
-  }
-
-
-  /* =========================================================
-     📊 PAINEL DE RELATÓRIOS — Admin Only
-  ========================================================= */
-  function abrirRelatorios() {
-    let overlay = document.getElementById("relatoriosOverlay");
-    if (!overlay) {
-      overlay = document.createElement("div");
-      overlay.id = "relatoriosOverlay";
-      overlay.className = "painel-overlay";
-      overlay.innerHTML = `
-        <div class="painel-box" style="max-width:560px;">
-          <div class="painel-head">
-            <span>📊 Relatórios Degust</span>
-            <button class="fechar-painel" id="fechar-relatorios" type="button">✖</button>
-          </div>
-          <div class="painel-body">
-
-            <!-- Filtro de período -->
-            <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px;">
-              <button class="rel-filtro rel-ativo" data-dias="7"  type="button">7 dias</button>
-              <button class="rel-filtro" data-dias="30" type="button">30 dias</button>
-              <button class="rel-filtro" data-dias="0"  type="button">Personalizado</button>
-            </div>
-
-            <!-- Datas personalizadas -->
-            <div id="rel-datas-custom" style="display:none;gap:8px;margin-bottom:14px;flex-wrap:wrap;">
-              <input type="date" id="rel-data-inicio" style="flex:1;padding:8px;border:1px solid var(--dourado);border-radius:8px;font-size:.85rem;">
-              <input type="date" id="rel-data-fim"    style="flex:1;padding:8px;border:1px solid var(--dourado);border-radius:8px;font-size:.85rem;">
-              <button id="rel-btn-custom" type="button" style="background:var(--marrom);color:var(--bege);border:none;padding:8px 16px;border-radius:8px;font-weight:700;cursor:pointer;">Filtrar</button>
-            </div>
-
-            <!-- Cards de resumo -->
-            <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px;" id="rel-cards">
-              <div class="rel-card"><div class="rel-card-val" id="rel-total-vendas">—</div><div class="rel-card-label">Total em Vendas</div></div>
-              <div class="rel-card"><div class="rel-card-val" id="rel-num-pedidos">—</div><div class="rel-card-label">Pedidos</div></div>
-              <div class="rel-card"><div class="rel-card-val" id="rel-ticket-medio">—</div><div class="rel-card-label">Ticket Médio</div></div>
-              <div class="rel-card"><div class="rel-card-val" id="rel-mais-vendido">—</div><div class="rel-card-label">Mais Vendido</div></div>
-            </div>
-
-            <!-- Lista de pedidos do período -->
-            <h4 style="color:var(--marrom);margin:0 0 10px;font-size:.95rem;">📋 Pedidos no Período</h4>
-            <div id="rel-lista-pedidos" style="max-height:260px;overflow-y:auto;"></div>
-
-            <!-- Exportar -->
-            <button id="rel-exportar" type="button" style="width:100%;margin-top:14px;background:var(--dourado);color:var(--marrom);border:none;padding:13px;border-radius:10px;font-weight:800;font-size:.95rem;cursor:pointer;">
-              📥 Exportar CSV
-            </button>
-          </div>
-        </div>`;
-      document.body.appendChild(overlay);
-
-      // Fechar
-      document.getElementById("fechar-relatorios").addEventListener("click", () => {
-        overlay.classList.remove("active");
-      });
-      overlay.addEventListener("click", e => { if (e.target === overlay) overlay.classList.remove("active"); });
-
-      // Filtros de período
-      overlay.querySelectorAll(".rel-filtro").forEach(btn => {
-        btn.addEventListener("click", () => {
-          overlay.querySelectorAll(".rel-filtro").forEach(b => b.classList.remove("rel-ativo"));
-          btn.classList.add("rel-ativo");
-          const dias = parseInt(btn.dataset.dias);
-          const custom = document.getElementById("rel-datas-custom");
-          if (dias === 0) {
-            custom.style.display = "flex";
-          } else {
-            custom.style.display = "none";
-            const fim   = new Date();
-            const inicio = new Date(); inicio.setDate(inicio.getDate() - dias);
-            buscarRelatorio(inicio, fim);
-          }
-        });
-      });
-
-      // Botão filtrar personalizado
-      document.getElementById("rel-btn-custom").addEventListener("click", () => {
-        const di = document.getElementById("rel-data-inicio").value;
-        const df = document.getElementById("rel-data-fim").value;
-        if (!di || !df) return alert("Selecione as duas datas.");
-        buscarRelatorio(new Date(di + "T00:00:00"), new Date(df + "T23:59:59"));
-      });
-
-      // Exportar CSV
-      document.getElementById("rel-exportar").addEventListener("click", exportarCSV);
+    if (state.cart.length === 0) {
+      listCont.innerHTML = `
+        <div class="cart-empty-state">
+          <span class="empty-icon">🍰</span>
+          <p>Seu carrinho está vazio.<br>Escolha uma doçura!</p>
+        </div>
+      `;
     }
 
-    overlay.classList.add("active");
-    // Carrega 7 dias por padrão
-    const fim    = new Date();
-    const inicio = new Date(); inicio.setDate(inicio.getDate() - 7);
-    buscarRelatorio(inicio, fim);
-  }
+    state.cart.forEach((item, index) => {
+      const itemTotal = item.preco * item.qtd;
+      subtotal += itemTotal;
+      totalItensQtd += item.qtd;
 
-  let _pedidosRelatorio = []; // cache para exportação
+      const itemDiv = document.createElement("div");
+      itemDiv.className = "cart-item";
+      itemDiv.innerHTML = `
+        <div class="cart-item-main">
+          <div class="cart-item-details">
+            <span class="cart-item-name">${item.nome}</span>
+            ${item.detalhes ? `<small class="cart-item-extras">${item.detalhes}</small>` : ''}
+            <span class="cart-item-price-unit">${formatCurrency(item.preco)}</span>
+          </div>
+          <div class="cart-item-ctrl">
+            <button class="btn-qty" onclick="changeQty(${index}, -1)" aria-label="Remover um">−</button>
+            <span class="qty-val">${item.qtd}</span>
+            <button class="btn-qty" onclick="changeQty(${index}, 1)" aria-label="Adicionar outro">+</button>
+          </div>
+        </div>
+      `;
+      listCont.appendChild(itemDiv);
+    });
 
-  function buscarRelatorio(inicio, fim) {
-    const listaEl = document.getElementById("rel-lista-pedidos");
-    if (!listaEl || !db) return;
-    listaEl.innerHTML = '<p style="text-align:center;color:#999;padding:16px;">Carregando...</p>';
+    // Atualiza o contador de bolhas no header
+    if (countHeader) countHeader.textContent = totalItensQtd;
 
-    db.collection("Pedidos")
-      .where("criadoEm", ">=", firebase.firestore.Timestamp.fromDate(inicio))
-      .where("criadoEm", "<=", firebase.firestore.Timestamp.fromDate(fim))
-      .orderBy("criadoEm", "desc")
-      .get()
-      .then(snap => {
-        _pedidosRelatorio = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    // --- CÁLCULO DE FINANCEIRO ---
+    atualizarVisualFrete(subtotal);
+    
+    let valorDesconto = 0;
+    const rowDesc = document.getElementById("coupon-discount-row");
+    const labelDesc = document.getElementById("cart-discount");
 
-        // Métricas
-        const totalVendas  = _pedidosRelatorio.reduce((s, p) => s + (Number(p.total) || 0), 0);
-        const numPedidos   = _pedidosRelatorio.length;
-        const ticketMedio  = numPedidos > 0 ? totalVendas / numPedidos : 0;
+    if (state.activeCoupon) {
+      const c = state.activeCoupon;
+      valorDesconto = c.tipo === "fixo" ? c.valor : (subtotal * (c.valor / 100));
+      
+      if (rowDesc && labelDesc) {
+        rowDesc.style.display = "flex";
+        labelDesc.textContent = `- ${formatCurrency(valorDesconto)}`;
+      }
+    } else if (rowDesc) {
+      rowDesc.style.display = "none";
+    }
 
-        // Produto mais vendido
-        const contagem = {};
-        _pedidosRelatorio.forEach(p => {
-          (p.itens || []).forEach(i => {
-            const k = i.nome?.split("(")[0].trim() || "?";
-            contagem[k] = (contagem[k] || 0) + (i.qtd || 1);
+    const totalFinal = Math.max(0, subtotal + state.deliveryConfig.taxa - valorDesconto);
+    
+    // Injeta o resumo final e o botão de checkout
+    atualizarResumoFinalUI(subtotal, state.deliveryConfig.taxa, totalFinal);
+  };
+
+  // 📝 ATUALIZA OS TEXTOS DE VALORES NO RODAPÉ DO CARRINHO
+  const atualizarResumoFinalUI = (sub, taxa, total) => {
+    const actionsArea = document.getElementById("cart-actions-area");
+    if (!actionsArea) return;
+
+    actionsArea.innerHTML = `
+      <div class="cart-totals-box">
+        <div class="summary-row">
+          <span>Subtotal</span>
+          <span>${formatCurrency(sub)}</span>
+        </div>
+        <div class="summary-row">
+          <span>Taxa de Entrega</span>
+          <span class="${taxa === 0 ? 'free-tag' : ''}">${taxa === 0 ? 'GRÁTIS' : formatCurrency(taxa)}</span>
+        </div>
+        <div class="summary-row total-row-main">
+          <span>Total</span>
+          <span>${formatCurrency(total)}</span>
+        </div>
+      </div>
+      <button id="main-finish-btn" class="btn-checkout-start" onclick="iniciarCheckout(${total})">
+        FECHAR PEDIDO ➔
+      </button>
+    `;
+  };
+
+  // 🔄 ALTERADOR DE QUANTIDADE
+  window.changeQty = (index, delta) => {
+    if (state.ui_lock) return;
+    lockUI(100);
+
+    state.cart[index].qtd += delta;
+    
+    if (state.cart[index].qtd <= 0) {
+      state.cart.splice(index, 1);
+      popupAdd("Item removido.");
+    }
+    
+    renderCart();
+  };
+
+  /* FIM DA PARTE 7 - AGUARDANDO OK PARA A PARTE 8: CUPONS E FIDELIDADE PROGRESSIVA */
+  /* =========================================================
+     🎁 SISTEMA DE FIDELIDADE & CUPONS REATIVOS
+     Lógica de descontos e progressão de prêmios.
+  ========================================================= */
+
+  /* =========================================================
+     🎫 ADVANCED COUPON ENGINE (Validação Profunda)
+     Gerencia regras de negócio, validade e limites.
+  ========================================================= */
+
+  const aplicarCupomService = async (codigo) => {
+    if (state.ui_lock) return;
+    lockUI(1000);
+
+    const subtotalAtual = state.cart.reduce((acc, i) => acc + (i.preco * i.qtd), 0);
+    const msgEl = document.getElementById("coupon-message");
+    if (!msgEl) return;
+
+    try {
+      msgEl.innerHTML = '<span class="spinner-small"></span> Validando regras...';
+      
+      const doc = await withRetry(() => state.db.collection("cupons").doc(codigo).get());
+      
+      if (!doc.exists) {
+        throw new Error("Este cupom não existe.");
+      }
+      
+      const c = doc.data();
+
+      // 1. Verificação de Ativação
+      if (!c.ativo) throw new Error("Este cupom foi desativado.");
+
+      // 2. Verificação de Validade Temporal
+      if (c.validade && c.validade.toDate() < new Date()) {
+        throw new Error("Este cupom expirou.");
+      }
+      
+      // 3. Verificação de Valor Mínimo
+      if (c.valorMinimo && subtotalAtual < c.valorMinimo) {
+        throw new Error(`Pedido mínimo para este cupom: ${formatCurrency(c.valorMinimo)}`);
+      }
+
+      // 4. Verificação de Uso Único (Opcional)
+      if (c.apenasPrimeira && state.currentUser) {
+        const checkPeds = await state.db.collection("Pedidos")
+          .where("userId", "==", state.currentUser.uid)
+          .where("prefixo", "==", "degust")
+          .limit(1).get();
+          
+        if (!checkPeds.empty) throw new Error("Válido apenas para sua primeira compra!");
+      }
+
+      // Sucesso
+      state.activeCoupon = {
+        id: codigo,
+        tipo: c.tipo,
+        valor: c.valor
+      };
+
+      msgEl.innerHTML = `<span class="success-txt">✅ Cupom "${codigo}" aplicado!</span>`;
+      playFeedback('success');
+      popupAdd(`Desconto de ${c.tipo === 'fixo' ? formatCurrency(c.valor) : c.valor + '%'} ativado! 🎁`);
+      
+    } catch (err) {
+      state.activeCoupon = null;
+      msgEl.innerHTML = `<span class="err-txt">❌ ${err.message}</span>`;
+      playFeedback('error');
+    } finally {
+      renderCart(); // Atualiza os totais
+    }
+  };
+
+  // 🎁 MOTOR DE INCENTIVO (Quanto falta para o prêmio?)
+  const mostrarIncentivoFidelidade = async () => {
+    if (!state.currentUser) return;
+    
+    try {
+      const userRef = state.db.collection("usuarios").doc(state.currentUser.uid);
+      const userDoc = await userRef.get();
+      
+      // Busca o progresso real usando o prefixo degust_
+      const bolosJaPedidos = userDoc.exists ? (userDoc.data().degust_bolosPedidos || 0) : 0;
+      
+      // Encontra na nossa matriz (FIDELIDADE_MASTER) o próximo marco
+      const proximoMarco = FIDELIDADE_MASTER.recompensas.find(r => r.pedido > bolosJaPedidos);
+      
+      if (proximoMarco) {
+        const faltam = proximoMarco.pedido - bolosJaPedidos;
+        const msgIncentivo = faltam === 1 
+          ? `Falta só 1 bolo para você ganhar: ${proximoMarco.desc}! 🍰`
+          : `Faltam ${faltam} bolos para você ganhar seu prêmio de ${proximoMarco.desc}! 🎁`;
+        
+        // Dispara o toast especial do extras.js
+        if (typeof popupAdd === 'function') {
+          setTimeout(() => popupAdd(msgIncentivo, 4500), 800);
+        }
+      }
+    } catch (err) {
+      console.warn("Fidelidade: Erro ao calcular incentivo visual.", err);
+    }
+  };
+
+  // Listener do Formulário de Cupom
+  document.getElementById("coupon-form")?.addEventListener("submit", (e) => {
+    e.preventDefault();
+    if (state.ui_lock) return;
+    lockUI(1000);
+
+    const input = document.getElementById("coupon-input");
+    if (input && input.value.trim() !== "") {
+      aplicarCupomService(input.value.trim().toUpperCase());
+    }
+  });
+
+  /* FIM DA PARTE 8 - AGUARDANDO OK PARA A PARTE 9: CHECKOUT E MODAL DE PAGAMENTO PIX */
+  /* =========================================================
+     💠 CHECKOUT INTELIGENTE & PAGAMENTO (v12.0)
+     Garante que o pedido só avance se todos os dados estiverem OK.
+  ========================================================= */
+
+  window.iniciarCheckout = async (valorTotal) => {
+    if (state.ui_lock) return;
+    lockUI(600);
+
+    // 1. Validação de Carrinho Vazio
+    if (state.cart.length === 0) {
+      return popupAdd("Seu carrinho está vazio! Escolha um bolo primeiro. 🛒");
+    }
+
+    // 2. Validação de Autenticação (Garante pontos para o cliente)
+    if (!state.currentUser) {
+      popupAdd("Identifique-se para acumular pontos neste pedido! 👤");
+      UIManager.open("login", document.getElementById("login-modal"));
+      return;
+    }
+
+    // 3. Validação de Logística
+    const isRetirada = document.getElementById("retirar-local")?.checked;
+    const enderecoAuto = document.getElementById("endereco-auto")?.value;
+    const numeroManual = document.getElementById("numero-input")?.value;
+    const enderecoManual = document.getElementById("manualEndereco")?.value;
+
+    if (!isRetirada) {
+      // Se não for retirada, precisa de um endereço (seja via CEP ou Manual)
+      const temEndereco = (enderecoAuto && numeroManual) || (enderecoManual);
+      if (!temEndereco) {
+        popupAdd("⚠️ Por favor, informe onde devemos entregar seu bolo.");
+        return;
+      }
+    }
+
+    // 4. Preparação do Modal de Pagamento
+    const pixModal = document.getElementById("pix-modal");
+    const displayValor = document.getElementById("pix-valor");
+
+    if (displayValor) {
+      displayValor.textContent = formatCurrency(valorTotal);
+    }
+
+    // Abre o modal de finalização
+    UIManager.open("pix", pixModal);
+    console.log(`[Checkout] Iniciado para o valor: ${valorTotal}`);
+  };
+
+  // --- CONTROLE DOS BOTÕES DO MODAL PIX ---
+  
+  // Copiar chave PIX
+  document.getElementById("btn-copy-pix")?.addEventListener("click", () => {
+    const chavePix = "degustbolosnopote@gmail.com";
+    
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(chavePix).then(() => {
+        state.pixCopied = true;
+        popupAdd("Chave PIX copiada com sucesso! 💠");
+        
+        // Efeito visual no botão
+        const btn = document.getElementById("btn-copy-pix");
+        if (btn) {
+          const originalText = btn.innerHTML;
+          btn.innerHTML = "✅ Chave Copiada!";
+          setTimeout(() => { btn.innerHTML = originalText; }, 3000);
+        }
+      });
+    } else {
+      // Fallback para navegadores antigos/celulares específicos
+      popupAdd(`Chave: ${chavePix}`);
+    }
+  });
+
+  /* FIM DA PARTE 9 - AGUARDANDO OK PARA A PARTE 10: SALVAMENTO BLINDADO NO FIRESTORE (A JOIA DA COROA) */
+  /* =========================================================
+     💾 GRAVAÇÃO BLINDADA (DATABASE & FIDELIDADE)
+     Garante a integridade do pedido e dos pontos do cliente.
+  ========================================================= */
+
+  const processarPedidoNoBanco = async (metodoPagamento) => {
+    if (state.ui_lock) return;
+    lockUI(2000);
+
+    const btnFinish = document.getElementById("btn-finish-pix");
+    const originalBtnTxt = btnFinish ? btnFinish.innerHTML : "";
+
+    try {
+      // 1. Início do Loading Visual
+      if (btnFinish) {
+        btnFinish.disabled = true;
+        btnFinish.innerHTML = '<span class="spinner"></span> Processando Pedido...';
+      }
+
+      // 2. Coleta de Dados de Logística
+      const isRetirada = document.getElementById("retirar-local")?.checked;
+      const endAuto = document.getElementById("endereco-auto")?.value;
+      const numAuto = document.getElementById("numero-input")?.value;
+      const endManual = document.getElementById("manualEndereco")?.value;
+
+      const enderecoFinal = isRetirada 
+        ? "Retirada na Loja (Degust)" 
+        : (endAuto ? `${endAuto}, Nº ${numAuto}` : endManual);
+
+      // 3. Cálculos de Conferência
+      const subtotal = state.cart.reduce((acc, i) => acc + (i.preco * i.qtd), 0);
+      const desconto = state.activeCoupon ? (state.activeCoupon.tipo === 'fixo' ? state.activeCoupon.valor : (subtotal * (state.activeCoupon.valor / 100))) : 0;
+      const totalGeral = Math.max(0, subtotal + state.deliveryConfig.taxa - desconto);
+
+      // 4. Objeto do Pedido (Estrutura v12.0)
+      const novoPedido = {
+        userId: state.currentUser.uid,
+        cliente_nome: state.currentUser.displayName,
+        cliente_email: state.currentUser.email,
+        prefixo: "degust",
+        itens: state.cart.map(item => ({
+          nome: item.nome,
+          qtd: item.qtd,
+          preco_un: item.preco,
+          extras: item.detalhes || "Nenhum"
+        })),
+        financeiro: {
+          subtotal: subtotal,
+          taxa_entrega: state.deliveryConfig.taxa,
+          desconto_aplicado: desconto,
+          cupom: state.activeCoupon ? state.activeCoupon.id : "Nenhum",
+          total_pago: totalGeral
+        },
+        logistica: {
+          metodo: isRetirada ? "Retirada" : "Entrega",
+          endereco_completo: enderecoFinal,
+          pagamento_escolhido: metodoPagamento
+        },
+        status: "novo",
+        data_criacao: firebase.firestore.FieldValue.serverTimestamp()
+      };
+
+      // 5. EXECUÇÃO DA TRANSAÇÃO (Pedido + Ponto de Fidelidade)
+      await withRetry(async () => {
+        const userRef = state.db.collection("usuarios").doc(state.currentUser.uid);
+        const pedidosRef = state.db.collection("Pedidos").doc(); // Gera ID automático
+
+        await state.db.runTransaction(async (transaction) => {
+          const userDoc = await transaction.get(userRef);
+          
+          // Incrementa contador de bolos do usuário (prefixo degust_)
+          const totalAntigo = userDoc.exists ? (userDoc.data().degust_bolosPedidos || 0) : 0;
+          const novoTotal = totalAntigo + 1;
+
+          transaction.set(pedidosRef, novoPedido);
+          transaction.update(userRef, {
+            degust_bolosPedidos: novoTotal,
+            degust_ultimoPedidoData: firebase.firestore.FieldValue.serverTimestamp()
           });
         });
-        const maisVendido = Object.entries(contagem).sort((a,b) => b[1]-a[1])[0]?.[0] || "—";
-
-        document.getElementById("rel-total-vendas").textContent  = money(totalVendas);
-        document.getElementById("rel-num-pedidos").textContent   = numPedidos;
-        document.getElementById("rel-ticket-medio").textContent  = money(ticketMedio);
-        document.getElementById("rel-mais-vendido").textContent  = maisVendido.split(" ")[1] || maisVendido;
-
-        if (numPedidos === 0) {
-          listaEl.innerHTML = '<p style="text-align:center;color:#999;padding:16px;">Nenhum pedido neste período.</p>';
-          return;
-        }
-
-        listaEl.innerHTML = _pedidosRelatorio.map(p => {
-          const dt = p.criadoEm?.toDate?.();
-          const dataHora = dt
-            ? dt.toLocaleDateString("pt-BR") + " " + dt.toLocaleTimeString("pt-BR",{hour:"2-digit",minute:"2-digit"})
-            : "—";
-          const itens = (p.itens||[]).map(i=>`${i.nome} x${i.qtd||1}`).join(", ") || p.resumo || "—";
-          const cor = {enviado:"#E1A95F",preparando:"#1976d2",pronto:"#2e7d32",entregue:"#4caf50",cancelado:"#d32f2f"}[p.status||"enviado"] || "#999";
-          return `<div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid #f0e8d8;gap:8px;flex-wrap:wrap;">
-            <div style="flex:1;min-width:0;">
-              <div style="font-size:.75rem;color:#aaa;">${dataHora}</div>
-              <div style="font-size:.82rem;color:#4B2C20;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${itens}</div>
-            </div>
-            <div style="text-align:right;flex-shrink:0;">
-              <div style="font-weight:800;color:#C8282D;font-size:.9rem;">${p.total ? money(p.total) : "—"}</div>
-              <div style="font-size:.7rem;font-weight:700;color:${cor};text-transform:uppercase;">${p.status||"enviado"}</div>
-            </div>
-          </div>`;
-        }).join("");
-      })
-      .catch(err => {
-        console.error("Erro relatório:", err);
-        listaEl.innerHTML = '<p style="text-align:center;color:#c62828;padding:16px;">Erro ao carregar dados.</p>';
       });
-  }
 
-  function exportarCSV() {
-    if (!_pedidosRelatorio.length) return alert("Nenhum dado para exportar.");
-    const linhas = [
-      ["Data","Hora","Cliente","Itens","Total","Status"],
-      ..._pedidosRelatorio.map(p => {
-        const dt = p.criadoEm?.toDate?.();
-        return [
-          dt ? dt.toLocaleDateString("pt-BR") : "—",
-          dt ? dt.toLocaleTimeString("pt-BR",{hour:"2-digit",minute:"2-digit"}) : "—",
-          p.nomeCliente || p.email || "—",
-          (p.itens||[]).map(i=>`${i.nome} x${i.qtd||1}`).join(" | ") || p.resumo || "—",
-          (p.total || 0).toFixed(2).replace(".",","),
-          p.status || "enviado"
-        ];
-      })
-    ];
-    const csv  = linhas.map(r => r.map(v => `"${String(v).replace(/"/g,'""')}"`).join(";")).join("\n");
-    const blob = new Blob(["﻿" + csv], { type: "text/csv;charset=utf-8;" });
-    const url  = URL.createObjectURL(blob);
-    const a    = document.createElement("a");
-    a.href = url; a.download = `degust-relatorio-${new Date().toISOString().slice(0,10)}.csv`;
-    a.click(); URL.revokeObjectURL(url);
-  }
+      // 6. Sucesso: Disparar WhatsApp e Resetar
+      enviarWhatsApp(novoPedido);
+      
+      popupAdd("Pedido Confirmado! 🍰✨");
+      state.cart = [];
+      state.activeCoupon = null;
+      renderCart();
+      UIManager.closeAll();
 
-  /* =========================================================
-     🕰️ STATUS DA LOJA
-  ========================================================= */
-  const atualizarStatusLoja = () => {
-    const hora = new Date().getHours();
-    const aberto = hora >= 14 && hora < 22;
-    if (el.statusBanner) {
-      el.statusBanner.textContent = aberto ? "🟢 Aberto — Peça sua doçura agora!" : "🔴 Fechado — Abrimos hoje às 14h";
-      el.statusBanner.className   = `status-banner ${aberto ? "open" : "closed"}`;
+    } catch (err) {
+      console.error("Erro Crítico no Salvamento:", err);
+      popupAdd("❌ Falha ao salvar. Por favor, tire print do carrinho e envie no Whats!");
+    } finally {
+      if (btnFinish) {
+        btnFinish.disabled = false;
+        btnFinish.innerHTML = originalBtnTxt;
+      }
     }
   };
 
-  atualizarStatusLoja();
-  setInterval(atualizarStatusLoja, 60000);
+  // Funções de gatilho do Modal PIX
+  document.getElementById("btn-finish-pix")?.addEventListener("click", () => processarPedidoNoBanco("PIX Copia e Cola"));
+  document.getElementById("btn-finish-sem-pix")?.addEventListener("click", () => processarPedidoNoBanco("Pagamento na Entrega"));
 
+  /* FIM DA PARTE 10 - AGUARDANDO OK PARA A PARTE 11: INTEGRAÇÃO WHATSAPP E PAINÉIS DE HISTÓRICO */
   /* =========================================================
-     🍪 COOKIES — CORRIGIDO v11.0
-     Problema anterior: display:flex !important no CSS impedia
-     que o JS fechasse com display:none ou classList.remove
+     📱 INTEGRAÇÃO WHATSAPP & HISTÓRICO DE CLIENTE
+     Transforma dados em mensagens e exibe o passado do usuário.
   ========================================================= */
-  const cookieBanner    = document.getElementById("cookie-banner");
-  const cookieAcceptBtn = document.getElementById("cookie-accept");
 
-  if (cookieBanner && cookieAcceptBtn) {
-    if (localStorage.getItem("degust-cookies-accepted")) {
-      // Já aceitou antes — mantém oculto
-      cookieBanner.style.display = "none";
-    } else {
-      // Aparece após 2s via classe .show (sem !important no CSS)
-      setTimeout(() => cookieBanner.classList.add("show"), 2000);
-    }
+  // 🟢 GERADOR DE MENSAGEM WHATSAPP (v12.0)
+  const enviarWhatsApp = (p) => {
+    const f = p.financeiro;
+    const l = p.logistica;
+    
+    let msg = `*🍰 NOVO PEDIDO - DEGUST BOLOS*\n`;
+    msg += `_ID do Cliente: ${p.userId.substring(0, 5)}..._\n`;
+    msg += `--------------------------------------\n`;
+    msg += `👤 *Cliente:* ${p.cliente_nome}\n`;
+    msg += `📍 *Local:* ${l.endereco_completo}\n`;
+    msg += `💳 *Pagamento:* ${l.pagamento_escolhido}\n`;
+    msg += `--------------------------------------\n\n`;
 
-    cookieAcceptBtn.addEventListener("click", () => {
-      localStorage.setItem("degust-cookies-accepted", "true");
-      cookieBanner.classList.remove("show");
-      // Aguarda a transição terminar e então oculta definitivamente
-      setTimeout(() => { cookieBanner.style.display = "none"; }, 450);
-      popupAdd("Preferências salvas! 🍪");
+    p.itens.forEach(item => {
+      msg += `▪️ ${item.qtd}x *${item.nome}*\n`;
+      if (item.extras !== "Nenhum") msg += `   _Extras: ${item.extras}_\n`;
+      msg += `   Sub: ${formatCurrency(item.preco_un * item.qtd)}\n\n`;
     });
-  }
+
+    msg += `--------------------------------------\n`;
+    msg += `💰 *Subtotal:* ${formatCurrency(f.subtotal)}\n`;
+    if (f.desconto_aplicado > 0) msg += `🎁 *Desconto:* -${formatCurrency(f.desconto_aplicado)}\n`;
+    msg += `🛵 *Entrega:* ${f.taxa_entrega === 0 ? 'GRÁTIS' : formatCurrency(f.taxa_entrega)}\n`;
+    msg += `⭐ *TOTAL: ${formatCurrency(f.total_pago)}*\n`;
+    msg += `--------------------------------------\n\n`;
+    msg += `_Pedido enviado via site Degust Bolos_`;
+
+    const numeroCarol = "5534999999999"; // Substitua pelo número real dela
+    const url = `https://wa.me/${numeroCarol}?text=${encodeURIComponent(msg)}`;
+    
+    // Pequeno delay para o usuário ver o feedback de sucesso no site antes de sair
+    setTimeout(() => { window.open(url, '_blank'); }, 1000);
+  };
+
+  // 📦 CARREGADOR DE HISTÓRICO (Painel Meus Pedidos)
+  window.carregarPedidos = async () => {
+    if (!state.currentUser) return;
+    
+    const container = document.getElementById("listaPedidos");
+    if (!container) return;
+
+    container.innerHTML = `
+      <div class="loading-history">
+        <span class="spinner"></span>
+        <p>Buscando suas doçuras...</p>
+      </div>
+    `;
+
+    try {
+      const snapshot = await withRetry(() => 
+        state.db.collection("Pedidos")
+          .where("userId", "==", state.currentUser.uid)
+          .where("prefixo", "==", "degust")
+          .orderBy("data_criacao", "desc")
+          .limit(8)
+          .get()
+      );
+
+      if (snapshot.empty) {
+        container.innerHTML = '<p class="empty-msg">Você ainda não tem pedidos salvos. 🍰</p>';
+        return;
+      }
+
+      container.innerHTML = snapshot.docs.map(doc => {
+        const d = doc.data();
+        const dataFmt = d.data_criacao ? d.data_criacao.toDate().toLocaleDateString('pt-BR') : 'Agora';
+        const totalFmt = formatCurrency(d.financeiro.total_pago);
+        
+        return `
+          <div class="pedido-card-item">
+            <div class="p-card-header">
+              <span class="p-data">${dataFmt}</span>
+              <span class="p-status st-${d.status}">${d.status.toUpperCase()}</span>
+            </div>
+            <div class="p-card-body">
+              ${d.itens.map(i => `<span>${i.qtd}x ${i.nome}</span>`).join('')}
+            </div>
+            <div class="p-card-footer">
+              <span class="p-pagto">${d.logistica.pagamento_escolhido}</span>
+              <strong class="p-total">${totalFmt}</strong>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+    } catch (err) {
+      console.error("Histórico:", err);
+      container.innerHTML = '<p class="err-msg">Não conseguimos carregar seus pedidos agora. ⚠️</p>';
+    }
+  };
+
+  /* FIM DA PARTE 11 - AGUARDANDO OK PARA A PARTE 12: PAINEL DE RECOMPENSAS E BUSCA INTELIGENTE */
+  /* =========================================================
+     🎁 PAINEL DE RECOMPENSAS (FIDELIDADE ATIVA)
+     Renderiza o progresso do cliente e libera os prêmios.
+  ========================================================= */
+
+  window.carregarRecompensasUI = async () => {
+    if (!state.currentUser) return;
+    
+    const listaRec = document.getElementById("listaRecompensas");
+    const progMsg = document.getElementById("progresso-mensagem");
+    const progBar = document.getElementById("progresso-bar");
+    const contVal = document.getElementById("contador-valor");
+
+    if (!listaRec) return;
+
+    try {
+      // Busca o progresso real do usuário no Firestore
+      const userDoc = await state.db.collection("usuarios").doc(state.currentUser.uid).get();
+      const bolosRealizados = userDoc.exists ? (userDoc.data().degust_bolosPedidos || 0) : 0;
+      
+      // Atualiza o contador gigante (Aquele da "Carol Admin")
+      if (contVal) contVal.textContent = bolosRealizados;
+
+      // Renderiza os cards de prêmios baseados na FIDELIDADE_MASTER (Parte 1)
+      listaRec.innerHTML = FIDELIDADE_MASTER.recompensas.map(r => {
+        const alcancado = bolosRealizados >= r.pedido;
+        return `
+          <div class="recompensa-item ${alcancado ? 'concluida' : ''}">
+            <div class="rec-info-wrap">
+              <span class="rec-icon">${alcancado ? '✨' : '🔒'}</span>
+              <div class="rec-text-group">
+                <p class="rec-title">${r.desc}</p>
+                <small class="rec-meta">Meta: ${r.pedido}º pedido</small>
+              </div>
+            </div>
+            ${alcancado ? '<span class="rec-status-badge">LIBERADO</span>' : ''}
+          </div>
+        `;
+      }).join('');
+
+      // --- ATUALIZAÇÃO DO TERMÔMETRO (BARRA) ---
+      // Encontra qual é o próximo prêmio que ele ainda não ganhou
+      const proximo = FIDELIDADE_MASTER.recompensas.find(r => r.pedido > bolosRealizados);
+      
+      if (proxima && progBar && progMsg) {
+        const metaAtual = proximo.pedido;
+        const faltam = metaAtual - bolosRealizados;
+        const percentual = (bolosRealizados / metaAtual) * 100;
+        
+        progBar.style.width = `${percentual}%`;
+        progMsg.innerHTML = `Faltam apenas <strong>${faltam}</strong> pedidos para seu próximo prêmio!`;
+      } else if (progBar && progMsg) {
+        progBar.style.width = "100%";
+        progBar.style.background = "var(--success)";
+        progMsg.textContent = "Parabéns! Você completou todos os níveis de fidelidade! 🏆";
+      }
+
+    } catch (err) {
+      console.error("[Fidelidade UI] Falha ao renderizar prêmios:", err);
+    }
+  };
 
   /* =========================================================
-     🏁 INICIALIZAÇÃO
+     🔍 FILTRO DE BUSCA INTELIGENTE (SEM RELOAD)
+     Esconde e mostra produtos conforme a digitação do cliente.
   ========================================================= */
-  inicializarFirebase();
-  resetListeners();
-  renderMiniCart();
-  // Checa status da loja após Firebase inicializar
-  setTimeout(() => checarStatusLoja(), 800);
 
-  console.log("%c🍰 Degust Bolos no Pote v11.4 — Sistema Carregado!", "color:#E1A95F;font-size:14px;font-weight:bold;");
+  const dispararFiltroProdutos = (termo) => {
+    // Normaliza para ignorar acentos e letras maiúsculas
+    const query = termo.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+    const cards = document.querySelectorAll(".card");
+    const sections = document.querySelectorAll(".menu-section");
 
-}); // fim DOMContentLoaded
+    cards.forEach(card => {
+      // Busca no nome e na descrição (dataset ou texto)
+      const nome = card.dataset.name ? card.dataset.name.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "") : "";
+      const descricao = card.querySelector("p") ? card.querySelector("p").textContent.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "") : "";
+      
+      if (nome.includes(query) || descricao.includes(query)) {
+        card.style.display = "flex";
+        card.classList.add("fade-in-search");
+      } else {
+        card.style.display = "none";
+        card.classList.remove("fade-in-search");
+      }
+    });
+
+    // Limpeza visual: Se uma seção ficar sem nenhum bolo visível, esconde o título dela
+    sections.forEach(sec => {
+      const temBolosVisiveis = Array.from(sec.querySelectorAll(".card")).some(c => c.style.display !== "none");
+      sec.style.display = temBolosVisiveis ? "block" : "none";
+    });
+  };
+
+  // Listener Real-time (Digitação)
+  document.getElementById("search-input")?.addEventListener("input", (e) => {
+    dispararFiltroProdutos(e.target.value);
+  });
+
+  /* FIM DA PARTE 12 - AGUARDANDO OK PARA A PARTE 13: RELATÓRIOS ADMIN E INICIALIZAÇÃO FINAL */
+  /* =========================================================
+     📊 ADMIN DASHBOARD PRO (Relatórios Detalhados)
+     Versão estendida para fechamento de caixa e métricas.
+  ========================================================= */
+
+  window.carregarRelatoriosAdmin = async (periodo = 'hoje') => {
+    if (!state.currentUser) return;
+    const container = document.getElementById("listaPedidos");
+    if (!container) return;
+
+    container.innerHTML = `
+      <div class="admin-loading-state">
+        <p>Gerando relatório de ${periodo}... 📈</p>
+      </div>`;
+
+    try {
+      let inicio = new Date();
+      inicio.setHours(0, 0, 0, 0); // Começo do dia de hoje
+      
+      // Lógica de Filtro Temporal
+      if (periodo === 'semana') inicio.setDate(inicio.getDate() - 7);
+      if (periodo === 'mes') inicio.setMonth(inicio.getMonth() - 1);
+
+      const snapshot = await withRetry(() => 
+        state.db.collection("Pedidos")
+          .where("prefixo", "==", "degust")
+          .where("data_criacao", ">=", firebase.firestore.Timestamp.fromDate(inicio))
+          .orderBy("data_criacao", "desc")
+          .get()
+      );
+
+      if (snapshot.empty) {
+        container.innerHTML = `
+          <div class="admin-header-controls">
+            <button onclick="carregarRelatoriosAdmin('hoje')" class="btn-filter ${periodo === 'hoje' ? 'active' : ''}">Hoje</button>
+            <button onclick="carregarRelatoriosAdmin('semana')" class="btn-filter ${periodo === 'semana' ? 'active' : ''}">Semana</button>
+          </div>
+          <p class="admin-empty">Nenhuma venda encontrada para este período.</p>`;
+        return;
+      }
+
+      let stats = { total: 0, pix: 0, entrega: 0, itens: 0, fretes: 0 };
+      let listaHtml = "";
+
+      snapshot.forEach(doc => {
+        const p = doc.data();
+        const valorDoc = p.financeiro.total_pago;
+        stats.total += valorDoc;
+        stats.itens += p.itens.length;
+        stats.fretes += p.financeiro.taxa_entrega;
+        
+        if (p.logistica.pagamento_escolhido.includes("PIX")) {
+          stats.pix += valorDoc;
+        } else {
+          stats.entrega += valorDoc;
+        }
+
+        listaHtml += `
+          <div class="admin-card-venda">
+            <div class="venda-topo">
+              <strong>${p.cliente_nome.split(' ')[0]}</strong>
+              <span class="venda-valor">${formatCurrency(valorDoc)}</span>
+            </div>
+            <div class="venda-detalhes-min">
+              <small>${p.logistica.metodo} • ${p.logistica.pagamento_escolhido}</small>
+            </div>
+          </div>`;
+      });
+
+      container.innerHTML = `
+        <div class="admin-header-controls">
+          <button onclick="carregarRelatoriosAdmin('hoje')" class="btn-filter ${periodo === 'hoje' ? 'active' : ''}">Hoje</button>
+          <button onclick="carregarRelatoriosAdmin('semana')" class="btn-filter ${periodo === 'semana' ? 'active' : ''}">Semana</button>
+        </div>
+        <div class="admin-summary-grid">
+          <div class="stat-box"><strong>Total</strong><span>${formatCurrency(stats.total)}</span></div>
+          <div class="stat-box"><strong>Em PIX</strong><span>${formatCurrency(stats.pix)}</span></div>
+          <div class="stat-box"><strong>Fretes</strong><span>${formatCurrency(stats.fretes)}</span></div>
+        </div>
+        <div class="admin-vendas-lista">
+          ${listaHtml}
+        </div>
+      `;
+
+    } catch (err) {
+      console.error("[Admin Error]:", err);
+      container.innerHTML = `<p class="err-msg">Erro ao gerar relatório. Verifique sua conexão. ⚠️</p>`;
+    }
+  };
+  };
+
+  /* =========================================================
+     🚀 INICIALIZAÇÃO DE EVENTOS (A SOLDA FINAL)
+     Conecta todos os IDs do HTML às funções do JavaScript.
+  ========================================================= */
+
+  const vincularEventosDOM = () => {
+    
+    // 1. Menu e Navegação
+    document.getElementById("hamburger-btn")?.addEventListener("click", () => UIManager.open("side-menu", document.getElementById("side-menu")));
+    document.getElementById("menu-close")?.addEventListener("click", () => UIManager.closeSideMenu());
+    document.getElementById("menu-overlay")?.addEventListener("click", () => UIManager.closeSideMenu());
+    document.getElementById("cart-backdrop")?.addEventListener("click", () => UIManager.closeAll());
+
+    // 2. Botões de Acesso (Header)
+    document.getElementById("user-btn")?.addEventListener("click", () => {
+      if (state.currentUser) {
+        UIManager.open("recompensas", document.getElementById("painelRecompensasOverlay"));
+        carregarRecompensasUI();
+      } else {
+        UIManager.open("login", document.getElementById("login-modal"));
+      }
+    });
+
+    document.getElementById("cart-icon")?.addEventListener("click", () => {
+      UIManager.open("mini-cart", document.getElementById("mini-cart"));
+      renderCart();
+    });
+
+    // 3. Login e Logout
+    document.getElementById("google-login")?.addEventListener("click", handleGoogleLogin);
+    document.querySelectorAll(".btn-logout-action").forEach(btn => {
+      btn.addEventListener("click", handleLogout);
+    });
+
+    // 4. Ações do Menu Lateral (Data-Actions)
+    document.querySelectorAll(".menu-link-action").forEach(btn => {
+      btn.addEventListener("click", (e) => {
+        const action = e.currentTarget.dataset.action;
+        UIManager.handleMenuAction(() => {
+          if (action === "perfil" || action === "recompensas") {
+            UIManager.open("recompensas", document.getElementById("painelRecompensasOverlay"));
+            carregarRecompensasUI();
+          } else if (action === "meus-pedidos") {
+            UIManager.open("pedidos", document.getElementById("painelPedidosOverlay"));
+            carregarPedidos();
+          } else if (action === "admin-vendas") {
+            UIManager.open("admin", document.getElementById("painelPedidosOverlay"));
+            carregarRelatoriosAdmin();
+          }
+        });
+      });
+    });
+
+    // 5. Botões de Modais de Fechamento
+    document.querySelectorAll(".extras-close, .modal-close").forEach(btn => {
+      btn.addEventListener("click", () => UIManager.closeAll());
+    });
+
+    // 6. Sistema de Cookies (Banner)
+    const cookieBtn = document.getElementById("cookie-accept");
+    if (cookieBtn) {
+      cookieBtn.addEventListener("click", () => {
+        const banner = document.getElementById("cookie-banner");
+        if (banner) banner.style.display = "none";
+        localStorage.setItem("degust_cookies_v12", "accepted");
+      });
+      
+      if (localStorage.getItem("degust_cookies_v12")) {
+        const banner = document.getElementById("cookie-banner");
+        if (banner) banner.style.display = "none";
+      }
+    }
+  };
+
+  // --- IGNITE! (DISPARO DO SISTEMA) ---
+  const bootstrap = async () => {
+    await initFirebase();
+    vincularEventosDOM();
+    renderCart(); // Inicia carrinho zerado
+    console.log("🍰 Degust v12.0: Sistema totalmente operacional.");
+  };
+
+  bootstrap();
+
+}); // FIM DO DOMCONTENTLOADED
