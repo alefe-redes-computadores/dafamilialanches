@@ -142,8 +142,7 @@
 
   <main class="main-content-wrapper" id="main-content">
     
-    <div id="status-banner" class="status-banner">
-      </div>
+    <div id="status-banner" class="status-banner"></div>
 
     <div class="search-container">
       <div class="search-input-wrapper">
@@ -199,8 +198,8 @@
             </div>
           </div>
         </div>
-
-      </div> </section>
+      </div>
+    </section>
 
     <section class="menu-section" id="bolos-section">
       <div class="section-header">
@@ -275,7 +274,8 @@
             </div>
           </div>
         </div>
-      </div> </section>
+      </div>
+    </section>
   </main>
 
   <aside id="mini-cart" class="mini-cart" aria-hidden="true">
@@ -288,8 +288,7 @@
     </div>
 
     <div class="mini-list-wrapper">
-      <div class="mini-list">
-        </div>
+      <div class="mini-list"></div>
     </div>
 
     <div class="mini-foot">
@@ -323,13 +322,10 @@
           </div>
         </div>
         <div id="manualArea" class="manual-address-area" style="display:none;">
-          <div class="manual-helper-info">
-            <p>Preencha os dados abaixo para entrega:</p>
-          </div>
           <input type="text" id="manualEndereco" placeholder="Rua e Bairro" class="input-degust-manual">
           <input type="text" id="manualNumero" placeholder="Número da residência" class="input-degust-manual">
           <div class="manual-actions">
-            <button id="btnConfirmarEndereco" type="button" class="btn-confirm-manual">Confirmar Endereço</button>
+            <button id="btnConfirmarEndereco" type="button" class="btn-confirm-manual">Confirmar</button>
             <button id="btnVoltarCEP" type="button" class="btn-back-cep">Usar CEP</button>
           </div>
         </div>
@@ -340,7 +336,6 @@
             <span class="checkmark"></span>
             <span class="label-text">Vou retirar na Degust 🍰</span>
           </label>
-          <p class="retirada-info-text">Rua Espanha, 72 — Parque das Nações</p>
         </div>
 
         <div class="coupon-section-degust">
@@ -350,17 +345,9 @@
           </form>
           <div id="coupon-message" class="coupon-feedback"></div>
         </div>
-
-        <div class="cart-totals-summary">
-          <div class="summary-row" id="coupon-discount-row" style="display:none;">
-            <span>🎁 Desconto Cupom:</span>
-            <span id="cart-discount" class="discount-value">- R$ 0,00</span>
-          </div>
-          </div>
-
-        <div id="cart-actions-area">
-          </div>
-      </div> </div> </aside>
+      </div>
+    </div>
+  </aside>
 
   <footer class="footer">
     <div class="footer-container">
@@ -368,28 +355,12 @@
         <img src="logo.png" alt="Degust" width="45" height="45" loading="lazy">
         <p>Doçura em cada camada.</p>
       </div>
-      
-      <div class="footer-address">
-        <p>📍 Patos de Minas — MG</p>
-        <p>Segunda a Sábado: 14h às 22h</p>
-      </div>
-
-      <div class="footer-social-links">
-        <a href="https://wa.me/message/VDQCBHWD33ORK1" target="_blank" class="footer-btn-link" title="Fale no WhatsApp">
-          <span class="icon-social">🟢</span> WhatsApp
-        </a>
-        <a href="https://www.instagram.com/degustbolosnopote" target="_blank" class="footer-btn-link" title="Siga no Instagram">
-          <span class="icon-social">📸</span> Instagram
-        </a>
-      </div>
-
       <div class="footer-legal">
         <p>© 2026 <strong>Degust Bolos no Pote</strong></p>
-        <p><small>Desenvolvido com carinho para Álefe Jôhsefe</small></p>
-        <p><small class="version-tag">Build v12.0.4 — Mobile Optimized</small></p>
       </div>
     </div>
   </footer>
+
   <div id="extras-modal" class="modal" aria-hidden="true">
     <div class="modal-content">
       <div class="modal-head">
@@ -397,8 +368,7 @@
         <button class="extras-close" type="button" aria-label="Fechar">✖</button>
       </div>
       <div class="modal-body">
-        <div class="extras-list">
-          </div>
+        <div class="extras-list"></div>
       </div>
       <div class="modal-foot">
         <button id="extras-confirm" class="btn-primary-degust">Confirmar e Adicionar</button>
@@ -413,14 +383,9 @@
         <button class="login-close" type="button" aria-label="Fechar">✖</button>
       </div>
       <div class="modal-body login-body">
-        <div class="login-welcome-text">
-          <p>Entre para acumular pontos em cada bolo e ganhar prêmios exclusivos! 🎁</p>
-        </div>
         <button id="google-login" class="btn-google-auth" type="button">
-          <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="" width="18">
           Entrar com Google
         </button>
-        <p class="login-footer-info">Seus dados estão seguros com a criptografia do Google.</p>
       </div>
     </div>
   </div>
@@ -436,20 +401,8 @@
           <p>Valor Total:</p>
           <span id="pix-valor">R$ 0,00</span>
         </div>
-        
-        <div class="pix-instructions">
-          <p>1. Copie a chave abaixo.</p>
-          <p>2. Pague no seu banco.</p>
-          <p>3. Envie o comprovante no Zap!</p>
-        </div>
-
-        <div class="pix-code-box" id="pix-copy-area">
-          <span class="pix-key-text">degustbolosnopote@gmail.com</span>
-        </div>
-
         <button id="btn-copy-pix" class="pix-btn-copy">📋 Copiar Chave PIX</button>
         <button id="btn-finish-pix" class="pix-btn-whatsapp">✅ Enviar Pedido no WhatsApp</button>
-        
         <button id="btn-finish-sem-pix" class="btn-link-gray">Finalizar para pagar na entrega</button>
       </div>
     </div>
@@ -458,68 +411,26 @@
   <div class="painel-overlay" id="painelPedidosOverlay">
     <div class="painel-box">
       <div class="painel-head">
-        <div class="painel-title">
-          <span>📦 Meus Pedidos</span>
-        </div>
+        <div class="painel-title"><span>📦 Meus Pedidos</span></div>
         <button class="fechar-painel" type="button">✖</button>
       </div>
-      <div class="painel-body" id="listaPedidos">
-        </div>
+      <div class="painel-body" id="listaPedidos"></div>
     </div>
   </div>
 
   <div class="painel-overlay" id="painelRecompensasOverlay">
     <div class="painel-box">
       <div class="painel-head">
-        <div class="painel-title">
-          <span>🎁 Cartão Fidelidade Degust</span>
-        </div>
+        <div class="painel-title"><span>🎁 Cartão Fidelidade</span></div>
         <button class="fechar-painel" type="button">✖</button>
       </div>
       <div class="painel-body">
-        <div class="fidelidade-status-card">
-          <p class="status-label">Seu progresso atual:</p>
-          <div class="contador-wrapper">
-            <span id="contador-valor" class="numero-pontos">0</span>
-            <span class="unidade-pontos">bolos</span>
-          </div>
-          <div class="fidelidade-progress-bar-container">
-            <div id="progresso-bar" class="progress-fill-fidelidade"></div>
-          </div>
-          <p id="progresso-mensagem" class="fidelidade-msg">Faça seu primeiro pedido para pontuar!</p>
-        </div>
-
-        <div class="recompensas-lista-wrapper">
-          <h4 class="sub-title-painel">Prêmios Disponíveis:</h4>
-          <div id="listaRecompensas" class="lista-items-fidelidade">
-            </div>
-        </div>
-
-        <div class="historico-resgates">
-          <h4 class="sub-title-painel">Prêmios já resgatados:</h4>
-          <div id="historicoRecompensas" class="historico-resgates-lista"></div>
-        </div>
+        <div id="listaRecompensas"></div>
       </div>
-    </div>
-  </div>
-
-  <div id="cookie-banner" class="cookie-banner-degust">
-    <div class="cookie-content">
-      <p>🍪 Utilizamos cookies para salvar seu carrinho e melhorar sua experiência. <button id="cookie-accept">Entendi!</button></p>
     </div>
   </div>
 
   <script defer src="script.js?v=12.0.4"></script>
   <script defer src="extras.js?v=10.0"></script>
-  
-  <script>
-    if ("serviceWorker" in navigator) {
-      window.addEventListener("load", () => {
-        navigator.serviceWorker.register("/service-worker.js")
-          .then(reg => console.log("SW: Ativo ✅"))
-          .catch(err => console.error("SW: Falha ❌", err));
-      });
-    }
-  </script>
 </body>
 </html>
