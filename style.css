@@ -612,3 +612,52 @@ body {
   text-decoration: none;
   color: var(--bege);
   font-weight: 600;
+  font-size: 0.8rem;
+}
+
+.footer-legal {
+  border-top: 1px solid rgba(255,255,255,0.15);
+  padding-top: 16px;
+  font-size: 0.7rem;
+}
+
+.footer-legal strong {
+  color: var(--dourado);
+}
+
+/* TOAST */
+.popup-add {
+  position: fixed;
+  top: 80px;
+  left: 50%;
+  transform: translateX(-50%) translateY(-20px);
+  background: var(--marrom);
+  color: var(--bege);
+  padding: 10px 20px;
+  border-radius: 40px;
+  font-size: 0.8rem;
+  z-index: 3000;
+  opacity: 0;
+  transition: all 0.3s;
+}
+
+.popup-add.show {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+/* RESPONSIVO */
+@media (max-width: 480px) {
+  .grid {
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 10px;
+  }
+  
+  .user-button span:last-child {
+    display: none;
+  }
+  
+  .user-button {
+    padding: 6px 8px;
+  }
+}
