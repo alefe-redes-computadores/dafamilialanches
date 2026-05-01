@@ -22,6 +22,9 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   };
   
+const sound = new Audio('click.wav');
+
+  
     // --- CONFIGURAÇÃO LOGÍSTICA AVANÇADA (EXPANSÃO 1) ---
   const CONFIG_BUSINESS = {
     horarios: {
@@ -490,7 +493,9 @@ document.addEventListener("DOMContentLoaded", () => {
     
     // Feedback visual e sonoro
     renderCart();
-    if (typeof sound !== 'undefined') sound.play(); 
+    if (window.sound) {
+      sound.play().catch(() => {});
+    } 
     
     // Incentivo de Fidelidade (Função virá na Parte 7)
     if (state.currentUser) {
@@ -555,6 +560,9 @@ document.addEventListener("DOMContentLoaded", () => {
         obs: "" 
       });
       playFeedback('success');
+      if (window.sound) {
+      sound.play().catch(() => {});
+    }
       renderCart();
       popupAdd("Personalizado com sucesso! ✨");
     }
@@ -870,8 +878,10 @@ document.addEventListener("DOMContentLoaded", () => {
         
         // Dispara o toast especial do extras.js
         if (typeof popupAdd === 'function') {
-          setTimeout(() => popupAdd(msgIncentivo, 4500), 800);
+          const textoParaExibir = msgIncentivo; // Garante a referência
+          setTimeout(() => popupAdd(textoParaExibir, 4500), 800);
         }
+
       }
     } catch (err) {
       console.warn("Fidelidade: Erro ao calcular incentivo visual.", err);
@@ -1215,9 +1225,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
       // --- ATUALIZAÇÃO DO TERMÔMETRO (BARRA) ---
       // Encontra qual é o próximo prêmio que ele ainda não ganhou
-      const proximo = FIDELIDADE_MASTER.recompensas.find(r => r.pedido > bolosRealizados);
+      const proximoMarco = FIDELIDADE_MASTER.recompensas.find(r => r.pedido > bolosRealizados);
       
-      if (proxima && progBar && progMsg) {
+      if (proximoMarco && progBar && progMsg) {
         const metaAtual = proximo.pedido;
         const faltam = metaAtual - bolosRealizados;
         const percentual = (bolosRealizados / metaAtual) * 100;
