@@ -14,7 +14,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&family=Inter:wght@400;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css?v=13.0" />
+  <link rel="stylesheet" href="style.css?v=13.1" />
 
   <script defer src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
   <script defer src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
@@ -70,7 +70,7 @@
       </div>
     </div>
     <div class="menu-footer">
-      <p>v13.0 — Três Marias/MG</p>
+      <p>v13.1 — Três Marias/MG</p>
     </div>
   </nav>
 
@@ -211,7 +211,7 @@
     </section>
   </main>
 
-  <!-- CARRINHO LATERAL -->
+  <!-- CARRINHO LATERAL (COM RETIRADA CORRIGIDA) -->
   <aside id="mini-cart" class="mini-cart">
     <div class="mini-head">
       <div class="mini-title-area"><span class="mini-icon">🛍️</span><h3>Seu Pedido</h3></div>
@@ -240,9 +240,19 @@
           <input type="text" id="manualNumero" placeholder="Número">
           <button id="btnConfirmarEndereco">Confirmar</button>
         </div>
-        <label style="display:flex; align-items:center; gap:8px; margin:10px 0;">
-          <input type="checkbox" id="retirar-local"> Vou retirar na Degust 🍰
-        </label>
+
+        <!-- RETIRADA CORRIGIDA (com estrutura do CSS) -->
+        <div class="retirar-local-wrapper">
+          <label class="checkbox-container-degust">
+            <input type="checkbox" id="retirar-local">
+            <span class="label-text">Vou retirar na Degust 🍰</span>
+          </label>
+          <!-- endereço opcional (pode ser removido se não quiser) -->
+          <div class="retirada-endereco">
+            📍 Rua Espanha, 72 — Parque das Nações, Três Marias/MG
+          </div>
+        </div>
+
         <div style="display:flex; gap:8px; margin:10px 0;">
           <input type="text" id="coupon-input" placeholder="Tem um cupom?">
           <button id="btn-apply-coupon">Aplicar</button>
@@ -299,35 +309,34 @@
     </div>
   </div>
 
-  <!-- RODAPÉ (CORRIGIDO: TRÊS MARIAS) -->
-<footer class="footer">
-  <div class="footer-container">
-    <div class="footer-brand">
-      <img src="logo.png" alt="Degust">
-      <p>Doçura em cada camada.</p>
+  <!-- RODAPÉ CORRIGIDO (TRÊS MARIAS) -->
+  <footer class="footer">
+    <div class="footer-container">
+      <div class="footer-brand">
+        <img src="logo.png" alt="Degust">
+        <p>Doçura em cada camada.</p>
+      </div>
+      <div class="footer-links">
+        <a href="https://wa.me/message/VDQCBHWD33ORK1" target="_blank" class="footer-link">
+          <span class="footer-icon">🟢</span> WhatsApp
+        </a>
+        <a href="https://www.instagram.com/degustbolosnopote" target="_blank" class="footer-link">
+          <span class="footer-icon">📸</span> Instagram
+        </a>
+      </div>
+      <div class="footer-legal">
+        <p>© 2026 <strong>Degust Bolos no Pote</strong> | Três Marias - MG</p>
+        <p>Segunda a Sábado: 14h às 22h</p>
+      </div>
     </div>
+  </footer>
 
-    <div class="footer-links">
-      <a href="https://wa.me/message/VDQCBHWD33ORK1" target="_blank" class="footer-link">
-        <span class="footer-icon">🟢</span> WhatsApp
-      </a>
-      <a href="https://www.instagram.com/degustbolosnopote" target="_blank" class="footer-link">
-        <span class="footer-icon">📸</span> Instagram
-      </a>
-    </div>
-
-    <div class="footer-legal">
-      <p>© 2026 <strong>Degust Bolos no Pote</strong> | Três Marias - MG</p>
-      <p>Segunda a Sábado: 14h às 22h</p>
-    </div>
-  </div>
-</footer>
   <div id="cookie-banner" class="cookie-banner">
     <p>🍪 Este site usa cookies para melhorar sua experiência. <a href="#" style="color:var(--dourado);">Saiba mais</a></p>
     <button id="cookie-accept">Aceitar</button>
   </div>
 
-  <script defer src="script.js?v=13.0"></script>
+  <script defer src="script.js?v=13.1"></script>
   <script defer src="extras.js?v=10.0"></script>
 </body>
 </html>
