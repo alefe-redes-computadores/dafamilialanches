@@ -101,8 +101,12 @@ document.addEventListener("DOMContentLoaded", () => {
   };
 
   // --- UTILS: FORMATADOR DE MOEDA ---
-  const formatCurrency = (value) => {
-    return value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+    const formatCurrency = (value) => {
+    return new Intl.NumberFormat('pt-BR', { 
+      style: 'currency', 
+      currency: 'BRL',
+      minimumFractionDigits: 2 
+    }).format(value);
   };
 
   /* FIM DA PARTE 1 - AGUARDANDO OK PARA INICIAR O UIMANAGER COMPLETO */
@@ -253,7 +257,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   
   /* =========================================================
-     🔥 FIREBASE CORE & AUTHENTICATION (DETALHADO)
+     🔥 FIREBASE CORE & AUTHENTICATION (DETALHADqO)
      Garante que o app saiba quem é o usuário em tempo real.
   ========================================================= */
 
@@ -265,6 +269,22 @@ document.addEventListener("DOMContentLoaded", () => {
     messagingSenderId: "9514758263",
     appId: "1:9514758263:web:ce0f8a8e3"
   };
+  
+    /* =========================================================
+     ✨ FEEDBACK TÁTIL (VIBRAÇÃO MOBILE)
+     Patterns: [vibração, pausa, vibração]
+  ========================================================= */
+  const playFeedback = (type = 'click') => {
+    if (navigator.vibrate) {
+      const patterns = { 
+        click: 10, 
+        success: [10, 30, 10], 
+        error: [50, 50, 50] 
+      };
+      navigator.vibrate(patterns[type] || 10);
+    }
+  };
+
 
   const initFirebase = async () => {
     try {
@@ -480,66 +500,64 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   };
 
-  // 🍫 ABRIR CONFIGURADOR DE EXTRAS
+  /* =========================================================
+     🛒 MOTOR DE EXTRAS PRO (RESTAURAÇÃO TOTAL v12.9)
+  ========================================================= */
   window.openExtras = (nome, precoBase) => {
     const modal = document.getElementById("extras-modal");
-    const container = modal ? modal.querySelector(".extras-list") : null;
-    
+    const container = modal?.querySelector(".extras-list");
     if (!modal || !container) return;
 
-    // Limpa e reconstrói a lista de Toppings (TOPPINGS_DATA vem do extras.js)
     container.innerHTML = TOPPINGS_DATA.map(t => `
-      <div class="extra-item-row" onclick="this.querySelector('input').click()">
-        <div class="extra-main-info">
-          <input type="checkbox" name="topping" value="${t.nome}" data-price="${t.preco}" onclick="event.stopPropagation()">
-          <span class="extra-name">${t.nome}</span>
-        </div>
-        <span class="extra-price-tag">+ ${formatCurrency(t.preco)}</span>
+      <div class="extra-item-row" style="display: flex; justify-content: space-between; padding: 10px; border-bottom: 1px solid #eee;">
+        <label style="display: flex; align-items: center; gap: 10px; width: 100%; cursor: pointer;">
+          <input type="checkbox" name="topping" value="${t.nome}" data-price="${t.preco}" onchange="updateExtraTotal()">
+          <span style="font-weight: 600;">${t.nome}</span>
+        </label>
+        <span style="color: var(--marrom);">+ ${formatCurrency(t.preco)}</span>
       </div>
     `).join("");
 
-    // Armazena metadados no elemento para a confirmação
     modal.dataset.tempNome = nome;
     modal.dataset.tempPreco = precoBase;
-    
+    updateExtraTotal(); // Chama o cálculo inicial
     UIManager.open("extras", modal);
   };
 
-  // ✅ CONFIRMAR E ADICIONAR COM EXTRAS
+  window.updateExtraTotal = () => {
+    const modal = document.getElementById("extras-modal");
+    const base = parseFloat(modal.dataset.tempPreco);
+    const checks = Array.from(modal.querySelectorAll('input[name="topping"]:checked'));
+    const total = base + checks.reduce((acc, i) => acc + parseFloat(i.dataset.price), 0);
+    const display = document.getElementById("extra-total-display");
+    if (display) display.textContent = formatCurrency(total);
+  };
+
   document.getElementById("extras-confirm")?.addEventListener("click", () => {
     const modal = document.getElementById("extras-modal");
-    if (!modal) return;
-
-    const nomeOriginal = modal.dataset.tempNome;
-    const precoOriginal = parseFloat(modal.dataset.tempPreco);
-    
-    // Captura apenas os marcados
-    const selecionados = Array.from(modal.querySelectorAll('input[name="topping"]:checked')).map(i => ({
-      nome: i.value,
-      preco: parseFloat(i.dataset.price)
+    const nomeBase = modal.dataset.tempNome;
+    const precoBase = parseFloat(modal.dataset.tempPreco);
+    const selecionados = Array.from(modal.querySelectorAll('input[name="topping"]:checked')).map(c => ({
+      nome: c.value, 
+      preco: parseFloat(c.dataset.price)
     }));
 
     if (selecionados.length === 0) {
-      // Se não escolheu nada, trata como item comum
-      window.addItem(nomeOriginal, precoOriginal);
+      window.addItem(nomeBase, precoBase);
     } else {
-      // Cria um nome descritivo para o carrinho
-      const extrasNomes = selecionados.map(s => s.nome).join(", ");
-      const precoAdicionais = selecionados.reduce((acc, curr) => acc + curr.preco, 0);
-      
+      const adicionaisPreco = selecionados.reduce((acc, curr) => acc + curr.preco, 0);
       state.cart.push({
-        nome: `${nomeOriginal} (+ ${selecionados.length} extras)`,
-        detalhes: extrasNomes,
-        preco: precoOriginal + precoAdicionais,
+        nome: nomeBase,
+        detalhes: selecionados.map(s => s.nome).join(", "),
+        preco: precoBase + adicionaisPreco,
         qtd: 1,
-        extras: selecionados // Guarda o array para relatórios futuros
+        extras: selecionados,
+        obs: "" 
       });
-      
+      playFeedback('success');
       renderCart();
-      if (typeof sound !== 'undefined') sound.play();
-      popupAdd("Personalizado com sucesso! 🍰✨");
+      popupAdd("Personalizado com sucesso! ✨");
     }
-
     UIManager.close("extras", modal);
   });
 
@@ -653,10 +671,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
   /* FIM DA PARTE 6 - AGUARDANDO OK PARA A PARTE 7: RENDERIZAÇÃO DO CARRINHO E RESUMO DE VALORES */
   /* =========================================================
-     🎨 MOTOR DE RENDERIZAÇÃO PRO (v12.5 - ESTENDIDO)
-     Inclui gestão de observações e metadados por item.
+     🎨 MOTOR DE RENDERIZAÇÃO PRO (RESTAURAÇÃO TOTAL v12.9)
+     Inclui campo de observações e gestão de totais.
   ========================================================= */
-
   window.renderCart = () => {
     const listCont = document.querySelector(".mini-list");
     const countHeader = document.getElementById("cart-count");
@@ -667,83 +684,81 @@ document.addEventListener("DOMContentLoaded", () => {
     let totalItensQtd = 0;
 
     if (state.cart.length === 0) {
-      listCont.innerHTML = `
-        <div class="cart-empty-state">
-          <span class="empty-icon">🍰</span>
-          <p>Seu carrinho está vazio.<br>Escolha uma doçura!</p>
-        </div>`;
+      listCont.innerHTML = `<div class="cart-empty-state"><p>Seu carrinho está vazio. 🍰</p></div>`;
     }
 
     state.cart.forEach((item, index) => {
-      const itemTotal = item.preco * item.qtd;
-      subtotal += itemTotal;
+      subtotal += item.preco * item.qtd;
       totalItensQtd += item.qtd;
 
       const itemDiv = document.createElement("div");
       itemDiv.className = "cart-item-expanded";
       itemDiv.innerHTML = `
-        <div class="cart-item-main">
-          <div class="cart-item-details">
-            <span class="cart-item-name">${item.nome}</span>
-            ${item.detalhes ? `<small class="cart-item-extras">${item.detalhes}</small>` : ''}
-            <span class="cart-item-price-unit">${formatCurrency(item.preco)}</span>
+        <div class="cart-item-row" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+          <div class="item-info">
+            <strong style="display:block; color:var(--marrom);">${item.nome}</strong>
+            ${item.detalhes ? `<small style="color:#777;">${item.detalhes}</small>` : ''}
           </div>
-          <div class="cart-item-ctrl">
+          <div class="qty-ctrl" style="display: flex; align-items: center; gap: 8px;">
             <button class="btn-qty" onclick="changeQty(${index}, -1)">−</button>
-            <span class="qty-val">${item.qtd}</span>
+            <span style="font-weight:bold;">${item.qtd}</span>
             <button class="btn-qty" onclick="changeQty(${index}, 1)">+</button>
           </div>
         </div>
-        <div class="item-obs-area" style="margin-top: 8px;">
-          <input type="text" class="input-obs-cart" 
-                 placeholder="Alguma observação para este item?" 
+        <div class="obs-box" style="margin-bottom: 12px;">
+          <input type="text" placeholder="Observação (ex: sem colher)" 
                  onchange="state.cart[${index}].obs = this.value" 
                  value="${item.obs || ''}"
-                 style="width: 100%; font-size: 12px; padding: 5px; border-radius: 5px; border: 1px solid #ddd; background: #f9f9f9;">
-        </div>
-      `;
+                 style="width: 100%; font-size: 12px; padding: 6px; border: 1px solid #ddd; border-radius: 4px; background: #fafafa;">
+        </div>`;
       listCont.appendChild(itemDiv);
     });
 
     if (countHeader) countHeader.textContent = totalItensQtd;
-
     atualizarVisualFrete(subtotal);
     
-    let valorDesconto = 0;
-    if (state.activeCoupon) {
-      const c = state.activeCoupon;
-      valorDesconto = c.tipo === "fixo" ? c.valor : (subtotal * (c.valor / 100));
-    }
+    // BACKUP AUTOMÁTICO
+    if (typeof salvarSessaoLocal === 'function') salvarSessaoLocal();
 
-    const totalFinal = Math.max(0, subtotal + state.deliveryConfig.taxa - valorDesconto);
+    let desc = 0;
+    if (state.activeCoupon) {
+      desc = state.activeCoupon.tipo === "fixo" ? state.activeCoupon.valor : (subtotal * (state.activeCoupon.valor / 100));
+    }
+    
+    const totalFinal = Math.max(0, subtotal + state.deliveryConfig.taxa - desc);
     atualizarResumoFinalUI(subtotal, state.deliveryConfig.taxa, totalFinal);
   };
 
-  // 📝 ATUALIZA OS TEXTOS DE VALORES NO RODAPÉ DO CARRINHO
   const atualizarResumoFinalUI = (sub, taxa, total) => {
     const actionsArea = document.getElementById("cart-actions-area");
     if (!actionsArea) return;
 
     actionsArea.innerHTML = `
-      <div class="cart-totals-box">
-        <div class="summary-row">
+      <div class="cart-totals-box" style="padding: 15px; background: #fdfdfd; border-top: 1px solid #eee;">
+        <div class="summary-row" style="display:flex; justify-content:space-between; margin-bottom:5px;">
           <span>Subtotal</span>
           <span>${formatCurrency(sub)}</span>
         </div>
-        <div class="summary-row">
+        <div class="summary-row" style="display:flex; justify-content:space-between; margin-bottom:5px;">
           <span>Taxa de Entrega</span>
           <span class="${taxa === 0 ? 'free-tag' : ''}">${taxa === 0 ? 'GRÁTIS' : formatCurrency(taxa)}</span>
         </div>
-        <div class="summary-row total-row-main">
+        ${state.activeCoupon ? `
+        <div class="summary-row" style="display:flex; justify-content:space-between; margin-bottom:5px; color:var(--vermelho);">
+          <span>Desconto</span>
+          <span>-${formatCurrency(sub + taxa - total)}</span>
+        </div>` : ''}
+        <div class="summary-row total-row-main" style="display:flex; justify-content:space-between; font-weight:bold; font-size:1.1rem; margin-top:10px; color:var(--marrom);">
           <span>Total</span>
           <span>${formatCurrency(total)}</span>
         </div>
       </div>
-      <button id="main-finish-btn" class="btn-checkout-start" onclick="iniciarCheckout(${total})">
+      <button id="main-finish-btn" class="btn-checkout-start" onclick="iniciarCheckout(${total})" style="width:100%; padding:15px; background:var(--marrom); color:#fff; border:none; font-weight:bold;">
         FECHAR PEDIDO ➔
       </button>
     `;
   };
+
 
   // 🔄 ALTERADOR DE QUANTIDADE
   window.changeQty = (index, delta) => {
@@ -958,6 +973,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const processarPedidoNoBanco = async (metodoPagamento) => {
     if (state.ui_lock) return;
+    if (!isLojaAberta()) return popupAdd("⚠️ Loja fechada agora! Confira o horário no menu. 🕒");
+
     lockUI(2000);
 
     const btnFinish = document.getElementById("btn-finish-pix");
@@ -996,6 +1013,7 @@ document.addEventListener("DOMContentLoaded", () => {
           qtd: item.qtd,
           preco_un: item.preco,
           extras: item.detalhes || "Nenhum"
+          obs: item.obs || "Sem observações" 
         })),
         financeiro: {
           subtotal: subtotal,
@@ -1506,7 +1524,6 @@ document.addEventListener("DOMContentLoaded", () => {
   };
 
   // --- IGNITE! (DISPARO DO SISTEMA) ---
-  const bootstrap = async () => {
   const bootstrap = async () => {
     try {
       await initFirebase();
