@@ -145,7 +145,7 @@ const sound = new Audio('click.wav');
       const backdrop = document.getElementById('cart-backdrop');
       if (backdrop && name !== 'side-menu') {
         backdrop.classList.add('active');
-        document.body.classList.add('no-scroll');
+        if (name !== 'side-menu') document.body.classList.add('no-scroll');
       }
 
       // Se abrir algo que não seja o menu lateral, garante que o menu feche
@@ -179,21 +179,24 @@ const sound = new Audio('click.wav');
     },
 
     closeAll() {
-      console.log("[UI] Fechando todos os componentes ativos");
+      console.log("[UI] Reset Geral de Interface");
+      // 1. Força a remoção da trava de scroll
+      document.body.classList.remove('no-scroll');
       
-      // Fecha Modais e Overlays
-      document.querySelectorAll('.modal, .painel-overlay, #mini-cart').forEach(el => {
-        const name = el.id || 'unnamed-panel';
-        this.close(name, el);
+      // 2. Esconde os fundos escuros (Backdrops)
+      document.getElementById('cart-backdrop')?.classList.remove('active');
+      document.getElementById('menu-overlay')?.classList.remove('active');
+      
+      // 3. Fecha todos os painéis e limpa o estado
+      document.querySelectorAll('.modal, .painel-overlay, #mini-cart, #side-menu').forEach(el => {
+        el.classList.remove('show', 'active');
+        el.setAttribute('aria-hidden', 'true');
+        // Dá um pequeno tempo para a animação de saída antes de sumir
+        setTimeout(() => { if(!el.classList.contains('active')) el.style.display = 'none'; }, 350);
       });
 
-      this.closeSideMenu();
       this.activePanels.clear();
-      
-      const backdrop = document.getElementById('cart-backdrop');
-      if (backdrop) backdrop.classList.remove('active');
-      document.body.classList.remove('no-scroll');
-    },
+
 
     closeSideMenu() {
       const menu = document.getElementById('side-menu');
@@ -1411,7 +1414,10 @@ const sound = new Audio('click.wav');
     document.getElementById("hamburger-btn")?.addEventListener("click", () => UIManager.open("side-menu", document.getElementById("side-menu")));
     document.getElementById("menu-close")?.addEventListener("click", () => UIManager.closeSideMenu());
     document.getElementById("menu-overlay")?.addEventListener("click", () => UIManager.closeSideMenu());
-    document.getElementById("cart-backdrop")?.addEventListener("click", () => UIManager.closeAll());
+    document.getElementById("cart-backdrop")?.addEventListener("click", () => {
+        console.log("Clique no fundo: Fechando tudo...");
+        UIManager.closeAll();
+    });
 
     // 2. Botões de Acesso (Header)
     document.getElementById("user-btn")?.addEventListener("click", () => {
