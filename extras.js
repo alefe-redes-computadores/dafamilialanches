@@ -1,16 +1,45 @@
 /* =====================================================
-   🍰 Degust Bolos no Pote — extras.js v12.1
-   Toast animado + miniaturas nos pedidos
-===================================================== */
+   🍰 Degust Bolos no Pote — Extras.js (v10.0)
+   - Ajuste: Notificações no topo e miniaturas de bolos
+   ===================================================== */
 
 (function () {
 
-  // 1. INJEÇÃO DE CSS EXTRA PARA TOASTS
+  // 1. INJEÇÃO DE CSS (Cores Degust)
   (function injectStyles() {
     if (document.getElementById('degust-extras-style')) return;
+
     const st = document.createElement('style');
     st.id = 'degust-extras-style';
     st.textContent = `
+      .popup-add, .dfl-toast {
+        position: fixed !important;
+        top: 75px !important;
+        bottom: auto !important;
+        left: 50% !important;
+        transform: translateX(-50%) translateY(-150%) !important;
+        background: #4B2C20 !important; /* Marrom Degust */
+        color: #F5E6CA !important; /* Bege Degust */
+        font-family: 'Poppins', sans-serif !important;
+        font-weight: 700 !important;
+        font-size: 0.95rem !important;
+        padding: 12px 24px !important;
+        border-radius: 50px !important;
+        box-shadow: 0 8px 25px rgba(0,0,0,0.3) !important;
+        z-index: 9999 !important;
+        opacity: 0 !important;
+        transition: all 0.45s cubic-bezier(0.68, -0.55, 0.265, 1.55) !important;
+        display: flex !important;
+        align-items: center !important;
+        gap: 10px !important;
+        border: 1px solid #E1A95F !important;
+      }
+
+      .popup-add.show, .dfl-toast.show {
+        opacity: 1 !important;
+        transform: translateX(-50%) translateY(0) !important;
+      }
+
       .pedido-card .pedido-thumb {
         width: 100% !important;
         height: 110px !important;
@@ -18,29 +47,21 @@
         background-position: center !important;
         border-radius: 8px !important;
         background-color: #fdf8ef !important;
-        margin-bottom: 8px !important;
       }
     `;
     document.head.appendChild(st);
   })();
 
-  // 2. ÍCONES CONTEXTUAIS NOS TOASTS
+  // 2. ESTILIZADOR DE TOASTS (Ícones de doces)
   function stylizePopup(el) {
     const msg = el.textContent || "";
     if (el.dataset.processed === msg) return;
 
     let icon = '🍰';
-    if (/Login|Olá|Bem-vind/i.test(msg))    icon = '✨';
-    else if (/Pedido|WhatsApp/i.test(msg))   icon = '🧁';
-    else if (/adicionado/i.test(msg))        icon = '🛒';
-    else if (/Recompensa|ponto|prêmio|brinde/i.test(msg)) icon = '🎁';
-    else if (/Falta/i.test(msg))             icon = '⭐';
-    else if (/Erro|Falha/i.test(msg))        icon = '⚠️';
-    else if (/Copiado|Copiada/i.test(msg))   icon = '✅';
-    else if (/removido/i.test(msg))          icon = '🗑️';
-    else if (/Cupom/i.test(msg))             icon = '🏷️';
-    else if (/Frete|Grátis/i.test(msg))      icon = '🚀';
-    else if (/cookie|preferência/i.test(msg)) icon = '🍪';
+    if (/Login|Olá/i.test(msg)) icon = '✨';
+    else if (/Pedido/i.test(msg)) icon = '🧁';
+    else if (/adicionado/i.test(msg)) icon = '🛒';
+    else if (/Erro|Falha/i.test(msg)) icon = '⚠️';
 
     el.innerHTML = `<span style="font-size:1.2em">${icon}</span> ${msg}`;
     el.dataset.processed = el.textContent;
@@ -49,30 +70,18 @@
   const observer = new MutationObserver((mutations) => {
     mutations.forEach(m => {
       m.addedNodes.forEach(node => {
-        if (node.nodeType === 1 && node.classList.contains('popup-add')) {
-          stylizePopup(node);
-        }
+        if (node.nodeType === 1 && node.classList.contains('popup-add')) stylizePopup(node);
       });
-      m.target && m.target.classList?.contains('popup-add') && stylizePopup(m.target);
     });
   });
-  observer.observe(document.body, { childList: true, subtree: true, characterData: true });
+  observer.observe(document.body, { childList: true, subtree: true });
 
-  // 3. MAPA DE MINIATURAS — todos os produtos
+  // 3. MAPA DE MINIATURAS (Seus 4 bolos)
   const THUMB_MAP = [
-    { key: 'brigadeiro',  img: 'produtos/brigadeiro.png' },
-    { key: 'chocolatudo', img: 'produtos/chocolatudo.png' },
-    { key: 'prestígio',   img: 'produtos/prestigio.png' },
-    { key: 'prestigio',   img: 'produtos/prestigio.png' },
-    { key: 'silvestre',   img: 'produtos/ninhosilvestre.png' },
-    { key: 'geleia',      img: 'produtos/ninhosilvestre.png' },
-    { key: 'morango',     img: 'produtos/ninhosilvestre.png' },
-    { key: 'tropical',    img: 'produtos/tropicalcream.png' },
-    { key: 'abacaxi',     img: 'produtos/tropicalcream.png' },
-    { key: 'maracujá',    img: 'produtos/bombomdemaracuja.png' },
-    { key: 'maracuja',    img: 'produtos/bombomdemaracuja.png' },
-    { key: 'bombom',      img: 'produtos/bombomdemaracuja.png' },
-    { key: 'ninho',       img: 'produtos/ninhocremoso.png' },
+    { key: 'brigadeiro', img: 'produtos/brigadeiro.png' },
+    { key: 'prestigio', img: 'produtos/prestigio.png' },
+    { key: 'geleia', img: 'produtos/ninhocomgeleiademorango.png' },
+    { key: 'ninho', img: 'produtos/ninhocremoso.png' }
   ];
 
   function fixThumbnail(el) {
@@ -92,5 +101,4 @@
   }
 
   window.addEventListener('DOMContentLoaded', watchOrders);
-
 })();
