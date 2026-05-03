@@ -724,39 +724,32 @@ document.addEventListener("DOMContentLoaded", () => {
     mostrarToastLogin(`Bem-vinda(o), ${nome}! 🍰`);
   }
 
-  function atualizarBotaoUsuario(user) {
-    if (!el.userBtn) return;
-    const nome = user
-      ? (user.displayName?.split(" ")[0] || user.email?.split("@")[0] || "você")
-      : null;
+function atualizarBotaoUsuario(user) {
+  if (!el.userBtn) return;
 
-    const content  = document.getElementById("user-btn-content");
-    const fotoWrap = document.getElementById("user-foto-wrap");
-    const fotoImg  = document.getElementById("user-foto");
+  if (user) {
+    // Pega a foto do Google ou coloca um ícone se não existir
+    const fotoUrl = user.photoURL || "";
+    el.userBtn.innerHTML = fotoUrl 
+      ? `<img src="${fotoUrl}" id="user-foto-header" alt="Perfil">` 
+      : `<span>👤</span>`;
+    
+    // Ajustes de estilo via JS para a foto ficar perfeita
+    el.userBtn.style.padding = "0"; 
+    el.userBtn.style.display = "flex";
+    el.userBtn.style.background = "transparent";
 
-    if (user) {
-      if (content) content.textContent = nome;
-      if (user.photoURL && fotoImg && fotoWrap) {
-        fotoImg.src = user.photoURL;
-        fotoImg.onerror = () => { fotoWrap.style.display = "none"; };
-        fotoWrap.style.display = "inline-flex";
-        fotoWrap.style.alignItems = "center";
-        fotoWrap.style.marginRight = "6px";
-      }
-      el.userBtn.style.display = "flex";
-      el.userBtn.style.alignItems = "center";
-      el.userBtn.style.gap = "0";
-      el.userBtn.style.padding = "5px 10px";
-      if (isAdmin(user)) {
-        document.querySelector(".admin-section")?.style.setProperty("display","block");
-      }
-    } else {
-      if (content) content.textContent = "Entrar";
-      if (fotoWrap) fotoWrap.style.display = "none";
-      el.userBtn.style.padding = "";
-      el.userBtn.style.display = "";
+    if (isAdmin(user)) {
+      document.querySelector(".admin-section")?.style.setProperty("display","block");
     }
+  } else {
+    // Volta ao estado original se não estiver logado (Novo Else)
+    el.userBtn.innerHTML = `<span>Entrar</span>`;
+    el.userBtn.style.padding = "8px 14px";
+    el.userBtn.style.background = "var(--marrom)";
+    el.userBtn.style.display = ""; // Reseta o flex se necessário
   }
+}
 
   function mostrarToastLogin(msg) {
     let toast = document.getElementById("toast-login");
