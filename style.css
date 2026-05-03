@@ -48,13 +48,22 @@ body {
 }
 
 /* ── HEADER ── */
+
 .header {
-  position:fixed; inset-inline:0; top:0; z-index:1600;
-  display:flex; justify-content:space-between; align-items:center;
-  background:var(--dourado); padding:10px 16px;
-  box-shadow:var(--shadow-1); height:70px;
-  border-bottom:2px solid rgba(75,44,32,.1);
+  position: fixed;
+  inset-inline: 0;
+  top: 0;
+  z-index: 1600;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: var(--dourado);
+  padding: 0 18px; /* Aumentamos o respiro lateral */
+  height: 80px; /* Altura mais elegante para o mobile */
+  box-shadow: 0 4px 15px rgba(75, 44, 32, 0.12);
+  border-bottom: 2px solid rgba(75, 44, 32, 0.1);
 }
+
 .header-content { display:flex; align-items:center; gap:12px; }
 #hamburger-btn { background:none; border:none; cursor:pointer; display:flex; flex-direction:column; gap:5px; padding:5px; }
 #hamburger-btn .bar { width:25px; height:3px; background:var(--marrom); border-radius:2px; transition:.3s; }
@@ -556,20 +565,26 @@ body.no-scroll { overflow:hidden; }
 }
 .delivery-system input {
   width: 100%;
-  padding: 12px;
-  border-radius: 10px;
-  border: 2px solid var(--bege);
-  background: var(--branco);
-  font-size: 0.85rem;
+  padding: 14px 16px !important;
+  border-radius: 12px !important;
+  border: 2px solid #eee !important;
+  background: white !important;
+  font-family: 'Inter', sans-serif;
+  margin-bottom: 8px;
+  transition: all 0.3s ease;
 }
-.delivery-system button {
-  background: var(--marrom);
-  color: var(--bege);
-  border: none;
-  padding: 12px;
-  border-radius: 10px;
-  font-weight: 700;
+
+.delivery-system button, #btn-calcular-frete {
+  background: var(--marrom) !important;
+  color: var(--bege) !important;
+  border-radius: 12px !important;
+  font-weight: 800 !important;
+  padding: 14px !important;
+  text-transform: uppercase;
+  width: 100%;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.1);
   cursor: pointer;
+  border: none !important;
 }
 /* ── RETIRADA NA DEGUST (alinhado e bonito) ── */
 .retirar-local-wrapper {
@@ -847,4 +862,41 @@ body.no-scroll { overflow:hidden; }
 .progresso-texto {
   font-size: 0.85rem;
   margin-top: 8px;
+}
+
+
+/* --- LEGO: REFINAMENTOS FINAIS v13.2 --- */
+
+/* 1. Botão Finalizar: Gradiente Profissional e Destaque */
+#main-finish-btn {
+  background: linear-gradient(135deg, #2e7d32 0%, #1b5e20 100%) !important;
+  color: white !important;
+  padding: 18px !important;
+  border-radius: 50px !important;
+  font-weight: 800 !important;
+  font-size: 1rem !important;
+  box-shadow: 0 6px 15px rgba(46, 125, 50, 0.3) !important;
+  border: none !important;
+  margin-top: 15px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+/* 2. Menu Lateral: Espaçamento e Fonte Clean */
+.menu-list li a, .menu-list li .menu-link-action {
+  border-bottom: 1px solid rgba(75, 44, 32, 0.03) !important;
+  padding: 16px 20px !important;
+  font-family: 'Inter', sans-serif !important;
+  font-weight: 600 !important;
+}
+
+/* 3. Bolinha de Status: Efeito Neon Suave */
+#status-banner.open {
+  box-shadow: 0 0 12px rgba(46, 204, 113, 0.6);
+  border: 2px solid #fff;
+}
+
+/* 4. Fix do Carrinho: Garantir que nada seja cortado */
+.mini-foot {
+  padding-bottom: calc(25px + env(safe-area-inset-bottom)) !important;
 }
