@@ -1,16 +1,14 @@
 /* =========================================================
-   🍰 Degust v13.0 – FINAL
-   - UI blindada, PIX, Firebase
-   - Persistência do carrinho (localStorage)
-   - Sistema de Recompensas progressivo (metas 5,10,15,20,25,30)
-   ========================================================= */
+   ðŸ° Degust v13.1 â€” SISTEMA UI BLINDADO + PIX INTELIGENTE
+   CorreÃ§Ãµes: cookies, painÃ©is, cliques, duplicaÃ§Ãµes removidas
+========================================================= */
 
 document.addEventListener("DOMContentLoaded", () => {
 
   let pixCopied = false;
 
   /* =========================================================
-     🛠️ UIManager v11.0
+     ðŸ›¡ï¸ UIManager v11.0
   ========================================================= */
   let ui_lock = false;
 
@@ -30,6 +28,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
       this.currentPanel = panelName;
 
+      // mini-cart e pix-modal usam classe 'active'; modais comuns usam 'show'
       const useActive = ["mini-cart", "pix-modal"];
       if (useActive.includes(panelElement.id)) {
         panelElement.classList.add("active");
@@ -37,11 +36,12 @@ document.addEventListener("DOMContentLoaded", () => {
         panelElement.classList.add("show");
       }
 
+      // PainÃ©is deslizantes (pedidos / recompensas) tÃªm overlay prÃ³prio
       const overlayId = panelElement.dataset.overlay;
       if (overlayId) {
         const overlay = document.getElementById(overlayId);
         if (overlay) overlay.classList.add("active");
-        return;
+        return; // nÃ£o usa o backdrop geral
       }
 
       if (panelElement.id !== "side-menu") {
@@ -56,9 +56,11 @@ document.addEventListener("DOMContentLoaded", () => {
     },
 
     closeAll() {
+      // Fecha modais normais
       document.querySelectorAll(".modal.show, .modal.active, #mini-cart.active").forEach(el => {
         el.classList.remove("show", "active");
       });
+      // Fecha os painÃ©is deslizantes
       document.querySelectorAll(".painel-overlay.active").forEach(el => {
         el.classList.remove("active");
       });
@@ -85,6 +87,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   };
 
+  /* --- BACKDROP --- */
   const Backdrop = {
     show() {
       const bd = document.getElementById("cart-backdrop");
@@ -100,7 +103,7 @@ document.addEventListener("DOMContentLoaded", () => {
   if (bdElement) bdElement.addEventListener("click", () => UIManager.closeAll());
 
   /* =========================================================
-     🍔 MENU HAMBÚRGUER
+     ðŸ” MENU HAMBÃšRGUER
   ========================================================= */
   const hamburgerBtn = document.getElementById("hamburger-btn");
   const sideMenu     = document.getElementById("side-menu");
@@ -121,7 +124,7 @@ document.addEventListener("DOMContentLoaded", () => {
   if (menuOverlay)  menuOverlay.addEventListener("click",  () => UIManager.closeSideMenu());
 
   /* =========================================================
-     🎯 ATALHOS DO MENU LATERAL
+     ðŸŽ¯ ATALHOS DO MENU LATERAL â€” usando data-action
   ========================================================= */
   document.querySelectorAll(".menu-link-action[data-action]").forEach(link => {
     link.addEventListener("click", (e) => {
@@ -130,18 +133,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
       UIManager.handleMenuAction(() => {
         if (action === "meus-pedidos") {
-                    if (!currentUser) {
-            popupAdd("Faz login para ver os teus pedidos! 👤");
-            UIManager.open("login", el.loginModal);
-            return;
-          }
           const overlay = document.getElementById("painelPedidosOverlay");
           if (overlay) overlay.classList.add("active");
-
         } else if (action === "recompensas") {
           const overlay = document.getElementById("painelRecompensasOverlay");
           if (overlay) overlay.classList.add("active");
-          if (currentUser) carregarRecompensas(currentUser);
         } else if (action === "perfil") {
           const userBtn = document.getElementById("user-btn");
           if (userBtn) userBtn.click();
@@ -152,6 +148,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   });
 
+  // Scroll suave para seÃ§Ãµes
   document.querySelectorAll(".menu-link[href^='#']").forEach(link => {
     link.addEventListener("click", (e) => {
       e.preventDefault();
@@ -171,7 +168,7 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   /* =========================================================
-     🎁 PAINÉIS DESLIZANTES
+     ðŸŽ PAINÃ‰IS DESLIZANTES (PEDIDOS & RECOMPENSAS) v11.0
   ========================================================= */
   function abrirPainel(overlayId) {
     const overlay = document.getElementById(overlayId);
@@ -184,6 +181,10 @@ document.addEventListener("DOMContentLoaded", () => {
     document.querySelectorAll(".painel-overlay").forEach(el => el.classList.remove("active"));
   }
 
+  // BotÃµes flutuantes
+  // BotÃµes flutuantes removidos â€” acesso via menu conta e menu lateral
+
+  // Fechar pelos botÃµes X dentro dos painÃ©is
   document.querySelectorAll(".fechar-painel, .fechar-pedidos, .fechar-recompensas").forEach(btn => {
     btn.addEventListener("click", (e) => {
       e.stopPropagation();
@@ -191,6 +192,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   });
 
+  // Fechar clicando no overlay (fundo escuro)
   document.querySelectorAll(".painel-overlay").forEach(overlay => {
     overlay.addEventListener("click", (e) => {
       if (e.target === overlay) fecharTodosPaineis();
@@ -198,7 +200,7 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   /* =========================================================
-     💰 SISTEMA PIX
+     ðŸ’° SISTEMA PIX v11.0
   ========================================================= */
   const pixModal       = document.getElementById("pix-modal");
   const pixValor       = document.getElementById("pix-valor");
@@ -211,13 +213,13 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const AVISO_PIX = `
     <div style="background:#fff3cd;border:2px solid #ffc107;border-radius:12px;padding:14px;margin-bottom:14px;text-align:left;">
-      <p style="margin:0 0 8px;font-size:.95rem;font-weight:800;color:#856404;">📋 SIGA ESSES PASSOS:</p>
-      <p style="margin:0 0 6px;font-size:.85rem;color:#333;"><b>1️⃣️</b> Clique em <b>"Enviar Pedido no WhatsApp"</b></p>
-      <p style="margin:0 0 6px;font-size:.85rem;color:#333;"><b>2️⃣️</b> Faça o PIX no valor acima</p>
-      <p style="margin:0;font-size:.85rem;color:#333;"><b>3️⃣️</b> Mande o comprovante <b>na mesma conversa</b></p>
+      <p style="margin:0 0 8px;font-size:.95rem;font-weight:800;color:#856404;">ðŸ“‹ SIGA ESSES PASSOS:</p>
+      <p style="margin:0 0 6px;font-size:.85rem;color:#333;"><b>1ï¸âƒ£</b> Clique em <b>"Enviar Pedido no WhatsApp"</b></p>
+      <p style="margin:0 0 6px;font-size:.85rem;color:#333;"><b>2ï¸âƒ£</b> FaÃ§a o PIX no valor acima</p>
+      <p style="margin:0;font-size:.85rem;color:#333;"><b>3ï¸âƒ£</b> Mande o comprovante <b>na mesma conversa</b></p>
     </div>
     <div style="background:#fff0f0;border:1px solid #ffcdd2;border-radius:8px;padding:10px;margin-bottom:14px;text-align:center;">
-      <p style="margin:0;font-size:.8rem;color:#c62828;font-weight:700;">⚠️ Sem o pedido no WhatsApp não saberemos do seu pedido!</p>
+      <p style="margin:0;font-size:.8rem;color:#c62828;font-weight:700;">âš ï¸ Sem o pedido no WhatsApp nÃ£o saberemos do seu pedido!</p>
     </div>`;
 
   async function abrirModalPIX() {
@@ -234,16 +236,18 @@ document.addEventListener("DOMContentLoaded", () => {
         else pixBody.prepend(div);
       }
 
+      // Mostra banner de pontos no modal PIX se nÃ£o existir ainda
       if (pixBody && !pixBody.querySelector(".pix-pontos")) {
         const pontosDiv = document.createElement("div");
         pontosDiv.className = "pix-pontos";
         pontosDiv.style.cssText = "background:linear-gradient(135deg,#fff8e1,#fffde7);border:1px solid #E1A95F;border-radius:10px;padding:10px 12px;margin-bottom:12px;display:flex;align-items:center;gap:8px;text-align:left;";
-        pontosDiv.innerHTML = '<span style="font-size:1.3rem;">⭐</span><p style="margin:0;font-size:.78rem;color:#4B2C20;font-weight:600;">Este pedido acumula <b>+1 ponto</b> no seu cartão fidelidade!</p>';
+        pontosDiv.innerHTML = '<span style="font-size:1.3rem;">â­</span><p style="margin:0;font-size:.78rem;color:#4B2C20;font-weight:600;">Este pedido acumula <b>+1 ponto</b> no seu cartÃ£o fidelidade!</p>';
         pixBody.appendChild(pontosDiv);
       }
       UIManager.open("pix", pixModal);
     } catch (err) {
       console.error("Erro ao abrir PIX:", err);
+      fecharPedidoOriginal();
     }
   }
 
@@ -261,7 +265,7 @@ document.addEventListener("DOMContentLoaded", () => {
       }
       pixCopied = true;
       const orig = pixBtnCopy.textContent;
-      pixBtnCopy.textContent = "Chave Copiada! ✓";
+      pixBtnCopy.textContent = "Chave Copiada! âœ“";
       pixBtnCopy.style.background = "#4CAF50";
       setTimeout(() => { pixBtnCopy.textContent = orig; pixBtnCopy.style.background = ""; }, 2000);
     });
@@ -271,14 +275,16 @@ document.addEventListener("DOMContentLoaded", () => {
     pixClose.addEventListener("click", (e) => {
       e.preventDefault();
       UIManager.closeAll();
+      setTimeout(() => fecharPedidoOriginal?.(), 300);
     });
   }
 
+  // BotÃ£o finalizar sem PIX
   const btnSemPix = document.getElementById("btn-finish-sem-pix");
   if (btnSemPix) {
     btnSemPix.addEventListener("click", async () => {
-      const { subtotal, delivery, discount, total } = await calcTotals();
-      const addr = window.finalAddressStringForWhatsApp || "Não informado";
+      const { subtotal, delivery, discount, total, cupomInfo } = await calcTotals();
+      const addr = window.finalAddressStringForWhatsApp || "NÃ£o informado";
       const msg = [
         "*NOVO PEDIDO - Degust Bolos no Pote*",
         "------------------------------------",
@@ -302,9 +308,10 @@ document.addEventListener("DOMContentLoaded", () => {
       ].filter(l => l !== null).join("\n");
       window.open(`https://wa.me/5538998527894?text=${encodeURIComponent(msg)}`, "_blank");
 
+      // Salva pedido no Firestore para aparecer no painel admin
       if (db && currentUser) {
         const itensSalvar = cart.map(i => ({ nome: i.nome, preco: i.preco, qtd: i.qtd }));
-        await db.collection("Pedidos").add({
+        db.collection("Pedidos").add({
           userId:    currentUser.uid,
           nome:      currentUser.displayName || currentUser.email,
           email:     currentUser.email,
@@ -320,23 +327,18 @@ document.addEventListener("DOMContentLoaded", () => {
           data:      new Date().toISOString(),
           criadoEm:  firebase.firestore.FieldValue.serverTimestamp()
         }).catch(err => console.error("Erro ao salvar pedido:", err));
-        // incrementar contador de pedidos para recompensas
-        await incrementarContadorPedidos(currentUser.uid);
       }
 
-      // limpar carrinho após finalizar
-      cart = [];
-      renderMiniCart();
-      saveCart();
       UIManager.closeAll();
     });
   }
 
   if (pixBtnWhatsapp) {
     pixBtnWhatsapp.addEventListener("click", async () => {
-      const { subtotal, delivery, discount, total } = await calcTotals();
-      const addr = window.finalAddressStringForWhatsApp || "Não informado";
+      const { subtotal, delivery, discount, total, cupomInfo } = await calcTotals();
+      const addr = window.finalAddressStringForWhatsApp || "NÃ£o informado";
 
+      // Linhas base do pedido (sem seÃ§Ã£o PIX â€” cliente jÃ¡ viu o modal)
       const linhasPedido = [
         "*NOVO PEDIDO - Degust Bolos no Pote*",
         "------------------------------------",
@@ -354,6 +356,7 @@ document.addEventListener("DOMContentLoaded", () => {
         ""
       ].filter(l => l !== null);
 
+      // SeÃ§Ã£o PIX apenas se cliente copiou a chave
       const linhasPix = pixCopied ? [
         "------------------------------------",
         "*PAGAMENTO VIA PIX*",
@@ -380,9 +383,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
       window.open(`https://wa.me/5538998527894?text=${encodeURIComponent(msg)}`, "_blank");
 
+      // Salva pedido no Firestore para aparecer no painel admin
       if (db && currentUser) {
         const itensSalvar = cart.map(i => ({ nome: i.nome, preco: i.preco, qtd: i.qtd }));
-        await db.collection("Pedidos").add({
+        db.collection("Pedidos").add({
           userId:    currentUser.uid,
           nome:      currentUser.displayName || currentUser.email,
           email:     currentUser.email,
@@ -398,20 +402,15 @@ document.addEventListener("DOMContentLoaded", () => {
           data:      new Date().toISOString(),
           criadoEm:  firebase.firestore.FieldValue.serverTimestamp()
         }).catch(err => console.error("Erro ao salvar pedido:", err));
-        await incrementarContadorPedidos(currentUser.uid);
       }
 
-      cart = [];
-      renderMiniCart();
-      saveCart();
       UIManager.closeAll();
     });
   }
 
   window.finalAddressStringForWhatsApp = "";
-
   /* =========================================================
-     MÁSCARA DE CEP
+     1. MÃSCARA DE CEP
   ========================================================= */
   const cepInputMask = document.getElementById("cep-input");
   if (cepInputMask) {
@@ -423,7 +422,7 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   /* =========================================================
-     ⚙️ CONFIGURAÇÕES BASE
+     âš™ï¸ CONFIGURAÃ‡Ã•ES BASE
   ========================================================= */
   const sound = new Audio("click.wav");
   let cart = [];
@@ -435,29 +434,14 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const money = (n) => `R$ ${Number(n || 0).toFixed(2).replace(".", ",")}`;
 
-  // ================== PERSISTÊNCIA DO CARRINHO ==================
-  function saveCart() {
-    localStorage.setItem('degustCart', JSON.stringify(cart));
-  }
-
-  function loadCart() {
-    const saved = localStorage.getItem('degustCart');
-    if (saved) {
-      try {
-        cart = JSON.parse(saved);
-        renderMiniCart();
-      } catch(e) { console.error("Erro ao carregar carrinho", e); }
-    }
-  }
-
   /* =========================================================
-     🔍 BUSCA INTELIGENTE
+     ðŸ” BUSCA INTELIGENTE
   ========================================================= */
   const searchInput = document.getElementById("search-input");
 
   const PRODUTOS_BUSCA = [
     { nome: "Brigadeiro",               aliases: ["chocolate", "preto", "granulado", "tradicional"], preco: 10 },
-    { nome: "Prestígio",                aliases: ["prestigio", "coco", "beijinho"] },
+    { nome: "PrestÃ­gio",                aliases: ["prestigio", "coco", "beijinho"] },
     { nome: "Ninho com Geleia de Morango", aliases: ["morango", "geleia", "fruta", "ninho morango"] },
     { nome: "Ninho Cremoso",            aliases: ["leite ninho", "branco", "puro", "ninho"] }
   ];
@@ -484,6 +468,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const cards = document.querySelectorAll(".card");
     if (!query || query.length < 1) {
       cards.forEach(c => (c.style.display = ""));
+      // Mostra seÃ§Ãµes vazias tambÃ©m
       document.querySelectorAll(".menu-section").forEach(s => s.style.display = "");
       return;
     }
@@ -498,9 +483,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
       if (!match) {
         for (const p of PRODUTOS_BUSCA) {
+          // Fuzzy match no nome do produto
           if (distanciaLevenshtein(q, normalizar(p.nome)) <= 2) {
             if (textoTotal.includes(normalizar(p.nome))) { match = true; break; }
           }
+          // Alias direto
           for (const alias of p.aliases) {
             const aliasNorm = normalizar(alias);
             if (aliasNorm.includes(q) || q.includes(aliasNorm)) {
@@ -513,6 +500,7 @@ document.addEventListener("DOMContentLoaded", () => {
       card.style.display = match ? "" : "none";
     });
 
+    // Esconde seÃ§Ãµes que ficaram sem cards visÃ­veis
     document.querySelectorAll(".menu-section").forEach(sec => {
       const temVisivel = [...sec.querySelectorAll(".card")].some(c => c.style.display !== "none");
       sec.style.display = temVisivel ? "" : "none";
@@ -522,7 +510,7 @@ document.addEventListener("DOMContentLoaded", () => {
   if (searchInput) searchInput.addEventListener("input", e => filtrarCards(e.target.value));
 
   /* =========================================================
-     🎯 MAPEAMENTO DO DOM
+     ðŸŽ¯ MAPEAMENTO DO DOM
   ========================================================= */
   const el = {
     cartIcon:         document.getElementById("cart-icon"),
@@ -539,10 +527,10 @@ document.addEventListener("DOMContentLoaded", () => {
     googleBtn:        document.getElementById("google-login"),
     userBtn:          document.getElementById("user-btn"),
     statusBanner:     document.getElementById("status-banner"),
-    pedidosBtn:       null,
+    pedidosBtn:       null, // removido â€” acesso via menu conta
     pedidosPanel:     document.getElementById("painelPedidos"),
     pedidosLista:     document.getElementById("listaPedidos"),
-    recompensasBtn:   null,
+    recompensasBtn:   null, // removido â€” acesso via menu conta
     recompensasPanel: document.getElementById("recompensas-panel"),
     recompensasLista: document.getElementById("listaRecompensas"),
     historicoLista:   document.getElementById("historicoRecompensas"),
@@ -558,6 +546,7 @@ document.addEventListener("DOMContentLoaded", () => {
     pixModal:         document.getElementById("pix-modal")
   };
 
+  // BotÃµes de fechar modais
   document.querySelectorAll(".extras-close, .login-close, .dashboard-close, .pix-close").forEach(btn => {
     btn.addEventListener("click", (e) => { e.stopPropagation(); UIManager.closeAll(); });
   });
@@ -569,7 +558,7 @@ document.addEventListener("DOMContentLoaded", () => {
   if (el.cartBackdrop) el.cartBackdrop.addEventListener("click", () => UIManager.closeAll());
 
   /* =========================================================
-     🎟️ CUPONS
+     ðŸŽŸï¸ CUPONS
   ========================================================= */
   const couponForm = document.getElementById("coupon-form");
   let couponApplied = (localStorage.getItem("degustCoupon") || "").toUpperCase();
@@ -581,7 +570,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if (!val) {
       couponApplied = "";
       localStorage.removeItem("degustCoupon");
-      popupAdd("Cupom removido. 🏷️");
+      popupAdd("Cupom removido. ðŸ·ï¸");
     } else {
       couponApplied = val;
       localStorage.setItem("degustCoupon", couponApplied);
@@ -590,7 +579,7 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   /* =========================================================
-     💬 POPUP / TOAST
+     ðŸ’¬ POPUP / TOAST
   ========================================================= */
   function popupAdd(msg) {
     let pop = document.querySelector(".popup-add");
@@ -605,28 +594,29 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   /* =========================================================
-     📊 BARRA DE PROGRESSO (FRETE GRÁTIS)
+     ðŸ“Š BARRA DE PROGRESSO (FRETE GRÃTIS)
   ========================================================= */
   function atualizarBarraProgresso() {
-    const subtotal = getCartSubtotal();
+    const subtotal      = getCartSubtotal();
     const progressText  = document.getElementById("progressText");
     const progressFill  = document.getElementById("progressFill");
-    if (!progressText || !progressFill) return;
+    const progressWrapper = document.getElementById("progressWrapper");
+    if (!progressText || !progressFill || !progressWrapper) return;
 
     const pct = Math.min(100, (subtotal / LIMITE_FRETE_GRATIS) * 100);
     progressFill.style.width = `${pct}%`;
 
     if (subtotal >= LIMITE_FRETE_GRATIS) {
-      progressText.innerHTML = `🎉 <strong>Frete Grátis Liberado!</strong>`;
+      progressText.innerHTML = `ðŸŽ‰ <strong>Frete GrÃ¡tis Liberado!</strong>`;
       progressFill.style.background = "linear-gradient(90deg,#4caf50,#2e7d32)";
     } else {
-      progressText.innerHTML = `Faltam <strong>${money(LIMITE_FRETE_GRATIS - subtotal)}</strong> p/ Frete Grátis`;
+      progressText.innerHTML = `Faltam <strong>${money(LIMITE_FRETE_GRATIS - subtotal)}</strong> p/ Frete GrÃ¡tis`;
       progressFill.style.background = "linear-gradient(90deg,#E1A95F,#4B2C20)";
     }
   }
 
   /* =========================================================
-     🛒 CARRINHO
+     ðŸ›’ CARRINHO
   ========================================================= */
   function renderMiniCart() {
     if (!el.miniList) return;
@@ -635,13 +625,12 @@ document.addEventListener("DOMContentLoaded", () => {
     atualizarBarraProgresso();
 
     if (!cart.length) {
-      el.miniList.innerHTML = '<p style="text-align:center;color:#999;padding:20px;">Seu carrinho está vazio 🍰</p>';
+      el.miniList.innerHTML = '<p style="text-align:center;color:#999;padding:20px;">Seu carrinho estÃ¡ vazio ðŸ°</p>';
       if (el.miniFoot) el.miniFoot.querySelectorAll(".cart-summary-generated").forEach(e => e.remove());
       const cm = document.getElementById("coupon-message");
       const cdr = document.getElementById("coupon-discount-row");
       if (cm) cm.innerHTML = "";
       if (cdr) cdr.style.display = "none";
-      saveCart();
       return;
     }
 
@@ -650,13 +639,13 @@ document.addEventListener("DOMContentLoaded", () => {
         <div style="display:flex;justify-content:space-between;align-items:center;">
           <div style="flex:1;">
             <p style="font-weight:700;margin-bottom:4px;color:#4B2C20;">${item.nome}</p>
-            <p style="color:#666;font-size:.85rem;">${money(item.preco)} × ${item.qtd}</p>
+            <p style="color:#666;font-size:.85rem;">${money(item.preco)} Ã— ${item.qtd}</p>
           </div>
           <div style="display:flex;gap:6px;align-items:center;">
-            <button type="button" class="cart-minus" data-idx="${idx}" style="background:#E1A95F;color:#4B2C20;border:none;border-radius:5px;width:30px;height:30px;cursor:pointer;font-weight:bold;font-size:1.1rem;">−</button>
+            <button type="button" class="cart-minus" data-idx="${idx}" style="background:#E1A95F;color:#4B2C20;border:none;border-radius:5px;width:30px;height:30px;cursor:pointer;font-weight:bold;font-size:1.1rem;">âˆ’</button>
             <span style="font-weight:700;min-width:20px;text-align:center;">${item.qtd}</span>
             <button type="button" class="cart-plus"  data-idx="${idx}" style="background:#4B2C20;color:#F5E6CA;border:none;border-radius:5px;width:30px;height:30px;cursor:pointer;font-weight:bold;font-size:1.1rem;">+</button>
-            <button type="button" class="cart-remove" data-idx="${idx}" style="background:#d32f2f;color:#fff;border:none;border-radius:5px;width:30px;height:30px;cursor:pointer;">🗑</button>
+            <button type="button" class="cart-remove" data-idx="${idx}" style="background:#d32f2f;color:#fff;border:none;border-radius:5px;width:30px;height:30px;cursor:pointer;">ðŸ—‘</button>
           </div>
         </div>
       </div>
@@ -664,7 +653,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
     bindMiniCartButtons();
     enhanceMiniCartUI();
-    saveCart(); // Salva sempre que renderizar
   }
 
   const getCartSubtotal = () => cart.reduce((s, i) => s + (Number(i.preco) || 0) * (Number(i.qtd) || 0), 0);
@@ -686,12 +674,12 @@ document.addEventListener("DOMContentLoaded", () => {
       const i = +e.currentTarget.dataset.idx;
       cart.splice(i, 1);
       renderMiniCart();
-      popupAdd("Item removido! 🗑️");
+      popupAdd("Item removido! ðŸ—‘ï¸");
     }));
   }
 
   /* =========================================================
-     🔥 FIREBASE
+     ðŸ”¥ FIREBASE
   ========================================================= */
   const firebaseConfig = {
     apiKey: "AIzaSyATQBcbYuzKpKlSwNlbpRiAM1XyHqhGeak",
@@ -709,7 +697,7 @@ document.addEventListener("DOMContentLoaded", () => {
   function inicializarFirebase() {
     if (isFirebaseInitialized) return;
     try {
-      if (!window.firebase) throw new Error("Firebase SDK não carregado.");
+      if (!window.firebase) throw new Error("Firebase SDK nÃ£o carregado.");
       if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
       auth = firebase.auth();
       db   = firebase.firestore();
@@ -722,48 +710,53 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function handleLoginSuccess(user) {
     currentUser = user;
-    const nome = user.displayName?.split(" ")[0] || user.email?.split("@")[0] || "doçura";
+    const nome = user.displayName?.split(" ")[0] || user.email?.split("@")[0] || "doÃ§ura";
     UIManager.closeAll();
     atualizarBotaoUsuario(user);
     carregarPedidos(user);
     carregarRecompensas(user);
-    mostrarToastLogin(`Bem-vinda(o), ${nome}! 🍰`);
+    // Toast de boas-vindas mais destacado
+    mostrarToastLogin(`Bem-vinda(o), ${nome}! ðŸ°`);
   }
 
-function atualizarBotaoUsuario(user) {
-  if (!el.userBtn) return;
+  function atualizarBotaoUsuario(user) {
+    if (!el.userBtn) return;
+    const nome = user
+      ? (user.displayName?.split(" ")[0] || user.email?.split("@")[0] || "vocÃª")
+      : null;
 
-  if (user) {
-    const fotoUrl = user.photoURL || "";
-    if (fotoUrl) {
-      // Ativa o modo círculo e insere a foto do Google
-      el.userBtn.classList.add("has-photo");
-      el.userBtn.innerHTML = `<img src="${fotoUrl}" id="user-foto-header" alt="Perfil">`;
-      
-      // Ajustes de estilo para o modo foto
-      el.userBtn.style.padding = "0"; 
-      el.userBtn.style.background = "transparent";
+    const content  = document.getElementById("user-btn-content");
+    const fotoWrap = document.getElementById("user-foto-wrap");
+    const fotoImg  = document.getElementById("user-foto");
+
+    if (user) {
+      // Nome no botÃ£o
+      if (content) content.textContent = nome;
+
+      // Foto de perfil do Google visÃ­vel no header
+      if (user.photoURL && fotoImg && fotoWrap) {
+        fotoImg.src = user.photoURL;
+        fotoImg.onerror = () => { fotoWrap.style.display = "none"; };
+        fotoWrap.style.display = "inline-flex";
+        fotoWrap.style.alignItems = "center";
+        fotoWrap.style.marginRight = "6px";
+      }
+
+      el.userBtn.style.display = "flex";
+      el.userBtn.style.alignItems = "center";
+      el.userBtn.style.gap = "0";
+      el.userBtn.style.padding = "5px 10px";
+
+      if (isAdmin(user)) {
+        document.querySelector(".admin-section")?.style.setProperty("display","block");
+      }
     } else {
-      // Fallback: se logar e não tiver foto, mostra o primeiro nome
-      const nome = user.displayName?.split(" ")[0] || "Olá";
-      el.userBtn.classList.remove("has-photo");
-      el.userBtn.innerHTML = `<span>${nome}</span>`;
-      el.userBtn.style.padding = "8px 16px";
-      el.userBtn.style.background = "var(--marrom)";
+      if (content) content.textContent = "Entrar";
+      if (fotoWrap) fotoWrap.style.display = "none";
+      el.userBtn.style.padding = "";
+      el.userBtn.style.display = "";
     }
-
-    if (isAdmin(user)) {
-      document.querySelector(".admin-section")?.style.setProperty("display","block");
-    }
-  } else {
-    // Se deslogado, mostra "Login" (mais clean) e remove o modo foto
-    el.userBtn.classList.remove("has-photo");
-    el.userBtn.innerHTML = `<span>Login</span>`;
-    el.userBtn.style.padding = "8px 16px";
-    el.userBtn.style.background = "var(--marrom)";
-    el.userBtn.style.display = "flex";
   }
-}
 
   function mostrarToastLogin(msg) {
     let toast = document.getElementById("toast-login");
@@ -790,140 +783,9 @@ function atualizarBotaoUsuario(user) {
     }, 3500);
   }
 
-  // ================== SISTEMA DE RECOMPENSAS (METAS PROGRESSIVAS) ==================
-  let recompensasMetas = [];
-
-  async function carregarMetasRecompensas() {
-    if (!db) return;
-    try {
-      const doc = await db.collection("settings").doc("degust_config").get();
-      if (doc.exists && doc.data().recompensas) {
-        recompensasMetas = doc.data().recompensas;
-      } else {
-        // fallback
-        recompensasMetas = [
-          { pedido: 5, tipo: "cupom", valor: 5, descricao: "Cupom de R$5,00" },
-          { pedido: 10, tipo: "cupom", valor: 10, descricao: "Cupom de R$10,00" },
-          { pedido: 15, tipo: "brinde", valor: 0, descricao: "1 Bolo grátis" },
-          { pedido: 20, tipo: "cupom", valor: 15, descricao: "Cupom de R$15,00" },
-          { pedido: 25, tipo: "brinde", valor: 0, descricao: "2 Bolos grátis" },
-          { pedido: 30, tipo: "combo", valor: 0, descricao: "Combo especial" }
-        ];
-      }
-    } catch(e) { console.error("Erro ao carregar metas recompensas", e); }
-  }
-
-  async function incrementarContadorPedidos(userId) {
-    if (!db) return;
-    const userRef = db.collection("Usuarios").doc(userId);
-    const userDoc = await userRef.get();
-    let bolosPedidos = userDoc.exists ? (userDoc.data().bolosPedidos || 0) : 0;
-    const novoTotal = bolosPedidos + 1;
-    await userRef.set({ bolosPedidos: novoTotal }, { merge: true });
-
-    const recompensasRecebidas = userDoc.exists ? (userDoc.data().recompensasRecebidas || []) : [];
-    for (let meta of recompensasMetas) {
-      if (novoTotal >= meta.pedido && !recompensasRecebidas.includes(meta.pedido.toString())) {
-        await userRef.update({
-          recompensasDisponiveis: firebase.firestore.FieldValue.arrayUnion({
-            pedido: meta.pedido,
-            tipo: meta.tipo,
-            valor: meta.valor,
-            descricao: meta.descricao,
-            data: new Date().toISOString()
-          }),
-          recompensasRecebidas: firebase.firestore.FieldValue.arrayUnion(meta.pedido.toString())
-        });
-        popupAdd(`🎉 Parabéns! Você ganhou ${meta.descricao}!`);
-      }
-    }
-  }
-
-  async function carregarRecompensas(user) {
-    if (!db || !user) return;
-    const userRef = db.collection("Usuarios").doc(user.uid);
-    const userDoc = await userRef.get();
-    const bolos = userDoc.exists ? (userDoc.data().bolosPedidos || 0) : 0;
-
-    const contadorEl = document.getElementById("contador-valor");
-    if (contadorEl) contadorEl.textContent = bolos;
-
-    let proximaMeta = null;
-    for (let meta of recompensasMetas) {
-      if (bolos < meta.pedido) {
-        proximaMeta = meta;
-        break;
-      }
-    }
-    const faltam = proximaMeta ? (proximaMeta.pedido - bolos) : 0;
-    const mensagemEl = document.getElementById("progresso-mensagem");
-    if (mensagemEl) {
-      if (proximaMeta) {
-        mensagemEl.textContent = `Faltam ${faltam} bolo${faltam !== 1 ? 's' : ''} para ganhar ${proximaMeta.descricao}`;
-      } else {
-        mensagemEl.textContent = "🎉 Você já atingiu todas as metas! Novas em breve.";
-      }
-    }
-
-    const pct = proximaMeta ? (bolos / proximaMeta.pedido) * 100 : 100;
-    const barraEl = document.getElementById("progresso-bar");
-    if (barraEl) barraEl.style.width = `${Math.min(100, pct)}%`;
-
-    const recompensasDisponiveis = userDoc.exists ? (userDoc.data().recompensasDisponiveis || []) : [];
-    const listaEl = document.getElementById("listaRecompensas");
-    if (listaEl) {
-      if (recompensasDisponiveis.length === 0) {
-        listaEl.innerHTML = '<p style="color:#999;">Nenhuma recompensa disponível no momento.</p>';
-      } else {
-        listaEl.innerHTML = recompensasDisponiveis.map(r => `
-          <div class="recompensa-item">
-            <span>🎁 ${r.descricao}</span>
-            <button class="btn-resgatar" data-pedido="${r.pedido}">Resgatar</button>
-          </div>
-        `).join("");
-        document.querySelectorAll('.btn-resgatar').forEach(btn => {
-          btn.addEventListener('click', async (e) => {
-            const pedidoMeta = parseInt(e.currentTarget.dataset.pedido);
-            await resgatarRecompensa(user.uid, pedidoMeta);
-            carregarRecompensas(user);
-          });
-        });
-      }
-    }
-  }
-
-  async function resgatarRecompensa(userId, pedidoMeta) {
-    if (!db) return;
-    const userRef = db.collection("Usuarios").doc(userId);
-    const userDoc = await userRef.get();
-    let recompensas = userDoc.data().recompensasDisponiveis || [];
-    const recompensa = recompensas.find(r => r.pedido === pedidoMeta);
-    if (!recompensa) return;
-
-    if (recompensa.tipo === "cupom") {
-      const codigoCupom = `DEGUST${recompensa.valor}${Date.now()}`;
-      popupAdd(`Cupom gerado: ${codigoCupom} - Válido por 30 dias`);
-      await db.collection("cupons").add({
-        codigo: codigoCupom,
-        valor: recompensa.valor,
-        userId: userId,
-        usado: false,
-        criadoEm: firebase.firestore.FieldValue.serverTimestamp()
-      });
-    } else {
-      popupAdd(`🎁 ${recompensa.descricao} resgatado! Apresente no próximo pedido.`);
-    }
-
-    const novasDisponiveis = recompensas.filter(r => r.pedido !== pedidoMeta);
-    const historico = userDoc.data().historicoRecompensas || [];
-    historico.push({ ...recompensa, resgatadoEm: new Date().toISOString() });
-    await userRef.update({
-      recompensasDisponiveis: novasDisponiveis,
-      historicoRecompensas: historico
-    });
-  }
-
-  // status da loja (ignorar bolinha por enquanto)
+  // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+  // ðŸª STATUS DA LOJA â€” checa em tempo real
+  // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
   function checarStatusLoja() {
     if (!db) return;
     db.collection("settings").doc("degust_status").onSnapshot(doc => {
@@ -935,61 +797,90 @@ function atualizarBotaoUsuario(user) {
   function aplicarStatusLoja(aberta) {
     const cards   = document.querySelectorAll(".card");
     const addBtns = document.querySelectorAll(".add-cart, .extras-btn");
+
     if (!aberta) {
+      // Loja fechada â€” cards acinzentados, botÃµes desabilitados
       cards.forEach(card => {
         card.style.opacity = "0.55";
         card.style.filter  = "grayscale(60%)";
         card.style.pointerEvents = "none";
       });
       addBtns.forEach(btn => { btn.disabled = true; });
+
+      // Banner de aviso se nÃ£o existir
+      if (!document.getElementById("banner-loja-fechada")) {
+        const banner = document.createElement("div");
+        banner.id = "banner-loja-fechada";
+        banner.style.cssText = "background:#b71c1c;color:#fff;text-align:center;padding:12px 16px;font-weight:700;font-size:.9rem;border-radius:10px;margin-bottom:12px;";
+        banner.textContent = "ðŸ”´ Estamos fechados no momento. Volte em breve!";
+        const statusBanner = document.getElementById("status-banner");
+        if (statusBanner) statusBanner.after(banner);
+      }
     } else {
+      // Loja aberta â€” restaura
       cards.forEach(card => {
         card.style.opacity = "";
         card.style.filter  = "";
         card.style.pointerEvents = "";
       });
       addBtns.forEach(btn => { btn.disabled = false; });
+      const banner = document.getElementById("banner-loja-fechada");
+      if (banner) banner.remove();
     }
   }
 
   function setupAuthListener() {
+    // Captura retorno do redirect do Google
     auth.getRedirectResult()
       .then(result => {
-        if (result && result.user) handleLoginSuccess(result.user);
+        if (result && result.user) {
+          handleLoginSuccess(result.user);
+        }
       })
-      .catch(err => { if (err.code !== "auth/no-auth-event") console.error("Redirect error:", err.code); });
+      .catch(err => {
+        if (err.code !== "auth/no-auth-event") {
+          console.error("Redirect error:", err.code);
+        }
+      });
 
     auth.onAuthStateChanged(user => {
       currentUser = user;
-      // Chamamos a função inteligente que gere o botão e a foto de forma correta
-      atualizarBotaoUsuario(user); 
-
       if (user) {
+        const nome = user.displayName?.split(" ")[0] || user.email.split("@")[0];
+        el.userBtn.textContent = `OlÃ¡, ${nome} âœ¨`;
         if (el.pedidosBtn)    el.pedidosBtn.style.display    = "";
         if (el.recompensasBtn) el.recompensasBtn.style.display = "";
-        if (isAdmin(user)) document.querySelector(".admin-section")?.style.setProperty("display", "block");
+        if (isAdmin(user)) {
+          document.querySelector(".admin-section")?.style.setProperty("display", "block");
+        }
+        // Carrega pedidos e recompensas ao logar
         carregarPedidos(user);
         carregarRecompensas(user);
       } else {
+        el.userBtn.textContent = "Entrar / Perfil ðŸ‘¤";
         document.querySelector(".admin-section")?.style.setProperty("display", "none");
-        // Limpa a lista quando desloga para segurança visual
-        if (el.pedidosLista) el.pedidosLista.innerHTML = '<p class="empty-orders">Faça login para ver suas doçuras anteriores.</p>';
       }
     });
-
+  }
 
   /* =========================================================
-     🔑 LOGIN
+     ðŸ”‘ LOGIN
   ========================================================= */
+  // handleLoginSuccess definida acima (prÃ³ximo ao setupAuthListener)
+
+  // Login apenas via Google â€” e-mail/senha desabilitado
+
   el.googleBtn?.addEventListener("click", () => {
     inicializarFirebase();
-    if (!isFirebaseInitialized) return alert("Erro de conexão. Recarregue a página.");
+    if (!isFirebaseInitialized) return alert("Erro de conexÃ£o. Recarregue a pÃ¡gina.");
     const provider = new firebase.auth.GoogleAuthProvider();
     provider.setCustomParameters({ prompt: "select_account" });
+    // Tenta popup primeiro; se bloqueado cai para redirect
     auth.signInWithPopup(provider)
       .then(r => { if (r.user) handleLoginSuccess(r.user); })
       .catch(err => {
         if (err.code === "auth/popup-blocked" || err.code === "auth/popup-closed-by-user") {
+          // Fallback: redirect
           auth.signInWithRedirect(provider).catch(e => alert("Erro: " + e.message));
         } else if (err.code !== "auth/cancelled-popup-request") {
           alert("Erro ao entrar com Google: " + err.message);
@@ -1001,6 +892,7 @@ function atualizarBotaoUsuario(user) {
     if (!currentUser) {
       UIManager.open("login", el.loginModal);
     } else {
+      // Mostra mini menu de conta
       mostrarMenuConta();
     }
   });
@@ -1009,7 +901,7 @@ function atualizarBotaoUsuario(user) {
     let menu = document.getElementById("conta-menu");
     if (menu) { menu.remove(); return; }
 
-    const nome  = currentUser.displayName || currentUser.email?.split("@")[0] || "você";
+    const nome  = currentUser.displayName || currentUser.email?.split("@")[0] || "vocÃª";
     const foto  = currentUser.photoURL;
     const rect  = el.userBtn.getBoundingClientRect();
 
@@ -1024,20 +916,20 @@ function atualizarBotaoUsuario(user) {
     `;
     menu.innerHTML = `
       <div style="background:#4B2C20;padding:14px 16px;display:flex;align-items:center;gap:10px;">
-        ${foto ? `<img src="${foto}" style="width:38px;height:38px;border-radius:50%;border:2px solid #E1A95F;" onerror="this.style.display='none'">` : '<span style="font-size:1.8rem;">👤</span>'}
+        ${foto ? `<img src="${foto}" style="width:38px;height:38px;border-radius:50%;border:2px solid #E1A95F;" onerror="this.style.display='none'">` : '<span style="font-size:1.8rem;">ðŸ‘¤</span>'}
         <div>
           <div style="color:#F5E6CA;font-weight:700;font-size:.95rem;">${nome.split(" ")[0]}</div>
           <div style="color:#E1A95F;font-size:.72rem;opacity:.85;">${currentUser.email || ""}</div>
         </div>
       </div>
       <button id="conta-meus-pedidos" type="button" style="width:100%;padding:13px 16px;background:none;border:none;border-bottom:1px solid #f0e8d8;text-align:left;cursor:pointer;color:#4B2C20;font-weight:600;font-size:.9rem;display:flex;align-items:center;gap:8px;">
-        📦 Meus Pedidos
+        ðŸ“¦ Meus Pedidos
       </button>
       <button id="conta-recompensas" type="button" style="width:100%;padding:13px 16px;background:none;border:none;border-bottom:1px solid #f0e8d8;text-align:left;cursor:pointer;color:#4B2C20;font-weight:600;font-size:.9rem;display:flex;align-items:center;gap:8px;">
-        🎁 Recompensas
+        ðŸŽ Recompensas
       </button>
       <button id="conta-sair" type="button" style="width:100%;padding:13px 16px;background:none;border:none;text-align:left;cursor:pointer;color:#C8282D;font-weight:700;font-size:.9rem;display:flex;align-items:center;gap:8px;">
-        🚪 Sair da conta
+        ðŸšª Sair da conta
       </button>
     `;
     document.body.appendChild(menu);
@@ -1049,16 +941,16 @@ function atualizarBotaoUsuario(user) {
     document.getElementById("conta-recompensas").addEventListener("click", () => {
       menu.remove();
       document.getElementById("painelRecompensasOverlay")?.classList.add("active");
-      if (currentUser) carregarRecompensas(currentUser);
     });
     document.getElementById("conta-sair").addEventListener("click", () => {
       menu.remove();
       auth.signOut().then(() => {
-        mostrarToastLogin("Até logo! 👋");
+        mostrarToastLogin("AtÃ© logo! ðŸ‘‹");
         setTimeout(() => location.reload(), 1200);
       });
     });
 
+    // Fecha ao clicar fora
     setTimeout(() => {
       document.addEventListener("click", function fecharMenu(e) {
         if (!menu.contains(e.target) && e.target !== el.userBtn) {
@@ -1070,10 +962,10 @@ function atualizarBotaoUsuario(user) {
   }
 
   /* =========================================================
-     🍬 ADICIONAIS (TOPPINGS)
+     ðŸ¬ ADICIONAIS (TOPPINGS)
   ========================================================= */
   const TOPPINGS_DATA = [
-    { id: "extra_ninho",     nome: "Leite Ninho em Pó",   preco: 2.00 },
+    { id: "extra_ninho",     nome: "Leite Ninho em PÃ³",   preco: 2.00 },
     { id: "extra_nutella",   nome: "Nutella Pura",         preco: 4.50 },
     { id: "extra_granulado", nome: "Granulado Gourmet",    preco: 1.50 },
     { id: "extra_morango",   nome: "Morango Picado",       preco: 3.00 },
@@ -1114,14 +1006,14 @@ function atualizarBotaoUsuario(user) {
   });
 
   /* =========================================================
-     🚀 PRODUTOS
+     ðŸš€ PRODUTOS â€” LISTENERS
   ========================================================= */
   function addCommonItem(nome, preco) {
     const found = cart.find(i => i.nome === nome && i.preco === preco);
     if (found) found.qtd++;
     else cart.push({ nome, preco: Number(preco), qtd: 1 });
     renderMiniCart();
-    popupAdd(`${nome.split("(")[0].trim()} adicionado! 🍰`);
+    popupAdd(`${nome.split("(")[0].trim()} adicionado! ðŸ°`);
     try { if (sound) sound.play(); } catch (e) {}
   }
 
@@ -1146,28 +1038,28 @@ function atualizarBotaoUsuario(user) {
   }
 
   /* =========================================================
-     🚚 FRETE & ENDEREÇO
+     ðŸšš FRETE & ENDEREÃ‡O
   ========================================================= */
   let modoEnderecoManual = false;
 
   const buscarCEP = async () => {
     const cep = document.getElementById("cep-input")?.value.replace(/\D/g, "");
-    if (cep?.length !== 8) return alert("Digite um CEP válido com 8 dígitos.");
+    if (cep?.length !== 8) return alert("Digite um CEP vÃ¡lido com 8 dÃ­gitos.");
     const btn = document.getElementById("btn-calcular-frete");
     btn.textContent = "Buscando...";
     btn.disabled = true;
     try {
       const res  = await fetch(`https://viacep.com.br/ws/${cep}/json/`);
       const data = await res.json();
-      if (data.erro) throw new Error("CEP não encontrado.");
+      if (data.erro) throw new Error("CEP nÃ£o encontrado.");
       const ruaBairro = document.getElementById("endereco-auto");
       if (ruaBairro) ruaBairro.value = `${data.logradouro}, ${data.bairro} - ${data.localidade}/${data.uf}`;
-      document.getElementById("numero-input").disabled = false;
+      document.getElementById("numero-input").disabled    = false;
       document.getElementById("complemento-input").disabled = false;
       document.getElementById("numero-input")?.focus();
-      popupAdd("Endereço localizado! 📍");
+      popupAdd("EndereÃ§o localizado! ðŸ“");
     } catch {
-      alert("Erro ao buscar CEP. Tente digitar o endereço manualmente.");
+      alert("Erro ao buscar CEP. Tente digitar o endereÃ§o manualmente.");
     } finally {
       btn.textContent = "Buscar";
       btn.disabled = false;
@@ -1185,11 +1077,12 @@ function atualizarBotaoUsuario(user) {
   el.btnConfirmar?.addEventListener("click", () => {
     const end = el.manualEndereco?.value.trim();
     const num = el.manualNumero?.value.trim();
-    if (!end || !num) return alert("Preencha o endereço e o número!");
-    popupAdd("Endereço manual salvo! ✅");
+    if (!end || !num) return alert("Preencha o endereÃ§o e o nÃºmero!");
+    popupAdd("EndereÃ§o manual salvo! âœ…");
     renderMiniCart();
   });
 
+  // Retirada no local
   document.getElementById("retirar-local")?.addEventListener("change", (e) => {
     ["cep-input","btn-calcular-frete","numero-input","complemento-input"].forEach(id => {
       const el2 = document.getElementById(id);
@@ -1197,12 +1090,12 @@ function atualizarBotaoUsuario(user) {
       el2.style.opacity = e.target.checked ? "0.5" : "1";
       if (el2.tagName === "INPUT") el2.disabled = e.target.checked;
     });
-    if (e.target.checked) popupAdd("Opção: Retirada na Degust 🍰");
+    if (e.target.checked) popupAdd("OpÃ§Ã£o: Retirada na Degust ðŸ°");
     renderMiniCart();
   });
 
   /* =========================================================
-     💰 CÁLCULOS
+     ðŸ’° CÃLCULOS
   ========================================================= */
   async function calcTotals() {
     const subtotal = getCartSubtotal();
@@ -1232,14 +1125,14 @@ function atualizarBotaoUsuario(user) {
 
     if (couponApplied) {
       if (cupomInfo.valid) {
-        if (couponMsg) couponMsg.innerHTML = `<span style="color:#2e7d32;font-size:.85rem;">✅ Cupom <b>${couponApplied}</b> aplicado!</span>`;
+        if (couponMsg) couponMsg.innerHTML = `<span style="color:#2e7d32;font-size:.85rem;">âœ… Cupom <b>${couponApplied}</b> aplicado!</span>`;
         if (discount > 0 && couponDiscountRow) {
           couponDiscountRow.style.display = "flex";
           const cd = document.getElementById("cart-discount");
           if (cd) cd.textContent = `-${money(discount)}`;
         }
       } else {
-        if (couponMsg) couponMsg.innerHTML = `<span style="color:#d32f2f;font-size:.85rem;">❌ Cupom inválido ou expirado.</span>`;
+        if (couponMsg) couponMsg.innerHTML = `<span style="color:#d32f2f;font-size:.85rem;">âŒ Cupom invÃ¡lido ou expirado.</span>`;
         if (couponDiscountRow) couponDiscountRow.style.display = "none";
       }
     }
@@ -1258,7 +1151,7 @@ function atualizarBotaoUsuario(user) {
         </div>
         <div style="display:flex;justify-content:space-between;margin-bottom:5px;color:#666;">
           <span>Taxa de Entrega:</span>
-          <span>${delivery === 0 ? '<b style="color:#2e7d32;">GRÁTIS</b>' : money(delivery)}</span>
+          <span>${delivery === 0 ? '<b style="color:#2e7d32;">GRÃTIS</b>' : money(delivery)}</span>
         </div>
         ${discount > 0 ? `
         <div style="display:flex;justify-content:space-between;margin-bottom:5px;color:#2e7d32;">
@@ -1269,23 +1162,26 @@ function atualizarBotaoUsuario(user) {
         </div>
       </div>
       <div style="background:linear-gradient(135deg,#fff8e1,#fffde7);border:1px solid #E1A95F;border-radius:10px;padding:10px 12px;margin-top:10px;display:flex;align-items:center;gap:8px;">
-        <span style="font-size:1.4rem;">🎁</span>
+        <span style="font-size:1.4rem;">ðŸŽ</span>
         <div>
           <p style="margin:0;font-size:.78rem;font-weight:700;color:#4B2C20;">Esta compra acumula pontos de fidelidade!</p>
           <p style="margin:0;font-size:.72rem;color:#8d6e63;">Acesse pelo menu lateral ou pelo seu perfil</p>
         </div>
       </div>
       <button id="main-finish-btn" type="button" style="width:100%;background:#4caf50;color:#fff;border:none;padding:15px;border-radius:10px;font-weight:bold;font-size:1.1rem;cursor:pointer;margin-top:10px;box-shadow:0 4px 10px rgba(76,175,80,.3);">
-        FINALIZAR PEDIDO 🍰
+        FINALIZAR PEDIDO ðŸ°
       </button>
     `;
 
     document.getElementById("main-finish-btn")?.addEventListener("click", () => window.fecharPedido());
   }
 
+  /* =========================================================
+     ðŸ“¦ FINALIZAR PEDIDO
+  ========================================================= */
   window.fecharPedido = async function () {
-    if (!cart.length) return alert("O carrinho está vazio! Escolha uma doçura primeiro. 🍰");
-    if (!currentUser) { alert("Faça login para finalizar seu pedido!"); UIManager.open("login", el.loginModal); return; }
+    if (!cart.length) return alert("O carrinho estÃ¡ vazio! Escolha uma doÃ§ura primeiro. ðŸ°");
+    if (!currentUser) { alert("FaÃ§a login para finalizar seu pedido!"); UIManager.open("login", el.loginModal); return; }
 
     const isRetirar = document.getElementById("retirar-local")?.checked;
     let addr = "";
@@ -1293,23 +1189,23 @@ function atualizarBotaoUsuario(user) {
     if (modoEnderecoManual) {
       const end = el.manualEndereco?.value?.trim() || "";
       const num = el.manualNumero?.value?.trim()   || "";
-      if (end && num) addr = `${end}, N° ${num} (Manual)`;
+      if (end && num) addr = `${end}, NÂ° ${num} (Manual)`;
     } else {
       const rua   = document.getElementById("endereco-auto")?.value.trim()   || "";
       const num   = document.getElementById("numero-input")?.value.trim()    || "";
       const comp  = document.getElementById("complemento-input")?.value.trim() || "";
       const cepV  = document.getElementById("cep-input")?.value.replace(/\D/g,"") || "";
       if (rua && num) {
-        addr = `${rua}, N° ${num}`;
+        addr = `${rua}, NÂ° ${num}`;
         if (comp) addr += `, Comp: ${comp}`;
         if (cepV.length === 8) addr += ` | CEP: ${cepV}`;
       }
     }
 
     if (isRetirar) {
-      addr = "Retirada na loja: Rua Espanha, 72 - Parque das Nações, Três Marias/MG";
+      addr = "Retirada na loja: Rua Espanha, 72 - Parque das NaÃ§Ãµes, TrÃªs Marias/MG";
     } else if (!addr) {
-      alert("Preencha o endereço completo (ou marque 'Retirar no Local') para continuar.");
+      alert("Preencha o endereÃ§o completo (ou marque 'Retirar no Local') para continuar.");
       return;
     }
 
@@ -1317,16 +1213,18 @@ function atualizarBotaoUsuario(user) {
     abrirModalPIX();
   };
 
+
   /* =========================================================
-     📦 MEUS PEDIDOS
+     ðŸ“¦ MEUS PEDIDOS â€” busca no Firestore
   ========================================================= */
+  // Emoji miniatura por nome do produto
   function emojiProduto(nome) {
     const n = (nome || "").toLowerCase();
-    if (n.includes("brigadeiro"))  return "🍫";
-    if (n.includes("prestígio") || n.includes("prestigio")) return "🥥";
-    if (n.includes("morango"))     return "🍓";
-    if (n.includes("ninho"))       return "🥛";
-    return "🍰";
+    if (n.includes("brigadeiro"))  return "ðŸ«";
+    if (n.includes("prestÃ­gio") || n.includes("prestigio")) return "ðŸ¥¥";
+    if (n.includes("morango"))     return "ðŸ“";
+    if (n.includes("ninho"))       return "ðŸ¥›";
+    return "ðŸ°";
   }
 
   function carregarPedidos(user) {
@@ -1335,6 +1233,7 @@ function atualizarBotaoUsuario(user) {
     if (!lista) return;
     lista.innerHTML = '<p style="text-align:center;color:#999;padding:20px;">Carregando seus pedidos...</p>';
 
+    // Query sem orderBy para evitar erro de Ã­ndice â€” ordena no cliente
     db.collection("Pedidos")
       .where("userId", "==", user.uid)
       .limit(20)
@@ -1349,13 +1248,14 @@ function atualizarBotaoUsuario(user) {
         if (snapshot.empty) {
           lista.innerHTML = `
             <div style="text-align:center;padding:30px 10px;">
-              <div style="font-size:3rem;margin-bottom:10px;">🍰</div>
-              <p style="color:#999;font-size:.95rem;">Você ainda não fez nenhum pedido.</p>
+              <div style="font-size:3rem;margin-bottom:10px;">ðŸ°</div>
+              <p style="color:#999;font-size:.95rem;">VocÃª ainda nÃ£o fez nenhum pedido.</p>
               <p style="color:#E1A95F;font-size:.85rem;font-weight:600;">Que tal experimentar um bolinho hoje?</p>
             </div>`;
           return;
         }
 
+        // Ordena no cliente por data desc
         const docs = [...snapshot.docs].sort((a, b) => {
           const da = a.data().criadoEm?.toDate?.() || new Date(a.data().data || 0);
           const db2 = b.data().criadoEm?.toDate?.() || new Date(b.data().data || 0);
@@ -1363,35 +1263,43 @@ function atualizarBotaoUsuario(user) {
         });
         lista.innerHTML = docs.map(doc => {
           const d = doc.data();
-          let dataHora = "—";
+
+          // Data â€” campo pode ser Timestamp ou string ISO
+          let dataHora = "â€”";
           if (d.criadoEm?.toDate) {
             const dt = d.criadoEm.toDate();
-            dataHora = dt.toLocaleDateString("pt-BR") + " às " + dt.toLocaleTimeString("pt-BR",{hour:"2-digit",minute:"2-digit"});
+            dataHora = dt.toLocaleDateString("pt-BR") + " Ã s " + dt.toLocaleTimeString("pt-BR",{hour:"2-digit",minute:"2-digit"});
           } else if (d.data) {
             try {
               const dt = new Date(d.data);
-              if (!isNaN(dt)) dataHora = dt.toLocaleDateString("pt-BR") + " às " + dt.toLocaleTimeString("pt-BR",{hour:"2-digit",minute:"2-digit"});
+              if (!isNaN(dt)) dataHora = dt.toLocaleDateString("pt-BR") + " Ã s " + dt.toLocaleTimeString("pt-BR",{hour:"2-digit",minute:"2-digit"});
             } catch(e) { dataHora = d.data; }
           }
 
-          const itens = Array.isArray(d.itensObj) ? d.itensObj : (Array.isArray(d.itens) ? d.itens : []);
+          // Itens â€” pode ser array em itensObj ou string em itens
+          const itens = Array.isArray(d.itensObj) ? d.itensObj
+                      : Array.isArray(d.itens)    ? d.itens
+                      : [];
+
+          // Grade de miniaturas (mÃ¡x 4 emojis)
           const emojis = itens.slice(0, 4).map(i => emojiProduto(i.nome));
           const miniatura = emojis.length > 0
             ? `<div style="display:flex;gap:4px;margin-bottom:8px;flex-wrap:wrap;">
                 ${emojis.map(e => `<span style="font-size:1.6rem;background:#fdf8ef;border-radius:8px;width:36px;height:36px;display:flex;align-items:center;justify-content:center;">${e}</span>`).join("")}
                </div>`
-            : `<div style="font-size:2rem;margin-bottom:8px;">🍰</div>`;
+            : `<div style="font-size:2rem;margin-bottom:8px;">ðŸ°</div>`;
 
+          // Texto dos itens
           const itensTexto = itens.length > 0
-            ? itens.map(i => `${i.nome}${i.qtd > 1 ? ` x${i.qtd}` : ""}`).join(" • ")
+            ? itens.map(i => `${i.nome}${i.qtd > 1 ? ` x${i.qtd}` : ""}`).join(" â€¢ ")
             : (d.resumo || "Pedido");
 
           const total  = d.total  ? money(d.total)  : "";
           const status = d.status || "enviado";
           const cores  = { enviado:"#E1A95F", preparando:"#1976d2", pronto:"#2e7d32", entregue:"#4caf50", cancelado:"#d32f2f" };
           const cor    = cores[status] || "#999";
-          const icones = { enviado:"📨", preparando:"👩‍🍳", pronto:"✅", entregue:"🎉", cancelado:"❌" };
-          const icone  = icones[status] || "📦";
+          const icones = { enviado:"ðŸ“¨", preparando:"ðŸ‘©â€ðŸ³", pronto:"âœ…", entregue:"ðŸŽ‰", cancelado:"âŒ" };
+          const icone  = icones[status] || "ðŸ“¦";
 
           return `
             <div style="background:#fff;border-radius:14px;padding:14px;margin-bottom:12px;border:1px solid rgba(225,169,95,.25);box-shadow:0 2px 8px rgba(0,0,0,.06);">
@@ -1412,7 +1320,65 @@ function atualizarBotaoUsuario(user) {
   }
 
   /* =========================================================
-     📊 PAINEL DE RELATÓRIOS (Admin)
+     ðŸŽ RECOMPENSAS â€” busca no Firestore
+  ========================================================= */
+  function carregarRecompensas(user) {
+    if (!db || !user) return;
+    const contadorEl  = document.getElementById("contador-valor");
+    const barraEl     = document.getElementById("progresso-bar");
+    const mensagemEl  = document.getElementById("progresso-mensagem");
+    const listaEl     = document.getElementById("listaRecompensas");
+    const historicoEl = document.getElementById("historicoRecompensas");
+    if (!contadorEl) return;
+
+    db.collection("Usuarios").doc(user.uid).get()
+      .then(doc => {
+        const dados = doc.exists ? doc.data() : {};
+        const bolos    = dados.bolosPedidos  || 0;
+        const meta     = dados.metaFidelidade || 5;
+        const pct      = Math.min(100, (bolos / meta) * 100);
+        const faltam   = Math.max(0, meta - bolos);
+
+        if (contadorEl) contadorEl.textContent = bolos;
+        if (barraEl)    barraEl.style.width = `${pct}%`;
+        if (mensagemEl) {
+          mensagemEl.textContent = bolos >= meta
+            ? "ðŸŽ‰ ParabÃ©ns! VocÃª ganhou uma recompensa!"
+            : `Faltam ${faltam} bolo${faltam !== 1 ? "s" : ""} para sua prÃ³xima recompensa!`;
+        }
+
+        // Recompensas disponÃ­veis
+        const recompensas = dados.recompensasDisponiveis || [];
+        if (listaEl) {
+          listaEl.innerHTML = recompensas.length
+            ? recompensas.map(r => `
+                <div style="background:#fff;border:1px solid var(--dourado);border-radius:10px;padding:12px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center;">
+                  <span style="font-weight:600;color:#4B2C20;">ðŸŽ ${r.descricao || r}</span>
+                  <span style="font-size:.75rem;color:#E1A95F;font-weight:700;">DISPONÃVEL</span>
+                </div>`).join("")
+            : '<p style="color:#999;text-align:center;font-size:.9rem;">Nenhuma recompensa disponÃ­vel no momento.</p>';
+        }
+
+        // HistÃ³rico
+        const historico = dados.historicoRecompensas || [];
+        if (historicoEl) {
+          historicoEl.innerHTML = historico.length
+            ? historico.map(h => `
+                <div style="padding:8px 0;border-bottom:1px solid #eee;font-size:.85rem;color:#666;">
+                  ðŸ† ${h.descricao || h} â€” <span style="color:#4B2C20;">${h.data || ""}</span>
+                </div>`).join("")
+            : '<p style="color:#999;text-align:center;font-size:.9rem;">VocÃª ainda nÃ£o resgatou prÃªmios.</p>';
+        }
+      })
+      .catch(err => {
+        console.error("Erro ao carregar recompensas:", err);
+        if (mensagemEl) mensagemEl.textContent = "Erro ao carregar recompensas.";
+      });
+  }
+
+
+  /* =========================================================
+     ðŸ“Š PAINEL DE RELATÃ“RIOS â€” Admin Only
   ========================================================= */
   function abrirRelatorios() {
     let overlay = document.getElementById("relatoriosOverlay");
@@ -1423,40 +1389,52 @@ function atualizarBotaoUsuario(user) {
       overlay.innerHTML = `
         <div class="painel-box" style="max-width:560px;">
           <div class="painel-head">
-            <span>📊 Relatórios Degust</span>
-            <button class="fechar-painel" id="fechar-relatorios" type="button">✖</button>
+            <span>ðŸ“Š RelatÃ³rios Degust</span>
+            <button class="fechar-painel" id="fechar-relatorios" type="button">âœ–</button>
           </div>
           <div class="painel-body">
+
+            <!-- Filtro de perÃ­odo -->
             <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px;">
               <button class="rel-filtro rel-ativo" data-dias="7"  type="button">7 dias</button>
               <button class="rel-filtro" data-dias="30" type="button">30 dias</button>
               <button class="rel-filtro" data-dias="0"  type="button">Personalizado</button>
             </div>
+
+            <!-- Datas personalizadas -->
             <div id="rel-datas-custom" style="display:none;gap:8px;margin-bottom:14px;flex-wrap:wrap;">
               <input type="date" id="rel-data-inicio" style="flex:1;padding:8px;border:1px solid var(--dourado);border-radius:8px;font-size:.85rem;">
               <input type="date" id="rel-data-fim"    style="flex:1;padding:8px;border:1px solid var(--dourado);border-radius:8px;font-size:.85rem;">
               <button id="rel-btn-custom" type="button" style="background:var(--marrom);color:var(--bege);border:none;padding:8px 16px;border-radius:8px;font-weight:700;cursor:pointer;">Filtrar</button>
             </div>
+
+            <!-- Cards de resumo -->
             <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px;" id="rel-cards">
-              <div class="rel-card"><div class="rel-card-val" id="rel-total-vendas">—</div><div class="rel-card-label">Total em Vendas</div></div>
-              <div class="rel-card"><div class="rel-card-val" id="rel-num-pedidos">—</div><div class="rel-card-label">Pedidos</div></div>
-              <div class="rel-card"><div class="rel-card-val" id="rel-ticket-medio">—</div><div class="rel-card-label">Ticket Médio</div></div>
-              <div class="rel-card"><div class="rel-card-val" id="rel-mais-vendido">—</div><div class="rel-card-label">Mais Vendido</div></div>
+              <div class="rel-card"><div class="rel-card-val" id="rel-total-vendas">â€”</div><div class="rel-card-label">Total em Vendas</div></div>
+              <div class="rel-card"><div class="rel-card-val" id="rel-num-pedidos">â€”</div><div class="rel-card-label">Pedidos</div></div>
+              <div class="rel-card"><div class="rel-card-val" id="rel-ticket-medio">â€”</div><div class="rel-card-label">Ticket MÃ©dio</div></div>
+              <div class="rel-card"><div class="rel-card-val" id="rel-mais-vendido">â€”</div><div class="rel-card-label">Mais Vendido</div></div>
             </div>
-            <h4 style="color:var(--marrom);margin:0 0 10px;font-size:.95rem;">📋 Pedidos no Período</h4>
+
+            <!-- Lista de pedidos do perÃ­odo -->
+            <h4 style="color:var(--marrom);margin:0 0 10px;font-size:.95rem;">ðŸ“‹ Pedidos no PerÃ­odo</h4>
             <div id="rel-lista-pedidos" style="max-height:260px;overflow-y:auto;"></div>
+
+            <!-- Exportar -->
             <button id="rel-exportar" type="button" style="width:100%;margin-top:14px;background:var(--dourado);color:var(--marrom);border:none;padding:13px;border-radius:10px;font-weight:800;font-size:.95rem;cursor:pointer;">
-              📥 Exportar CSV
+              ðŸ“¥ Exportar CSV
             </button>
           </div>
         </div>`;
       document.body.appendChild(overlay);
 
+      // Fechar
       document.getElementById("fechar-relatorios").addEventListener("click", () => {
         overlay.classList.remove("active");
       });
       overlay.addEventListener("click", e => { if (e.target === overlay) overlay.classList.remove("active"); });
 
+      // Filtros de perÃ­odo
       overlay.querySelectorAll(".rel-filtro").forEach(btn => {
         btn.addEventListener("click", () => {
           overlay.querySelectorAll(".rel-filtro").forEach(b => b.classList.remove("rel-ativo"));
@@ -1474,6 +1452,7 @@ function atualizarBotaoUsuario(user) {
         });
       });
 
+      // BotÃ£o filtrar personalizado
       document.getElementById("rel-btn-custom").addEventListener("click", () => {
         const di = document.getElementById("rel-data-inicio").value;
         const df = document.getElementById("rel-data-fim").value;
@@ -1481,16 +1460,18 @@ function atualizarBotaoUsuario(user) {
         buscarRelatorio(new Date(di + "T00:00:00"), new Date(df + "T23:59:59"));
       });
 
+      // Exportar CSV
       document.getElementById("rel-exportar").addEventListener("click", exportarCSV);
     }
 
     overlay.classList.add("active");
+    // Carrega 7 dias por padrÃ£o
     const fim    = new Date();
     const inicio = new Date(); inicio.setDate(inicio.getDate() - 7);
     buscarRelatorio(inicio, fim);
   }
 
-  let _pedidosRelatorio = [];
+  let _pedidosRelatorio = []; // cache para exportaÃ§Ã£o
 
   function buscarRelatorio(inicio, fim) {
     const listaEl = document.getElementById("rel-lista-pedidos");
@@ -1504,10 +1485,13 @@ function atualizarBotaoUsuario(user) {
       .get()
       .then(snap => {
         _pedidosRelatorio = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+
+        // MÃ©tricas
         const totalVendas  = _pedidosRelatorio.reduce((s, p) => s + (Number(p.total) || 0), 0);
         const numPedidos   = _pedidosRelatorio.length;
         const ticketMedio  = numPedidos > 0 ? totalVendas / numPedidos : 0;
 
+        // Produto mais vendido
         const contagem = {};
         _pedidosRelatorio.forEach(p => {
           (p.itens || []).forEach(i => {
@@ -1515,7 +1499,7 @@ function atualizarBotaoUsuario(user) {
             contagem[k] = (contagem[k] || 0) + (i.qtd || 1);
           });
         });
-        const maisVendido = Object.entries(contagem).sort((a,b) => b[1]-a[1])[0]?.[0] || "—";
+        const maisVendido = Object.entries(contagem).sort((a,b) => b[1]-a[1])[0]?.[0] || "â€”";
 
         document.getElementById("rel-total-vendas").textContent  = money(totalVendas);
         document.getElementById("rel-num-pedidos").textContent   = numPedidos;
@@ -1523,30 +1507,31 @@ function atualizarBotaoUsuario(user) {
         document.getElementById("rel-mais-vendido").textContent  = maisVendido.split(" ")[1] || maisVendido;
 
         if (numPedidos === 0) {
-          listaEl.innerHTML = '<p style="text-align:center;color:#999;padding:16px;">Nenhum pedido neste período.</p>';
+          listaEl.innerHTML = '<p style="text-align:center;color:#999;padding:16px;">Nenhum pedido neste perÃ­odo.</p>';
           return;
         }
 
         listaEl.innerHTML = _pedidosRelatorio.map(p => {
           const dt = p.criadoEm?.toDate?.();
-          const dataHora = dt ? dt.toLocaleDateString("pt-BR") + " " + dt.toLocaleTimeString("pt-BR",{hour:"2-digit",minute:"2-digit"}) : "—";
-          const itens = (p.itens||[]).map(i=>`${i.nome} x${i.qtd||1}`).join(", ") || p.resumo || "—";
-          const cores = { enviado:"#E1A95F", preparando:"#1976d2", pronto:"#2e7d32", entregue:"#4caf50", cancelado:"#d32f2f" };
-          const cor   = cores[p.status||"enviado"] || "#999";
+          const dataHora = dt
+            ? dt.toLocaleDateString("pt-BR") + " " + dt.toLocaleTimeString("pt-BR",{hour:"2-digit",minute:"2-digit"})
+            : "â€”";
+          const itens = (p.itens||[]).map(i=>`${i.nome} x${i.qtd||1}`).join(", ") || p.resumo || "â€”";
+          const cor = {enviado:"#E1A95F",preparando:"#1976d2",pronto:"#2e7d32",entregue:"#4caf50",cancelado:"#d32f2f"}[p.status||"enviado"] || "#999";
           return `<div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid #f0e8d8;gap:8px;flex-wrap:wrap;">
             <div style="flex:1;min-width:0;">
               <div style="font-size:.75rem;color:#aaa;">${dataHora}</div>
               <div style="font-size:.82rem;color:#4B2C20;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${itens}</div>
             </div>
             <div style="text-align:right;flex-shrink:0;">
-              <div style="font-weight:800;color:#C8282D;font-size:.9rem;">${p.total ? money(p.total) : "—"}</div>
+              <div style="font-weight:800;color:#C8282D;font-size:.9rem;">${p.total ? money(p.total) : "â€”"}</div>
               <div style="font-size:.7rem;font-weight:700;color:${cor};text-transform:uppercase;">${p.status||"enviado"}</div>
             </div>
           </div>`;
         }).join("");
       })
       .catch(err => {
-        console.error("Erro relatório:", err);
+        console.error("Erro relatÃ³rio:", err);
         listaEl.innerHTML = '<p style="text-align:center;color:#c62828;padding:16px;">Erro ao carregar dados.</p>';
       });
   }
@@ -1558,55 +1543,73 @@ function atualizarBotaoUsuario(user) {
       ..._pedidosRelatorio.map(p => {
         const dt = p.criadoEm?.toDate?.();
         return [
-          dt ? dt.toLocaleDateString("pt-BR") : "—",
-          dt ? dt.toLocaleTimeString("pt-BR",{hour:"2-digit",minute:"2-digit"}) : "—",
-          p.nomeCliente || p.email || "—",
-          (p.itens||[]).map(i=>`${i.nome} x${i.qtd||1}`).join(" | ") || p.resumo || "—",
+          dt ? dt.toLocaleDateString("pt-BR") : "â€”",
+          dt ? dt.toLocaleTimeString("pt-BR",{hour:"2-digit",minute:"2-digit"}) : "â€”",
+          p.nomeCliente || p.email || "â€”",
+          (p.itens||[]).map(i=>`${i.nome} x${i.qtd||1}`).join(" | ") || p.resumo || "â€”",
           (p.total || 0).toFixed(2).replace(".",","),
           p.status || "enviado"
         ];
       })
     ];
-    const csv = linhas.map(r => r.map(v => `"${String(v).replace(/"/g,'""')}"`).join(";")).join("\n");
+    const csv  = linhas.map(r => r.map(v => `"${String(v).replace(/"/g,'""')}"`).join(";")).join("\n");
     const blob = new Blob(["ï»¿" + csv], { type: "text/csv;charset=utf-8;" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
+    const url  = URL.createObjectURL(blob);
+    const a    = document.createElement("a");
     a.href = url; a.download = `degust-relatorio-${new Date().toISOString().slice(0,10)}.csv`;
     a.click(); URL.revokeObjectURL(url);
   }
 
   /* =========================================================
-     🕰️ STATUS LOJA (horário fixo, removido)
-     Cookies
+     ðŸ•°ï¸ STATUS DA LOJA
+  ========================================================= */
+  const atualizarStatusLoja = () => {
+    const hora = new Date().getHours();
+    const aberto = hora >= 14 && hora < 22;
+    if (el.statusBanner) {
+      el.statusBanner.textContent = aberto ? "ðŸŸ¢ Aberto â€” PeÃ§a sua doÃ§ura agora!" : "ðŸ”´ Fechado â€” Abrimos hoje Ã s 14h";
+      el.statusBanner.className   = `status-banner ${aberto ? "open" : "closed"}`;
+    }
+  };
+
+  atualizarStatusLoja();
+  setInterval(atualizarStatusLoja, 60000);
+
+  /* =========================================================
+     ðŸª COOKIES â€” CORRIGIDO v11.0
+     Problema anterior: display:flex !important no CSS impedia
+     que o JS fechasse com display:none ou classList.remove
   ========================================================= */
   const cookieBanner    = document.getElementById("cookie-banner");
   const cookieAcceptBtn = document.getElementById("cookie-accept");
 
   if (cookieBanner && cookieAcceptBtn) {
     if (localStorage.getItem("degust-cookies-accepted")) {
+      // JÃ¡ aceitou antes â€” mantÃ©m oculto
       cookieBanner.style.display = "none";
     } else {
+      // Aparece apÃ³s 2s via classe .show (sem !important no CSS)
       setTimeout(() => cookieBanner.classList.add("show"), 2000);
     }
 
     cookieAcceptBtn.addEventListener("click", () => {
       localStorage.setItem("degust-cookies-accepted", "true");
       cookieBanner.classList.remove("show");
+      // Aguarda a transiÃ§Ã£o terminar e entÃ£o oculta definitivamente
       setTimeout(() => { cookieBanner.style.display = "none"; }, 450);
-      popupAdd("Preferências salvas! 🍪");
+      popupAdd("PreferÃªncias salvas! ðŸª");
     });
   }
 
   /* =========================================================
-     🏁 INICIALIZAÇÃO
+     ðŸ INICIALIZAÃ‡ÃƒO
   ========================================================= */
   inicializarFirebase();
   resetListeners();
-  loadCart();          // carrega o carrinho salvo
   renderMiniCart();
-  carregarMetasRecompensas();   // carrega as metas de recompensa
+  // Checa status da loja apÃ³s Firebase inicializar
   setTimeout(() => checarStatusLoja(), 800);
 
-  console.log("%c🍰 Degust Bolos no Pote v13.0 — Sistema Completo (carrinho persistente + recompensas)", "color:#E1A95F;font-size:14px;font-weight:bold;");
+  console.log("%cðŸ° Degust Bolos no Pote v11.4 â€” Sistema Carregado!", "color:#E1A95F;font-size:14px;font-weight:bold;");
 
-});
+}); // fim DOMContentLoaded
