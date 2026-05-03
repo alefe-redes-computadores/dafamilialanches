@@ -1,5 +1,5 @@
 /* =========================================================
-   🍰 Degust v13.3 – FINAL (CORRIGIDO)
+   🍰 Degust v13.5 – FINAL (CORRIGIDO)
    - UI blindada, PIX, Firebase
    - Persistência do carrinho (localStorage)
    - Sistema de Recompensas progressivo (metas 5,10,15,20,25,30)
@@ -613,10 +613,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
     if (subtotal >= LIMITE_FRETE_GRATIS) {
       progressText.innerHTML = `🎉 <strong>Frete Grátis Liberado!</strong>`;
-      progressFill.style.background = "linear-gradient(90deg,#4caf50,#2e7d32)";
+      progressFill.style.background = pct >= 100 ? 'linear-gradient(90deg,#4caf50,#2e7d32)' : `linear-gradient(90deg, #E1A95F ${pct}%, #c8a04a 100%)`;
     } else {
       progressText.innerHTML = `Faltam <strong>${money(LIMITE_FRETE_GRATIS - subtotal)}</strong> p/ Frete Grátis`;
-      progressFill.style.background = "linear-gradient(90deg,#E1A95F,#4B2C20)";
+      progressFill.style.background = pct >= 100 ? 'linear-gradient(90deg,#4caf50,#2e7d32)' : `linear-gradient(90deg, #E1A95F ${pct}%, #c8a04a 100%)`;
     }
   }
 
@@ -698,7 +698,7 @@ document.addEventListener("DOMContentLoaded", () => {
   };
 
   let auth, db;
-  const ADMINS = ["degustbolosnopote@gmail.com", "degustbolosnopote@gmail.com"];
+  const ADMINS = ["carols2maite@gmail.com", "degustbolosnopote@gmail.com"];
   const isAdmin = (u) => u?.email && ADMINS.map(e=>e.toLowerCase()).includes(u.email.toLowerCase());
 
   function inicializarFirebase() {
@@ -726,36 +726,54 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function atualizarBotaoUsuario(user) {
-    if (!el.userBtn) return;
-    const nome = user
-      ? (user.displayName?.split(" ")[0] || user.email?.split("@")[0] || "você")
-      : null;
-
-    const content  = document.getElementById("user-btn-content");
-    const fotoWrap = document.getElementById("user-foto-wrap");
-    const fotoImg  = document.getElementById("user-foto");
+    const content   = document.getElementById("user-btn-content");
+    const fotoWrap  = document.getElementById("user-foto-wrap");
+    const fotoImg   = document.getElementById("user-foto");
+    const menuPerfil = document.getElementById("menu-perfil-link");
+    const menuSair   = document.getElementById("menu-sair-item");
+    const btnSair    = document.getElementById("menu-btn-sair");
 
     if (user) {
+      const nome = user.displayName?.split(" ")[0] || user.email?.split("@")[0] || "você";
+      // Header: foto + nome curto
       if (content) content.textContent = nome;
       if (user.photoURL && fotoImg && fotoWrap) {
         fotoImg.src = user.photoURL;
         fotoImg.onerror = () => { fotoWrap.style.display = "none"; };
         fotoWrap.style.display = "inline-flex";
         fotoWrap.style.alignItems = "center";
-        fotoWrap.style.marginRight = "6px";
+        fotoWrap.style.marginRight = "5px";
       }
-      el.userBtn.style.display = "flex";
-      el.userBtn.style.alignItems = "center";
-      el.userBtn.style.gap = "0";
-      el.userBtn.style.padding = "5px 10px";
+      if (el.userBtn) {
+        el.userBtn.style.display    = "flex";
+        el.userBtn.style.alignItems = "center";
+        el.userBtn.style.padding    = "5px 10px";
+      }
+      // Menu lateral: ocultar "Perfil/Login", mostrar "Sair"
+      if (menuPerfil) menuPerfil.closest("li").style.display = "none";
+      if (menuSair)   menuSair.style.display = "";
+      if (btnSair && !btnSair._listenerAdded) {
+        btnSair._listenerAdded = true;
+        btnSair.addEventListener("click", () => {
+          UIManager.closeSideMenu();
+          setTimeout(() => {
+            if (confirm("Deseja sair da sua conta?")) {
+              auth.signOut().then(() => { popupAdd("Até logo! 👋"); location.reload(); });
+            }
+          }, 200);
+        });
+      }
       if (isAdmin(user)) {
         document.querySelector(".admin-section")?.style.setProperty("display","block");
       }
     } else {
       if (content) content.textContent = "Entrar";
       if (fotoWrap) fotoWrap.style.display = "none";
-      el.userBtn.style.padding = "";
-      el.userBtn.style.display = "";
+      if (el.userBtn) { el.userBtn.style.padding = ""; el.userBtn.style.display = ""; }
+      // Menu: mostrar Perfil/Login, ocultar Sair
+      if (menuPerfil) menuPerfil.closest("li").style.display = "";
+      if (menuSair)   menuSair.style.display = "none";
+      document.querySelector(".admin-section")?.style.setProperty("display","none");
     }
   }
 
@@ -811,9 +829,9 @@ document.addEventListener("DOMContentLoaded", () => {
     if (!db) return;
     const userRef = db.collection("Usuarios").doc(userId);
     const userDoc = await userRef.get();
-    let bolosPedidos = userDoc.exists ? (userDoc.data().bolosPedidos || 0) : 0;
+    let bolosPedidos = userDoc.exists ? (userDoc.data().degust_bolosPedidos || 0) : 0;
     const novoTotal = bolosPedidos + 1;
-    await userRef.set({ bolosPedidos: novoTotal }, { merge: true });
+    await userRef.set({ degust_bolosPedidos: novoTotal }, { merge: true });
 
     const recompensasRecebidas = userDoc.exists ? (userDoc.data().recompensasRecebidas || []) : [];
     for (let meta of recompensasMetas) {
@@ -844,7 +862,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     db.collection("Usuarios").doc(user.uid).get().then(doc => {
       const dados  = doc.exists ? doc.data() : {};
-      const bolos  = dados.bolosPedidos || 0;
+      const bolos  = dados.degust_bolosPedidos || 0;
       // Usar recompensasMetas em vez de RECOMPENSAS_CONFIG
       const prox   = recompensasMetas.find(r => r.pedido > bolos);
       const meta   = prox ? prox.pedido : (recompensasMetas.length ? recompensasMetas[recompensasMetas.length-1].pedido : 5);
@@ -1100,7 +1118,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if (currentUser && db) {
       db.collection("Usuarios").doc(currentUser.uid).get()
         .then(doc => {
-          const b = doc.exists ? (doc.data().bolosPedidos||0) : 0;
+          const b = doc.exists ? (doc.data().degust_bolosPedidos||0) : 0;
           const p = recompensasMetas.find(r => r.pedido > b);
           popupAdd(p && (p.pedido-b) <= 2 ? `⭐ Falta${p.pedido-b===1?"":"m"} ${p.pedido-b} para: ${p.descricao}!` : `${_n} adicionado! 🍰`);
         }).catch(()=> popupAdd(`${_n} adicionado! 🍰`));
@@ -1584,6 +1602,14 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
+
+
+  document.querySelectorAll(".btn-maes-preview").forEach(btn => {
+    btn.addEventListener("click", () => {
+      popupAdd("Estamos preparando algo muito especial para o Dia das Mães! Aguarde os lançamentos... ✨");
+    });
+  });
+
   /* =========================================================
      🏁 INICIALIZAÇÃO
   ========================================================= */
@@ -1594,6 +1620,6 @@ document.addEventListener("DOMContentLoaded", () => {
   carregarMetasRecompensas();
   setTimeout(() => checarStatusLoja(), 800);
 
-  console.log("%c🍰 Degust Bolos no Pote v13.3 — Sistema Completo (carrinho persistente + recompensas + PIX corrigido)", "color:#E1A95F;font-size:14px;font-weight:bold;");
+  console.log("%c🍰 Degust Bolos no Pote v13.5 — Sistema Completo (carrinho persistente + recompensas + PIX corrigido)", "color:#E1A95F;font-size:14px;font-weight:bold;");
 
 });
