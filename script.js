@@ -130,8 +130,14 @@ document.addEventListener("DOMContentLoaded", () => {
 
       UIManager.handleMenuAction(() => {
         if (action === "meus-pedidos") {
+                    if (!currentUser) {
+            popupAdd("Faz login para ver os teus pedidos! 👤");
+            UIManager.open("login", el.loginModal);
+            return;
+          }
           const overlay = document.getElementById("painelPedidosOverlay");
           if (overlay) overlay.classList.add("active");
+
         } else if (action === "recompensas") {
           const overlay = document.getElementById("painelRecompensasOverlay");
           if (overlay) overlay.classList.add("active");
@@ -955,20 +961,22 @@ function atualizarBotaoUsuario(user) {
 
     auth.onAuthStateChanged(user => {
       currentUser = user;
+      // Chamamos a função inteligente que gere o botão e a foto de forma correta
+      atualizarBotaoUsuario(user); 
+
       if (user) {
-        const nome = user.displayName?.split(" ")[0] || user.email.split("@")[0];
-        el.userBtn.textContent = `Olá, ${nome} ✨`;
         if (el.pedidosBtn)    el.pedidosBtn.style.display    = "";
         if (el.recompensasBtn) el.recompensasBtn.style.display = "";
         if (isAdmin(user)) document.querySelector(".admin-section")?.style.setProperty("display", "block");
         carregarPedidos(user);
         carregarRecompensas(user);
       } else {
-        el.userBtn.textContent = "Entrar / Perfil 👤";
         document.querySelector(".admin-section")?.style.setProperty("display", "none");
+        // Limpa a lista quando desloga para segurança visual
+        if (el.pedidosLista) el.pedidosLista.innerHTML = '<p class="empty-orders">Faça login para ver suas doçuras anteriores.</p>';
       }
     });
-  }
+
 
   /* =========================================================
      🔑 LOGIN
