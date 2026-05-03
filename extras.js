@@ -1,20 +1,20 @@
 /* =====================================================
-   🍰 Degust Bolos no Pote — Extras.js (v10.0)
-   - Ajuste: Notificações no topo e miniaturas de bolos
+   ðŸ° Degust Bolos no Pote â€” Extras.js (v10.0)
+   - Ajuste: NotificaÃ§Ãµes no topo e miniaturas de bolos
    ===================================================== */
 
 (function () {
 
-  // 1. INJEÇÃO DE CSS (Cores Degust)
+  // 1. INJEÃ‡ÃƒO DE CSS (Cores Degust)
   (function injectStyles() {
     if (document.getElementById('degust-extras-style')) return;
-
+    
     const st = document.createElement('style');
     st.id = 'degust-extras-style';
     st.textContent = `
       .popup-add, .dfl-toast {
         position: fixed !important;
-        top: 75px !important;
+        top: 75px !important; 
         bottom: auto !important;
         left: 50% !important;
         transform: translateX(-50%) translateY(-150%) !important;
@@ -52,16 +52,16 @@
     document.head.appendChild(st);
   })();
 
-  // 2. ESTILIZADOR DE TOASTS (Ícones de doces)
+  // 2. ESTILIZADOR DE TOASTS (Ãcones de Doces)
   function stylizePopup(el) {
     const msg = el.textContent || "";
     if (el.dataset.processed === msg) return;
 
-    let icon = '🍰';
-    if (/Login|Olá/i.test(msg)) icon = '✨';
-    else if (/Pedido/i.test(msg)) icon = '🧁';
-    else if (/adicionado/i.test(msg)) icon = '🛒';
-    else if (/Erro|Falha/i.test(msg)) icon = '⚠️';
+    let icon = 'ðŸ°';
+    if (/Login|OlÃ¡/i.test(msg)) icon = 'âœ¨';
+    else if (/Pedido/i.test(msg)) icon = 'ðŸ§';
+    else if (/adicionado/i.test(msg)) icon = 'ðŸ›’';
+    else if (/Erro|Falha/i.test(msg)) icon = 'âš ï¸';
 
     el.innerHTML = `<span style="font-size:1.2em">${icon}</span> ${msg}`;
     el.dataset.processed = el.textContent;
@@ -76,7 +76,7 @@
   });
   observer.observe(document.body, { childList: true, subtree: true });
 
-  // 3. MAPA DE MINIATURAS (Seus 4 bolos)
+  // 3. MAPA DE MINIATURAS (Seus 4 Bolos)
   const THUMB_MAP = [
     { key: 'brigadeiro', img: 'produtos/brigadeiro.png' },
     { key: 'prestigio', img: 'produtos/prestigio.png' },
