@@ -728,26 +728,34 @@ function atualizarBotaoUsuario(user) {
   if (!el.userBtn) return;
 
   if (user) {
-    // Pega a foto do Google ou coloca um ícone se não existir
     const fotoUrl = user.photoURL || "";
-    el.userBtn.innerHTML = fotoUrl 
-      ? `<img src="${fotoUrl}" id="user-foto-header" alt="Perfil">` 
-      : `<span>👤</span>`;
-    
-    // Ajustes de estilo via JS para a foto ficar perfeita
-    el.userBtn.style.padding = "0"; 
-    el.userBtn.style.display = "flex";
-    el.userBtn.style.background = "transparent";
+    if (fotoUrl) {
+      // Ativa o modo círculo e insere a foto do Google
+      el.userBtn.classList.add("has-photo");
+      el.userBtn.innerHTML = `<img src="${fotoUrl}" id="user-foto-header" alt="Perfil">`;
+      
+      // Ajustes de estilo para o modo foto
+      el.userBtn.style.padding = "0"; 
+      el.userBtn.style.background = "transparent";
+    } else {
+      // Fallback: se logar e não tiver foto, mostra o primeiro nome
+      const nome = user.displayName?.split(" ")[0] || "Olá";
+      el.userBtn.classList.remove("has-photo");
+      el.userBtn.innerHTML = `<span>${nome}</span>`;
+      el.userBtn.style.padding = "8px 16px";
+      el.userBtn.style.background = "var(--marrom)";
+    }
 
     if (isAdmin(user)) {
       document.querySelector(".admin-section")?.style.setProperty("display","block");
     }
   } else {
-    // Volta ao estado original se não estiver logado (Novo Else)
-    el.userBtn.innerHTML = `<span>Entrar</span>`;
-    el.userBtn.style.padding = "8px 14px";
+    // Se deslogado, mostra "Login" (mais clean) e remove o modo foto
+    el.userBtn.classList.remove("has-photo");
+    el.userBtn.innerHTML = `<span>Login</span>`;
+    el.userBtn.style.padding = "8px 16px";
     el.userBtn.style.background = "var(--marrom)";
-    el.userBtn.style.display = ""; // Reseta o flex se necessário
+    el.userBtn.style.display = "flex";
   }
 }
 
