@@ -87,7 +87,6 @@
       </button>
     </div>
   </header>
-
   <div id="cart-backdrop"></div>
 
   <div class="main-content-wrapper">
@@ -99,6 +98,7 @@
     <section class="menu-section" id="bolos-section">
       <h2>🍰 Bolos no Pote</h2>
       <div class="grid">
+
         <div class="card" data-name="Chocolatudo" data-price="15.00">
           <img src="chocolatudo.png" alt="Chocolatudo" width="120" height="120" loading="lazy" onerror="this.src='logo.png'">
           <h3>Chocolatudo <span class="badge-small">Intenso</span></h3>
@@ -109,6 +109,7 @@
             <button class="extras-btn" type="button">Adicionais</button>
           </div>
         </div>
+
         <div class="card" data-name="Prestígio" data-price="15.00">
           <img src="prestigio.png" alt="Prestígio" width="120" height="120" loading="lazy" onerror="this.src='logo.png'">
           <h3>Prestígio <span class="badge-small">Coco</span></h3>
@@ -119,6 +120,7 @@
             <button class="extras-btn" type="button">Adicionais</button>
           </div>
         </div>
+
         <div class="card" data-name="Ninho Cremoso" data-price="15.00">
           <img src="ninhocremoso.png" alt="Ninho Cremoso" width="120" height="120" loading="lazy" onerror="this.src='logo.png'">
           <h3>Ninho Cremoso <span class="badge-small">Suave</span></h3>
@@ -129,6 +131,7 @@
             <button class="extras-btn" type="button">Adicionais</button>
           </div>
         </div>
+
         <div class="card" data-name="Bombom de Maracujá" data-price="16.00">
           <img src="bombomdemaracuja.png" alt="Maracujá" width="120" height="120" loading="lazy" onerror="this.src='logo.png'">
           <h3>Maracujá <span class="badge-small">Azedinho</span></h3>
@@ -139,8 +142,10 @@
             <button class="extras-btn" type="button">Adicionais</button>
           </div>
         </div>
+
       </div>
     </section>
+
     <aside id="mini-cart" class="mini-cart" aria-hidden="true">
       <div class="mini-head">
         <h3>🛍 Seu Pedido</h3>
@@ -171,7 +176,7 @@
           </div>
           <div style="margin-top:8px;display:flex;gap:10px;flex-wrap:wrap;">
             <button id="btnNaoSeiCEP" type="button" style="font-size:.75rem;background:none;border:none;color:var(--vermelho);cursor:pointer;text-decoration:underline;">Não sei meu CEP</button>
-            <button id="btnManual" type="button" style="font-size:.75rem;background:none;border:none;color:var(--marrom);cursor:pointer;text-decoration:underline;">Digitar endereço manualmente</button>
+            <button id="btnManual" type="button" style="font-size:.75rem;background:none;border:none;color:var(--marrom);cursor:pointer;text-decoration:underline;">Digitar manualmente</button>
           </div>
         </div>
 
@@ -192,15 +197,9 @@
         </label>
 
         <form id="coupon-form" style="display:flex;gap:8px;margin-bottom:10px;">
-          <input type="text" id="coupon-input" placeholder="Código do Cupom"
-            style="flex:1;padding:10px;border:1px solid var(--dourado);border-radius:8px;text-transform:uppercase;font-size:.85rem;">
+          <input type="text" id="coupon-input" placeholder="Cupom" style="flex:1;padding:10px;border:1px solid var(--dourado);border-radius:8px;text-transform:uppercase;">
           <button type="submit" style="background:var(--marrom);color:var(--bege);border:none;padding:0 14px;border-radius:8px;font-weight:700;cursor:pointer;">Aplicar</button>
         </form>
-        <div id="coupon-message" style="min-height:20px;margin-bottom:6px;"></div>
-        <div class="summary-row" id="coupon-discount-row" style="display:none;">
-          <span>Desconto Cupom</span>
-          <span id="cart-discount">R$ 0,00</span>
-        </div>
       </div>
     </aside>
 
@@ -222,7 +221,6 @@
       </div>
     </footer>
   </div>
-
   <div id="extras-modal" class="modal" aria-hidden="true">
     <div class="modal-content" role="dialog" aria-modal="true">
       <div class="modal-head">
@@ -270,9 +268,7 @@
         <button class="pix-close" type="button">✖</button>
       </div>
       <div class="pix-body" style="padding:20px; text-align:center;">
-        <p style="margin-bottom:10px;color:#555;">Finalize seu pedido pagando antecipadamente.</p>
-        <div style="font-size:1.2rem;margin:15px 0;font-weight:bold;color:#222;">Total a Pagar: <span id="pix-valor" style="color:#4caf50;">R$ 0,00</span></div>
-        <div class="pix-code-box" style="background:#f9f9f9; padding:15px; border-radius:12px; margin:15px 0; border:1px solid #eee;">
+        <div class="pix-code-box" style="background:#f9f9f9; padding:15px; border-radius:12px; margin-bottom:15px; border:1px solid #eee;">
           <p style="margin:0;font-size:.9rem;color:#666;">Chave PIX (E-mail):</p>
           <strong style="font-size:1.1rem;color:#333;display:block;margin:5px 0;">degustbolosnopote@gmail.com</strong>
           <small style="display:block;color:#888;">Beneficiário: Degust / Carol</small>
@@ -302,26 +298,17 @@
         <button class="fechar-painel fechar-recompensas" type="button">✖</button>
       </div>
       <div class="painel-body">
-        <h4 style="margin-top:0;color:var(--marrom);">🏆 Seu Cartão Fidelidade</h4>
         <div style="margin-bottom:20px;border:1px solid var(--dourado);padding:15px;border-radius:12px;background:#fff;">
           <p style="margin:0 0 8px;font-size:1.05rem;">Bolos Pedidos: <span id="contador-valor" style="font-weight:bold;color:var(--vermelho);">...</span> de <strong>5</strong></p>
           <div style="background:#eee;height:14px;border-radius:10px;overflow:hidden;"><div id="progresso-bar" style="height:100%;width:0%;transition:width .5s;background:var(--dourado);"></div></div>
-          <p id="progresso-mensagem" style="margin-top:8px;font-size:.85rem;color:#666;">Preparando suas recompensas...</p>
         </div>
-        <h4 style="color:var(--marrom);margin-bottom:10px;">🏷️ Recompensas Disponíveis</h4>
         <div id="listaRecompensas"></div>
-        <h4 style="color:var(--marrom);margin:16px 0 10px;">📜 Histórico de Prêmios</h4>
-        <div id="historicoRecompensas"><p style="color:#999;text-align:center;font-size:.9rem;">Você ainda não resgatou prêmios.</p></div>
       </div>
     </div>
   </div>
 
-  <div class="minhas-recompensas"><button class="recompensas-btn" type="button" aria-label="Minhas Recompensas"></button></div>
-  <div class="meus-pedidos"><button class="meus-pedidos-btn" type="button" aria-label="Meus Pedidos"></button></div>
-
-  <div id="cookie-banner" role="region" aria-label="Aviso de Cookies">
-    <p>Usamos cookies para garantir que sua experiência na Degust seja a mais doce possível. <a href="#" rel="noopener">Privacidade</a>.</p>
-    <button id="cookie-accept" type="button">Aceitar</button>
+  <div id="cookie-banner" style="position:fixed; bottom:0; left:0; width:100%; background:var(--marrom); color:var(--bege); padding:15px; text-align:center; display:none; z-index:9999;">
+    <p>Usamos cookies para melhorar sua experiência. <button id="cookie-accept" style="background:var(--dourado); border:none; padding:5px 15px; border-radius:20px; font-weight:bold; cursor:pointer;">Aceitar</button></p>
   </div>
 
   <script defer src="script.js?v=13.3"></script>
@@ -330,7 +317,7 @@
     if ("serviceWorker" in navigator) {
       window.addEventListener("load", () => {
         navigator.serviceWorker.register("/service-worker.js")
-          .then(() => console.log("✅ PWA Degust: Service Worker Ativo"))
+          .then(() => console.log("✅ PWA Ativo"))
           .catch(err => console.error("❌ SW erro:", err));
       });
     }
