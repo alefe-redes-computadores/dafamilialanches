@@ -944,7 +944,33 @@ body.no-scroll { overflow:hidden; }
 #cookie-accept { background:var(--dourado); color:var(--marrom); border:none; padding:12px 40px; border-radius:10px; font-weight:800; cursor:pointer; }
 
 /* ── POPUP TOAST ── */
-.popup-add { position:fixed; top:75px; left:50%; transform:translateX(-50%) translateY(-150%); background:var(--marrom); color:var(--bege); padding:12px 24px; border-radius:50px; font-weight:700; font-size:.9rem; box-shadow:0 8px 25px rgba(0,0,0,.3); z-index:20000; opacity:0; pointer-events:none; transition:all .45s cubic-bezier(.68,-.55,.265,1.55); display:flex; align-items:center; gap:10px; border:1px solid var(--dourado); white-space:nowrap; }
+.popup-add { 
+  position: fixed; 
+  top: 75px; 
+  left: 50%; 
+  transform: translateX(-50%) translateY(-150%); 
+  background: var(--marrom); 
+  color: var(--bege); 
+  padding: 12px 24px; 
+  border-radius: 50px; 
+  font-weight: 700; 
+  font-size: .9rem; 
+  box-shadow: 0 8px 25px rgba(0,0,0,.3); 
+  z-index: 20000; 
+  opacity: 0; 
+  pointer-events: none; 
+  transition: all .45s cubic-bezier(.68, -.55, .265, 1.55); 
+  display: flex; 
+  align-items: center; 
+  justify-content: center;
+  gap: 10px; 
+  border: 1px solid var(--dourado); 
+  white-space: normal !important; /* Permite que o texto quebre linha */
+  width: 90% !important;         /* Ajusta a largura à tela do celular */
+  max-width: 350px; 
+  text-align: center;
+}
+
 .popup-add.show { opacity:1; transform:translateX(-50%) translateY(0); }
 
 /* ── MANUAL ADDRESS ── */
