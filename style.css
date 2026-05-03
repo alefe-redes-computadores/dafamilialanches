@@ -900,3 +900,36 @@ body.no-scroll { overflow:hidden; }
 .mini-foot {
   padding-bottom: calc(25px + env(safe-area-inset-bottom)) !important;
 }
+
+
+/* --- HEADER REFINADA: FOTO GOOGLE & ALINHAMENTO --- */
+
+/* Ajuste do botão de usuário para aceitar a foto */
+#user-btn {
+  background: rgba(75, 44, 32, 0.1) !important; /* Fundo discreto */
+  color: var(--marrom) !important;
+  border: none !important;
+  padding: 5px !important; /* Reduzido para focar na foto */
+  border-radius: 50% !important;
+  width: 42px;
+  height: 42px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: none !important;
+}
+
+/* A foto do Google redonda na Header */
+#user-foto-header {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  border: 2px solid var(--marrom);
+  object-fit: cover;
+}
+
+/* Esconde a tagline no mobile para limpar o visual */
+@media (max-width: 480px) {
+  .header-info p { display: none; }
+  .header-info h1 { font-size: 1.3rem !important; }
+}
