@@ -2,89 +2,152 @@
 <html lang="pt-br">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=yes" />
-  <title>Degust Bolos no Pote — Três Marias - MG</title>
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=yes"
+  />
+  <title>Degust Bolos no Pote | Três Marias - MG</title>
 
-  <link rel="icon" type="image/png" sizes="16x16" href="logo.png">
-  <link rel="icon" type="image/png" sizes="32x32" href="logo.png">
-  <link rel="apple-touch-icon" sizes="180x180" href="logo.png">
-  <link rel="manifest" href="/manifest.webmanifest">
-  <meta name="theme-color" content="#E1A95F">
+  <link rel="icon" type="image/png" sizes="16x16" href="logo.png" />
+  <link rel="icon" type="image/png" sizes="32x32" href="logo.png" />
+  <link rel="apple-touch-icon" sizes="180x180" href="logo.png" />
+  <link rel="manifest" href="manifest.webmanifest" />
+  <meta name="theme-color" content="#E1A95F" />
 
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&family=Inter:wght@400;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css?v=13.1" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&family=Inter:wght@400;700&display=swap"
+    rel="stylesheet"
+  />
+
+  <link rel="stylesheet" href="style.css?v13.0" />
 
   <script defer src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
   <script defer src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
   <script defer src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
 </head>
 <body>
-
   <audio id="checkout-sound" src="click.wav" preload="auto" hidden></audio>
+
   <div id="cart-backdrop"></div>
   <div id="menu-overlay"></div>
 
-  <!-- MENU LATERAL -->
-  <nav id="side-menu">
+  <nav id="side-menu" aria-label="Menu lateral">
     <div class="menu-header">
       <div class="menu-logo-area">
-        <img src="logo.png" alt="Degust" width="40" height="40">
+        <img src="logo.png" alt="Degust" width="40" height="40" />
         <h3>Degust Menu</h3>
       </div>
-      <button id="menu-close" type="button">✖</button>
+      <button id="menu-close" type="button" aria-label="Fechar menu">✕</button>
     </div>
-    
+
     <div class="menu-content">
       <div class="menu-section-block">
-        <h4 class="menu-title">👤 Minha Conta</h4>
+        <h4 class="menu-title">Minha Conta</h4>
         <ul class="menu-list">
-          <li><button type="button" class="menu-link-action" data-action="perfil"><span class="menu-icon">👤</span> Meu Perfil / Login</button></li>
-          <li><button type="button" class="menu-link-action" data-action="meus-pedidos"><span class="menu-icon">📦</span> Meus Pedidos</button></li>
-          <li><button type="button" class="menu-link-action" data-action="recompensas"><span class="menu-icon">🎁</span> Recompensas Fidelidade</button></li>
+          <li>
+            <button type="button" class="menu-link-action" data-action="perfil">
+              <span class="menu-icon">👤</span>
+              Meu Perfil / Login
+            </button>
+          </li>
+          <li>
+            <button type="button" class="menu-link-action" data-action="meus-pedidos">
+              <span class="menu-icon">📦</span>
+              Meus Pedidos
+            </button>
+          </li>
+          <li>
+            <button type="button" class="menu-link-action" data-action="recompensas">
+              <span class="menu-icon">🎁</span>
+              Recompensas Fidelidade
+            </button>
+          </li>
         </ul>
       </div>
 
       <div class="menu-section-block">
-        <h4 class="menu-title">🍴 Cardápio</h4>
+        <h4 class="menu-title">Cardápio</h4>
         <ul class="menu-list">
-          <li><a href="#novidades-section" class="menu-link"><span class="menu-icon">✨</span> Novidades</a></li>
-          <li><a href="#bolos-section" class="menu-link"><span class="menu-icon">🍰</span> Bolos no Pote</a></li>
+          <li>
+            <a href="#novidades-section" class="menu-link">
+              <span class="menu-icon">✨</span>
+              Novidades
+            </a>
+          </li>
+          <li>
+            <a href="#bolos-section" class="menu-link">
+              <span class="menu-icon">🍰</span>
+              Bolos no Pote
+            </a>
+          </li>
         </ul>
       </div>
 
-      <div class="menu-section-block admin-section" style="display:none;">
-        <h4 class="menu-title">⚙️ Painel Admin</h4>
+      <div class="menu-section-block admin-section" style="display: none;">
+        <h4 class="menu-title">Painel Admin</h4>
         <ul class="menu-list">
-          <li><button type="button" class="menu-link-action" data-action="relatorios"><span class="menu-icon">📊</span> Relatórios de Vendas</button></li>
+          <li>
+            <button type="button" class="menu-link-action" data-action="relatorios">
+              <span class="menu-icon">📊</span>
+              Relatórios de Vendas
+            </button>
+          </li>
         </ul>
       </div>
 
       <div class="menu-section-block">
-        <h4 class="menu-title">📱 Suporte e Social</h4>
+        <h4 class="menu-title">Suporte e Social</h4>
         <ul class="menu-list">
-          <li><a href="https://wa.me/message/VDQCBHWD33ORK1" target="_blank" class="menu-link-social"><span class="menu-icon">🟢</span> WhatsApp Degust</a></li>
-          <li><a href="https://www.instagram.com/degustbolosnopote" target="_blank" class="menu-link-social"><span class="menu-icon">📸</span> Instagram Oficial</a></li>
+          <li>
+            <a
+              href="https://wa.me/5538998527894"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="menu-link-social"
+            >
+              <span class="menu-icon">💬</span>
+              WhatsApp Degust
+            </a>
+          </li>
+          <li>
+            <a
+              href="https://www.instagram.com/degustbolosnopote"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="menu-link-social"
+            >
+              <span class="menu-icon">📸</span>
+              Instagram Oficial
+            </a>
+          </li>
         </ul>
       </div>
     </div>
+
     <div class="menu-footer">
-      <p>v13.1 — Três Marias/MG</p>
+      <p>v13.0 • Três Marias - MG</p>
     </div>
   </nav>
 
-  <!-- HEADER -->
   <header class="header">
     <div class="header-content">
-      <button id="hamburger-btn" type="button">
+      <button id="hamburger-btn" type="button" aria-label="Abrir menu">
         <span class="bar"></span>
         <span class="bar"></span>
         <span class="bar"></span>
       </button>
+
       <div class="logo-container">
         <div class="logo-wrapper">
-          <img src="logo.png" alt="Degust Logo" class="logo" width="50" height="50">
+          <img
+            src="logo.png"
+            alt="Degust Logo"
+            class="logo"
+            width="50"
+            height="50"
+          />
         </div>
         <div class="header-info">
           <h1>Degust</h1>
@@ -92,119 +155,196 @@
         </div>
       </div>
     </div>
+
     <div class="header-actions">
-      <button id="user-btn" class="user-button" type="button">
-        <span id="user-btn-content">Entrar</span>
+      <button id="user-btn" class="user-button" type="button" aria-label="Minha conta">
+        <span id="user-btn-content">Login</span>
       </button>
-      <button id="cart-icon" class="cart-button" type="button">
+
+      <button id="cart-icon" class="cart-button" type="button" aria-label="Abrir carrinho">
         <span>🛒</span>
         <span id="cart-count">0</span>
       </button>
     </div>
   </header>
 
-  <!-- CONTEÚDO PRINCIPAL -->
   <main class="main-content-wrapper">
-    
     <div class="search-container">
       <div class="search-input-wrapper">
-        <input type="text" id="search-input" placeholder="Qual doçura você procura?" autocomplete="off">
+        <input
+          type="text"
+          id="search-input"
+          placeholder="Qual doçura você procura?"
+          autocomplete="off"
+        />
       </div>
     </div>
 
-    <!-- NOVIDADES -->
     <section class="menu-section" id="novidades-section">
       <div class="section-header">
         <h2>✨ Novidades da Semana</h2>
         <p class="section-desc">Lançamentos exclusivos que você vai amar!</p>
       </div>
+
       <div class="grid">
         <div class="card" data-name="Tropical Cream" data-price="12.00">
-          <div class="card-badge-wrap"><span class="badge-new">Novo</span></div>
-          <div class="card-img-container"><img src="produtos/tropicalcream.png" alt="Tropical Cream" onerror="this.src='logo.png'"></div>
+          <div class="card-badge-wrap">
+            <span class="badge-new">Novo</span>
+          </div>
+          <div class="card-img-container">
+            <img
+              src="produtos/tropicalcream.png"
+              alt="Tropical Cream"
+              width="300"
+              height="300"
+            />
+          </div>
           <div class="card-info">
             <h3>Tropical Cream</h3>
-            <div class="price-promo-wrap"><span class="price-new">R$ 12,00</span></div>
+            <div class="price-promo-wrap">
+              <span class="price-new">R$ 12,00</span>
+            </div>
             <p>Massa branca leve com recheio cremoso de Ninho e pedaços suculentos de abacaxi.</p>
             <div class="actions">
-              <button type="button" class="add-cart">ADICIONAR</button>
-              <button type="button" class="extras-btn">ADICIONAIS</button>
+              <button class="add-cart" type="button">ADICIONAR</button>
+              <button class="extras-btn" type="button">ADICIONAIS</button>
             </div>
           </div>
         </div>
 
         <div class="card" data-name="Bombom de Maracujá" data-price="12.00">
-          <div class="card-badge-wrap"><span class="badge-new">Novo</span></div>
-          <div class="card-img-container"><img src="produtos/bombomdemaracuja.png" alt="Bombom de Maracujá" onerror="this.src='logo.png'"></div>
+          <div class="card-badge-wrap">
+            <span class="badge-new">Novo</span>
+          </div>
+          <div class="card-img-container">
+            <img
+              src="produtos/bombomdemaracuja.png"
+              alt="Bombom de Maracujá"
+              width="300"
+              height="300"
+            />
+          </div>
           <div class="card-info">
-            <h3>Maracujá <span class="badge-small">Azedinho</span></h3>
-            <div class="price-promo-wrap"><span class="price-new">R$ 12,00</span></div>
+            <h3>
+              Bombom de Maracujá
+              <span class="badge-small">Azedinho</span>
+            </h3>
+            <div class="price-promo-wrap">
+              <span class="price-new">R$ 12,00</span>
+            </div>
             <p>Massa chocolate, recheio 100% cacau e o toque refrescante do mousse de maracujá.</p>
             <div class="actions">
-              <button type="button" class="add-cart">ADICIONAR</button>
-              <button type="button" class="extras-btn">ADICIONAIS</button>
+              <button class="add-cart" type="button">ADICIONAR</button>
+              <button class="extras-btn" type="button">ADICIONAIS</button>
             </div>
           </div>
         </div>
       </div>
     </section>
 
-
-    <!-- CLÁSSICOS -->
     <section class="menu-section" id="bolos-section">
       <div class="section-header">
         <h2>🍰 Nossos Clássicos</h2>
         <p class="section-desc">Os favoritos que nunca saem de moda.</p>
       </div>
+
       <div class="grid">
         <div class="card" data-name="Chocolatudo" data-price="10.00">
-          <div class="card-img-container"><img src="produtos/chocolatudo.png" alt="Chocolatudo"></div>
+          <div class="card-img-container">
+            <img
+              src="produtos/chocolatudo.png"
+              alt="Chocolatudo"
+              width="300"
+              height="300"
+            />
+          </div>
           <div class="card-info">
-            <h3>Chocolatudo <span class="badge-small">100% Cacau</span></h3>
-            <div class="price-promo-wrap"><span class="price-new">R$ 10,00</span></div>
+            <h3>
+              Chocolatudo
+              <span class="badge-small">100% Cacau</span>
+            </h3>
+            <div class="price-promo-wrap">
+              <span class="price-new">R$ 10,00</span>
+            </div>
             <p>Massa chocolate molhadinha com recheio de chocolate intenso 100% cacau.</p>
             <div class="actions">
-              <button class="add-cart">ADICIONAR</button>
-              <button class="extras-btn">ADICIONAIS</button>
+              <button class="add-cart" type="button">ADICIONAR</button>
+              <button class="extras-btn" type="button">ADICIONAIS</button>
             </div>
           </div>
         </div>
 
         <div class="card" data-name="Prestígio" data-price="10.00">
-          <div class="card-img-container"><img src="produtos/prestigio.png" alt="Prestígio"></div>
+          <div class="card-img-container">
+            <img
+              src="produtos/prestigio.png"
+              alt="Prestígio"
+              width="300"
+              height="300"
+            />
+          </div>
           <div class="card-info">
-            <h3>Prestígio <span class="badge-small">Coco</span></h3>
-            <div class="price-promo-wrap"><span class="price-new">R$ 10,00</span></div>
+            <h3>
+              Prestígio
+              <span class="badge-small">Coco</span>
+            </h3>
+            <div class="price-promo-wrap">
+              <span class="price-new">R$ 10,00</span>
+            </div>
             <p>Combinação perfeita de massa de chocolate com recheio cremoso de côco.</p>
             <div class="actions">
-              <button class="add-cart">ADICIONAR</button>
-              <button class="extras-btn">ADICIONAIS</button>
+              <button class="add-cart" type="button">ADICIONAR</button>
+              <button class="extras-btn" type="button">ADICIONAIS</button>
             </div>
           </div>
         </div>
 
         <div class="card" data-name="Ninho Silvestre" data-price="12.00">
-          <div class="card-img-container"><img src="produtos/ninhosilvestre.png" alt="Ninho Silvestre"></div>
+          <div class="card-img-container">
+            <img
+              src="produtos/ninhosilvestre.png"
+              alt="Ninho Silvestre"
+              width="300"
+              height="300"
+            />
+          </div>
           <div class="card-info">
-            <h3>Ninho Silvestre <span class="badge-small">Morango</span></h3>
-            <div class="price-promo-wrap"><span class="price-new">R$ 12,00</span></div>
+            <h3>
+              Ninho Silvestre
+              <span class="badge-small">Morango</span>
+            </h3>
+            <div class="price-promo-wrap">
+              <span class="price-new">R$ 12,00</span>
+            </div>
             <p>Massa branca com recheio de ninho cremoso e uma deliciosa geleia de morango.</p>
             <div class="actions">
-              <button class="add-cart">ADICIONAR</button>
-              <button class="extras-btn">ADICIONAIS</button>
+              <button class="add-cart" type="button">ADICIONAR</button>
+              <button class="extras-btn" type="button">ADICIONAIS</button>
             </div>
           </div>
         </div>
 
         <div class="card" data-name="Ninho Cremoso" data-price="10.00">
-          <div class="card-img-container"><img src="produtos/ninhocremoso.png" alt="Ninho Cremoso"></div>
+          <div class="card-img-container">
+            <img
+              src="produtos/ninhocremoso.png"
+              alt="Ninho Cremoso"
+              width="300"
+              height="300"
+            />
+          </div>
           <div class="card-info">
-            <h3>Ninho Cremoso <span class="badge-small">Suave</span></h3>
-            <div class="price-promo-wrap"><span class="price-new">R$ 10,00</span></div>
+            <h3>
+              Ninho Cremoso
+              <span class="badge-small">Suave</span>
+            </h3>
+            <div class="price-promo-wrap">
+              <span class="price-new">R$ 10,00</span>
+            </div>
             <p>O autêntico sabor do Leite Ninho em uma textura irresistivelmente cremosa.</p>
             <div class="actions">
-              <button class="add-cart">ADICIONAR</button>
-              <button class="extras-btn">ADICIONAIS</button>
+              <button class="add-cart" type="button">ADICIONAR</button>
+              <button class="extras-btn" type="button">ADICIONAIS</button>
             </div>
           </div>
         </div>
@@ -212,142 +352,260 @@
     </section>
   </main>
 
-  <!-- CARRINHO LATERAL (COM RETIRADA CORRIGIDA) -->
-  <aside id="mini-cart" class="mini-cart">
+  <aside id="mini-cart" class="mini-cart" aria-label="Carrinho lateral">
     <div class="mini-head">
-      <div class="mini-title-area"><span class="mini-icon">🛍️</span><h3>Seu Pedido</h3></div>
-      <button class="extras-close" type="button">✖</button>
+      <div class="mini-title-area">
+        <span class="mini-icon">🧾</span>
+        <h3>Seu Pedido</h3>
+      </div>
+      <button class="extras-close" type="button" aria-label="Fechar carrinho">✕</button>
     </div>
-    <div class="mini-list-wrapper"><div class="mini-list"></div></div>
+
+    <div class="mini-list-wrapper">
+      <div class="mini-list"></div>
+    </div>
+
     <div class="mini-foot">
       <div id="progressWrapper" class="progress-wrapper">
-        <p id="progressText" class="progress-text">Carregando...</p>
+        <p id="progressText" class="progress-text">
+          Faltam <strong>R$ 80,00</strong> para Frete Grátis
+        </p>
         <div class="progress-bar-container">
           <div id="progressFill" class="progress-fill"></div>
         </div>
       </div>
-      <div class="delivery-system">
-        <input type="text" id="cep-input" placeholder="Digite seu CEP" maxlength="9">
+
+      <div class="delivery-system frete-container">
+        <input
+          type="text"
+          id="cep-input"
+          placeholder="Digite seu CEP"
+          maxlength="9"
+        />
         <button id="btn-calcular-frete" type="button">Buscar</button>
-        <input type="text" id="endereco-auto" placeholder="Rua, Bairro — Cidade/UF" readonly>
+
+        <input
+          type="text"
+          id="endereco-auto"
+          placeholder="Rua, Bairro - Cidade/UF"
+          readonly
+        />
+
         <div style="display:flex; gap:8px;">
-          <input type="text" id="numero-input" placeholder="Nº" style="flex:1">
-          <input type="text" id="complemento-input" placeholder="Complemento" style="flex:2">
+          <input type="text" id="numero-input" placeholder="Nº" style="flex:1;" disabled />
+          <input type="text" id="complemento-input" placeholder="Complemento" style="flex:2;" disabled />
         </div>
 
-        <div class="retirar-local-wrapper">
-          <label class="checkbox-container-degust">
-            <input type="checkbox" id="retirar-local">
-            <span class="label-text">Vou retirar na Degust 🍰</span>
-          </label>
+        <div style="display:flex; gap:12px; justify-content:center; flex-wrap:wrap;">
+          <button id="btnNaoSeiCEP" type="button" style="background:none; border:none; color:var(--dourado);">
+            Não sei meu CEP
+          </button>
+          <button id="btnManual" type="button" style="background:none; border:none; color:var(--dourado);">
+            Endereço Manual
+          </button>
         </div>
 
-        <form id="coupon-form" style="display:flex; gap:8px; margin-top:10px;">
-          <input type="text" id="coupon-input" placeholder="Tem um cupom?">
-          <button type="submit" id="btn-apply-coupon">Aplicar</button>
-        </form>
-        <div id="coupon-message" style="min-height:20px; font-size:0.8rem;"></div>
-        <div id="coupon-discount-row" style="display:none; justify-content:space-between; font-weight:bold; color:var(--vermelho);">
-          <span>Desconto Cupom</span>
-          <span id="cart-discount">R$ 0,00</span>
+        <div id="manualArea" style="display:none;">
+          <input type="text" id="manualEndereco" placeholder="Rua e Bairro" />
+          <input type="text" id="manualNumero" placeholder="Número" />
+          <button id="btnConfirmarEndereco" type="button">Confirmar</button>
+          <button id="btnVoltarCEP" type="button" style="margin-top:8px;">Voltar para CEP</button>
         </div>
       </div>
+
+      <div class="retirar-local-wrapper">
+        <label class="checkbox-container-degust">
+          <input type="checkbox" id="retirar-local" />
+          <span class="label-text">Vou retirar na Degust</span>
+        </label>
+        <div class="retirada-endereco">
+          Rua Espanha, 72 - Parque das Nações, Três Marias - MG
+        </div>
+      </div>
+
+      <form id="coupon-form" class="coupon-form-wrapper">
+        <input type="text" id="coupon-input" placeholder="Tem um cupom?" autocomplete="off" />
+        <button id="btn-apply-coupon" type="submit">Aplicar</button>
+      </form>
+
+      <div id="coupon-message"></div>
+
+      <div
+        id="coupon-discount-row"
+        style="display:none; justify-content:space-between; margin-top:8px; color:#2e7d32; font-weight:700;"
+      >
+        <span>Desconto</span>
+        <span id="cart-discount">-R$ 0,00</span>
+      </div>
+
+      <button id="main-finish-btn" type="button">FINALIZAR PEDIDO</button>
     </div>
   </aside>
 
-
-  <!-- MODAIS -->
-  <div id="extras-modal" class="modal">
+  <div id="extras-modal" class="modal" aria-hidden="true">
     <div class="modal-content">
-      <div class="modal-head"><h3>Escolha seus Adicionais</h3><button class="extras-close">✖</button></div>
-      <div class="modal-body"><div class="extras-list"></div></div>
-      <div class="modal-foot"><button id="extras-confirm">Confirmar e Adicionar</button></div>
+      <div class="modal-head">
+        <h3>Escolha seus Adicionais</h3>
+        <button class="extras-close" type="button" aria-label="Fechar">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="extras-list"></div>
+      </div>
+      <div class="modal-foot">
+        <button id="extras-confirm" type="button">Confirmar e Adicionar</button>
+      </div>
     </div>
   </div>
 
-  <div id="login-modal" class="modal">
+  <div id="login-modal" class="modal" aria-hidden="true">
     <div class="modal-content">
-      <div class="modal-head"><h3>Identificação</h3><button class="login-close">✖</button></div>
+      <div class="modal-head">
+        <h3>Identificação</h3>
+        <button class="login-close" type="button" aria-label="Fechar">✕</button>
+      </div>
       <div class="modal-body login-body">
-        <p>Entre para acumular pontos em cada bolo e ganhar prêmios exclusivos! 🎉</p>
-        <button id="google-login" class="btn-google-auth">Entrar com Google</button>
-        <p style="font-size:0.7rem; margin-top:12px;">Seus dados estão seguros com a criptografia do Google.</p>
+        <p>Entre para acumular pontos em cada bolo e ganhar prêmios exclusivos!</p>
+        <button id="google-login" class="btn-google-auth" type="button">
+          Entrar com Google
+        </button>
+        <p style="font-size:0.7rem; margin-top:12px;">
+          Seus dados estão seguros com a criptografia do Google.
+        </p>
       </div>
     </div>
   </div>
 
-  <div id="pix-modal" class="modal">
+  <div id="pix-modal" class="modal" aria-hidden="true">
     <div class="modal-content">
-      <div class="modal-head"><h3>Finalizar Pagamento 💠</h3><button class="pix-close">✖</button></div>
+      <div class="modal-head">
+        <h3>Finalizar Pagamento</h3>
+        <button class="pix-close" type="button" aria-label="Fechar">✕</button>
+      </div>
       <div class="pix-body">
-        <div class="pix-amount-display"><p>Valor Total:</p><span id="pix-valor">R$ 0,00</span></div>
-        <button id="btn-copy-pix" class="pix-btn-copy">📋 Copiar Chave PIX</button>
-        <button id="btn-finish-pix" class="pix-btn-whatsapp">✅ Enviar Pedido no WhatsApp</button>
-        <button id="btn-finish-sem-pix" class="btn-link-gray">Finalizar para pagar na entrega</button>
+        <div class="pix-amount-display">
+          <p>Valor Total</p>
+          <span id="pix-valor">R$ 0,00</span>
+        </div>
+
+        <div
+          style="background:#fff8e1; border:1px solid #E1A95F; border-radius:12px; padding:12px; margin-bottom:14px; text-align:left;"
+        >
+          <p style="margin:0 0 8px; font-weight:800; color:#4B2C20;">Chave PIX</p>
+          <p style="margin:0 0 10px; word-break:break-word; color:#C8282D; font-weight:700;">
+            degustbolosnopote@gmail.com
+          </p>
+          <p style="margin:0; font-size:0.85rem; color:#6d4c41;">
+            Clique em “Enviar Pedido no WhatsApp”, faça o PIX no valor acima e envie o comprovante na mesma conversa.
+          </p>
+        </div>
+
+        <button id="btn-copy-pix" class="pix-btn-copy" type="button">
+          Copiar Chave PIX
+        </button>
+        <button id="btn-finish-pix" class="pix-btn-whatsapp" type="button">
+          Enviar Pedido no WhatsApp
+        </button>
+        <button id="btn-finish-sem-pix" class="btn-link-gray" type="button">
+          Finalizar para pagar na entrega
+        </button>
       </div>
     </div>
   </div>
 
-  <!-- PAINÉIS -->
   <div class="painel-overlay" id="painelPedidosOverlay">
     <div class="painel-box">
-      <div class="painel-head"><div class="painel-title">📦 Meus Pedidos</div><button class="fechar-painel">✖</button></div>
+      <div class="painel-head">
+        <div class="painel-title">Meus Pedidos</div>
+        <button class="fechar-painel" type="button" aria-label="Fechar">✕</button>
+      </div>
       <div class="painel-body" id="listaPedidos"></div>
     </div>
   </div>
 
   <div class="painel-overlay" id="painelRecompensasOverlay">
-  <div class="painel-box">
-    <div class="painel-head">
-      <div class="painel-title">🎁 Cartão Fidelidade</div>
-      <button class="fechar-painel">✖</button>
-    </div>
-    <div class="painel-body">
-      <!-- ÁREA DE PROGRESSO -->
-      <div class="fidelidade-status-card">
-        <div class="contador-wrapper">
-          <span class="numero-pontos" id="contador-valor">0</span>
-          <span class="unidade-pontos">bolos pedidos</span>
-        </div>
-        <div class="fidelidade-progress-bar-container">
-          <div id="progresso-bar" class="progress-fill-fidelidade" style="width:0%"></div>
-        </div>
-        <p id="progresso-mensagem" class="progresso-texto">Carregando...</p>
+    <div class="painel-box">
+      <div class="painel-head">
+        <div class="painel-title">Cartão Fidelidade</div>
+        <button class="fechar-painel" type="button" aria-label="Fechar">✕</button>
       </div>
-      <!-- LISTA DE RECOMPENSAS DISPONÍVEIS -->
-      <div id="listaRecompensas"></div>
+      <div class="painel-body">
+        <div class="fidelidade-status-card">
+          <div class="contador-wrapper">
+            <span class="numero-pontos" id="contador-valor">0</span>
+            <span class="unidade-pontos">bolos pedidos</span>
+          </div>
+
+          <div class="fidelidade-progress-bar-container">
+            <div id="progresso-bar" class="progress-fill-fidelidade" style="width:0%;"></div>
+          </div>
+
+          <p id="progresso-mensagem" class="progresso-texto">Carregando...</p>
+        </div>
+
+        <div id="listaRecompensas"></div>
+        <div id="historicoRecompensas"></div>
+      </div>
     </div>
   </div>
-</div>
 
-  <!-- RODAPÉ CORRIGIDO (TRÊS MARIAS) -->
+  <div id="status-banner" class="status-banner"></div>
+
   <footer class="footer">
     <div class="footer-container">
       <div class="footer-brand">
-        <img src="logo.png" alt="Degust">
+        <img src="logo.png" alt="Degust" width="50" height="50" />
         <p>Doçura em cada camada.</p>
       </div>
+
       <div class="footer-links">
-        <a href="https://wa.me/message/VDQCBHWD33ORK1" target="_blank" class="footer-link">
-          <span class="footer-icon">🟢</span> WhatsApp
+        <a
+          href="https://wa.me/5538998527894"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="footer-link"
+        >
+          <span class="footer-icon">💬</span>
+          WhatsApp
         </a>
-        <a href="https://www.instagram.com/degustbolosnopote" target="_blank" class="footer-link">
-          <span class="footer-icon">📸</span> Instagram
+
+        <a
+          href="https://www.instagram.com/degustbolosnopote"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="footer-link"
+        >
+          <span class="footer-icon">📸</span>
+          Instagram
         </a>
       </div>
+
       <div class="footer-legal">
         <p>© 2026 <strong>Degust Bolos no Pote</strong> | Três Marias - MG</p>
-        <p>Segunda a Sábado: 14h às 22h</p>
+        <p>
+          Desenvolvido por
+          <a
+            href="https://wa.me/5534999229439"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="footer-link"
+            style="padding:0; background:none; border-radius:0; text-decoration:underline;"
+          >
+            Álefe Jôhsefe 🚀
+          </a>
+        </p>
       </div>
     </div>
   </footer>
 
   <div id="cookie-banner" class="cookie-banner">
-    <p>🍪 Este site usa cookies para melhorar sua experiência. <a href="#" style="color:var(--dourado);">Saiba mais</a></p>
-    <button id="cookie-accept">Aceitar</button>
+    <p>
+      Este site usa cookies para melhorar sua experiência.
+      <a href="#" style="color:var(--dourado);">Saiba mais</a>
+    </p>
+    <button id="cookie-accept" type="button">Aceitar</button>
   </div>
 
-  <script defer src="script.js?v=13.0"></script>
-  <script defer src="extras.js?v=10.0"></script>
+  <script defer src="script.js?v13.0"></script>
+  <script defer src="extras.js?v10.0"></script>
 </body>
 </html>
