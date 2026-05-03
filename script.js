@@ -1621,5 +1621,4 @@ document.addEventListener("DOMContentLoaded", () => {
   setTimeout(() => checarStatusLoja(), 800);
 
   console.log("%c🍰 Degust Bolos no Pote v13.5 — Sistema Completo (carrinho persistente + recompensas + PIX corrigido)", "color:#E1A95F;font-size:14px;font-weight:bold;");
-
 });
