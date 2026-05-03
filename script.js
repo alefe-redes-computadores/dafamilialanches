@@ -1,6 +1,6 @@
 /* =========================================================
-   ðŸ° Degust v13.1 â€” SISTEMA UI BLINDADO + PIX INTELIGENTE
-   CorreÃ§Ãµes: cookies, painÃ©is, cliques, duplicaÃ§Ãµes removidas
+   🍰 Degust v13.0 — SISTEMA UI BLINDADO + PIX INTELIGENTE
+   Correções: cookies, painéis, cliques, duplicações removidas
 ========================================================= */
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -8,7 +8,7 @@ document.addEventListener("DOMContentLoaded", () => {
   let pixCopied = false;
 
   /* =========================================================
-     ðŸ›¡ï¸ UIManager v11.0
+     🛡️ UIManager v11.0
   ========================================================= */
   let ui_lock = false;
 
@@ -36,12 +36,12 @@ document.addEventListener("DOMContentLoaded", () => {
         panelElement.classList.add("show");
       }
 
-      // PainÃ©is deslizantes (pedidos / recompensas) tÃªm overlay prÃ³prio
+      // Painéis deslizantes (pedidos / recompensas) têm overlay próprio
       const overlayId = panelElement.dataset.overlay;
       if (overlayId) {
         const overlay = document.getElementById(overlayId);
         if (overlay) overlay.classList.add("active");
-        return; // nÃ£o usa o backdrop geral
+        return; // não usa o backdrop geral
       }
 
       if (panelElement.id !== "side-menu") {
@@ -60,7 +60,7 @@ document.addEventListener("DOMContentLoaded", () => {
       document.querySelectorAll(".modal.show, .modal.active, #mini-cart.active").forEach(el => {
         el.classList.remove("show", "active");
       });
-      // Fecha os painÃ©is deslizantes
+      // Fecha os painéis deslizantes
       document.querySelectorAll(".painel-overlay.active").forEach(el => {
         el.classList.remove("active");
       });
@@ -103,7 +103,7 @@ document.addEventListener("DOMContentLoaded", () => {
   if (bdElement) bdElement.addEventListener("click", () => UIManager.closeAll());
 
   /* =========================================================
-     ðŸ” MENU HAMBÃšRGUER
+     🍔 MENU HAMBÚRGUER
   ========================================================= */
   const hamburgerBtn = document.getElementById("hamburger-btn");
   const sideMenu     = document.getElementById("side-menu");
@@ -124,7 +124,7 @@ document.addEventListener("DOMContentLoaded", () => {
   if (menuOverlay)  menuOverlay.addEventListener("click",  () => UIManager.closeSideMenu());
 
   /* =========================================================
-     ðŸŽ¯ ATALHOS DO MENU LATERAL â€” usando data-action
+     🎯 ATALHOS DO MENU LATERAL — usando data-action
   ========================================================= */
   document.querySelectorAll(".menu-link-action[data-action]").forEach(link => {
     link.addEventListener("click", (e) => {
@@ -148,7 +148,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   });
 
-  // Scroll suave para seÃ§Ãµes
+  // Scroll suave para seções
   document.querySelectorAll(".menu-link[href^='#']").forEach(link => {
     link.addEventListener("click", (e) => {
       e.preventDefault();
@@ -168,7 +168,7 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   /* =========================================================
-     ðŸŽ PAINÃ‰IS DESLIZANTES (PEDIDOS & RECOMPENSAS) v11.0
+     🎁 PAINÉIS DESLIZANTES (PEDIDOS & RECOMPENSAS) v11.0
   ========================================================= */
   function abrirPainel(overlayId) {
     const overlay = document.getElementById(overlayId);
@@ -181,10 +181,10 @@ document.addEventListener("DOMContentLoaded", () => {
     document.querySelectorAll(".painel-overlay").forEach(el => el.classList.remove("active"));
   }
 
-  // BotÃµes flutuantes
-  // BotÃµes flutuantes removidos â€” acesso via menu conta e menu lateral
+  // Botões flutuantes
+  // Botões flutuantes removidos — acesso via menu conta e menu lateral
 
-  // Fechar pelos botÃµes X dentro dos painÃ©is
+  // Fechar pelos botões X dentro dos painéis
   document.querySelectorAll(".fechar-painel, .fechar-pedidos, .fechar-recompensas").forEach(btn => {
     btn.addEventListener("click", (e) => {
       e.stopPropagation();
@@ -200,7 +200,7 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   /* =========================================================
-     ðŸ’° SISTEMA PIX v11.0
+     💰 SISTEMA PIX v11.0
   ========================================================= */
   const pixModal       = document.getElementById("pix-modal");
   const pixValor       = document.getElementById("pix-valor");
@@ -213,13 +213,13 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const AVISO_PIX = `
     <div style="background:#fff3cd;border:2px solid #ffc107;border-radius:12px;padding:14px;margin-bottom:14px;text-align:left;">
-      <p style="margin:0 0 8px;font-size:.95rem;font-weight:800;color:#856404;">ðŸ“‹ SIGA ESSES PASSOS:</p>
-      <p style="margin:0 0 6px;font-size:.85rem;color:#333;"><b>1ï¸âƒ£</b> Clique em <b>"Enviar Pedido no WhatsApp"</b></p>
-      <p style="margin:0 0 6px;font-size:.85rem;color:#333;"><b>2ï¸âƒ£</b> FaÃ§a o PIX no valor acima</p>
-      <p style="margin:0;font-size:.85rem;color:#333;"><b>3ï¸âƒ£</b> Mande o comprovante <b>na mesma conversa</b></p>
+      <p style="margin:0 0 8px;font-size:.95rem;font-weight:800;color:#856404;">📋 SIGA ESSES PASSOS:</p>
+      <p style="margin:0 0 6px;font-size:.85rem;color:#333;"><b>1️⃣</b> Clique em <b>"Enviar Pedido no WhatsApp"</b></p>
+      <p style="margin:0 0 6px;font-size:.85rem;color:#333;"><b>2️⃣</b> Faça o PIX no valor acima</p>
+      <p style="margin:0;font-size:.85rem;color:#333;"><b>3️⃣</b> Mande o comprovante <b>na mesma conversa</b></p>
     </div>
     <div style="background:#fff0f0;border:1px solid #ffcdd2;border-radius:8px;padding:10px;margin-bottom:14px;text-align:center;">
-      <p style="margin:0;font-size:.8rem;color:#c62828;font-weight:700;">âš ï¸ Sem o pedido no WhatsApp nÃ£o saberemos do seu pedido!</p>
+      <p style="margin:0;font-size:.8rem;color:#c62828;font-weight:700;">⚠️ Sem o pedido no WhatsApp não saberemos do seu pedido!</p>
     </div>`;
 
   async function abrirModalPIX() {
@@ -236,12 +236,12 @@ document.addEventListener("DOMContentLoaded", () => {
         else pixBody.prepend(div);
       }
 
-      // Mostra banner de pontos no modal PIX se nÃ£o existir ainda
+      // Mostra banner de pontos no modal PIX se não existir ainda
       if (pixBody && !pixBody.querySelector(".pix-pontos")) {
         const pontosDiv = document.createElement("div");
         pontosDiv.className = "pix-pontos";
         pontosDiv.style.cssText = "background:linear-gradient(135deg,#fff8e1,#fffde7);border:1px solid #E1A95F;border-radius:10px;padding:10px 12px;margin-bottom:12px;display:flex;align-items:center;gap:8px;text-align:left;";
-        pontosDiv.innerHTML = '<span style="font-size:1.3rem;">â­</span><p style="margin:0;font-size:.78rem;color:#4B2C20;font-weight:600;">Este pedido acumula <b>+1 ponto</b> no seu cartÃ£o fidelidade!</p>';
+        pontosDiv.innerHTML = '<span style="font-size:1.3rem;">⭐</span><p style="margin:0;font-size:.78rem;color:#4B2C20;font-weight:600;">Este pedido acumula <b>+1 ponto</b> no seu cartão fidelidade!</p>';
         pixBody.appendChild(pontosDiv);
       }
       UIManager.open("pix", pixModal);
@@ -265,7 +265,7 @@ document.addEventListener("DOMContentLoaded", () => {
       }
       pixCopied = true;
       const orig = pixBtnCopy.textContent;
-      pixBtnCopy.textContent = "Chave Copiada! âœ“";
+      pixBtnCopy.textContent = "Chave Copiada! ✓";
       pixBtnCopy.style.background = "#4CAF50";
       setTimeout(() => { pixBtnCopy.textContent = orig; pixBtnCopy.style.background = ""; }, 2000);
     });
@@ -279,12 +279,12 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  // BotÃ£o finalizar sem PIX
+  // Botão finalizar sem PIX
   const btnSemPix = document.getElementById("btn-finish-sem-pix");
   if (btnSemPix) {
     btnSemPix.addEventListener("click", async () => {
       const { subtotal, delivery, discount, total, cupomInfo } = await calcTotals();
-      const addr = window.finalAddressStringForWhatsApp || "NÃ£o informado";
+      const addr = window.finalAddressStringForWhatsApp || "Não informado";
       const msg = [
         "*NOVO PEDIDO - Degust Bolos no Pote*",
         "------------------------------------",
@@ -308,10 +308,10 @@ document.addEventListener("DOMContentLoaded", () => {
       ].filter(l => l !== null).join("\n");
       window.open(`https://wa.me/5538998527894?text=${encodeURIComponent(msg)}`, "_blank");
 
-      // Salva pedido no Firestore para aparecer no painel admin
+      // Salva pedido no Firestore com retry (3 tentativas)
       if (db && currentUser) {
         const itensSalvar = cart.map(i => ({ nome: i.nome, preco: i.preco, qtd: i.qtd }));
-        db.collection("Pedidos").add({
+        const dadosPedido = {
           userId:    currentUser.uid,
           nome:      currentUser.displayName || currentUser.email,
           email:     currentUser.email,
@@ -326,19 +326,90 @@ document.addEventListener("DOMContentLoaded", () => {
           fonte:     "degust",
           data:      new Date().toISOString(),
           criadoEm:  firebase.firestore.FieldValue.serverTimestamp()
-        }).catch(err => console.error("Erro ao salvar pedido:", err));
+        };
+
+        // Retry automático — tenta 3 vezes com 2s de intervalo
+        async function salvarComRetry(tentativa = 1) {
+          try {
+            const docRef = await db.collection("Pedidos").add(dadosPedido);
+            // Incrementa contador de pedidos do usuário (campo degust_)
+            await db.collection("Usuarios").doc(currentUser.uid).set({
+              degust_bolosPedidos: firebase.firestore.FieldValue.increment(1)
+            }, { merge: true });
+            // Verifica se desbloqueou recompensa
+            verificarRecompensa(currentUser);
+          } catch(err) {
+            console.error(`Tentativa ${tentativa} falhou:`, err);
+            if (tentativa < 3) {
+              setTimeout(() => salvarComRetry(tentativa + 1), 2000);
+            } else {
+              // Salva localmente como fallback
+              const pendentes = JSON.parse(localStorage.getItem("degust_pendingOrders") || "[]");
+              pendentes.push({ ...dadosPedido, criadoEm: new Date().toISOString() });
+              localStorage.setItem("degust_pendingOrders", JSON.stringify(pendentes));
+              console.warn("Pedido salvo localmente. Será sincronizado quando houver conexão.");
+            }
+          }
+        }
+
+        salvarComRetry();
       }
 
       UIManager.closeAll();
     });
   }
 
+  // Verifica se usuário desbloqueou nova recompensa após pedido
+  async function verificarRecompensa(user) {
+    if (!db || !user) return;
+    try {
+      const doc = await db.collection("Usuarios").doc(user.uid).get();
+      const bolos = doc.exists ? (doc.data().degust_bolosPedidos || 0) : 0;
+      const recompensa = tabelaRecompensas.find(r => r.pedido === bolos);
+      if (recompensa) {
+        // Adiciona à lista de disponíveis
+        await db.collection("Usuarios").doc(user.uid).update({
+          degust_recompensasDisponiveis: firebase.firestore.FieldValue.arrayUnion({
+            descricao: recompensa.descricao,
+            tipo: recompensa.tipo,
+            data: new Date().toLocaleDateString("pt-BR"),
+            pedidoCheckpoint: bolos
+          })
+        });
+        // Toast especial de recompensa
+        setTimeout(() => {
+          mostrarToastLogin(`🎁 Parabéns! Você ganhou: ${recompensa.descricao}!`);
+        }, 1500);
+      }
+    } catch(err) {
+      console.error("Erro ao verificar recompensa:", err);
+    }
+  }
+
+  // Sincroniza pedidos salvos offline quando conexão volta
+  function sincronizarPendentes() {
+    if (!db || !currentUser) return;
+    const pendentes = JSON.parse(localStorage.getItem("degust_pendingOrders") || "[]");
+    if (!pendentes.length) return;
+    pendentes.forEach(pedido => {
+      db.collection("Pedidos").add({
+        ...pedido,
+        criadoEm: firebase.firestore.FieldValue.serverTimestamp(),
+        sincronizado: true
+      }).then(() => {
+        const restantes = JSON.parse(localStorage.getItem("degust_pendingOrders") || "[]")
+          .filter(p => p.data !== pedido.data);
+        localStorage.setItem("degust_pendingOrders", JSON.stringify(restantes));
+      }).catch(() => {});
+    });
+  }
+
   if (pixBtnWhatsapp) {
     pixBtnWhatsapp.addEventListener("click", async () => {
       const { subtotal, delivery, discount, total, cupomInfo } = await calcTotals();
-      const addr = window.finalAddressStringForWhatsApp || "NÃ£o informado";
+      const addr = window.finalAddressStringForWhatsApp || "Não informado";
 
-      // Linhas base do pedido (sem seÃ§Ã£o PIX â€” cliente jÃ¡ viu o modal)
+      // Linhas base do pedido (sem seção PIX — cliente já viu o modal)
       const linhasPedido = [
         "*NOVO PEDIDO - Degust Bolos no Pote*",
         "------------------------------------",
@@ -356,7 +427,7 @@ document.addEventListener("DOMContentLoaded", () => {
         ""
       ].filter(l => l !== null);
 
-      // SeÃ§Ã£o PIX apenas se cliente copiou a chave
+      // Seção PIX apenas se cliente copiou a chave
       const linhasPix = pixCopied ? [
         "------------------------------------",
         "*PAGAMENTO VIA PIX*",
@@ -383,34 +454,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
       window.open(`https://wa.me/5538998527894?text=${encodeURIComponent(msg)}`, "_blank");
 
-      // Salva pedido no Firestore para aparecer no painel admin
-      if (db && currentUser) {
-        const itensSalvar = cart.map(i => ({ nome: i.nome, preco: i.preco, qtd: i.qtd }));
-        db.collection("Pedidos").add({
-          userId:    currentUser.uid,
-          nome:      currentUser.displayName || currentUser.email,
-          email:     currentUser.email,
-          itensObj:  itensSalvar,
-          itens:     itensSalvar.map(i => `${i.nome} x${i.qtd}`).join(", "),
-          total:     total,
-          subtotal:  subtotal,
-          entrega:   delivery,
-          desconto:  discount,
-          endereco:  addr,
-          status:    "novo",
-          fonte:     "degust",
-          data:      new Date().toISOString(),
-          criadoEm:  firebase.firestore.FieldValue.serverTimestamp()
-        }).catch(err => console.error("Erro ao salvar pedido:", err));
-      }
-
-      UIManager.closeAll();
-    });
-  }
+    
 
   window.finalAddressStringForWhatsApp = "";
   /* =========================================================
-     1. MÃSCARA DE CEP
+     1. MÁSCARA DE CEP
   ========================================================= */
   const cepInputMask = document.getElementById("cep-input");
   if (cepInputMask) {
@@ -422,7 +470,7 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   /* =========================================================
-     âš™ï¸ CONFIGURAÃ‡Ã•ES BASE
+     ⚙️ CONFIGURAÇÕES BASE
   ========================================================= */
   const sound = new Audio("click.wav");
   let cart = [];
@@ -435,16 +483,20 @@ document.addEventListener("DOMContentLoaded", () => {
   const money = (n) => `R$ ${Number(n || 0).toFixed(2).replace(".", ",")}`;
 
   /* =========================================================
-     ðŸ” BUSCA INTELIGENTE
+     🔍 BUSCA INTELIGENTE
   ========================================================= */
   const searchInput = document.getElementById("search-input");
 
   const PRODUTOS_BUSCA = [
-    { nome: "Brigadeiro",               aliases: ["chocolate", "preto", "granulado", "tradicional"], preco: 10 },
-    { nome: "PrestÃ­gio",                aliases: ["prestigio", "coco", "beijinho"] },
-    { nome: "Ninho com Geleia de Morango", aliases: ["morango", "geleia", "fruta", "ninho morango"] },
-    { nome: "Ninho Cremoso",            aliases: ["leite ninho", "branco", "puro", "ninho"] }
-  ];
+  { nome: "Brigadeiro", aliases: ["chocolate", "preto", "granulado", "tradicional"], preco: 10 },
+  { nome: "Prestígio", aliases: ["prestigio", "coco", "beijinho"] },
+  { nome: "Ninho com Geleia de Morango", aliases: ["morango", "geleia", "fruta", "ninho morango"] },
+  { nome: "Ninho Cremoso", aliases: ["leite ninho", "branco", "puro", "ninho"] },
+  { nome: "Tropical Cream", aliases: ["tropical", "cream", "abacaxi", "ninho com abacaxi"] },
+  { nome: "Bombom de Maracujá", aliases: ["bombom", "maracuja", "maracujá", "mousse de maracuja", "mousse de maracujá"] },
+  { nome: "Chocolatudo", aliases: ["chocolate 100 cacau", "chocolate 100% cacau", "chocolatudo"] },
+  { nome: "Ninho Silvestre", aliases: ["ninho silvestre", "morango", "geleia de morango"] }
+];
 
   function normalizar(t) {
     return t.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim();
@@ -468,7 +520,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const cards = document.querySelectorAll(".card");
     if (!query || query.length < 1) {
       cards.forEach(c => (c.style.display = ""));
-      // Mostra seÃ§Ãµes vazias tambÃ©m
+      // Mostra seções vazias também
       document.querySelectorAll(".menu-section").forEach(s => s.style.display = "");
       return;
     }
@@ -500,7 +552,7 @@ document.addEventListener("DOMContentLoaded", () => {
       card.style.display = match ? "" : "none";
     });
 
-    // Esconde seÃ§Ãµes que ficaram sem cards visÃ­veis
+    // Esconde seções que ficaram sem cards visíveis
     document.querySelectorAll(".menu-section").forEach(sec => {
       const temVisivel = [...sec.querySelectorAll(".card")].some(c => c.style.display !== "none");
       sec.style.display = temVisivel ? "" : "none";
@@ -510,7 +562,7 @@ document.addEventListener("DOMContentLoaded", () => {
   if (searchInput) searchInput.addEventListener("input", e => filtrarCards(e.target.value));
 
   /* =========================================================
-     ðŸŽ¯ MAPEAMENTO DO DOM
+     🎯 MAPEAMENTO DO DOM
   ========================================================= */
   const el = {
     cartIcon:         document.getElementById("cart-icon"),
@@ -527,10 +579,10 @@ document.addEventListener("DOMContentLoaded", () => {
     googleBtn:        document.getElementById("google-login"),
     userBtn:          document.getElementById("user-btn"),
     statusBanner:     document.getElementById("status-banner"),
-    pedidosBtn:       null, // removido â€” acesso via menu conta
+    pedidosBtn:       null, // removido — acesso via menu conta
     pedidosPanel:     document.getElementById("painelPedidos"),
     pedidosLista:     document.getElementById("listaPedidos"),
-    recompensasBtn:   null, // removido â€” acesso via menu conta
+    recompensasBtn:   null, // removido — acesso via menu conta
     recompensasPanel: document.getElementById("recompensas-panel"),
     recompensasLista: document.getElementById("listaRecompensas"),
     historicoLista:   document.getElementById("historicoRecompensas"),
@@ -546,7 +598,7 @@ document.addEventListener("DOMContentLoaded", () => {
     pixModal:         document.getElementById("pix-modal")
   };
 
-  // BotÃµes de fechar modais
+  // Botões de fechar modais
   document.querySelectorAll(".extras-close, .login-close, .dashboard-close, .pix-close").forEach(btn => {
     btn.addEventListener("click", (e) => { e.stopPropagation(); UIManager.closeAll(); });
   });
@@ -558,7 +610,7 @@ document.addEventListener("DOMContentLoaded", () => {
   if (el.cartBackdrop) el.cartBackdrop.addEventListener("click", () => UIManager.closeAll());
 
   /* =========================================================
-     ðŸŽŸï¸ CUPONS
+     🎟️ CUPONS
   ========================================================= */
   const couponForm = document.getElementById("coupon-form");
   let couponApplied = (localStorage.getItem("degustCoupon") || "").toUpperCase();
@@ -570,7 +622,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if (!val) {
       couponApplied = "";
       localStorage.removeItem("degustCoupon");
-      popupAdd("Cupom removido. ðŸ·ï¸");
+      popupAdd("Cupom removido. 🏷️");
     } else {
       couponApplied = val;
       localStorage.setItem("degustCoupon", couponApplied);
@@ -579,7 +631,7 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   /* =========================================================
-     ðŸ’¬ POPUP / TOAST
+     💬 POPUP / TOAST
   ========================================================= */
   function popupAdd(msg) {
     let pop = document.querySelector(".popup-add");
@@ -594,7 +646,7 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   /* =========================================================
-     ðŸ“Š BARRA DE PROGRESSO (FRETE GRÃTIS)
+     📊 BARRA DE PROGRESSO (FRETE GRÁTIS)
   ========================================================= */
   function atualizarBarraProgresso() {
     const subtotal      = getCartSubtotal();
@@ -607,16 +659,16 @@ document.addEventListener("DOMContentLoaded", () => {
     progressFill.style.width = `${pct}%`;
 
     if (subtotal >= LIMITE_FRETE_GRATIS) {
-      progressText.innerHTML = `ðŸŽ‰ <strong>Frete GrÃ¡tis Liberado!</strong>`;
+      progressText.innerHTML = `🎉 <strong>Frete Grátis Liberado!</strong>`;
       progressFill.style.background = "linear-gradient(90deg,#4caf50,#2e7d32)";
     } else {
-      progressText.innerHTML = `Faltam <strong>${money(LIMITE_FRETE_GRATIS - subtotal)}</strong> p/ Frete GrÃ¡tis`;
+      progressText.innerHTML = `Faltam <strong>${money(LIMITE_FRETE_GRATIS - subtotal)}</strong> p/ Frete Grátis`;
       progressFill.style.background = "linear-gradient(90deg,#E1A95F,#4B2C20)";
     }
   }
 
   /* =========================================================
-     ðŸ›’ CARRINHO
+     🛒 CARRINHO
   ========================================================= */
   function renderMiniCart() {
     if (!el.miniList) return;
@@ -625,7 +677,7 @@ document.addEventListener("DOMContentLoaded", () => {
     atualizarBarraProgresso();
 
     if (!cart.length) {
-      el.miniList.innerHTML = '<p style="text-align:center;color:#999;padding:20px;">Seu carrinho estÃ¡ vazio ðŸ°</p>';
+      el.miniList.innerHTML = '<p style="text-align:center;color:#999;padding:20px;">Seu carrinho está vazio 🍰</p>';
       if (el.miniFoot) el.miniFoot.querySelectorAll(".cart-summary-generated").forEach(e => e.remove());
       const cm = document.getElementById("coupon-message");
       const cdr = document.getElementById("coupon-discount-row");
@@ -639,13 +691,13 @@ document.addEventListener("DOMContentLoaded", () => {
         <div style="display:flex;justify-content:space-between;align-items:center;">
           <div style="flex:1;">
             <p style="font-weight:700;margin-bottom:4px;color:#4B2C20;">${item.nome}</p>
-            <p style="color:#666;font-size:.85rem;">${money(item.preco)} Ã— ${item.qtd}</p>
+            <p style="color:#666;font-size:.85rem;">${money(item.preco)} × ${item.qtd}</p>
           </div>
           <div style="display:flex;gap:6px;align-items:center;">
-            <button type="button" class="cart-minus" data-idx="${idx}" style="background:#E1A95F;color:#4B2C20;border:none;border-radius:5px;width:30px;height:30px;cursor:pointer;font-weight:bold;font-size:1.1rem;">âˆ’</button>
+            <button type="button" class="cart-minus" data-idx="${idx}" style="background:#E1A95F;color:#4B2C20;border:none;border-radius:5px;width:30px;height:30px;cursor:pointer;font-weight:bold;font-size:1.1rem;">−</button>
             <span style="font-weight:700;min-width:20px;text-align:center;">${item.qtd}</span>
             <button type="button" class="cart-plus"  data-idx="${idx}" style="background:#4B2C20;color:#F5E6CA;border:none;border-radius:5px;width:30px;height:30px;cursor:pointer;font-weight:bold;font-size:1.1rem;">+</button>
-            <button type="button" class="cart-remove" data-idx="${idx}" style="background:#d32f2f;color:#fff;border:none;border-radius:5px;width:30px;height:30px;cursor:pointer;">ðŸ—‘</button>
+            <button type="button" class="cart-remove" data-idx="${idx}" style="background:#d32f2f;color:#fff;border:none;border-radius:5px;width:30px;height:30px;cursor:pointer;">🗑</button>
           </div>
         </div>
       </div>
@@ -674,12 +726,12 @@ document.addEventListener("DOMContentLoaded", () => {
       const i = +e.currentTarget.dataset.idx;
       cart.splice(i, 1);
       renderMiniCart();
-      popupAdd("Item removido! ðŸ—‘ï¸");
+      popupAdd("Item removido! 🗑️");
     }));
   }
 
   /* =========================================================
-     ðŸ”¥ FIREBASE
+     🔥 FIREBASE
   ========================================================= */
   const firebaseConfig = {
     apiKey: "AIzaSyATQBcbYuzKpKlSwNlbpRiAM1XyHqhGeak",
@@ -697,7 +749,7 @@ document.addEventListener("DOMContentLoaded", () => {
   function inicializarFirebase() {
     if (isFirebaseInitialized) return;
     try {
-      if (!window.firebase) throw new Error("Firebase SDK nÃ£o carregado.");
+      if (!window.firebase) throw new Error("Firebase SDK não carregado.");
       if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
       auth = firebase.auth();
       db   = firebase.firestore();
@@ -710,19 +762,19 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function handleLoginSuccess(user) {
     currentUser = user;
-    const nome = user.displayName?.split(" ")[0] || user.email?.split("@")[0] || "doÃ§ura";
+    const nome = user.displayName?.split(" ")[0] || user.email?.split("@")[0] || "doçura";
     UIManager.closeAll();
     atualizarBotaoUsuario(user);
     carregarPedidos(user);
     carregarRecompensas(user);
     // Toast de boas-vindas mais destacado
-    mostrarToastLogin(`Bem-vinda(o), ${nome}! ðŸ°`);
+    mostrarToastLogin(`Bem-vinda(o), ${nome}! 🍰`);
   }
 
   function atualizarBotaoUsuario(user) {
     if (!el.userBtn) return;
     const nome = user
-      ? (user.displayName?.split(" ")[0] || user.email?.split("@")[0] || "vocÃª")
+      ? (user.displayName?.split(" ")[0] || user.email?.split("@")[0] || "você")
       : null;
 
     const content  = document.getElementById("user-btn-content");
@@ -730,10 +782,10 @@ document.addEventListener("DOMContentLoaded", () => {
     const fotoImg  = document.getElementById("user-foto");
 
     if (user) {
-      // Nome no botÃ£o
+      // Nome no botão
       if (content) content.textContent = nome;
 
-      // Foto de perfil do Google visÃ­vel no header
+      // Foto de perfil do Google visível no header
       if (user.photoURL && fotoImg && fotoWrap) {
         fotoImg.src = user.photoURL;
         fotoImg.onerror = () => { fotoWrap.style.display = "none"; };
@@ -783,9 +835,9 @@ document.addEventListener("DOMContentLoaded", () => {
     }, 3500);
   }
 
-  // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-  // ðŸª STATUS DA LOJA â€” checa em tempo real
-  // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+  // ══════════════════════════════════════════
+  // 🏪 STATUS DA LOJA — checa em tempo real
+  // ══════════════════════════════════════════
   function checarStatusLoja() {
     if (!db) return;
     db.collection("settings").doc("degust_status").onSnapshot(doc => {
@@ -799,7 +851,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const addBtns = document.querySelectorAll(".add-cart, .extras-btn");
 
     if (!aberta) {
-      // Loja fechada â€” cards acinzentados, botÃµes desabilitados
+      // Loja fechada — cards acinzentados, botões desabilitados
       cards.forEach(card => {
         card.style.opacity = "0.55";
         card.style.filter  = "grayscale(60%)";
@@ -807,17 +859,17 @@ document.addEventListener("DOMContentLoaded", () => {
       });
       addBtns.forEach(btn => { btn.disabled = true; });
 
-      // Banner de aviso se nÃ£o existir
+      // Banner de aviso se não existir
       if (!document.getElementById("banner-loja-fechada")) {
         const banner = document.createElement("div");
         banner.id = "banner-loja-fechada";
         banner.style.cssText = "background:#b71c1c;color:#fff;text-align:center;padding:12px 16px;font-weight:700;font-size:.9rem;border-radius:10px;margin-bottom:12px;";
-        banner.textContent = "ðŸ”´ Estamos fechados no momento. Volte em breve!";
+        banner.textContent = "🔴 Estamos fechados no momento. Volte em breve!";
         const statusBanner = document.getElementById("status-banner");
         if (statusBanner) statusBanner.after(banner);
       }
     } else {
-      // Loja aberta â€” restaura
+      // Loja aberta — restaura
       cards.forEach(card => {
         card.style.opacity = "";
         card.style.filter  = "";
@@ -843,36 +895,36 @@ document.addEventListener("DOMContentLoaded", () => {
         }
       });
 
+    // onAuthStateChanged — só atualiza UI, não duplica carregamento
     auth.onAuthStateChanged(user => {
       currentUser = user;
+      atualizarBotaoUsuario(user);
       if (user) {
-        const nome = user.displayName?.split(" ")[0] || user.email.split("@")[0];
-        el.userBtn.textContent = `OlÃ¡, ${nome} âœ¨`;
-        if (el.pedidosBtn)    el.pedidosBtn.style.display    = "";
-        if (el.recompensasBtn) el.recompensasBtn.style.display = "";
         if (isAdmin(user)) {
-          document.querySelector(".admin-section")?.style.setProperty("display", "block");
+          document.querySelector(".admin-section")?.style.setProperty("display","block");
+        } else {
+          document.querySelector(".admin-section")?.style.setProperty("display","none");
         }
-        // Carrega pedidos e recompensas ao logar
-        carregarPedidos(user);
-        carregarRecompensas(user);
-      } else {
-        el.userBtn.textContent = "Entrar / Perfil ðŸ‘¤";
-        document.querySelector(".admin-section")?.style.setProperty("display", "none");
+        // Só carrega se handleLoginSuccess não tiver carregado já
+        if (!user._dadosCarregados) {
+          user._dadosCarregados = true;
+          carregarPedidos(user);
+          carregarRecompensas(user);
+        }
       }
     });
   }
 
   /* =========================================================
-     ðŸ”‘ LOGIN
+     🔑 LOGIN
   ========================================================= */
-  // handleLoginSuccess definida acima (prÃ³ximo ao setupAuthListener)
+  // handleLoginSuccess definida acima (próximo ao setupAuthListener)
 
-  // Login apenas via Google â€” e-mail/senha desabilitado
+  // Login apenas via Google — e-mail/senha desabilitado
 
   el.googleBtn?.addEventListener("click", () => {
     inicializarFirebase();
-    if (!isFirebaseInitialized) return alert("Erro de conexÃ£o. Recarregue a pÃ¡gina.");
+    if (!isFirebaseInitialized) return alert("Erro de conexão. Recarregue a página.");
     const provider = new firebase.auth.GoogleAuthProvider();
     provider.setCustomParameters({ prompt: "select_account" });
     // Tenta popup primeiro; se bloqueado cai para redirect
@@ -901,7 +953,7 @@ document.addEventListener("DOMContentLoaded", () => {
     let menu = document.getElementById("conta-menu");
     if (menu) { menu.remove(); return; }
 
-    const nome  = currentUser.displayName || currentUser.email?.split("@")[0] || "vocÃª";
+    const nome  = currentUser.displayName || currentUser.email?.split("@")[0] || "você";
     const foto  = currentUser.photoURL;
     const rect  = el.userBtn.getBoundingClientRect();
 
@@ -916,20 +968,20 @@ document.addEventListener("DOMContentLoaded", () => {
     `;
     menu.innerHTML = `
       <div style="background:#4B2C20;padding:14px 16px;display:flex;align-items:center;gap:10px;">
-        ${foto ? `<img src="${foto}" style="width:38px;height:38px;border-radius:50%;border:2px solid #E1A95F;" onerror="this.style.display='none'">` : '<span style="font-size:1.8rem;">ðŸ‘¤</span>'}
+        ${foto ? `<img src="${foto}" style="width:38px;height:38px;border-radius:50%;border:2px solid #E1A95F;" onerror="this.style.display='none'">` : '<span style="font-size:1.8rem;">👤</span>'}
         <div>
           <div style="color:#F5E6CA;font-weight:700;font-size:.95rem;">${nome.split(" ")[0]}</div>
           <div style="color:#E1A95F;font-size:.72rem;opacity:.85;">${currentUser.email || ""}</div>
         </div>
       </div>
       <button id="conta-meus-pedidos" type="button" style="width:100%;padding:13px 16px;background:none;border:none;border-bottom:1px solid #f0e8d8;text-align:left;cursor:pointer;color:#4B2C20;font-weight:600;font-size:.9rem;display:flex;align-items:center;gap:8px;">
-        ðŸ“¦ Meus Pedidos
+        📦 Meus Pedidos
       </button>
       <button id="conta-recompensas" type="button" style="width:100%;padding:13px 16px;background:none;border:none;border-bottom:1px solid #f0e8d8;text-align:left;cursor:pointer;color:#4B2C20;font-weight:600;font-size:.9rem;display:flex;align-items:center;gap:8px;">
-        ðŸŽ Recompensas
+        🎁 Recompensas
       </button>
       <button id="conta-sair" type="button" style="width:100%;padding:13px 16px;background:none;border:none;text-align:left;cursor:pointer;color:#C8282D;font-weight:700;font-size:.9rem;display:flex;align-items:center;gap:8px;">
-        ðŸšª Sair da conta
+        🚪 Sair da conta
       </button>
     `;
     document.body.appendChild(menu);
@@ -945,7 +997,7 @@ document.addEventListener("DOMContentLoaded", () => {
     document.getElementById("conta-sair").addEventListener("click", () => {
       menu.remove();
       auth.signOut().then(() => {
-        mostrarToastLogin("AtÃ© logo! ðŸ‘‹");
+        mostrarToastLogin("Até logo! 👋");
         setTimeout(() => location.reload(), 1200);
       });
     });
@@ -962,10 +1014,10 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   /* =========================================================
-     ðŸ¬ ADICIONAIS (TOPPINGS)
+     🍬 ADICIONAIS (TOPPINGS)
   ========================================================= */
   const TOPPINGS_DATA = [
-    { id: "extra_ninho",     nome: "Leite Ninho em PÃ³",   preco: 2.00 },
+    { id: "extra_ninho",     nome: "Leite Ninho em Pó",   preco: 2.00 },
     { id: "extra_nutella",   nome: "Nutella Pura",         preco: 4.50 },
     { id: "extra_granulado", nome: "Granulado Gourmet",    preco: 1.50 },
     { id: "extra_morango",   nome: "Morango Picado",       preco: 3.00 },
@@ -1006,14 +1058,33 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   /* =========================================================
-     ðŸš€ PRODUTOS â€” LISTENERS
+     🚀 PRODUTOS — LISTENERS
   ========================================================= */
   function addCommonItem(nome, preco) {
     const found = cart.find(i => i.nome === nome && i.preco === preco);
     if (found) found.qtd++;
     else cart.push({ nome, preco: Number(preco), qtd: 1 });
     renderMiniCart();
-    popupAdd(`${nome.split("(")[0].trim()} adicionado! ðŸ°`);
+    // Toast com progresso de fidelidade — Atualização 2
+    const nomeSimples = nome.split("(")[0].trim();
+    if (currentUser && db) {
+      db.collection("Usuarios").doc(currentUser.uid).get()
+        .then(doc => {
+          const bolos = doc.exists ? (doc.data().degust_bolosPedidos || 0) : 0;
+          const prox  = proximaRecompensa ? proximaRecompensa(bolos) : null;
+          if (prox) {
+            const faltam = prox.pedido - bolos;
+            popupAdd(faltam <= 2
+              ? `🎁 Falta${faltam===1?"":"m"} ${faltam} pedido${faltam===1?"":"s"} para: ${prox.descricao}!`
+              : `${nomeSimples} adicionado! 🍰`);
+          } else {
+            popupAdd(`${nomeSimples} adicionado! 🍰`);
+          }
+        })
+        .catch(() => popupAdd(`${nomeSimples} adicionado! 🍰`));
+    } else {
+      popupAdd(`${nomeSimples} adicionado! 🍰`);
+    }
     try { if (sound) sound.play(); } catch (e) {}
   }
 
@@ -1038,28 +1109,28 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   /* =========================================================
-     ðŸšš FRETE & ENDEREÃ‡O
+     🚚 FRETE & ENDEREÇO
   ========================================================= */
   let modoEnderecoManual = false;
 
   const buscarCEP = async () => {
     const cep = document.getElementById("cep-input")?.value.replace(/\D/g, "");
-    if (cep?.length !== 8) return alert("Digite um CEP vÃ¡lido com 8 dÃ­gitos.");
+    if (cep?.length !== 8) return alert("Digite um CEP válido com 8 dígitos.");
     const btn = document.getElementById("btn-calcular-frete");
     btn.textContent = "Buscando...";
     btn.disabled = true;
     try {
       const res  = await fetch(`https://viacep.com.br/ws/${cep}/json/`);
       const data = await res.json();
-      if (data.erro) throw new Error("CEP nÃ£o encontrado.");
+      if (data.erro) throw new Error("CEP não encontrado.");
       const ruaBairro = document.getElementById("endereco-auto");
       if (ruaBairro) ruaBairro.value = `${data.logradouro}, ${data.bairro} - ${data.localidade}/${data.uf}`;
       document.getElementById("numero-input").disabled    = false;
       document.getElementById("complemento-input").disabled = false;
       document.getElementById("numero-input")?.focus();
-      popupAdd("EndereÃ§o localizado! ðŸ“");
+      popupAdd("Endereço localizado! 📍");
     } catch {
-      alert("Erro ao buscar CEP. Tente digitar o endereÃ§o manualmente.");
+      alert("Erro ao buscar CEP. Tente digitar o endereço manualmente.");
     } finally {
       btn.textContent = "Buscar";
       btn.disabled = false;
@@ -1077,8 +1148,8 @@ document.addEventListener("DOMContentLoaded", () => {
   el.btnConfirmar?.addEventListener("click", () => {
     const end = el.manualEndereco?.value.trim();
     const num = el.manualNumero?.value.trim();
-    if (!end || !num) return alert("Preencha o endereÃ§o e o nÃºmero!");
-    popupAdd("EndereÃ§o manual salvo! âœ…");
+    if (!end || !num) return alert("Preencha o endereço e o número!");
+    popupAdd("Endereço manual salvo! ✅");
     renderMiniCart();
   });
 
@@ -1090,12 +1161,12 @@ document.addEventListener("DOMContentLoaded", () => {
       el2.style.opacity = e.target.checked ? "0.5" : "1";
       if (el2.tagName === "INPUT") el2.disabled = e.target.checked;
     });
-    if (e.target.checked) popupAdd("OpÃ§Ã£o: Retirada na Degust ðŸ°");
+    if (e.target.checked) popupAdd("Opção: Retirada na Degust 🍰");
     renderMiniCart();
   });
 
   /* =========================================================
-     ðŸ’° CÃLCULOS
+     💰 CÁLCULOS
   ========================================================= */
   async function calcTotals() {
     const subtotal = getCartSubtotal();
@@ -1125,14 +1196,14 @@ document.addEventListener("DOMContentLoaded", () => {
 
     if (couponApplied) {
       if (cupomInfo.valid) {
-        if (couponMsg) couponMsg.innerHTML = `<span style="color:#2e7d32;font-size:.85rem;">âœ… Cupom <b>${couponApplied}</b> aplicado!</span>`;
+        if (couponMsg) couponMsg.innerHTML = `<span style="color:#2e7d32;font-size:.85rem;">✅ Cupom <b>${couponApplied}</b> aplicado!</span>`;
         if (discount > 0 && couponDiscountRow) {
           couponDiscountRow.style.display = "flex";
           const cd = document.getElementById("cart-discount");
           if (cd) cd.textContent = `-${money(discount)}`;
         }
       } else {
-        if (couponMsg) couponMsg.innerHTML = `<span style="color:#d32f2f;font-size:.85rem;">âŒ Cupom invÃ¡lido ou expirado.</span>`;
+        if (couponMsg) couponMsg.innerHTML = `<span style="color:#d32f2f;font-size:.85rem;">❌ Cupom inválido ou expirado.</span>`;
         if (couponDiscountRow) couponDiscountRow.style.display = "none";
       }
     }
@@ -1151,7 +1222,7 @@ document.addEventListener("DOMContentLoaded", () => {
         </div>
         <div style="display:flex;justify-content:space-between;margin-bottom:5px;color:#666;">
           <span>Taxa de Entrega:</span>
-          <span>${delivery === 0 ? '<b style="color:#2e7d32;">GRÃTIS</b>' : money(delivery)}</span>
+          <span>${delivery === 0 ? '<b style="color:#2e7d32;">GRÁTIS</b>' : money(delivery)}</span>
         </div>
         ${discount > 0 ? `
         <div style="display:flex;justify-content:space-between;margin-bottom:5px;color:#2e7d32;">
@@ -1162,14 +1233,14 @@ document.addEventListener("DOMContentLoaded", () => {
         </div>
       </div>
       <div style="background:linear-gradient(135deg,#fff8e1,#fffde7);border:1px solid #E1A95F;border-radius:10px;padding:10px 12px;margin-top:10px;display:flex;align-items:center;gap:8px;">
-        <span style="font-size:1.4rem;">ðŸŽ</span>
+        <span style="font-size:1.4rem;">🎁</span>
         <div>
           <p style="margin:0;font-size:.78rem;font-weight:700;color:#4B2C20;">Esta compra acumula pontos de fidelidade!</p>
           <p style="margin:0;font-size:.72rem;color:#8d6e63;">Acesse pelo menu lateral ou pelo seu perfil</p>
         </div>
       </div>
       <button id="main-finish-btn" type="button" style="width:100%;background:#4caf50;color:#fff;border:none;padding:15px;border-radius:10px;font-weight:bold;font-size:1.1rem;cursor:pointer;margin-top:10px;box-shadow:0 4px 10px rgba(76,175,80,.3);">
-        FINALIZAR PEDIDO ðŸ°
+        FINALIZAR PEDIDO 🍰
       </button>
     `;
 
@@ -1177,11 +1248,19 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   /* =========================================================
-     ðŸ“¦ FINALIZAR PEDIDO
+     📦 FINALIZAR PEDIDO
   ========================================================= */
   window.fecharPedido = async function () {
-    if (!cart.length) return alert("O carrinho estÃ¡ vazio! Escolha uma doÃ§ura primeiro. ðŸ°");
-    if (!currentUser) { alert("FaÃ§a login para finalizar seu pedido!"); UIManager.open("login", el.loginModal); return; }
+    if (!cart.length) return alert("O carrinho está vazio! Escolha uma doçura primeiro. 🍰");
+    if (!currentUser) { alert("Faça login para finalizar seu pedido!"); UIManager.open("login", el.loginModal); return; }
+
+    // Loading no botão
+    const finishBtn = document.getElementById("main-finish-btn");
+    if (finishBtn) {
+      finishBtn.disabled = true;
+      finishBtn.textContent = "Preparando... 🍰";
+      finishBtn.style.opacity = "0.7";
+    }
 
     const isRetirar = document.getElementById("retirar-local")?.checked;
     let addr = "";
@@ -1189,42 +1268,54 @@ document.addEventListener("DOMContentLoaded", () => {
     if (modoEnderecoManual) {
       const end = el.manualEndereco?.value?.trim() || "";
       const num = el.manualNumero?.value?.trim()   || "";
-      if (end && num) addr = `${end}, NÂ° ${num} (Manual)`;
+      if (end && num) addr = `${end}, N° ${num} (Manual)`;
     } else {
       const rua   = document.getElementById("endereco-auto")?.value.trim()   || "";
       const num   = document.getElementById("numero-input")?.value.trim()    || "";
       const comp  = document.getElementById("complemento-input")?.value.trim() || "";
       const cepV  = document.getElementById("cep-input")?.value.replace(/\D/g,"") || "";
       if (rua && num) {
-        addr = `${rua}, NÂ° ${num}`;
+        addr = `${rua}, N° ${num}`;
         if (comp) addr += `, Comp: ${comp}`;
         if (cepV.length === 8) addr += ` | CEP: ${cepV}`;
       }
     }
 
     if (isRetirar) {
-      addr = "Retirada na loja: Rua Espanha, 72 - Parque das NaÃ§Ãµes, TrÃªs Marias/MG";
+      addr = "Retirada na loja: Rua Espanha, 72 - Parque das Nações, Três Marias/MG";
     } else if (!addr) {
-      alert("Preencha o endereÃ§o completo (ou marque 'Retirar no Local') para continuar.");
+      alert("Preencha o endereço completo (ou marque 'Retirar no Local') para continuar.");
+      // Restaura botão se der erro
+      if (finishBtn) {
+        finishBtn.disabled = false;
+        finishBtn.textContent = "FINALIZAR PEDIDO 🍰";
+        finishBtn.style.opacity = "";
+      }
       return;
     }
 
     window.finalAddressStringForWhatsApp = addr;
+    // Restaura botão antes de abrir modal
+    if (finishBtn) {
+      finishBtn.disabled = false;
+      finishBtn.textContent = "FINALIZAR PEDIDO 🍰";
+      finishBtn.style.opacity = "";
+    }
     abrirModalPIX();
   };
 
 
   /* =========================================================
-     ðŸ“¦ MEUS PEDIDOS â€” busca no Firestore
+     📦 MEUS PEDIDOS — busca no Firestore
   ========================================================= */
   // Emoji miniatura por nome do produto
   function emojiProduto(nome) {
     const n = (nome || "").toLowerCase();
-    if (n.includes("brigadeiro"))  return "ðŸ«";
-    if (n.includes("prestÃ­gio") || n.includes("prestigio")) return "ðŸ¥¥";
-    if (n.includes("morango"))     return "ðŸ“";
-    if (n.includes("ninho"))       return "ðŸ¥›";
-    return "ðŸ°";
+    if (n.includes("brigadeiro"))  return "🍫";
+    if (n.includes("prestígio") || n.includes("prestigio")) return "🥥";
+    if (n.includes("morango"))     return "🍓";
+    if (n.includes("ninho"))       return "🥛";
+    return "🍰";
   }
 
   function carregarPedidos(user) {
@@ -1233,7 +1324,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if (!lista) return;
     lista.innerHTML = '<p style="text-align:center;color:#999;padding:20px;">Carregando seus pedidos...</p>';
 
-    // Query sem orderBy para evitar erro de Ã­ndice â€” ordena no cliente
+    // Query sem orderBy para evitar erro de índice — ordena no cliente
     db.collection("Pedidos")
       .where("userId", "==", user.uid)
       .limit(20)
@@ -1248,8 +1339,8 @@ document.addEventListener("DOMContentLoaded", () => {
         if (snapshot.empty) {
           lista.innerHTML = `
             <div style="text-align:center;padding:30px 10px;">
-              <div style="font-size:3rem;margin-bottom:10px;">ðŸ°</div>
-              <p style="color:#999;font-size:.95rem;">VocÃª ainda nÃ£o fez nenhum pedido.</p>
+              <div style="font-size:3rem;margin-bottom:10px;">🍰</div>
+              <p style="color:#999;font-size:.95rem;">Você ainda não fez nenhum pedido.</p>
               <p style="color:#E1A95F;font-size:.85rem;font-weight:600;">Que tal experimentar um bolinho hoje?</p>
             </div>`;
           return;
@@ -1264,42 +1355,42 @@ document.addEventListener("DOMContentLoaded", () => {
         lista.innerHTML = docs.map(doc => {
           const d = doc.data();
 
-          // Data â€” campo pode ser Timestamp ou string ISO
-          let dataHora = "â€”";
+          // Data — campo pode ser Timestamp ou string ISO
+          let dataHora = "—";
           if (d.criadoEm?.toDate) {
             const dt = d.criadoEm.toDate();
-            dataHora = dt.toLocaleDateString("pt-BR") + " Ã s " + dt.toLocaleTimeString("pt-BR",{hour:"2-digit",minute:"2-digit"});
+            dataHora = dt.toLocaleDateString("pt-BR") + " às " + dt.toLocaleTimeString("pt-BR",{hour:"2-digit",minute:"2-digit"});
           } else if (d.data) {
             try {
               const dt = new Date(d.data);
-              if (!isNaN(dt)) dataHora = dt.toLocaleDateString("pt-BR") + " Ã s " + dt.toLocaleTimeString("pt-BR",{hour:"2-digit",minute:"2-digit"});
+              if (!isNaN(dt)) dataHora = dt.toLocaleDateString("pt-BR") + " às " + dt.toLocaleTimeString("pt-BR",{hour:"2-digit",minute:"2-digit"});
             } catch(e) { dataHora = d.data; }
           }
 
-          // Itens â€” pode ser array em itensObj ou string em itens
+          // Itens — pode ser array em itensObj ou string em itens
           const itens = Array.isArray(d.itensObj) ? d.itensObj
                       : Array.isArray(d.itens)    ? d.itens
                       : [];
 
-          // Grade de miniaturas (mÃ¡x 4 emojis)
+          // Grade de miniaturas (máx 4 emojis)
           const emojis = itens.slice(0, 4).map(i => emojiProduto(i.nome));
           const miniatura = emojis.length > 0
             ? `<div style="display:flex;gap:4px;margin-bottom:8px;flex-wrap:wrap;">
                 ${emojis.map(e => `<span style="font-size:1.6rem;background:#fdf8ef;border-radius:8px;width:36px;height:36px;display:flex;align-items:center;justify-content:center;">${e}</span>`).join("")}
                </div>`
-            : `<div style="font-size:2rem;margin-bottom:8px;">ðŸ°</div>`;
+            : `<div style="font-size:2rem;margin-bottom:8px;">🍰</div>`;
 
           // Texto dos itens
           const itensTexto = itens.length > 0
-            ? itens.map(i => `${i.nome}${i.qtd > 1 ? ` x${i.qtd}` : ""}`).join(" â€¢ ")
+            ? itens.map(i => `${i.nome}${i.qtd > 1 ? ` x${i.qtd}` : ""}`).join(" • ")
             : (d.resumo || "Pedido");
 
           const total  = d.total  ? money(d.total)  : "";
           const status = d.status || "enviado";
           const cores  = { enviado:"#E1A95F", preparando:"#1976d2", pronto:"#2e7d32", entregue:"#4caf50", cancelado:"#d32f2f" };
           const cor    = cores[status] || "#999";
-          const icones = { enviado:"ðŸ“¨", preparando:"ðŸ‘©â€ðŸ³", pronto:"âœ…", entregue:"ðŸŽ‰", cancelado:"âŒ" };
-          const icone  = icones[status] || "ðŸ“¦";
+          const icones = { enviado:"📨", preparando:"👩‍🍳", pronto:"✅", entregue:"🎉", cancelado:"❌" };
+          const icone  = icones[status] || "📦";
 
           return `
             <div style="background:#fff;border-radius:14px;padding:14px;margin-bottom:12px;border:1px solid rgba(225,169,95,.25);box-shadow:0 2px 8px rgba(0,0,0,.06);">
@@ -1320,8 +1411,42 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   /* =========================================================
-     ðŸŽ RECOMPENSAS â€” busca no Firestore
+     🎁 RECOMPENSAS — busca no Firestore
   ========================================================= */
+  // Tabela de recompensas progressiva — lida do Firebase settings/degust_config
+  // Fallback local caso o documento não exista ainda
+  const RECOMPENSAS_DEFAULT = [
+    { pedido: 5,  tipo: "cupom",  descricao: "Cupom de R$ 5,00 no próximo pedido" },
+    { pedido: 10, tipo: "cupom",  descricao: "Cupom de R$ 10,00 no próximo pedido" },
+    { pedido: 15, tipo: "brinde", descricao: "1 Bolo no Pote grátis" },
+    { pedido: 20, tipo: "cupom",  descricao: "Cupom de R$ 15,00 no próximo pedido" },
+    { pedido: 25, tipo: "brinde", descricao: "2 Bolos no Pote grátis" },
+    { pedido: 30, tipo: "combo",  descricao: "Combo especial surpresa" }
+  ];
+
+  let tabelaRecompensas = RECOMPENSAS_DEFAULT;
+
+  // Carrega config do Firebase uma vez
+  function carregarConfigRecompensas() {
+    if (!db) return;
+    db.collection("settings").doc("degust_config").get()
+      .then(doc => {
+        if (doc.exists && doc.data().recompensas) {
+          tabelaRecompensas = doc.data().recompensas;
+        }
+      })
+      .catch(() => {}); // usa fallback se falhar
+  }
+
+  function proximaRecompensa(bolos) {
+    const prox = tabelaRecompensas.find(r => r.pedido > bolos);
+    return prox || null;
+  }
+
+  function recompensasDesbloqueadas(bolos) {
+    return tabelaRecompensas.filter(r => r.pedido <= bolos);
+  }
+
   function carregarRecompensas(user) {
     if (!db || !user) return;
     const contadorEl  = document.getElementById("contador-valor");
@@ -1331,43 +1456,51 @@ document.addEventListener("DOMContentLoaded", () => {
     const historicoEl = document.getElementById("historicoRecompensas");
     if (!contadorEl) return;
 
+    // Usa campos prefixados degust_ para não conflitar com lanchonete
     db.collection("Usuarios").doc(user.uid).get()
       .then(doc => {
         const dados = doc.exists ? doc.data() : {};
-        const bolos    = dados.bolosPedidos  || 0;
-        const meta     = dados.metaFidelidade || 5;
-        const pct      = Math.min(100, (bolos / meta) * 100);
-        const faltam   = Math.max(0, meta - bolos);
+        const bolos   = dados.degust_bolosPedidos || 0;
+        const proxRec = proximaRecompensa(bolos);
+        const meta    = proxRec ? proxRec.pedido : (tabelaRecompensas[tabelaRecompensas.length-1]?.pedido || 30);
+        const ultimaMeta = tabelaRecompensas.filter(r => r.pedido <= bolos).pop();
+        const baseCalculo = ultimaMeta ? ultimaMeta.pedido : 0;
+        const pct = Math.min(100, ((bolos - baseCalculo) / (meta - baseCalculo)) * 100);
+        const faltam = Math.max(0, meta - bolos);
 
         if (contadorEl) contadorEl.textContent = bolos;
         if (barraEl)    barraEl.style.width = `${pct}%`;
         if (mensagemEl) {
-          mensagemEl.textContent = bolos >= meta
-            ? "ðŸŽ‰ ParabÃ©ns! VocÃª ganhou uma recompensa!"
-            : `Faltam ${faltam} bolo${faltam !== 1 ? "s" : ""} para sua prÃ³xima recompensa!`;
+          if (!proxRec) {
+            mensagemEl.innerHTML = `🏆 <strong>Uau! Você completou todas as recompensas!</strong>`;
+          } else if (faltam === 0) {
+            mensagemEl.innerHTML = `🎉 <strong>Você ganhou: ${proxRec.descricao}!</strong>`;
+          } else {
+            mensagemEl.innerHTML = `Faltam <strong>${faltam} pedido${faltam !== 1 ? "s" : ""}</strong> para: <em>${proxRec.descricao}</em>`;
+          }
         }
 
-        // Recompensas disponÃ­veis
-        const recompensas = dados.recompensasDisponiveis || [];
+        // Recompensas disponíveis para resgate
+        const disponiveis = dados.degust_recompensasDisponiveis || [];
         if (listaEl) {
-          listaEl.innerHTML = recompensas.length
-            ? recompensas.map(r => `
+          listaEl.innerHTML = disponiveis.length
+            ? disponiveis.map(r => `
                 <div style="background:#fff;border:1px solid var(--dourado);border-radius:10px;padding:12px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center;">
-                  <span style="font-weight:600;color:#4B2C20;">ðŸŽ ${r.descricao || r}</span>
-                  <span style="font-size:.75rem;color:#E1A95F;font-weight:700;">DISPONÃVEL</span>
+                  <span style="font-weight:600;color:#4B2C20;">🎁 ${r.descricao || r}</span>
+                  <span style="font-size:.75rem;color:#E1A95F;font-weight:700;">DISPONÍVEL</span>
                 </div>`).join("")
-            : '<p style="color:#999;text-align:center;font-size:.9rem;">Nenhuma recompensa disponÃ­vel no momento.</p>';
+            : '<p style="color:#999;text-align:center;font-size:.9rem;">Nenhuma recompensa disponível no momento.</p>';
         }
 
-        // HistÃ³rico
-        const historico = dados.historicoRecompensas || [];
+        // Histórico
+        const historico = dados.degust_historicoRecompensas || [];
         if (historicoEl) {
           historicoEl.innerHTML = historico.length
             ? historico.map(h => `
                 <div style="padding:8px 0;border-bottom:1px solid #eee;font-size:.85rem;color:#666;">
-                  ðŸ† ${h.descricao || h} â€” <span style="color:#4B2C20;">${h.data || ""}</span>
+                  🏆 ${h.descricao || h} — <span style="color:#4B2C20;">${h.data || ""}</span>
                 </div>`).join("")
-            : '<p style="color:#999;text-align:center;font-size:.9rem;">VocÃª ainda nÃ£o resgatou prÃªmios.</p>';
+            : '<p style="color:#999;text-align:center;font-size:.9rem;">Você ainda não resgatou prêmios.</p>';
         }
       })
       .catch(err => {
@@ -1378,7 +1511,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
   /* =========================================================
-     ðŸ“Š PAINEL DE RELATÃ“RIOS â€” Admin Only
+     📊 PAINEL DE RELATÓRIOS — Admin Only
   ========================================================= */
   function abrirRelatorios() {
     let overlay = document.getElementById("relatoriosOverlay");
@@ -1389,12 +1522,12 @@ document.addEventListener("DOMContentLoaded", () => {
       overlay.innerHTML = `
         <div class="painel-box" style="max-width:560px;">
           <div class="painel-head">
-            <span>ðŸ“Š RelatÃ³rios Degust</span>
-            <button class="fechar-painel" id="fechar-relatorios" type="button">âœ–</button>
+            <span>📊 Relatórios Degust</span>
+            <button class="fechar-painel" id="fechar-relatorios" type="button">✖</button>
           </div>
           <div class="painel-body">
 
-            <!-- Filtro de perÃ­odo -->
+            <!-- Filtro de período -->
             <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px;">
               <button class="rel-filtro rel-ativo" data-dias="7"  type="button">7 dias</button>
               <button class="rel-filtro" data-dias="30" type="button">30 dias</button>
@@ -1410,19 +1543,19 @@ document.addEventListener("DOMContentLoaded", () => {
 
             <!-- Cards de resumo -->
             <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px;" id="rel-cards">
-              <div class="rel-card"><div class="rel-card-val" id="rel-total-vendas">â€”</div><div class="rel-card-label">Total em Vendas</div></div>
-              <div class="rel-card"><div class="rel-card-val" id="rel-num-pedidos">â€”</div><div class="rel-card-label">Pedidos</div></div>
-              <div class="rel-card"><div class="rel-card-val" id="rel-ticket-medio">â€”</div><div class="rel-card-label">Ticket MÃ©dio</div></div>
-              <div class="rel-card"><div class="rel-card-val" id="rel-mais-vendido">â€”</div><div class="rel-card-label">Mais Vendido</div></div>
+              <div class="rel-card"><div class="rel-card-val" id="rel-total-vendas">—</div><div class="rel-card-label">Total em Vendas</div></div>
+              <div class="rel-card"><div class="rel-card-val" id="rel-num-pedidos">—</div><div class="rel-card-label">Pedidos</div></div>
+              <div class="rel-card"><div class="rel-card-val" id="rel-ticket-medio">—</div><div class="rel-card-label">Ticket Médio</div></div>
+              <div class="rel-card"><div class="rel-card-val" id="rel-mais-vendido">—</div><div class="rel-card-label">Mais Vendido</div></div>
             </div>
 
-            <!-- Lista de pedidos do perÃ­odo -->
-            <h4 style="color:var(--marrom);margin:0 0 10px;font-size:.95rem;">ðŸ“‹ Pedidos no PerÃ­odo</h4>
+            <!-- Lista de pedidos do período -->
+            <h4 style="color:var(--marrom);margin:0 0 10px;font-size:.95rem;">📋 Pedidos no Período</h4>
             <div id="rel-lista-pedidos" style="max-height:260px;overflow-y:auto;"></div>
 
             <!-- Exportar -->
             <button id="rel-exportar" type="button" style="width:100%;margin-top:14px;background:var(--dourado);color:var(--marrom);border:none;padding:13px;border-radius:10px;font-weight:800;font-size:.95rem;cursor:pointer;">
-              ðŸ“¥ Exportar CSV
+              📥 Exportar CSV
             </button>
           </div>
         </div>`;
@@ -1434,7 +1567,7 @@ document.addEventListener("DOMContentLoaded", () => {
       });
       overlay.addEventListener("click", e => { if (e.target === overlay) overlay.classList.remove("active"); });
 
-      // Filtros de perÃ­odo
+      // Filtros de período
       overlay.querySelectorAll(".rel-filtro").forEach(btn => {
         btn.addEventListener("click", () => {
           overlay.querySelectorAll(".rel-filtro").forEach(b => b.classList.remove("rel-ativo"));
@@ -1452,7 +1585,7 @@ document.addEventListener("DOMContentLoaded", () => {
         });
       });
 
-      // BotÃ£o filtrar personalizado
+      // Botão filtrar personalizado
       document.getElementById("rel-btn-custom").addEventListener("click", () => {
         const di = document.getElementById("rel-data-inicio").value;
         const df = document.getElementById("rel-data-fim").value;
@@ -1465,13 +1598,13 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     overlay.classList.add("active");
-    // Carrega 7 dias por padrÃ£o
+    // Carrega 7 dias por padrão
     const fim    = new Date();
     const inicio = new Date(); inicio.setDate(inicio.getDate() - 7);
     buscarRelatorio(inicio, fim);
   }
 
-  let _pedidosRelatorio = []; // cache para exportaÃ§Ã£o
+  let _pedidosRelatorio = []; // cache para exportação
 
   function buscarRelatorio(inicio, fim) {
     const listaEl = document.getElementById("rel-lista-pedidos");
@@ -1486,7 +1619,7 @@ document.addEventListener("DOMContentLoaded", () => {
       .then(snap => {
         _pedidosRelatorio = snap.docs.map(d => ({ id: d.id, ...d.data() }));
 
-        // MÃ©tricas
+        // Métricas
         const totalVendas  = _pedidosRelatorio.reduce((s, p) => s + (Number(p.total) || 0), 0);
         const numPedidos   = _pedidosRelatorio.length;
         const ticketMedio  = numPedidos > 0 ? totalVendas / numPedidos : 0;
@@ -1499,7 +1632,7 @@ document.addEventListener("DOMContentLoaded", () => {
             contagem[k] = (contagem[k] || 0) + (i.qtd || 1);
           });
         });
-        const maisVendido = Object.entries(contagem).sort((a,b) => b[1]-a[1])[0]?.[0] || "â€”";
+        const maisVendido = Object.entries(contagem).sort((a,b) => b[1]-a[1])[0]?.[0] || "—";
 
         document.getElementById("rel-total-vendas").textContent  = money(totalVendas);
         document.getElementById("rel-num-pedidos").textContent   = numPedidos;
@@ -1507,7 +1640,7 @@ document.addEventListener("DOMContentLoaded", () => {
         document.getElementById("rel-mais-vendido").textContent  = maisVendido.split(" ")[1] || maisVendido;
 
         if (numPedidos === 0) {
-          listaEl.innerHTML = '<p style="text-align:center;color:#999;padding:16px;">Nenhum pedido neste perÃ­odo.</p>';
+          listaEl.innerHTML = '<p style="text-align:center;color:#999;padding:16px;">Nenhum pedido neste período.</p>';
           return;
         }
 
@@ -1515,8 +1648,8 @@ document.addEventListener("DOMContentLoaded", () => {
           const dt = p.criadoEm?.toDate?.();
           const dataHora = dt
             ? dt.toLocaleDateString("pt-BR") + " " + dt.toLocaleTimeString("pt-BR",{hour:"2-digit",minute:"2-digit"})
-            : "â€”";
-          const itens = (p.itens||[]).map(i=>`${i.nome} x${i.qtd||1}`).join(", ") || p.resumo || "â€”";
+            : "—";
+          const itens = (p.itens||[]).map(i=>`${i.nome} x${i.qtd||1}`).join(", ") || p.resumo || "—";
           const cor = {enviado:"#E1A95F",preparando:"#1976d2",pronto:"#2e7d32",entregue:"#4caf50",cancelado:"#d32f2f"}[p.status||"enviado"] || "#999";
           return `<div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid #f0e8d8;gap:8px;flex-wrap:wrap;">
             <div style="flex:1;min-width:0;">
@@ -1524,14 +1657,14 @@ document.addEventListener("DOMContentLoaded", () => {
               <div style="font-size:.82rem;color:#4B2C20;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${itens}</div>
             </div>
             <div style="text-align:right;flex-shrink:0;">
-              <div style="font-weight:800;color:#C8282D;font-size:.9rem;">${p.total ? money(p.total) : "â€”"}</div>
+              <div style="font-weight:800;color:#C8282D;font-size:.9rem;">${p.total ? money(p.total) : "—"}</div>
               <div style="font-size:.7rem;font-weight:700;color:${cor};text-transform:uppercase;">${p.status||"enviado"}</div>
             </div>
           </div>`;
         }).join("");
       })
       .catch(err => {
-        console.error("Erro relatÃ³rio:", err);
+        console.error("Erro relatório:", err);
         listaEl.innerHTML = '<p style="text-align:center;color:#c62828;padding:16px;">Erro ao carregar dados.</p>';
       });
   }
@@ -1543,17 +1676,17 @@ document.addEventListener("DOMContentLoaded", () => {
       ..._pedidosRelatorio.map(p => {
         const dt = p.criadoEm?.toDate?.();
         return [
-          dt ? dt.toLocaleDateString("pt-BR") : "â€”",
-          dt ? dt.toLocaleTimeString("pt-BR",{hour:"2-digit",minute:"2-digit"}) : "â€”",
-          p.nomeCliente || p.email || "â€”",
-          (p.itens||[]).map(i=>`${i.nome} x${i.qtd||1}`).join(" | ") || p.resumo || "â€”",
+          dt ? dt.toLocaleDateString("pt-BR") : "—",
+          dt ? dt.toLocaleTimeString("pt-BR",{hour:"2-digit",minute:"2-digit"}) : "—",
+          p.nomeCliente || p.email || "—",
+          (p.itens||[]).map(i=>`${i.nome} x${i.qtd||1}`).join(" | ") || p.resumo || "—",
           (p.total || 0).toFixed(2).replace(".",","),
           p.status || "enviado"
         ];
       })
     ];
     const csv  = linhas.map(r => r.map(v => `"${String(v).replace(/"/g,'""')}"`).join(";")).join("\n");
-    const blob = new Blob(["ï»¿" + csv], { type: "text/csv;charset=utf-8;" });
+    const blob = new Blob(["﻿" + csv], { type: "text/csv;charset=utf-8;" });
     const url  = URL.createObjectURL(blob);
     const a    = document.createElement("a");
     a.href = url; a.download = `degust-relatorio-${new Date().toISOString().slice(0,10)}.csv`;
@@ -1561,13 +1694,13 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   /* =========================================================
-     ðŸ•°ï¸ STATUS DA LOJA
+     🕰️ STATUS DA LOJA
   ========================================================= */
   const atualizarStatusLoja = () => {
     const hora = new Date().getHours();
     const aberto = hora >= 14 && hora < 22;
     if (el.statusBanner) {
-      el.statusBanner.textContent = aberto ? "ðŸŸ¢ Aberto â€” PeÃ§a sua doÃ§ura agora!" : "ðŸ”´ Fechado â€” Abrimos hoje Ã s 14h";
+      el.statusBanner.textContent = aberto ? "🟢 Aberto — Peça sua doçura agora!" : "🔴 Fechado — Abrimos hoje às 14h";
       el.statusBanner.className   = `status-banner ${aberto ? "open" : "closed"}`;
     }
   };
@@ -1576,7 +1709,7 @@ document.addEventListener("DOMContentLoaded", () => {
   setInterval(atualizarStatusLoja, 60000);
 
   /* =========================================================
-     ðŸª COOKIES â€” CORRIGIDO v11.0
+     🍪 COOKIES — CORRIGIDO v11.0
      Problema anterior: display:flex !important no CSS impedia
      que o JS fechasse com display:none ou classList.remove
   ========================================================= */
@@ -1585,31 +1718,90 @@ document.addEventListener("DOMContentLoaded", () => {
 
   if (cookieBanner && cookieAcceptBtn) {
     if (localStorage.getItem("degust-cookies-accepted")) {
-      // JÃ¡ aceitou antes â€” mantÃ©m oculto
+      // Já aceitou antes — mantém oculto
       cookieBanner.style.display = "none";
     } else {
-      // Aparece apÃ³s 2s via classe .show (sem !important no CSS)
+      // Aparece após 2s via classe .show (sem !important no CSS)
       setTimeout(() => cookieBanner.classList.add("show"), 2000);
     }
 
     cookieAcceptBtn.addEventListener("click", () => {
       localStorage.setItem("degust-cookies-accepted", "true");
       cookieBanner.classList.remove("show");
-      // Aguarda a transiÃ§Ã£o terminar e entÃ£o oculta definitivamente
+      // Aguarda a transição terminar e então oculta definitivamente
       setTimeout(() => { cookieBanner.style.display = "none"; }, 450);
-      popupAdd("PreferÃªncias salvas! ðŸª");
+      popupAdd("Preferências salvas! 🍪");
     });
   }
 
   /* =========================================================
-     ðŸ INICIALIZAÃ‡ÃƒO
+     🏁 INICIALIZAÇÃO
   ========================================================= */
+
+  /* ── INDICADOR ONLINE/OFFLINE ── */
+  function atualizarStatusOnline() {
+    const dot = document.getElementById("status-dot");
+    if (!dot) return;
+    if (navigator.onLine) {
+      dot.className = "status-dot online";
+      dot.textContent = "Online";
+      sincronizarPendentes();
+    } else {
+      dot.className = "status-dot offline";
+      dot.textContent = "Offline";
+    }
+  }
+  window.addEventListener("online",  atualizarStatusOnline);
+  window.addEventListener("offline", atualizarStatusOnline);
+
+
+  /* =========================================================
+     🏷️ FILTROS POR CATEGORIA — Atualização 2
+  ========================================================= */
+  function iniciarFiltrosCategorias() {
+    const filterBtns = document.querySelectorAll(".filter-btn");
+    if (!filterBtns.length) return;
+
+    filterBtns.forEach(btn => {
+      btn.addEventListener("click", () => {
+        filterBtns.forEach(b => b.classList.remove("ativo"));
+        btn.classList.add("ativo");
+        const filtro = btn.dataset.filter;
+        filtrarPorCategoria(filtro);
+      });
+    });
+  }
+
+  function filtrarPorCategoria(filtro) {
+    const sections = document.querySelectorAll(".menu-section[data-categoria]");
+    const cards    = document.querySelectorAll(".card[data-categoria]");
+
+    if (filtro === "todos") {
+      sections.forEach(s => s.style.display = "");
+      cards.forEach(c => c.style.display = "");
+      return;
+    }
+
+    sections.forEach(s => {
+      s.style.display = s.dataset.categoria === filtro ? "" : "none";
+    });
+    cards.forEach(card => {
+      card.style.display = card.dataset.categoria === filtro ? "" : "none";
+    });
+  }
+
   inicializarFirebase();
   resetListeners();
   renderMiniCart();
-  // Checa status da loja apÃ³s Firebase inicializar
-  setTimeout(() => checarStatusLoja(), 800);
+  // Checa status da loja após Firebase inicializar
+  setTimeout(() => {
+    checarStatusLoja();
+    carregarConfigRecompensas();
+    sincronizarPendentes();
+    atualizarStatusOnline();
+    iniciarFiltrosCategorias();
+  }, 800);
 
-  console.log("%cðŸ° Degust Bolos no Pote v11.4 â€” Sistema Carregado!", "color:#E1A95F;font-size:14px;font-weight:bold;");
+  console.log("%c🍰 Degust Bolos no Pote v13.0 — Atualização 1 e 2 Carregadas!", "color:#E1A95F;font-size:14px;font-weight:bold;");
 
 }); // fim DOMContentLoaded
