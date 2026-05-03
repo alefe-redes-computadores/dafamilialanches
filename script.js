@@ -1,8 +1,10 @@
 /* =========================================================
-   🍰 Degust v13.0 – FINAL
+   🍰 Degust v13.3 – FINAL (CORRIGIDO)
    - UI blindada, PIX, Firebase
    - Persistência do carrinho (localStorage)
    - Sistema de Recompensas progressivo (metas 5,10,15,20,25,30)
+   - Correção: RECOMPENSAS_CONFIG -> recompensasMetas
+   - Correção: botão finalizar sem duplicação
    ========================================================= */
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -206,9 +208,9 @@ document.addEventListener("DOMContentLoaded", () => {
   const AVISO_PIX = `
     <div style="background:#fff3cd;border:2px solid #ffc107;border-radius:12px;padding:14px;margin-bottom:14px;text-align:left;">
       <p style="margin:0 0 8px;font-size:.95rem;font-weight:800;color:#856404;">📋 SIGA ESSES PASSOS:</p>
-      <p style="margin:0 0 6px;font-size:.85rem;color:#333;"><b>1️⃣️</b> Clique em <b>"Enviar Pedido no WhatsApp"</b></p>
-      <p style="margin:0 0 6px;font-size:.85rem;color:#333;"><b>2️⃣️</b> Faça o PIX no valor acima</p>
-      <p style="margin:0;font-size:.85rem;color:#333;"><b>3️⃣️</b> Mande o comprovante <b>na mesma conversa</b></p>
+      <p style="margin:0 0 6px;font-size:.85rem;color:#333;"><b>1️⃣</b> Clique em <b>"Enviar Pedido no WhatsApp"</b></p>
+      <p style="margin:0 0 6px;font-size:.85rem;color:#333;"><b>2️⃣</b> Faça o PIX no valor acima</p>
+      <p style="margin:0;font-size:.85rem;color:#333;"><b>3️⃣</b> Mande o comprovante <b>na mesma conversa</b></p>
     </div>
     <div style="background:#fff0f0;border:1px solid #ffcdd2;border-radius:8px;padding:10px;margin-bottom:14px;text-align:center;">
       <p style="margin:0;font-size:.8rem;color:#c62828;font-weight:700;">⚠️ Sem o pedido no WhatsApp não saberemos do seu pedido!</p>
@@ -254,6 +256,7 @@ document.addEventListener("DOMContentLoaded", () => {
         document.body.removeChild(ta);
       }
       pixCopied = true;
+      alert("✅ Chave PIX copiada! Agora clique em 'Enviar Pedido no WhatsApp' e envie o comprovante após o pagamento.");
       const orig = pixBtnCopy.textContent;
       pixBtnCopy.textContent = "Chave Copiada! ✓";
       pixBtnCopy.style.background = "#4CAF50";
@@ -314,11 +317,9 @@ document.addEventListener("DOMContentLoaded", () => {
           data:      new Date().toISOString(),
           criadoEm:  firebase.firestore.FieldValue.serverTimestamp()
         }).catch(err => console.error("Erro ao salvar pedido:", err));
-        // incrementar contador de pedidos para recompensas
         await incrementarContadorPedidos(currentUser.uid);
       }
 
-      // limpar carrinho após finalizar
       cart = [];
       renderMiniCart();
       saveCart();
@@ -658,7 +659,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     bindMiniCartButtons();
     enhanceMiniCartUI();
-    saveCart(); // Salva sempre que renderizar
+    saveCart();
   }
 
   const getCartSubtotal = () => cart.reduce((s, i) => s + (Number(i.preco) || 0) * (Number(i.qtd) || 0), 0);
@@ -843,11 +844,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
     db.collection("Usuarios").doc(user.uid).get().then(doc => {
       const dados  = doc.exists ? doc.data() : {};
-      const bolos  = dados.degust_bolosPedidos || 0;
-      const prox   = RECOMPENSAS_CONFIG.find(r => r.pedido > bolos);
-      const meta   = prox ? prox.pedido : RECOMPENSAS_CONFIG[RECOMPENSAS_CONFIG.length-1].pedido;
-      const base   = RECOMPENSAS_CONFIG.filter(r => r.pedido <= bolos).pop()?.pedido || 0;
-      const pct    = Math.min(100, ((bolos - base) / (meta - base)) * 100);
+      const bolos  = dados.bolosPedidos || 0;
+      // Usar recompensasMetas em vez de RECOMPENSAS_CONFIG
+      const prox   = recompensasMetas.find(r => r.pedido > bolos);
+      const meta   = prox ? prox.pedido : (recompensasMetas.length ? recompensasMetas[recompensasMetas.length-1].pedido : 5);
+      const base   = recompensasMetas.filter(r => r.pedido <= bolos).pop()?.pedido || 0;
+      const pct    = meta === base ? 100 : Math.min(100, ((bolos - base) / (meta - base)) * 100);
       const faltam = Math.max(0, meta - bolos);
 
       if (contadorEl) contadorEl.textContent = bolos;
@@ -856,11 +858,11 @@ document.addEventListener("DOMContentLoaded", () => {
         if (!prox) mensagemEl.innerHTML = `🏆 <strong>Você completou todas as recompensas!</strong>`;
         else mensagemEl.innerHTML = `Faltam <strong>${faltam} pedido${faltam!==1?"s":""}</strong> para: <em>${prox.descricao}</em>`;
       }
-      const disponiveis = dados.degust_recompensasDisponiveis || [];
+      const disponiveis = dados.recompensasDisponiveis || [];
       if (listaEl) listaEl.innerHTML = disponiveis.length
         ? disponiveis.map(r=>`<div style="background:#fff;border:1px solid var(--dourado);border-radius:10px;padding:12px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center;"><span style="font-weight:600;color:#4B2C20;">🎁 ${r.descricao||r}</span><span style="font-size:.75rem;color:#E1A95F;font-weight:700;">DISPONÍVEL</span></div>`).join("")
         : '<p style="color:#999;text-align:center;font-size:.9rem;">Nenhuma recompensa disponível.</p>';
-      const historico = dados.degust_historicoRecompensas || [];
+      const historico = dados.historicoRecompensas || [];
       if (historicoEl) historicoEl.innerHTML = historico.length
         ? historico.map(h=>`<div style="padding:8px 0;border-bottom:1px solid #eee;font-size:.85rem;color:#666;">🏆 ${h.descricao||h} — <span style="color:#4B2C20;">${h.data||""}</span></div>`).join("")
         : '<p style="color:#999;text-align:center;font-size:.9rem;">Você ainda não resgatou prêmios.</p>';
@@ -898,7 +900,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  // status da loja (ignorar bolinha por enquanto)
+  // status da loja
   function checarStatusLoja() {
     if (!db) return;
     db.collection("settings").doc("degust_status").onSnapshot(doc => {
@@ -1098,8 +1100,8 @@ document.addEventListener("DOMContentLoaded", () => {
     if (currentUser && db) {
       db.collection("Usuarios").doc(currentUser.uid).get()
         .then(doc => {
-          const b = doc.exists ? (doc.data().degust_bolosPedidos||0) : 0;
-          const p = RECOMPENSAS_CONFIG.find(r => r.pedido > b);
+          const b = doc.exists ? (doc.data().bolosPedidos||0) : 0;
+          const p = recompensasMetas.find(r => r.pedido > b);
           popupAdd(p && (p.pedido-b) <= 2 ? `⭐ Falta${p.pedido-b===1?"":"m"} ${p.pedido-b} para: ${p.descricao}!` : `${_n} adicionado! 🍰`);
         }).catch(()=> popupAdd(`${_n} adicionado! 🍰`));
     } else { popupAdd(`${_n} adicionado! 🍰`); }
@@ -1256,12 +1258,16 @@ document.addEventListener("DOMContentLoaded", () => {
           <p style="margin:0;font-size:.72rem;color:#8d6e63;">Acesse pelo menu lateral ou pelo seu perfil</p>
         </div>
       </div>
-      <button id="main-finish-btn" type="button" style="width:100%;background:#4caf50;color:#fff;border:none;padding:15px;border-radius:10px;font-weight:bold;font-size:1.1rem;cursor:pointer;margin-top:10px;box-shadow:0 4px 10px rgba(76,175,80,.3);">
-        FINALIZAR PEDIDO 🍰
-      </button>
     `;
 
-    document.getElementById("main-finish-btn")?.addEventListener("click", () => window.fecharPedido());
+    // CORREÇÃO: não criar novo botão, apenas conectar o existente
+    const finishBtn = document.getElementById("main-finish-btn");
+    if (finishBtn) {
+      // Remove listeners antigos para evitar duplicação
+      const newBtn = finishBtn.cloneNode(true);
+      finishBtn.parentNode.replaceChild(newBtn, finishBtn);
+      newBtn.addEventListener("click", () => window.fecharPedido());
+    }
   }
 
   window.fecharPedido = async function () {
@@ -1364,7 +1370,7 @@ document.addEventListener("DOMContentLoaded", () => {
             : `<div style="font-size:2rem;margin-bottom:8px;">🍰</div>`;
 
           const itensTexto = itens.length > 0
-            ? itens.map(i => `${i.nome}${i.qtd > 1 ? ` x${i.qtd}` : ""}`).join(" • ")
+            ? itens.map(i => `${i.nome || "Item"}${i.qtd > 1 ? ` x${i.qtd}` : ""}`).join(" • ")
             : (d.resumo || "Pedido");
 
           const total  = d.total  ? money(d.total)  : "";
@@ -1511,7 +1517,7 @@ document.addEventListener("DOMContentLoaded", () => {
         listaEl.innerHTML = _pedidosRelatorio.map(p => {
           const dt = p.criadoEm?.toDate?.();
           const dataHora = dt ? dt.toLocaleDateString("pt-BR") + " " + dt.toLocaleTimeString("pt-BR",{hour:"2-digit",minute:"2-digit"}) : "—";
-          const itens = (p.itens||[]).map(i=>`${i.nome} x${i.qtd||1}`).join(", ") || p.resumo || "—";
+          const itens = (p.itens||[]).map(i=>`${i.nome || "Item"} x${i.qtd||1}`).join(", ") || p.resumo || "—";
           const cores = { enviado:"#E1A95F", preparando:"#1976d2", pronto:"#2e7d32", entregue:"#4caf50", cancelado:"#d32f2f" };
           const cor   = cores[p.status||"enviado"] || "#999";
           return `<div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid #f0e8d8;gap:8px;flex-wrap:wrap;">
@@ -1542,7 +1548,7 @@ document.addEventListener("DOMContentLoaded", () => {
           dt ? dt.toLocaleDateString("pt-BR") : "—",
           dt ? dt.toLocaleTimeString("pt-BR",{hour:"2-digit",minute:"2-digit"}) : "—",
           p.nomeCliente || p.email || "—",
-          (p.itens||[]).map(i=>`${i.nome} x${i.qtd||1}`).join(" | ") || p.resumo || "—",
+          (p.itens||[]).map(i=>`${i.nome || "Item"} x${i.qtd||1}`).join(" | ") || p.resumo || "—",
           (p.total || 0).toFixed(2).replace(".",","),
           p.status || "enviado"
         ];
@@ -1583,11 +1589,11 @@ document.addEventListener("DOMContentLoaded", () => {
   ========================================================= */
   inicializarFirebase();
   resetListeners();
-  loadCart();          // carrega o carrinho salvo
+  loadCart();
   renderMiniCart();
-  carregarMetasRecompensas();   // carrega as metas de recompensa
+  carregarMetasRecompensas();
   setTimeout(() => checarStatusLoja(), 800);
 
-  console.log("%c🍰 Degust Bolos no Pote v13.0 — Sistema Completo (carrinho persistente + recompensas)", "color:#E1A95F;font-size:14px;font-weight:bold;");
+  console.log("%c🍰 Degust Bolos no Pote v13.3 — Sistema Completo (carrinho persistente + recompensas + PIX corrigido)", "color:#E1A95F;font-size:14px;font-weight:bold;");
 
 });
