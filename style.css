@@ -901,22 +901,26 @@ body.no-scroll { overflow:hidden; }
   padding-bottom: calc(25px + env(safe-area-inset-bottom)) !important;
 }
 
-
-/* --- HEADER REFINADA: FOTO GOOGLE & ALINHAMENTO --- */
-
-/* Ajuste do botão de usuário para aceitar a foto */
+/* --- FIX: BOTÃO DINÂMICO (FOTO OU TEXTO) --- */
 #user-btn {
-  background: rgba(75, 44, 32, 0.1) !important; /* Fundo discreto */
-  color: var(--marrom) !important;
+  background: var(--marrom) !important;
+  color: var(--bege) !important;
   border: none !important;
-  padding: 5px !important; /* Reduzido para focar na foto */
-  border-radius: 50% !important;
-  width: 42px;
-  height: 42px;
-  display: flex;
+  padding: 8px 16px !important; /* Tamanho para o texto "Login" */
+  border-radius: 50px !important;
+  display: flex !important;
   align-items: center;
   justify-content: center;
-  box-shadow: none !important;
+  transition: var(--transition);
+  min-width: 42px;
+  height: 42px;
+}
+
+/* Quando o JS detectar a foto, o botão vira um círculo */
+#user-btn.has-photo {
+  padding: 0 !important;
+  width: 42px;
+  background: transparent !important;
 }
 
 /* A foto do Google redonda na Header */
@@ -928,8 +932,23 @@ body.no-scroll { overflow:hidden; }
   object-fit: cover;
 }
 
-/* Esconde a tagline no mobile para limpar o visual */
+/* --- HEADER CLEAN: FOCO TOTAL NA MARCA --- */
 @media (max-width: 480px) {
-  .header-info p { display: none; }
-  .header-info h1 { font-size: 1.3rem !important; }
+  /* 1. Remove o slogan para dar respiro visual */
+  .header-info p { 
+    display: none !important; 
+  }
+
+  /* 2. Ajusta o nome "Degust" para ficar imponente e centralizado */
+  .header-info h1 { 
+    font-size: 1.45rem !important; 
+    letter-spacing: -0.5px !important;
+    margin: 0 !important;
+    line-height: 1.1 !important;
+  }
+
+  /* 3. Garante que o Logo e o Nome fiquem próximos e organizados */
+  .logo-container {
+    gap: 8px !important;
+  }
 }
