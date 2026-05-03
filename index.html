@@ -22,7 +22,7 @@
 
   <link rel="preconnect" href="https://www.gstatic.com" crossorigin>
   <link rel="preload" as="image" href="logo.png">
-  <link rel="stylesheet" href="style.css?v=11.1" />
+  <link rel="stylesheet" href="style.css?v=13.1" />
 
   <script defer src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
   <script defer src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
@@ -56,6 +56,7 @@
         <h4 class="menu-title">Cardápio</h4>
         <ul class="menu-list">
           <li><a href="#bolos-section" class="menu-link">🍰 Bolos no Pote</a></li>
+          <li><a href="#novidades-section" class="menu-link">✨ Novidades</a></li>
         </ul>
       </div>
 
@@ -113,6 +114,7 @@
       <input type="text" id="search-input" placeholder="🔍 Qual doçura você procura?" autocomplete="off">
     </div>
 
+    <!-- SEÇÃO BOLOS NO POTE -->
     <section class="menu-section" id="bolos-section">
       <h2>🍰 Bolos no Pote</h2>
       <div class="grid">
@@ -164,7 +166,37 @@
       </div>
     </section>
 
-    <!-- MINI-CARRINHO -->
+    <!-- NOVIDADES - SEÇÃO ADICIONADA -->
+    <section class="menu-section" id="novidades-section">
+      <h2>✨ Novidades</h2>
+      <div class="grid">
+        <div class="card" data-name="Bolo de Maracujá" data-price="16.00">
+          <div class="card-badge-wrap"><span class="badge-new">Novo</span></div>
+          <img src="produtos/bombomdemaracuja.png" alt="Bolo de Maracujá" width="120" height="120" loading="lazy">
+          <h3>Maracujá <span class="badge-small">Supremo</span></h3>
+          <p class="price">R$ 16,00</p>
+          <p>Creme de maracujá com pedaços da fruta e ganache branca.</p>
+          <div class="actions">
+            <button class="add-cart" type="button">Adicionar</button>
+            <button class="extras-btn" type="button">Adicionais</button>
+          </div>
+        </div>
+
+        <div class="card" data-name="Bolo de Chocolate Belga" data-price="17.00">
+          <div class="card-badge-wrap"><span class="badge-new">Novo</span></div>
+          <img src="produtos/chocolatudo.png" alt="Chocolate Belga" width="120" height="120" loading="lazy">
+          <h3>Chocolate Belga <span class="badge-small">Premium</span></h3>
+          <p class="price">R$ 17,00</p>
+          <p>Massa 72% cacau com recheio cremoso de chocolate belga.</p>
+          <div class="actions">
+            <button class="add-cart" type="button">Adicionar</button>
+            <button class="extras-btn" type="button">Adicionais</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- MINI-CARRINHO (mesmo conteúdo do original) -->
     <aside id="mini-cart" class="mini-cart" aria-hidden="true">
       <div class="mini-head">
         <h3>🛍 Seu Pedido</h3>
@@ -242,18 +274,14 @@
         </div>
         <div class="footer-copy">
           <p>© 2026 <strong>Degust Bolos no Pote</strong></p>
-          <p><small>v11.1 • Doçura em cada camada 🍰</small></p>
+          <p><small>v13.1 • Doçura em cada camada 🍰</small></p>
         </div>
       </div>
     </footer>
 
   </div><!-- fim .main-content-wrapper -->
 
-  <!-- ============================================================
-       MODAIS E PAINÉIS — TODOS FORA DO WRAPPER
-       position:fixed, começam invisíveis (opacity:0 pointer-events:none)
-  ============================================================= -->
-
+  <!-- MODAIS E PAINÉIS (mesmos do original) -->
   <!-- Modal Adicionais -->
   <div id="extras-modal" class="modal" aria-hidden="true">
     <div class="modal-content" role="dialog" aria-modal="true">
@@ -376,7 +404,7 @@
     <button id="cookie-accept" type="button">Aceitar</button>
   </div>
 
-  <script defer src="script.js?v=11.1"></script>
+  <script defer src="script.js?v=13.1"></script>
   <script defer src="extras.js?v=5.2.2"></script>
   <script>
     if ("serviceWorker" in navigator) {
