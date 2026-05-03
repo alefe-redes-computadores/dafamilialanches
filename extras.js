@@ -1,11 +1,12 @@
 /* =====================================================
    🍰 Degust Bolos no Pote — extras.js v12.1
    Toast animado + miniaturas nos pedidos
+   Sincronizado com os arquivos do GitHub
 ===================================================== */
 
 (function () {
 
-  // 1. INJEÇÃO DE CSS EXTRA PARA TOASTS
+  // 1. INJEÇÃO DE CSS EXTRA PARA TOASTS E MINIATURAS
   (function injectStyles() {
     if (document.getElementById('degust-extras-style')) return;
     const st = document.createElement('style');
@@ -20,11 +21,12 @@
         background-color: #fdf8ef !important;
         margin-bottom: 8px !important;
       }
+      .popup-add span { margin-right: 8px; }
     `;
     document.head.appendChild(st);
   })();
 
-  // 2. ÍCONES CONTEXTUAIS NOS TOASTS
+  // 2. ÍCONES CONTEXTUAIS NOS TOASTS (POPUP-ADD)
   function stylizePopup(el) {
     const msg = el.textContent || "";
     if (el.dataset.processed === msg) return;
@@ -42,7 +44,7 @@
     else if (/Frete|Grátis/i.test(msg))      icon = '🚀';
     else if (/cookie|preferência/i.test(msg)) icon = '🍪';
 
-    el.innerHTML = `<span style="font-size:1.2em">${icon}</span> ${msg}`;
+    el.innerHTML = `<span>${icon}</span> ${msg}`;
     el.dataset.processed = el.textContent;
   }
 
@@ -53,25 +55,20 @@
           stylizePopup(node);
         }
       });
-      m.target && m.target.classList?.contains('popup-add') && stylizePopup(m.target);
     });
   });
-  observer.observe(document.body, { childList: true, subtree: true, characterData: true });
+  observer.observe(document.body, { childList: true, subtree: true });
 
-  // 3. MAPA DE MINIATURAS — todos os produtos
+  // 3. MAPA DE MINIATURAS — SINCRONIZADO COM GITHUB
+  // Mapeia o texto do pedido para o arquivo real na pasta produtos/
   const THUMB_MAP = [
-    { key: 'brigadeiro',  img: 'produtos/brigadeiro.png' },
     { key: 'chocolatudo', img: 'produtos/chocolatudo.png' },
     { key: 'prestígio',   img: 'produtos/prestigio.png' },
     { key: 'prestigio',   img: 'produtos/prestigio.png' },
     { key: 'silvestre',   img: 'produtos/ninhosilvestre.png' },
-    { key: 'geleia',      img: 'produtos/ninhosilvestre.png' },
-    { key: 'morango',     img: 'produtos/ninhosilvestre.png' },
     { key: 'tropical',    img: 'produtos/tropicalcream.png' },
-    { key: 'abacaxi',     img: 'produtos/tropicalcream.png' },
     { key: 'maracujá',    img: 'produtos/bombomdemaracuja.png' },
     { key: 'maracuja',    img: 'produtos/bombomdemaracuja.png' },
-    { key: 'bombom',      img: 'produtos/bombomdemaracuja.png' },
     { key: 'ninho',       img: 'produtos/ninhocremoso.png' },
   ];
 
