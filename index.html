@@ -219,48 +219,41 @@
     </div>
     <div class="mini-list-wrapper"><div class="mini-list"></div></div>
     <div class="mini-foot">
-      <div class="progress-wrapper">
-        <p id="progressText" class="progress-text">Faltam <strong>R$ 80,00</strong> para Frete Grátis 🚀</p>
-        <div class="progress-bar-container"><div id="progressFill" class="progress-fill"></div></div>
+      <div id="progressWrapper" class="progress-wrapper">
+        <p id="progressText" class="progress-text">Carregando...</p>
+        <div class="progress-bar-container">
+          <div id="progressFill" class="progress-fill"></div>
+        </div>
       </div>
       <div class="delivery-system">
         <input type="text" id="cep-input" placeholder="Digite seu CEP" maxlength="9">
-        <button id="btn-calcular-frete">Buscar</button>
+        <button id="btn-calcular-frete" type="button">Buscar</button>
         <input type="text" id="endereco-auto" placeholder="Rua, Bairro — Cidade/UF" readonly>
         <div style="display:flex; gap:8px;">
           <input type="text" id="numero-input" placeholder="Nº" style="flex:1">
           <input type="text" id="complemento-input" placeholder="Complemento" style="flex:2">
         </div>
-        <div style="display:flex; gap:12px; justify-content:center;">
-          <button id="btnNaoSeiCEP" style="background:none; border:none; color:var(--dourado);">Não sei meu CEP</button>
-          <button id="btnManual" style="background:none; border:none; color:var(--dourado);">Endereço Manual</button>
-        </div>
-        <div id="manualArea" style="display:none;">
-          <input type="text" id="manualEndereco" placeholder="Rua e Bairro">
-          <input type="text" id="manualNumero" placeholder="Número">
-          <button id="btnConfirmarEndereco">Confirmar</button>
-        </div>
 
-        <!-- RETIRADA CORRIGIDA (com estrutura do CSS) -->
         <div class="retirar-local-wrapper">
           <label class="checkbox-container-degust">
             <input type="checkbox" id="retirar-local">
             <span class="label-text">Vou retirar na Degust 🍰</span>
           </label>
-          <!-- endereço opcional (pode ser removido se não quiser) -->
-          <div class="retirada-endereco">
-            📍 Rua Espanha, 72 — Parque das Nações, Três Marias/MG
-          </div>
         </div>
 
-        <div style="display:flex; gap:8px; margin:10px 0;">
+        <form id="coupon-form" style="display:flex; gap:8px; margin-top:10px;">
           <input type="text" id="coupon-input" placeholder="Tem um cupom?">
-          <button id="btn-apply-coupon">Aplicar</button>
+          <button type="submit" id="btn-apply-coupon">Aplicar</button>
+        </form>
+        <div id="coupon-message" style="min-height:20px; font-size:0.8rem;"></div>
+        <div id="coupon-discount-row" style="display:none; justify-content:space-between; font-weight:bold; color:var(--vermelho);">
+          <span>Desconto Cupom</span>
+          <span id="cart-discount">R$ 0,00</span>
         </div>
       </div>
-      <button id="main-finish-btn">FINALIZAR PEDIDO 🍰</button>
     </div>
   </aside>
+
 
   <!-- MODAIS -->
   <div id="extras-modal" class="modal">
