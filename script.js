@@ -594,7 +594,7 @@ document.addEventListener("DOMContentLoaded", () => {
       pop.className = "popup-add";
       document.body.appendChild(pop);
     }
-    pop.textContent = msg;
+    pop.innerHTML = msg;
     pop.classList.add("show");
     setTimeout(() => pop.classList.remove("show"), 2000);
   }
@@ -613,10 +613,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
     if (subtotal >= LIMITE_FRETE_GRATIS) {
       progressText.innerHTML = `🎉 <strong>Frete Grátis Liberado!</strong>`;
-      progressFill.style.background = pct >= 100 ? 'linear-gradient(90deg,#4caf50,#2e7d32)' : `linear-gradient(90deg, #E1A95F ${pct}%, #c8a04a 100%)`;
+      progressFill.style.background = `linear-gradient(90deg,#4caf50,#2e7d32)`;
     } else {
       progressText.innerHTML = `Faltam <strong>${money(LIMITE_FRETE_GRATIS - subtotal)}</strong> p/ Frete Grátis`;
-      progressFill.style.background = pct >= 100 ? 'linear-gradient(90deg,#4caf50,#2e7d32)' : `linear-gradient(90deg, #E1A95F ${pct}%, #c8a04a 100%)`;
+      progressFill.style.background = `linear-gradient(90deg, #E1A95F ${pct}%, #c8a04a 100%)`;
     }
   }
 
@@ -947,6 +947,71 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
+
+  // ── Header dinâmica ──
+  function atualizarHeaderUsuario(user) {
+    const btn     = document.getElementById("user-btn");
+    const content = document.getElementById("user-btn-content");
+    const foto    = document.getElementById("user-foto");
+    if (!btn || !content) return;
+    if (user) {
+      const nome = user.displayName?.split(" ")[0] || user.email?.split("@")[0] || "você";
+      content.textContent = nome;
+      if (user.photoURL && foto) {
+        foto.src = user.photoURL;
+        foto.style.display = "inline-block";
+        foto.onerror = () => { foto.style.display = "none"; };
+      }
+      btn.style.display    = "flex";
+      btn.style.alignItems = "center";
+      btn.style.padding    = "5px 10px";
+    } else {
+      content.style.fontWeight = "800";
+      content.textContent = "Login";
+      if (foto) foto.style.display = "none";
+      btn.style.padding = "";
+    }
+  }
+
+  // ── Menu lateral renderização condicional ──
+  function atualizarMenuLateral(user) {
+    const perfilLi  = document.getElementById("menu-perfil-link")?.closest("li");
+    const sairItem  = document.getElementById("menu-sair-item");
+    if (user) {
+      if (perfilLi) perfilLi.style.display = "none";
+      if (sairItem) {
+        sairItem.style.display = "";
+        const menuContent = document.querySelector(".menu-content");
+        if (menuContent && !document.getElementById("sidebar-loyalty")) {
+        const loyaltyDiv = document.createElement("div");
+        loyaltyDiv.id = "sidebar-loyalty";
+        loyaltyDiv.style.padding = "10px 18px";
+        loyaltyDiv.innerHTML = `
+          <div style="background:#fdf8ef;border:1px solid #E1A95F;border-radius:10px;padding:12px;margin-bottom:10px;">
+            <p style="font-size:11px;margin:0 0 6px;font-weight:700;color:#4B2C20;">Meu Progresso 🎁</p>
+            <div style="background:#eee;height:8px;border-radius:10px;overflow:hidden;">
+              <div id="side-progress-fill" style="height:100%;background:var(--dourado);width:0%;transition:width 0.5s;"></div>
+            </div>
+          </div>`;
+         menuContent.prepend(loyaltyDiv);
+         }
+        const btnSair = document.getElementById("menu-btn-sair");
+        if (btnSair && !btnSair._ok) {
+          btnSair._ok = true;
+          btnSair.addEventListener("click", () => {
+            UIManager.closeSideMenu();
+            setTimeout(() => {
+              auth.signOut().then(() => { mostrarToastLogin("Até logo! 👋"); setTimeout(() => location.reload(), 1000); });
+            }, 200);
+          });
+        }
+      }
+    } else {
+      if (perfilLi) perfilLi.style.display = "";
+      if (sairItem) sairItem.style.display = "none";
+    }
+  }
+
   function setupAuthListener() {
     auth.getRedirectResult()
       .then(result => {
@@ -956,16 +1021,13 @@ document.addEventListener("DOMContentLoaded", () => {
 
     auth.onAuthStateChanged(user => {
       currentUser = user;
+      atualizarHeaderUsuario(user);
+      atualizarMenuLateral(user);
       if (user) {
-        const nome = user.displayName?.split(" ")[0] || user.email.split("@")[0];
-        el.userBtn.textContent = `Olá, ${nome} ✨`;
-        if (el.pedidosBtn)    el.pedidosBtn.style.display    = "";
-        if (el.recompensasBtn) el.recompensasBtn.style.display = "";
         if (isAdmin(user)) document.querySelector(".admin-section")?.style.setProperty("display", "block");
         carregarPedidos(user);
         carregarRecompensas(user);
       } else {
-        el.userBtn.textContent = "Entrar / Perfil 👤";
         document.querySelector(".admin-section")?.style.setProperty("display", "none");
       }
     });
@@ -1620,6 +1682,6 @@ document.addEventListener("DOMContentLoaded", () => {
   carregarMetasRecompensas();
   setTimeout(() => checarStatusLoja(), 800);
 
-  console.log("%c🍰 Degust Bolos no Pote v13.5 — Sistema Completo (carrinho persistente + recompensas + PIX corrigido)", "color:#E1A95F;font-size:14px;font-weight:bold;");
+  console.log("%c🍰 Degust Bolos no Pote v13.5 — Build Final", "color:#E1A95F;font-size:14px;font-weight:bold;");
 
 });
